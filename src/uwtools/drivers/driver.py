@@ -22,6 +22,7 @@ from uwtools.config.validator import get_schema_file, validate, validate_externa
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
+from uwtools.strings import STR
 from uwtools.utils.processing import execute
 
 # NB: Class docstrings are programmatically defined.
@@ -40,17 +41,21 @@ class Assets(ABC):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ) -> None:
-        self._config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        self._config.dereference(
+        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
+        config.dereference(
             context={
-                **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if leadtime is not None else {}),
-                **self._config.data,
+                **({STR.cycle: cycle} if cycle else {}),
+                **({STR.leadtime: leadtime} if leadtime is not None else {}),
+                **config.data,
             }
         )
+        self._config = config
         for key in key_path or []:
             self._config = self._config[key]
+        if coupler:
+            self._config[STR.rundir] = config[coupler][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -62,7 +67,7 @@ class Assets(ABC):
             m, s = divmod(r, 60)
             leadtime = "%02d:%02d:%02d" % (h, m, s)
         return " ".join(
-            filter(None, [str(self), cycle, leadtime, "in", self._driver_config["rundir"]])
+            filter(None, [str(self), cycle, leadtime, "in", self._driver_config[STR.rundir]])
         )
 
     def __str__(self) -> str:
@@ -107,8 +112,8 @@ class Assets(ABC):
         :param path: Path to dump file to.
         :param schema: Schema to validate final config against.
         """
-        user_values = config_values.get("update_values", {})
-        if base_file := config_values.get("base_file"):
+        user_values = config_values.get(STR.updatevalues, {})
+        if base_file := config_values.get(STR.basefile):
             cfgobj = config_class(base_file)
             cfgobj.update_values(user_values)
             cfgobj.dereference()
@@ -154,19 +159,19 @@ class Assets(ABC):
         """
         schema: dict = {"type": "object"}
         nmlcfg = self._driver_config
-        for config_key in config_keys or ["namelist"]:
+        for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
-        if nmlcfg.get("validate", True):
+        if nmlcfg.get(STR.validate, True):
             schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
-                "properties",
+                STR.properties,
                 self._driver_name,
-                "properties",
-                "namelist",
-                "properties",
-                "update_values",
+                STR.properties,
+                STR.namelist,
+                STR.properties,
+                STR.updatevalues,
             ]:
                 schema = schema[schema_key]
         return schema
@@ -176,7 +181,7 @@ class Assets(ABC):
         """
         The path to the component's run directory.
         """
-        return Path(self._driver_config["rundir"])
+        return Path(self._driver_config[STR.rundir])
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -312,7 +317,7 @@ class Driver(Assets):
         """
         A run.
         """
-        yield self._taskname("run")
+        yield self._taskname(STR.run)
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
     @task
@@ -357,17 +362,17 @@ class Driver(Assets):
         Returns platform configuration data.
         """
         try:
-            platform = self._config["platform"]
+            platform = self._config[STR.platform]
         except KeyError as e:
             raise UWConfigError("Required 'platform' block missing in config") from e
-        threads = self._driver_config.get("execution", {}).get("threads")
+        threads = self._driver_config.get(STR.execution, {}).get(STR.threads)
         return {
-            "account": platform["account"],
-            "rundir": self._rundir,
-            "scheduler": platform["scheduler"],
-            "stdout": "%s.out" % self._runscript_path.name,  # config may override
-            **({"threads": threads} if threads else {}),
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
+            STR.account: platform[STR.account],
+            STR.rundir: self._rundir,
+            STR.scheduler: platform[STR.scheduler],
+            STR.stdout: "%s.out" % self._runscript_path.name,  # config may override
+            **({STR.threads: threads} if threads else {}),
+            **self._driver_config.get(STR.execution, {}).get(STR.batchargs, {}),
         }
 
     @property
@@ -375,12 +380,12 @@ class Driver(Assets):
         """
         Returns the full command-line component invocation.
         """
-        execution = self._driver_config.get("execution", {})
-        mpiargs = execution.get("mpiargs", [])
+        execution = self._driver_config.get(STR.execution, {})
+        mpiargs = execution.get(STR.mpiargs, [])
         components = [
-            execution.get("mpicmd"),  # MPI run program
+            execution.get(STR.mpicmd),  # MPI run program
             *[str(x) for x in mpiargs],  # MPI arguments
-            execution["executable"],  # component executable name
+            execution[STR.executable],  # component executable name
         ]
         return " ".join(filter(None, components))
 
@@ -449,7 +454,7 @@ class Driver(Assets):
             validate_external(schema_file=schema_file, config=self._config)
         else:
             validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self._config)
-        validate_internal(schema_name="platform", config=self._config)
+        validate_internal(schema_name=STR.platform, config=self._config)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """
@@ -457,11 +462,11 @@ class Driver(Assets):
         """
         path.parent.mkdir(parents=True, exist_ok=True)
         envvars = envvars or {}
-        threads = self._driver_config.get("execution", {}).get("threads")
+        threads = self._driver_config.get(STR.execution, {}).get(STR.threads)
         if threads and "OMP_NUM_THREADS" not in envvars:
             raise UWConfigError("Config specified threads but driver does not set OMP_NUM_THREADS")
         rs = self._runscript(
-            envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
+            envcmds=self._driver_config.get(STR.execution, {}).get(STR.envcmds, []),
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
@@ -581,11 +586,11 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     )
 
 
-_add_docstring(Assets, omit=["batch"])
-_add_docstring(AssetsCycleBased, omit=["batch", "leadtime"])
-_add_docstring(AssetsCycleLeadtimeBased, omit=["batch"])
-_add_docstring(AssetsTimeInvariant, omit=["batch", "cycle", "leadtime"])
+_add_docstring(Assets, omit=[STR.batch])
+_add_docstring(AssetsCycleBased, omit=[STR.batch, STR.leadtime])
+_add_docstring(AssetsCycleLeadtimeBased, omit=[STR.batch])
+_add_docstring(AssetsTimeInvariant, omit=[STR.batch, STR.cycle, STR.leadtime])
 _add_docstring(Driver)
-_add_docstring(DriverCycleBased, omit=["leadtime"])
+_add_docstring(DriverCycleBased, omit=[STR.leadtime])
 _add_docstring(DriverCycleLeadtimeBased)
-_add_docstring(DriverTimeInvariant, omit=["cycle", "leadtime"])
+_add_docstring(DriverTimeInvariant, omit=[STR.cycle, STR.leadtime])

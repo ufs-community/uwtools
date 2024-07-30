@@ -48,20 +48,20 @@ class MPASInit(MPASBase):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["namelist"].get("base_file")
+        base_file = self._driver_config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         stop_time = self._cycle + timedelta(
             hours=self._driver_config["boundary_conditions"]["length"]
         )
-        namelist = self._driver_config["namelist"]
-        update_values = namelist.get("update_values", {})
+        namelist = self._driver_config[STR.namelist]
+        update_values = namelist.get(STR.updatevalues, {})
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
                 "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:00:00"),
             }
         )
-        namelist["update_values"] = update_values
+        namelist[STR.updatevalues] = update_values
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,

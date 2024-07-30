@@ -45,19 +45,19 @@ class MPAS(MPASBase):
         path = self._rundir / "namelist.atmosphere"
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
-        base_file = self._driver_config["namelist"].get("base_file")
+        base_file = self._driver_config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         duration = timedelta(hours=self._driver_config["length"])
         str_duration = str(duration).replace(" days, ", "_")
-        namelist = self._driver_config["namelist"]
-        update_values = namelist.get("update_values", {})
+        namelist = self._driver_config[STR.namelist]
+        update_values = namelist.get(STR.updatevalues, {})
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
                 "config_run_duration": str_duration,
             }
         )
-        namelist["update_values"] = update_values
+        namelist[STR.updatevalues] = update_values
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,

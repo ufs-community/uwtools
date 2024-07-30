@@ -49,6 +49,6 @@ class IODA(JEDIBase):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config["execution"]["executable"]
+        executable = self._driver_config[STR.execution][STR.executable]
         jedi_config = str(self._rundir / self._config_fn)
         return " ".join([executable, jedi_config])

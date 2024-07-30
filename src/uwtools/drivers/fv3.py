@@ -67,7 +67,7 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield filecopy(src=Path(self._driver_config["field_table"]["base_file"]), dst=path)
+        yield filecopy(src=Path(self._driver_config["field_table"][STR.basefile]), dst=path)
 
     @tasks
     def files_copied(self):
@@ -100,7 +100,7 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["model_configure"].get("base_file")
+        base_file = self._driver_config["model_configure"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
@@ -117,11 +117,11 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["namelist"].get("base_file")
+        base_file = self._driver_config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config["namelist"],
+            config_values=self._driver_config[STR.namelist],
             path=path,
             schema=self._namelist_schema(),
         )
@@ -170,7 +170,7 @@ class FV3(DriverCycleBased):
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
             "MPI_TYPE_DEPTH": 20,
-            "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
+            "OMP_NUM_THREADS": self._driver_config.get(STR.execution, {}).get(STR.threads, 1),
             "OMP_STACKSIZE": "512m",
         }
         self._write_runscript(path=path, envvars=envvars)
