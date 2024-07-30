@@ -58,14 +58,15 @@ These targets work from the code in its current state in the clone. ``make env``
 Building ``condev`` Locally
 ---------------------------
 
-As an alternative to installing the :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the ``base`` environment:
+As an alternative to installing the :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda:
 
 .. code-block:: text
 
-   # Activate your conda
+   # Activate your conda. Optionally, activate a non-'base' environment.
+   conda install -y conda-build conda-verify
    git clone https://github.com/maddenp/condev.git
    make -C condev package
-   conda install -y -c local -c conda-forge --override-channels condev
+   conda install -y -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels condev
 
 Files Derived from ``condev``
 -----------------------------
