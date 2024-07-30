@@ -47,7 +47,7 @@ def config(tmp_path):
             "namelist": {
                 "update_values": {
                     "config": {
-                        "atm_core_files_input_grid": str(afile),
+                        "atm_core_files_input_grid": [str(afile), str(afile)],
                         "atm_files_input_grid": str(afile),
                         "atm_tracer_files_input_grid": str(afile),
                         "atm_weight_file": str(afile),

@@ -1,6 +1,8 @@
 ``orog_gsl``
 ============
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``orog_gsl``. Documentation for this UFS Utils component is :ufs-utils:`here <orog-gsl>`.
 
 .. literalinclude:: orog_gsl/help.cmd

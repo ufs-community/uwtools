@@ -1,6 +1,8 @@
 ``make_solo_mosaic``
 ====================
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``make_solo_mosaic``. Documentation for this UFS Utils component is :ufs-utils:`here <make-solo-mosaic>`.
 
 .. literalinclude:: make_solo_mosaic/help.cmd

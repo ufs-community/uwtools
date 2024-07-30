@@ -1,6 +1,8 @@
 ``chgres_cube``
 ===============
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-cube>` component.
 
 .. literalinclude:: chgres_cube/help.cmd
