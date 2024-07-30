@@ -10,7 +10,7 @@ from iotaa import Asset
 
 from uwtools.file import Copier, Linker
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
-from uwtools.utils.api import str2path as _str2path
+from uwtools.utils.file import str2path as _str2path
 
 
 def copy(

@@ -89,18 +89,6 @@ def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
-@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
-def test_str2path_passthrough(val):
-    assert api.str2path(val) == val
-
-
-def test_str2path_convert():
-    val = "/some/path"
-    result = api.str2path(val)
-    assert isinstance(result, Path)
-    assert result == Path(val)
-
-
 @mark.parametrize("hours", [0, 24, 168])
 def test__execute(execute_kwargs, hours, tmp_path):
     graph_file = tmp_path / "g.dot"

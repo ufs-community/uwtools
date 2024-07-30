@@ -9,7 +9,7 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
-from uwtools.utils.api import str2path as _str2path
+from uwtools.utils.file import str2path as _str2path
 
 
 def realize(

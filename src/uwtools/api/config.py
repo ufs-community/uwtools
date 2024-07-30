@@ -16,8 +16,8 @@ from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_external as _validate_external
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
-from uwtools.utils.api import str2path as _str2path
 from uwtools.utils.file import FORMAT as _FORMAT
+from uwtools.utils.file import str2path as _str2path
 
 # Public
 
