@@ -36,7 +36,7 @@ class Assets(ABC):
         self,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
