@@ -45,7 +45,7 @@ Use a Fresh Miniforge Installation
 Build the ``uwtools`` Package Locally
 -------------------------------------
 
-#. Install the necessary build packages. (If your conda's ``base`` environment is not writable (e.g. you are using a shared conda installation), first create and activate your own environment, or follow the `Use a Fresh Miniforge Installation`_ instructions.)
+#. Install the necessary build packages. If your conda's ``base`` environment is not writable (e.g. you are using a shared conda installation), first create and activate your own environment, or follow the `Use a Fresh Miniforge Installation`_ instructions.
 
    .. code-block:: text
 
