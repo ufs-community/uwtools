@@ -456,8 +456,9 @@ def test_schema_chgres_cube(chgres_cube_config):
         assert f"'{key}' is a required property" in errors(with_del(chgres_cube_config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**chgres_cube_config, "foo": "bar"})
-    # "rundir" must be a string:
+    # "rundir" must be present, and must be a string:
     assert "'rundir' is a required property" in errors(with_del(chgres_cube_config, "rundir"))
+    assert "is not of type 'string'" in errors(with_set(chgres_cube_config, None, "rundir"))
 
 
 def test_schema_chgres_cube_namelist(chgres_cube_config, chgres_cube_prop):
