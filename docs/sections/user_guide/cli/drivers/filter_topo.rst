@@ -1,6 +1,8 @@
 ``filter_topo``
 ===============
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``filter_topo``. Documentation for this UFS Utils component is :ufs-utils:`here <filter-topo>`.
 
 .. literalinclude:: filter_topo/help.cmd

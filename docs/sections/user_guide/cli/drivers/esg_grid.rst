@@ -1,6 +1,8 @@
 ``esg_grid``
 ============
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the :ufs-utils:`regional_esg_grid<regional-esg-grid>` component.
 
 .. literalinclude:: esg_grid/help.cmd
