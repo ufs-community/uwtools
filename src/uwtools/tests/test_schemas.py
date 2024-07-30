@@ -482,7 +482,7 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
     config = chgres_cube_config["namelist"]["update_values"]["config"]
     errors = chgres_cube_prop("namelist", "properties", "update_values", "properties", "config")
     # Some entries are required:
-    for key in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
+    for key in ["mosaic_file_target_grid", "vcoord_file_target_grid"]:
         assert "is a required property" in errors(with_del(config, key))
     # Additional entries of namelist-compatible types are permitted:
     for val in [[1, 2, 3], True, 88, 3.14, "bar"]:
@@ -529,6 +529,7 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
         "orog_dir_input_grid",
         "orog_dir_target_grid",
         "thomp_mp_climo_file",
+        "varmap_file",
         "varmap_file",
         "vcoord_file_target_grid",
         "wam_parm_file",

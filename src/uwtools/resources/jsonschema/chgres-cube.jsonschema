@@ -223,7 +223,6 @@
                   },
                   "required": [
                     "mosaic_file_target_grid",
-                    "varmap_file",
                     "vcoord_file_target_grid"
                   ],
                   "type": "object"

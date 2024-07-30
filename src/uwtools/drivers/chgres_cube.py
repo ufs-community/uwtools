@@ -34,7 +34,7 @@ class ChgresCube(DriverCycleBased):
             input_files.append(base_file)
         if update_values := namelist.get("update_values"):
             config_files = update_values["config"]
-            for k in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
+            for k in ["mosaic_file_target_grid", "vcoord_file_target_grid"]:
                 input_files.append(config_files[k])
             for k in [
                 "atm_core_files_input_grid",
@@ -45,6 +45,7 @@ class ChgresCube(DriverCycleBased):
                 "orog_files_input_grid",
                 "orog_files_target_grid",
                 "sfc_files_input_grid",
+                "varmap_file",
             ]:
                 if k in config_files:
                     v = config_files[k]
