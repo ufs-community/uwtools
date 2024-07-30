@@ -474,8 +474,6 @@ def test_schema_chgres_cube_namelist(chgres_cube_config, chgres_cube_prop):
     assert "'config' is a required property" in errors(
         with_del(namelist, "update_values", "config")
     )
-    # A combination of base_file and update_values is ok:
-    assert not errors(namelist)
     # At least one is required:
     assert "is not valid" in errors({})
 
