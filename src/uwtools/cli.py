@@ -328,10 +328,9 @@ def _add_subparser_file_common(parser: Parser) -> ActionChecks:
 
     :param parser: The parser to configure.
     """
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
+    _add_arg_target_dir(optional, helpmsg="Root directory for relative destination paths")
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
@@ -803,10 +802,12 @@ def _add_arg_search_path(group: Group) -> None:
     )
 
 
-def _add_arg_target_dir(group: Group, required: bool) -> None:
+def _add_arg_target_dir(
+    group: Group, required: bool = False, helpmsg: Optional[str] = None
+) -> None:
     group.add_argument(
         _switch(STR.targetdir),
-        help="Path to target directory",
+        help=helpmsg or "Path to target directory",
         metavar="PATH",
         required=required,
         type=Path,

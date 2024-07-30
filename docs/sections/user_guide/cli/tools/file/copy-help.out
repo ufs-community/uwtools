@@ -1,13 +1,9 @@
-usage: uw file copy --target-dir PATH [-h] [--version] [--config-file PATH]
+usage: uw file copy [-h] [--version] [--config-file PATH] [--target-dir PATH]
                     [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run]
                     [--quiet] [--verbose]
                     [KEY ...]
 
 Copy files
-
-Required arguments:
-  --target-dir PATH
-      Path to target directory
 
 Optional arguments:
   -h, --help
@@ -16,6 +12,8 @@ Optional arguments:
       Show version info and exit
   --config-file PATH, -c PATH
       Path to UW YAML config file (default: read from stdin)
+  --target-dir PATH
+      Root directory for relative destination paths
   --cycle CYCLE
       The cycle in ISO8601 format (e.g. 2024-05-29T12)
   --leadtime LEADTIME
