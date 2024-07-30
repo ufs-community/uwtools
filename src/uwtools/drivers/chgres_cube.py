@@ -55,7 +55,7 @@ class ChgresCube(DriverCycleBased):
         yield [file(Path(input_file)) for input_file in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config["namelist"],
+            config_values=namelist,
             path=path,
             schema=self._namelist_schema(),
         )
