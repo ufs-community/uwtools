@@ -10,6 +10,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
@@ -183,3 +184,6 @@ class FV3(DriverCycleBased):
         Returns the name of this driver.
         """
         return STR.fv3
+
+
+set_driver_docstring(FV3)

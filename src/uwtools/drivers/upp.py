@@ -8,6 +8,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -101,3 +102,6 @@ class UPP(DriverCycleLeadtimeBased):
             "%s < %s" % (execution[STR.executable], self._namelist_path.name),
         ]
         return " ".join(filter(None, components))
+
+
+set_driver_docstring(UPP)

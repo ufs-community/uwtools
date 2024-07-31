@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -132,3 +133,6 @@ def _ext(n):
     """
     b = 26
     return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
+
+
+set_driver_docstring(Ungrib)

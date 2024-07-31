@@ -7,6 +7,7 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import symlink
 
@@ -86,3 +87,6 @@ class OrogGSL(DriverTimeInvariant):
         inputs = [str(self._driver_config["config"][k]) for k in ("tile", "resolution", "halo")]
         executable = self._driver_config[STR.execution][STR.executable]
         return "echo '%s' | %s" % ("\n".join(inputs), executable)
+
+
+set_driver_docstring(OrogGSL)

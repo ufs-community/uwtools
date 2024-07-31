@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, symlink
 
@@ -84,3 +85,6 @@ class MPASInit(MPASBase):
         The streams filename.
         """
         return "streams.init_atmosphere"
+
+
+set_driver_docstring(MPASInit)

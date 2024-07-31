@@ -7,6 +7,7 @@ from pathlib import Path
 from iotaa import asset, external, tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -54,3 +55,6 @@ class GlobalEquivResol(DriverTimeInvariant):
         executable = self._driver_config[STR.execution][STR.executable]
         input_file_path = self._driver_config["input_grid_file"]
         return f"{executable} {input_file_path}"
+
+
+set_driver_docstring(GlobalEquivResol)

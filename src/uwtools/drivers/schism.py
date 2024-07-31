@@ -8,6 +8,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
 from uwtools.drivers.driver import AssetsCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -52,3 +53,6 @@ class SCHISM(AssetsCycleBased):
         Returns the name of this driver.
         """
         return STR.schism
+
+
+set_driver_docstring(SCHISM)

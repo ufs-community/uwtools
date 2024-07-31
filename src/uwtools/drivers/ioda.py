@@ -5,6 +5,7 @@ A driver for the ioda component.
 from iotaa import tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -52,3 +53,6 @@ class IODA(JEDIBase):
         executable = self._driver_config[STR.execution][STR.executable]
         jedi_config = str(self._rundir / self._config_fn)
         return " ".join([executable, jedi_config])
+
+
+set_driver_docstring(IODA)

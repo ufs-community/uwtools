@@ -5,6 +5,7 @@ A driver for make_solo_mosaic.
 from iotaa import tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -48,3 +49,6 @@ class MakeSoloMosaic(DriverTimeInvariant):
         :param suffix: Log-string suffix.
         """
         return "%s %s" % (self._driver_name, suffix)
+
+
+set_driver_docstring(MakeSoloMosaic)

@@ -8,6 +8,7 @@ from pathlib import Path
 from iotaa import asset, refs, run, task, tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -84,3 +85,6 @@ class JEDI(JEDIBase):
             str(jedi_config),  # JEDI config file
         ]
         return " ".join(filter(None, components))
+
+
+set_driver_docstring(JEDI)
