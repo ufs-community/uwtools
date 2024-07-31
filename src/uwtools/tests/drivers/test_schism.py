@@ -25,7 +25,7 @@ def config(tmp_path):
                     "dt": 100,
                 },
             },
-            "rundir": str(tmp_path),
+            "rundir": str(tmp_path / "run"),
         },
     }
 
