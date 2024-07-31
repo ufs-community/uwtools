@@ -24,7 +24,7 @@ class Stager:
 
     def __init__(
         self,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, Path]] = None,
         target_dir: Optional[Union[str, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
@@ -44,7 +44,7 @@ class Stager:
         """
         dryrun(enable=dry_run)
         self._target_dir = str2path(target_dir)
-        self._config = YAMLConfig(config=config)
+        self._config = YAMLConfig(config=str2path(config))
         self._keys = keys or []
         self._config.dereference(
             context={
