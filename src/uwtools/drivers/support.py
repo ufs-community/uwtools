@@ -2,6 +2,7 @@
 Driver support.
 """
 
+import re
 from typing import Type
 
 import iotaa as _iotaa
@@ -19,12 +20,17 @@ def graph() -> str:
 def set_driver_docstring(driver_class: Type) -> None:
     """
     Appends inherited parameter descriptions to the driver's own docstring.
+
+    :param driver_class: The class whose docstring to update.
     """
-    header = driver_class.__doc__
-    body = driver_class.__mro__[1].__doc__
-    assert header is not None
-    assert body is not None
-    setattr(driver_class, "__doc__", "\n".join([header.strip(), *body.split("\n")[1:]]))
+    head_old = driver_class.__doc__
+    body_old = driver_class.__mro__[1].__doc__
+    assert head_old is not None
+    assert body_old is not None
+    head = head_old.strip()
+    body = re.sub(r"\n\n+", "\n", body_old.strip()).split("\n")[1:]
+    new = "\n".join([f"{head}\n", *body])
+    setattr(driver_class, "__doc__", new)
 
 
 def tasks(driver_class: DriverT) -> dict[str, str]:
