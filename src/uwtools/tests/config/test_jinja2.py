@@ -186,7 +186,7 @@ def test_register_filters_path_join(key):
 
 
 def test_render(values_file, template_file, tmp_path):
-    outfile = str(tmp_path / "out.txt")
+    outfile = tmp_path / "out.txt"
     expected = "roses are red, violets are blue"
     result = render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
     assert result == expected
