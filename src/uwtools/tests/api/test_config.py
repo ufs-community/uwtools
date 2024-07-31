@@ -9,6 +9,7 @@ from pytest import mark
 
 from uwtools.api import config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.utils.file import FORMAT
 
 
@@ -94,18 +95,22 @@ def test_realize_to_dict():
 @mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
 def test_validate(cfg):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
-    with patch.object(config, "_validate_external", return_value=True) as _validate_external:
-        assert config.validate(**kwargs)
-    _validate_external.assert_called_once_with(
-        schema_file=Path(kwargs["schema_file"]), config=kwargs["config"]
+    with patch.object(config, "_validate_external") as _validate_external:
+        assert config.validate(**kwargs) is True
+        _validate_external.side_effect = UWConfigError()
+        assert config.validate(**kwargs) is False
+    _validate_external.assert_called_with(
+        schema_file=Path(kwargs["schema_file"]),
+        config=kwargs["config"],
     )
 
 
-def test_validate_config_file(tmp_path):
+@mark.parametrize("cast", (str, Path))
+def test_validate_config_file(cast, tmp_path):
     cfg = tmp_path / "config.yaml"
     with open(cfg, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    kwargs: dict = {"schema_file": "schema-file", "config": cfg}
+    kwargs: dict = {"schema_file": "schema-file", "config": cast(cfg)}
     with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)
     _validate_external.assert_called_once_with(schema_file=Path(kwargs["schema_file"]), config=cfg)
