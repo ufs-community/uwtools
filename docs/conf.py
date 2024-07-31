@@ -12,6 +12,7 @@ with open("../recipe/meta.json", "r", encoding="utf-8") as f:
 
 autoclass_content = "both"
 autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml", "referencing"]
+autodoc_typehints = "description"
 copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.extlinks", "sphinx.ext.intersphinx"]
 extlinks_detect_hardcoded_links = True
@@ -24,8 +25,8 @@ numfig = True
 numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow Tools"
 release = _metadata["version"]
-version = _metadata["version"]
 user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+version = _metadata["version"]
 
 extlinks = {
     "anaconda": ("https://www.anaconda.com/%s", "%s"),
