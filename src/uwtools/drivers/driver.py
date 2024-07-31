@@ -594,7 +594,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
-    :param coupler: Name of coupler block in config providing shared values.
+    :param coupler: Name of coupler block in config providing run-time values.
     """
     setattr(
         class_,
