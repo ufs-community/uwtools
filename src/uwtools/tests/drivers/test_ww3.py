@@ -25,7 +25,7 @@ def config(tmp_path):
                     "input_forcing_winds": "C",
                 },
             },
-            "rundir": str(tmp_path),
+            "rundir": str(tmp_path / "run"),
         },
     }
 

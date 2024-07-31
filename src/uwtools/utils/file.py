@@ -120,6 +120,7 @@ def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, 
     :param filepath: The path to a file to write to.
     """
     if filepath:
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         with open(filepath, mode, encoding="utf-8") as f:
             yield f
     else:
