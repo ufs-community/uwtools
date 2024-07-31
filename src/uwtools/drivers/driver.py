@@ -43,19 +43,19 @@ class Assets(ABC):
         schema_file: Optional[Path] = None,
         coupler: Optional[str] = None,
     ) -> None:
-        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        config.dereference(
+        self._config_full = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
+        self._config_full.dereference(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
-                **config.data,
+                **self._config_full.data,
             }
         )
-        self._config = config
+        self._config = self._config_full
         for key in key_path or []:
             self._config = self._config[key]
         if coupler:
-            self._config[STR.rundir] = config[coupler][STR.rundir]
+            self._config[STR.rundir] = self._config_full[coupler][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -217,10 +217,11 @@ class AssetsCycleBased(Assets):
     def __init__(
         self,
         cycle: datetime,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -228,6 +229,7 @@ class AssetsCycleBased(Assets):
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
+            coupler=coupler,
         )
         self._cycle = cycle
 
@@ -241,10 +243,11 @@ class AssetsCycleLeadtimeBased(Assets):
         self,
         cycle: datetime,
         leadtime: timedelta,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -253,6 +256,7 @@ class AssetsCycleLeadtimeBased(Assets):
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
+            coupler=coupler,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -265,16 +269,18 @@ class AssetsTimeInvariant(Assets):
 
     def __init__(
         self,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             config=config,
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
+            coupler=coupler,
         )
 
 
@@ -287,11 +293,12 @@ class Driver(Assets):
         self,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -300,8 +307,11 @@ class Driver(Assets):
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
+            coupler=coupler,
         )
         self._batch = batch
+        if coupler:
+            self._config[STR.execution] = self._config_full[coupler][STR.execution]
 
     # Workflow tasks
 
@@ -487,11 +497,12 @@ class DriverCycleBased(Driver):
     def __init__(
         self,
         cycle: datetime,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -500,6 +511,7 @@ class DriverCycleBased(Driver):
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
+            coupler=coupler,
         )
         self._cycle = cycle
 
@@ -513,11 +525,12 @@ class DriverCycleLeadtimeBased(Driver):
         self,
         cycle: datetime,
         leadtime: timedelta,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -527,6 +540,7 @@ class DriverCycleLeadtimeBased(Driver):
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
+            coupler=coupler,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -539,11 +553,12 @@ class DriverTimeInvariant(Driver):
 
     def __init__(
         self,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
+        coupler: Optional[str] = None,
     ):
         super().__init__(
             config=config,
@@ -551,6 +566,7 @@ class DriverTimeInvariant(Driver):
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
+            coupler=coupler,
         )
 
 
