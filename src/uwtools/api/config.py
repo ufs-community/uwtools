@@ -15,6 +15,7 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_external as _validate_external
+from uwtools.exceptions import UWConfigError
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import FORMAT as _FORMAT
 from uwtools.utils.file import str2path as _str2path
@@ -173,9 +174,14 @@ def validate(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise.
     """
-    return _validate_external(
-        schema_file=_str2path(schema_file), config=_ensure_data_source(_str2path(config), stdin_ok)
-    )
+    try:
+        _validate_external(
+            schema_file=_str2path(schema_file),
+            config=_ensure_data_source(_str2path(config), stdin_ok),
+        )
+    except UWConfigError:
+        return False
+    return True
 
 
 # Import-time code

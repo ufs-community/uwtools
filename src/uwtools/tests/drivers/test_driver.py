@@ -71,9 +71,9 @@ class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
     pass
 
 
-def write(path, s):
+def write(path, x):
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(s, f)
+        json.dump(x, f)
         return path
 
 
@@ -103,8 +103,28 @@ def config(tmp_path):
             "account": "me",
             "scheduler": "slurm",
         },
-        "rootdir": "/path/to",
     }
+
+
+@fixture
+def coupler_schema(tmp_path):
+    return write(
+        tmp_path / "concrete.jsonschema",
+        {
+            "properties": {
+                "concrete": {
+                    "properties": {
+                        "execution": {"type": "object"},
+                        "rundir": {"type": "string"},
+                    },
+                    "required": ["rundir"],
+                    "type": "object",
+                },
+            },
+            "required": ["concrete"],
+            "type": "object",
+        },
+    )
 
 
 @fixture
@@ -122,6 +142,17 @@ def driverobj(config):
 
 def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
+
+
+def test_Assets_coupler(config, coupler_schema):
+    config["coupler"] = {"rundir": "/coupler/run/dir"}
+    del config["concrete"]["rundir"]
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        with raises(UWConfigError):
+            ConcreteAssetsTimeInvariant(config=config, schema_file=coupler_schema)
+        assert ConcreteAssetsTimeInvariant(
+            config=config, schema_file=coupler_schema, coupler="coupler"
+        )
 
 
 def test_Assets_repr_cycle_based(config):
@@ -263,6 +294,21 @@ def test_Assets__validate_external(config):
 def test_Driver(driverobj):
     assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
     assert driverobj._batch is True
+
+
+def test_Driver_coupler(config, coupler_schema):
+    config["coupler"] = {
+        "execution": {"executable": "/path/to/coupled.exe"},
+        "rundir": "/coupler/run/dir",
+    }
+    del config["concrete"]["rundir"]
+    del config["concrete"]["execution"]
+    with patch.object(ConcreteDriverTimeInvariant, "_validate", driver.Driver._validate):
+        with raises(UWConfigError):
+            ConcreteDriverTimeInvariant(config=config, schema_file=coupler_schema)
+        assert ConcreteDriverTimeInvariant(
+            config=config, schema_file=coupler_schema, coupler="coupler"
+        )
 
 
 # Tests for workflow methods

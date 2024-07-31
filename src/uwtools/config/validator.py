@@ -47,37 +47,37 @@ def validate(schema: dict, config: dict) -> bool:
 
 
 def validate_internal(
-    schema_name: str, config: Union[dict, YAMLConfig, Optional[Path]] = None
+    schema_name: str, config: Optional[Union[dict, YAMLConfig, Path]] = None
 ) -> None:
     """
     Validate a config against a uwtools-internal schema.
 
-    :param config: The config to validate.
     :param schema_name: Name of uwtools schema to validate the config against.
+    :param config: The config to validate.
     :raises: UWConfigError if config fails validation.
     """
 
     log.info("Validating config against internal schema %s", schema_name)
     schema_file = get_schema_file(schema_name)
     log.debug("Using schema file: %s", schema_file)
-    if not validate_external(config=config, schema_file=schema_file):
-        raise UWConfigError("YAML validation errors")
+    validate_external(config=config, schema_file=schema_file)
 
 
 def validate_external(
     schema_file: Path, config: Union[dict, YAMLConfig, Optional[Path]] = None
-) -> bool:
+) -> None:
     """
     Validate a YAML config against the JSON Schema in the given schema file.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param config: The config to validate.
-    :return: Did the YAML file conform to the schema?
+    :raises: UWConfigError if config fails validation.
     """
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     cfgobj = _prep_config(config)
-    return validate(schema=schema, config=cfgobj.data)
+    if not validate(schema=schema, config=cfgobj.data):
+        raise UWConfigError("YAML validation errors")
 
 
 # Private functions

@@ -55,7 +55,7 @@ class Assets(ABC):
         for key in key_path or []:
             self._config = self._config[key]
         if coupler:
-            self._config[STR.rundir] = self._config_full[coupler][STR.rundir]
+            self._config[self._driver_name][STR.rundir] = self._config_full[coupler][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -201,12 +201,14 @@ class Assets(ABC):
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
         Perform all necessary schema validation.
+
+        :param schema_file: The JSON Schema file to use for validation.
+        :raises: UWConfigError if config fails validation.
         """
-        schema_name = self._driver_name.replace("_", "-")
         if schema_file:
             validate_external(schema_file=schema_file, config=self._config)
         else:
-            validate_internal(schema_name=schema_name, config=self._config)
+            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self._config)
 
 
 class AssetsCycleBased(Assets):
@@ -311,7 +313,9 @@ class Driver(Assets):
         )
         self._batch = batch
         if coupler:
-            self._config[STR.execution] = self._config_full[coupler][STR.execution]
+            self._config[self._driver_name][STR.execution] = self._config_full[coupler][
+                STR.execution
+            ]
 
     # Workflow tasks
 
