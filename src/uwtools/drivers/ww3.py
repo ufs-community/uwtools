@@ -30,6 +30,7 @@ class WaveWatchIII(AssetsCycleBased):
         yield asset(path, path.is_file)
         template_file = Path(self._driver_config["namelist"]["template_file"])
         yield file(template_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
         render(
             input_file=template_file,
             output_file=path,
