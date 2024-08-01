@@ -17,6 +17,7 @@ workflow:
       account: "&ACCOUNT;"
       command: "echo hello $person"
       jobname: hello
+      native: --reservation my_reservation
       nodes: 1:ppn=1
       walltime: 00:01:00
       envars:
