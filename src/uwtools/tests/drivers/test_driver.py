@@ -431,10 +431,6 @@ def test_Driver__runscript_done_file(driverobj):
     assert driverobj._runscript_done_file == "runscript.concrete.done"
 
 
-def test_Driver__runscript_done_file(driverobj):
-    assert driverobj._runscript_done_file == "runscript.concrete.done"
-
-
 def test_Driver__runscript_path(driverobj):
     assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
 

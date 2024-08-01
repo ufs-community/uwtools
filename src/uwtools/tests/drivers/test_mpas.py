@@ -142,7 +142,7 @@ def test_MPAS_namelist_file(caplog, driverobj):
 def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = 120
-    driverobj = MPAS(config=config, cycle=cycle)
+    driverobj = mpas.MPAS(config=config, cycle=cycle)
     dst = driverobj._rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
