@@ -13,18 +13,19 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.utils.api import str2path
 from uwtools.utils.tasks import filecopy, symlink
 
 
-class FileStager:
+class Stager:
     """
     The base class for staging files.
     """
 
     def __init__(
         self,
-        config: Optional[Union[dict, Path]] = None,
-        target_dir: Optional[Path] = None,
+        config: Optional[Union[dict, str, Path]] = None,
+        target_dir: Optional[Union[str, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
         keys: Optional[list[str]] = None,
@@ -42,8 +43,8 @@ class FileStager:
         :raises: UWConfigError if config fails validation.
         """
         dryrun(enable=dry_run)
-        self._target_dir = target_dir
-        self._config = YAMLConfig(config=config)
+        self._target_dir = str2path(target_dir)
+        self._config = YAMLConfig(config=str2path(config))
         self._keys = keys or []
         self._config.dereference(
             context={
@@ -98,7 +99,7 @@ class FileStager:
         return True
 
 
-class Copier(FileStager):
+class Copier(Stager):
     """
     Stage files by copying.
     """
@@ -113,7 +114,7 @@ class Copier(FileStager):
         yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._file_map.items()]
 
 
-class Linker(FileStager):
+class Linker(Stager):
     """
     Stage files by linking.
     """
