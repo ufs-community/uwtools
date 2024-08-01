@@ -1021,7 +1021,7 @@ def test_schema_rocoto_workflow_cycledef():
     assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
 
 
-def test_schena_rocoto_task_resources():
+def test_schema_rocoto_task_resources():
     errors = schema_validator("rocoto", "$defs", "task", "properties")
     # Basic resource options
     assert not errors([{"cores": 1}])
