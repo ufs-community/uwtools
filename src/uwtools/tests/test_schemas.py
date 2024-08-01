@@ -1673,7 +1673,7 @@ def test_schena_rocoto_task_resources():
     assert not errors([{"nodes": "1:ppn=12"}])
     # Combined valid resources
     assert not errors([{"cores": 1, "native": "abc"}])
-    assert not errors([{"nodes": "1:ppn=12", "native": "abc"}])
+    assert not errors([{"native": "abc", "nodes": "1:ppn=12"}])
 
 
 # schism
