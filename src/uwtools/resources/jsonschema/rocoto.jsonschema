@@ -290,6 +290,23 @@
     },
     "task": {
       "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "cores"
+          ]
+        },
+        {
+          "required": [
+            "native"
+          ]
+        },
+        {
+          "required": [
+            "nodes"
+          ]
+        }
+      ],
       "dependentSchemas": {
         "exclusive": {
           "not": {
@@ -328,23 +345,6 @@
           ]
         }
       },
-      "oneOf": [
-        {
-          "required": [
-            "cores"
-          ]
-        },
-        {
-          "required": [
-            "native"
-          ]
-        },
-        {
-          "required": [
-            "nodes"
-          ]
-        }
-      ],
       "properties": {
         "account": {
           "type": "string"
