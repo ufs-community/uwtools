@@ -48,7 +48,7 @@ class MPAS(MPASBase):
         yield asset(path, path.is_file)
         yield None
         duration = timedelta(hours=self._driver_config["length"])
-        str_duration = str(duration).replace(" days, ", "")
+        str_duration = str(duration).replace(" days, ", "_")
         try:
             namelist = self._driver_config["namelist"]
         except KeyError as e:

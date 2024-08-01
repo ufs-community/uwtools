@@ -1021,6 +1021,18 @@ def test_schema_rocoto_workflow_cycledef():
     assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
 
 
+def test_schema_rocoto_task_resources():
+    errors = schema_validator("rocoto", "$defs", "task", "properties")
+    # Basic resource options
+    assert not errors([{"cores": 1}])
+    assert not errors([{"native": "abc"}])
+    assert not errors([{"native": {"cyclestr": {"value": "def"}}}])
+    assert not errors([{"nodes": "1:ppn=12"}])
+    # Combined valid resources
+    assert not errors([{"cores": 1, "native": "abc"}])
+    assert not errors([{"native": "abc", "nodes": "1:ppn=12"}])
+
+
 # sfc-climo-gen
 
 
