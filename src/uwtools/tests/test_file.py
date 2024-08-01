@@ -74,27 +74,27 @@ def test_Linker(assets, source):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_FileStager(assets, source):
+def test_Stager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
-    stager = file.FileStager(target_dir=dstdir, config=config, keys=["a", "b"])
+    stager = file.Stager(target_dir=dstdir, config=config, keys=["a", "b"])
     assert set(stager._file_map.keys()) == {"foo", "subdir/bar"}
     assert stager._validate() is True
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_FileStager_bad_key(assets, source):
+def test_Stager_bad_key(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
-        file.FileStager(target_dir=dstdir, config=config, keys=["a", "x"])
+        file.Stager(target_dir=dstdir, config=config, keys=["a", "x"])
     assert str(e.value) == "Failed following YAML key(s): a -> x"
 
 
 @mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
-def test_FileStager_empty_val(assets, val):
+def test_Stager_empty_val(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:
-        file.FileStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
+        file.Stager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
     assert str(e.value) == "No file map found at key path: a -> b"

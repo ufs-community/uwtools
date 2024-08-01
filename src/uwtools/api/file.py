@@ -10,7 +10,6 @@ from iotaa import Asset
 
 from uwtools.file import Copier, Linker
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
-from uwtools.utils.file import str2path as _str2path
 
 
 def copy(
@@ -36,7 +35,7 @@ def copy(
     """
     copier = Copier(
         target_dir=Path(target_dir) if target_dir else None,
-        config=_ensure_data_source(_str2path(config), stdin_ok),
+        config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
@@ -69,7 +68,7 @@ def link(
     """
     linker = Linker(
         target_dir=Path(target_dir) if target_dir else None,
-        config=_ensure_data_source(_str2path(config), stdin_ok),
+        config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
