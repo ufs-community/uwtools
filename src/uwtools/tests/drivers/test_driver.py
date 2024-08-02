@@ -290,7 +290,7 @@ def test_Assets__validate_external(config):
 
 
 def test_Driver(driverobj):
-    assert Path(driverobj._config["base_file"]).name == "base.yaml"
+    assert Path(driverobj.config["base_file"]).name == "base.yaml"
     assert driverobj._batch is True
 
 
@@ -391,13 +391,12 @@ def test_Driver__create_user_updated_config_base_file(
     base_file, driverobj, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
-    dc = driverobj._config
     if not base_file:
-        del dc["base_file"]
+        del driverobj._config["base_file"]
     if not update_values:
-        del dc["update_values"]
+        del driverobj._config["update_values"]
     ConcreteDriverTimeInvariant._create_user_updated_config(
-        config_class=YAMLConfig, config_values=dc, path=path
+        config_class=YAMLConfig, config_values=driverobj.config, path=path
     )
     with open(path, "r", encoding="utf-8") as f:
         updated = yaml.safe_load(f)

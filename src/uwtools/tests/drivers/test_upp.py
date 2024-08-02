@@ -120,7 +120,7 @@ def test_UPP_files_linked(driverobj):
 def test_UPP_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
-    with open(driverobj._config["namelist"]["base_file"], "w", encoding="utf-8") as f:
+    with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
         print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
     dst = driverobj._rundir / "itag"
     assert not dst.is_file()
@@ -147,7 +147,7 @@ def test_UPP_namelist_file_fails_validation(caplog, driverobj):
 
 def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._config["rundir"], "missing.nml"))
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()

@@ -112,7 +112,7 @@ def test_JEDI_configuration_file(driverobj):
 
 def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = Path(driverobj._config["rundir"], "missing")
+    base_file = Path(driverobj.config["rundir"], "missing")
     driverobj._config["configuration_file"]["base_file"] = base_file
     cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
