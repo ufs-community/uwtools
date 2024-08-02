@@ -533,10 +533,8 @@ def test_walk_key_path_fail_bad_leaf_value():
 
 
 def test_walk_key_path_pass():
-    assert tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b"]) == (
-        {"c": "cherry"},
-        "a -> b",
-    )
+    expected = ({"c": "cherry"}, "a -> b")
+    assert tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b"]) == expected
 
 
 def test__ensure_format_bad_no_path_no_format():
