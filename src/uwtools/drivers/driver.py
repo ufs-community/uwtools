@@ -41,7 +41,7 @@ class Assets(ABC):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ) -> None:
         self._config_full = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         self._config_full.dereference(
@@ -54,8 +54,8 @@ class Assets(ABC):
         self._config = self._config_full
         for key in key_path or []:
             self._config = self._config[key]
-        if coupler:
-            self._config[self._driver_name][STR.rundir] = self._config_full[coupler][STR.rundir]
+        if controller:
+            self._config[self._driver_name][STR.rundir] = self._config_full[controller][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -223,7 +223,7 @@ class AssetsCycleBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -231,7 +231,7 @@ class AssetsCycleBased(Assets):
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
         self._cycle = cycle
 
@@ -249,7 +249,7 @@ class AssetsCycleLeadtimeBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -258,7 +258,7 @@ class AssetsCycleLeadtimeBased(Assets):
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -275,14 +275,14 @@ class AssetsTimeInvariant(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             config=config,
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
 
 
@@ -300,7 +300,7 @@ class Driver(Assets):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -309,11 +309,11 @@ class Driver(Assets):
             dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
         self._batch = batch
-        if coupler:
-            self._config[self._driver_name][STR.execution] = self._config_full[coupler][
+        if controller:
+            self._config[self._driver_name][STR.execution] = self._config_full[controller][
                 STR.execution
             ]
 
@@ -506,7 +506,7 @@ class DriverCycleBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -515,7 +515,7 @@ class DriverCycleBased(Driver):
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
         self._cycle = cycle
 
@@ -534,7 +534,7 @@ class DriverCycleLeadtimeBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -544,7 +544,7 @@ class DriverCycleLeadtimeBased(Driver):
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -562,7 +562,7 @@ class DriverTimeInvariant(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        coupler: Optional[str] = None,
+        controller: Optional[str] = None,
     ):
         super().__init__(
             config=config,
@@ -570,7 +570,7 @@ class DriverTimeInvariant(Driver):
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
-            coupler=coupler,
+            controller=controller,
         )
 
 
@@ -594,7 +594,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
-    :param coupler: Name of coupler block in config providing run-time values.
+    :param controller: Name of block in config controlling run-time values.
     """
     setattr(
         class_,

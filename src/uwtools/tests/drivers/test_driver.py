@@ -107,7 +107,7 @@ def config(tmp_path):
 
 
 @fixture
-def coupler_schema(tmp_path):
+def controller_schema(tmp_path):
     return write(
         tmp_path / "concrete.jsonschema",
         {
@@ -144,14 +144,14 @@ def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
 
 
-def test_Assets_coupler(config, coupler_schema):
-    config["coupler"] = {"rundir": "/coupler/run/dir"}
+def test_Assets_controller(config, controller_schema):
+    config["controller"] = {"rundir": "/controller/run/dir"}
     del config["concrete"]["rundir"]
     with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
         with raises(UWConfigError):
-            ConcreteAssetsTimeInvariant(config=config, schema_file=coupler_schema)
+            ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteAssetsTimeInvariant(
-            config=config, schema_file=coupler_schema, coupler="coupler"
+            config=config, schema_file=controller_schema, controller="controller"
         )
 
 
@@ -296,18 +296,18 @@ def test_Driver(driverobj):
     assert driverobj._batch is True
 
 
-def test_Driver_coupler(config, coupler_schema):
-    config["coupler"] = {
+def test_Driver_controller(config, controller_schema):
+    config["controller"] = {
         "execution": {"executable": "/path/to/coupled.exe"},
-        "rundir": "/coupler/run/dir",
+        "rundir": "/controller/run/dir",
     }
     del config["concrete"]["rundir"]
     del config["concrete"]["execution"]
     with patch.object(ConcreteDriverTimeInvariant, "_validate", driver.Driver._validate):
         with raises(UWConfigError):
-            ConcreteDriverTimeInvariant(config=config, schema_file=coupler_schema)
+            ConcreteDriverTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteDriverTimeInvariant(
-            config=config, schema_file=coupler_schema, coupler="coupler"
+            config=config, schema_file=controller_schema, controller="controller"
         )
 
 
@@ -609,7 +609,7 @@ def test__add_docstring():
         omit = [
             "batch",
             "config",
-            "coupler",
+            "controller",
             "cycle",
             "dry_run",
             "key_path",
