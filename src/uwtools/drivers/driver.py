@@ -53,7 +53,11 @@ class Assets(ABC):
                 **config.data,
             }
         )
+        # The _config_full attribute points to the config block that includes the driver-specific
+        # block and any surrounding context, including e.g. platform: for some drivers.
         self._config_full, _ = walk_key_path(config.data, key_path or [])
+        # The _config attribute points to the driver-specific config block. It is supplemented with
+        # config data from the controller block, if specified.
         try:
             self._config = self._config_full[self._driver_name]
         except KeyError as e:
@@ -78,14 +82,14 @@ class Assets(ABC):
     @property
     def config(self) -> dict:
         """
-        A copy of the driver config.
+        A copy of the driver-specific config block.
         """
         return deepcopy(self._config)
 
     @property
     def config_full(self) -> dict:
         """
-        A copy of the full input config.
+        A copy of the driver-specific config block's parent block.
         """
         return deepcopy(self._config_full)
 
