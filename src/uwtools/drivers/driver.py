@@ -76,14 +76,14 @@ class Assets(ABC):
     @property
     def config(self) -> dict:
         """
-        Return a copy of the driver config.
+        A copy of the driver config.
         """
         return deepcopy(self._driver_config)
 
     @property
     def config_full(self) -> dict:
         """
-        Return a copy of the full input config.
+        A copy of the full input config.
         """
         full_config: dict = self._config.data
         return deepcopy(full_config)
