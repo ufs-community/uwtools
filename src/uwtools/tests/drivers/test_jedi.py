@@ -177,7 +177,7 @@ def test_JEDI_validate_only(caplog, driverobj):
             result = Mock(output="", success=True)
             run.return_value = result
             driverobj.validate_only()
-            cfgfile = Path(driverobj._config["rundir"]) / "jedi.yaml"
+            cfgfile = Path(driverobj._config["rundir"], "jedi.yaml")
             cmds = [
                 "module load some-module",
                 "module load jedi-module",

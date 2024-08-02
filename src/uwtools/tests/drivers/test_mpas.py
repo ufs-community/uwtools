@@ -26,7 +26,7 @@ def streams_file(config, driverobj, drivername):
     array_elements = {"file", "stream", "var", "var_array", "var_struct"}
     array_elements_tested = set()
     driverobj.streams_file()
-    path = Path(driverobj._config["rundir"]) / driverobj._streams_fn
+    path = Path(driverobj._config["rundir"], driverobj._streams_fn)
     with open(path, "r", encoding="utf-8") as f:
         xml = etree.parse(f).getroot()
     assert xml.tag == "streams"
@@ -214,7 +214,7 @@ def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
 
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._config["rundir"]) / "missing.nml")
+    base_file = str(Path(driverobj._config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()

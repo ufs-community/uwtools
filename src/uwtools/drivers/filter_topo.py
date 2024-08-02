@@ -26,7 +26,7 @@ class FilterTopo(DriverTimeInvariant):
         The input grid file.
         """
         src = Path(self.config["config"]["input_grid_file"])
-        dst = Path(self.config[STR.rundir]) / src.name
+        dst = Path(self.config[STR.rundir], src.name)
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)

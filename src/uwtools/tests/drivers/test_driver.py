@@ -574,7 +574,7 @@ def test_Driver__write_runscript(driverobj):
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):
-    path = Path(driverobj._config["rundir"]) / "runscript"
+    path = Path(driverobj._config["rundir"], "runscript")
     driverobj._config["execution"]["threads"] = 4
     with raises(UWConfigError) as e:
         driverobj._write_runscript(path=path)

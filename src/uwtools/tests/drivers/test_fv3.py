@@ -200,7 +200,7 @@ def test_FV3_namelist_file_fails_validation(caplog, driverobj):
 
 def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._config["rundir"]) / "missing.nml")
+    base_file = str(Path(driverobj._config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()

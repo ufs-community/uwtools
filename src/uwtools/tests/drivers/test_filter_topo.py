@@ -80,7 +80,7 @@ def test_FilterTopo(method):
 
 
 def test_FilterTopo_input_grid_file(driverobj):
-    path = Path(driverobj._config["rundir"]) / "C403_grid.tile7.halo4.nc"
+    path = Path(driverobj._config["rundir"], "C403_grid.tile7.halo4.nc")
     assert not path.is_file()
     driverobj.input_grid_file()
     assert path.is_symlink()
