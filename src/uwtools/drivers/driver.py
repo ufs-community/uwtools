@@ -198,9 +198,7 @@ class Assets(ABC):
         if schema_file:
             validate_external(schema_file=schema_file, config=self.config_full)
         else:
-            validate_internal(
-                schema_name=self._driver_name.replace("_", "-"), config=self.config_full
-            )
+            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self.config_full)
 
 
 class AssetsCycleBased(Assets):
@@ -481,9 +479,7 @@ class Driver(Assets):
         if schema_file:
             validate_external(schema_file=schema_file, config=self.config_full)
         else:
-            validate_internal(
-                schema_name=self._driver_name.replace("_", "-"), config=self.config_full
-            )
+            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self.config_full)
         validate_internal(schema_name=STR.platform, config=self.config_full)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
