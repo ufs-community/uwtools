@@ -520,9 +520,23 @@ def test_realize_config_values_needed_yaml(caplog):
     assert actual.strip() == dedent(expected).strip()
 
 
-@mark.skip("PM FIXME")
-def test_walk_key_path():
-    pass
+def test_walk_key_path_fail_bad_key_path():
+    with raises(UWError) as e:
+        tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "x"])
+    assert str(e.value) == "Bad config path: a -> x"
+
+
+def test_walk_key_path_fail_bad_leaf_value():
+    with raises(UWError) as e:
+        tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b", "c"])
+    assert str(e.value) == "Value at a -> b -> c must be a dictionary"
+
+
+def test_walk_key_path_pass():
+    assert tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b"]) == (
+        {"c": "cherry"},
+        "a -> b",
+    )
 
 
 def test__ensure_format_bad_no_path_no_format():
