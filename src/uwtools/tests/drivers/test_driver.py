@@ -218,7 +218,7 @@ def test_Assets_key_path(config, tmp_path):
     assetsobj = ConcreteAssetsTimeInvariant(
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
-    assert config == assetsobj._config_full
+    assert config == assetsobj.config_full
 
 
 def test_Assets_leadtime(config):
@@ -282,7 +282,7 @@ def test_Assets__validate_external(config):
             assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
-            "config": assetsobj._config_full,
+            "config": assetsobj.config_full,
         }
 
 
