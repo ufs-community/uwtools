@@ -144,24 +144,13 @@ def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
 
 
-def test_Assets_controller(config, controller_schema):
-    config["controller"] = {"rundir": "/controller/run/dir"}
-    del config["concrete"]["rundir"]
-    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
-        with raises(UWConfigError):
-            ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
-        assert ConcreteAssetsTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
-        )
-
-
-def test_Assets_repr_cycle_based(config):
+def test_Assets___repr___cycle_based(config):
     obj = ConcreteAssetsCycleBased(config=config, cycle=dt.datetime(2024, 7, 2, 12))
     expected = "concrete 2024-07-02T12:00 in %s" % obj._driver_config["rundir"]
     assert repr(obj) == expected
 
 
-def test_Assets_repr_cycle_and_leadtime_based(config):
+def test_Assets___repr___cycle_and_leadtime_based(config):
     obj = ConcreteAssetsCycleLeadtimeBased(
         config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
@@ -169,13 +158,13 @@ def test_Assets_repr_cycle_and_leadtime_based(config):
     assert repr(obj) == expected
 
 
-def test_Assets_repr_time_invariant(config):
+def test_Assets___repr___time_invariant(config):
     obj = ConcreteAssetsTimeInvariant(config=config)
     expected = "concrete in %s" % obj._driver_config["rundir"]
     assert repr(obj) == expected
 
 
-def test_Assets_str(assetsobj):
+def test_Assets___str__(assetsobj):
     assert str(assetsobj) == "concrete"
 
 
@@ -193,6 +182,23 @@ def test_Assets_config_full(assetsobj):
     assert not assetsobj.config_full is assetsobj._config
 
 
+def test_Assets_controller(config, controller_schema):
+    config["controller"] = {"rundir": "/controller/run/dir"}
+    del config["concrete"]["rundir"]
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        with raises(UWConfigError):
+            ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
+        assert ConcreteAssetsTimeInvariant(
+            config=config, schema_file=controller_schema, controller="controller"
+        )
+
+
+def test_Assets_cycle(config):
+    cycle = dt.datetime(2024, 7, 2, 12)
+    obj = ConcreteAssetsCycleBased(config=config, cycle=cycle)
+    assert obj.cycle == cycle
+
+
 @mark.parametrize("val", (True, False))
 def test_Assets_dry_run(config, val):
     with patch.object(driver, "dryrun") as dryrun:
@@ -200,10 +206,7 @@ def test_Assets_dry_run(config, val):
         dryrun.assert_called_once_with(enable=val)
 
 
-# Tests for workflow methods
-
-
-def test_key_path(config, tmp_path):
+def test_Assets_key_path(config, tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.dump({"foo": {"bar": config}}))
     assetsobj = ConcreteAssetsTimeInvariant(
@@ -212,13 +215,18 @@ def test_key_path(config, tmp_path):
     assert config == assetsobj._config
 
 
+def test_Assets_leadtime(config):
+    cycle = dt.datetime(2024, 7, 2, 12)
+    leadtime = dt.timedelta(hours=6)
+    obj = ConcreteAssetsCycleLeadtimeBased(config=config, cycle=cycle, leadtime=leadtime)
+    assert obj.cycle == cycle
+    assert obj.leadtime == leadtime
+
+
 def test_Assets_validate(assetsobj, caplog):
     log.setLevel(logging.INFO)
     assetsobj.validate()
     assert regex_logged(caplog, "State: Ready")
-
-
-# Tests for private helper methods
 
 
 @mark.parametrize(
@@ -288,12 +296,18 @@ def test_Assets__validate_external(config):
         }
 
 
-# Driver Tests
+# Driver Family Tests
 
 
 def test_Driver(driverobj):
     assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
     assert driverobj._batch is True
+
+
+def test_Driver_cycle(config):
+    cycle = dt.datetime(2024, 7, 2, 12)
+    obj = ConcreteDriverCycleBased(config=config, cycle=cycle)
+    assert obj.cycle == cycle
 
 
 def test_Driver_controller(config, controller_schema):
@@ -311,7 +325,12 @@ def test_Driver_controller(config, controller_schema):
         )
 
 
-# Tests for workflow methods
+def test_Driver_leadtime(config):
+    cycle = dt.datetime(2024, 7, 2, 12)
+    leadtime = dt.timedelta(hours=6)
+    obj = ConcreteDriverCycleLeadtimeBased(config=config, cycle=cycle, leadtime=leadtime)
+    assert obj.cycle == cycle
+    assert obj.leadtime == leadtime
 
 
 @mark.parametrize("batch", [True, False])
@@ -367,9 +386,6 @@ def test_Driver__run_via_local_execution(driverobj):
                 log_output=True,
             )
         prd.assert_called_once_with()
-
-
-# Tests for private helper methods
 
 
 @mark.parametrize(

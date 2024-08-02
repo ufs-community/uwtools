@@ -235,6 +235,13 @@ class AssetsCycleBased(Assets):
         )
         self._cycle = cycle
 
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
 
 class AssetsCycleLeadtimeBased(Assets):
     """
@@ -262,6 +269,20 @@ class AssetsCycleLeadtimeBased(Assets):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
+    @property
+    def leadtime(self):
+        """
+        The leadtime.
+        """
+        return self._leadtime
 
 
 class AssetsTimeInvariant(Assets):
@@ -519,6 +540,13 @@ class DriverCycleBased(Driver):
         )
         self._cycle = cycle
 
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
 
 class DriverCycleLeadtimeBased(Driver):
     """
@@ -548,6 +576,20 @@ class DriverCycleLeadtimeBased(Driver):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
+    @property
+    def leadtime(self):
+        """
+        The leadtime.
+        """
+        return self._leadtime
 
 
 class DriverTimeInvariant(Driver):
