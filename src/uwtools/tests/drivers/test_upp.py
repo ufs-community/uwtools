@@ -101,20 +101,20 @@ def test_UPP_files_copied(driverobj):
     for _, src in driverobj._config["files_to_copy"].items():
         Path(src).touch()
     for dst, _ in driverobj._config["files_to_copy"].items():
-        assert not Path(driverobj._rundir / dst).is_file()
+        assert not (driverobj._rundir / dst).is_file()
     driverobj.files_copied()
     for dst, _ in driverobj._config["files_to_copy"].items():
-        assert Path(driverobj._rundir / dst).is_file()
+        assert (driverobj._rundir / dst).is_file()
 
 
 def test_UPP_files_linked(driverobj):
     for _, src in driverobj._config["files_to_link"].items():
         Path(src).touch()
     for dst, _ in driverobj._config["files_to_link"].items():
-        assert not Path(driverobj._rundir / dst).is_file()
+        assert not (driverobj._rundir / dst).is_file()
     driverobj.files_linked()
     for dst, _ in driverobj._config["files_to_link"].items():
-        assert Path(driverobj._rundir / dst).is_symlink()
+        assert (driverobj._rundir / dst).is_symlink()
 
 
 def test_UPP_namelist_file(caplog, driverobj):
