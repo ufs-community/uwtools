@@ -144,6 +144,12 @@ def test_Assets(assetsobj):
     assert Path(assetsobj.config["base_file"]).name == "base.yaml"
 
 
+def test_Assets_fail_bad_config(config):
+    with raises(UWConfigError) as e:
+        ConcreteAssetsTimeInvariant(config=config["concrete"])
+    assert str(e.value) == "Required 'concrete' block missing in config"
+
+
 def test_Assets___repr___cycle_based(config):
     obj = ConcreteAssetsCycleBased(config=config, cycle=dt.datetime(2024, 7, 2, 12))
     expected = "concrete 2024-07-02T12:00 in %s" % obj.config["rundir"]
