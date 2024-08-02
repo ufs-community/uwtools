@@ -86,9 +86,9 @@ def test_Shave__driver_name(driverobj):
 
 def test_Shave__runcmd(driverobj):
     cmd = driverobj._runcmd
-    input_file_path = driverobj._config["config"]["input_grid_file"]
     nx = driverobj.config["config"]["nx"]
     ny = driverobj.config["config"]["ny"]
     nh4 = driverobj.config["config"]["nh4"]
+    input_file_path = driverobj._config["config"]["input_grid_file"]
     output_file_path = input_file_path.replace(".nc", "_NH0.nc")
     assert cmd == f"/path/to/shave {nx} {ny} {nh4} {input_file_path} {output_file_path}"
