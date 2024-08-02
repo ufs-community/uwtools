@@ -64,7 +64,7 @@ def validate_internal(
 
 
 def validate_external(
-    schema_file: Path, config: Union[dict, YAMLConfig, Optional[Path]] = None
+    schema_file: Path, config: Optional[Union[dict, YAMLConfig, Path]] = None
 ) -> None:
     """
     Validate a YAML config against the JSON Schema in the given schema file.
