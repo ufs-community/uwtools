@@ -18,6 +18,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import get_schema_file, validate, validate_external, validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -51,9 +52,7 @@ class Assets(ABC):
                 **config.data,
             }
         )
-        self._config_full = config.data
-        for key in key_path or []:
-            self._config_full = self._config_full[key]
+        self._config_full, _ = walk_key_path(config.data, key_path or [])
         self._config = self._config_full
         try:
             self._config = self._config[self._driver_name]
