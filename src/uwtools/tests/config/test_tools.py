@@ -520,6 +520,11 @@ def test_realize_config_values_needed_yaml(caplog):
     assert actual.strip() == dedent(expected).strip()
 
 
+@mark.skip("PM FIXME")
+def test_walk_key_path():
+    pass
+
+
 def test__ensure_format_bad_no_path_no_format():
     with raises(UWError) as e:
         tools._ensure_format(desc="foo")
