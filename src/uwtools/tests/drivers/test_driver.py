@@ -549,7 +549,7 @@ def test_Driver__validate_external(config):
 
 def test_Driver__write_runscript(driverobj):
     rundir = driverobj._config["rundir"]
-    path = Path(rundir) / "runscript"
+    path = Path(rundir, "runscript")
     executable = driverobj._config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
