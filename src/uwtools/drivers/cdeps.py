@@ -42,7 +42,6 @@ class CDEPS(AssetsCycleBased):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         self._model_namelist_file("atm_in", path)
 
     @task
@@ -79,7 +78,6 @@ class CDEPS(AssetsCycleBased):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         self._model_namelist_file("ocn_in", path)
 
     @task

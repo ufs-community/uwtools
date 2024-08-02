@@ -24,6 +24,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
+from uwtools.utils.file import writable
 from uwtools.utils.processing import execute
 
 # NB: Class docstrings are programmatically defined.
@@ -123,7 +124,6 @@ class Assets(ABC):
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
         if validate(schema=schema or {"type": "object"}, config=config):
-            path.parent.mkdir(parents=True, exist_ok=True)
             dump()
             log.debug(f"Wrote config to {path}")
         else:
@@ -488,7 +488,6 @@ class Driver(Assets):
         """
         Write the runscript.
         """
-        path.parent.mkdir(parents=True, exist_ok=True)
         envvars = envvars or {}
         threads = self.config.get(STR.execution, {}).get(STR.threads)
         if threads and "OMP_NUM_THREADS" not in envvars:
@@ -502,7 +501,7 @@ class Driver(Assets):
             ],
             scheduler=self._scheduler if self._batch else None,
         )
-        with open(path, "w", encoding="utf-8") as f:
+        with writable(path) as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 

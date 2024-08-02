@@ -70,7 +70,6 @@ class Ungrib(DriverCycleBased):
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=d,
