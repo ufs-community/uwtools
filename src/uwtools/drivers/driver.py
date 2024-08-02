@@ -53,9 +53,8 @@ class Assets(ABC):
             }
         )
         self._config_full, _ = walk_key_path(config.data, key_path or [])
-        self._config = self._config_full
         try:
-            self._config = self._config[self._driver_name]
+            self._config = self._config_full[self._driver_name]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
         if controller:
