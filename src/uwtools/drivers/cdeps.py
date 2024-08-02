@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 from uwtools.api.template import _render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import AssetsCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -127,3 +128,6 @@ class CDEPS(AssetsCycleBased):
             output_file=path,
             values_src=self._driver_config[group],
         )
+
+
+set_driver_docstring(CDEPS)

@@ -6,12 +6,12 @@ import datetime as dt
 import re
 from inspect import getfullargspec
 from pathlib import Path
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Callable, Optional, TypeVar, Union
 
 from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
-from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
+from uwtools.utils.file import str2path
 
 T = TypeVar("T")
 
@@ -131,15 +131,6 @@ def make_execute(
             return execute_cycle_leadtime
         return execute_cycle
     return execute
-
-
-def str2path(val: Any) -> Any:
-    """
-    Return str value as Path, other types unmodified.
-
-    :param val: Any value.
-    """
-    return Path(val) if isinstance(val, str) else val
 
 
 # Private

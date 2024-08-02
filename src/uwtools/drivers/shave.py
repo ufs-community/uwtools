@@ -5,6 +5,7 @@ A driver for shave.
 from iotaa import tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -37,10 +38,13 @@ class Shave(DriverTimeInvariant):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config["execution"]["executable"]
+        executable = self._driver_config[STR.execution][STR.executable]
         config = self._driver_config["config"]
         input_file = config["input_grid_file"]
         output_file = input_file.replace(".nc", "_NH0.nc")
         flags = [config[key] for key in ["nx", "ny", "nh4", "input_grid_file"]]
         flags.append(output_file)
         return f"{executable} {' '.join(str(flag) for flag in flags)}"
+
+
+set_driver_docstring(Shave)

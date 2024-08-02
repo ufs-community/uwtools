@@ -71,9 +71,9 @@ class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
     pass
 
 
-def write(path, s):
+def write(path, x):
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(s, f)
+        json.dump(x, f)
         return path
 
 
@@ -103,8 +103,28 @@ def config(tmp_path):
             "account": "me",
             "scheduler": "slurm",
         },
-        "rootdir": "/path/to",
     }
+
+
+@fixture
+def controller_schema(tmp_path):
+    return write(
+        tmp_path / "concrete.jsonschema",
+        {
+            "properties": {
+                "concrete": {
+                    "properties": {
+                        "execution": {"type": "object"},
+                        "rundir": {"type": "string"},
+                    },
+                    "required": ["rundir"],
+                    "type": "object",
+                },
+            },
+            "required": ["concrete"],
+            "type": "object",
+        },
+    )
 
 
 @fixture
@@ -122,6 +142,17 @@ def driverobj(config):
 
 def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
+
+
+def test_Assets_controller(config, controller_schema):
+    config["controller"] = {"rundir": "/controller/run/dir"}
+    del config["concrete"]["rundir"]
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        with raises(UWConfigError):
+            ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
+        assert ConcreteAssetsTimeInvariant(
+            config=config, schema_file=controller_schema, controller="controller"
+        )
 
 
 def test_Assets_repr_cycle_based(config):
@@ -263,6 +294,21 @@ def test_Assets__validate_external(config):
 def test_Driver(driverobj):
     assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
     assert driverobj._batch is True
+
+
+def test_Driver_controller(config, controller_schema):
+    config["controller"] = {
+        "execution": {"executable": "/path/to/coupled.exe"},
+        "rundir": "/controller/run/dir",
+    }
+    del config["concrete"]["rundir"]
+    del config["concrete"]["execution"]
+    with patch.object(ConcreteDriverTimeInvariant, "_validate", driver.Driver._validate):
+        with raises(UWConfigError):
+            ConcreteDriverTimeInvariant(config=config, schema_file=controller_schema)
+        assert ConcreteDriverTimeInvariant(
+            config=config, schema_file=controller_schema, controller="controller"
+        )
 
 
 # Tests for workflow methods
@@ -560,6 +606,15 @@ def test__add_docstring():
     assert getattr(C, "__doc__") is None
     with patch.object(driver, "C", C, create=True):
         class_ = driver.C  # type: ignore # pylint: disable=no-member
-        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch", "schema_file"]
+        omit = [
+            "batch",
+            "config",
+            "controller",
+            "cycle",
+            "dry_run",
+            "key_path",
+            "leadtime",
+            "schema_file",
+        ]
         driver._add_docstring(class_=class_, omit=omit)
-    assert getattr(C, "__doc__").strip() == "The driver."
+    assert getattr(C, "__doc__").strip() == "A driver."

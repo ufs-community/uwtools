@@ -1,5 +1,5 @@
 """
-A base class for jedi-based drivers.
+A base class for JEDI-based drivers.
 """
 
 from abc import abstractmethod
@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
@@ -28,7 +29,7 @@ class JEDIBase(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["configuration_file"].get("base_file")
+        base_file = self._driver_config["configuration_file"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,

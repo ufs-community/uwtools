@@ -8,6 +8,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -29,10 +30,10 @@ class ChgresCube(DriverCycleBased):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         input_files = []
-        namelist = self._driver_config["namelist"]
-        if base_file := namelist.get("base_file"):
+        namelist = self._driver_config[STR.namelist]
+        if base_file := namelist.get(STR.basefile):
             input_files.append(base_file)
-        if update_values := namelist.get("update_values"):
+        if update_values := namelist.get(STR.updatevalues):
             config_files = update_values["config"]
             for k in ["mosaic_file_target_grid", "vcoord_file_target_grid"]:
                 input_files.append(config_files[k])
@@ -83,7 +84,7 @@ class ChgresCube(DriverCycleBased):
         yield None
         envvars = {
             "KMP_AFFINITY": "scatter",
-            "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
+            "OMP_NUM_THREADS": self._driver_config.get(STR.execution, {}).get(STR.threads, 1),
             "OMP_STACKSIZE": "1024m",
         }
         self._write_runscript(path=path, envvars=envvars)
@@ -96,3 +97,6 @@ class ChgresCube(DriverCycleBased):
         Returns the name of this driver.
         """
         return STR.chgrescube
+
+
+set_driver_docstring(ChgresCube)

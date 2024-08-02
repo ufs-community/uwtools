@@ -8,6 +8,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -28,11 +29,11 @@ class ESGGrid(DriverTimeInvariant):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["namelist"].get("base_file")
+        base_file = self._driver_config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config["namelist"],
+            config_values=self._driver_config[STR.namelist],
             path=path,
             schema=self._namelist_schema(schema_keys=["$defs", "namelist_content"]),
         )
@@ -56,3 +57,6 @@ class ESGGrid(DriverTimeInvariant):
         Returns the name of this driver.
         """
         return STR.esggrid
+
+
+set_driver_docstring(ESGGrid)

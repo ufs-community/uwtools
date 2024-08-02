@@ -24,7 +24,7 @@ cdeps:
         stream_data_files:
           - /path/to/data_file1.nc
         stream_data_variables:
-          - 'temperature Sa_tbot'
+          - temperature Sa_tbot
         stream_lev_dimname: 'null'
         stream_mesh_file: /path/to/mesh1.nc
         stream_offset: 0
@@ -59,8 +59,8 @@ cdeps:
           - /path/to/data_file2.nc
           - /path/to/data_file3.nc
         stream_data_variables:
-          - 'sst So_t'
-          - 'mask So_omask'
+          - sst So_t
+          - mask So_omask
         stream_lev_dimname: 'null'
         stream_mesh_file: /path/to/mesh2.nc
         stream_offset: 0

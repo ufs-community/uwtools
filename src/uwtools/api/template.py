@@ -10,7 +10,7 @@ from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinj
 from uwtools.config.jinja2 import render as _render
 from uwtools.exceptions import UWTemplateRenderError
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
-from uwtools.utils.api import str2path as _str2path
+from uwtools.utils.file import str2path as _str2path
 
 
 def render(

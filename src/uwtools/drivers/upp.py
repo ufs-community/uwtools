@@ -8,6 +8,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -49,12 +50,12 @@ class UPP(DriverCycleLeadtimeBased):
         path = self._namelist_path
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
-        base_file = self._driver_config["namelist"].get("base_file")
+        base_file = self._driver_config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         path.parent.mkdir(parents=True, exist_ok=True)
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config["namelist"],
+            config_values=self._driver_config[STR.namelist],
             path=path,
             schema=self._namelist_schema(),
         )
@@ -93,11 +94,14 @@ class UPP(DriverCycleLeadtimeBased):
         """
         Returns the full command-line component invocation.
         """
-        execution = self._driver_config.get("execution", {})
-        mpiargs = execution.get("mpiargs", [])
+        execution = self._driver_config.get(STR.execution, {})
+        mpiargs = execution.get(STR.mpiargs, [])
         components = [
-            execution.get("mpicmd"),
+            execution.get(STR.mpicmd),
             *[str(x) for x in mpiargs],
-            "%s < %s" % (execution["executable"], self._namelist_path.name),
+            "%s < %s" % (execution[STR.executable], self._namelist_path.name),
         ]
         return " ".join(filter(None, components))
+
+
+set_driver_docstring(UPP)

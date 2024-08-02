@@ -5,6 +5,7 @@ A driver for make_hgrid.
 from iotaa import tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -37,7 +38,7 @@ class MakeHgrid(DriverTimeInvariant):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config["execution"]["executable"]
+        executable = self._driver_config[STR.execution][STR.executable]
         config = self._driver_config["config"]
         flags = []
         for k, v in config.items():
@@ -48,3 +49,6 @@ class MakeHgrid(DriverTimeInvariant):
             else:
                 flags.append("--%s %s" % (k, v))
         return f"{executable} " + " ".join(flags)
+
+
+set_driver_docstring(MakeHgrid)

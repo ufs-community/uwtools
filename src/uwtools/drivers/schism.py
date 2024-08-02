@@ -8,6 +8,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
 from uwtools.drivers.driver import AssetsCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -28,12 +29,12 @@ class SCHISM(AssetsCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        template_file = Path(self._driver_config["namelist"]["template_file"])
+        template_file = Path(self._driver_config[STR.namelist]["template_file"])
         yield file(path=template_file)
         render(
             input_file=template_file,
             output_file=path,
-            overrides=self._driver_config["namelist"]["template_values"],
+            overrides=self._driver_config[STR.namelist]["template_values"],
         )
 
     @tasks
@@ -52,3 +53,6 @@ class SCHISM(AssetsCycleBased):
         Returns the name of this driver.
         """
         return STR.schism
+
+
+set_driver_docstring(SCHISM)

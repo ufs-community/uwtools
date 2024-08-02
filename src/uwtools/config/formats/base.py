@@ -14,6 +14,7 @@ from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error, yaml_to_str
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, log
+from uwtools.utils.file import str2path
 
 
 class Config(ABC, UserDict):
@@ -22,7 +23,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config: Optional[Union[dict, Path]] = None) -> None:
+    def __init__(self, config: Optional[Union[dict, str, Path]] = None) -> None:
         """
         Construct a Config object.
 
@@ -33,7 +34,7 @@ class Config(ABC, UserDict):
             self._config_file = None
             self.update(config)
         else:
-            self._config_file = config if config else None
+            self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
         if self.get_depth_threshold() and self.depth != self.get_depth_threshold():
             raise UWConfigError(

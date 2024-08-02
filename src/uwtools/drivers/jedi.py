@@ -8,6 +8,7 @@ from pathlib import Path
 from iotaa import asset, refs, run, task, tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -42,11 +43,11 @@ class JEDI(JEDIBase):
         yield taskname
         a = asset(None, lambda: False)
         yield a
-        executable = file(Path(self._driver_config["execution"]["executable"]))
+        executable = file(Path(self._driver_config[STR.execution][STR.executable]))
         config = self.configuration_file()
         yield [executable, config]
         cmd = "time %s --validate-only %s 2>&1" % (refs(executable), refs(config))
-        if envcmds := self._driver_config["execution"].get("envcmds"):
+        if envcmds := self._driver_config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
         result = run(taskname, cmd)
         if result.success:
@@ -74,13 +75,16 @@ class JEDI(JEDIBase):
         """
         Returns the full command-line component invocation.
         """
-        execution = self._driver_config["execution"]
+        execution = self._driver_config[STR.execution]
         jedi_config = self._rundir / self._config_fn
-        mpiargs = execution.get("mpiargs", [])
+        mpiargs = execution.get(STR.mpiargs, [])
         components = [
-            execution.get("mpicmd"),  # MPI run program
+            execution.get(STR.mpicmd),  # MPI run program
             *[str(x) for x in mpiargs],  # MPI arguments
-            execution["executable"],  # component executable name
+            execution[STR.executable],  # component executable name
             str(jedi_config),  # JEDI config file
         ]
         return " ".join(filter(None, components))
+
+
+set_driver_docstring(JEDI)

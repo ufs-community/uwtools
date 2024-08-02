@@ -20,6 +20,26 @@ def test_graph():
     ready()
     assert support.graph().startswith("digraph")
 
+
+def test_set_driver_docstring():
+    class Parent:
+        """
+        This will be discarded.
+
+        body
+        """
+
+    class Child(Parent):
+        """
+        head.
+        """
+
+    support.set_driver_docstring(Child)
+    assert Child.__doc__ == "head.\n\n        body"
+
+
+def test_tasks():
+
     class SomeDriver(DriverTimeInvariant):
         def provisioned_rundir(self):
             pass
