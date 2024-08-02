@@ -144,7 +144,6 @@ def test_Assets(assetsobj):
     assert Path(assetsobj.config["base_file"]).name == "base.yaml"
 
 
-
 def test_Assets_fail_bad_config(config):
     with raises(UWConfigError) as e:
         ConcreteAssetsTimeInvariant(config=config["concrete"])
