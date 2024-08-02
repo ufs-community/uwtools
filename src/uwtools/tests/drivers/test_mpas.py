@@ -26,7 +26,7 @@ def streams_file(config, driverobj, drivername):
     array_elements = {"file", "stream", "var", "var_array", "var_struct"}
     array_elements_tested = set()
     driverobj.streams_file()
-    path = Path(driverobj._config["rundir"], driverobj._streams_fn)
+    path = Path(driverobj.config["rundir"], driverobj._streams_fn)
     with open(path, "r", encoding="utf-8") as f:
         xml = etree.parse(f).getroot()
     assert xml.tag == "streams"
@@ -147,7 +147,7 @@ def test_MPAS_boundary_files(driverobj, cycle):
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
-    infile_path = Path(driverobj._config["lateral_boundary_conditions"]["path"])
+    infile_path = Path(driverobj.config["lateral_boundary_conditions"]["path"])
     infile_path.mkdir()
     for n in ns:
         path = infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"

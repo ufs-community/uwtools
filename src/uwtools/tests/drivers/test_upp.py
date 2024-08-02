@@ -98,22 +98,22 @@ def test_UPP(method):
 
 
 def test_UPP_files_copied(driverobj):
-    for _, src in driverobj._config["files_to_copy"].items():
+    for _, src in driverobj.config["files_to_copy"].items():
         Path(src).touch()
-    for dst, _ in driverobj._config["files_to_copy"].items():
+    for dst, _ in driverobj.config["files_to_copy"].items():
         assert not (driverobj._rundir / dst).is_file()
     driverobj.files_copied()
-    for dst, _ in driverobj._config["files_to_copy"].items():
+    for dst, _ in driverobj.config["files_to_copy"].items():
         assert (driverobj._rundir / dst).is_file()
 
 
 def test_UPP_files_linked(driverobj):
-    for _, src in driverobj._config["files_to_link"].items():
+    for _, src in driverobj.config["files_to_link"].items():
         Path(src).touch()
-    for dst, _ in driverobj._config["files_to_link"].items():
+    for dst, _ in driverobj.config["files_to_link"].items():
         assert not (driverobj._rundir / dst).is_file()
     driverobj.files_linked()
-    for dst, _ in driverobj._config["files_to_link"].items():
+    for dst, _ in driverobj.config["files_to_link"].items():
         assert (driverobj._rundir / dst).is_symlink()
 
 
@@ -176,7 +176,7 @@ def test_UPP__namelist_path(driverobj):
 
 
 def test_UPP__runcmd(driverobj):
-    assert driverobj._runcmd == "%s < itag" % driverobj._config["execution"]["executable"]
+    assert driverobj._runcmd == "%s < itag" % driverobj.config["execution"]["executable"]
 
 
 def test_UPP__taskname(driverobj):

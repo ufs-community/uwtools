@@ -129,7 +129,7 @@ def test_MPASInit_boundary_files(cycle, driverobj):
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
-    input_path = Path(driverobj._config["boundary_conditions"]["path"])
+    input_path = Path(driverobj.config["boundary_conditions"]["path"])
     input_path.mkdir()
     for n in ns:
         (input_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
@@ -189,7 +189,7 @@ def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
 
 def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._config["rundir"], "missing.nml"))
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()

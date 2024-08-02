@@ -52,7 +52,7 @@ def test_WaveWatchIII(method):
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
-    src = driverobj._config["namelist"]["template_file"]
+    src = driverobj.config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     dst = driverobj._rundir / "ww3_shel.nml"

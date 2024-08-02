@@ -52,7 +52,7 @@ def test_SCHISM(method):
 
 
 def test_SCHISM_namelist_file(driverobj):
-    src = driverobj._config["namelist"]["template_file"]
+    src = driverobj.config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     dst = driverobj._rundir / "param.nml"

@@ -121,7 +121,7 @@ def test_CDEPS__model_namelist_file(driverobj):
     with patch.object(driverobj, "_create_user_updated_config") as cuuc:
         driverobj._model_namelist_file(group=group, path=path)
         cuuc.assert_called_once_with(
-            config_class=NMLConfig, config_values=driverobj._config[group], path=path
+            config_class=NMLConfig, config_values=driverobj.config[group], path=path
         )
 
 
@@ -134,5 +134,5 @@ def test_CDEPS__model_stream_file(driverobj):
         render.assert_called_once_with(
             input_file=template_file,
             output_file=path,
-            values_src=driverobj._config[group],
+            values_src=driverobj.config[group],
         )

@@ -99,10 +99,10 @@ def test_JEDI(method):
 
 def test_JEDI_configuration_file(driverobj):
     basecfg = {"foo": "bar"}
-    base_file = Path(driverobj._config["configuration_file"]["base_file"])
+    base_file = Path(driverobj.config["configuration_file"]["base_file"])
     with open(base_file, "w", encoding="utf-8") as f:
         yaml.dump(basecfg, f)
-    cfgfile = Path(driverobj._config["rundir"], "jedi.yaml")
+    cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert cfgfile.is_file()
@@ -114,7 +114,7 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = Path(driverobj._config["rundir"], "missing")
     driverobj._config["configuration_file"]["base_file"] = base_file
-    cfgfile = Path(driverobj._config["rundir"], "jedi.yaml")
+    cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
@@ -177,12 +177,12 @@ def test_JEDI_validate_only(caplog, driverobj):
             result = Mock(output="", success=True)
             run.return_value = result
             driverobj.validate_only()
-            cfgfile = Path(driverobj._config["rundir"], "jedi.yaml")
+            cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
             cmds = [
                 "module load some-module",
                 "module load jedi-module",
                 "time %s --validate-only %s 2>&1"
-                % (driverobj._config["execution"]["executable"], cfgfile),
+                % (driverobj.config["execution"]["executable"], cfgfile),
             ]
             run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
@@ -197,7 +197,7 @@ def test_JEDI__driver_name(driverobj):
 
 
 def test_JEDI__runcmd(driverobj):
-    executable = driverobj._config["execution"]["executable"]
+    executable = driverobj.config["execution"]["executable"]
     config = driverobj._rundir / driverobj._config_fn
     assert (
         driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"

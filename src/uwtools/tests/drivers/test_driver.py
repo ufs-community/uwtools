@@ -326,7 +326,7 @@ def test_Driver_leadtime(config):
 @mark.parametrize("batch", [True, False])
 def test_Driver_run(batch, driverobj):
     driverobj._batch = batch
-    executable = Path(driverobj._config["execution"]["executable"])
+    executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "_run_via_batch_submission") as rvbs:
         with patch.object(driverobj, "_run_via_local_execution") as rvle:
@@ -351,7 +351,7 @@ def test_Driver_runscript(arg, driverobj, type_):
 
 def test_Driver__run_via_batch_submission(driverobj):
     runscript = driverobj._runscript_path
-    executable = Path(driverobj._config["execution"]["executable"])
+    executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(
@@ -365,7 +365,7 @@ def test_Driver__run_via_batch_submission(driverobj):
 
 
 def test_Driver__run_via_local_execution(driverobj):
-    executable = Path(driverobj._config["execution"]["executable"])
+    executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(driver, "execute") as execute:
@@ -464,7 +464,7 @@ def test_Driver__run_resources_pass(driverobj):
 
 
 def test_Driver__runcmd(driverobj):
-    executable = driverobj._config["execution"]["executable"]
+    executable = driverobj.config["execution"]["executable"]
     assert driverobj._runcmd == f"foo bar baz {executable}"
 
 
@@ -511,7 +511,7 @@ def test_Driver__runscript_done_file(driverobj):
 
 
 def test_Driver__runscript_path(driverobj):
-    rundir = Path(driverobj._config["rundir"])
+    rundir = Path(driverobj.config["rundir"])
     assert driverobj._runscript_path == rundir / "runscript.concrete"
 
 
@@ -548,9 +548,9 @@ def test_Driver__validate_external(config):
 
 
 def test_Driver__write_runscript(driverobj):
-    rundir = driverobj._config["rundir"]
+    rundir = driverobj.config["rundir"]
     path = Path(rundir, "runscript")
-    executable = driverobj._config["execution"]["executable"]
+    executable = driverobj.config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
     #!/bin/bash
@@ -574,7 +574,7 @@ def test_Driver__write_runscript(driverobj):
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):
-    path = Path(driverobj._config["rundir"], "runscript")
+    path = Path(driverobj.config["rundir"], "runscript")
     driverobj._config["execution"]["threads"] = 4
     with raises(UWConfigError) as e:
         driverobj._write_runscript(path=path)
