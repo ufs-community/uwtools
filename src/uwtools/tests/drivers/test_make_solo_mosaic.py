@@ -47,7 +47,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -76,7 +75,7 @@ def test_MakeSoloMosiac__driver_name(driverobj):
 
 
 def test_MakeSoloMosaic__runcmd(driverobj):
-    dir_path = driverobj._config["make_solo_mosaic"]["config"]["dir"]
+    dir_path = driverobj.config["config"]["dir"]
     cmd = driverobj._runcmd
     assert cmd == f"/path/to/make_solo_mosaic.exe --dir {dir_path} --num_tiles 1"
 

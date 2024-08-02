@@ -23,7 +23,7 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         Ensure the specified input grid file exists.
         """
-        path = Path(self._driver_config["input_grid_file"])
+        path = Path(self.config["input_grid_file"])
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
 
@@ -52,8 +52,8 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config[STR.execution][STR.executable]
-        input_file_path = self._driver_config["input_grid_file"]
+        executable = self.config[STR.execution][STR.executable]
+        input_file_path = self.config["input_grid_file"]
         return f"{executable} {input_file_path}"
 
 

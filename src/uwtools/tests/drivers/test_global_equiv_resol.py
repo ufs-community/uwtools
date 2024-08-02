@@ -46,7 +46,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -66,7 +65,7 @@ def test_GlobalEquivResol(method):
 
 
 def test_GlobalEquivResol_input_file(driverobj):
-    path = Path(driverobj._driver_config["input_grid_file"])
+    path = Path(driverobj._config["input_grid_file"])
     assert not driverobj.input_file().ready()
     path.parent.mkdir()
     path.touch()
@@ -86,7 +85,7 @@ def test_GlobalEquivResol_provisioned_rundir(driverobj):
 
 def test_GlobalEquivResol__runcmd(driverobj):
     cmd = driverobj._runcmd
-    input_file_path = driverobj._driver_config["input_grid_file"]
+    input_file_path = driverobj._config["input_grid_file"]
     assert cmd == f"/path/to/global_equiv_resol.exe {input_file_path}"
 
 

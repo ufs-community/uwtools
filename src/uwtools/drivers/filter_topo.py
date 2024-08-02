@@ -25,8 +25,8 @@ class FilterTopo(DriverTimeInvariant):
         """
         The input grid file.
         """
-        src = Path(self._driver_config["config"]["input_grid_file"])
-        dst = Path(self._driver_config[STR.rundir]) / src.name
+        src = Path(self.config["config"]["input_grid_file"])
+        dst = Path(self.config[STR.rundir]) / src.name
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
@@ -43,7 +43,7 @@ class FilterTopo(DriverTimeInvariant):
         yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config[STR.namelist],
+            config_values=self.config[STR.namelist],
             path=path,
             schema=self._namelist_schema(),
         )

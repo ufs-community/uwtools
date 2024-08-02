@@ -141,12 +141,12 @@ def driverobj(config):
 
 
 def test_Assets(assetsobj):
-    assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
+    assert Path(assetsobj.config["base_file"]).name == "base.yaml"
 
 
 def test_Assets___repr___cycle_based(config):
     obj = ConcreteAssetsCycleBased(config=config, cycle=dt.datetime(2024, 7, 2, 12))
-    expected = "concrete 2024-07-02T12:00 in %s" % obj._driver_config["rundir"]
+    expected = "concrete 2024-07-02T12:00 in %s" % obj.config["rundir"]
     assert repr(obj) == expected
 
 
@@ -154,13 +154,13 @@ def test_Assets___repr___cycle_and_leadtime_based(config):
     obj = ConcreteAssetsCycleLeadtimeBased(
         config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
-    expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj._driver_config["rundir"]
+    expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj.config["rundir"]
     assert repr(obj) == expected
 
 
 def test_Assets___repr___time_invariant(config):
     obj = ConcreteAssetsTimeInvariant(config=config)
-    expected = "concrete in %s" % obj._driver_config["rundir"]
+    expected = "concrete in %s" % obj.config["rundir"]
     assert repr(obj) == expected
 
 
@@ -170,16 +170,16 @@ def test_Assets___str__(assetsobj):
 
 def test_Assets_config(assetsobj):
     # The user-accessible object is equivalent to the internal driver config:
-    assert assetsobj.config == assetsobj._driver_config
+    assert assetsobj.config == assetsobj._config
     # But they are separate objects:
-    assert not assetsobj.config is assetsobj._driver_config
+    assert not assetsobj.config is assetsobj._config
 
 
 def test_Assets_config_full(assetsobj):
     # The user-accessible object is equivalent to the internal driver config:
-    assert assetsobj.config_full == assetsobj._config
+    assert assetsobj.config_full == assetsobj._config_full
     # But they are separate objects:
-    assert not assetsobj.config_full is assetsobj._config
+    assert not assetsobj.config_full is assetsobj._config_full
 
 
 def test_Assets_controller(config, controller_schema):
@@ -212,7 +212,7 @@ def test_Assets_key_path(config, tmp_path):
     assetsobj = ConcreteAssetsTimeInvariant(
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
-    assert config == assetsobj._config
+    assert config == assetsobj._config_full
 
 
 def test_Assets_leadtime(config):
@@ -242,7 +242,7 @@ def test_Assets__create_user_updated_config_base_file(
     assetsobj, base_file, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
-    dc = assetsobj._driver_config
+    dc = assetsobj.config
     if not base_file:
         del dc["base_file"]
     if not update_values:
@@ -255,24 +255,8 @@ def test_Assets__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Assets__driver_config_fail(assetsobj):
-    del assetsobj._config["concrete"]
-    with raises(UWConfigError) as e:
-        assert assetsobj._driver_config
-    assert str(e.value) == "Required 'concrete' block missing in config"
-
-
-def test_Assets__driver_config_pass(assetsobj):
-    assert set(assetsobj._driver_config.keys()) == {
-        "base_file",
-        "execution",
-        "rundir",
-        "update_values",
-    }
-
-
 def test_Assets__rundir(assetsobj):
-    assert assetsobj._rundir == Path(assetsobj._driver_config["rundir"])
+    assert assetsobj._rundir == Path(assetsobj.config["rundir"])
 
 
 def test_Assets__validate_internal(assetsobj):
@@ -281,7 +265,7 @@ def test_Assets__validate_internal(assetsobj):
             assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": assetsobj._config,
+            "config": assetsobj.config_full,
         }
 
 
@@ -292,7 +276,7 @@ def test_Assets__validate_external(config):
             assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
-            "config": assetsobj._config,
+            "config": assetsobj._config_full,
         }
 
 
@@ -300,7 +284,7 @@ def test_Assets__validate_external(config):
 
 
 def test_Driver(driverobj):
-    assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
+    assert Path(driverobj._config["base_file"]).name == "base.yaml"
     assert driverobj._batch is True
 
 
@@ -336,7 +320,7 @@ def test_Driver_leadtime(config):
 @mark.parametrize("batch", [True, False])
 def test_Driver_run(batch, driverobj):
     driverobj._batch = batch
-    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable = Path(driverobj._config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "_run_via_batch_submission") as rvbs:
         with patch.object(driverobj, "_run_via_local_execution") as rvle:
@@ -361,7 +345,7 @@ def test_Driver_runscript(arg, driverobj, type_):
 
 def test_Driver__run_via_batch_submission(driverobj):
     runscript = driverobj._runscript_path
-    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable = Path(driverobj._config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(
@@ -375,7 +359,7 @@ def test_Driver__run_via_batch_submission(driverobj):
 
 
 def test_Driver__run_via_local_execution(driverobj):
-    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable = Path(driverobj._config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(driver, "execute") as execute:
@@ -401,7 +385,7 @@ def test_Driver__create_user_updated_config_base_file(
     base_file, driverobj, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
-    dc = driverobj._driver_config
+    dc = driverobj._config
     if not base_file:
         del dc["base_file"]
     if not update_values:
@@ -414,31 +398,13 @@ def test_Driver__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Driver__driver_config_fail(driverobj):
-    del driverobj._config["concrete"]
-    with raises(UWConfigError) as e:
-        assert driverobj._driver_config
-    assert str(e.value) == "Required 'concrete' block missing in config"
-
-
-def test_Driver__driver_config_pass(driverobj):
-    assert set(driverobj._driver_config.keys()) == {
-        "base_file",
-        "execution",
-        "rundir",
-        "update_values",
-    }
-
-
 def test_Driver__namelist_schema_custom(driverobj, tmp_path):
     nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
     schema = {"foo": {"bar": nmlschema}}
     schema_path = tmp_path / "test.jsonschema"
     with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(schema, f)
-    with patch.object(
-        ConcreteDriverTimeInvariant, "_driver_config", new_callable=PropertyMock
-    ) as dc:
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"baz": {"qux": {"validate": True}}}
         with patch.object(driver, "get_schema_file", return_value=schema_path):
             assert (
@@ -457,24 +423,20 @@ def test_Driver__namelist_schema_default(driverobj, tmp_path):
     schema_path = tmp_path / "test.jsonschema"
     with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(schema, f)
-    with patch.object(
-        ConcreteDriverTimeInvariant, "_driver_config", new_callable=PropertyMock
-    ) as dc:
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"namelist": {"validate": True}}
         with patch.object(driver, "get_schema_file", return_value=schema_path):
             assert driverobj._namelist_schema() == nmlschema
 
 
 def test_Driver__namelist_schema_default_disable(driverobj):
-    with patch.object(
-        ConcreteDriverTimeInvariant, "_driver_config", new_callable=PropertyMock
-    ) as dc:
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"namelist": {"validate": False}}
         assert driverobj._namelist_schema() == {"type": "object"}
 
 
 def test_Driver__run_resources_fail(driverobj):
-    del driverobj._config["platform"]
+    del driverobj._config_full["platform"]
     with raises(UWConfigError) as e:
         assert driverobj._run_resources
     assert str(e.value) == "Required 'platform' block missing in config"
@@ -484,9 +446,7 @@ def test_Driver__run_resources_pass(driverobj):
     account = "me"
     scheduler = "slurm"
     walltime = "00:05:00"
-    driverobj._driver_config["execution"].update(
-        {"batchargs": {"threads": 4, "walltime": walltime}}
-    )
+    driverobj._config["execution"].update({"batchargs": {"threads": 4, "walltime": walltime}})
     assert driverobj._run_resources == {
         "account": account,
         "rundir": driverobj._rundir,
@@ -498,7 +458,7 @@ def test_Driver__run_resources_pass(driverobj):
 
 
 def test_Driver__runcmd(driverobj):
-    executable = driverobj._driver_config["execution"]["executable"]
+    executable = driverobj._config["execution"]["executable"]
     assert driverobj._runcmd == f"foo bar baz {executable}"
 
 
@@ -545,7 +505,7 @@ def test_Driver__runscript_done_file(driverobj):
 
 
 def test_Driver__runscript_path(driverobj):
-    rundir = Path(driverobj._driver_config["rundir"])
+    rundir = Path(driverobj._config["rundir"])
     assert driverobj._runscript_path == rundir / "runscript.concrete"
 
 
@@ -562,11 +522,11 @@ def test_Driver__validate_internal(assetsobj):
             assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": assetsobj._config,
+            "config": assetsobj.config_full,
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
-            "config": assetsobj._config,
+            "config": assetsobj.config_full,
         }
 
 
@@ -577,14 +537,14 @@ def test_Driver__validate_external(config):
             assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
-            "config": assetsobj._config,
+            "config": assetsobj.config_full,
         }
 
 
 def test_Driver__write_runscript(driverobj):
-    rundir = driverobj._driver_config["rundir"]
+    rundir = driverobj._config["rundir"]
     path = Path(rundir) / "runscript"
-    executable = driverobj._driver_config["execution"]["executable"]
+    executable = driverobj._config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
     #!/bin/bash
@@ -608,8 +568,8 @@ def test_Driver__write_runscript(driverobj):
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):
-    path = Path(driverobj._driver_config["rundir"]) / "runscript"
-    driverobj._driver_config["execution"]["threads"] = 4
+    path = Path(driverobj._config["rundir"]) / "runscript"
+    driverobj._config["execution"]["threads"] = 4
     with raises(UWConfigError) as e:
         driverobj._write_runscript(path=path)
     assert str(e.value) == "Config specified threads but driver does not set OMP_NUM_THREADS"

@@ -54,7 +54,7 @@ class CDEPS(AssetsCycleBased):
         yield self._taskname(f"stream file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        template_file = self._driver_config["atm_streams"]["template_file"]
+        template_file = self.config["atm_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("atm_streams", path, template_file)
 
@@ -91,7 +91,7 @@ class CDEPS(AssetsCycleBased):
         yield self._taskname(f"stream file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        template_file = self._driver_config["ocn_streams"]["template_file"]
+        template_file = self.config["ocn_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
 
@@ -112,7 +112,7 @@ class CDEPS(AssetsCycleBased):
         :param path: Path to write namelist to.
         """
         self._create_user_updated_config(
-            config_class=NMLConfig, config_values=self._driver_config[group], path=path
+            config_class=NMLConfig, config_values=self.config[group], path=path
         )
 
     def _model_stream_file(self, group: str, path: Path, template_file: str) -> None:
@@ -126,7 +126,7 @@ class CDEPS(AssetsCycleBased):
         _render(
             input_file=Path(template_file),
             output_file=path,
-            values_src=self._driver_config[group],
+            values_src=self.config[group],
         )
 
 

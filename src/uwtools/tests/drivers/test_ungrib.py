@@ -59,7 +59,6 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -119,7 +118,7 @@ def test_Ungrib_provisioned_rundir(driverobj):
 def test_Ungrib_vtable(driverobj):
     src = driverobj._rundir / "Vtable.GFS.in"
     src.touch()
-    driverobj._driver_config["vtable"] = src
+    driverobj._config["vtable"] = src
     dst = driverobj._rundir / "Vtable"
     assert not dst.is_symlink()
     driverobj.vtable()

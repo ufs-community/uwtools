@@ -26,7 +26,7 @@ def streams_file(config, driverobj, drivername):
     array_elements = {"file", "stream", "var", "var_array", "var_struct"}
     array_elements_tested = set()
     driverobj.streams_file()
-    path = Path(driverobj._driver_config["rundir"]) / driverobj._streams_fn
+    path = Path(driverobj._config["rundir"]) / driverobj._streams_fn
     with open(path, "r", encoding="utf-8") as f:
         xml = etree.parse(f).getroot()
     assert xml.tag == "streams"
@@ -120,7 +120,6 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -148,7 +147,7 @@ def test_MPAS_boundary_files(driverobj, cycle):
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
-    infile_path = Path(driverobj._driver_config["lateral_boundary_conditions"]["path"])
+    infile_path = Path(driverobj._config["lateral_boundary_conditions"]["path"])
     infile_path.mkdir()
     for n in ns:
         path = infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
@@ -206,7 +205,7 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
 
 def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
@@ -215,8 +214,8 @@ def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
 
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
-    driverobj._driver_config["namelist"]["base_file"] = base_file
+    base_file = str(Path(driverobj._config["rundir"]) / "missing.nml")
+    driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")

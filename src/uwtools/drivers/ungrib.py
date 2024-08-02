@@ -27,7 +27,7 @@ class Ungrib(DriverCycleBased):
         Symlinks to all the GRIB files.
         """
         yield self._taskname("GRIB files")
-        gfs_files = self._driver_config["gfs_files"]
+        gfs_files = self.config["gfs_files"]
         offset = abs(gfs_files["offset"])
         endhour = gfs_files["forecast_length"] + offset
         interval = gfs_files["interval_hours"]
@@ -47,7 +47,7 @@ class Ungrib(DriverCycleBased):
         The namelist file.
         """
         # Do not use offset here. It's relative to the MPAS fcst to run.
-        gfs_files = self._driver_config["gfs_files"]
+        gfs_files = self.config["gfs_files"]
         endhour = gfs_files["forecast_length"]
         end_date = self._cycle + timedelta(hours=endhour)
         interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
@@ -98,10 +98,10 @@ class Ungrib(DriverCycleBased):
         path = self._rundir / "Vtable"
         yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["vtable"])
+        infile = Path(self.config["vtable"])
         yield file(path=infile)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(Path(self._driver_config["vtable"]))
+        path.symlink_to(Path(self.config["vtable"]))
 
     # Private helper methods
 

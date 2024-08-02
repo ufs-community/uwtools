@@ -29,12 +29,12 @@ class FV3(DriverCycleBased):
         Lateral boundary-condition files.
         """
         yield self._taskname("lateral boundary-condition files")
-        lbcs = self._driver_config["lateral_boundary_conditions"]
+        lbcs = self.config["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
-        endhour = self._driver_config["length"] + offset + 1
+        endhour = self.config["length"] + offset + 1
         interval = lbcs["interval_hours"]
         symlinks = {}
-        for n in [7] if self._driver_config["domain"] == "global" else range(1, 7):
+        for n in [7] if self.config["domain"] == "global" else range(1, 7):
             for boundary_hour in range(offset, endhour, interval):
                 target = Path(lbcs["path"].format(tile=n, forecast_hour=boundary_hour))
                 linkname = (
@@ -53,7 +53,7 @@ class FV3(DriverCycleBased):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        if src := self._driver_config.get(fn):
+        if src := self.config.get(fn):
             path.parent.mkdir(parents=True, exist_ok=True)
             copy(src=src, dst=path)
         else:
@@ -68,7 +68,7 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield filecopy(src=Path(self._driver_config["field_table"][STR.basefile]), dst=path)
+        yield filecopy(src=Path(self.config["field_table"][STR.basefile]), dst=path)
 
     @tasks
     def files_copied(self):
@@ -78,7 +78,7 @@ class FV3(DriverCycleBased):
         yield self._taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
+            for dst, src in self.config.get("files_to_copy", {}).items()
         ]
 
     @tasks
@@ -89,7 +89,7 @@ class FV3(DriverCycleBased):
         yield self._taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+            for linkname, target in self.config.get("files_to_link", {}).items()
         ]
 
     @task
@@ -101,11 +101,11 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["model_configure"].get(STR.basefile)
+        base_file = self.config["model_configure"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._driver_config["model_configure"],
+            config_values=self.config["model_configure"],
             path=path,
         )
 
@@ -118,11 +118,11 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config[STR.namelist],
+            config_values=self.config[STR.namelist],
             path=path,
             schema=self._namelist_schema(),
         )
@@ -143,7 +143,7 @@ class FV3(DriverCycleBased):
             self.restart_directory(),
             self.runscript(),
         ]
-        if self._driver_config["domain"] == "regional":
+        if self.config["domain"] == "regional":
             required.append(self.boundary_files())
         yield required
 
@@ -171,7 +171,7 @@ class FV3(DriverCycleBased):
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
             "MPI_TYPE_DEPTH": 20,
-            "OMP_NUM_THREADS": self._driver_config.get(STR.execution, {}).get(STR.threads, 1),
+            "OMP_NUM_THREADS": self.config.get(STR.execution, {}).get(STR.threads, 1),
             "OMP_STACKSIZE": "512m",
         }
         self._write_runscript(path=path, envvars=envvars)

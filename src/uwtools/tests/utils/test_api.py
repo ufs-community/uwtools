@@ -95,7 +95,7 @@ def test__execute(execute_kwargs, hours, tmp_path):
     kwargs = {
         **execute_kwargs,
         "driver_class": TestDriverCL,
-        "config": {"some": "config"},
+        "config": {"concrete": {"some": "config"}},
         "cycle": dt.datetime.now(),
         "leadtime": dt.timedelta(hours=hours),
         "graph_file": graph_file,

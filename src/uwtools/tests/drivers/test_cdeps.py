@@ -48,7 +48,7 @@ def test_CDEPS_nml(caplog, driverobj, group):
     log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / f"d{group}_in"
     assert not dst.is_file()
-    del driverobj._driver_config[f"{group}_in"]["base_file"]
+    del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
     path = Path(refs(task()))
     assert dst.is_file()
@@ -87,7 +87,7 @@ def test_CDEPS_streams(driverobj, group):
     template_file = driverobj._rundir.parent / "template.jinja2"
     with open(template_file, "w", encoding="utf-8") as f:
         print(dedent(template).strip(), file=f)
-    driverobj._driver_config[f"{group}_streams"]["template_file"] = template_file
+    driverobj._config[f"{group}_streams"]["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
     path = Path(refs(task()))
     assert dst.is_file()
@@ -121,7 +121,7 @@ def test_CDEPS__model_namelist_file(driverobj):
     with patch.object(driverobj, "_create_user_updated_config") as cuuc:
         driverobj._model_namelist_file(group=group, path=path)
         cuuc.assert_called_once_with(
-            config_class=NMLConfig, config_values=driverobj._driver_config[group], path=path
+            config_class=NMLConfig, config_values=driverobj._config[group], path=path
         )
 
 
@@ -134,5 +134,5 @@ def test_CDEPS__model_stream_file(driverobj):
         render.assert_called_once_with(
             input_file=template_file,
             output_file=path,
-            values_src=driverobj._driver_config[group],
+            values_src=driverobj._config[group],
         )

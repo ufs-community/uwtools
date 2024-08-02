@@ -43,11 +43,11 @@ class JEDI(JEDIBase):
         yield taskname
         a = asset(None, lambda: False)
         yield a
-        executable = file(Path(self._driver_config[STR.execution][STR.executable]))
+        executable = file(Path(self.config[STR.execution][STR.executable]))
         config = self.configuration_file()
         yield [executable, config]
         cmd = "time %s --validate-only %s 2>&1" % (refs(executable), refs(config))
-        if envcmds := self._driver_config[STR.execution].get(STR.envcmds):
+        if envcmds := self.config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
         result = run(taskname, cmd)
         if result.success:
@@ -75,7 +75,7 @@ class JEDI(JEDIBase):
         """
         Returns the full command-line component invocation.
         """
-        execution = self._driver_config[STR.execution]
+        execution = self.config[STR.execution]
         jedi_config = self._rundir / self._config_fn
         mpiargs = execution.get(STR.mpiargs, [])
         components = [

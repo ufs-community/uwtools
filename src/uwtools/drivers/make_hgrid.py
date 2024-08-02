@@ -38,8 +38,8 @@ class MakeHgrid(DriverTimeInvariant):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config[STR.execution][STR.executable]
-        config = self._driver_config["config"]
+        executable = self.config[STR.execution][STR.executable]
+        config = self.config["config"]
         flags = []
         for k, v in config.items():
             if isinstance(v, bool):

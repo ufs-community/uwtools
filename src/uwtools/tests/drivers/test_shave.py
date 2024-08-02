@@ -52,7 +52,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -87,9 +86,9 @@ def test_Shave__driver_name(driverobj):
 
 def test_Shave__runcmd(driverobj):
     cmd = driverobj._runcmd
-    nx = driverobj._driver_config["config"]["nx"]
-    ny = driverobj._driver_config["config"]["ny"]
-    nh4 = driverobj._driver_config["config"]["nh4"]
-    input_file_path = driverobj._driver_config["config"]["input_grid_file"]
+    nx = driverobj._config["config"]["nx"]
+    ny = driverobj._config["config"]["ny"]
+    nh4 = driverobj._config["config"]["nh4"]
+    input_file_path = driverobj._config["config"]["input_grid_file"]
     output_file_path = input_file_path.replace(".nc", "_NH0.nc")
     assert cmd == f"/path/to/shave {nx} {ny} {nh4} {input_file_path} {output_file_path}"

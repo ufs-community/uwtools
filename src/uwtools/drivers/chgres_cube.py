@@ -30,7 +30,7 @@ class ChgresCube(DriverCycleBased):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         input_files = []
-        namelist = self._driver_config[STR.namelist]
+        namelist = self.config[STR.namelist]
         if base_file := namelist.get(STR.basefile):
             input_files.append(base_file)
         if update_values := namelist.get(STR.updatevalues):
@@ -84,7 +84,7 @@ class ChgresCube(DriverCycleBased):
         yield None
         envvars = {
             "KMP_AFFINITY": "scatter",
-            "OMP_NUM_THREADS": self._driver_config.get(STR.execution, {}).get(STR.threads, 1),
+            "OMP_NUM_THREADS": self.config.get(STR.execution, {}).get(STR.threads, 1),
             "OMP_STACKSIZE": "1024m",
         }
         self._write_runscript(path=path, envvars=envvars)

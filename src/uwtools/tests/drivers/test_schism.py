@@ -45,18 +45,14 @@ def driverobj(config, cycle):
 
 @mark.parametrize(
     "method",
-    [
-        "_driver_config",
-        "_taskname",
-        "_validate",
-    ],
+    ["_taskname", "_validate"],
 )
 def test_SCHISM(method):
     assert getattr(SCHISM, method) is getattr(AssetsCycleBased, method)
 
 
 def test_SCHISM_namelist_file(driverobj):
-    src = driverobj._driver_config["namelist"]["template_file"]
+    src = driverobj._config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     dst = driverobj._rundir / "param.nml"
