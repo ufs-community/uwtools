@@ -27,7 +27,7 @@ class SCHISM(AssetsCycleBased):
         """
         fn = "param.nml"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         template_file = Path(self.config[STR.namelist]["template_file"])
         yield file(path=template_file)

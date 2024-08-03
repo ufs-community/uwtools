@@ -93,6 +93,13 @@ class Assets(ABC):
         """
         return deepcopy(self._config_full)
 
+    @property
+    def rundir(self) -> Path:
+        """
+        The path to the component's run directory.
+        """
+        return Path(self.config[STR.rundir])
+
     # Workflow tasks
 
     @external
@@ -167,13 +174,6 @@ class Assets(ABC):
             ]:
                 schema = schema[schema_key]
         return schema
-
-    @property
-    def _rundir(self) -> Path:
-        """
-        The path to the component's run directory.
-        """
-        return Path(self.config[STR.rundir])
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -375,11 +375,11 @@ class Driver(Assets):
         A run executed directly on the local system.
         """
         yield self._taskname("run via local execution")
-        path = self._rundir / self._runscript_done_file
+        path = self.rundir / self._runscript_done_file
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
+        execute(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Private helper methods
 
@@ -395,7 +395,7 @@ class Driver(Assets):
         threads = self.config.get(STR.execution, {}).get(STR.threads)
         return {
             STR.account: platform[STR.account],
-            STR.rundir: self._rundir,
+            STR.rundir: self.rundir,
             STR.scheduler: platform[STR.scheduler],
             STR.stdout: "%s.out" % self._runscript_path.name,  # config may override
             **({STR.threads: threads} if threads else {}),
@@ -464,7 +464,7 @@ class Driver(Assets):
         """
         Returns the path to the runscript.
         """
-        return self._rundir / f"runscript.{self._driver_name}"
+        return self.rundir / f"runscript.{self._driver_name}"
 
     @property
     def _scheduler(self) -> JobScheduler:

@@ -27,7 +27,7 @@ class WaveWatchIII(AssetsCycleBased):
         """
         fn = "ww3_shel.nml"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         template_file = Path(self.config[STR.namelist]["template_file"])
         yield file(template_file)
@@ -54,7 +54,7 @@ class WaveWatchIII(AssetsCycleBased):
         The restart directory.
         """
         yield self._taskname("restart directory")
-        path = self._rundir / "restart_wave"
+        path = self.rundir / "restart_wave"
         yield asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)

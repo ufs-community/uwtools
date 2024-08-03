@@ -109,7 +109,7 @@ def test_IODA__driver_name(driverobj):
 
 
 def test_IODA__runcmd(driverobj):
-    config = str(driverobj._rundir / driverobj._config_fn)
+    config = str(driverobj.rundir / driverobj._config_fn)
     assert driverobj._runcmd == f"/path/to/bufr2ioda.x {config}"
 
 

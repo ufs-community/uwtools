@@ -108,7 +108,7 @@ def test_SfcClimoGen(method):
 
 def test_SfcClimoGen_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / "fort.41"
+    dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready):
         path = Path(refs(driverobj.namelist_file()))

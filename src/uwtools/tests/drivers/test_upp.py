@@ -101,20 +101,20 @@ def test_UPP_files_copied(driverobj):
     for _, src in driverobj.config["files_to_copy"].items():
         Path(src).touch()
     for dst, _ in driverobj.config["files_to_copy"].items():
-        assert not (driverobj._rundir / dst).is_file()
+        assert not (driverobj.rundir / dst).is_file()
     driverobj.files_copied()
     for dst, _ in driverobj.config["files_to_copy"].items():
-        assert (driverobj._rundir / dst).is_file()
+        assert (driverobj.rundir / dst).is_file()
 
 
 def test_UPP_files_linked(driverobj):
     for _, src in driverobj.config["files_to_link"].items():
         Path(src).touch()
     for dst, _ in driverobj.config["files_to_link"].items():
-        assert not (driverobj._rundir / dst).is_file()
+        assert not (driverobj.rundir / dst).is_file()
     driverobj.files_linked()
     for dst, _ in driverobj.config["files_to_link"].items():
-        assert (driverobj._rundir / dst).is_symlink()
+        assert (driverobj.rundir / dst).is_symlink()
 
 
 def test_UPP_namelist_file(caplog, driverobj):
@@ -122,7 +122,7 @@ def test_UPP_namelist_file(caplog, driverobj):
     datestr = "2024-05-05_12:00:00"
     with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
         print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
-    dst = driverobj._rundir / "itag"
+    dst = driverobj.rundir / "itag"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
@@ -172,7 +172,7 @@ def test_UPP__driver_name(driverobj):
 
 
 def test_UPP__namelist_path(driverobj):
-    assert driverobj._namelist_path == driverobj._rundir / "itag"
+    assert driverobj._namelist_path == driverobj.rundir / "itag"
 
 
 def test_UPP__runcmd(driverobj):

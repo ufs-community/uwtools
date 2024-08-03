@@ -143,7 +143,7 @@ def test_MPAS(method):
 def test_MPAS_boundary_files(driverobj, cycle):
     ns = (0, 1)
     links = [
-        driverobj._rundir / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+        driverobj.rundir / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
@@ -180,7 +180,7 @@ def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 
 def test_MPAS_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / "namelist.atmosphere"
+    dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
@@ -193,7 +193,7 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = 120
     driverobj = MPAS(config=config, cycle=cycle)
-    dst = driverobj._rundir / "namelist.atmosphere"
+    dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()

@@ -27,7 +27,7 @@ class SfcClimoGen(DriverTimeInvariant):
         """
         fn = "fort.41"
         yield self._taskname(f"namelist file {fn}")
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         vals = self.config[STR.namelist][STR.updatevalues]["config"]
         input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]

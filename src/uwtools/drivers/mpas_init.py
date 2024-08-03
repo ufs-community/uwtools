@@ -36,7 +36,7 @@ class MPASInit(MPASBase):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             target = Path(boundary_filepath, fn)
-            linkname = self._rundir / fn
+            linkname = self.rundir / fn
             symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
@@ -47,7 +47,7 @@ class MPASInit(MPASBase):
         """
         fn = "namelist.init_atmosphere"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None

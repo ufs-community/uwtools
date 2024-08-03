@@ -37,7 +37,7 @@ class FilterTopo(DriverTimeInvariant):
         The namelist file.
         """
         fn = "input.nml"
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield self._taskname(f"namelist file {fn}")
         yield asset(path, path.is_file)
         yield None

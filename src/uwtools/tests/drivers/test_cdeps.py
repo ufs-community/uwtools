@@ -46,7 +46,7 @@ def test_CDEPS_atm(driverobj):
 @mark.parametrize("group", ["atm", "ocn"])
 def test_CDEPS_nml(caplog, driverobj, group):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / f"d{group}_in"
+    dst = driverobj.rundir / f"d{group}_in"
     assert not dst.is_file()
     del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
@@ -66,7 +66,7 @@ def test_CDEPS_ocn(driverobj):
 
 @mark.parametrize("group", ["atm", "ocn"])
 def test_CDEPS_streams(driverobj, group):
-    dst = driverobj._rundir / f"d{group}.streams"
+    dst = driverobj.rundir / f"d{group}.streams"
     assert not dst.is_file()
     template = """
     {{ streams.stream01.dtlimit }}
@@ -84,7 +84,7 @@ def test_CDEPS_streams(driverobj, group):
     {{ streams.stream01.yearFirst }}
     {{ streams.stream01.yearLast }}
     """
-    template_file = driverobj._rundir.parent / "template.jinja2"
+    template_file = driverobj.rundir.parent / "template.jinja2"
     with open(template_file, "w", encoding="utf-8") as f:
         print(dedent(template).strip(), file=f)
     driverobj._config[f"{group}_streams"]["template_file"] = template_file

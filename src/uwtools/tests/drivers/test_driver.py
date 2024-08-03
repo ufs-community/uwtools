@@ -262,7 +262,7 @@ def test_Assets__create_user_updated_config_base_file(
 
 
 def test_Assets__rundir(assetsobj):
-    assert assetsobj._rundir == Path(assetsobj.config["rundir"])
+    assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
 
 def test_Assets__validate_internal(assetsobj):
@@ -372,7 +372,7 @@ def test_Driver__run_via_local_execution(driverobj):
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
+                cwd=driverobj.rundir,
                 log_output=True,
             )
         prd.assert_called_once_with()
@@ -454,7 +454,7 @@ def test_Driver__run_resources_pass(driverobj):
     driverobj._config["execution"].update({"batchargs": {"threads": 4, "walltime": walltime}})
     assert driverobj._run_resources == {
         "account": account,
-        "rundir": driverobj._rundir,
+        "rundir": driverobj.rundir,
         "scheduler": scheduler,
         "stdout": "runscript.concrete.out",
         "threads": 4,
