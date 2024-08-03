@@ -2,7 +2,6 @@
 API access to the ``uwtools`` driver base classes.
 """
 
-import sys
 from datetime import datetime, timedelta
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
@@ -11,6 +10,16 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
+from uwtools.drivers.driver import (  # pylint: disable=unused-import
+    Assets,
+    AssetsCycleBased,
+    AssetsCycleLeadtimeBased,
+    AssetsTimeInvariant,
+    Driver,
+    DriverCycleBased,
+    DriverCycleLeadtimeBased,
+    DriverTimeInvariant,
+)
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
@@ -91,25 +100,6 @@ def tasks(module: str, classname: str) -> dict[str, str]:
     return _tasks(class_)
 
 
-_CLASSNAMES = [
-    "Assets",
-    "AssetsCycleBased",
-    "AssetsCycleLeadtimeBased",
-    "AssetsTimeInvariant",
-    "Driver",
-    "DriverCycleBased",
-    "DriverCycleLeadtimeBased",
-    "DriverTimeInvariant",
-]
-
-
-def _add_classes():
-    m = import_module("uwtools.drivers.driver")
-    for classname in _CLASSNAMES:
-        setattr(sys.modules[__name__], classname, getattr(m, classname))
-        __all__.append(classname)
-
-
 def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type]:
     """
     Returns the driver class.
@@ -161,5 +151,19 @@ def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
         return None
 
 
-__all__: list[str] = [graph.__name__]
-_add_classes()
+__all__ = [
+    getattr(x, "__name__")
+    for x in (
+        Assets,
+        AssetsCycleBased,
+        AssetsCycleLeadtimeBased,
+        AssetsTimeInvariant,
+        Driver,
+        DriverCycleBased,
+        DriverCycleLeadtimeBased,
+        DriverTimeInvariant,
+        execute,
+        graph,
+        tasks,
+    )
+]

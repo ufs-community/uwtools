@@ -18,11 +18,13 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import get_schema_file, validate, validate_external, validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
+from uwtools.utils.file import writable
 from uwtools.utils.processing import execute
 
 # NB: Class docstrings are programmatically defined.
@@ -43,19 +45,25 @@ class Assets(ABC):
         schema_file: Optional[Path] = None,
         controller: Optional[str] = None,
     ) -> None:
-        self._config_full = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        self._config_full.dereference(
+        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
+        config.dereference(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
-                **self._config_full.data,
+                **config.data,
             }
         )
-        self._config = self._config_full
-        for key in key_path or []:
-            self._config = self._config[key]
+        # The _config_full attribute points to the config block that includes the driver-specific
+        # block and any surrounding context, including e.g. platform: for some drivers.
+        self._config_full, _ = walk_key_path(config.data, key_path or [])
+        # The _config attribute points to the driver-specific config block. It is supplemented with
+        # config data from the controller block, if specified.
+        try:
+            self._config = self._config_full[self._driver_name]
+        except KeyError as e:
+            raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
         if controller:
-            self._config[self._driver_name][STR.rundir] = self._config_full[controller][STR.rundir]
+            self._config[STR.rundir] = self._config_full[controller][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -66,9 +74,7 @@ class Assets(ABC):
             h, r = divmod(self._leadtime.total_seconds(), 3600)
             m, s = divmod(r, 60)
             leadtime = "%02d:%02d:%02d" % (h, m, s)
-        return " ".join(
-            filter(None, [str(self), cycle, leadtime, "in", self._driver_config[STR.rundir]])
-        )
+        return " ".join(filter(None, [str(self), cycle, leadtime, "in", self.config[STR.rundir]]))
 
     def __str__(self) -> str:
         return self._driver_name
@@ -76,17 +82,16 @@ class Assets(ABC):
     @property
     def config(self) -> dict:
         """
-        Return a copy of the driver config.
+        A copy of the driver-specific config block.
         """
-        return deepcopy(self._driver_config)
+        return deepcopy(self._config)
 
     @property
     def config_full(self) -> dict:
         """
-        Return a copy of the full input config.
+        A copy of the driver-specific config block's parent block.
         """
-        full_config: dict = self._config.data
-        return deepcopy(full_config)
+        return deepcopy(self._config_full)
 
     # Workflow tasks
 
@@ -123,23 +128,10 @@ class Assets(ABC):
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
         if validate(schema=schema or {"type": "object"}, config=config):
-            path.parent.mkdir(parents=True, exist_ok=True)
             dump()
             log.debug(f"Wrote config to {path}")
         else:
             log.debug(f"Failed to validate {path}")
-
-    @property
-    def _driver_config(self) -> dict[str, Any]:
-        """
-        Returns the config block specific to this driver.
-        """
-        name = self._driver_name
-        try:
-            driver_config: dict[str, Any] = self._config[name]
-            return driver_config
-        except KeyError as e:
-            raise UWConfigError("Required '%s' block missing in config" % name) from e
 
     @property
     @abstractmethod
@@ -158,7 +150,7 @@ class Assets(ABC):
         :param schema_keys: Keys leading to the namelist-validating (sub)schema.
         """
         schema: dict = {"type": "object"}
-        nmlcfg = self._driver_config
+        nmlcfg = self.config
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
@@ -181,7 +173,7 @@ class Assets(ABC):
         """
         The path to the component's run directory.
         """
-        return Path(self._driver_config[STR.rundir])
+        return Path(self.config[STR.rundir])
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -206,9 +198,11 @@ class Assets(ABC):
         :raises: UWConfigError if config fails validation.
         """
         if schema_file:
-            validate_external(schema_file=schema_file, config=self._config)
+            validate_external(schema_file=schema_file, config=self.config_full)
         else:
-            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self._config)
+            validate_internal(
+                schema_name=self._driver_name.replace("_", "-"), config=self.config_full
+            )
 
 
 class AssetsCycleBased(Assets):
@@ -234,6 +228,13 @@ class AssetsCycleBased(Assets):
             controller=controller,
         )
         self._cycle = cycle
+
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
 
 
 class AssetsCycleLeadtimeBased(Assets):
@@ -262,6 +263,20 @@ class AssetsCycleLeadtimeBased(Assets):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
+    @property
+    def leadtime(self):
+        """
+        The leadtime.
+        """
+        return self._leadtime
 
 
 class AssetsTimeInvariant(Assets):
@@ -313,9 +328,7 @@ class Driver(Assets):
         )
         self._batch = batch
         if controller:
-            self._config[self._driver_name][STR.execution] = self._config_full[controller][
-                STR.execution
-            ]
+            self._config[STR.execution] = self._config_full[controller][STR.execution]
 
     # Workflow tasks
 
@@ -376,17 +389,17 @@ class Driver(Assets):
         Returns platform configuration data.
         """
         try:
-            platform = self._config[STR.platform]
+            platform = self.config_full[STR.platform]
         except KeyError as e:
             raise UWConfigError("Required 'platform' block missing in config") from e
-        threads = self._driver_config.get(STR.execution, {}).get(STR.threads)
+        threads = self.config.get(STR.execution, {}).get(STR.threads)
         return {
             STR.account: platform[STR.account],
             STR.rundir: self._rundir,
             STR.scheduler: platform[STR.scheduler],
             STR.stdout: "%s.out" % self._runscript_path.name,  # config may override
             **({STR.threads: threads} if threads else {}),
-            **self._driver_config.get(STR.execution, {}).get(STR.batchargs, {}),
+            **self.config.get(STR.execution, {}).get(STR.batchargs, {}),
         }
 
     @property
@@ -394,7 +407,7 @@ class Driver(Assets):
         """
         Returns the full command-line component invocation.
         """
-        execution = self._driver_config.get(STR.execution, {})
+        execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])
         components = [
             execution.get(STR.mpicmd),  # MPI run program
@@ -463,24 +476,28 @@ class Driver(Assets):
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
         Perform all necessary schema validation.
+
+        :param schema_file: The JSON Schema file to use for validation.
+        :raises: UWConfigError if config fails validation.
         """
         if schema_file:
-            validate_external(schema_file=schema_file, config=self._config)
+            validate_external(schema_file=schema_file, config=self.config_full)
         else:
-            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self._config)
-        validate_internal(schema_name=STR.platform, config=self._config)
+            validate_internal(
+                schema_name=self._driver_name.replace("_", "-"), config=self.config_full
+            )
+        validate_internal(schema_name=STR.platform, config=self.config_full)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """
         Write the runscript.
         """
-        path.parent.mkdir(parents=True, exist_ok=True)
         envvars = envvars or {}
-        threads = self._driver_config.get(STR.execution, {}).get(STR.threads)
+        threads = self.config.get(STR.execution, {}).get(STR.threads)
         if threads and "OMP_NUM_THREADS" not in envvars:
             raise UWConfigError("Config specified threads but driver does not set OMP_NUM_THREADS")
         rs = self._runscript(
-            envcmds=self._driver_config.get(STR.execution, {}).get(STR.envcmds, []),
+            envcmds=self.config.get(STR.execution, {}).get(STR.envcmds, []),
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
@@ -488,7 +505,7 @@ class Driver(Assets):
             ],
             scheduler=self._scheduler if self._batch else None,
         )
-        with open(path, "w", encoding="utf-8") as f:
+        with writable(path) as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
@@ -519,6 +536,13 @@ class DriverCycleBased(Driver):
         )
         self._cycle = cycle
 
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
 
 class DriverCycleLeadtimeBased(Driver):
     """
@@ -548,6 +572,20 @@ class DriverCycleLeadtimeBased(Driver):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+    @property
+    def cycle(self):
+        """
+        The cycle.
+        """
+        return self._cycle
+
+    @property
+    def leadtime(self):
+        """
+        The leadtime.
+        """
+        return self._leadtime
 
 
 class DriverTimeInvariant(Driver):

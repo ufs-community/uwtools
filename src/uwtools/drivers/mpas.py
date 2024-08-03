@@ -27,15 +27,15 @@ class MPAS(MPASBase):
         Boundary files.
         """
         yield self._taskname("boundary files")
-        lbcs = self._driver_config["lateral_boundary_conditions"]
-        endhour = self._driver_config["length"]
+        lbcs = self.config["lateral_boundary_conditions"]
+        endhour = self.config["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"lbc.{file_date.strftime('%Y-%m-%d_%H.%M.%S')}.nc"
             linkname = self._rundir / fn
-            symlinks[linkname] = Path(lbcs["path"]) / fn
+            symlinks[linkname] = Path(lbcs["path"], fn)
         yield [symlink(target=t, linkname=l) for l, t in symlinks.items()]
 
     @task
@@ -46,11 +46,11 @@ class MPAS(MPASBase):
         path = self._rundir / "namelist.atmosphere"
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
-        base_file = self._driver_config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
-        duration = timedelta(hours=self._driver_config["length"])
+        duration = timedelta(hours=self.config["length"])
         str_duration = str(duration).replace(" days, ", "_")
-        namelist = self._driver_config[STR.namelist]
+        namelist = self.config[STR.namelist]
         update_values = namelist.get(STR.updatevalues, {})
         update_values.setdefault("nhyd_model", {}).update(
             {

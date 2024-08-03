@@ -44,7 +44,19 @@ def kwargs(args):
 # Tests
 
 
-@mark.parametrize("classname", driver_api._CLASSNAMES)
+@mark.parametrize(
+    "classname",
+    [
+        "Assets",
+        "AssetsCycleBased",
+        "AssetsCycleLeadtimeBased",
+        "AssetsTimeInvariant",
+        "Driver",
+        "DriverCycleBased",
+        "DriverCycleLeadtimeBased",
+        "DriverTimeInvariant",
+    ],
+)
 def test_driver(classname):
     assert getattr(driver_api, classname) is getattr(driver_lib, classname)
 

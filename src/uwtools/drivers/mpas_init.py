@@ -27,7 +27,7 @@ class MPASInit(MPASBase):
         Boundary files.
         """
         yield self._taskname("boundary files")
-        lbcs = self._driver_config["boundary_conditions"]
+        lbcs = self.config["boundary_conditions"]
         endhour = lbcs["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
@@ -35,7 +35,7 @@ class MPASInit(MPASBase):
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
-            target = Path(boundary_filepath) / fn
+            target = Path(boundary_filepath, fn)
             linkname = self._rundir / fn
             symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
@@ -49,12 +49,10 @@ class MPASInit(MPASBase):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
-        stop_time = self._cycle + timedelta(
-            hours=self._driver_config["boundary_conditions"]["length"]
-        )
-        namelist = self._driver_config[STR.namelist]
+        stop_time = self._cycle + timedelta(hours=self.config["boundary_conditions"]["length"])
+        namelist = self.config[STR.namelist]
         update_values = namelist.get(STR.updatevalues, {})
         update_values.setdefault("nhyd_model", {}).update(
             {

@@ -87,7 +87,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -120,7 +119,7 @@ def test_SfcClimoGen_namelist_file(caplog, driverobj):
 
 def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["config"]["halo"] = "string"
+    driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready):
         path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()

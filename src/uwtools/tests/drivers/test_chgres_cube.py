@@ -86,7 +86,6 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -116,7 +115,7 @@ def test_ChgresCube_namelist_file(caplog, driverobj):
 
 def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
+    driverobj._config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
@@ -125,8 +124,8 @@ def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
 
 def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
-    driverobj._driver_config["namelist"]["base_file"] = base_file
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")

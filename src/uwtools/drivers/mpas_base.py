@@ -35,7 +35,7 @@ class MPASBase(DriverCycleBased):
         yield self._taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
+            for dst, src in self.config.get("files_to_copy", {}).items()
         ]
 
     @tasks
@@ -46,7 +46,7 @@ class MPASBase(DriverCycleBased):
         yield self._taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+            for linkname, target in self.config.get("files_to_link", {}).items()
         ]
 
     @task
@@ -82,7 +82,7 @@ class MPASBase(DriverCycleBased):
         yield asset(path, path.is_file)
         yield None
         streams = Element("streams")
-        for k, v in self._driver_config["streams"].items():
+        for k, v in self.config["streams"].items():
             stream = SubElement(streams, "stream" if v["mutable"] else "immutable_stream")
             stream.set("name", k)
             for attr in ["type", "filename_template"]:

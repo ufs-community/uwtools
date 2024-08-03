@@ -57,10 +57,6 @@ def test_tasks():
             "@tasks t3"
 
         @property
-        def _driver_config(self):
-            pass
-
-        @property
         def _driver_name(self):
             pass
 

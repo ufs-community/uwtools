@@ -38,8 +38,8 @@ class Shave(DriverTimeInvariant):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config[STR.execution][STR.executable]
-        config = self._driver_config["config"]
+        executable = self.config[STR.execution][STR.executable]
+        config = self.config["config"]
         input_file = config["input_grid_file"]
         output_file = input_file.replace(".nc", "_NH0.nc")
         flags = [config[key] for key in ["nx", "ny", "nh4", "input_grid_file"]]

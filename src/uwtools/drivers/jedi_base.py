@@ -29,11 +29,11 @@ class JEDIBase(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        base_file = self._driver_config["configuration_file"].get(STR.basefile)
+        base_file = self.config["configuration_file"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._driver_config["configuration_file"],
+            config_values=self.config["configuration_file"],
             path=path,
         )
 
@@ -45,7 +45,7 @@ class JEDIBase(DriverCycleBased):
         yield self._taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
+            for dst, src in self.config.get("files_to_copy", {}).items()
         ]
 
     @tasks
@@ -56,7 +56,7 @@ class JEDIBase(DriverCycleBased):
         yield self._taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+            for linkname, target in self.config.get("files_to_link", {}).items()
         ]
 
     @tasks

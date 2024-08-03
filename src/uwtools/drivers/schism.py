@@ -29,12 +29,12 @@ class SCHISM(AssetsCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        template_file = Path(self._driver_config[STR.namelist]["template_file"])
+        template_file = Path(self.config[STR.namelist]["template_file"])
         yield file(path=template_file)
         render(
             input_file=template_file,
             output_file=path,
-            overrides=self._driver_config[STR.namelist]["template_values"],
+            overrides=self.config[STR.namelist]["template_values"],
         )
 
     @tasks
