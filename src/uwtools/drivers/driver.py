@@ -80,7 +80,7 @@ class Assets(ABC):
     @property
     def config(self) -> dict:
         """
-        A copy of the driver-specific config block.
+        A copy of the driver-specific config.
         """
         return deepcopy(self._config)
 
