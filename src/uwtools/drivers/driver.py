@@ -87,7 +87,7 @@ class Assets(ABC):
     @property
     def config_full(self) -> dict:
         """
-        A copy of the driver-specific config block's parent block.
+        A copy of the original input config, dereferenced.
         """
         return deepcopy(self._config_full)
 
@@ -326,7 +326,7 @@ class Driver(Assets):
         )
         self._batch = batch
         if controller:
-            self._config[STR.execution] = self._config_full[controller][STR.execution]
+            self._config[STR.execution] = self.config_full[controller][STR.execution]
 
     # Workflow tasks
 
