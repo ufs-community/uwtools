@@ -30,7 +30,7 @@ def execute(
     module: Union[Path, str],
     classname: str,
     task: str,
-    schema_file: str,
+    schema_file: Optional[str] = None,
     config: Optional[Union[Path, str]] = None,
     cycle: Optional[datetime] = None,  # pylint: disable=unused-argument
     leadtime: Optional[timedelta] = None,  # pylint: disable=unused-argument
@@ -69,7 +69,7 @@ def execute(
         config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
         key_path=key_path,
-        schema_file=schema_file,
+        schema_file=schema_file or Path(module).with_suffix(".jsonschema"),
     )
     for arg in sorted(non_optional):
         if arg in accepted and locals()[arg] is None:
