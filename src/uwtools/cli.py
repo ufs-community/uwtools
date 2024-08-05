@@ -595,8 +595,6 @@ def _dispatch_template_translate(args: Args) -> bool:
 
 # Arguments
 
-# pylint: disable=missing-function-docstring
-
 
 def _add_arg_batch(group: Group) -> None:
     group.add_argument(

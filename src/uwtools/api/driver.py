@@ -10,7 +10,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
-from uwtools.drivers.driver import (  # pylint: disable=unused-import
+from uwtools.drivers.driver import (
     Assets,
     AssetsCycleBased,
     AssetsCycleLeadtimeBased,
