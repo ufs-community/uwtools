@@ -45,16 +45,16 @@ class Assets(ABC):
         schema_file: Optional[Path] = None,
         controller: Optional[str] = None,
     ) -> None:
-        config_full = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        config_full.dereference(
+        config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
+        config_input.dereference(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
-                **config_full.data,
+                **config_input.data,
             }
         )
-        self._config_full = config_full.data
-        config_intermediate, _ = walk_key_path(config_full.data, key_path or [])
+        self._config_full = config_input.data
+        config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
         self._platform = config_intermediate.get("platform")
         try:
             self._config = config_intermediate[self._driver_name]
