@@ -76,7 +76,7 @@ class JEDI(JEDIBase):
         Returns the full command-line component invocation.
         """
         execution = self.config[STR.execution]
-        jedi_config = self._rundir / self._config_fn
+        jedi_config = self.rundir / self._config_fn
         mpiargs = execution.get(STR.mpiargs, [])
         components = [
             execution.get(STR.mpicmd),  # MPI run program

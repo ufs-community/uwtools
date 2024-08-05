@@ -125,7 +125,7 @@ def test_MPASInit(method):
 def test_MPASInit_boundary_files(cycle, driverobj):
     ns = (0, 1)
     links = [
-        driverobj._rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
+        driverobj.rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
@@ -157,7 +157,7 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
 
 
 def test_MPASInit_namelist_contents(cycle, driverobj):
-    dst = driverobj._rundir / "namelist.init_atmosphere"
+    dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
@@ -170,7 +170,7 @@ def test_MPASInit_namelist_contents(cycle, driverobj):
 
 def test_MPASInit_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / "namelist.init_atmosphere"
+    dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()

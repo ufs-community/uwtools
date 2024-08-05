@@ -51,7 +51,7 @@ class IODA(JEDIBase):
         Returns the full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
-        jedi_config = str(self._rundir / self._config_fn)
+        jedi_config = str(self.rundir / self._config_fn)
         return " ".join([executable, jedi_config])
 
 

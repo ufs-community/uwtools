@@ -198,7 +198,7 @@ def test_JEDI__driver_name(driverobj):
 
 def test_JEDI__runcmd(driverobj):
     executable = driverobj.config["execution"]["executable"]
-    config = driverobj._rundir / driverobj._config_fn
+    config = driverobj.rundir / driverobj._config_fn
     assert (
         driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"
     )

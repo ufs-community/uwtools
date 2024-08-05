@@ -37,7 +37,7 @@ class Ungrib(DriverCycleBased):
             infile = Path(
                 gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
             )
-            link_name = self._rundir / f"GRIBFILE.{_ext(n)}"
+            link_name = self.rundir / f"GRIBFILE.{_ext(n)}"
             links.append((infile, link_name))
         yield [self._gribfile(infile, link) for infile, link in links]
 
@@ -66,7 +66,7 @@ class Ungrib(DriverCycleBased):
                 },
             }
         }
-        path = self._rundir / "namelist.wps"
+        path = self.rundir / "namelist.wps"
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
         yield None
@@ -94,7 +94,7 @@ class Ungrib(DriverCycleBased):
         """
         A symlink to the Vtable file.
         """
-        path = self._rundir / "Vtable"
+        path = self.rundir / "Vtable"
         yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
         infile = Path(self.config["vtable"])

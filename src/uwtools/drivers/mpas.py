@@ -34,7 +34,7 @@ class MPAS(MPASBase):
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"lbc.{file_date.strftime('%Y-%m-%d_%H.%M.%S')}.nc"
-            linkname = self._rundir / fn
+            linkname = self.rundir / fn
             symlinks[linkname] = Path(lbcs["path"], fn)
         yield [symlink(target=t, linkname=l) for l, t in symlinks.items()]
 
@@ -43,7 +43,7 @@ class MPAS(MPASBase):
         """
         The namelist file.
         """
-        path = self._rundir / "namelist.atmosphere"
+        path = self.rundir / "namelist.atmosphere"
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)

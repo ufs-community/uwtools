@@ -45,7 +45,7 @@ def make_execute(
     :param with_leadtime: Does the driver's constructor take a 'leadtime' parameter?
     """
 
-    def execute(  # pylint: disable=unused-argument
+    def execute(
         task: str,
         config: Optional[Union[Path, str]] = None,
         batch: bool = False,
@@ -67,7 +67,7 @@ def make_execute(
             stdin_ok=stdin_ok,
         )
 
-    def execute_cycle(  # pylint: disable=unused-argument
+    def execute_cycle(
         task: str,
         cycle: dt.datetime,
         config: Optional[Union[Path, str]] = None,
@@ -90,7 +90,7 @@ def make_execute(
             stdin_ok=stdin_ok,
         )
 
-    def execute_cycle_leadtime(  # pylint: disable=unused-argument
+    def execute_cycle_leadtime(
         task: str,
         cycle: dt.datetime,
         leadtime: dt.timedelta,

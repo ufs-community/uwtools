@@ -45,25 +45,23 @@ class Assets(ABC):
         schema_file: Optional[Path] = None,
         controller: Optional[str] = None,
     ) -> None:
-        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        config.dereference(
+        config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
+        config_input.dereference(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
-                **config.data,
+                **config_input.data,
             }
         )
-        # The _config_full attribute points to the config block that includes the driver-specific
-        # block and any surrounding context, including e.g. platform: for some drivers.
-        self._config_full, _ = walk_key_path(config.data, key_path or [])
-        # The _config attribute points to the driver-specific config block. It is supplemented with
-        # config data from the controller block, if specified.
+        self._config_full: dict = config_input.data
+        config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
+        self._platform = config_intermediate.get("platform")
         try:
-            self._config = self._config_full[self._driver_name]
+            self._config: dict = config_intermediate[self._driver_name]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
         if controller:
-            self._config[STR.rundir] = self._config_full[controller][STR.rundir]
+            self._config[STR.rundir] = config_intermediate[controller][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -82,16 +80,23 @@ class Assets(ABC):
     @property
     def config(self) -> dict:
         """
-        A copy of the driver-specific config block.
+        A copy of the driver-specific config.
         """
         return deepcopy(self._config)
 
     @property
     def config_full(self) -> dict:
         """
-        A copy of the driver-specific config block's parent block.
+        A copy of the original input config, dereferenced.
         """
         return deepcopy(self._config_full)
+
+    @property
+    def rundir(self) -> Path:
+        """
+        The path to the component's run directory.
+        """
+        return Path(self.config[STR.rundir])
 
     # Workflow tasks
 
@@ -167,13 +172,6 @@ class Assets(ABC):
             ]:
                 schema = schema[schema_key]
         return schema
-
-    @property
-    def _rundir(self) -> Path:
-        """
-        The path to the component's run directory.
-        """
-        return Path(self.config[STR.rundir])
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -328,7 +326,7 @@ class Driver(Assets):
         )
         self._batch = batch
         if controller:
-            self._config[STR.execution] = self._config_full[controller][STR.execution]
+            self._config[STR.execution] = self.config_full[controller][STR.execution]
 
     # Workflow tasks
 
@@ -375,11 +373,11 @@ class Driver(Assets):
         A run executed directly on the local system.
         """
         yield self._taskname("run via local execution")
-        path = self._rundir / self._runscript_done_file
+        path = self.rundir / self._runscript_done_file
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
+        execute(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Private helper methods
 
@@ -388,15 +386,13 @@ class Driver(Assets):
         """
         Returns platform configuration data.
         """
-        try:
-            platform = self.config_full[STR.platform]
-        except KeyError as e:
-            raise UWConfigError("Required 'platform' block missing in config") from e
+        if not self._platform:
+            raise UWConfigError("Required 'platform' block missing in config")
         threads = self.config.get(STR.execution, {}).get(STR.threads)
         return {
-            STR.account: platform[STR.account],
-            STR.rundir: self._rundir,
-            STR.scheduler: platform[STR.scheduler],
+            STR.account: self._platform[STR.account],
+            STR.rundir: self.rundir,
+            STR.scheduler: self._platform[STR.scheduler],
             STR.stdout: "%s.out" % self._runscript_path.name,  # config may override
             **({STR.threads: threads} if threads else {}),
             **self.config.get(STR.execution, {}).get(STR.batchargs, {}),
@@ -464,7 +460,7 @@ class Driver(Assets):
         """
         Returns the path to the runscript.
         """
-        return self._rundir / f"runscript.{self._driver_name}"
+        return self.rundir / f"runscript.{self._driver_name}"
 
     @property
     def _scheduler(self) -> JobScheduler:

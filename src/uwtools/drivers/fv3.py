@@ -38,7 +38,7 @@ class FV3(DriverCycleBased):
             for boundary_hour in range(offset, endhour, interval):
                 target = Path(lbcs["path"].format(tile=n, forecast_hour=boundary_hour))
                 linkname = (
-                    self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(boundary_hour - offset):03d}.nc"
+                    self.rundir / "INPUT" / f"gfs_bndy.tile{n}.{(boundary_hour - offset):03d}.nc"
                 )
                 symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
@@ -50,7 +50,7 @@ class FV3(DriverCycleBased):
         """
         fn = "diag_table"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
         if src := self.config.get(fn):
@@ -66,7 +66,7 @@ class FV3(DriverCycleBased):
         """
         fn = "field_table"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         yield filecopy(src=Path(self.config["field_table"][STR.basefile]), dst=path)
 
@@ -77,7 +77,7 @@ class FV3(DriverCycleBased):
         """
         yield self._taskname("files copied")
         yield [
-            filecopy(src=Path(src), dst=self._rundir / dst)
+            filecopy(src=Path(src), dst=self.rundir / dst)
             for dst, src in self.config.get("files_to_copy", {}).items()
         ]
 
@@ -88,7 +88,7 @@ class FV3(DriverCycleBased):
         """
         yield self._taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self._rundir / linkname)
+            symlink(target=Path(target), linkname=self.rundir / linkname)
             for linkname, target in self.config.get("files_to_link", {}).items()
         ]
 
@@ -99,7 +99,7 @@ class FV3(DriverCycleBased):
         """
         fn = "model_configure"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config["model_configure"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
@@ -116,7 +116,7 @@ class FV3(DriverCycleBased):
         """
         fn = "input.nml"
         yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
@@ -153,7 +153,7 @@ class FV3(DriverCycleBased):
         The RESTART directory.
         """
         yield self._taskname("RESTART directory")
-        path = self._rundir / "RESTART"
+        path = self.rundir / "RESTART"
         yield asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)

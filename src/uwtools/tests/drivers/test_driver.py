@@ -218,7 +218,8 @@ def test_Assets_key_path(config, tmp_path):
     assetsobj = ConcreteAssetsTimeInvariant(
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
-    assert config == assetsobj.config_full
+    assert assetsobj.config == config[assetsobj._driver_name]
+    assert assetsobj._platform == config["platform"]
 
 
 def test_Assets_leadtime(config):
@@ -262,7 +263,7 @@ def test_Assets__create_user_updated_config_base_file(
 
 
 def test_Assets__rundir(assetsobj):
-    assert assetsobj._rundir == Path(assetsobj.config["rundir"])
+    assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
 
 def test_Assets__validate_internal(assetsobj):
@@ -372,7 +373,7 @@ def test_Driver__run_via_local_execution(driverobj):
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
+                cwd=driverobj.rundir,
                 log_output=True,
             )
         prd.assert_called_once_with()
@@ -441,7 +442,7 @@ def test_Driver__namelist_schema_default_disable(driverobj):
 
 
 def test_Driver__run_resources_fail(driverobj):
-    del driverobj._config_full["platform"]
+    driverobj._platform = None
     with raises(UWConfigError) as e:
         assert driverobj._run_resources
     assert str(e.value) == "Required 'platform' block missing in config"
@@ -454,7 +455,7 @@ def test_Driver__run_resources_pass(driverobj):
     driverobj._config["execution"].update({"batchargs": {"threads": 4, "walltime": walltime}})
     assert driverobj._run_resources == {
         "account": account,
-        "rundir": driverobj._rundir,
+        "rundir": driverobj.rundir,
         "scheduler": scheduler,
         "stdout": "runscript.concrete.out",
         "threads": 4,

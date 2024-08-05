@@ -27,7 +27,7 @@ class ChgresCube(DriverCycleBased):
         """
         fn = "fort.41"
         yield self._taskname(f"namelist file {fn}")
-        path = self._rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         input_files = []
         namelist = self.config[STR.namelist]

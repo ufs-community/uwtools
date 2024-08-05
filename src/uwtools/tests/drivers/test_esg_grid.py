@@ -86,7 +86,7 @@ def test_ESGGrid(method):
 
 def test_ESGGrid_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / "regional_grid.nml"
+    dst = driverobj.rundir / "regional_grid.nml"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()

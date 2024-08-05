@@ -26,6 +26,9 @@ pretty = true
 warn_return_any = true
 
 [tool.pylint.messages_control]
+enable = [
+  "useless-suppression",
+]
 disable = [
   "consider-using-f-string",
   "duplicate-code",

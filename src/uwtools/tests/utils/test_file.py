@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.utils.file module.
 """
