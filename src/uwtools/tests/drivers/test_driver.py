@@ -218,7 +218,8 @@ def test_Assets_key_path(config, tmp_path):
     assetsobj = ConcreteAssetsTimeInvariant(
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
-    assert config == assetsobj.config_full
+    assert assetsobj.config == config[assetsobj._driver_name]
+    assert assetsobj._platform == config["platform"]
 
 
 def test_Assets_leadtime(config):
@@ -441,7 +442,7 @@ def test_Driver__namelist_schema_default_disable(driverobj):
 
 
 def test_Driver__run_resources_fail(driverobj):
-    del driverobj._config_full["platform"]
+    driverobj._platform = None
     with raises(UWConfigError) as e:
         assert driverobj._run_resources
     assert str(e.value) == "Required 'platform' block missing in config"

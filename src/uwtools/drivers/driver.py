@@ -45,25 +45,23 @@ class Assets(ABC):
         schema_file: Optional[Path] = None,
         controller: Optional[str] = None,
     ) -> None:
-        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        config.dereference(
+        config_full = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
+        config_full.dereference(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
-                **config.data,
+                **config_full.data,
             }
         )
-        # The _config_full attribute points to the config block that includes the driver-specific
-        # block and any surrounding context, including e.g. platform: for some drivers.
-        self._config_full, _ = walk_key_path(config.data, key_path or [])
-        # The _config attribute points to the driver-specific config block. It is supplemented with
-        # config data from the controller block, if specified.
+        self._config_full = config_full.data
+        config_intermediate, _ = walk_key_path(config_full.data, key_path or [])
+        self._platform = config_intermediate.get("platform")
         try:
-            self._config = self._config_full[self._driver_name]
+            self._config = config_intermediate[self._driver_name]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
         if controller:
-            self._config[STR.rundir] = self._config_full[controller][STR.rundir]
+            self._config[STR.rundir] = config_intermediate[controller][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -388,15 +386,13 @@ class Driver(Assets):
         """
         Returns platform configuration data.
         """
-        try:
-            platform = self.config_full[STR.platform]
-        except KeyError as e:
-            raise UWConfigError("Required 'platform' block missing in config") from e
+        if not self._platform:
+            raise UWConfigError("Required 'platform' block missing in config")
         threads = self.config.get(STR.execution, {}).get(STR.threads)
         return {
-            STR.account: platform[STR.account],
+            STR.account: self._platform[STR.account],
             STR.rundir: self.rundir,
-            STR.scheduler: platform[STR.scheduler],
+            STR.scheduler: self._platform[STR.scheduler],
             STR.stdout: "%s.out" % self._runscript_path.name,  # config may override
             **({STR.threads: threads} if threads else {}),
             **self.config.get(STR.execution, {}).get(STR.batchargs, {}),
