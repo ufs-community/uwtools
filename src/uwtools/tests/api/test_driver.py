@@ -73,7 +73,10 @@ def test_execute_fail_stdin_not_ok(kwargs):
     assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
 
 
-def test_execute_pass(caplog, kwargs, tmp_path):
+@mark.parametrize("remove", ([], ["schema_file"]))
+def test_execute_pass(caplog, kwargs, remove, tmp_path):
+    for kwarg in remove:
+        del kwargs[kwarg]
     kwargs["cycle"] = dt.datetime.now()
     log.setLevel(logging.DEBUG)
     graph_file = tmp_path / "g.dot"

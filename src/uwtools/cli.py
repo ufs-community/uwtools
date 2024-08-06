@@ -177,7 +177,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.validate, "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_schema_file(required)
+    _add_arg_schema_file(required, required=True)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     return _add_args_verbosity(optional)
@@ -266,9 +266,9 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_module(required)
     _add_arg_classname(required)
     _add_arg_task(required)
-    _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
+    _add_arg_schema_file(optional)
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_batch(optional)
@@ -780,12 +780,12 @@ def _add_arg_quiet(group: Group) -> None:
     )
 
 
-def _add_arg_schema_file(group: Group) -> None:
+def _add_arg_schema_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.schemafile),
         help="Path to schema file to use for validation",
         metavar="PATH",
-        required=True,
+        required=required,
         type=Path,
     )
 
