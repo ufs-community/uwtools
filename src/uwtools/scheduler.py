@@ -13,6 +13,7 @@ from typing import Any, Optional
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.strings import STR
 from uwtools.utils.processing import execute
 
 
@@ -22,7 +23,8 @@ class JobScheduler(ABC):
     """
 
     def __init__(self, props: dict[str, Any]):
-        self._props = {k: v for k, v in props.items() if k != "scheduler"}
+        self._scheduler = props[STR.scheduler]
+        self._props = {k: v for k, v in props.items() if k != STR.scheduler}
         self._validate_props()
 
     # Public methods
@@ -37,7 +39,7 @@ class JobScheduler(ABC):
         for key, value in self._processed_props.items():
             if key in self._forbidden_directives:
                 msg = "Directive '%s' invalid for scheduler '%s'"
-                raise UWConfigError(msg % (key, self._props["scheduler"]))
+                raise UWConfigError(msg % (key, self._scheduler))
             if key in self._managed_directives:
                 switch = self._managed_directives[key]
                 if callable(switch) and (x := switch(value)) is not None:
@@ -58,7 +60,7 @@ class JobScheduler(ABC):
         :raises: UWConfigError if 'scheduler' is un- or mis-defined.
         """
         schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
-        if name := props.get("scheduler"):
+        if name := props.get(STR.scheduler):
             log.debug("Getting '%s' scheduler", name)
             if scheduler_class := schedulers.get(name):
                 return scheduler_class(props)  # type: ignore

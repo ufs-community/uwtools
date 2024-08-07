@@ -78,19 +78,26 @@ def test_JobScheduler_directives(schedulerobj):
     assert schedulerobj.directives == ["#DIR --a=foo", "#DIR --pi=3.14", "#DIR --t=01:10:00"]
 
 
-def test_JobScheduler_get_scheduler_bad_scheduler_specified():
+def test_JobScheduler_get_scheduler_fail_bad_directive_specified(props):
+    scheduler = ConcreteScheduler.get_scheduler(props={**props, "shell": "csh"})
+    with raises(UWConfigError) as e:
+        assert scheduler.directives
+    assert str(e.value).startswith("Directive 'shell' invalid for scheduler 'slurm'")
+
+
+def test_JobScheduler_get_scheduler_fail_bad_scheduler_specified():
     with raises(UWConfigError) as e:
         ConcreteScheduler.get_scheduler(props={"scheduler": "foo"})
     assert str(e.value).startswith("Scheduler 'foo' should be one of:")
 
 
-def test_JobScheduler_get_scheduler_no_scheduler_specified():
+def test_JobScheduler_get_scheduler_fail_no_scheduler_specified():
     with raises(UWConfigError) as e:
         ConcreteScheduler.get_scheduler(props={})
     assert str(e.value).startswith("No 'scheduler' defined in")
 
 
-def test_JobScheduler_get_scheduler_ok(props):
+def test_JobScheduler_get_scheduler_pass(props):
     assert isinstance(ConcreteScheduler.get_scheduler(props=props), scheduler.Slurm)
 
 
