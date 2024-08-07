@@ -34,7 +34,7 @@ class WaveWatchIII(AssetsCycleBased):
         render(
             input_file=template_file,
             output_file=path,
-            overrides=self.config[STR.namelist]["template_values"],
+            overrides=self.config[STR.namelist].get("template_values", {}),
         )
 
     @tasks
