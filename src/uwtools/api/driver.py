@@ -152,18 +152,15 @@ def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
 
 
 __all__ = [
-    getattr(x, "__name__")
-    for x in (
-        Assets,
-        AssetsCycleBased,
-        AssetsCycleLeadtimeBased,
-        AssetsTimeInvariant,
-        Driver,
-        DriverCycleBased,
-        DriverCycleLeadtimeBased,
-        DriverTimeInvariant,
-        execute,
-        graph,
-        tasks,
-    )
+    "Assets",
+    "AssetsCycleBased",
+    "AssetsCycleLeadtimeBased",
+    "AssetsTimeInvariant",
+    "Driver",
+    "DriverCycleBased",
+    "DriverCycleLeadtimeBased",
+    "DriverTimeInvariant",
+    "execute",
+    "graph",
+    "tasks",
 ]
