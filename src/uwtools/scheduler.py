@@ -35,6 +35,9 @@ class JobScheduler(ABC):
         pre, sep = self._prefix, self._directive_separator
         ds = []
         for key, value in self._processed_props.items():
+            if key in self._forbidden_directives:
+                msg = "Directive '%s' invalid for scheduler '%s'"
+                raise UWConfigError(msg % (key, self._props["scheduler"]))
             if key in self._managed_directives:
                 switch = self._managed_directives[key]
                 if callable(switch) and (x := switch(value)) is not None:
@@ -85,6 +88,13 @@ class JobScheduler(ABC):
     def _directive_separator(self) -> str:
         """
         Returns the character used to separate directive keys and values.
+        """
+
+    @property
+    @abstractmethod
+    def _forbidden_directives(self) -> list[str]:
+        """
+        Returns directives that this scheduler does not support.
         """
 
     @property
@@ -142,6 +152,13 @@ class LSF(JobScheduler):
         return " "
 
     @property
+    def _forbidden_directives(self) -> list[str]:
+        """
+        Returns directives that this scheduler does not support.
+        """
+        return []
+
+    @property
     def _managed_directives(self) -> dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
@@ -191,6 +208,13 @@ class PBS(JobScheduler):
         Returns the character used to separate directive keys and values.
         """
         return " "
+
+    @property
+    def _forbidden_directives(self) -> list[str]:
+        """
+        Returns directives that this scheduler does not support.
+        """
+        return []
 
     @property
     def _managed_directives(self) -> dict[str, Any]:
@@ -282,6 +306,13 @@ class Slurm(JobScheduler):
     """
     Represents the Slurm scheduler.
     """
+
+    @property
+    def _forbidden_directives(self) -> list[str]:
+        """
+        Returns directives that this scheduler does not support.
+        """
+        return [_DirectivesOptional.SHELL]
 
     @property
     def _managed_directives(self) -> dict[str, Any]:

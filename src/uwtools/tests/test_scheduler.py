@@ -54,6 +54,10 @@ class ConcreteScheduler(scheduler.JobScheduler):
         return directive_separator
 
     @property
+    def _forbidden_directives(self) -> list[str]:
+        return ["shell"]
+
+    @property
     def _managed_directives(self) -> dict[str, Any]:
         return managed_directives
 
