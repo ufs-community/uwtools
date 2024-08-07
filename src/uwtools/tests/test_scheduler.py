@@ -152,6 +152,10 @@ def test_LSF__directive_separator(lsf):
     assert lsf._directive_separator == " "
 
 
+def test_LSF__forbidden_directives(lsf):
+    assert lsf._forbidden_directives == []
+
+
 def test_LSF__managed_directives(lsf):
     mds = lsf._managed_directives
     assert mds["account"] == "-P"
@@ -184,6 +188,10 @@ def test_PBS(pbs):
 
 def test_PBS__directive_separator(pbs):
     assert pbs._directive_separator == " "
+
+
+def test_PBS__forbidden_directives(pbs):
+    assert pbs._forbidden_directives == []
 
 
 def test_PBS__managed_directives(pbs):
@@ -234,6 +242,10 @@ def test_Slurm(slurm):
 
 def test_Slurm__directive_separator(slurm):
     assert slurm._directive_separator == "="
+
+
+def test_Slurm__forbidden_directives(slurm):
+    assert slurm._forbidden_directives == ["shell"]
 
 
 def test_Slurm__managed_directives(slurm):
