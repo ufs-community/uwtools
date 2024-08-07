@@ -26,7 +26,7 @@ class MPASInit(MPASBase):
         """
         Boundary files.
         """
-        yield self._taskname("boundary files")
+        yield self.taskname("boundary files")
         lbcs = self.config["boundary_conditions"]
         endhour = lbcs["length"]
         interval = lbcs["interval_hours"]
@@ -46,7 +46,7 @@ class MPASInit(MPASBase):
         The namelist file.
         """
         fn = "namelist.init_atmosphere"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)

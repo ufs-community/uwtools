@@ -32,7 +32,7 @@ class MPASBase(DriverCycleBased):
         """
         Files copied for run.
         """
-        yield self._taskname("files copied")
+        yield self.taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self.rundir / dst)
             for dst, src in self.config.get("files_to_copy", {}).items()
@@ -43,7 +43,7 @@ class MPASBase(DriverCycleBased):
         """
         Files linked for run.
         """
-        yield self._taskname("files linked")
+        yield self.taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self.rundir / linkname)
             for linkname, target in self.config.get("files_to_link", {}).items()
@@ -61,7 +61,7 @@ class MPASBase(DriverCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.boundary_files(),
             self.files_copied(),
@@ -77,7 +77,7 @@ class MPASBase(DriverCycleBased):
         The streams file.
         """
         fn = self._streams_fn
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None

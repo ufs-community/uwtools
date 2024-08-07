@@ -98,6 +98,21 @@ class Assets(ABC):
         """
         return Path(self.config[STR.rundir])
 
+    def taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        cycle = getattr(self, "_cycle", None)
+        leadtime = getattr(self, "_leadtime", None)
+        timestr = (
+            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S")
+            if cycle and leadtime is not None
+            else cycle.strftime("%Y%m%d %HZ") if cycle else None
+        )
+        return " ".join(filter(None, [timestr, self._driver_name, suffix]))
+
     # Workflow tasks
 
     @external
@@ -105,7 +120,7 @@ class Assets(ABC):
         """
         Validate the UW driver config.
         """
-        yield self._taskname("valid schema")
+        yield self.taskname("valid schema")
         yield asset(None, lambda: True)
 
     # Private helper methods
@@ -172,21 +187,6 @@ class Assets(ABC):
             ]:
                 schema = schema[schema_key]
         return schema
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        cycle = getattr(self, "_cycle", None)
-        leadtime = getattr(self, "_leadtime", None)
-        timestr = (
-            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S")
-            if cycle and leadtime is not None
-            else cycle.strftime("%Y%m%d %HZ") if cycle else None
-        )
-        return " ".join(filter(None, [timestr, self._driver_name, suffix]))
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
@@ -342,7 +342,7 @@ class Driver(Assets):
         """
         A run.
         """
-        yield self._taskname(STR.run)
+        yield self.taskname(STR.run)
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
     @task
@@ -351,7 +351,7 @@ class Driver(Assets):
         The runscript.
         """
         path = self._runscript_path
-        yield self._taskname(path.name)
+        yield self.taskname(path.name)
         yield asset(path, path.is_file)
         yield None
         self._write_runscript(path)
@@ -361,7 +361,7 @@ class Driver(Assets):
         """
         A run executed via the batch system.
         """
-        yield self._taskname("run via batch submission")
+        yield self.taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()
@@ -372,7 +372,7 @@ class Driver(Assets):
         """
         A run executed directly on the local system.
         """
-        yield self._taskname("run via local execution")
+        yield self.taskname("run via local execution")
         path = self.rundir / self._runscript_done_file
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()

@@ -28,7 +28,7 @@ class FV3(DriverCycleBased):
         """
         Lateral boundary-condition files.
         """
-        yield self._taskname("lateral boundary-condition files")
+        yield self.taskname("lateral boundary-condition files")
         lbcs = self.config["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
         endhour = self.config["length"] + offset + 1
@@ -49,7 +49,7 @@ class FV3(DriverCycleBased):
         The diag_table file.
         """
         fn = "diag_table"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
@@ -65,7 +65,7 @@ class FV3(DriverCycleBased):
         The field_table file.
         """
         fn = "field_table"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield filecopy(src=Path(self.config["field_table"][STR.basefile]), dst=path)
@@ -75,7 +75,7 @@ class FV3(DriverCycleBased):
         """
         Files copied for run.
         """
-        yield self._taskname("files copied")
+        yield self.taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self.rundir / dst)
             for dst, src in self.config.get("files_to_copy", {}).items()
@@ -86,7 +86,7 @@ class FV3(DriverCycleBased):
         """
         Files linked for run.
         """
-        yield self._taskname("files linked")
+        yield self.taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self.rundir / linkname)
             for linkname, target in self.config.get("files_to_link", {}).items()
@@ -98,7 +98,7 @@ class FV3(DriverCycleBased):
         The model_configure file.
         """
         fn = "model_configure"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config["model_configure"].get(STR.basefile)
@@ -115,7 +115,7 @@ class FV3(DriverCycleBased):
         The namelist file.
         """
         fn = "input.nml"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
@@ -132,7 +132,7 @@ class FV3(DriverCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         required = [
             self.diag_table(),
             self.field_table(),
@@ -152,7 +152,7 @@ class FV3(DriverCycleBased):
         """
         The RESTART directory.
         """
-        yield self._taskname("RESTART directory")
+        yield self.taskname("RESTART directory")
         path = self.rundir / "RESTART"
         yield asset(path, path.is_dir)
         yield None
@@ -164,7 +164,7 @@ class FV3(DriverCycleBased):
         The runscript.
         """
         path = self._runscript_path
-        yield self._taskname(path.name)
+        yield self.taskname(path.name)
         yield asset(path, path.is_file)
         yield None
         envvars = {

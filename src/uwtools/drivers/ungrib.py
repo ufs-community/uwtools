@@ -26,7 +26,7 @@ class Ungrib(DriverCycleBased):
         """
         Symlinks to all the GRIB files.
         """
-        yield self._taskname("GRIB files")
+        yield self.taskname("GRIB files")
         gfs_files = self.config["gfs_files"]
         offset = abs(gfs_files["offset"])
         endhour = gfs_files["forecast_length"] + offset
@@ -67,7 +67,7 @@ class Ungrib(DriverCycleBased):
             }
         }
         path = self.rundir / "namelist.wps"
-        yield self._taskname(str(path))
+        yield self.taskname(str(path))
         yield asset(path, path.is_file)
         yield None
         self._create_user_updated_config(
@@ -81,7 +81,7 @@ class Ungrib(DriverCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.gribfiles(),
             self.namelist_file(),
@@ -95,7 +95,7 @@ class Ungrib(DriverCycleBased):
         A symlink to the Vtable file.
         """
         path = self.rundir / "Vtable"
-        yield self._taskname(str(path))
+        yield self.taskname(str(path))
         yield asset(path, path.is_symlink)
         infile = Path(self.config["vtable"])
         yield file(path=infile)
@@ -119,7 +119,7 @@ class Ungrib(DriverCycleBased):
         :param link: Link name.
         :param infile: File to link.
         """
-        yield self._taskname(str(link))
+        yield self.taskname(str(link))
         yield asset(link, link.is_symlink)
         yield file(path=infile)
         link.parent.mkdir(parents=True, exist_ok=True)

@@ -26,7 +26,7 @@ class SfcClimoGen(DriverTimeInvariant):
         The namelist file.
         """
         fn = "fort.41"
-        yield self._taskname(f"namelist file {fn}")
+        yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
         vals = self.config[STR.namelist][STR.updatevalues]["config"]
@@ -46,7 +46,7 @@ class SfcClimoGen(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.namelist_file(),
             self.runscript(),

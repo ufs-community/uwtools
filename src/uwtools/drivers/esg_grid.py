@@ -26,7 +26,7 @@ class ESGGrid(DriverTimeInvariant):
         The namelist file.
         """
         fn = "regional_grid.nml"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
@@ -43,7 +43,7 @@ class ESGGrid(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.namelist_file(),
             self.runscript(),

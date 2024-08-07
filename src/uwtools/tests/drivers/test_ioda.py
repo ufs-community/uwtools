@@ -113,5 +113,5 @@ def test_IODA__runcmd(driverobj):
     assert driverobj._runcmd == f"/path/to/bufr2ioda.x {config}"
 
 
-def test_IODA__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240501 06Z ioda foo"
+def test_IODA_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240501 06Z ioda foo"

@@ -27,7 +27,7 @@ class FilterTopo(DriverTimeInvariant):
         """
         src = Path(self.config["config"]["input_grid_file"])
         dst = Path(self.config[STR.rundir], src.name)
-        yield self._taskname("Input grid")
+        yield self.taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -38,7 +38,7 @@ class FilterTopo(DriverTimeInvariant):
         """
         fn = "input.nml"
         path = self.rundir / fn
-        yield self._taskname(f"namelist file {fn}")
+        yield self.taskname(f"namelist file {fn}")
         yield asset(path, path.is_file)
         yield None
         self._create_user_updated_config(
@@ -53,7 +53,7 @@ class FilterTopo(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.input_grid_file(),
             self.namelist_file(),

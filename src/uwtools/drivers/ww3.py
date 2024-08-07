@@ -26,7 +26,7 @@ class WaveWatchIII(AssetsCycleBased):
         Render the namelist from the template file.
         """
         fn = "ww3_shel.nml"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         template_file = Path(self.config[STR.namelist]["template_file"])
@@ -42,7 +42,7 @@ class WaveWatchIII(AssetsCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.namelist_file(),
             self.restart_directory(),
@@ -53,7 +53,7 @@ class WaveWatchIII(AssetsCycleBased):
         """
         The restart directory.
         """
-        yield self._taskname("restart directory")
+        yield self.taskname("restart directory")
         path = self.rundir / "restart_wave"
         yield asset(path, path.is_dir)
         yield None

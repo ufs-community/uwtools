@@ -24,7 +24,7 @@ class GlobalEquivResol(DriverTimeInvariant):
         Ensure the specified input grid file exists.
         """
         path = Path(self.config["input_grid_file"])
-        yield self._taskname(path.name)
+        yield self.taskname(path.name)
         yield asset(path, path.is_file)
 
     @tasks
@@ -32,7 +32,7 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.input_file(),
             self.runscript(),

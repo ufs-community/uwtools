@@ -21,7 +21,7 @@ class IODA(JEDIBase):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.configuration_file(),
             self.files_copied(),

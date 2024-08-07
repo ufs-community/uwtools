@@ -26,7 +26,7 @@ class MPAS(MPASBase):
         """
         Boundary files.
         """
-        yield self._taskname("boundary files")
+        yield self.taskname("boundary files")
         lbcs = self.config["lateral_boundary_conditions"]
         endhour = self.config["length"]
         interval = lbcs["interval_hours"]
@@ -44,7 +44,7 @@ class MPAS(MPASBase):
         The namelist file.
         """
         path = self.rundir / "namelist.atmosphere"
-        yield self._taskname(str(path))
+        yield self.taskname(str(path))
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None

@@ -45,7 +45,7 @@ def driverobj(config, cycle):
 
 @mark.parametrize(
     "method",
-    ["_taskname", "_validate"],
+    ["taskname", "_validate"],
 )
 def test_SCHISM(method):
     assert getattr(SCHISM, method) is getattr(AssetsCycleBased, method)
