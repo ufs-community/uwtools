@@ -228,7 +228,10 @@ def test_Slurm__directive_separator(slurm):
 def test_Slurm__managed_directives(slurm):
     mds = slurm._managed_directives
     assert mds["cores"] == "--ntasks"
-    assert mds["exclusive"](None) == "--exclusive"
+    assert mds["debug"](True) == "--verbose"
+    assert mds["debug"](False) is None
+    assert mds["exclusive"](True) == "--exclusive"
+    assert mds["exclusive"](False) is None
     assert mds["export"] == "--export"
     assert mds["jobname"] == "--job-name"
     assert mds["memory"] == "--mem"

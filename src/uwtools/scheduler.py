@@ -37,11 +37,10 @@ class JobScheduler(ABC):
         for key, value in self._processed_props.items():
             if key in self._managed_directives:
                 switch = self._managed_directives[key]
-                ds.append(
-                    "%s %s" % (pre, switch(value))
-                    if callable(switch)
-                    else "%s %s%s%s" % (pre, switch, sep, value)
-                )
+                if callable(switch) and (x := switch(value)) is not None:
+                    ds.append("%s %s" % (pre, x))
+                else:
+                    ds.append("%s %s%s%s" % (pre, switch, sep, value))
             else:
                 ds.append("%s %s%s%s" % (pre, key, sep, value))
         return sorted(ds)
@@ -291,7 +290,8 @@ class Slurm(JobScheduler):
         """
         return {
             _DirectivesOptional.CORES: "--ntasks",
-            _DirectivesOptional.EXCLUSIVE: lambda _: "--exclusive",
+            _DirectivesOptional.DEBUG: lambda b: "--verbose" if b else None,
+            _DirectivesOptional.EXCLUSIVE: lambda b: "--exclusive" if b else None,
             _DirectivesOptional.EXPORT: "--export",
             _DirectivesOptional.JOB_NAME: "--job-name",
             _DirectivesOptional.MEMORY: "--mem",

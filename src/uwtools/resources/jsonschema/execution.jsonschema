@@ -4,6 +4,48 @@
     "batchargs": {
       "additionalProperties": true,
       "properties": {
+        "cores": {
+          "type": "integer"
+        },
+        "debug": {
+          "type": "boolean"
+        },
+        "exclusive": {
+          "type": "boolean"
+        },
+        "export": {
+          "type": "string"
+        },
+        "jobname": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        },
+        "nodes": {
+          "type": "integer"
+        },
+        "partition": {
+          "type": "string"
+        },
+        "queue": {
+          "type": "string"
+        },
+        "rundir": {
+          "type": "string"
+        },
+        "shell": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "stdout": {
+          "type": "string"
+        },
+        "tasks_per_node": {
+          "type": "integer"
+        },
         "threads": {
           "not": {}
         },
