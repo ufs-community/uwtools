@@ -23,7 +23,7 @@ lint() {
   msg Running linter
   (
     set -eux
-    pylint -j 4 .
+    pylint -j 4 setup.py uwtools
   )
   msg OK
 }
