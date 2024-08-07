@@ -96,7 +96,7 @@ class Assets(ABC):
         """
         The path to the component's run directory.
         """
-        return Path(self.config[STR.rundir])
+        return Path(self.config[STR.rundir]).absolute()
 
     def taskname(self, suffix: str) -> str:
         """
