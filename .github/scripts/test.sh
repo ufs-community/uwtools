@@ -8,6 +8,7 @@ run_tests() {
   set -x
   pip install --editable src # set new Python version in entry-point scripts
   python --version
+  git clean -dfx
   make test
   return $?
 }
