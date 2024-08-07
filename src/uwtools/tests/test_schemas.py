@@ -297,6 +297,44 @@ def ww3_prop():
     return partial(schema_validator, "ww3", "properties", "ww3", "properties")
 
 
+# batchargs
+
+
+def test_schema_batchargs():
+    errors = schema_validator("batchargs")
+    # Basic correctness, only walltime is required:
+    assert "'walltime' is a required property" in errors({})
+    assert not errors({"walltime": "00:05:00"})
+    # Managed properties are fine:
+    assert not errors({"queue": "string", "walltime": "00:05:00"})
+    # But so are unknown ones:
+    assert not errors({"--foo": 88, "walltime": "00:05:00"})
+    # It just has to be a map:
+    assert "[] is not of type 'object'\n" in errors([])
+    # The "threads" argument is not allowed: It will be propagated, if set, from execution.threads.
+    assert "should not be valid" in errors({"threads": 4, "walltime": "00:05:00"})
+    # Some keys require boolean values:
+    for key in ["debug", "exclusive"]:
+        assert "is not of type 'boolean'\n" in errors({key: None})
+    # Some keys require integer values:
+    for key in ["cores", "nodes"]:
+        assert "is not of type 'integer'\n" in errors({key: None})
+    # Some keys require string values:
+    for key in [
+        "export",
+        "jobname",
+        "memory",
+        "partition",
+        "queue",
+        "rundir",
+        "shell",
+        "stderr",
+        "stdout",
+        "walltime",
+    ]:
+        assert "is not of type 'string'\n" in errors({key: None})
+
+
 # cdeps
 
 
@@ -632,7 +670,7 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
 # execution
 
 
-def test_execution():
+def test_schema_execution():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
@@ -654,42 +692,7 @@ def test_execution():
     )
 
 
-def test_execution_batchargs():
-    errors = schema_validator("execution", "properties", "batchargs")
-    # Basic correctness, only walltime is required:
-    assert "'walltime' is a required property" in errors({})
-    assert not errors({"walltime": "00:05:00"})
-    # Managed properties are fine:
-    assert not errors({"queue": "string", "walltime": "00:05:00"})
-    # But so are unknown ones:
-    assert not errors({"--foo": 88, "walltime": "00:05:00"})
-    # It just has to be a map:
-    assert "[] is not of type 'object'\n" in errors([])
-    # The "threads" argument is not allowed: It will be propagated, if set, from execution.threads.
-    assert "should not be valid" in errors({"threads": 4, "walltime": "00:05:00"})
-    # Some keys require boolean values:
-    for key in ["debug", "exclusive"]:
-        assert "is not of type 'boolean'\n" in errors({key: None})
-    # Some keys require integer values:
-    for key in ["cores", "nodes"]:
-        assert "is not of type 'integer'\n" in errors({key: None})
-    # Some keys require string values:
-    for key in [
-        "export",
-        "jobname",
-        "memory",
-        "partition",
-        "queue",
-        "rundir",
-        "shell",
-        "stderr",
-        "stdout",
-        "walltime",
-    ]:
-        assert "is not of type 'string'\n" in errors({key: None})
-
-
-def test_execution_executable():
+def test_schema_execution_executable():
     errors = schema_validator("execution", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
@@ -697,7 +700,7 @@ def test_execution_executable():
     assert "88 is not of type 'string'\n" in errors(88)
 
 
-def test_execution_mpiargs():
+def test_schema_execution_mpiargs():
     errors = schema_validator("execution", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
@@ -707,7 +710,7 @@ def test_execution_mpiargs():
     assert "88 is not of type 'string'\n" in errors(["string1", 88])
 
 
-def test_execution_threads():
+def test_schema_execution_threads():
     errors = schema_validator("execution", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(1)
@@ -719,7 +722,7 @@ def test_execution_threads():
 # execution-serial
 
 
-def test_execution_serial():
+def test_schema_execution_serial():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     errors = schema_validator("execution")
@@ -731,14 +734,6 @@ def test_execution_serial():
     assert not errors({**config, **batchargs})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
-
-
-def test_execution_serial_batchargs():
-    test_execution_batchargs()
-
-
-def test_execution_serial_executable():
-    test_execution_batchargs()
 
 
 # files-to-stage
