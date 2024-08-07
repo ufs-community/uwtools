@@ -44,6 +44,9 @@ def test_tasks():
         def provisioned_rundir(self):
             pass
 
+        def taskname(self, suffix):
+            pass
+
         @external
         def t1(self):
             "@external t1"
@@ -62,9 +65,6 @@ def test_tasks():
 
         @property
         def _resources(self):
-            pass
-
-        def _taskname(self, suffix):
             pass
 
         def _validate(self, schema_file: Optional[Path] = None):

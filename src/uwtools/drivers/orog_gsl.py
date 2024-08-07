@@ -29,7 +29,7 @@ class OrogGSL(DriverTimeInvariant):
         )
         src = Path(self.config["config"]["input_grid_file"])
         dst = Path(self.config[STR.rundir], fn)
-        yield self._taskname("Input grid")
+        yield self.taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -38,7 +38,7 @@ class OrogGSL(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.input_grid_file(),
             self.runscript(),
@@ -54,7 +54,7 @@ class OrogGSL(DriverTimeInvariant):
         fn = "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
         src = Path(self.config["config"]["topo_data_2p5m"])
         dst = Path(self.config[STR.rundir], fn)
-        yield self._taskname("Input grid")
+        yield self.taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -66,7 +66,7 @@ class OrogGSL(DriverTimeInvariant):
         fn = "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
         src = Path(self.config["config"]["topo_data_30s"])
         dst = Path(self.config[STR.rundir], fn)
-        yield self._taskname("Input grid")
+        yield self.taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 

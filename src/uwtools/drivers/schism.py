@@ -26,7 +26,7 @@ class SCHISM(AssetsCycleBased):
         Render the namelist from the template file.
         """
         fn = "param.nml"
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         template_file = Path(self.config[STR.namelist]["template_file"])
@@ -42,7 +42,7 @@ class SCHISM(AssetsCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield self.namelist_file()
 
     # Private helper methods

@@ -45,7 +45,7 @@ def driverobj(config, cycle):
 
 @mark.parametrize(
     "method",
-    ["_taskname", "_validate"],
+    ["taskname", "_validate"],
 )
 def test_WaveWatchIII(method):
     assert getattr(WaveWatchIII, method) is getattr(AssetsCycleBased, method)

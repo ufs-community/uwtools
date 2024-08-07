@@ -151,5 +151,5 @@ def test_ChgresCube__driver_name(driverobj):
     assert driverobj._driver_name == "chgres_cube"
 
 
-def test_ChgresCube__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z chgres_cube foo"
+def test_ChgresCube_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z chgres_cube foo"

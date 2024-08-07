@@ -21,7 +21,7 @@ class Shave(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield self.runscript()
 
     # Private helper methods

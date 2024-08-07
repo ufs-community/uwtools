@@ -204,5 +204,5 @@ def test_JEDI__runcmd(driverobj):
     )
 
 
-def test_JEDI__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z jedi foo"
+def test_JEDI_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z jedi foo"

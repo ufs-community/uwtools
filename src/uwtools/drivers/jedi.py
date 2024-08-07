@@ -25,7 +25,7 @@ class JEDI(JEDIBase):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.configuration_file(),
             self.files_copied(),
@@ -39,7 +39,7 @@ class JEDI(JEDIBase):
         """
         Validate JEDI config YAML.
         """
-        taskname = self._taskname("validate_only")
+        taskname = self.taskname("validate_only")
         yield taskname
         a = asset(None, lambda: False)
         yield a

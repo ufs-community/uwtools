@@ -80,8 +80,8 @@ def test_MakeSoloMosaic__runcmd(driverobj):
     assert cmd == f"/path/to/make_solo_mosaic.exe --dir {dir_path} --num_tiles 1"
 
 
-def test_MakeSoloMosaic__taskname(driverobj):
-    assert driverobj._taskname("foo") == "make_solo_mosaic foo"
+def test_MakeSoloMosaic_taskname(driverobj):
+    assert driverobj.taskname("foo") == "make_solo_mosaic foo"
 
 
 def test_MakeSoloMosaic__validate(driverobj):

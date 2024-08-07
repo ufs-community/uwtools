@@ -26,7 +26,7 @@ class JEDIBase(DriverCycleBased):
         The executable's YAML configuration file.
         """
         fn = self._config_fn
-        yield self._taskname(fn)
+        yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config["configuration_file"].get(STR.basefile)
@@ -42,7 +42,7 @@ class JEDIBase(DriverCycleBased):
         """
         Files copied for run.
         """
-        yield self._taskname("files copied")
+        yield self.taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self.rundir / dst)
             for dst, src in self.config.get("files_to_copy", {}).items()
@@ -53,7 +53,7 @@ class JEDIBase(DriverCycleBased):
         """
         Files linked for run.
         """
-        yield self._taskname("files linked")
+        yield self.taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self.rundir / linkname)
             for linkname, target in self.config.get("files_to_link", {}).items()

@@ -138,8 +138,8 @@ def test_Ungrib__gribfile(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z ungrib foo"
+def test_Ungrib_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
 
 
 def test__ext():

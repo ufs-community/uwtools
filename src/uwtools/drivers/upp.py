@@ -25,7 +25,7 @@ class UPP(DriverCycleLeadtimeBased):
         """
         Files copied for run.
         """
-        yield self._taskname("files copied")
+        yield self.taskname("files copied")
         yield [
             filecopy(src=Path(src), dst=self.rundir / dst)
             for dst, src in self.config.get("files_to_copy", {}).items()
@@ -36,7 +36,7 @@ class UPP(DriverCycleLeadtimeBased):
         """
         Files linked for run.
         """
-        yield self._taskname("files linked")
+        yield self.taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self.rundir / linkname)
             for linkname, target in self.config.get("files_to_link", {}).items()
@@ -48,7 +48,7 @@ class UPP(DriverCycleLeadtimeBased):
         The namelist file.
         """
         path = self._namelist_path
-        yield self._taskname(str(path))
+        yield self.taskname(str(path))
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
@@ -64,7 +64,7 @@ class UPP(DriverCycleLeadtimeBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.files_copied(),
             self.files_linked(),

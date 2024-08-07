@@ -179,5 +179,5 @@ def test_UPP__runcmd(driverobj):
     assert driverobj._runcmd == "%s < itag" % driverobj.config["execution"]["executable"]
 
 
-def test_UPP__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240507 12:00:00 upp foo"
+def test_UPP_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"

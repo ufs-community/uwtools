@@ -21,8 +21,18 @@ class MakeSoloMosaic(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield self.runscript()
+
+    # Public helper methods
+
+    def taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s" % (self._driver_name, suffix)
 
     # Private helper methods
 
@@ -41,14 +51,6 @@ class MakeSoloMosaic(DriverTimeInvariant):
         executable = self.config[STR.execution][STR.executable]
         flags = " ".join(f"--{k} {v}" for k, v in self.config["config"].items())
         return f"{executable} {flags}"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)
 
 
 set_driver_docstring(MakeSoloMosaic)

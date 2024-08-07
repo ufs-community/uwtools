@@ -26,7 +26,7 @@ class CDEPS(AssetsCycleBased):
         """
         Create data atmosphere configuration with all required content.
         """
-        yield self._taskname("data atmosphere configuration")
+        yield self.taskname("data atmosphere configuration")
         yield [
             self.atm_nml(),
             self.atm_stream(),
@@ -38,7 +38,7 @@ class CDEPS(AssetsCycleBased):
         Create data atmosphere Fortran namelist file (datm_in).
         """
         fn = "datm_in"
-        yield self._taskname(f"namelist file {fn}")
+        yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
@@ -50,7 +50,7 @@ class CDEPS(AssetsCycleBased):
         Create data atmosphere stream config file (datm.streams).
         """
         fn = "datm.streams"
-        yield self._taskname(f"stream file {fn}")
+        yield self.taskname(f"stream file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
         template_file = self.config["atm_streams"]["template_file"]
@@ -62,7 +62,7 @@ class CDEPS(AssetsCycleBased):
         """
         Create data ocean configuration with all required content.
         """
-        yield self._taskname("data atmosphere configuration")
+        yield self.taskname("data atmosphere configuration")
         yield [
             self.ocn_nml(),
             self.ocn_stream(),
@@ -74,7 +74,7 @@ class CDEPS(AssetsCycleBased):
         Create data ocean Fortran namelist file (docn_in).
         """
         fn = "docn_in"
-        yield self._taskname(f"namelist file {fn}")
+        yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
@@ -86,7 +86,7 @@ class CDEPS(AssetsCycleBased):
         Create data ocean stream config file (docn.streams).
         """
         fn = "docn.streams"
-        yield self._taskname(f"stream file {fn}")
+        yield self.taskname(f"stream file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
         template_file = self.config["ocn_streams"]["template_file"]
