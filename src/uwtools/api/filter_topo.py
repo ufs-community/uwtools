@@ -11,4 +11,4 @@ from uwtools.utils.api import make_execute as _make_execute
 _driver = FilterTopo
 execute = _make_execute(_driver)
 tasks = partial(tasks, _driver)
-__all__ = [_driver.__name__, "execute", "graph", "tasks"]
+__all__ = ["FilterTopo", "execute", "graph", "tasks"]
