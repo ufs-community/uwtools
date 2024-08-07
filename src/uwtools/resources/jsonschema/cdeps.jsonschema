@@ -43,7 +43,10 @@
               "items": {
                 "type": "string"
               },
-              "type": "array"
+              "type": [
+                "array",
+                "string"
+              ]
             },
             "taxmode": {
               "type": "string"
