@@ -662,6 +662,26 @@ def test_execution_batchargs():
     assert "[] is not of type 'object'" in errors([])
     # The "threads" argument is not allowed: It will be propagated, if set, from execution.threads.
     assert "should not be valid" in errors({"threads": 4, "walltime": "00:05:00"})
+    # Some keys require boolean values:
+    for key in ["debug", "exclusive"]:
+        assert "is not of type 'boolean'" in errors({key: None})
+    # Some keys require integer values:
+    for key in ["cores", "nodes"]:
+        assert "is not of type 'integer'" in errors({key: None})
+    # Some keys require string values:
+    for key in [
+        "export",
+        "jobname",
+        "memory",
+        "partition",
+        "queue",
+        "rundir",
+        "shell",
+        "stderr",
+        "stdout",
+        "walltime",
+    ]:
+        assert "is not of type 'string'" in errors({key: None})
 
 
 def test_execution_executable():
