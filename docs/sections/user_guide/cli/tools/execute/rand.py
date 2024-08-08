@@ -2,21 +2,21 @@ from random import randint
 
 from iotaa import asset, task
 
-from uwtools.api.driver import DriverCycleBased
+from uwtools.api.driver import AssetsTimeInvariant
 from uwtools.api.logging import use_uwtools_logger
 
 use_uwtools_logger()
 
 
-class Rand(DriverCycleBased):
+class Rand(AssetsTimeInvariant):
 
     @task
     def randfile(self):
         """
-        A file containing a random number.
+        A file containing a random integer.
         """
-        path = self.rundir / "random"
-        yield self.taskname("Random-number file")
+        path = self.rundir / "randint"
+        yield self.taskname("Random-integer file")
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True)
@@ -25,4 +25,4 @@ class Rand(DriverCycleBased):
 
     @property
     def _driver_name(self):
-        return "random"
+        return "rand"

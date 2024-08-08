@@ -1,0 +1,9 @@
+[2024-08-08T19:43:05]     INFO 0 UW schema-validation errors found
+[2024-08-08T19:43:05]     INFO rand Random-integer file: Initial state: Not Ready
+[2024-08-08T19:43:05]     INFO rand Random-integer file: Checking requirements
+[2024-08-08T19:43:05]     INFO rand Random-integer file: Requirement(s) ready
+[2024-08-08T19:43:05]     INFO rand Random-integer file: Executing
+[2024-08-08T19:43:05]     INFO rand Random-integer file: Final state: Ready
+total 4
+-rw-r----- 1 maddenp maddenp 3 Aug  8 19:43 randint
+18
