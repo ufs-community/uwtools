@@ -29,6 +29,15 @@ class IODA(JEDIBase):
             self.runscript(),
         ]
 
+    # Public helper methods
+
+    @property
+    def driver_name(self) -> str:
+        """
+        Returns the name of this driver.
+        """
+        return STR.ioda
+
     # Private helper methods
 
     @property
@@ -37,13 +46,6 @@ class IODA(JEDIBase):
         Returns the name of the config file used in execution.
         """
         return "ioda.yaml"
-
-    @property
-    def _driver_name(self) -> str:
-        """
-        Returns the name of this driver.
-        """
-        return STR.ioda
 
     @property
     def _runcmd(self) -> str:

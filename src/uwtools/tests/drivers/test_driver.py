@@ -40,7 +40,7 @@ class Common:
         pass
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         return "concrete"
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
@@ -218,7 +218,7 @@ def test_Assets_key_path(config, tmp_path):
     assetsobj = ConcreteAssetsTimeInvariant(
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
-    assert assetsobj.config == config[assetsobj._driver_name]
+    assert assetsobj.config == config[assetsobj.driver_name]
     assert assetsobj._platform == config["platform"]
 
 

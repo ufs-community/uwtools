@@ -102,14 +102,16 @@ class Ungrib(DriverCycleBased):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(Path(self.config["vtable"]))
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.ungrib
+
+    # Private helper methods
 
     @task
     def _gribfile(self, infile: Path, link: Path):

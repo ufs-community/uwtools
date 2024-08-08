@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 WaveWatchIII driver tests.
 """
@@ -79,5 +79,5 @@ def test_WaveWatchIII_restart_directory(driverobj):
     assert path.is_dir()
 
 
-def test_WaveWatchIII__driver_name(driverobj):
-    assert driverobj._driver_name == "ww3"
+def test_WaveWatchIII_driver_name(driverobj):
+    assert driverobj.driver_name == "ww3"

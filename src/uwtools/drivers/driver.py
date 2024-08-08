@@ -57,9 +57,9 @@ class Assets(ABC):
         config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
         self._platform = config_intermediate.get("platform")
         try:
-            self._config: dict = config_intermediate[self._driver_name]
+            self._config: dict = config_intermediate[self.driver_name]
         except KeyError as e:
-            raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
+            raise UWConfigError("Required '%s' block missing in config" % self.driver_name) from e
         if controller:
             self._config[STR.rundir] = config_intermediate[controller][STR.rundir]
         self._validate(schema_file)
@@ -75,7 +75,7 @@ class Assets(ABC):
         return " ".join(filter(None, [str(self), cycle, leadtime, "in", self.config[STR.rundir]]))
 
     def __str__(self) -> str:
-        return self._driver_name
+        return self.driver_name
 
     @property
     def config(self) -> dict:
@@ -111,7 +111,7 @@ class Assets(ABC):
             if cycle and leadtime is not None
             else cycle.strftime("%Y%m%d %HZ") if cycle else None
         )
-        return " ".join(filter(None, [timestr, self._driver_name, suffix]))
+        return " ".join(filter(None, [timestr, self.driver_name, suffix]))
 
     # Workflow tasks
 
@@ -153,12 +153,16 @@ class Assets(ABC):
         else:
             log.debug(f"Failed to validate {path}")
 
+    # Public helper methods
+
     @property
     @abstractmethod
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
+
+    # Private helper methods
 
     def _namelist_schema(
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
@@ -174,12 +178,12 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
+            schema_file = get_schema_file(schema_name=self.driver_name.replace("_", "-"))
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
                 STR.properties,
-                self._driver_name,
+                self.driver_name,
                 STR.properties,
                 STR.namelist,
                 STR.properties,
@@ -199,7 +203,7 @@ class Assets(ABC):
             validate_external(schema_file=schema_file, config=self.config_full)
         else:
             validate_internal(
-                schema_name=self._driver_name.replace("_", "-"), config=self.config_full
+                schema_name=self.driver_name.replace("_", "-"), config=self.config_full
             )
 
 
@@ -460,7 +464,7 @@ class Driver(Assets):
         """
         Returns the path to the runscript.
         """
-        return self.rundir / f"runscript.{self._driver_name}"
+        return self.rundir / f"runscript.{self.driver_name}"
 
     @property
     def _scheduler(self) -> JobScheduler:
@@ -480,7 +484,7 @@ class Driver(Assets):
             validate_external(schema_file=schema_file, config=self.config_full)
         else:
             validate_internal(
-                schema_name=self._driver_name.replace("_", "-"), config=self.config_full
+                schema_name=self.driver_name.replace("_", "-"), config=self.config_full
             )
         validate_internal(schema_name=STR.platform, config=self.config_full)
 

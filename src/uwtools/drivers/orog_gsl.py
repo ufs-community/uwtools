@@ -70,14 +70,16 @@ class OrogGSL(DriverTimeInvariant):
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.oroggsl
+
+    # Private helper methods
 
     @property
     def _runcmd(self):

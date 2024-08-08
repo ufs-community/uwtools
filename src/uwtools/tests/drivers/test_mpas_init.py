@@ -211,8 +211,8 @@ def test_MPASInit_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MPASInit__driver_name(driverobj):
-    assert driverobj._driver_name == "mpas_init"
+def test_MPASInit_driver_name(driverobj):
+    assert driverobj.driver_name == "mpas_init"
 
 
 def test_MPASInit_streams_file(config, driverobj):

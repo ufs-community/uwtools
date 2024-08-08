@@ -80,8 +80,8 @@ def test_Shave_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_Shave__driver_name(driverobj):
-    assert driverobj._driver_name == "shave"
+def test_Shave_driver_name(driverobj):
+    assert driverobj.driver_name == "shave"
 
 
 def test_Shave__runcmd(driverobj):

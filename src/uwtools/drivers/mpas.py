@@ -66,14 +66,16 @@ class MPAS(MPASBase):
             schema=self._namelist_schema(),
         )
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.mpas
+
+    # Private helper methods
 
     @property
     def _streams_fn(self) -> str:

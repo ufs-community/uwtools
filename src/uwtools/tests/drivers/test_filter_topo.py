@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 filter_topo driver tests.
 """
@@ -100,5 +100,5 @@ def test_FilterTopo_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_FilterTopo__driver_name(driverobj):
-    assert driverobj._driver_name == "filter_topo"
+def test_FilterTopo_driver_name(driverobj):
+    assert driverobj.driver_name == "filter_topo"
