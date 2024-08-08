@@ -5,7 +5,8 @@ SUPPORTED_PYTHON_VERSIONS=( 3.9 3.10 3.11 3.12 )
 run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   env=python-$PYTHON_VERSION
-  conda create --yes --name $env --quiet python=$PYTHON_VERSION
+  devpkgs=$(jq .packages.dev[] recipe/meta.json | tr -d ' "')
+  conda create --yes --name $env --quiet python=$PYTHON_VERSION $devpkgs
   conda activate $env
   set -x
   python --version
@@ -13,6 +14,7 @@ run_tests() {
   pip install --editable src # sets new Python version in entry-point scripts
   make test
   status=$?
+  set +x
   conda deactivate
   return $status
 }
