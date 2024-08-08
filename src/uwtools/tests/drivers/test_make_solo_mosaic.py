@@ -70,7 +70,7 @@ def test_MakeSoloMosaic_provisioned_rundir(driverobj):
         runscript.assert_called_once_with()
 
 
-def test_MakeSoloMosiac_driver_name(driverobj):
+def test_MakeSoloMosaic_driver_name(driverobj):
     assert driverobj.driver_name == "make_solo_mosaic"
 
 
