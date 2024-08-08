@@ -1022,7 +1022,7 @@ def _basic_setup(parser: Parser) -> Group:
         _switch(STR.version),
         action=STR.version,
         help="Show version info and exit",
-        version=f"%(prog)s {_version()}",
+        version=f"{Path(sys.argv[0]).name} {_version()}",
     )
     return optional
 
