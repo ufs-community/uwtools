@@ -67,6 +67,7 @@ def test__get_driver_module_implicit():
 
 def test_execute_fail_stdin_not_ok(kwargs):
     kwargs["config"] = None
+    kwargs["cycle"] = dt.datetime.now()
     kwargs["stdin_ok"] = False
     with raises(UWError) as e:
         driver_api.execute(**kwargs)
