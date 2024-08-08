@@ -9,9 +9,6 @@ use_uwtools_logger()
 
 
 class Rand(DriverCycleBased):
-    """
-    A random-number driver.
-    """
 
     @task
     def randfile(self):
