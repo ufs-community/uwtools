@@ -24,5 +24,5 @@ class Rand(AssetsTimeInvariant):
             print(randint(self.config["lo"], self.config["hi"]), file=f)
 
     @property
-    def _driver_name(self):
+    def driver_name(self):
         return "rand"
