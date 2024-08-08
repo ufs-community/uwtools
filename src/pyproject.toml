@@ -28,7 +28,6 @@ warn_return_any = true
 [tool.pylint.main]
 extension-pkg-allow-list = ["lxml"]
 jobs = 4
-persistent = false
 recursive = true
 
 [tool.pylint."messages control"]
