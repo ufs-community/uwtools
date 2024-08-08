@@ -14,18 +14,26 @@ Examples
 
 These examples use the following inputs:
 
-- Driver module ``rand.py``
+Module ``rand.py``
 
-  .. literalinclude:: execute/rand.py
-     :language: python
+.. literalinclude:: execute/rand.py
+   :language: python
 
-- Driver schema ``rand.jsonschema``
+Schema ``rand.jsonschema``
 
-  .. literalinclude:: execute/rand.jsonschema
+.. literalinclude:: execute/rand.jsonschema
      :language: json
 
-- Config file ``rand.yaml``
+Config ``rand.yaml``
 
-  .. literalinclude:: execute/rand.yaml
-     :language: yaml
+.. literalinclude:: execute/rand.yaml
+   :language: yaml
 
+* Execute the external driver:
+
+  .. literalinclude:: execute/execute.cmd
+     :language: text
+     :emphasize-lines: 2
+  .. literalinclude:: execute/execute.out
+     :language: text
+  
