@@ -1,27 +1,7 @@
-[2024-08-08T23:32:47]     INFO 0 UW schema-validation errors found
-[2024-08-08T23:32:47]     INFO rand Random-integer file: Initial state: Not Ready
-[2024-08-08T23:32:47]     INFO rand Random-integer file: Checking requirements
-[2024-08-08T23:32:47]     INFO rand Random-integer file: Requirement(s) ready
-[2024-08-08T23:32:47]     INFO rand Random-integer file: Executing
-Traceback (most recent call last):
-  File "/home/maddenp/sw/conda/envs/DEV-uwtools/bin/uw", line 8, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/home/maddenp/git/uwtools/src/uwtools/cli.py", line 91, in main
-    sys.exit(0 if modes[args[STR.mode]](args) else 1)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/maddenp/git/uwtools/src/uwtools/cli.py", line 291, in _dispatch_execute
-    return uwtools.api.driver.execute(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/maddenp/git/uwtools/src/uwtools/api/driver.py", line 89, in execute
-    getattr(driverobj, task)()
-  File "/home/maddenp/sw/conda/envs/DEV-uwtools/lib/python3.12/site-packages/iotaa/__init__.py", line 428, in __iotaa_task__
-    _execute(g, taskname)
-  File "/home/maddenp/sw/conda/envs/DEV-uwtools/lib/python3.12/site-packages/iotaa/__init__.py", line 497, in _execute
-    next(g)
-  File "/home/maddenp/git/uwtools/docs/sections/user_guide/cli/tools/execute/rand.py", line 22, in randfile
-    path.parent.mkdir(parents=True)
-  File "/home/maddenp/sw/conda/envs/DEV-uwtools/lib/python3.12/pathlib.py", line 1311, in mkdir
-    os.mkdir(self, mode)
-FileExistsError: [Errno 17] File exists: '/tmp/rand'
-Random integer is 89
+[2024-08-08T23:46:07]     INFO 0 UW schema-validation errors found
+[2024-08-08T23:46:07]     INFO rand Random-integer file: Initial state: Not Ready
+[2024-08-08T23:46:07]     INFO rand Random-integer file: Checking requirements
+[2024-08-08T23:46:07]     INFO rand Random-integer file: Requirement(s) ready
+[2024-08-08T23:46:07]     INFO rand Random-integer file: Executing
+[2024-08-08T23:46:07]     INFO rand Random-integer file: Final state: Ready
+Random integer is 43
