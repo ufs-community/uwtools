@@ -1,0 +1,20 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "hi": {
+      "type": "integer"
+    },
+    "lo": {
+      "type": "integer"
+    },
+    "rundir": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "lo",
+    "hi",
+    "rundir"
+  ],
+  "type": "object"
+}
