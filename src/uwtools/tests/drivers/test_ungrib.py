@@ -125,8 +125,8 @@ def test_Ungrib_vtable(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib__driver_name(driverobj):
-    assert driverobj._driver_name == "ungrib"
+def test_Ungrib_driver_name(driverobj):
+    assert driverobj.driver_name == "ungrib"
 
 
 def test_Ungrib__gribfile(driverobj):

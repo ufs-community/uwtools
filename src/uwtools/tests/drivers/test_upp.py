@@ -167,8 +167,8 @@ def test_UPP_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_UPP__driver_name(driverobj):
-    assert driverobj._driver_name == "upp"
+def test_UPP_driver_name(driverobj):
+    assert driverobj.driver_name == "upp"
 
 
 def test_UPP__namelist_path(driverobj):

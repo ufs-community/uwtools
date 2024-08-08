@@ -54,6 +54,15 @@ class JEDI(JEDIBase):
             logging.info("%s: Config is valid", taskname)
             a.ready = lambda: True
 
+    # Public helper methods
+
+    @property
+    def driver_name(self) -> str:
+        """
+        Returns the name of this driver.
+        """
+        return STR.jedi
+
     # Private helper methods
 
     @property
@@ -62,13 +71,6 @@ class JEDI(JEDIBase):
         Returns the name of the config file used in execution.
         """
         return "jedi.yaml"
-
-    @property
-    def _driver_name(self) -> str:
-        """
-        Returns the name of this driver.
-        """
-        return STR.jedi
 
     @property
     def _runcmd(self) -> str:

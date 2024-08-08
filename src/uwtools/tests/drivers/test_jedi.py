@@ -188,12 +188,12 @@ def test_JEDI_validate_only(caplog, driverobj):
     assert regex_logged(caplog, "Config is valid")
 
 
+def test_JEDI_driver_name(driverobj):
+    assert driverobj.driver_name == "jedi"
+
+
 def test_JEDI__config_fn(driverobj):
     assert driverobj._config_fn == "jedi.yaml"
-
-
-def test_JEDI__driver_name(driverobj):
-    assert driverobj._driver_name == "jedi"
 
 
 def test_JEDI__runcmd(driverobj):

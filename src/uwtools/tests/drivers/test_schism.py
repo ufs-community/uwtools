@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 SCHISM driver tests.
 """
@@ -71,5 +71,5 @@ def test_SCHISM_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_SCHISM__driver_name(driverobj):
-    assert driverobj._driver_name == "schism"
+def test_SCHISM_driver_name(driverobj):
+    assert driverobj.driver_name == "schism"

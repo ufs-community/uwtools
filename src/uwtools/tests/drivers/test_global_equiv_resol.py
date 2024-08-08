@@ -83,11 +83,11 @@ def test_GlobalEquivResol_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_FilterTopo_driver_name(driverobj):
+    assert driverobj.driver_name == "global_equiv_resol"
+
+
 def test_GlobalEquivResol__runcmd(driverobj):
     cmd = driverobj._runcmd
     input_file_path = driverobj.config["input_grid_file"]
     assert cmd == f"/path/to/global_equiv_resol.exe {input_file_path}"
-
-
-def test_FilterTopo__driver_name(driverobj):
-    assert driverobj._driver_name == "global_equiv_resol"
