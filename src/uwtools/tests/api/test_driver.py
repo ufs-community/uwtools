@@ -65,6 +65,13 @@ def test__get_driver_module_implicit():
     pass
 
 
+@mark.parametrize("key,val", [("batch", True), ("leadtime", 6)])
+def test_execute_fail_bad_args(caplog, key, kwargs, val):
+    kwargs.update({"cycle": dt.datetime.now(), key: val})
+    assert driver_api.execute(**kwargs) is False
+    assert logged(caplog, f"TestDriver does not accept argument '{key}'")
+
+
 def test_execute_fail_stdin_not_ok(kwargs):
     kwargs["config"] = None
     kwargs["cycle"] = dt.datetime.now()
