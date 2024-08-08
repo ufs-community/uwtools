@@ -32,16 +32,18 @@ class MakeSoloMosaic(DriverTimeInvariant):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s" % (self._driver_name, suffix)
+        return "%s %s" % (self.driver_name, suffix)
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.makesolomosaic
+
+    # Private helper methods
 
     @property
     def _runcmd(self):

@@ -236,8 +236,8 @@ def test_MPAS_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MPAS__driver_name(driverobj):
-    assert driverobj._driver_name == "mpas"
+def test_MPAS_driver_name(driverobj):
+    assert driverobj.driver_name == "mpas"
 
 
 def test_MPAS_streams_file(config, driverobj):

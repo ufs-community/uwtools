@@ -138,5 +138,5 @@ def test_SfcClimoGen_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_SfcClimoGen__driver_name(driverobj):
-    assert driverobj._driver_name == "sfc_climo_gen"
+def test_SfcClimoGen_driver_name(driverobj):
+    assert driverobj.driver_name == "sfc_climo_gen"

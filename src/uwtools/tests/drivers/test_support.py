@@ -60,7 +60,7 @@ def test_tasks():
             "@tasks t3"
 
         @property
-        def _driver_name(self):
+        def driver_name(self):
             pass
 
         @property

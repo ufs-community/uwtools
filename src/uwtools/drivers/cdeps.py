@@ -93,14 +93,16 @@ class CDEPS(AssetsCycleBased):
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.cdeps
+
+    # Private helper methods
 
     def _model_namelist_file(self, group: str, path: Path) -> None:
         """

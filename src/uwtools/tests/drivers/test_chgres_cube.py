@@ -147,8 +147,8 @@ def test_ChgresCube_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_ChgresCube__driver_name(driverobj):
-    assert driverobj._driver_name == "chgres_cube"
+def test_ChgresCube_driver_name(driverobj):
+    assert driverobj.driver_name == "chgres_cube"
 
 
 def test_ChgresCube_taskname(driverobj):

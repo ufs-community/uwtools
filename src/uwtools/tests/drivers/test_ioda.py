@@ -100,12 +100,12 @@ def test_IODA_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_IODA_driver_name(driverobj):
+    assert driverobj.driver_name == "ioda"
+
+
 def test_IODA__config_fn(driverobj):
     assert driverobj._config_fn == "ioda.yaml"
-
-
-def test_IODA__driver_name(driverobj):
-    assert driverobj._driver_name == "ioda"
 
 
 def test_IODA__runcmd(driverobj):

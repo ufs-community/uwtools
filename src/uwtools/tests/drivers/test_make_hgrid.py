@@ -76,8 +76,8 @@ def test_MakeHgrid_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MakeHgrid__driver_name(driverobj):
-    assert driverobj._driver_name == "make_hgrid"
+def test_MakeHgrid_driver_name(driverobj):
+    assert driverobj.driver_name == "make_hgrid"
 
 
 def test_MakeHgrid__runcmd(driverobj):

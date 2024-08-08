@@ -247,9 +247,9 @@ def test_FV3_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
+def test_FV3_driver_name(driverobj):
+    assert driverobj.driver_name == "fv3"
+
+
 def test_FV3_taskname(driverobj):
     assert driverobj.taskname("foo") == "20240201 18Z fv3 foo"
-
-
-def test_FV3__driver_name(driverobj):
-    assert driverobj._driver_name == "fv3"

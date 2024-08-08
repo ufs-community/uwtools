@@ -59,10 +59,10 @@ class WaveWatchIII(AssetsCycleBased):
         yield None
         path.mkdir(parents=True)
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """

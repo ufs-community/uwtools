@@ -23,6 +23,7 @@ from uwtools.drivers.driver import (
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
+from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source
 
 
@@ -62,22 +63,27 @@ def execute(
     """
     if not (class_ := _get_driver_class(module, classname)):
         return False
+    args = dict(locals())
     accepted = set(getfullargspec(class_).args)
-    non_optional = {"cycle", "leadtime"}
-    required = accepted & non_optional
+    non_optional = {STR.cycle, STR.leadtime}
+    for arg in sorted([STR.batch, *non_optional]):
+        if args.get(arg) and arg not in accepted:
+            log.error("%s does not accept argument '%s'", classname, arg)
+            return False
+    for arg in sorted(non_optional):
+        if arg in accepted and args[arg] is None:
+            log.error("%s requires argument '%s'", classname, arg)
+            return False
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
         key_path=key_path,
         schema_file=schema_file or Path(module).with_suffix(".jsonschema"),
     )
-    for arg in sorted(non_optional):
-        if arg in accepted and locals()[arg] is None:
-            log.error("%s requires argument '%s'", classname, arg)
-            return False
-    for arg in sorted(["batch", *required]):
+    required = non_optional & accepted
+    for arg in sorted([STR.batch, *required]):
         if arg in accepted:
-            kwargs[arg] = locals()[arg]
+            kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
     getattr(driverobj, task)()
