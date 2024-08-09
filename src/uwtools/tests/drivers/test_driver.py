@@ -219,7 +219,6 @@ def test_Assets_key_path(config, tmp_path):
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
     assert assetsobj.config == config[assetsobj.driver_name]
-    assert assetsobj._platform == config["platform"]
 
 
 def test_Assets_leadtime(config):
@@ -234,6 +233,14 @@ def test_Assets_validate(assetsobj, caplog):
     log.setLevel(logging.INFO)
     assetsobj.validate()
     assert regex_logged(caplog, "State: Ready")
+
+
+def test_Assets_validate_key_path(config, controller_schema):
+    config = {"a": {"b": config}}
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        assert ConcreteAssetsTimeInvariant(
+            config=config, key_path=["a", "b"], schema_file=controller_schema
+        )
 
 
 @mark.parametrize(
@@ -442,7 +449,7 @@ def test_Driver__namelist_schema_default_disable(driverobj):
 
 
 def test_Driver__run_resources_fail(driverobj):
-    driverobj._platform = None
+    del driverobj._config_intermediate["platform"]
     with raises(UWConfigError) as e:
         assert driverobj._run_resources
     assert str(e.value) == "Required 'platform' block missing in config"

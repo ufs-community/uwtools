@@ -54,14 +54,13 @@ class Assets(ABC):
             }
         )
         self._config_full: dict = config_input.data
-        config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
-        self._platform = config_intermediate.get("platform")
+        self._config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
         try:
-            self._config: dict = config_intermediate[self.driver_name]
+            self._config: dict = self._config_intermediate[self.driver_name]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name) from e
         if controller:
-            self._config[STR.rundir] = config_intermediate[controller][STR.rundir]
+            self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
         self._validate(schema_file)
         dryrun(enable=dry_run)
 
@@ -200,10 +199,10 @@ class Assets(ABC):
         :raises: UWConfigError if config fails validation.
         """
         if schema_file:
-            validate_external(schema_file=schema_file, config=self.config_full)
+            validate_external(schema_file=schema_file, config=self._config_intermediate)
         else:
             validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self.config_full
+                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
             )
 
 
@@ -390,13 +389,13 @@ class Driver(Assets):
         """
         Returns platform configuration data.
         """
-        if not self._platform:
+        if not (platform := self._config_intermediate.get("platform")):
             raise UWConfigError("Required 'platform' block missing in config")
         threads = self.config.get(STR.execution, {}).get(STR.threads)
         return {
-            STR.account: self._platform[STR.account],
+            STR.account: platform[STR.account],
             STR.rundir: self.rundir,
-            STR.scheduler: self._platform[STR.scheduler],
+            STR.scheduler: platform[STR.scheduler],
             STR.stdout: "%s.out" % self._runscript_path.name,  # config may override
             **({STR.threads: threads} if threads else {}),
             **self.config.get(STR.execution, {}).get(STR.batchargs, {}),
@@ -481,10 +480,10 @@ class Driver(Assets):
         :raises: UWConfigError if config fails validation.
         """
         if schema_file:
-            validate_external(schema_file=schema_file, config=self.config_full)
+            validate_external(schema_file=schema_file, config=self._config_intermediate)
         else:
             validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self.config_full
+                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
             )
         validate_internal(schema_name=STR.platform, config=self.config_full)
 
