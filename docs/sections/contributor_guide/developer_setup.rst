@@ -6,7 +6,7 @@ Creating a ``bash`` Development Shell
 
 If an existing conda (:miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaconda:`Anaconda<>`, etc.) installation is available and writable, step 1 may be skipped.
 
-.. include:: /shared/miniforge_instructions.rst
+#. .. include:: /shared/miniforge_instructions.rst
 
 #. Install the :anaconda-condev:`condev package<>` into the ``base`` environment.
 
