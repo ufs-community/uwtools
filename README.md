@@ -6,4 +6,7 @@ Unified Workflow Tools for use with UFS applications and beyond
 
 ## Documentation
 
-Comprehensive documentation is available for [the development version](https://uwtools.readthedocs.io/en/main/) and for [the latest release](https://uwtools.readthedocs.io/en/stable/).
+Comprehensive documentation is available for:
+
+* [The latest release](https://uwtools.readthedocs.io/en/stable/)
+* [The development version](https://uwtools.readthedocs.io/en/main/)

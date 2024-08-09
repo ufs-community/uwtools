@@ -1,0 +1,1 @@
+uw execute --help

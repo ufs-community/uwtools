@@ -1,4 +1,4 @@
-#. Visit the :miniforge:`Miniforge releases page<releases/latest>` and obtain the URL and filename for the ``Miniforge3-[os]-[architecture].sh`` installer appropriate to your system, for example ``Miniforge3-Linux-x86_64.sh`` or ``Miniforge3-MacOSX-arm64.sh``. Download, install, and activate. Modify the ``$HOME/conda`` installation directory per your needs.
+Visit the :miniforge:`Miniforge releases page<releases/latest>` and obtain the URL and filename for the ``Miniforge3-[os]-[architecture].sh`` installer appropriate to your system, for example ``Miniforge3-Linux-x86_64.sh`` or ``Miniforge3-MacOSX-arm64.sh``. Download, install, and activate. Modify the ``$HOME/conda`` installation directory per your needs.
 
    .. code-block:: text
 
