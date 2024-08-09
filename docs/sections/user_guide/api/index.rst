@@ -5,8 +5,8 @@ API
    cdeps
    chgres_cube
    config
-   esg_grid
    driver
+   esg_grid
    file
    filter_topo
    fv3

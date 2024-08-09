@@ -20,6 +20,7 @@ html_logo = os.path.join("static", "ufs.png")
 html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+linkcheck_ignore = [r"https://github.com/.*#.*"]
 nitpick_ignore_regex = [("py:class", r"^uwtools\..*")]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
@@ -40,6 +41,7 @@ extlinks = {
     "coverage": ("https://coverage.readthedocs.io/en/7.3.4/%s", "%s"),
     "docformatter": ("https://docformatter.readthedocs.io/en/stable/%s", "%s"),
     "github-docs": ("https://docs.github.com/en/%s", "%s"),
+    "iotaa-readme": ("https://github.com/maddenp/iotaa/blob/main/README.md#%s", "%s"),
     "isort": ("https://pycqa.github.io/isort/%s", "%s"),
     "jinja2": ("https://jinja.palletsprojects.com/%s", "%s"),
     "jq": ("https://jqlang.github.io/jq/manual/v1.7/%s", "%s"),
