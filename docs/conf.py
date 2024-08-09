@@ -40,6 +40,7 @@ extlinks = {
     "coverage": ("https://coverage.readthedocs.io/en/7.3.4/%s", "%s"),
     "docformatter": ("https://docformatter.readthedocs.io/en/stable/%s", "%s"),
     "github-docs": ("https://docs.github.com/en/%s", "%s"),
+    "iotaa": ("https://github.com/maddenp/iotaa/%s", "%s"),
     "isort": ("https://pycqa.github.io/isort/%s", "%s"),
     "jinja2": ("https://jinja.palletsprojects.com/%s", "%s"),
     "jq": ("https://jqlang.github.io/jq/manual/v1.7/%s", "%s"),

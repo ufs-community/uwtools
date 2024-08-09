@@ -9,6 +9,12 @@ The ``uw`` mode for executing external drivers.
 .. literalinclude:: execute/help.out
    :language: text
 
+For the three required arguments:
+
+* ``--module`` specifies the path to a ``.py`` file containing a UW driver class. The path may be: absolute (e.g. ``/path/to/driver.py``), in which case ``uw`` may be invoked from anywhere on the filesystem; relative to the shell's current directory (e.g. ``../driver.py``, ``sub/dir/driver.py``); or simply the filename (e.g. ``driver.py``) if the directory containing the module is added to ``PYTHONPATH``.
+* ``--class`` specifies the name of a class in the above module that implements the driver, which should use one of the classes exported by ``uwtools.api.driver`` as its base class.
+* ``--task`` specifies the name of a method in the above class that implements a :iotaa:`task<blob/main/README.md#tasks>`, decorated with :iotaa:`@task<blob/main/README.md#task>`, :iotaa:`@tasks<blob/main/README.md#tasks>`, or :iotaa:`@external<blob/main/README.md#external>`.
+
 .. _cli_execute_examples:
               
 Examples
