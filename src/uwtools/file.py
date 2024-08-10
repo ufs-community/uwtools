@@ -3,9 +3,10 @@ File handling.
 """
 
 import datetime as dt
+from abc import ABC, abstractmethod
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, TypeVar, Union
 
 from iotaa import dryrun, tasks
 
@@ -14,12 +15,14 @@ from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.utils.api import str2path
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import filecopy, symlink  # , directory
+
+T = TypeVar("T")
 
 
-class Stager:
+class Stager(ABC):
     """
-    The base class for staging files.
+    The base class for staging files and directories.
     """
 
     def __init__(
@@ -32,7 +35,7 @@ class Stager:
         dry_run: bool = False,
     ) -> None:
         """
-        Handle files.
+        Stage files and directories.
 
         :param config: YAML-file path, or dict (read stdin if missing or None).
         :param target_dir: Path to target directory.
@@ -43,30 +46,98 @@ class Stager:
         :raises: UWConfigError if config fails validation.
         """
         dryrun(enable=dry_run)
-        self._target_dir = str2path(target_dir)
-        self._config = YAMLConfig(config=str2path(config))
         self._keys = keys or []
-        self._config.dereference(
+        self._target_dir = str2path(target_dir)
+        yaml_config = YAMLConfig(config=str2path(config))
+        yaml_config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
                 **({"leadtime": leadtime} if leadtime else {}),
-                **self._config.data,
+                **yaml_config.data,
             }
         )
+        self._config = yaml_config.data
         self._validate()
 
-    def _check_dst_paths(self, cfg: dict[str, str]) -> None:
+    def _check_paths(self, paths: list[str]) -> None:
         """
-        Check that all destination paths are absolute if no target directory is specified.
+        Check that all paths are absolute if no target directory is specified.
 
-        :parm cfg: The dst/linkname -> src/target map.
+        :parm paths: The paths to check.
         :raises: UWConfigError if no target directory is specified and a relative path is.
         """
         if not self._target_dir:
             errmsg = "Relative path '%s' requires the target directory to be specified"
-            for dst in cfg.keys():
+            for dst in paths:
                 if not Path(dst).is_absolute():
                     raise UWConfigError(errmsg % dst)
+
+    def _get_block(self, expected_type: type[T]) -> T:
+        """
+        Navigate keys to a config block.
+
+        :param expected_type: The expected type of the block.
+        :return: The block, from a potentially larger config.
+        """
+        cfg = self._config
+        nav = []
+        for key in self._keys:
+            nav.append(key)
+            if key not in cfg:
+                raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
+            log.debug("Following config key '%s'", key)
+            cfg = cfg[key]
+        if not isinstance(cfg, expected_type):
+            raise UWConfigError(
+                "Expected block not found at key path: %s" % " -> ".join(self._keys)
+            )
+        return cfg
+
+    @abstractmethod
+    def _validate(self) -> None:
+        """
+        Validate config against its schema.
+
+        :return: True if config passes validation.
+        :raises: UWConfigError if config fails validation.
+        """
+
+
+class DirectoryStager(Stager):
+    """
+    Stage directories.
+    """
+
+    @tasks
+    def go(self):
+        """
+        Cretae directories.
+        """
+        # linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
+        yield "Directories"
+        # yield [directory(path=path) for path in self.
+
+    @property
+    def _schema(self) -> str:
+        """
+        Returns the name of the schema for this stager.
+        """
+        return "directories-to-create"
+
+    def _validate(self) -> None:
+        """
+        Validate config against its schema.
+
+        :return: True if config passes validation.
+        :raises: UWConfigError if config fails validation.
+        """
+        # validate_internal(schema_name="directories-to-make", config=self._directories)
+
+
+class FileStager(Stager):
+    """
+    Stage files.
+    """
 
     @cached_property
     def _file_map(self) -> dict:
@@ -75,20 +146,11 @@ class Stager:
 
         :return: The dst/src file block from a potentially larger config.
         """
-        cfg = self._config.data
-        nav = []
-        for key in self._keys:
-            nav.append(key)
-            if key not in cfg:
-                raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
-            log.debug("Following config key '%s'", key)
-            cfg = cfg[key]
-        if not isinstance(cfg, dict):
-            raise UWConfigError("No file map found at key path: %s" % " -> ".join(self._keys))
-        self._check_dst_paths(cfg)
+        cfg = self._get_block(expected_type=dict)
+        self._check_paths(list(cfg.keys()))
         return cfg
 
-    def _validate(self) -> bool:
+    def _validate(self) -> None:
         """
         Validate config against its schema.
 
@@ -96,10 +158,9 @@ class Stager:
         :raises: UWConfigError if config fails validation.
         """
         validate_internal(schema_name="files-to-stage", config=self._file_map)
-        return True
 
 
-class Copier(Stager):
+class Copier(FileStager):
     """
     Stage files by copying.
     """
@@ -114,7 +175,7 @@ class Copier(Stager):
         yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._file_map.items()]
 
 
-class Linker(Stager):
+class Linker(FileStager):
     """
     Stage files by linking.
     """

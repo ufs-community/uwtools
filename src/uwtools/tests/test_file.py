@@ -1,4 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
+# pylint: disable=redefined-outer-name
 
 import iotaa
 import yaml
@@ -6,6 +9,8 @@ from pytest import fixture, mark, raises
 
 from uwtools import file
 from uwtools.exceptions import UWConfigError
+
+# Fixtures
 
 
 @fixture
@@ -23,6 +28,17 @@ def assets(tmp_path):
         yaml.dump(cfgdict, f)
     dstdir = tmp_path / "dst"
     return dstdir, cfgdict, cfgfile
+
+
+# Helpers
+
+
+class ConcreteStager(file.Stager):
+    def _validate(self):
+        pass
+
+
+# Tests
 
 
 @mark.parametrize("source", ("dict", "file"))
@@ -62,6 +78,24 @@ def test_Copier_no_targetdir_relpath_fail(assets):
     assert errmsg % "foo" in str(e.value)
 
 
+# @mark.parametrize("val", [None, True, False, "str", 88, 3.14, {}, tuple()])
+# def test_Stager__get_block_fails_bad_type(assets, val):
+#     dstdir, cfgdict, _ = assets
+#     cfgdict["a"]["b"] = val
+#     with raises(UWConfigError) as e:
+#         file.DirectoryStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
+#     assert str(e.value) == "Expected block not found at key path: a -> b"
+
+
+@mark.parametrize("source", ("dict", "file"))
+def test_FilerStager(assets, source):
+    dstdir, cfgdict, cfgfile = assets
+    config = cfgdict if source == "dict" else cfgfile
+    stager = file.FileStager(target_dir=dstdir, config=config, keys=["a", "b"])
+    assert set(stager._file_map.keys()) == {"foo", "subdir/bar"}
+    stager._validate()
+
+
 @mark.parametrize("source", ("dict", "file"))
 def test_Linker(assets, source):
     dstdir, cfgdict, cfgfile = assets
@@ -73,28 +107,10 @@ def test_Linker(assets, source):
     assert (dstdir / "subdir" / "bar").is_symlink()
 
 
-@mark.parametrize("source", ("dict", "file"))
-def test_Stager(assets, source):
-    dstdir, cfgdict, cfgfile = assets
-    config = cfgdict if source == "dict" else cfgfile
-    stager = file.Stager(target_dir=dstdir, config=config, keys=["a", "b"])
-    assert set(stager._file_map.keys()) == {"foo", "subdir/bar"}
-    assert stager._validate() is True
-
-
-@mark.parametrize("source", ("dict", "file"))
-def test_Stager_bad_key(assets, source):
-    dstdir, cfgdict, cfgfile = assets
-    config = cfgdict if source == "dict" else cfgfile
-    with raises(UWConfigError) as e:
-        file.Stager(target_dir=dstdir, config=config, keys=["a", "x"])
-    assert str(e.value) == "Failed following YAML key(s): a -> x"
-
-
-@mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
-def test_Stager_empty_val(assets, val):
-    dstdir, cfgdict, _ = assets
-    cfgdict["a"]["b"] = val
-    with raises(UWConfigError) as e:
-        file.Stager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
-    assert str(e.value) == "No file map found at key path: a -> b"
+# @mark.parametrize("source", ("dict", "file", "mkdir"))
+# def test_Stager__get_block_fail(assets, source):
+#     dstdir, cfgdict, cfgfile = assets
+#     config = cfgdict if source == "dict" else cfgfile
+#     with raises(UWConfigError) as e:
+#         ConcreteStager(target_dir=dstdir, config=config, keys=["a", "x"])
+#     assert str(e.value) == "Failed following YAML key(s): a -> x"

@@ -101,6 +101,7 @@ class STR:
     link: str = "link"
     makehgrid: str = "make_hgrid"
     makesolomosaic: str = "make_solo_mosaic"
+    mkdir: str = "mkdir"
     mode: str = "mode"
     model: str = "model"
     module: str = "module"

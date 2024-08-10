@@ -319,12 +319,13 @@ def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
     return {
         STR.copy: _add_subparser_file_copy(subparsers),
         STR.link: _add_subparser_file_link(subparsers),
+        STR.mkdir: _add_subparser_file_mkdir(subparsers),
     }
 
 
 def _add_subparser_file_common(parser: Parser) -> ActionChecks:
     """
-    Common subparser code for mode: file {copy link}
+    Common subparser code for mode: file {copy link mkdir}
 
     :param parser: The parser to configure.
     """
@@ -359,6 +360,16 @@ def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
     return _add_subparser_file_common(parser)
 
 
+def _add_subparser_file_mkdir(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: file mkdir
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.mkdir, "Make directories")
+    return _add_subparser_file_common(parser)
+
+
 def _dispatch_file(args: Args) -> bool:
     """
     Dispatch logic for file mode.
@@ -368,6 +379,7 @@ def _dispatch_file(args: Args) -> bool:
     actions = {
         STR.copy: _dispatch_file_copy,
         STR.link: _dispatch_file_link,
+        STR.mkdir: _dispatch_file_mkdir,
     }
     return actions[args[STR.action]](args)
 
@@ -396,6 +408,23 @@ def _dispatch_file_link(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.file.link(
+        target_dir=args[STR.targetdir],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
+        keys=args[STR.keys],
+        dry_run=args[STR.dryrun],
+        stdin_ok=True,
+    )
+
+
+def _dispatch_file_mkdir(args: Args) -> bool:
+    """
+    Dispatch logic for file mkdir action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.file.mkdir(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],

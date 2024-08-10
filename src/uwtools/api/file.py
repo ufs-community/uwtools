@@ -8,7 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
-from uwtools.file import Copier, Linker
+from uwtools.file import Copier, DirectoryStager, Linker
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
@@ -33,7 +33,7 @@ def copy(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all copies were created.
     """
-    copier = Copier(
+    stager = Copier(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
@@ -41,7 +41,7 @@ def copy(
         keys=keys,
         dry_run=dry_run,
     )
-    assets: list[Asset] = copier.go()  # type: ignore
+    assets: list[Asset] = stager.go()  # type: ignore
     return all(asset.ready() for asset in assets)
 
 
@@ -66,7 +66,7 @@ def link(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all links were created.
     """
-    linker = Linker(
+    stager = Linker(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
@@ -74,8 +74,41 @@ def link(
         keys=keys,
         dry_run=dry_run,
     )
-    assets: list[Asset] = linker.go()  # type: ignore
+    assets: list[Asset] = stager.go()  # type: ignore
     return all(asset.ready() for asset in assets)
 
 
-__all__ = ["Copier", "Linker", "copy", "link"]
+def mkdir(
+    config: Optional[Union[Path, dict, str]] = None,
+    target_dir: Optional[Union[Path, str]] = None,
+    cycle: Optional[dt.datetime] = None,
+    leadtime: Optional[dt.timedelta] = None,
+    keys: Optional[list[str]] = None,
+    dry_run: bool = False,
+    stdin_ok: bool = False,
+) -> bool:
+    """
+    Make directories.
+
+    :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+    :param target_dir: Path to target directory.
+    :param cycle: A datetime object to make available for use in the config.
+    :param leadtime: A timedelta object to make available for use in the config.
+    :param keys: YAML keys leading to file dst/src block.
+    :param dry_run: Do not link files.
+    :param stdin_ok: OK to read from ``stdin``?
+    :return: ``True`` if all directories were made.
+    """
+    stager = DirectoryStager(
+        target_dir=Path(target_dir) if target_dir else None,
+        config=_ensure_data_source(config, stdin_ok),
+        cycle=cycle,
+        leadtime=leadtime,
+        keys=keys,
+        dry_run=dry_run,
+    )
+    assets: list[Asset] = stager.go()  # type: ignore
+    return all(asset.ready() for asset in assets)
+
+
+__all__ = ["Copier", "DirectoryStager", "Linker", "copy", "link", "mkdir"]
