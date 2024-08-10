@@ -376,7 +376,12 @@ def test__dispatch_config_validate_config_obj():
 
 
 @mark.parametrize(
-    "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
+    "action, funcname",
+    [
+        (STR.copy, "_dispatch_file_copy"),
+        (STR.link, "_dispatch_file_link"),
+        (STR.mkdir, "_dispatch_file_mkdir"),
+    ],
 )
 def test__dispatch_file(action, funcname):
     args = {STR.action: action}
@@ -405,6 +410,21 @@ def test__dispatch_file_link(args_dispatch_file):
     with patch.object(cli.uwtools.api.file, "link") as link:
         cli._dispatch_file_link(args)
     link.assert_called_once_with(
+        target_dir=args["target_dir"],
+        config=args["config_file"],
+        cycle=args["cycle"],
+        leadtime=args["leadtime"],
+        keys=args["keys"],
+        dry_run=args["dry_run"],
+        stdin_ok=args["stdin_ok"],
+    )
+
+
+def test__dispatch_file_mkdir(args_dispatch_file):
+    args = args_dispatch_file
+    with patch.object(cli.uwtools.api.file, "mkdir") as mkdir:
+        cli._dispatch_file_mkdir(args)
+    mkdir.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
         cycle=args["cycle"],
