@@ -34,10 +34,10 @@
           "$ref": "urn:uwtools:execution"
         },
         "files_to_copy": {
-          "$ref": "urn:uwtools:files-to-stage"
+          "$ref": "urn:uwtools:stage-files"
         },
         "files_to_link": {
-          "$ref": "urn:uwtools:files-to-stage"
+          "$ref": "urn:uwtools:stage-files"
         },
         "namelist": {
           "additionalProperties": false,

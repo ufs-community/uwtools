@@ -6,7 +6,9 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, TypeVar, Union
+
+# from typing import Optional, TypeVar, Union
+from typing import Optional, Union
 
 from iotaa import dryrun, tasks
 
@@ -14,10 +16,11 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.strings import STR
 from uwtools.utils.api import str2path
-from uwtools.utils.tasks import filecopy, symlink  # , directory
+from uwtools.utils.tasks import directory, filecopy, symlink
 
-T = TypeVar("T")
+# T = TypeVar("T")
 
 
 class Stager(ABC):
@@ -72,12 +75,12 @@ class Stager(ABC):
                 if not Path(dst).is_absolute():
                     raise UWConfigError(errmsg % dst)
 
-    def _config_block(self, expected_type: type[T]) -> T:
+    def _config_block(self) -> dict:
         """
         Navigate keys to a config block.
 
-        :param expected_type: The expected type of the block.
         :return: The block, from a potentially larger config.
+        :raises: UWConfigError if no target directory is specified and a relative path is.
         """
         cfg = self._config
         nav = []
@@ -87,7 +90,7 @@ class Stager(ABC):
                 raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
-        if not isinstance(cfg, expected_type):
+        if not isinstance(cfg, dict):
             msg = "Expected block not found at key path: %s" % " -> ".join(self._keys)
             raise UWConfigError(msg)
         return cfg
@@ -97,7 +100,6 @@ class Stager(ABC):
         """
         Validate config against its schema.
 
-        :return: True if config passes validation.
         :raises: UWConfigError if config fails validation.
         """
 
@@ -110,20 +112,29 @@ class DirectoryStager(Stager):
     @tasks
     def go(self):
         """
-        Cretae directories.
+        Create directories.
         """
-        # linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "Directories"
-        # yield [directory(path=path) for path in self.
+        yield [directory(path=Path(path)) for path in self._directories[STR.mkdir]]
+
+    @property
+    def _directories(self) -> dict:
+        """
+        Returns directories to create.
+
+        :raises: UWConfigError if no target directory is specified and a relative path is.
+        """
+        dirs = self._config_block()
+        self._check_paths(dirs[STR.mkdir])
+        return dirs
 
     def _validate(self) -> None:
         """
         Validate config against its schema.
 
-        :return: True if config passes validation.
         :raises: UWConfigError if config fails validation.
         """
-        # validate_internal(schema_name="directories-to-make", config=self._directories)
+        validate_internal(schema_name="stage-dirs", config=self._directories)
 
 
 class FileStager(Stager):
@@ -138,7 +149,7 @@ class FileStager(Stager):
 
         :return: The dst/src file block from a potentially larger config.
         """
-        cfg = self._config_block(expected_type=dict)
+        cfg = self._config_block()
         self._check_paths(list(cfg.keys()))
         return cfg
 
@@ -146,10 +157,9 @@ class FileStager(Stager):
         """
         Validate config against its schema.
 
-        :return: True if config passes validation.
         :raises: UWConfigError if config fails validation.
         """
-        validate_internal(schema_name="files-to-stage", config=self._file_map)
+        validate_internal(schema_name="stage-files", config=self._file_map)
 
 
 class Copier(FileStager):

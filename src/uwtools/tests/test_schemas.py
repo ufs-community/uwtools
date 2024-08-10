@@ -736,21 +736,6 @@ def test_schema_execution_serial():
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
-# files-to-stage
-
-
-def test_schema_files_to_stage():
-    errors = schema_validator("files-to-stage")
-    # The input must be an dict:
-    assert "is not of type 'object'\n" in errors([])
-    # A str -> str dict is ok:
-    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
-    # An empty dict is not allowed:
-    assert "{} should be non-empty" in errors({})
-    # Non-string values are not allowed:
-    assert "True is not of type 'string'\n" in errors({"file1": True})
-
-
 # filter-topo
 
 
@@ -1843,6 +1828,36 @@ def test_schema_shave_rundir(shave_prop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'\n" in errors(88)
+
+
+# stage-dirs
+
+
+def test_schema_stage_dirs():
+    errors = schema_validator("stage-dirs")
+    # The input must be an dict:
+    assert "is not of type 'object'\n" in errors([])
+    # Basic correctness:
+    assert not errors({"mkdir": ["/path/to/dir1", "/path/to/dir2"]})
+    # An empty array is not allowed:
+    assert "[] should be non-empty" in errors({"mkdir": []})
+    # Non-string values are not allowed:
+    assert "True is not of type 'string'\n" in errors({"mkdir": [True]})
+
+
+# stage-files
+
+
+def test_schema_stage_files():
+    errors = schema_validator("stage-files")
+    # The input must be an dict:
+    assert "is not of type 'object'\n" in errors([])
+    # A str -> str dict is ok:
+    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
+    # An empty dict is not allowed:
+    assert "{} should be non-empty" in errors({})
+    # Non-string values are not allowed:
+    assert "True is not of type 'string'\n" in errors({"file1": True})
 
 
 # ungrib

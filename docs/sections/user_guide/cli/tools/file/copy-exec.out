@@ -1,4 +1,4 @@
-[2024-08-02T00:43:08]     INFO Validating config against internal schema: files-to-stage
+[2024-08-02T00:43:08]     INFO Validating config against internal schema: stage-files
 [2024-08-02T00:43:08]     INFO 0 UW schema-validation errors found
 [2024-08-02T00:43:08]     INFO File copies: Initial state: Not Ready
 [2024-08-02T00:43:08]     INFO File copies: Checking requirements

@@ -45,10 +45,10 @@
           "type": "object"
         },
         "files_to_copy": {
-          "$ref": "urn:uwtools:files-to-stage"
+          "$ref": "urn:uwtools:stage-files"
         },
         "files_to_link": {
-          "$ref": "urn:uwtools:files-to-stage"
+          "$ref": "urn:uwtools:stage-files"
         },
         "lateral_boundary_conditions": {
           "additionalProperties": false,
