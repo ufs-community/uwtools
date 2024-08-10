@@ -72,7 +72,7 @@ class Stager(ABC):
                 if not Path(dst).is_absolute():
                     raise UWConfigError(errmsg % dst)
 
-    def _get_block(self, expected_type: type[T]) -> T:
+    def _config_block(self, expected_type: type[T]) -> T:
         """
         Navigate keys to a config block.
 
@@ -88,9 +88,8 @@ class Stager(ABC):
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, expected_type):
-            raise UWConfigError(
-                "Expected block not found at key path: %s" % " -> ".join(self._keys)
-            )
+            msg = "Expected block not found at key path: %s" % " -> ".join(self._keys)
+            raise UWConfigError(msg)
         return cfg
 
     @abstractmethod
@@ -146,7 +145,7 @@ class FileStager(Stager):
 
         :return: The dst/src file block from a potentially larger config.
         """
-        cfg = self._get_block(expected_type=dict)
+        cfg = self._config_block(expected_type=dict)
         self._check_paths(list(cfg.keys()))
         return cfg
 
