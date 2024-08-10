@@ -116,13 +116,6 @@ class DirectoryStager(Stager):
         yield "Directories"
         # yield [directory(path=path) for path in self.
 
-    @property
-    def _schema(self) -> str:
-        """
-        Returns the name of the schema for this stager.
-        """
-        return "directories-to-create"
-
     def _validate(self) -> None:
         """
         Validate config against its schema.

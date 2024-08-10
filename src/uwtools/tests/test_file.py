@@ -114,5 +114,8 @@ def test_Stager__config_block_fails_bad_type(assets, val):
     cfgdict["a"]["b"] = val
     stager = ConcreteStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
     with raises(UWConfigError) as e:
-        stager._config_block(expected_type=list if val == {} else dict)
+        if val == {}:
+            stager._config_block(expected_type=list)
+        else:
+            stager._config_block(expected_type=dict)
     assert str(e.value) == "Expected block not found at key path: a -> b"
