@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "mkdir": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "mkdir"
+  ],
+  "type": "object"
+}
