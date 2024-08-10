@@ -390,41 +390,12 @@ def test__dispatch_file(action, funcname):
     func.assert_called_once_with(args)
 
 
-def test__dispatch_file_copy(args_dispatch_file):
+@mark.parametrize("action", ["copy", "link", "mkdir"])
+def test__dispatch_file_action(action, args_dispatch_file):
     args = args_dispatch_file
-    with patch.object(cli.uwtools.api.file, "copy") as copy:
-        cli._dispatch_file_copy(args)
-    copy.assert_called_once_with(
-        target_dir=args["target_dir"],
-        config=args["config_file"],
-        cycle=args["cycle"],
-        leadtime=args["leadtime"],
-        keys=args["keys"],
-        dry_run=args["dry_run"],
-        stdin_ok=args["stdin_ok"],
-    )
-
-
-def test__dispatch_file_link(args_dispatch_file):
-    args = args_dispatch_file
-    with patch.object(cli.uwtools.api.file, "link") as link:
-        cli._dispatch_file_link(args)
-    link.assert_called_once_with(
-        target_dir=args["target_dir"],
-        config=args["config_file"],
-        cycle=args["cycle"],
-        leadtime=args["leadtime"],
-        keys=args["keys"],
-        dry_run=args["dry_run"],
-        stdin_ok=args["stdin_ok"],
-    )
-
-
-def test__dispatch_file_mkdir(args_dispatch_file):
-    args = args_dispatch_file
-    with patch.object(cli.uwtools.api.file, "mkdir") as mkdir:
-        cli._dispatch_file_mkdir(args)
-    mkdir.assert_called_once_with(
+    with patch.object(cli.uwtools.api.file, action) as a:
+        getattr(cli, f"_dispatch_file_{action}")(args)
+    a.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
         cycle=args["cycle"],
