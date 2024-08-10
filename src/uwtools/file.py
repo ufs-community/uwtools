@@ -4,11 +4,7 @@ File and directory staging.
 
 import datetime as dt
 from abc import ABC, abstractmethod
-
-# from functools import cached_property
 from pathlib import Path
-
-# from typing import Optional, TypeVar, Union
 from typing import Optional, Union
 
 from iotaa import dryrun, tasks
@@ -20,8 +16,6 @@ from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
-
-# T = TypeVar("T")
 
 
 class Stager(ABC):
@@ -65,18 +59,6 @@ class Stager(ABC):
         self._check_paths()
         self._validate()
 
-    #     def _check_paths(self, paths: list[str]) -> None:
-    #         """
-    #         Check that all paths are absolute if no target directory is specified.
-    #
-    #         :parm paths: The paths to check.
-    #         :raises: UWConfigError if no target directory is specified and a relative path is.
-    #         """
-    #         if not self._target_dir:
-    #             errmsg = "Relative path '%s' requires the target directory to be specified"
-    #             for dst in paths:
-    #                 if not Path(dst).is_absolute():
-    #                     raise UWConfigError(errmsg % dst)
     def _check_paths(self) -> None:
         """
         Check that all paths are absolute if no target directory is specified.
@@ -89,26 +71,6 @@ class Stager(ABC):
             for dst in self._dst_paths:
                 if not Path(dst).is_absolute():
                     raise UWConfigError(errmsg % dst)
-
-    #     def _config_block(self) -> dict:
-    #         """
-    #         Navigate keys to a config block.
-    #
-    #         :return: The block, from a potentially larger config.
-    #         :raises: UWConfigError if no target directory is specified and a relative path is.
-    #         """
-    #         cfg = self._config
-    #         nav = []
-    #         for key in self._keys:
-    #             nav.append(key)
-    #             if key not in cfg:
-    #                 raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
-    #             log.debug("Following config key '%s'", key)
-    #             cfg = cfg[key]
-    #         if not isinstance(cfg, dict):
-    #             msg = "Expected block not found at key path: %s" % " -> ".join(self._keys)
-    #             raise UWConfigError(msg)
-    #         return cfg
 
     def _set_config_block(self) -> None:
         """
@@ -168,7 +130,7 @@ class DirectoryStager(Stager):
     @property
     def _dst_paths(self) -> list[str]:
         """
-        Returns the paths to files or directories to create.
+        Returns the paths to directories to create.
         """
         paths: list[str] = self._config[STR.mkdir]
         return paths
@@ -180,24 +142,6 @@ class DirectoryStager(Stager):
         """
         return "stage-dirs"
 
-    # @property
-    # def _asdf(self) -> dict:
-    #     """
-    #     Returns directories to create.
-
-    #     :raises: UWConfigError if no target directory is specified and a relative path is.
-    #     """
-    #     self._check_paths(self._config[STR.mkdir])
-    #     return cfg
-
-    # def _validate(self) -> None:
-    #     """
-    #     Validate config against its schema.
-
-    #     :raises: UWConfigError if config fails validation.
-    #     """
-    #     validate_internal(schema_name="stage-dirs", config=self._config)
-
 
 class FileStager(Stager):
     """
@@ -207,7 +151,7 @@ class FileStager(Stager):
     @property
     def _dst_paths(self) -> list[str]:
         """
-        Returns the paths to files or directories to create.
+        Returns the paths to files to create.
         """
         return list(self._config.keys())
 
@@ -217,24 +161,6 @@ class FileStager(Stager):
         Returns the name of the schema to use for config validation.
         """
         return "stage-files"
-
-    # @cached_property
-    # def _asdf(self) -> dict:
-    #     """
-    #     Navigate keys to file dst/src config block.
-
-    #     :return: The dst/src file block from a potentially larger config.
-    #     """
-    #     self._check_paths(list(self._config.keys()))
-    #     return cfg
-
-    # def _validate(self) -> None:
-    #     """
-    #     Validate config against its schema.
-
-    #     :raises: UWConfigError if config fails validation.
-    #     """
-    #     validate_internal(schema_name="stage-files", config=self._config)
 
 
 class Copier(FileStager):
