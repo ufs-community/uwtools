@@ -8,7 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
-from uwtools.file import Copier, DirectoryStager, Linker
+from uwtools.file import Copier, Linker, MkDir
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
@@ -99,7 +99,7 @@ def mkdir(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all directories were made.
     """
-    stager = DirectoryStager(
+    stager = MkDir(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
@@ -111,4 +111,4 @@ def mkdir(
     return all(asset.ready() for asset in assets)
 
 
-__all__ = ["Copier", "DirectoryStager", "Linker", "copy", "link", "mkdir"]
+__all__ = ["Copier", "Linker", "MkDir", "copy", "link", "mkdir"]

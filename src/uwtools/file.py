@@ -114,38 +114,6 @@ class Stager(ABC):
         validate_internal(schema_name=self._schema, config=self._config)
 
 
-class DirectoryStager(Stager):
-    """
-    Make directories.
-    """
-
-    @tasks
-    def go(self):
-        """
-        Make directories.
-        """
-        yield "Directories"
-        yield [
-            directory(path=Path(self._target_dir / p if self._target_dir else p))
-            for p in self._config[STR.mkdir]
-        ]
-
-    @property
-    def _dst_paths(self) -> list[str]:
-        """
-        Returns the paths to directories to create.
-        """
-        paths: list[str] = self._config[STR.mkdir]
-        return paths
-
-    @property
-    def _schema(self) -> str:
-        """
-        Returns the name of the schema to use for config validation.
-        """
-        return "mkdir"
-
-
 class FileStager(Stager):
     """
     Stage files.
@@ -194,3 +162,35 @@ class Linker(FileStager):
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
         yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
+
+
+class MkDir(Stager):
+    """
+    Make directories.
+    """
+
+    @tasks
+    def go(self):
+        """
+        Make directories.
+        """
+        yield "Directories"
+        yield [
+            directory(path=Path(self._target_dir / p if self._target_dir else p))
+            for p in self._config[STR.mkdir]
+        ]
+
+    @property
+    def _dst_paths(self) -> list[str]:
+        """
+        Returns the paths to directories to create.
+        """
+        paths: list[str] = self._config[STR.mkdir]
+        return paths
+
+    @property
+    def _schema(self) -> str:
+        """
+        Returns the name of the schema to use for config validation.
+        """
+        return "mkdir"
