@@ -116,8 +116,6 @@ Given ``mkdir-config.yaml`` containing
 .. literalinclude:: file/mkdir-exec.out
    :language: text
 
-If absolute rather than relative paths are given, the ``--target-dir`` option may be ommitted. It will, in any case, have no effect on absolute paths.
-
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
 .. literalinclude:: file/mkdir-config-timedep.yaml
@@ -125,4 +123,13 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 .. literalinclude:: file/mkdir-exec-timedep.cmd
    :emphasize-lines: 2
 .. literalinclude:: file/mkdir-exec-timedep.out
+   :language: text
+
+The ``--target-dir`` option is optional when all directory paths are absolute, and will never be applied to absolute linkname paths. If any linkname paths are relative, however, it is an error not to provide a target directory:
+
+.. literalinclude:: file/mkdir-config.yaml
+   :language: yaml
+.. literalinclude:: file/mkdir-exec-no-target-dir-err.cmd
+   :emphasize-lines: 1
+.. literalinclude:: file/mkdir-exec-no-target-dir-err.out
    :language: text

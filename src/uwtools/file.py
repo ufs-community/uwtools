@@ -56,8 +56,8 @@ class Stager(ABC):
         )
         self._config = yaml_config.data
         self._set_config_block()
-        self._check_paths()
         self._validate()
+        self._check_paths()
 
     def _check_paths(self) -> None:
         """
@@ -116,16 +116,19 @@ class Stager(ABC):
 
 class DirectoryStager(Stager):
     """
-    Stage directories.
+    Make directories.
     """
 
     @tasks
     def go(self):
         """
-        Create directories.
+        Make directories.
         """
         yield "Directories"
-        yield [directory(path=Path(path)) for path in self._config[STR.mkdir]]
+        yield [
+            directory(path=Path(self._target_dir / p if self._target_dir else p))
+            for p in self._config[STR.mkdir]
+        ]
 
     @property
     def _dst_paths(self) -> list[str]:
