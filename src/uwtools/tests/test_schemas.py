@@ -1197,6 +1197,21 @@ def test_schema_make_solo_mosaic_rundir(make_solo_mosaic_prop):
     assert "88 is not of type 'string'\n" in errors(88)
 
 
+# mkdir
+
+
+def test_schema_mkdir():
+    errors = schema_validator("mkdir")
+    # The input must be an dict:
+    assert "is not of type 'object'\n" in errors([])
+    # Basic correctness:
+    assert not errors({"mkdir": ["/path/to/dir1", "/path/to/dir2"]})
+    # An empty array is not allowed:
+    assert "[] should be non-empty" in errors({"mkdir": []})
+    # Non-string values are not allowed:
+    assert "True is not of type 'string'\n" in errors({"mkdir": [True]})
+
+
 # mpas
 
 
@@ -1828,21 +1843,6 @@ def test_schema_shave_rundir(shave_prop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'\n" in errors(88)
-
-
-# stage-dirs
-
-
-def test_schema_stage_dirs():
-    errors = schema_validator("stage-dirs")
-    # The input must be an dict:
-    assert "is not of type 'object'\n" in errors([])
-    # Basic correctness:
-    assert not errors({"mkdir": ["/path/to/dir1", "/path/to/dir2"]})
-    # An empty array is not allowed:
-    assert "[] should be non-empty" in errors({"mkdir": []})
-    # Non-string values are not allowed:
-    assert "True is not of type 'string'\n" in errors({"mkdir": [True]})
 
 
 # stage-files

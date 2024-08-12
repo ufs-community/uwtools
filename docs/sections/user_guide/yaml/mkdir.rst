@@ -1,9 +1,9 @@
-.. _directories_yaml:
+.. _mkdir_yaml:
 
 Directory Blocks
 ================
 
-Directory blocks define a sequence of one or more directory to be created, nested under a ``mkdir:`` key. Each value is either an absolute path, or a path relative to the target directory.
+Directory blocks define a sequence of one or more directories to be created, nested under a ``mkdir:`` key. Each value is either an absolute path, or a path relative to the target directory, specified either via the CLI or an API call.
 
 Example block with aboslute paths:
 

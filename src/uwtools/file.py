@@ -140,7 +140,7 @@ class DirectoryStager(Stager):
         """
         Returns the name of the schema to use for config validation.
         """
-        return "stage-dirs"
+        return "mkdir"
 
 
 class FileStager(Stager):
