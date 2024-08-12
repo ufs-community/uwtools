@@ -1,7 +1,7 @@
 config:
   mkdir:
-    - foo//{{ yyyymmdd }}/{{ hh }}/{{ nnn }}/bar
-    - baz//{{ yyyymmdd }}/{{ hh }}/{{ nnn }}/qux
+    - foo/{{ yyyymmdd }}/{{ hh }}/{{ nnn }}/bar
+    - baz/{{ yyyymmdd }}/{{ hh }}/{{ nnn }}/qux
 yyyymmdd: "{{ cycle.strftime('%Y%m%d') }}"
 hh: "{{ cycle.strftime('%H') }}"
 nnn: "{{ '%03d' % (leadtime.total_seconds() // 3600) }}"

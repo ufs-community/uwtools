@@ -1,0 +1,3 @@
+[2024-08-12T04:35:49]     INFO Validating config against internal schema: mkdir
+[2024-08-12T04:35:49]     INFO 0 UW schema-validation errors found
+[2024-08-12T04:35:49]    ERROR Relative path 'foo' requires the target directory to be specified

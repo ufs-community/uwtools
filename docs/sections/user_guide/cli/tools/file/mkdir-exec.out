@@ -1,19 +1,21 @@
-[2024-08-12T03:59:15]     INFO Validating config against internal schema: stage-dirs
-[2024-08-12T03:59:15]     INFO 0 UW schema-validation errors found
-[2024-08-12T03:59:15]     INFO Directories: Initial state: Not Ready
-[2024-08-12T03:59:15]     INFO Directories: Checking requirements
-[2024-08-12T03:59:15]     INFO Directory foo: Initial state: Not Ready
-[2024-08-12T03:59:15]     INFO Directory foo: Checking requirements
-[2024-08-12T03:59:15]     INFO Directory foo: Requirement(s) ready
-[2024-08-12T03:59:15]     INFO Directory foo: Executing
-[2024-08-12T03:59:15]     INFO Directory foo: Final state: Ready
-[2024-08-12T03:59:15]     INFO Directory bar: Initial state: Not Ready
-[2024-08-12T03:59:15]     INFO Directory bar: Checking requirements
-[2024-08-12T03:59:15]     INFO Directory bar: Requirement(s) ready
-[2024-08-12T03:59:15]     INFO Directory bar: Executing
-[2024-08-12T03:59:15]     INFO Directory bar: Final state: Ready
-[2024-08-12T03:59:15]     INFO Directories: Final state: Ready
+[2024-08-12T04:35:49]     INFO Validating config against internal schema: mkdir
+[2024-08-12T04:35:49]     INFO 0 UW schema-validation errors found
+[2024-08-12T04:35:49]     INFO Directories: Initial state: Not Ready
+[2024-08-12T04:35:49]     INFO Directories: Checking requirements
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/foo: Initial state: Not Ready
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/foo: Checking requirements
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/foo: Requirement(s) ready
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/foo: Executing
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/foo: Final state: Ready
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/bar: Initial state: Not Ready
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/bar: Checking requirements
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/bar: Requirement(s) ready
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/bar: Executing
+[2024-08-12T04:35:49]     INFO Directory mkdir-parent/bar: Final state: Ready
+[2024-08-12T04:35:49]     INFO Directories: Final state: Ready
 
-mkdir-parent  [error opening dir]
+mkdir-parent/
+├── bar/
+└── foo/
 
-0 directories, 0 files
+3 directories, 0 files
