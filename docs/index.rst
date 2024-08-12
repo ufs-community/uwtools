@@ -74,9 +74,9 @@ This tool helps transform legacy configuration files templated with the atparse 
 File/Directory Provisioning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This tool helps users define the source and destination of files to be copied or linked, in the same UW YAML language used by UW drivers; or a set of directories to be created.
+This tool helps users define the source and destination of files to be copied or linked, or directories to be created, in the same UW YAML language used by UW drivers.
 
-| :any:`CLI documentation with examples<cli_file_copy_examples>`
+| :any:`CLI documentation with examples<cli_file_mode>`
 
 There is a video demonstration of the use of the ``uw file`` tool available via YouTube.
 

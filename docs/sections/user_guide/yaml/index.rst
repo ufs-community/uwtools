@@ -7,6 +7,7 @@ UW YAML
    components/index
    platform
    execution
+   directories
    files
    updating_values
    rocoto

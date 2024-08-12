@@ -1,14 +1,14 @@
 ``file``
 ========
 
+.. _cli_file_mode:
+
 The ``uw`` mode for handling filesystem files.
 
 .. literalinclude:: file/help.cmd
    :emphasize-lines: 1
 .. literalinclude:: file/help.out
    :language: text
-
-.. _cli_file_copy_examples:
 
 ``copy``
 --------
@@ -52,8 +52,6 @@ The ``--target-dir`` option is optional when all destination paths are absolute,
 .. literalinclude:: file/copy-exec-no-target-dir-err.out
    :language: text
 
-.. _cli_file_link_examples:
-
 ``link``
 --------
 
@@ -94,4 +92,37 @@ The ``--target-dir`` option is optional when all linkname paths are absolute, an
 .. literalinclude:: file/link-exec-no-target-dir-err.cmd
    :emphasize-lines: 1
 .. literalinclude:: file/link-exec-no-target-dir-err.out
+   :language: text
+
+``mkdir``
+---------
+
+The ``mkdir`` action creates directories. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`mkdir block <mkdir_yaml>`.
+
+.. literalinclude:: file/mkdir-help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: file/mkdir-help.out
+   :language: text
+
+Examples
+^^^^^^^^
+
+Given ``mkdir-config.yaml`` containing
+
+.. literalinclude:: file/mkdir-config.yaml
+   :language: yaml
+.. literalinclude:: file/mkdir-exec.cmd
+   :emphasize-lines: 2
+.. literalinclude:: file/mkdir-exec.out
+   :language: text
+
+If absolute rather than relative paths are given, the ``--target-dir`` option may be ommitted. It will, in any case, have no effect on absolute paths.
+
+The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
+
+.. literalinclude:: file/mkdir-config-timedep.yaml
+   :language: yaml
+.. literalinclude:: file/mkdir-exec-timedep.cmd
+   :emphasize-lines: 2
+.. literalinclude:: file/mkdir-exec-timedep.out
    :language: text
