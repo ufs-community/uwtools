@@ -32,10 +32,10 @@
           "$ref": "urn:uwtools:execution"
         },
         "files_to_copy": {
-          "$ref": "urn:uwtools:stage-files"
+          "$ref": "urn:uwtools:files-to-stage"
         },
         "files_to_link": {
-          "$ref": "urn:uwtools:stage-files"
+          "$ref": "urn:uwtools:files-to-stage"
         },
         "rundir": {
           "type": "string"

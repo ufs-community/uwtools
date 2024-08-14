@@ -1845,11 +1845,11 @@ def test_schema_shave_rundir(shave_prop):
     assert "88 is not of type 'string'\n" in errors(88)
 
 
-# stage-files
+# files-to-stage
 
 
 def test_schema_stage_files():
-    errors = schema_validator("stage-files")
+    errors = schema_validator("files-to-stage")
     # The input must be an dict:
     assert "is not of type 'object'\n" in errors([])
     # A str -> str dict is ok:

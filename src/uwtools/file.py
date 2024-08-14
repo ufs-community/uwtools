@@ -131,7 +131,7 @@ class FileStager(Stager):
         """
         Returns the name of the schema to use for config validation.
         """
-        return "stage-files"
+        return "files-to-stage"
 
 
 class Copier(FileStager):
