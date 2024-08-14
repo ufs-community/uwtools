@@ -1,5 +1,5 @@
 """
-API access to ``uwtools`` file-management tools.
+API access to ``uwtools`` file and directory management tools.
 """
 
 import datetime as dt
