@@ -125,7 +125,7 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 .. literalinclude:: file/mkdir-exec-timedep.out
    :language: text
 
-The ``--target-dir`` option is optional when all directory paths are absolute, and will never be applied to absolute linkname paths. If any linkname paths are relative, however, it is an error not to provide a target directory:
+The ``--target-dir`` option is optional when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
 
 .. literalinclude:: file/mkdir-config.yaml
    :language: yaml
