@@ -1,1 +1,3 @@
-[2024-07-26T21:51:23]    ERROR Relative path 'foo' requires the target directory to be specified
+[2024-08-14T15:19:57]     INFO Validating config against internal schema: files-to-stage
+[2024-08-14T15:19:57]     INFO 0 UW schema-validation errors found
+[2024-08-14T15:19:57]    ERROR Relative path 'foo' requires the target directory to be specified
