@@ -14,5 +14,5 @@ Positional arguments:
       Copy files
     link
       Link files
-    mkdir
+    makedirs
       Make directories

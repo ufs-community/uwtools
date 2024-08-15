@@ -64,8 +64,8 @@ def test_link_pass(kwargs):
         assert Path(p).is_symlink()
 
 
-def test_mkdir(tmp_path):
+def test_makedirs(tmp_path):
     paths = [tmp_path / "foo" / x for x in ("bar", "baz")]
     assert not any(path.is_dir() for path in paths)
-    assert file.mkdir(config={"mkdir": [str(path) for path in paths]}) is True
+    assert file.makedirs(config={"makedirs": [str(path) for path in paths]}) is True
     assert all(path.is_dir() for path in paths)

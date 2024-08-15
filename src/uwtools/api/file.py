@@ -8,7 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
-from uwtools.file import Copier, Linker, MkDir
+from uwtools.file import Copier, Linker, MakeDirs
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
@@ -78,7 +78,7 @@ def link(
     return all(asset.ready() for asset in assets)
 
 
-def mkdir(
+def makedirs(
     config: Optional[Union[Path, dict, str]] = None,
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
@@ -99,7 +99,7 @@ def mkdir(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all directories were made.
     """
-    stager = MkDir(
+    stager = MakeDirs(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
@@ -111,4 +111,4 @@ def mkdir(
     return all(asset.ready() for asset in assets)
 
 
-__all__ = ["Copier", "Linker", "MkDir", "copy", "link", "mkdir"]
+__all__ = ["Copier", "Linker", "MakeDirs", "copy", "link", "makedirs"]

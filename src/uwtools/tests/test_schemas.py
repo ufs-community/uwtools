@@ -1212,19 +1212,19 @@ def test_schema_make_solo_mosaic_rundir(make_solo_mosaic_prop):
     assert "88 is not of type 'string'\n" in errors(88)
 
 
-# mkdir
+# makedirs
 
 
-def test_schema_mkdir():
-    errors = schema_validator("mkdir")
+def test_schema_makedirs():
+    errors = schema_validator("makedirs")
     # The input must be an dict:
     assert "is not of type 'object'\n" in errors([])
     # Basic correctness:
-    assert not errors({"mkdir": ["/path/to/dir1", "/path/to/dir2"]})
+    assert not errors({"makedirs": ["/path/to/dir1", "/path/to/dir2"]})
     # An empty array is not allowed:
-    assert "[] should be non-empty" in errors({"mkdir": []})
+    assert "[] should be non-empty" in errors({"makedirs": []})
     # Non-string values are not allowed:
-    assert "True is not of type 'string'\n" in errors({"mkdir": [True]})
+    assert "True is not of type 'string'\n" in errors({"makedirs": [True]})
 
 
 # mpas

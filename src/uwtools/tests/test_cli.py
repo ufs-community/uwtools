@@ -103,7 +103,7 @@ def test__add_subparser_config_validate(subparsers):
 
 def test__add_subparser_file(subparsers):
     cli._add_subparser_file(subparsers)
-    assert actions(subparsers.choices[STR.file]) == [STR.copy, STR.link, STR.mkdir]
+    assert actions(subparsers.choices[STR.file]) == [STR.copy, STR.link, STR.makedirs]
 
 
 def test__add_subparser_file_copy(subparsers):
@@ -380,7 +380,7 @@ def test__dispatch_config_validate_config_obj():
     [
         (STR.copy, "_dispatch_file_copy"),
         (STR.link, "_dispatch_file_link"),
-        (STR.mkdir, "_dispatch_file_mkdir"),
+        (STR.makedirs, "_dispatch_file_makedirs"),
     ],
 )
 def test__dispatch_file(action, funcname):
@@ -390,7 +390,7 @@ def test__dispatch_file(action, funcname):
     func.assert_called_once_with(args)
 
 
-@mark.parametrize("action", ["copy", "link", "mkdir"])
+@mark.parametrize("action", ["copy", "link", "makedirs"])
 def test__dispatch_file_action(action, args_dispatch_file):
     args = args_dispatch_file
     with patch.object(cli.uwtools.api.file, action) as a:

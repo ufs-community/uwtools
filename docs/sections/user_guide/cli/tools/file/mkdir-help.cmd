@@ -1,1 +1,0 @@
-uw file mkdir --help

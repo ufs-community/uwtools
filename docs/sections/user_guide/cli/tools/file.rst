@@ -94,42 +94,42 @@ The ``--target-dir`` option is optional when all linkname paths are absolute, an
 .. literalinclude:: file/link-exec-no-target-dir-err.out
    :language: text
 
-``mkdir``
----------
+``makedirs``
+------------
 
-The ``mkdir`` action creates directories. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`mkdir block <mkdir_yaml>`.
+The ``makedirs`` action creates directories. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`makedirs block <makedirs_yaml>`.
 
-.. literalinclude:: file/mkdir-help.cmd
+.. literalinclude:: file/makedirs-help.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/mkdir-help.out
+.. literalinclude:: file/makedirs-help.out
    :language: text
 
 Examples
 ^^^^^^^^
 
-Given ``mkdir-config.yaml`` containing
+Given ``makedirs-config.yaml`` containing
 
-.. literalinclude:: file/mkdir-config.yaml
+.. literalinclude:: file/makedirs-config.yaml
    :language: yaml
-.. literalinclude:: file/mkdir-exec.cmd
+.. literalinclude:: file/makedirs-exec.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/mkdir-exec.out
+.. literalinclude:: file/makedirs-exec.out
    :language: text
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
-.. literalinclude:: file/mkdir-config-timedep.yaml
+.. literalinclude:: file/makedirs-config-timedep.yaml
    :language: yaml
-.. literalinclude:: file/mkdir-exec-timedep.cmd
+.. literalinclude:: file/makedirs-exec-timedep.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/mkdir-exec-timedep.out
+.. literalinclude:: file/makedirs-exec-timedep.out
    :language: text
 
 The ``--target-dir`` option is optional when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: file/mkdir-config.yaml
+.. literalinclude:: file/makedirs-config.yaml
    :language: yaml
-.. literalinclude:: file/mkdir-exec-no-target-dir-err.cmd
+.. literalinclude:: file/makedirs-exec-no-target-dir-err.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/mkdir-exec-no-target-dir-err.out
+.. literalinclude:: file/makedirs-exec-no-target-dir-err.out
    :language: text

@@ -1,7 +1,7 @@
 {
   "additionalProperties": false,
   "properties": {
-    "mkdir": {
+    "makedirs": {
       "items": {
         "type": "string"
       },
@@ -10,7 +10,7 @@
     }
   },
   "required": [
-    "mkdir"
+    "makedirs"
   ],
   "type": "object"
 }

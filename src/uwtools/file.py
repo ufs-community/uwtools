@@ -164,7 +164,7 @@ class Linker(FileStager):
         yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
 
 
-class MkDir(Stager):
+class MakeDirs(Stager):
     """
     Make directories.
     """
@@ -177,7 +177,7 @@ class MkDir(Stager):
         yield "Directories"
         yield [
             directory(path=Path(self._target_dir / p if self._target_dir else p))
-            for p in self._config[STR.mkdir]
+            for p in self._config[STR.makedirs]
         ]
 
     @property
@@ -185,7 +185,7 @@ class MkDir(Stager):
         """
         Returns the paths to directories to create.
         """
-        paths: list[str] = self._config[STR.mkdir]
+        paths: list[str] = self._config[STR.makedirs]
         return paths
 
     @property
@@ -193,4 +193,4 @@ class MkDir(Stager):
         """
         Returns the name of the schema to use for config validation.
         """
-        return "mkdir"
+        return "makedirs"

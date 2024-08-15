@@ -7,7 +7,7 @@ UW YAML
    components/index
    execution
    files
-   mkdir
+   makedirs
    platform
    rocoto
    tags
