@@ -52,18 +52,17 @@ def test_render_fail(kwargs):
         with raises(UWTemplateRenderError):
             template.render(**kwargs)
 
-def test_render_values_needed(caplog, template_file):
-    log.setLevel(logging.INFO)
-    template.render(input_file=template_file, values_needed=True)
-    for var in ("roses_color", "violets_color"):
-            assert logged(caplog, f"  {var}")
-
 def test_render_to_str(kwargs):
     del kwargs["output_file"]
     with patch.object(template, "render") as render:
         template.render_to_str(**kwargs)
         render.assert_called_once_with(**{**kwargs, "output_file": Path(os.devnull)})
 
+def test_render_values_needed(caplog, template_file):
+    log.setLevel(logging.INFO)
+    template.render(input_file=template_file, values_needed=True)
+    for var in ("roses_color", "violets_color"):
+            assert logged(caplog, f"  {var}")
 
 def test_translate():
     kwargs: dict = {
