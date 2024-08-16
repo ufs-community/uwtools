@@ -45,7 +45,7 @@ The following namelists and variables can be customized:
    * - Namelist
      - Variables
    * - ``model_inputs``
-     - ``datestr``, ``filename``, ``filenameflat``, ``filenameflux``, ``grib``, ``ioform``, ``modelname``
+     - ``datestr``, ``filename``, ``filenameflat``, ``filenameflux``, ``grib``, ``ioform``, ``modelname``, ``submodelname``
    * - ``nampgb``
      - ``aqf_on``, ``d2d_chem``, ``d3d_on``, ``filenameaer``, ``gccpp_on``, ``gocart_on``, ``gtg_on``, ``hyb_sigp``, ``kpo``, ``kpv``, ``kth``, ``method_blsn``, ``nasa_on``, ``numx``, ``po``, ``popascal``, ``pv``, ``rdaod``, ``slrutah_on``, ``th``, ``vtimeunits``, ``write_ifi_debug_files``
 
