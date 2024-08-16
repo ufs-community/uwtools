@@ -4,56 +4,67 @@ from testbook import testbook
 
 def test_render():
 
+    template = "fixtures/template/render-template.yaml"
+    values = "fixtures/template/render-values.yaml"
     rendered_template1 = "fixtures/template/render-complete-1.yaml"
     rendered_template2 = "fixtures/template/render-complete-2.yaml"
 
-    if os.path.exists(rendered_template1):
-        os.remove(rendered_template1)
-    if os.path.exists(rendered_template2):
-        os.remove(rendered_template2)
+    for file in rendered_template1, rendered_template2:
+        if os.path.exists(file):
+            os.remove(file)
+
+    with open(template, 'r') as f:
+        template_str = f.read().rstrip()
+    with open(values, 'r') as f:
+        values_str = f.read().rstrip()
 
     with testbook("template.ipynb", execute=True) as tb:
 
-        assert(tb.cell_output_text(5) == 'user:\n  name: {{ first }} {{ last }}\n  favorite_food: {{ food }}')
+        with open(rendered_template1, "r") as f:
+            rend_temp_str1 = f.read().rstrip()
+            temp_yaml1 = yaml.safe_load(rend_temp_str1)
+        assert temp_yaml1["user"] == {"name": "John Doe", "favorite_food": "burritos"}
+
+        with open(rendered_template2, "r") as f:
+            rend_temp_str2 = f.read().rstrip()
+            temp_yaml2 = yaml.safe_load(rend_temp_str2)
+        assert temp_yaml2["user"] == {"name": "Jane Doe", "favorite_food": "tamales"}
+
+        assert(tb.cell_output_text(5) == template_str)
         assert('INFO   first' in tb.cell_output_text(7) and
             'INFO   food' in tb.cell_output_text(7) and
             'INFO   last' in tb.cell_output_text(7))
-        assert(tb.cell_output_text(9) == "first: John\nlast: Doe\nfood: burritos")
-        assert(tb.cell_output_text(11) == "user:\n  name: John Doe\n  favorite_food: burritos")
-        assert(tb.cell_output_text(13) == "user:\n  name: Jane Doe\n  favorite_food: tamales")
-
-        assert os.path.exists(rendered_template1)
-        assert os.path.exists(rendered_template2)
-
-        with open(rendered_template1, "r") as f:
-            user_config = yaml.safe_load(f)
-        assert user_config["user"] == {"name": "John Doe", "favorite_food": "burritos"}
-
-        with open(rendered_template2, "r") as f:
-            user_config = yaml.safe_load(f)
-        assert user_config["user"] == {"name": "Jane Doe", "favorite_food": "tamales"}
+        assert(tb.cell_output_text(9) == values_str)
+        assert(tb.cell_output_text(11) == rend_temp_str1)
+        assert(tb.cell_output_text(13) == rend_temp_str2)
+        assert(rend_temp_str1 in tb.cell_output_text(15) and
+               rend_temp_str2 in tb.cell_output_text(15))     
     
     @testbook("template.ipynb", execute=True)
     def test_render_to_str(tb):
 
-        assert(tb.cell_output_text(13) == "user:\n  name: John Doe\n  favorite_food: burritos")
-        assert(tb.ref('result') == "user:\n  name: John Doe\n  favorite_food: burritos")
+        rend_temp_str = "user:\n  name: John Doe\n  favorite_food: burritos"
+        assert(tb.ref('result') == rend_temp_str)
+        assert(tb.cell_output_text(19) == rend_temp_str)
 
     def test_translate():
 
+        atparse_template = "fixtures/template/translate-template.yaml"
         translated_template = "fixtures/template/translate-complete.yaml"
         
         if os.path.exists(translated_template):
             os.remove(translated_template)
 
+        with open(atparse_template, 'r') as f:
+            atparse_str = f.read().rstrip()
+
         with testbook("template.ipynb", execute=True) as tb:
 
-            assert(tb.cell_output_text(21) == "flowers:\n  roses: @[ color1 ]\n  violets: @[ color2 ]")
-            assert(tb.cell_output_text(23) == "True")
-            assert(tb.cell_output_text(25) == "flowers:\n  roses: {{  color1  }}\n  violets: {{  color2  }}")
-
-            assert os.path.exists(translated_template)
-
             with open(translated_template, "r") as f:
-                user_config = yaml.safe_load(f)
-                assert user_config["flowers"] == {"roses": "{{  color1  }}", "violets": "{{  color2  }}"}
+                translated_str = f.read().rstrip()
+                translated_yaml = yaml.safe_load(translated_str)
+                assert translated_yaml["flowers"] == {"roses": "{{  color1  }}", "violets": "{{  color2  }}"}
+
+            assert(tb.cell_output_text(23) == atparse_str)
+            assert(tb.cell_output_text(25) == "True")
+            assert(tb.cell_output_text(27) == translated_str)           
