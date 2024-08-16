@@ -9,8 +9,9 @@ from pytest import fixture, raises
 
 from uwtools.api import template
 from uwtools.exceptions import UWTemplateRenderError
-from uwtools.tests.support import logged
 from uwtools.logging import log
+from uwtools.tests.support import logged
+
 
 @fixture
 def kwargs():
@@ -25,6 +26,7 @@ def kwargs():
         "values_needed": True,
         "dry_run": True,
     }
+
 
 @fixture
 def template_file(tmp_path):
@@ -52,17 +54,20 @@ def test_render_fail(kwargs):
         with raises(UWTemplateRenderError):
             template.render(**kwargs)
 
+
 def test_render_to_str(kwargs):
     del kwargs["output_file"]
     with patch.object(template, "render") as render:
         template.render_to_str(**kwargs)
         render.assert_called_once_with(**{**kwargs, "output_file": Path(os.devnull)})
 
+
 def test_render_values_needed(caplog, template_file):
     log.setLevel(logging.INFO)
     template.render(input_file=template_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
-            assert logged(caplog, f"  {var}")
+        assert logged(caplog, f"  {var}")
+
 
 def test_translate():
     kwargs: dict = {
