@@ -31,7 +31,6 @@
               "type": "string"
             },
             "update_values": {
-              "additionalProperties": false,
               "properties": {
                 "model_inputs": {
                   "additionalProperties": false,
