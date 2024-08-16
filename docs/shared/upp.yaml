@@ -27,6 +27,7 @@ upp:
         grib: grib2
         ioform: netcdf
         modelname: FV3R
+        submodelname: RTMA
       nampgb:
         kpo: 3
         numx: 1

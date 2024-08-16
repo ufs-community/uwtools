@@ -1956,6 +1956,10 @@ def test_schema_upp_namelist(upp_prop):
     assert "not one of ['FV3R', '3DRTMA', 'GFS', 'RAPR', 'NMM']" in errors(
         {"update_values": {"model_inputs": {"modelname": "foo"}}}
     )
+    # model_inputs: Only certain submodelname values are supported:
+    assert "not one of ['MPAS', 'RTMA']" in errors(
+        {"update_values": {"model_inputs": {"submodelname": "foo"}}}
+    )
     # model_inputs: No other keys are supported:
     assert "Additional properties are not allowed" in errors(
         {"update_values": {"model_inputs": {"something": "else"}}}
