@@ -177,7 +177,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.validate, "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_schema_file(required)
+    _add_arg_schema_file(required, required=True)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     return _add_args_verbosity(optional)
@@ -266,9 +266,9 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_module(required)
     _add_arg_classname(required)
     _add_arg_task(required)
-    _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
+    _add_arg_schema_file(optional)
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_batch(optional)
@@ -328,10 +328,9 @@ def _add_subparser_file_common(parser: Parser) -> ActionChecks:
 
     :param parser: The parser to configure.
     """
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
+    _add_arg_target_dir(optional, helpmsg="Root directory for relative destination paths")
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
@@ -596,8 +595,6 @@ def _dispatch_template_translate(args: Args) -> bool:
 
 # Arguments
 
-# pylint: disable=missing-function-docstring
-
 
 def _add_arg_batch(group: Group) -> None:
     group.add_argument(
@@ -783,12 +780,12 @@ def _add_arg_quiet(group: Group) -> None:
     )
 
 
-def _add_arg_schema_file(group: Group) -> None:
+def _add_arg_schema_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.schemafile),
         help="Path to schema file to use for validation",
         metavar="PATH",
-        required=True,
+        required=required,
         type=Path,
     )
 
@@ -803,10 +800,12 @@ def _add_arg_search_path(group: Group) -> None:
     )
 
 
-def _add_arg_target_dir(group: Group, required: bool) -> None:
+def _add_arg_target_dir(
+    group: Group, required: bool = False, helpmsg: Optional[str] = None
+) -> None:
     group.add_argument(
         _switch(STR.targetdir),
-        help="Path to target directory",
+        help=helpmsg or "Path to target directory",
         metavar="PATH",
         required=required,
         type=Path,
@@ -1023,7 +1022,7 @@ def _basic_setup(parser: Parser) -> Group:
         _switch(STR.version),
         action=STR.version,
         help="Show version info and exit",
-        version=f"%(prog)s {_version()}",
+        version=f"{Path(sys.argv[0]).name} {_version()}",
     )
     return optional
 

@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 filter_topo driver tests.
 """
@@ -60,7 +60,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -69,11 +68,11 @@ def driverobj(config):
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
-        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
         "runscript",
+        "taskname",
     ],
 )
 def test_FilterTopo(method):
@@ -81,7 +80,7 @@ def test_FilterTopo(method):
 
 
 def test_FilterTopo_input_grid_file(driverobj):
-    path = Path(driverobj._driver_config["rundir"]) / "C403_grid.tile7.halo4.nc"
+    path = Path(driverobj.config["rundir"], "C403_grid.tile7.halo4.nc")
     assert not path.is_file()
     driverobj.input_grid_file()
     assert path.is_symlink()
@@ -90,7 +89,7 @@ def test_FilterTopo_input_grid_file(driverobj):
 def test_FilterTopo_namelist_file(driverobj):
     path = refs(driverobj.namelist_file())
     actual = from_od(f90nml.read(path).todict())
-    expected = driverobj._driver_config["namelist"]["update_values"]
+    expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected
 
 
@@ -101,5 +100,5 @@ def test_FilterTopo_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_FilterTopo__driver_name(driverobj):
-    assert driverobj._driver_name == "filter_topo"
+def test_FilterTopo_driver_name(driverobj):
+    assert driverobj.driver_name == "filter_topo"

@@ -1,6 +1,8 @@
 ``ioda``
 ========
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the IODA components of the JEDI framework.
 
 .. literalinclude:: ioda/help.cmd

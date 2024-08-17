@@ -25,7 +25,12 @@ check_untyped_defs = true
 pretty = true
 warn_return_any = true
 
-[tool.pylint.messages_control]
+[tool.pylint.main]
+extension-pkg-allow-list = ["lxml"]
+jobs = 4
+recursive = true
+
+[tool.pylint."messages control"]
 disable = [
   "consider-using-f-string",
   "duplicate-code",
@@ -41,7 +46,8 @@ disable = [
   "unnecessary-lambda-assignment",
   "use-dict-literal",
 ]
-extension-pkg-allow-list = ["lxml"]
-recursive = true
+enable = [
+  "useless-suppression",
+]
 
 [tool.pytest.ini_options]

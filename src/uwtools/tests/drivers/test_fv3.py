@@ -84,7 +84,6 @@ def truetask():
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -104,19 +103,19 @@ def test_FV3(method):
 
 def test_FV3_boundary_files(driverobj):
     ns = (0, 1)
-    links = [driverobj._rundir / "INPUT" / f"gfs_bndy.tile7.{n:03d}.nc" for n in ns]
+    links = [driverobj.rundir / "INPUT" / f"gfs_bndy.tile7.{n:03d}.nc" for n in ns]
     assert not any(link.is_file() for link in links)
     for n in ns:
-        (driverobj._rundir / f"f{n}").touch()
+        (driverobj.rundir / f"f{n}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
 
 def test_FV3_diag_table(driverobj):
-    src = driverobj._rundir / "diag_table.in"
+    src = driverobj.rundir / "diag_table.in"
     src.touch()
-    driverobj._driver_config["diag_table"] = src
-    dst = driverobj._rundir / "diag_table"
+    driverobj._config["diag_table"] = src
+    dst = driverobj.rundir / "diag_table"
     assert not dst.is_file()
     driverobj.diag_table()
     assert dst.is_file()
@@ -128,11 +127,11 @@ def test_FV3_diag_table_warn(caplog, driverobj):
 
 
 def test_FV3_field_table(driverobj):
-    src = driverobj._rundir / "field_table.in"
+    src = driverobj.rundir / "field_table.in"
     src.touch()
-    dst = driverobj._rundir / "field_table"
+    dst = driverobj.rundir / "field_table"
     assert not dst.is_file()
-    driverobj._driver_config["field_table"] = {"base_file": str(src)}
+    driverobj._config["field_table"] = {"base_file": str(src)}
     driverobj.field_table()
     assert dst.is_file()
 
@@ -162,13 +161,13 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 @mark.parametrize("base_file_exists", [True, False])
 def test_FV3_model_configure(base_file_exists, caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    src = driverobj._rundir / "model_configure.in"
+    src = driverobj.rundir / "model_configure.in"
     if base_file_exists:
         with open(src, "w", encoding="utf-8") as f:
             yaml.dump({}, f)
-    dst = driverobj._rundir / "model_configure"
+    dst = driverobj.rundir / "model_configure"
     assert not dst.is_file()
-    driverobj._driver_config["model_configure"] = {"base_file": src}
+    driverobj._config["model_configure"] = {"base_file": src}
     driverobj.model_configure()
     if base_file_exists:
         assert dst.is_file()
@@ -179,12 +178,12 @@ def test_FV3_model_configure(base_file_exists, caplog, driverobj):
 
 def test_FV3_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    src = driverobj._rundir / "input.nml.in"
+    src = driverobj.rundir / "input.nml.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = driverobj._rundir / "input.nml"
+    dst = driverobj.rundir / "input.nml"
     assert not dst.is_file()
-    driverobj._driver_config["namelist_file"] = {"base_file": src}
+    driverobj._config["namelist_file"] = {"base_file": src}
     path = Path(refs(driverobj.namelist_file()))
     assert logged(caplog, f"Wrote config to {path}")
     assert dst.is_file()
@@ -192,7 +191,7 @@ def test_FV3_namelist_file(caplog, driverobj):
 
 def test_FV3_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["namsfc"]["foo"] = None
+    driverobj._config["namelist"]["update_values"]["namsfc"]["foo"] = None
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
@@ -201,8 +200,8 @@ def test_FV3_namelist_file_fails_validation(caplog, driverobj):
 
 def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
-    driverobj._driver_config["namelist"]["base_file"] = base_file
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
@@ -210,7 +209,7 @@ def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
 
 @mark.parametrize("domain", ("global", "regional"))
 def test_FV3_provisioned_rundir(domain, driverobj):
-    driverobj._driver_config["domain"] = domain
+    driverobj._config["domain"] = domain
     with patch.multiple(
         driverobj,
         boundary_files=D,
@@ -233,7 +232,7 @@ def test_FV3_provisioned_rundir(domain, driverobj):
 
 
 def test_FV3_restart_directory(driverobj):
-    path = driverobj._rundir / "RESTART"
+    path = driverobj.rundir / "RESTART"
     assert not path.is_dir()
     driverobj.restart_directory()
     assert path.is_dir()
@@ -248,9 +247,9 @@ def test_FV3_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_FV3__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z fv3 foo"
+def test_FV3_driver_name(driverobj):
+    assert driverobj.driver_name == "fv3"
 
 
-def test_FV3__driver_name(driverobj):
-    assert driverobj._driver_name == "fv3"
+def test_FV3_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z fv3 foo"

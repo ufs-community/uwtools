@@ -59,7 +59,6 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -82,7 +81,7 @@ def test_Ungrib_gribfiles(driverobj, tmp_path):
     links = []
     cycle_hr = 12
     for n, forecast_hour in enumerate((6, 12, 18)):
-        links = [driverobj._rundir / f"GRIBFILE.{ungrib._ext(n)}"]
+        links = [driverobj.rundir / f"GRIBFILE.{ungrib._ext(n)}"]
         infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(
             cycle_hr=cycle_hr, forecast_hour=forecast_hour
         )
@@ -93,7 +92,7 @@ def test_Ungrib_gribfiles(driverobj, tmp_path):
 
 
 def test_Ungrib_namelist_file(driverobj):
-    dst = driverobj._rundir / "namelist.wps"
+    dst = driverobj.rundir / "namelist.wps"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
@@ -117,30 +116,30 @@ def test_Ungrib_provisioned_rundir(driverobj):
 
 
 def test_Ungrib_vtable(driverobj):
-    src = driverobj._rundir / "Vtable.GFS.in"
+    src = driverobj.rundir / "Vtable.GFS.in"
     src.touch()
-    driverobj._driver_config["vtable"] = src
-    dst = driverobj._rundir / "Vtable"
+    driverobj._config["vtable"] = src
+    dst = driverobj.rundir / "Vtable"
     assert not dst.is_symlink()
     driverobj.vtable()
     assert dst.is_symlink()
 
 
-def test_Ungrib__driver_name(driverobj):
-    assert driverobj._driver_name == "ungrib"
+def test_Ungrib_driver_name(driverobj):
+    assert driverobj.driver_name == "ungrib"
 
 
 def test_Ungrib__gribfile(driverobj):
-    src = driverobj._rundir / "GRIBFILE.AAA.in"
+    src = driverobj.rundir / "GRIBFILE.AAA.in"
     src.touch()
-    dst = driverobj._rundir / "GRIBFILE.AAA"
+    dst = driverobj.rundir / "GRIBFILE.AAA"
     assert not dst.is_symlink()
     driverobj._gribfile(src, dst)
     assert dst.is_symlink()
 
 
-def test_Ungrib__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z ungrib foo"
+def test_Ungrib_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
 
 
 def test__ext():

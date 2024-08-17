@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.utils.file module.
 """
@@ -110,6 +110,18 @@ def test_readable_nofile():
 
 def test_resource_path():
     assert file.resource_path().is_dir()
+
+
+@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+def test_str2path_passthrough(val):
+    assert file.str2path(val) == val
+
+
+def test_str2path_convert():
+    val = "/some/path"
+    result = file.str2path(val)
+    assert isinstance(result, Path)
+    assert result == Path(val)
 
 
 def test_writable_file(tmp_path):

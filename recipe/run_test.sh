@@ -23,7 +23,7 @@ lint() {
   msg Running linter
   (
     set -eux
-    pylint -j 4 .
+    pylint .
   )
   msg OK
 }

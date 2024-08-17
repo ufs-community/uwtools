@@ -1,6 +1,8 @@
 ``cdeps``
 =========
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the :CDEPS:`cdeps<>` component.
 
 .. literalinclude:: cdeps/help.cmd

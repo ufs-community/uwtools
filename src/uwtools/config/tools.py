@@ -110,6 +110,29 @@ def realize_config(
     return input_obj.data
 
 
+def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
+    """
+    Navigate to the sub-config at the end of the path of given keys.
+
+    :param config: A config.
+    :param key_path: Path of keys to subsection of config file.
+    :return: The sub-config and a string representation of the key path.
+    """
+    keys = []
+    pathstr = "<unknown>"
+    for key in key_path:
+        keys.append(key)
+        pathstr = " -> ".join(keys)
+        try:
+            subconfig = config[key]
+        except KeyError as e:
+            raise log_and_error(f"Bad config path: {pathstr}") from e
+        if not isinstance(subconfig, dict):
+            raise log_and_error(f"Value at {pathstr} must be a dictionary")
+        config = subconfig
+    return config, pathstr
+
+
 # Private functions
 
 
@@ -138,25 +161,16 @@ def _ensure_format(
 
 def _print_config_section(config: dict, key_path: list[str]) -> None:
     """
-    Descends into the config via the given keys, then prints the contents of the located subtree as
-    key=value pairs, one per line.
+    Prints the contents of the located subtree as key=value pairs, one per line.
+
+    :param config: A config.
+    :param key_path: Path of keys to subsection of config file.
     """
-    keys = []
-    current_path = "<unknown>"
-    for section in key_path:
-        keys.append(section)
-        current_path = " -> ".join(keys)
-        try:
-            subconfig = config[section]
-        except KeyError as e:
-            raise log_and_error(f"Bad config path: {current_path}") from e
-        if not isinstance(subconfig, dict):
-            raise log_and_error(f"Value at {current_path} must be a dictionary")
-        config = subconfig
+    config, pathstr = walk_key_path(config, key_path)
     output_lines = []
     for key, value in config.items():
         if type(value) not in (bool, float, int, str):
-            raise log_and_error(f"Non-scalar value {value} found at {current_path}")
+            raise log_and_error(f"Non-scalar value {value} found at {pathstr}")
         output_lines.append(f"{key}={value}")
     print("\n".join(sorted(output_lines)))
 

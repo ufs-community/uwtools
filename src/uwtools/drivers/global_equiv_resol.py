@@ -7,6 +7,7 @@ from pathlib import Path
 from iotaa import asset, external, tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -22,8 +23,8 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         Ensure the specified input grid file exists.
         """
-        path = Path(self._driver_config["input_grid_file"])
-        yield self._taskname(path.name)
+        path = Path(self.config["input_grid_file"])
+        yield self.taskname(path.name)
         yield asset(path, path.is_file)
 
     @tasks
@@ -31,26 +32,31 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.input_file(),
             self.runscript(),
         ]
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.globalequivresol
+
+    # Private helper methods
 
     @property
     def _runcmd(self):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config["execution"]["executable"]
-        input_file_path = self._driver_config["input_grid_file"]
+        executable = self.config[STR.execution][STR.executable]
+        input_file_path = self.config["input_grid_file"]
         return f"{executable} {input_file_path}"
+
+
+set_driver_docstring(GlobalEquivResol)

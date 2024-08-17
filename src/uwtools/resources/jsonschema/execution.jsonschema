@@ -2,19 +2,7 @@
   "additionalProperties": false,
   "properties": {
     "batchargs": {
-      "additionalProperties": true,
-      "properties": {
-        "threads": {
-          "not": {}
-        },
-        "walltime": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "walltime"
-      ],
-      "type": "object"
+      "$ref": "urn:uwtools:batchargs"
     },
     "envcmds": {
       "items": {

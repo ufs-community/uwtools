@@ -38,34 +38,34 @@ To create a standalone conda environment providing ``uwtools``:
 Use a Fresh Miniforge Installation
 ----------------------------------
 
-.. include:: /shared/miniforge_instructions.rst
+#. .. include:: /shared/miniforge_instructions.rst
 
 #. Continue with the `Use an Existing conda Installation`_ instructions.
 
 Build the ``uwtools`` Package Locally
 -------------------------------------
 
-#. Install the necessary build packages into the conda installation's ``base`` environment (see the `Use a Fresh Miniforge Installation`_ instructions if an installation is unavailable or not writable):
+#. Install the necessary build packages. If your conda's ``base`` environment is not writable (e.g. you are using a shared conda installation), first create and activate your own environment, or follow the `Use a Fresh Miniforge Installation`_ instructions.
 
    .. code-block:: text
 
-      conda install -c conda-forge --override-channels conda-build conda-verify
+      conda install -y -c conda-forge --override-channels conda-build conda-verify
 
 #. In a clone of the :uwtools:`uwtools repository<>`, build the ``uwtools`` package:
 
    .. code-block:: text
 
       cd /to/your/uwtools/clone
-      conda build recipe -c conda-forge --override-channels
+      make package
 
 #. Verify local availability of the newly built package:
 
    .. code-block:: text
 
-      conda search -c local --override-channels uwtools
+      conda search -c $CONDA_PREFIX/conda-bld --override-channels uwtools
 
 #. Optionally, create an environment from the newly built package (specify the version if multiple local packages are available):
 
    .. code-block:: text
 
-      conda create -n uwtools -c local -c conda-forge --override-channels uwtools[=<version>]
+      conda create -y -n uwtools -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels uwtools[=<version>]

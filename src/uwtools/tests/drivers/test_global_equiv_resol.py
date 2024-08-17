@@ -46,7 +46,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -54,11 +53,11 @@ def driverobj(config):
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
-        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
         "runscript",
+        "taskname",
     ],
 )
 def test_GlobalEquivResol(method):
@@ -66,7 +65,7 @@ def test_GlobalEquivResol(method):
 
 
 def test_GlobalEquivResol_input_file(driverobj):
-    path = Path(driverobj._driver_config["input_grid_file"])
+    path = Path(driverobj.config["input_grid_file"])
     assert not driverobj.input_file().ready()
     path.parent.mkdir()
     path.touch()
@@ -84,11 +83,11 @@ def test_GlobalEquivResol_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_FilterTopo_driver_name(driverobj):
+    assert driverobj.driver_name == "global_equiv_resol"
+
+
 def test_GlobalEquivResol__runcmd(driverobj):
     cmd = driverobj._runcmd
-    input_file_path = driverobj._driver_config["input_grid_file"]
+    input_file_path = driverobj.config["input_grid_file"]
     assert cmd == f"/path/to/global_equiv_resol.exe {input_file_path}"
-
-
-def test_FilterTopo__driver_name(driverobj):
-    assert driverobj._driver_name == "global_equiv_resol"

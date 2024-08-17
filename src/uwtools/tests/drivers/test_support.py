@@ -20,8 +20,31 @@ def test_graph():
     ready()
     assert support.graph().startswith("digraph")
 
+
+def test_set_driver_docstring():
+    class Parent:
+        """
+        This will be discarded.
+
+        body
+        """
+
+    class Child(Parent):
+        """
+        head.
+        """
+
+    support.set_driver_docstring(Child)
+    assert Child.__doc__ == "head.\n\n        body"
+
+
+def test_tasks():
+
     class SomeDriver(DriverTimeInvariant):
         def provisioned_rundir(self):
+            pass
+
+        def taskname(self, suffix):
             pass
 
         @external
@@ -37,18 +60,11 @@ def test_graph():
             "@tasks t3"
 
         @property
-        def _driver_config(self):
-            pass
-
-        @property
-        def _driver_name(self):
+        def driver_name(self):
             pass
 
         @property
         def _resources(self):
-            pass
-
-        def _taskname(self, suffix):
             pass
 
         def _validate(self, schema_file: Optional[Path] = None):

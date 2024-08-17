@@ -32,10 +32,10 @@ class MPASBase(DriverCycleBased):
         """
         Files copied for run.
         """
-        yield self._taskname("files copied")
+        yield self.taskname("files copied")
         yield [
-            filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
+            filecopy(src=Path(src), dst=self.rundir / dst)
+            for dst, src in self.config.get("files_to_copy", {}).items()
         ]
 
     @tasks
@@ -43,10 +43,10 @@ class MPASBase(DriverCycleBased):
         """
         Files linked for run.
         """
-        yield self._taskname("files linked")
+        yield self.taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+            symlink(target=Path(target), linkname=self.rundir / linkname)
+            for linkname, target in self.config.get("files_to_link", {}).items()
         ]
 
     @task
@@ -61,7 +61,7 @@ class MPASBase(DriverCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.boundary_files(),
             self.files_copied(),
@@ -77,12 +77,12 @@ class MPASBase(DriverCycleBased):
         The streams file.
         """
         fn = self._streams_fn
-        yield self._taskname(fn)
-        path = self._rundir / fn
+        yield self.taskname(fn)
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
         streams = Element("streams")
-        for k, v in self._driver_config["streams"].items():
+        for k, v in self.config["streams"].items():
             stream = SubElement(streams, "stream" if v["mutable"] else "immutable_stream")
             stream.set("name", k)
             for attr in ["type", "filename_template"]:

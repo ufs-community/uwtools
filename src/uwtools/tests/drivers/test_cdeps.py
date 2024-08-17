@@ -27,7 +27,7 @@ from uwtools.tests.test_schemas import CDEPS_CONFIG
 @fixture
 def driverobj(tmp_path):
     return CDEPS(
-        config={"cdeps": {**deepcopy(CDEPS_CONFIG), "rundir": str(tmp_path)}},
+        config={"cdeps": {**deepcopy(CDEPS_CONFIG), "rundir": str(tmp_path / "run")}},
         cycle=dt.datetime.now(),
     )
 
@@ -46,9 +46,9 @@ def test_CDEPS_atm(driverobj):
 @mark.parametrize("group", ["atm", "ocn"])
 def test_CDEPS_nml(caplog, driverobj, group):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / f"d{group}_in"
+    dst = driverobj.rundir / f"d{group}_in"
     assert not dst.is_file()
-    del driverobj._driver_config[f"{group}_in"]["base_file"]
+    del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
     path = Path(refs(task()))
     assert dst.is_file()
@@ -65,8 +65,8 @@ def test_CDEPS_ocn(driverobj):
 
 
 @mark.parametrize("group", ["atm", "ocn"])
-def test_CDEP_streams(driverobj, group):
-    dst = driverobj._rundir / f"d{group}.streams"
+def test_CDEPS_streams(driverobj, group):
+    dst = driverobj.rundir / f"d{group}.streams"
     assert not dst.is_file()
     template = """
     {{ streams.stream01.dtlimit }}
@@ -84,10 +84,10 @@ def test_CDEP_streams(driverobj, group):
     {{ streams.stream01.yearFirst }}
     {{ streams.stream01.yearLast }}
     """
-    template_file = driverobj._rundir / "template.jinja2"
+    template_file = driverobj.rundir.parent / "template.jinja2"
     with open(template_file, "w", encoding="utf-8") as f:
         print(dedent(template).strip(), file=f)
-    driverobj._driver_config[f"{group}_streams"]["template_file"] = template_file
+    driverobj._config[f"{group}_streams"]["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
     path = Path(refs(task()))
     assert dst.is_file()
@@ -111,8 +111,8 @@ def test_CDEP_streams(driverobj, group):
         assert f.read().strip() == dedent(expected).strip()
 
 
-def test_CDEPS__driver_name(driverobj):
-    assert driverobj._driver_name == "cdeps"
+def test_CDEPS_driver_name(driverobj):
+    assert driverobj.driver_name == "cdeps"
 
 
 def test_CDEPS__model_namelist_file(driverobj):
@@ -121,7 +121,7 @@ def test_CDEPS__model_namelist_file(driverobj):
     with patch.object(driverobj, "_create_user_updated_config") as cuuc:
         driverobj._model_namelist_file(group=group, path=path)
         cuuc.assert_called_once_with(
-            config_class=NMLConfig, config_values=driverobj._driver_config[group], path=path
+            config_class=NMLConfig, config_values=driverobj.config[group], path=path
         )
 
 
@@ -134,5 +134,5 @@ def test_CDEPS__model_stream_file(driverobj):
         render.assert_called_once_with(
             input_file=template_file,
             output_file=path,
-            values_src=driverobj._driver_config[group],
+            values_src=driverobj.config[group],
         )
