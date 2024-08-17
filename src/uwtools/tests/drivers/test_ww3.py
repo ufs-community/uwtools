@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 WaveWatchIII driver tests.
 """
@@ -25,7 +25,7 @@ def config(tmp_path):
                     "input_forcing_winds": "C",
                 },
             },
-            "rundir": str(tmp_path),
+            "rundir": str(tmp_path / "run"),
         },
     }
 
@@ -45,21 +45,17 @@ def driverobj(config, cycle):
 
 @mark.parametrize(
     "method",
-    [
-        "_driver_config",
-        "_taskname",
-        "_validate",
-    ],
+    ["taskname", "_validate"],
 )
 def test_WaveWatchIII(method):
     assert getattr(WaveWatchIII, method) is getattr(AssetsCycleBased, method)
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
-    src = driverobj._driver_config["namelist"]["template_file"]
+    src = driverobj.config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = driverobj._rundir / "ww3_shel.nml"
+    dst = driverobj.rundir / "ww3_shel.nml"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
@@ -77,11 +73,11 @@ def test_WaveWatchIII_provisioned_rundir(driverobj):
 
 
 def test_WaveWatchIII_restart_directory(driverobj):
-    path = driverobj._rundir / "restart_wave"
+    path = driverobj.rundir / "restart_wave"
     assert not path.is_dir()
     driverobj.restart_directory()
     assert path.is_dir()
 
 
-def test_WaveWatchIII__driver_name(driverobj):
-    assert driverobj._driver_name == "ww3"
+def test_WaveWatchIII_driver_name(driverobj):
+    assert driverobj.driver_name == "ww3"

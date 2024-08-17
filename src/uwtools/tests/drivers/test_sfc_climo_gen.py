@@ -87,7 +87,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -96,11 +95,11 @@ def driverobj(config):
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
-        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
         "runscript",
+        "taskname",
     ],
 )
 def test_SfcClimoGen(method):
@@ -109,7 +108,7 @@ def test_SfcClimoGen(method):
 
 def test_SfcClimoGen_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / "fort.41"
+    dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready):
         path = Path(refs(driverobj.namelist_file()))
@@ -120,7 +119,7 @@ def test_SfcClimoGen_namelist_file(caplog, driverobj):
 
 def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["config"]["halo"] = "string"
+    driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready):
         path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
@@ -139,5 +138,5 @@ def test_SfcClimoGen_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_SfcClimoGen__driver_name(driverobj):
-    assert driverobj._driver_name == "sfc_climo_gen"
+def test_SfcClimoGen_driver_name(driverobj):
+    assert driverobj.driver_name == "sfc_climo_gen"

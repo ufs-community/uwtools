@@ -13,18 +13,19 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.utils.api import str2path
 from uwtools.utils.tasks import filecopy, symlink
 
 
-class FileStager:
+class Stager:
     """
     The base class for staging files.
     """
 
     def __init__(
         self,
-        target_dir: Path,
-        config: Optional[Union[dict, Path]] = None,
+        config: Optional[Union[dict, str, Path]] = None,
+        target_dir: Optional[Union[str, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
         keys: Optional[list[str]] = None,
@@ -33,17 +34,17 @@ class FileStager:
         """
         Handle files.
 
-        :param target_dir: Path to target directory
         :param config: YAML-file path, or dict (read stdin if missing or None).
+        :param target_dir: Path to target directory.
         :param cycle: A datetime object to make available for use in the config.
         :param leadtime: A timedelta object to make available for use in the config.
-        :param keys: YAML keys leading to file dst/src block
-        :param dry_run: Do not copy files
+        :param keys: YAML keys leading to file dst/src block.
+        :param dry_run: Do not copy files.
         :raises: UWConfigError if config fails validation.
         """
         dryrun(enable=dry_run)
-        self._target_dir = target_dir
-        self._config = YAMLConfig(config=config)
+        self._target_dir = str2path(target_dir)
+        self._config = YAMLConfig(config=str2path(config))
         self._keys = keys or []
         self._config.dereference(
             context={
@@ -53,6 +54,19 @@ class FileStager:
             }
         )
         self._validate()
+
+    def _check_dst_paths(self, cfg: dict[str, str]) -> None:
+        """
+        Check that all destination paths are absolute if no target directory is specified.
+
+        :parm cfg: The dst/linkname -> src/target map.
+        :raises: UWConfigError if no target directory is specified and a relative path is.
+        """
+        if not self._target_dir:
+            errmsg = "Relative path '%s' requires the target directory to be specified"
+            for dst in cfg.keys():
+                if not Path(dst).is_absolute():
+                    raise UWConfigError(errmsg % dst)
 
     @cached_property
     def _file_map(self) -> dict:
@@ -70,7 +84,8 @@ class FileStager:
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):
-            raise UWConfigError("No file map found at %s" % " -> ".join(self._keys))
+            raise UWConfigError("No file map found at key path: %s" % " -> ".join(self._keys))
+        self._check_dst_paths(cfg)
         return cfg
 
     def _validate(self) -> bool:
@@ -84,7 +99,7 @@ class FileStager:
         return True
 
 
-class FileCopier(FileStager):
+class Copier(Stager):
     """
     Stage files by copying.
     """
@@ -94,11 +109,12 @@ class FileCopier(FileStager):
         """
         Copy files.
         """
+        dst = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=self._target_dir / k) for k, v in self._file_map.items()]
+        yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._file_map.items()]
 
 
-class FileLinker(FileStager):
+class Linker(Stager):
     """
     Stage files by linking.
     """
@@ -108,8 +124,6 @@ class FileLinker(FileStager):
         """
         Link files.
         """
+        linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [
-            symlink(target=Path(v), linkname=self._target_dir / k)
-            for k, v in self._file_map.items()
-        ]
+        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._file_map.items()]

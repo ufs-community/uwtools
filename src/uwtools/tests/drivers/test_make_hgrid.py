@@ -51,7 +51,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -59,11 +58,11 @@ def driverobj(config):
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
-        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
         "runscript",
+        "taskname",
     ],
 )
 def test_MakeHgrid(method):
@@ -77,8 +76,8 @@ def test_MakeHgrid_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MakeHgrid__driver_name(driverobj):
-    assert driverobj._driver_name == "make_hgrid"
+def test_MakeHgrid_driver_name(driverobj):
+    assert driverobj.driver_name == "make_hgrid"
 
 
 def test_MakeHgrid__runcmd(driverobj):

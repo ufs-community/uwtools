@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 from uwtools.api.template import _render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import AssetsCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -25,7 +26,7 @@ class CDEPS(AssetsCycleBased):
         """
         Create data atmosphere configuration with all required content.
         """
-        yield self._taskname("data atmosphere configuration")
+        yield self.taskname("data atmosphere configuration")
         yield [
             self.atm_nml(),
             self.atm_stream(),
@@ -37,11 +38,10 @@ class CDEPS(AssetsCycleBased):
         Create data atmosphere Fortran namelist file (datm_in).
         """
         fn = "datm_in"
-        yield self._taskname(f"namelist file {fn}")
-        path = self._rundir / fn
+        yield self.taskname(f"namelist file {fn}")
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         self._model_namelist_file("atm_in", path)
 
     @task
@@ -50,10 +50,10 @@ class CDEPS(AssetsCycleBased):
         Create data atmosphere stream config file (datm.streams).
         """
         fn = "datm.streams"
-        yield self._taskname(f"stream file {fn}")
-        path = self._rundir / fn
+        yield self.taskname(f"stream file {fn}")
+        path = self.rundir / fn
         yield asset(path, path.is_file)
-        template_file = self._driver_config["atm_streams"]["template_file"]
+        template_file = self.config["atm_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("atm_streams", path, template_file)
 
@@ -62,7 +62,7 @@ class CDEPS(AssetsCycleBased):
         """
         Create data ocean configuration with all required content.
         """
-        yield self._taskname("data atmosphere configuration")
+        yield self.taskname("data atmosphere configuration")
         yield [
             self.ocn_nml(),
             self.ocn_stream(),
@@ -74,11 +74,10 @@ class CDEPS(AssetsCycleBased):
         Create data ocean Fortran namelist file (docn_in).
         """
         fn = "docn_in"
-        yield self._taskname(f"namelist file {fn}")
-        path = self._rundir / fn
+        yield self.taskname(f"namelist file {fn}")
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         self._model_namelist_file("ocn_in", path)
 
     @task
@@ -87,21 +86,23 @@ class CDEPS(AssetsCycleBased):
         Create data ocean stream config file (docn.streams).
         """
         fn = "docn.streams"
-        yield self._taskname(f"stream file {fn}")
-        path = self._rundir / fn
+        yield self.taskname(f"stream file {fn}")
+        path = self.rundir / fn
         yield asset(path, path.is_file)
-        template_file = self._driver_config["ocn_streams"]["template_file"]
+        template_file = self.config["ocn_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.cdeps
+
+    # Private helper methods
 
     def _model_namelist_file(self, group: str, path: Path) -> None:
         """
@@ -111,7 +112,7 @@ class CDEPS(AssetsCycleBased):
         :param path: Path to write namelist to.
         """
         self._create_user_updated_config(
-            config_class=NMLConfig, config_values=self._driver_config[group], path=path
+            config_class=NMLConfig, config_values=self.config[group], path=path
         )
 
     def _model_stream_file(self, group: str, path: Path, template_file: str) -> None:
@@ -125,5 +126,8 @@ class CDEPS(AssetsCycleBased):
         _render(
             input_file=Path(template_file),
             output_file=path,
-            values_src=self._driver_config[group],
+            values_src=self.config[group],
         )
+
+
+set_driver_docstring(CDEPS)

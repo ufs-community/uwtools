@@ -2,5 +2,5 @@ ww3:
   namelist:
     template_file: /path/to/ww3/ww3_shel.nml.IN
     template_values:
-      input_forcing_winds: "C"
+      input_forcing_winds: C
   rundir: /path/to/run/directory

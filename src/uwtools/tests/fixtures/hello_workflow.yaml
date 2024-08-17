@@ -23,6 +23,7 @@ workflow:
           attrs:
             offset: 01:00
           value: hello-@Y@m@d@H
+      native: --reservation my_reservation
       nodes: 1:ppn=1
       walltime: 00:01:00
       envars:

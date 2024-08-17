@@ -348,9 +348,7 @@ class _RocotoXML:
         :raises: UWConfigError if config fails validation.
         """
         schema_file = resource_path("jsonschema/rocoto.jsonschema")
-        ok = validate_yaml(schema_file=schema_file, config=config)
-        if not ok:
-            raise UWConfigError("YAML validation errors")
+        validate_yaml(schema_file=schema_file, config=config)
 
     @property
     def _doctype(self) -> Optional[str]:

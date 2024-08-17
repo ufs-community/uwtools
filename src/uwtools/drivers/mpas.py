@@ -9,6 +9,7 @@ from iotaa import asset, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, symlink
 
@@ -25,16 +26,16 @@ class MPAS(MPASBase):
         """
         Boundary files.
         """
-        yield self._taskname("boundary files")
-        lbcs = self._driver_config["lateral_boundary_conditions"]
-        endhour = self._driver_config["length"]
+        yield self.taskname("boundary files")
+        lbcs = self.config["lateral_boundary_conditions"]
+        endhour = self.config["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"lbc.{file_date.strftime('%Y-%m-%d_%H.%M.%S')}.nc"
-            linkname = self._rundir / fn
-            symlinks[linkname] = Path(lbcs["path"]) / fn
+            linkname = self.rundir / fn
+            symlinks[linkname] = Path(lbcs["path"], fn)
         yield [symlink(target=t, linkname=l) for l, t in symlinks.items()]
 
     @task
@@ -42,22 +43,22 @@ class MPAS(MPASBase):
         """
         The namelist file.
         """
-        path = self._rundir / "namelist.atmosphere"
-        yield self._taskname(str(path))
+        path = self.rundir / "namelist.atmosphere"
+        yield self.taskname(str(path))
         yield asset(path, path.is_file)
-        base_file = self._driver_config["namelist"].get("base_file")
+        base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
-        duration = timedelta(hours=self._driver_config["length"])
+        duration = timedelta(hours=self.config["length"])
         str_duration = str(duration).replace(" days, ", "_")
-        namelist = self._driver_config["namelist"]
-        update_values = namelist.get("update_values", {})
+        namelist = self.config[STR.namelist]
+        update_values = namelist.get(STR.updatevalues, {})
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
                 "config_run_duration": str_duration,
             }
         )
-        namelist["update_values"] = update_values
+        namelist[STR.updatevalues] = update_values
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
@@ -65,14 +66,16 @@ class MPAS(MPASBase):
             schema=self._namelist_schema(),
         )
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.mpas
+
+    # Private helper methods
 
     @property
     def _streams_fn(self) -> str:
@@ -80,3 +83,6 @@ class MPAS(MPASBase):
         The streams filename.
         """
         return "streams.atmosphere"
+
+
+set_driver_docstring(MPAS)

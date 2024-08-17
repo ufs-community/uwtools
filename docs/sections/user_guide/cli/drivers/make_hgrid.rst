@@ -1,6 +1,8 @@
 ``make_hgrid``
 ==============
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``make_hgrid``. Documentation for this UFS Utils component is :ufs-utils:`here <make-hgrid>`.
 
 .. literalinclude:: make_hgrid/help.cmd

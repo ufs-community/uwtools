@@ -26,7 +26,7 @@ def streams_file(config, driverobj, drivername):
     array_elements = {"file", "stream", "var", "var_array", "var_struct"}
     array_elements_tested = set()
     driverobj.streams_file()
-    path = Path(driverobj._driver_config["rundir"]) / driverobj._streams_fn
+    path = Path(driverobj.config["rundir"], driverobj._streams_fn)
     with open(path, "r", encoding="utf-8") as f:
         xml = etree.parse(f).getroot()
     assert xml.tag == "streams"
@@ -120,7 +120,6 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -129,12 +128,12 @@ def driverobj(config, cycle):
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
-        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
         "runscript",
         "streams_file",
+        "taskname",
     ],
 )
 def test_MPAS(method):
@@ -144,11 +143,11 @@ def test_MPAS(method):
 def test_MPAS_boundary_files(driverobj, cycle):
     ns = (0, 1)
     links = [
-        driverobj._rundir / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+        driverobj.rundir / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
-    infile_path = Path(driverobj._driver_config["lateral_boundary_conditions"]["path"])
+    infile_path = Path(driverobj.config["lateral_boundary_conditions"]["path"])
     infile_path.mkdir()
     for n in ns:
         path = infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
@@ -181,7 +180,7 @@ def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 
 def test_MPAS_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    dst = driverobj._rundir / "namelist.atmosphere"
+    dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
@@ -194,7 +193,7 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = 120
     driverobj = MPAS(config=config, cycle=cycle)
-    dst = driverobj._rundir / "namelist.atmosphere"
+    dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
@@ -206,7 +205,7 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
 
 def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
@@ -215,8 +214,8 @@ def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
 
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
-    driverobj._driver_config["namelist"]["base_file"] = base_file
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
@@ -237,8 +236,8 @@ def test_MPAS_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MPAS__driver_name(driverobj):
-    assert driverobj._driver_name == "mpas"
+def test_MPAS_driver_name(driverobj):
+    assert driverobj.driver_name == "mpas"
 
 
 def test_MPAS_streams_file(config, driverobj):

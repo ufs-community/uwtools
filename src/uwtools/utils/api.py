@@ -6,12 +6,12 @@ import datetime as dt
 import re
 from inspect import getfullargspec
 from pathlib import Path
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Callable, Optional, TypeVar, Union
 
 from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
-from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
+from uwtools.utils.file import str2path
 
 T = TypeVar("T")
 
@@ -45,7 +45,7 @@ def make_execute(
     :param with_leadtime: Does the driver's constructor take a 'leadtime' parameter?
     """
 
-    def execute(  # pylint: disable=unused-argument
+    def execute(
         task: str,
         config: Optional[Union[Path, str]] = None,
         batch: bool = False,
@@ -67,7 +67,7 @@ def make_execute(
             stdin_ok=stdin_ok,
         )
 
-    def execute_cycle(  # pylint: disable=unused-argument
+    def execute_cycle(
         task: str,
         cycle: dt.datetime,
         config: Optional[Union[Path, str]] = None,
@@ -90,7 +90,7 @@ def make_execute(
             stdin_ok=stdin_ok,
         )
 
-    def execute_cycle_leadtime(  # pylint: disable=unused-argument
+    def execute_cycle_leadtime(
         task: str,
         cycle: dt.datetime,
         leadtime: dt.timedelta,
@@ -131,15 +131,6 @@ def make_execute(
             return execute_cycle_leadtime
         return execute_cycle
     return execute
-
-
-def str2path(val: Any) -> Any:
-    """
-    Return str value as Path, other types unmodified.
-
-    :param val: Any value.
-    """
-    return Path(val) if isinstance(val, str) else val
 
 
 # Private

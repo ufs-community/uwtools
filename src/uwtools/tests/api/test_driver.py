@@ -1,4 +1,4 @@
-# pylint: disable=missing-class-docstring,missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
 import logging
@@ -44,7 +44,19 @@ def kwargs(args):
 # Tests
 
 
-@mark.parametrize("classname", driver_api._CLASSNAMES)
+@mark.parametrize(
+    "classname",
+    [
+        "Assets",
+        "AssetsCycleBased",
+        "AssetsCycleLeadtimeBased",
+        "AssetsTimeInvariant",
+        "Driver",
+        "DriverCycleBased",
+        "DriverCycleLeadtimeBased",
+        "DriverTimeInvariant",
+    ],
+)
 def test_driver(classname):
     assert getattr(driver_api, classname) is getattr(driver_lib, classname)
 
@@ -53,15 +65,26 @@ def test__get_driver_module_implicit():
     pass
 
 
+@mark.parametrize("key,val", [("batch", True), ("leadtime", 6)])
+def test_execute_fail_bad_args(caplog, key, kwargs, val):
+    kwargs.update({"cycle": dt.datetime.now(), key: val})
+    assert driver_api.execute(**kwargs) is False
+    assert logged(caplog, f"TestDriver does not accept argument '{key}'")
+
+
 def test_execute_fail_stdin_not_ok(kwargs):
     kwargs["config"] = None
+    kwargs["cycle"] = dt.datetime.now()
     kwargs["stdin_ok"] = False
     with raises(UWError) as e:
         driver_api.execute(**kwargs)
     assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
 
 
-def test_execute_pass(caplog, kwargs, tmp_path):
+@mark.parametrize("remove", ([], ["schema_file"]))
+def test_execute_pass(caplog, kwargs, remove, tmp_path):
+    for kwarg in remove:
+        del kwargs[kwarg]
     kwargs["cycle"] = dt.datetime.now()
     log.setLevel(logging.DEBUG)
     graph_file = tmp_path / "g.dot"
@@ -94,82 +117,86 @@ def test_tasks_fail_no_cycle(args, caplog, kwargs):
     assert logged(caplog, "%s requires argument '%s'" % (args.classname, "cycle"))
 
 
-def test_tasks_pass(args):
-    tasks = driver_api.tasks(classname=args.classname, module=args.module)
+@mark.parametrize("f", [Path, str])
+def test_tasks_pass(args, f):
+    tasks = driver_api.tasks(classname=args.classname, module=f(args.module))
     assert tasks["eighty_eight"] == "88"
 
 
 def test__get_driver_class_explicit_fail_bad_class(caplog, args):
     log.setLevel(logging.DEBUG)
     bad_class = "BadClass"
-    c = driver_api._get_driver_class(classname=bad_class, module=args.module)
+    c, module_path = driver_api._get_driver_class(classname=bad_class, module=args.module)
     assert c is None
+    assert module_path == args.module
     assert logged(caplog, "Module %s has no class %s" % (args.module, bad_class))
 
 
 def test__get_driver_class_explicit_fail_bad_name(caplog, args):
     log.setLevel(logging.DEBUG)
-    bad_name = "bad_name"
-    c = driver_api._get_driver_class(classname=args.classname, module=bad_name)
+    bad_name = Path("bad_name")
+    c, module_path = driver_api._get_driver_class(classname=args.classname, module=bad_name)
     assert c is None
+    assert module_path is None
     assert logged(caplog, "Could not load module %s" % bad_name)
 
 
 def test__get_driver_class_explicit_fail_bad_path(caplog, args, tmp_path):
     log.setLevel(logging.DEBUG)
     module = tmp_path / "not.py"
-    c = driver_api._get_driver_class(classname=args.classname, module=module)
+    c, module_path = driver_api._get_driver_class(classname=args.classname, module=module)
     assert c is None
+    assert module_path is None
     assert logged(caplog, "Could not load module %s" % module)
 
 
 def test__get_driver_class_explicit_fail_bad_spec(caplog, args):
     log.setLevel(logging.DEBUG)
     with patch.object(driver_api, "spec_from_file_location", return_value=None):
-        c = driver_api._get_driver_class(classname=args.classname, module=args.module)
+        c, module_path = driver_api._get_driver_class(classname=args.classname, module=args.module)
     assert c is None
+    assert module_path is None
     assert logged(caplog, "Could not load module %s" % args.module)
 
 
 def test__get_driver_class_explicit_pass(args):
     log.setLevel(logging.DEBUG)
-    c = driver_api._get_driver_class(classname=args.classname, module=args.module)
+    c, module_path = driver_api._get_driver_class(classname=args.classname, module=args.module)
     assert c
     assert c.__name__ == "TestDriver"
+    assert module_path == args.module
 
 
 def test__get_driver_class_implicit_pass(args):
     log.setLevel(logging.DEBUG)
     with patch.object(Path, "cwd", return_value=fixture_path()):
-        c = driver_api._get_driver_class(classname=args.classname, module=args.module)
-        assert c
-        assert c.__name__ == "TestDriver"
+        c, module_path = driver_api._get_driver_class(classname=args.classname, module=args.module)
+    assert c
+    assert c.__name__ == "TestDriver"
+    assert module_path == args.module
 
 
 def test__get_driver_module_explicit_absolute_fail(args):
     assert args.module.is_absolute()
-    module = str(args.module.with_suffix(".bad"))
+    module = args.module.with_suffix(".bad")
     assert not driver_api._get_driver_module_explicit(module=module)
 
 
 def test__get_driver_module_explicit_absolute_pass(args):
     assert args.module.is_absolute()
-    module = str(args.module)
-    assert driver_api._get_driver_module_explicit(module=module)
+    assert driver_api._get_driver_module_explicit(module=args.module)
 
 
 def test__get_driver_module_explicit_relative_fail(args):
     args.module = Path(os.path.relpath(args.module)).with_suffix(".bad")
     assert not args.module.is_absolute()
-    module = str(args.module)
-    assert not driver_api._get_driver_module_explicit(module=module)
+    assert not driver_api._get_driver_module_explicit(module=args.module)
 
 
 def test__get_driver_module_explicit_relative_pass(args):
     args.module = Path(os.path.relpath(args.module))
     assert not args.module.is_absolute()
-    module = str(args.module)
-    assert driver_api._get_driver_module_explicit(module=module)
+    assert driver_api._get_driver_module_explicit(module=args.module)
 
 
 def test__get_driver_module_implicit_pass_full_package():

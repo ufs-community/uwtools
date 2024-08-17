@@ -9,7 +9,7 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
-from uwtools.utils.api import str2path as _str2path
+from uwtools.utils.file import str2path as _str2path
 
 
 def realize(
@@ -24,12 +24,10 @@ def realize(
     as input. If no output file is specified, ``stdout`` is written to. Both the input config and
     output Rocoto XML will be validated against appropriate schcemas.
 
-    :param config: Path to YAML input file (``None`` or unspecified => read ``stdin``), or
-        ``YAMLConfig`` object
-    :param output_file: Path to write rendered XML file (``None`` or unspecified => write to
-        ``stdout``)
+    :param config: YAML input file or ``YAMLConfig`` object (``None`` => read ``stdin``).
+    :param output_file: XML output file path (``None`` => write to ``stdout``).
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True``
+    :return: ``True``.
     """
     _realize(
         config=_ensure_data_source(_str2path(config), stdin_ok), output_file=_str2path(output_file)
@@ -44,8 +42,8 @@ def validate(
     """
     Validate purported Rocoto XML file against its schema.
 
-    :param xml_file: Path to XML file (``None`` or unspecified => read ``stdin``)
+    :param xml_file: Path to XML file (``None`` or unspecified => read ``stdin``).
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if the XML conforms to the schema, ``False`` otherwise
+    :return: ``True`` if the XML conforms to the schema, ``False`` otherwise.
     """
     return _validate(xml_file=_ensure_data_source(_str2path(xml_file), stdin_ok))

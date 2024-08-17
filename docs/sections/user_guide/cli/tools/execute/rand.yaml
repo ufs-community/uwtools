@@ -1,0 +1,4 @@
+rand:
+  hi: 100
+  lo: 1
+  rundir: /tmp/rand

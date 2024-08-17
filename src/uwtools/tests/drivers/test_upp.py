@@ -80,7 +80,6 @@ def leadtime():
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -99,31 +98,31 @@ def test_UPP(method):
 
 
 def test_UPP_files_copied(driverobj):
-    for _, src in driverobj._driver_config["files_to_copy"].items():
+    for _, src in driverobj.config["files_to_copy"].items():
         Path(src).touch()
-    for dst, _ in driverobj._driver_config["files_to_copy"].items():
-        assert not Path(driverobj._rundir / dst).is_file()
+    for dst, _ in driverobj.config["files_to_copy"].items():
+        assert not (driverobj.rundir / dst).is_file()
     driverobj.files_copied()
-    for dst, _ in driverobj._driver_config["files_to_copy"].items():
-        assert Path(driverobj._rundir / dst).is_file()
+    for dst, _ in driverobj.config["files_to_copy"].items():
+        assert (driverobj.rundir / dst).is_file()
 
 
 def test_UPP_files_linked(driverobj):
-    for _, src in driverobj._driver_config["files_to_link"].items():
+    for _, src in driverobj.config["files_to_link"].items():
         Path(src).touch()
-    for dst, _ in driverobj._driver_config["files_to_link"].items():
-        assert not Path(driverobj._rundir / dst).is_file()
+    for dst, _ in driverobj.config["files_to_link"].items():
+        assert not (driverobj.rundir / dst).is_file()
     driverobj.files_linked()
-    for dst, _ in driverobj._driver_config["files_to_link"].items():
-        assert Path(driverobj._rundir / dst).is_symlink()
+    for dst, _ in driverobj.config["files_to_link"].items():
+        assert (driverobj.rundir / dst).is_symlink()
 
 
 def test_UPP_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
-    with open(driverobj._driver_config["namelist"]["base_file"], "w", encoding="utf-8") as f:
+    with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
         print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
-    dst = driverobj._rundir / "itag"
+    dst = driverobj.rundir / "itag"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
@@ -138,8 +137,8 @@ def test_UPP_namelist_file(caplog, driverobj):
 
 def test_UPP_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
-    del driverobj._driver_config["namelist"]["base_file"]
+    driverobj._config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
+    del driverobj._config["namelist"]["base_file"]
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
@@ -148,8 +147,8 @@ def test_UPP_namelist_file_fails_validation(caplog, driverobj):
 
 def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
-    driverobj._driver_config["namelist"]["base_file"] = base_file
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
@@ -168,17 +167,17 @@ def test_UPP_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_UPP__driver_name(driverobj):
-    assert driverobj._driver_name == "upp"
+def test_UPP_driver_name(driverobj):
+    assert driverobj.driver_name == "upp"
 
 
 def test_UPP__namelist_path(driverobj):
-    assert driverobj._namelist_path == driverobj._rundir / "itag"
+    assert driverobj._namelist_path == driverobj.rundir / "itag"
 
 
 def test_UPP__runcmd(driverobj):
-    assert driverobj._runcmd == "%s < itag" % driverobj._driver_config["execution"]["executable"]
+    assert driverobj._runcmd == "%s < itag" % driverobj.config["execution"]["executable"]
 
 
-def test_UPP__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240507 12:00:00 upp foo"
+def test_UPP_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"

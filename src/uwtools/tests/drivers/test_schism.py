@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 SCHISM driver tests.
 """
@@ -25,7 +25,7 @@ def config(tmp_path):
                     "dt": 100,
                 },
             },
-            "rundir": str(tmp_path),
+            "rundir": str(tmp_path / "run"),
         },
     }
 
@@ -45,21 +45,17 @@ def driverobj(config, cycle):
 
 @mark.parametrize(
     "method",
-    [
-        "_driver_config",
-        "_taskname",
-        "_validate",
-    ],
+    ["taskname", "_validate"],
 )
 def test_SCHISM(method):
     assert getattr(SCHISM, method) is getattr(AssetsCycleBased, method)
 
 
 def test_SCHISM_namelist_file(driverobj):
-    src = driverobj._driver_config["namelist"]["template_file"]
+    src = driverobj.config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = driverobj._rundir / "param.nml"
+    dst = driverobj.rundir / "param.nml"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
@@ -75,5 +71,5 @@ def test_SCHISM_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_SCHISM__driver_name(driverobj):
-    assert driverobj._driver_name == "schism"
+def test_SCHISM_driver_name(driverobj):
+    assert driverobj.driver_name == "schism"

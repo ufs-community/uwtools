@@ -5,6 +5,7 @@ A driver for the ioda component.
 from iotaa import tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
 
@@ -20,13 +21,22 @@ class IODA(JEDIBase):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.configuration_file(),
             self.files_copied(),
             self.files_linked(),
             self.runscript(),
         ]
+
+    # Public helper methods
+
+    @property
+    def driver_name(self) -> str:
+        """
+        Returns the name of this driver.
+        """
+        return STR.ioda
 
     # Private helper methods
 
@@ -38,17 +48,13 @@ class IODA(JEDIBase):
         return "ioda.yaml"
 
     @property
-    def _driver_name(self) -> str:
-        """
-        Returns the name of this driver.
-        """
-        return STR.ioda
-
-    @property
     def _runcmd(self) -> str:
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config["execution"]["executable"]
-        jedi_config = str(self._rundir / self._config_fn)
+        executable = self.config[STR.execution][STR.executable]
+        jedi_config = str(self.rundir / self._config_fn)
         return " ".join([executable, jedi_config])
+
+
+set_driver_docstring(IODA)

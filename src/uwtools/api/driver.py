@@ -2,7 +2,6 @@
 API access to the ``uwtools`` driver base classes.
 """
 
-import sys
 from datetime import datetime, timedelta
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
@@ -11,9 +10,20 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
+from uwtools.drivers.driver import (
+    Assets,
+    AssetsCycleBased,
+    AssetsCycleLeadtimeBased,
+    AssetsTimeInvariant,
+    Driver,
+    DriverCycleBased,
+    DriverCycleLeadtimeBased,
+    DriverTimeInvariant,
+)
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
+from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source
 
 
@@ -21,7 +31,7 @@ def execute(
     module: Union[Path, str],
     classname: str,
     task: str,
-    schema_file: str,
+    schema_file: Optional[str] = None,
     config: Optional[Union[Path, str]] = None,
     cycle: Optional[datetime] = None,  # pylint: disable=unused-argument
     leadtime: Optional[timedelta] = None,  # pylint: disable=unused-argument
@@ -37,7 +47,7 @@ def execute(
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
-    :param module: Path to driver module or name of module on sys.path
+    :param module: Path to driver module or name of module on sys.path.
     :param classname: Name of driver class to instantiate.
     :param task: Name of driver task to execute.
     :param schema_file: Path to schema file.
@@ -51,24 +61,31 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    if not (class_ := _get_driver_class(module, classname)):
+    class_, module_path = _get_driver_class(module, classname)
+    if not class_:
         return False
+    assert module_path is not None
+    args = dict(locals())
     accepted = set(getfullargspec(class_).args)
-    non_optional = {"cycle", "leadtime"}
-    required = accepted & non_optional
+    non_optional = {STR.cycle, STR.leadtime}
+    for arg in sorted([STR.batch, *non_optional]):
+        if args.get(arg) and arg not in accepted:
+            log.error("%s does not accept argument '%s'", classname, arg)
+            return False
+    for arg in sorted(non_optional):
+        if arg in accepted and args[arg] is None:
+            log.error("%s requires argument '%s'", classname, arg)
+            return False
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
         key_path=key_path,
-        schema_file=schema_file,
+        schema_file=schema_file or module_path.with_suffix(".jsonschema"),
     )
-    for arg in sorted(non_optional):
-        if arg in accepted and locals()[arg] is None:
-            log.error("%s requires argument '%s'", classname, arg)
-            return False
-    for arg in sorted(["batch", *required]):
+    required = non_optional & accepted
+    for arg in sorted([STR.batch, *required]):
         if arg in accepted:
-            kwargs[arg] = locals()[arg]
+            kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
     getattr(driverobj, task)()
@@ -78,65 +95,50 @@ def execute(
     return True
 
 
-def tasks(module: str, classname: str) -> dict[str, str]:
+def tasks(module: Union[Path, str], classname: str) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 
     :param module: Name of driver module.
     :param classname: Name of driver class to instantiate.
     """
-    if not (class_ := _get_driver_class(module, classname)):
+    class_, _ = _get_driver_class(module, classname)
+    if not class_:
         log.error("Could not get tasks from class %s in module %s", classname, module)
         return {}
     return _tasks(class_)
 
 
-_CLASSNAMES = [
-    "Assets",
-    "AssetsCycleBased",
-    "AssetsCycleLeadtimeBased",
-    "AssetsTimeInvariant",
-    "Driver",
-    "DriverCycleBased",
-    "DriverCycleLeadtimeBased",
-    "DriverTimeInvariant",
-]
-
-
-def _add_classes():
-    m = import_module("uwtools.drivers.driver")
-    for classname in _CLASSNAMES:
-        setattr(sys.modules[__name__], classname, getattr(m, classname))
-        __all__.append(classname)
-
-
-def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type]:
+def _get_driver_class(
+    module: Union[Path, str], classname: str
+) -> tuple[Optional[Type], Optional[Path]]:
     """
     Returns the driver class.
 
     :param module: Name of driver module to load.
     :param classname: Name of driver class to instantiate.
     """
-    module = str(module)
-    if not (m := _get_driver_module_explicit(module)):
-        if not (m := _get_driver_module_implicit(module)):
+    if not (m := _get_driver_module_explicit(Path(module))):
+        if not (m := _get_driver_module_implicit(str(module))):
             log.error("Could not load module %s", module)
-            return None
+            return None, None
+    assert m.__file__ is not None
+    module_path = Path(m.__file__)
     if hasattr(m, classname):
         c: Type = getattr(m, classname)
-        return c
+        return c, module_path
     log.error("Module %s has no class %s", module, classname)
-    return None
+    return None, module_path
 
 
-def _get_driver_module_explicit(module: str) -> Optional[ModuleType]:
+def _get_driver_module_explicit(module: Path) -> Optional[ModuleType]:
     """
     Returns the named module found via explicit lookup of given path.
 
     :param module: Name of driver module to load.
     """
     log.debug("Loading module %s", module)
-    if spec := spec_from_file_location(Path(module).name, module):
+    if spec := spec_from_file_location(module.name, module):
         m = module_from_spec(spec)
         if loader := spec.loader:
             try:
@@ -154,12 +156,23 @@ def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
 
     :param module: Name of driver module to load.
     """
+    log.debug("Loading module %s from sys.path", module)
     try:
-        log.debug("Loading module %s from sys.path", module)
         return import_module(module)
     except Exception:  # pylint: disable=broad-exception-caught
         return None
 
 
-__all__: list[str] = [graph.__name__]
-_add_classes()
+__all__ = [
+    "Assets",
+    "AssetsCycleBased",
+    "AssetsCycleLeadtimeBased",
+    "AssetsTimeInvariant",
+    "Driver",
+    "DriverCycleBased",
+    "DriverCycleLeadtimeBased",
+    "DriverTimeInvariant",
+    "execute",
+    "graph",
+    "tasks",
+]

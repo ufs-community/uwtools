@@ -1,0 +1,42 @@
+usage: uw execute --module MODULE --classname CLASSNAME --task TASK [-h]
+                  [--version] [--config-file PATH] [--schema-file PATH]
+                  [--cycle CYCLE] [--leadtime LEADTIME] [--batch] [--dry-run]
+                  [--graph-file PATH] [--key-path KEY[.KEY...]] [--quiet]
+                  [--verbose]
+
+Execute external driver.
+
+Required arguments:
+  --module MODULE
+      Path to driver module or name of module on sys.path
+  --classname CLASSNAME
+      Name of driver class
+  --task TASK
+      Driver task to execute
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --schema-file PATH
+      Path to schema file to use for validation
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. 2024-08-08T18)
+  --leadtime LEADTIME
+      The leadtime as hours[:minutes[:seconds]]
+  --batch
+      Submit run to batch scheduler
+  --dry-run
+      Only log info, making no changes
+  --graph-file PATH
+      Path to Graphviz DOT output [experimental]
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys leading through the config to the driver's
+      configuration block
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

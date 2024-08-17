@@ -3,6 +3,7 @@ import os
 import yaml
 from testbook import testbook
 
+
 # Run all cells of the example notebook.
 @testbook("./example.ipynb", execute=True)
 def test_get_yaml_config(tb):
@@ -44,7 +45,7 @@ def test_template_render():
         assert os.path.exists(rendered_path)
 
         # Check the contents of the rendered file.
-        with open(rendered_path, "r") as f:
+        with open(rendered_path, "r", encoding="utf-8") as f:
             user_config = yaml.safe_load(f)
         assert user_config["user"] == {"name": "John Doe", "favorite_food": "burritos"}
 
@@ -57,5 +58,5 @@ def test_template_render():
 def test_compare(tb):
 
     # Check output text of the cell prints the correct result
-    assert 'False' in tb.cell_output_text(21)
-    assert 'True' in tb.cell_output_text(25)
+    assert "False" in tb.cell_output_text(21)
+    assert "True" in tb.cell_output_text(25)

@@ -70,7 +70,6 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -101,18 +100,18 @@ def test_IODA_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_IODA_driver_name(driverobj):
+    assert driverobj.driver_name == "ioda"
+
+
 def test_IODA__config_fn(driverobj):
     assert driverobj._config_fn == "ioda.yaml"
 
 
-def test_IODA__driver_name(driverobj):
-    assert driverobj._driver_name == "ioda"
-
-
 def test_IODA__runcmd(driverobj):
-    config = str(driverobj._rundir / driverobj._config_fn)
+    config = str(driverobj.rundir / driverobj._config_fn)
     assert driverobj._runcmd == f"/path/to/bufr2ioda.x {config}"
 
 
-def test_IODA__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240501 06Z ioda foo"
+def test_IODA_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240501 06Z ioda foo"

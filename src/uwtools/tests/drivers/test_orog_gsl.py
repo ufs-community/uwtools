@@ -54,7 +54,6 @@ def driverobj(config):
 @mark.parametrize(
     "method",
     [
-        "_driver_config",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -62,11 +61,11 @@ def driverobj(config):
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
-        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
         "runscript",
+        "taskname",
     ],
 )
 def test_OrogGSL(method):
@@ -74,7 +73,7 @@ def test_OrogGSL(method):
 
 
 def test_OrogGSL_input_grid_file(driverobj):
-    path = Path(driverobj._driver_config["rundir"]) / "C403_grid.tile7.halo4.nc"
+    path = Path(driverobj.config["rundir"], "C403_grid.tile7.halo4.nc")
     assert not path.is_file()
     driverobj.input_grid_file()
     assert path.is_symlink()
@@ -90,26 +89,26 @@ def test_OrogGSL_provisioned_rundir(driverobj):
 
 
 def test_OrogGSL_topo_data_2p5m(driverobj):
-    path = Path(driverobj._driver_config["rundir"]) / "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
+    path = Path(driverobj.config["rundir"], "geo_em.d01.lat-lon.2.5m.HGT_M.nc")
     assert not path.is_file()
     driverobj.topo_data_2p5m()
     assert path.is_symlink()
 
 
 def test_OrogGSL_topo_data_3os(driverobj):
-    path = Path(driverobj._driver_config["rundir"]) / "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
+    path = Path(driverobj.config["rundir"], "HGT.Beljaars_filtered.lat-lon.30s_res.nc")
     assert not path.is_file()
     driverobj.topo_data_30s()
     assert path.is_symlink()
 
 
-def test_OrogGSL__driver_name(driverobj):
-    assert driverobj._driver_name == "orog_gsl"
+def test_OrogGSL_driver_name(driverobj):
+    assert driverobj.driver_name == "orog_gsl"
 
 
 def test_OrogGSL__runcmd(driverobj):
-    inputs = [str(driverobj._driver_config["config"][k]) for k in ("tile", "resolution", "halo")]
+    inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
     assert driverobj._runcmd == "echo '%s' | %s" % (
         "\n".join(inputs),
-        driverobj._driver_config["execution"]["executable"],
+        driverobj.config["execution"]["executable"],
     )

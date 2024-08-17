@@ -12,6 +12,7 @@ with open("../recipe/meta.json", "r", encoding="utf-8") as f:
 
 autoclass_content = "both"
 autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml", "referencing"]
+autodoc_typehints = "description"
 copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.extlinks", "sphinx.ext.intersphinx"]
 extlinks_detect_hardcoded_links = True
@@ -19,13 +20,14 @@ html_logo = os.path.join("static", "ufs.png")
 html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+linkcheck_ignore = [r"https://github.com/.*#.*"]
 nitpick_ignore_regex = [("py:class", r"^uwtools\..*")]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow Tools"
 release = _metadata["version"]
-version = _metadata["version"]
 user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+version = _metadata["version"]
 
 extlinks = {
     "anaconda": ("https://www.anaconda.com/%s", "%s"),
@@ -39,6 +41,7 @@ extlinks = {
     "coverage": ("https://coverage.readthedocs.io/en/7.3.4/%s", "%s"),
     "docformatter": ("https://docformatter.readthedocs.io/en/stable/%s", "%s"),
     "github-docs": ("https://docs.github.com/en/%s", "%s"),
+    "iotaa-readme": ("https://github.com/maddenp/iotaa/blob/main/README.md#%s", "%s"),
     "isort": ("https://pycqa.github.io/isort/%s", "%s"),
     "jinja2": ("https://jinja.palletsprojects.com/%s", "%s"),
     "jq": ("https://jqlang.github.io/jq/manual/v1.7/%s", "%s"),

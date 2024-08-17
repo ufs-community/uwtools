@@ -1,6 +1,8 @@
 ``ungrib``
 ==========
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``.
 
 .. literalinclude:: ungrib/help.cmd

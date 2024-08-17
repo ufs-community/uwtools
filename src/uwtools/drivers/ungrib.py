@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -25,8 +26,8 @@ class Ungrib(DriverCycleBased):
         """
         Symlinks to all the GRIB files.
         """
-        yield self._taskname("GRIB files")
-        gfs_files = self._driver_config["gfs_files"]
+        yield self.taskname("GRIB files")
+        gfs_files = self.config["gfs_files"]
         offset = abs(gfs_files["offset"])
         endhour = gfs_files["forecast_length"] + offset
         interval = gfs_files["interval_hours"]
@@ -36,7 +37,7 @@ class Ungrib(DriverCycleBased):
             infile = Path(
                 gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
             )
-            link_name = self._rundir / f"GRIBFILE.{_ext(n)}"
+            link_name = self.rundir / f"GRIBFILE.{_ext(n)}"
             links.append((infile, link_name))
         yield [self._gribfile(infile, link) for infile, link in links]
 
@@ -46,7 +47,7 @@ class Ungrib(DriverCycleBased):
         The namelist file.
         """
         # Do not use offset here. It's relative to the MPAS fcst to run.
-        gfs_files = self._driver_config["gfs_files"]
+        gfs_files = self.config["gfs_files"]
         endhour = gfs_files["forecast_length"]
         end_date = self._cycle + timedelta(hours=endhour)
         interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
@@ -65,11 +66,10 @@ class Ungrib(DriverCycleBased):
                 },
             }
         }
-        path = self._rundir / "namelist.wps"
-        yield self._taskname(str(path))
+        path = self.rundir / "namelist.wps"
+        yield self.taskname(str(path))
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=d,
@@ -81,7 +81,7 @@ class Ungrib(DriverCycleBased):
         """
         Run directory provisioned with all required content.
         """
-        yield self._taskname("provisioned run directory")
+        yield self.taskname("provisioned run directory")
         yield [
             self.gribfiles(),
             self.namelist_file(),
@@ -94,22 +94,24 @@ class Ungrib(DriverCycleBased):
         """
         A symlink to the Vtable file.
         """
-        path = self._rundir / "Vtable"
-        yield self._taskname(str(path))
+        path = self.rundir / "Vtable"
+        yield self.taskname(str(path))
         yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["vtable"])
+        infile = Path(self.config["vtable"])
         yield file(path=infile)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(Path(self._driver_config["vtable"]))
+        path.symlink_to(Path(self.config["vtable"]))
 
-    # Private helper methods
+    # Public helper methods
 
     @property
-    def _driver_name(self) -> str:
+    def driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.ungrib
+
+    # Private helper methods
 
     @task
     def _gribfile(self, infile: Path, link: Path):
@@ -119,7 +121,7 @@ class Ungrib(DriverCycleBased):
         :param link: Link name.
         :param infile: File to link.
         """
-        yield self._taskname(str(link))
+        yield self.taskname(str(link))
         yield asset(link, link.is_symlink)
         yield file(path=infile)
         link.parent.mkdir(parents=True, exist_ok=True)
@@ -132,3 +134,6 @@ def _ext(n):
     """
     b = 26
     return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
+
+
+set_driver_docstring(Ungrib)

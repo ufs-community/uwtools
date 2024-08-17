@@ -102,6 +102,15 @@ def resource_path(suffix: str = "") -> Path:
         return prefix / suffix
 
 
+def str2path(val: Any) -> Any:
+    """
+    Return str value as Path, other types unmodified.
+
+    :param val: Any value.
+    """
+    return Path(val) if isinstance(val, str) else val
+
+
 @contextmanager
 def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, None, None]:
     """
@@ -111,6 +120,7 @@ def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, 
     :param filepath: The path to a file to write to.
     """
     if filepath:
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         with open(filepath, mode, encoding="utf-8") as f:
             yield f
     else:
