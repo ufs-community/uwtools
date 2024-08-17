@@ -1,9 +1,18 @@
-TARGETS = test-nb
+TARGETS = format lint test-nb unittest
 
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
 
-test-nb:
+format:
+	black tests
+	isort tests
+
+lint:
+	pylint tests
+
+test-nb: lint unittest
+
+unittest:
 	pytest tests
