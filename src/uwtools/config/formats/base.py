@@ -165,7 +165,7 @@ class Config(ABC, UserDict):
         Assumes a section/key/value structure.
 
         :param dict1: The first dictionary.
-        :param dict2: The second dictionary.
+        :param dict2: The second dictionary (default: this config).
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
