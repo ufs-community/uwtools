@@ -6,11 +6,11 @@ import os
 from pathlib import Path
 from typing import Optional, Union
 
+from uwtools.config.formats.base import Config as _Config
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
-from uwtools.config.formats.yaml import Config as _Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
