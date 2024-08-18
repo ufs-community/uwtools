@@ -479,12 +479,7 @@ class Driver(Assets):
         :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
-        else:
-            validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
-            )
+        Assets._validate(self, schema_file)
         validate_internal(schema_name=STR.platform, config=self._config_intermediate)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
