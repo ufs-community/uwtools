@@ -66,6 +66,13 @@ class ConcreteConfig(Config):
 # Tests
 
 
+def test__characterize_values(config):
+    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
+    complete, template = config._characterize_values(values=values, parent="p")
+    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
+    assert template == ["  p3: {{ n }}"]
+
+
 def test__load_paths(config, tmp_path):
     paths = (tmp_path / fn for fn in ("f1", "f2"))
     for path in paths:
@@ -98,13 +105,6 @@ def test__parse_include(config):
     assert config["how_many"] == 17
     assert config["config"]["meat"] == "beef"
     assert len(config["config"]) == 2
-
-
-def test_characterize_values(config):
-    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    complete, template = config.characterize_values(values=values, parent="p")
-    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert template == ["  p3: {{ n }}"]
 
 
 @mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])

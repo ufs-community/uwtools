@@ -260,7 +260,9 @@ def _realize_config_values_needed(input_obj: Config) -> None:
 
     :param input_obj: The config to update.
     """
-    complete, template = input_obj.characterize_values(input_obj.data, parent="")
+    complete, template = input_obj._characterize_values(  # pylint: disable=protected-access
+        input_obj.data, parent=""
+    )
     if complete:
         log.info("Keys that are complete:")
         for var in complete:

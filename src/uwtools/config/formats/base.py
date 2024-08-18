@@ -48,6 +48,36 @@ class Config(ABC, UserDict):
 
     # Private methods
 
+    def _characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
+        """
+        Characterize values as complete or as template placeholders.
+
+        :param values: The dictionary to examine.
+        :param parent: Parent key.
+        :return: Lists of of complete and template-placeholder values.
+        """
+        complete: list[str] = []
+        template: list[str] = []
+        for key, val in values.items():
+            if isinstance(val, dict):
+                complete.append(f"{INDENT}{parent}{key}")
+                c, t = self._characterize_values(val, f"{parent}{key}.")
+                complete, template = complete + c, template + t
+            elif isinstance(val, list):
+                for item in val:
+                    if isinstance(item, dict):
+                        c, t = self._characterize_values(item, parent)
+                        complete, template = complete + c, template + t
+                        complete.append(f"{INDENT}{parent}{key}")
+                    elif "{{" in str(val) or "{%" in str(val):
+                        template.append(f"{INDENT}{parent}{key}: {val}")
+                        break
+            elif "{{" in str(val) or "{%" in str(val):
+                template.append(f"{INDENT}{parent}{key}: {val}")
+            else:
+                complete.append(f"{INDENT}{parent}{key}")
+        return complete, template
+
     @classmethod
     @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
@@ -122,36 +152,6 @@ class Config(ABC, UserDict):
                     del ref_dict[key]
 
     # Public methods
-
-    def characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
-        """
-        Characterize values as complete or as template placeholders.
-
-        :param values: The dictionary to examine.
-        :param parent: Parent key.
-        :return: Lists of of complete and template-placeholder values.
-        """
-        complete: list[str] = []
-        template: list[str] = []
-        for key, val in values.items():
-            if isinstance(val, dict):
-                complete.append(f"{INDENT}{parent}{key}")
-                c, t = self.characterize_values(val, f"{parent}{key}.")
-                complete, template = complete + c, template + t
-            elif isinstance(val, list):
-                for item in val:
-                    if isinstance(item, dict):
-                        c, t = self.characterize_values(item, parent)
-                        complete, template = complete + c, template + t
-                        complete.append(f"{INDENT}{parent}{key}")
-                    elif "{{" in str(val) or "{%" in str(val):
-                        template.append(f"{INDENT}{parent}{key}: {val}")
-                        break
-            elif "{{" in str(val) or "{%" in str(val):
-                template.append(f"{INDENT}{parent}{key}: {val}")
-            else:
-                complete.append(f"{INDENT}{parent}{key}")
-        return complete, template
 
     def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
         """
