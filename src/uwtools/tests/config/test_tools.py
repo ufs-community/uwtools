@@ -74,7 +74,7 @@ def help_realize_config_fmt2fmt(input_file, input_format, update_file, update_fo
     )
     cfgclass = tools.format_to_config(input_format)
     cfgobj = cfgclass(input_file)
-    cfgobj.update_values(cfgclass(update_file))
+    cfgobj.update_from(cfgclass(update_file))
     reference = tmpdir / f"expected{ext}"
     cfgobj.dump(reference)
     assert compare_files(reference, output_file)

@@ -201,7 +201,7 @@ def test_parse_include(config):
     assert len(config["config"]) == 2
 
 
-def test_update_values(config):
+def test_update_from(config):
     """
     Test that a config object can be updated.
     """
