@@ -76,6 +76,30 @@ def test__load_paths(config, tmp_path):
         assert cfg[path.name] == "present"
 
 
+def test__parse_include(config):
+    """
+    Test that non-YAML handles include tags properly.
+    """
+    del config["foo"]
+    # Create a symlink for the include file:
+    include_path = fixture_path("fruit_config.yaml")
+    config.data.update(
+        {
+            "config": {
+                "salad_include": f"!INCLUDE [{include_path}]",
+                "meat": "beef",
+                "dressing": "poppyseed",
+            }
+        }
+    )
+    config._parse_include()
+
+    assert config["fruit"] == "papaya"
+    assert config["how_many"] == 17
+    assert config["config"]["meat"] == "beef"
+    assert len(config["config"]) == 2
+
+
 def test_characterize_values(config):
     values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
     complete, template = config.characterize_values(values=values, parent="p")
@@ -175,30 +199,6 @@ def test_invalid_config(fmt2, tmp_path):
     with raises(UWConfigError) as e:
         tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
     assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
-
-
-def test_parse_include(config):
-    """
-    Test that non-YAML handles include tags properly.
-    """
-    del config["foo"]
-    # Create a symlink for the include file:
-    include_path = fixture_path("fruit_config.yaml")
-    config.data.update(
-        {
-            "config": {
-                "salad_include": f"!INCLUDE [{include_path}]",
-                "meat": "beef",
-                "dressing": "poppyseed",
-            }
-        }
-    )
-    config.parse_include()
-
-    assert config["fruit"] == "papaya"
-    assert config["how_many"] == 17
-    assert config["config"]["meat"] == "beef"
-    assert len(config["config"]) == 2
 
 
 def test_update_from(config):

@@ -32,6 +32,31 @@ def test_nml__get_format():
     assert NMLConfig._get_format() == FORMAT.nml
 
 
+def test_nml__parse_include():
+    """
+    Test that non-YAML handles include tags properly.
+    """
+    cfgobj = NMLConfig(fixture_path("include_files.nml"))
+    assert cfgobj["config"]["fruit"] == "papaya"
+    assert cfgobj["config"]["how_many"] == 17
+    assert cfgobj["config"]["meat"] == "beef"
+    assert len(cfgobj["config"]) == 5
+
+
+def test_nml__parse_include_mult_sect():
+    """
+    Test that non-YAML handles include tags with files that have multiple sections in separate file.
+    """
+    cfgobj = NMLConfig(fixture_path("include_files_with_sect.nml"))
+    assert cfgobj["config"]["fruit"] == "papaya"
+    assert cfgobj["config"]["how_many"] == 17
+    assert cfgobj["config"]["meat"] == "beef"
+    assert cfgobj["config"]["dressing"] == "ranch"
+    assert cfgobj["setting"]["size"] == "large"
+    assert len(cfgobj["config"]) == 5
+    assert len(cfgobj["setting"]) == 3
+
+
 def test_nml_derived_type_dict():
     nml = NMLConfig(config={"nl": {"o": {"i": 77, "j": 88}}})
     assert nml["nl"]["o"] == {"i": 77, "j": 88}
@@ -63,31 +88,6 @@ def test_nml_dump_dict_Namelist(data, tmp_path):
     NMLConfig.dump_dict(cfg=f90nml.Namelist(data), path=path)
     nml = f90nml.read(path)
     assert nml == data
-
-
-def test_nml_parse_include():
-    """
-    Test that non-YAML handles include tags properly.
-    """
-    cfgobj = NMLConfig(fixture_path("include_files.nml"))
-    assert cfgobj["config"]["fruit"] == "papaya"
-    assert cfgobj["config"]["how_many"] == 17
-    assert cfgobj["config"]["meat"] == "beef"
-    assert len(cfgobj["config"]) == 5
-
-
-def test_nml_parse_include_mult_sect():
-    """
-    Test that non-YAML handles include tags with files that have multiple sections in separate file.
-    """
-    cfgobj = NMLConfig(fixture_path("include_files_with_sect.nml"))
-    assert cfgobj["config"]["fruit"] == "papaya"
-    assert cfgobj["config"]["how_many"] == 17
-    assert cfgobj["config"]["meat"] == "beef"
-    assert cfgobj["config"]["dressing"] == "ranch"
-    assert cfgobj["setting"]["size"] == "large"
-    assert len(cfgobj["config"]) == 5
-    assert len(cfgobj["setting"]) == 3
 
 
 @mark.parametrize("func", [repr, str])

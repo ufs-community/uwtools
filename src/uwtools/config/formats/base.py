@@ -100,6 +100,27 @@ class Config(ABC, UserDict):
             cfg.update(self._load(config_file=config_file))
         return cfg
 
+    def _parse_include(self, ref_dict: Optional[dict] = None) -> None:
+        """
+        Recursively process include directives in a config object.
+
+        Recursively traverse the dictionary, replacing include tags with the contents of the files
+        they specify. Assumes a section/key/value structure. YAML provides this functionality in its
+        own loader.
+
+        :param ref_dict: A config object to process instead of the object's own data.
+        """
+        if ref_dict is None:
+            ref_dict = self.data
+        for key, value in deepcopy(ref_dict).items():
+            if isinstance(value, dict):
+                self._parse_include(ref_dict[key])
+            elif isinstance(value, str):
+                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
+                    filepaths = yaml.safe_load(m[1])
+                    self.update_from(self._load_paths(filepaths))
+                    del ref_dict[key]
+
     # Public methods
 
     def characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
@@ -213,27 +234,6 @@ class Config(ABC, UserDict):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-
-    def parse_include(self, ref_dict: Optional[dict] = None) -> None:
-        """
-        Recursively process include directives in a config object.
-
-        Recursively traverse the dictionary, replacing include tags with the contents of the files
-        they specify. Assumes a section/key/value structure. YAML provides this functionality in its
-        own loader.
-
-        :param ref_dict: A config object to process instead of the object's own data.
-        """
-        if ref_dict is None:
-            ref_dict = self.data
-        for key, value in deepcopy(ref_dict).items():
-            if isinstance(value, dict):
-                self.parse_include(ref_dict[key])
-            elif isinstance(value, str):
-                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
-                    filepaths = yaml.safe_load(m[1])
-                    self.update_from(self._load_paths(filepaths))
-                    del ref_dict[key]
 
     def update_from(self, src: Union[dict, UserDict]) -> None:
         """

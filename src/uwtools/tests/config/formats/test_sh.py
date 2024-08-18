@@ -24,13 +24,7 @@ def test_sh__get_format():
     assert SHConfig._get_format() == FORMAT.sh
 
 
-def test_sh_instantiation_depth():
-    with raises(UWConfigError) as e:
-        SHConfig(config={1: {2: {3: 4}}})
-    assert str(e.value) == "Cannot instantiate depth-1 SHConfig with depth-3 config"
-
-
-def test_sh_parse_include():
+def test_sh__parse_include():
     """
     Test that an sh file with no sections handles include tags properly.
     """
@@ -39,6 +33,12 @@ def test_sh_parse_include():
     assert cfgobj["how_many"] == "17"
     assert cfgobj["meat"] == "beef"
     assert len(cfgobj) == 5
+
+
+def test_sh_instantiation_depth():
+    with raises(UWConfigError) as e:
+        SHConfig(config={1: {2: {3: 4}}})
+    assert str(e.value) == "Cannot instantiate depth-1 SHConfig with depth-3 config"
 
 
 @mark.parametrize("func", [repr, str])

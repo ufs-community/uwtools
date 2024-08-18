@@ -22,7 +22,7 @@ class SHConfig(Config):
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)
-        self.parse_include()
+        self._parse_include()
 
     # Private methods
 
