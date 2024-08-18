@@ -48,7 +48,7 @@ Define the filter before proceeding.
 
 class YAMLConfig(Config):
     """
-    Concrete class to handle YAML config files.
+    Work with YAML configs.
     """
 
     # Private methods

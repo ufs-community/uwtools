@@ -14,7 +14,7 @@ from uwtools.utils.file import readable, writable
 
 class NMLConfig(Config):
     """
-    Concrete class to handle Fortran namelist files.
+    Work with Fortran namelist configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None) -> None:

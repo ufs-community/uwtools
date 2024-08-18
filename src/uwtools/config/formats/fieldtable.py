@@ -8,8 +8,7 @@ from uwtools.utils.file import writable
 
 class FieldTableConfig(YAMLConfig):
     """
-    This class exists to write out a field_table format given that its configuration has been set by
-    an input YAML file.
+    Work with configs in field_table format.
     """
 
     # Private methods

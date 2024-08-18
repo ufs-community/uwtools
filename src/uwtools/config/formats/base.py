@@ -23,8 +23,6 @@ class Config(ABC, UserDict):
 
     def __init__(self, config: Optional[Union[dict, str, Path]] = None) -> None:
         """
-        Construct a Config object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__()

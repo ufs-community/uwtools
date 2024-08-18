@@ -11,13 +11,11 @@ from uwtools.utils.file import readable, writable
 
 class INIConfig(Config):
     """
-    Concrete class to handle INI config files.
+    Work with INI configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
-        Construct an INIConfig object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)

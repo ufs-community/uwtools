@@ -12,13 +12,11 @@ from uwtools.utils.file import readable, writable
 
 class SHConfig(Config):
     """
-    Concrete class to handle bash config files.
+    Work with key=value shell configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
-        Construct a SHConfig object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)
