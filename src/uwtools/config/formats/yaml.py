@@ -169,7 +169,7 @@ class YAMLConfig(Config):
         """
         Dumps the config in YAML format.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         self.dump_dict(self.data, path)
 
@@ -179,7 +179,7 @@ class YAMLConfig(Config):
         Dumps a provided config dictionary in YAML format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)

@@ -78,7 +78,7 @@ class INIConfig(Config):
         """
         Dumps the config in INI format.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         self.dump_dict(self.data, path)
 
@@ -88,7 +88,7 @@ class INIConfig(Config):
         Dumps a provided config dictionary in INI format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)

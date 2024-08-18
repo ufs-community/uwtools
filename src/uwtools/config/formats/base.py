@@ -222,7 +222,7 @@ class Config(ABC, UserDict):
         """
         Dumps the config to stdout or a file.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
 
     @staticmethod
@@ -232,7 +232,7 @@ class Config(ABC, UserDict):
         Dumps a provided config dictionary to stdout or a file.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
 
     def update_from(self, src: Union[dict, UserDict]) -> None:

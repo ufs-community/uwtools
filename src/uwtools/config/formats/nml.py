@@ -79,7 +79,7 @@ class NMLConfig(Config):
         """
         Dumps the config in Fortran namelist format.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         self.dump_dict(cfg=self.data, path=path)
 
@@ -89,7 +89,7 @@ class NMLConfig(Config):
         Dumps a provided config dictionary in Fortran namelist format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)

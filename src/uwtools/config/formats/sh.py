@@ -79,7 +79,7 @@ class SHConfig(Config):
         """
         Dumps the config as key=value lines.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
         self.dump_dict(self.data, path)
@@ -90,7 +90,7 @@ class SHConfig(Config):
         Dumps a provided config dictionary in bash format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
