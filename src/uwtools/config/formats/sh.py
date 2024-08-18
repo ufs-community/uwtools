@@ -39,6 +39,20 @@ class SHConfig(Config):
             lines.append("%s=%s" % (key, shlex.quote(str(value))))
         return "\n".join(lines)
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 1
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.sh
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses key=value lines from shell code.
@@ -80,17 +94,3 @@ class SHConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return 1
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.sh

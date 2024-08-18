@@ -45,6 +45,20 @@ class INIConfig(Config):
             parser.write(sio)
             return sio.getvalue().strip()
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 2
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.ini
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses an INI file.
@@ -78,17 +92,3 @@ class INIConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return 2
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.ini

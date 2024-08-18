@@ -43,6 +43,14 @@ class ConcreteConfig(Config):
     def _dict_to_str(cls, cfg):
         pass
 
+    @staticmethod
+    def _get_depth_threshold():
+        pass
+
+    @staticmethod
+    def _get_format():
+        pass
+
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
@@ -52,14 +60,6 @@ class ConcreteConfig(Config):
 
     @staticmethod
     def dump_dict(cfg, path=None):
-        pass
-
-    @staticmethod
-    def get_depth_threshold():
-        pass
-
-    @staticmethod
-    def get_format():
         pass
 
 

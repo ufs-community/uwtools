@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.nml module.
 """
@@ -22,6 +22,14 @@ def data():
 
 
 # Tests
+
+
+def test_nml__get_depth_threshold():
+    assert NMLConfig._get_depth_threshold() is None
+
+
+def test_nml__get_format():
+    assert NMLConfig._get_format() == FORMAT.nml
 
 
 def test_nml_derived_type_dict():
@@ -55,14 +63,6 @@ def test_nml_dump_dict_Namelist(data, tmp_path):
     NMLConfig.dump_dict(cfg=f90nml.Namelist(data), path=path)
     nml = f90nml.read(path)
     assert nml == data
-
-
-def test_nml_get_format():
-    assert NMLConfig.get_format() == FORMAT.nml
-
-
-def test_nml_get_depth_threshold():
-    assert NMLConfig.get_depth_threshold() is None
 
 
 def test_nml_parse_include():

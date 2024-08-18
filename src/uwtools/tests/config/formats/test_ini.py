@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.config.formats.ini module.
 """
@@ -15,12 +15,12 @@ from uwtools.utils.file import FORMAT
 # Tests
 
 
-def test_ini_get_format():
-    assert INIConfig.get_format() == FORMAT.ini
+def test_ini__get_depth_threshold():
+    assert INIConfig._get_depth_threshold() == 2
 
 
-def test_ini_get_depth_threshold():
-    assert INIConfig.get_depth_threshold() == 2
+def test_ini__get_format():
+    assert INIConfig._get_format() == FORMAT.ini
 
 
 def test_ini_instantiation_depth():

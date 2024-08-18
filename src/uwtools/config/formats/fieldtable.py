@@ -37,6 +37,20 @@ class FieldTableConfig(YAMLConfig):
             lines[-1] += " /"
         return "\n".join(lines)
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return None
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.fieldtable
+
     # Public methods
 
     def dump(self, path: Optional[Path] = None) -> None:
@@ -74,17 +88,3 @@ class FieldTableConfig(YAMLConfig):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return None
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.fieldtable

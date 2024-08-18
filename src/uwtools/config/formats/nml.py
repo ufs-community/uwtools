@@ -47,6 +47,20 @@ class NMLConfig(Config):
             nml.write(sio, sort=False)
             return sio.getvalue().strip()
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return None
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.nml
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses a Fortran namelist file.
@@ -79,17 +93,3 @@ class NMLConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return None
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.nml

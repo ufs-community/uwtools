@@ -34,10 +34,10 @@ class Config(ABC, UserDict):
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
-        if self.get_depth_threshold() and self.depth != self.get_depth_threshold():
+        if self._get_depth_threshold() and self.depth != self._get_depth_threshold():
             raise UWConfigError(
                 "Cannot instantiate depth-%s %s with depth-%s config"
-                % (self.get_depth_threshold(), type(self).__name__, self.depth)
+                % (self._get_depth_threshold(), type(self).__name__, self.depth)
             )
 
     def __repr__(self) -> str:
@@ -55,6 +55,20 @@ class Config(ABC, UserDict):
         Returns the string representation of the given dict.
 
         :param cfg: A dict object.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
         """
 
     @abstractmethod
@@ -192,26 +206,12 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-
-    @staticmethod
-    @abstractmethod
     def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary to stdout or a file.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
-        """
-
-    @staticmethod
-    @abstractmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
         """
 
     def parse_include(self, ref_dict: Optional[dict] = None) -> None:
