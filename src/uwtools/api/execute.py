@@ -32,10 +32,11 @@ def execute(
     stdin_ok: Optional[bool] = False,
 ) -> bool:
     """
-    Execute a task.
+    Execute a driver task.
 
-    If ``batch`` is specified, a runscript will be written and submitted to the batch system.
-    Otherwise, the executable will be run directly on the current system.
+    If ``batch`` is specified and the driver is instructed to run, its runscript will be configured
+    for and submitted to the batch system. Otherwise, the executable will be run directly on the
+    current system.
 
     :param module: Path to driver module or name of module on sys.path.
     :param classname: Name of driver class to instantiate.
@@ -87,7 +88,7 @@ def execute(
 
 def tasks(module: Union[Path, str], classname: str) -> dict[str, str]:
     """
-    Returns a mapping from task names to their one-line descriptions.
+    Returns a mapping from driver task names to their one-line descriptions.
 
     :param module: Name of driver module.
     :param classname: Name of driver class to instantiate.
@@ -153,8 +154,4 @@ def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
         return None
 
 
-__all__ = [
-    "execute",
-    "graph",
-    "tasks",
-]
+__all__ = ["execute", "graph", "tasks"]
