@@ -73,6 +73,10 @@ def test__characterize_values(config):
     assert template == ["  p3: {{ n }}"]
 
 
+def test__depth(config):
+    assert config._depth == 1
+
+
 def test__load_paths(config, tmp_path):
     paths = (tmp_path / fn for fn in ("f1", "f2"))
     for path in paths:
@@ -133,10 +137,6 @@ def test_compare_config(caplog, fmt, salad_base):
         "salad:            size:  - None + large",
     ]:
         assert logged(caplog, msg)
-
-
-def test_depth(config):
-    assert config.depth == 1
 
 
 def test_dereference(tmp_path):

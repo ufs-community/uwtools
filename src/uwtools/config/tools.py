@@ -236,21 +236,21 @@ def _realize_config_update(
     """
     if update_config or update_format:
         update_format = _ensure_format("update", update_format, update_config)
+        fmt = lambda x: x._get_format()  # pylint: disable=protected-access
+        depth_ = lambda x: x._depth  # pylint: disable=protected-access
         if not update_config:
             log.debug("Reading update from stdin")
-        fmt = input_obj._get_format()  # pylint: disable=protected-access
-        _validate_format("update", update_format, fmt)
+        _validate_format("update", update_format, fmt(input_obj))
         update_obj: Config = (
             update_config
             if isinstance(update_config, Config)
             else format_to_config(update_format)(config=update_config)
         )
-        log.debug("Initial input config depth: %s", input_obj.depth)
-        log.debug("Update config depth: %s", update_obj.depth)
-        fmt = input_obj._get_format()  # pylint: disable=protected-access
-        config_check_depths_update(update_obj, fmt)
+        log.debug("Initial input config depth: %s", depth_(input_obj))
+        log.debug("Update config depth: %s", depth_(update_obj))
+        config_check_depths_update(update_obj, fmt(input_obj))
         input_obj.update_from(update_obj)
-        log.debug("Final input config depth: %s", input_obj.depth)
+        log.debug("Final input config depth: %s", depth_(input_obj))
     return input_obj
 
 

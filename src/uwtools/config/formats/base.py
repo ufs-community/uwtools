@@ -34,10 +34,10 @@ class Config(ABC, UserDict):
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
-        if self._get_depth_threshold() and self.depth != self._get_depth_threshold():
+        if self._get_depth_threshold() and self._depth != self._get_depth_threshold():
             raise UWConfigError(
                 "Cannot instantiate depth-%s %s with depth-%s config"
-                % (self._get_depth_threshold(), type(self).__name__, self.depth)
+                % (self._get_depth_threshold(), type(self).__name__, self._depth)
             )
 
     def __repr__(self) -> str:
@@ -77,6 +77,13 @@ class Config(ABC, UserDict):
             else:
                 complete.append(f"{INDENT}{parent}{key}")
         return complete, template
+
+    @property
+    def _depth(self) -> int:
+        """
+        Returns the depth of this config's hierarchy.
+        """
+        return depth(self.data)
 
     @classmethod
     @abstractmethod
@@ -190,13 +197,6 @@ class Config(ABC, UserDict):
                 log.info(msg)
 
         return not diffs
-
-    @property
-    def depth(self) -> int:
-        """
-        Returns the depth of this config's hierarchy.
-        """
-        return depth(self.data)
 
     def dereference(self, context: Optional[dict] = None) -> None:
         """
