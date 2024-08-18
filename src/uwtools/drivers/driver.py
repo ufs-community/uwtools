@@ -139,7 +139,7 @@ class Assets(ABC):
         user_values = config_values.get(STR.updatevalues, {})
         if base_file := config_values.get(STR.basefile):
             cfgobj = config_class(base_file)
-            cfgobj.update_values(user_values)
+            cfgobj.update_from(user_values)
             cfgobj.dereference()
             config = cfgobj.data
             dump = partial(cfgobj.dump, path)
@@ -479,12 +479,7 @@ class Driver(Assets):
         :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
-        else:
-            validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
-            )
+        Assets._validate(self, schema_file)
         validate_internal(schema_name=STR.platform, config=self._config_intermediate)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
