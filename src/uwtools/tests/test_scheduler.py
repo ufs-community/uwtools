@@ -104,10 +104,10 @@ def test_JobScheduler_get_scheduler_pass(props):
 def test_JobScheduler_submit_job(schedulerobj, tmp_path):
     runscript = tmp_path / "runscript"
     submit_file = tmp_path / "runscript.submit"
-    with patch.object(scheduler, "execute") as execute:
-        execute.return_value = (True, None)
+    with patch.object(scheduler, "runsub") as runsub:
+        runsub.return_value = (True, None)
         assert schedulerobj.submit_job(runscript=runscript, submit_file=submit_file) is True
-        execute.assert_called_once_with(
+        runsub.assert_called_once_with(
             cmd=f"sub {runscript} 2>&1 | tee {submit_file}", cwd=str(tmp_path)
         )
 

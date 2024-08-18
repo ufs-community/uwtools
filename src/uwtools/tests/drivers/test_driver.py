@@ -376,9 +376,9 @@ def test_Driver__run_via_local_execution(driverobj):
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_rundir") as prd:
-        with patch.object(driver, "execute") as execute:
+        with patch.object(driver, "runsub") as runsub:
             driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
+            runsub.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
                 cwd=driverobj.rundir,
                 log_output=True,

@@ -9,23 +9,23 @@ from typing import Optional, Union
 from uwtools.logging import INDENT, log
 
 
-def execute(
+def runsub(
     cmd: str,
     cwd: Optional[Union[Path, str]] = None,
     env: Optional[dict[str, str]] = None,
     log_output: Optional[bool] = False,
 ) -> tuple[bool, str]:
     """
-    Execute a command in a subshell.
+    Run a command in a subshell.
 
-    :param cmd: The command to execute.
-    :param cwd: Change to this directory before executing cmd.
-    :param env: Environment variables to set before executing cmd.
+    :param cmd: The command to run.
+    :param cwd: Change to this directory before running cmd.
+    :param env: Environment variables to set before running cmd.
     :param log_output: Log output from successful cmd? (Error output is always logged.)
     :return: A result object providing combined stder/stdout output and success values.
     """
 
-    log.info("Executing: %s", cmd)
+    log.info("Running: %s", cmd)
     if cwd:
         log.info("%sin %s", INDENT, cwd)
     if env:
