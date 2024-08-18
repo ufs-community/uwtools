@@ -9,14 +9,14 @@ from typing import Optional, Union
 from uwtools.logging import INDENT, log
 
 
-def runsub(
+def shellcmd(
     cmd: str,
     cwd: Optional[Union[Path, str]] = None,
     env: Optional[dict[str, str]] = None,
     log_output: Optional[bool] = False,
 ) -> tuple[bool, str]:
     """
-    Run a command in a subshell.
+    Run a command in a shell.
 
     :param cmd: The command to run.
     :param cwd: Change to this directory before running cmd.

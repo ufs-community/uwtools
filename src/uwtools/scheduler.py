@@ -14,7 +14,7 @@ from typing import Any, Optional
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
-from uwtools.utils.processing import runsub
+from uwtools.utils.processing import shellcmd
 
 
 class JobScheduler(ABC):
@@ -80,7 +80,7 @@ class JobScheduler(ABC):
         cmd = f"{self._submit_cmd} {runscript}"
         if submit_file:
             cmd += " 2>&1 | tee %s" % submit_file
-        success, _ = runsub(cmd=cmd, cwd=f"{runscript.parent}")
+        success, _ = shellcmd(cmd=cmd, cwd=f"{runscript.parent}")
         return success
 
     # Private methods
