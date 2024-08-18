@@ -139,7 +139,7 @@ class Assets(ABC):
         user_values = config_values.get(STR.updatevalues, {})
         if base_file := config_values.get(STR.basefile):
             cfgobj = config_class(base_file)
-            cfgobj.update_values(user_values)
+            cfgobj.update_from(user_values)
             cfgobj.dereference()
             config = cfgobj.data
             dump = partial(cfgobj.dump, path)

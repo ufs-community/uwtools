@@ -234,10 +234,10 @@ class Config(ABC, UserDict):
             elif isinstance(value, str):
                 if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
                     filepaths = yaml.safe_load(m[1])
-                    self.update_values(self._load_paths(filepaths))
+                    self.update_from(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def update_values(self, src: Union[dict, Config]) -> None:
+    def update_from(self, src: Union[dict, Config]) -> None:
         """
         Updates a config.
 

@@ -246,7 +246,7 @@ def _realize_config_update(
         log.debug("Initial input config depth: %s", input_obj.depth)
         log.debug("Update config depth: %s", update_obj.depth)
         config_check_depths_update(update_obj, input_obj.get_format())
-        input_obj.update_values(update_obj)
+        input_obj.update_from(update_obj)
         log.debug("Final input config depth: %s", input_obj.depth)
     return input_obj
 
