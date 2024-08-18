@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import re
 from abc import ABC, abstractmethod
@@ -237,7 +235,7 @@ class Config(ABC, UserDict):
                     self.update_from(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def update_from(self, src: Union[dict, Config]) -> None:
+    def update_from(self, src: Union[dict, UserDict]) -> None:
         """
         Updates a config.
 
@@ -254,4 +252,4 @@ class Config(ABC, UserDict):
                 else:
                     dst[key] = val
 
-        update(src.data if isinstance(src, Config) else src, self.data)
+        update(src.data if isinstance(src, UserDict) else src, self.data)
