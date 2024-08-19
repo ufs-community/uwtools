@@ -18,6 +18,7 @@ from typing import Any, Callable, NoReturn, Optional
 import uwtools.api
 import uwtools.api.config
 import uwtools.api.driver
+import uwtools.api.execute
 import uwtools.api.file
 import uwtools.api.rocoto
 import uwtools.api.template
@@ -288,7 +289,7 @@ def _dispatch_execute(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.driver.execute(
+    return uwtools.api.execute.execute(
         classname=args[STR.classname],
         module=args[STR.module],
         task=args[STR.task],

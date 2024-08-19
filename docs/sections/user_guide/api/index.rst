@@ -7,6 +7,7 @@ API
    config
    driver
    esg_grid
+   execute
    file
    filter_topo
    fv3

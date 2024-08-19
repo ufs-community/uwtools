@@ -177,7 +177,7 @@ def test__dispatch_execute():
         "task": "eighty_eight",
         "stdin_ok": True,
     }
-    with patch.object(cli.uwtools.api.driver, "execute") as execute:
+    with patch.object(cli.uwtools.api.execute, "execute") as execute:
         cli._dispatch_execute(args=args)
         execute.assert_called_once_with(
             classname="TestDriver",
