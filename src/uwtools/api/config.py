@@ -250,7 +250,7 @@ Recognized file extensions are: {extensions}
 __all__ = [
     "FieldTableConfig",
     "INIConfig",
-    "INIConfig",
+    "NMLConfig",
     "SHConfig",
     "YAMLConfig",
     "compare",
