@@ -9,7 +9,7 @@ from typing import Optional, Union
 from uwtools.logging import INDENT, log
 
 
-def shellcmd(
+def run_shell_cmd(
     cmd: str,
     cwd: Optional[Union[Path, str]] = None,
     env: Optional[dict[str, str]] = None,

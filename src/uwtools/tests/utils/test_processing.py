@@ -12,7 +12,7 @@ from uwtools.utils import processing
 def test_run_failure(caplog):
     processing.log.setLevel(logging.INFO)
     cmd = "expr 1 / 0"
-    success, output = processing.shellcmd(cmd=cmd)
+    success, output = processing.run_shell_cmd(cmd=cmd)
     assert "division by zero" in output
     assert success is False
     assert logged(caplog, "Running: %s" % cmd)
@@ -24,7 +24,9 @@ def test_run_failure(caplog):
 def test_run_success(caplog, tmp_path):
     processing.log.setLevel(logging.INFO)
     cmd = "echo hello $FOO"
-    success, _ = processing.shellcmd(cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True)
+    success, _ = processing.run_shell_cmd(
+        cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True
+    )
     assert success
     assert logged(caplog, "Running: %s" % cmd)
     assert logged(caplog, "  in %s" % tmp_path)

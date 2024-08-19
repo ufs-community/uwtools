@@ -25,7 +25,7 @@ from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
-from uwtools.utils.processing import shellcmd
+from uwtools.utils.processing import run_shell_cmd
 
 # NB: Class docstrings are programmatically defined.
 
@@ -380,7 +380,7 @@ class Driver(Assets):
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        shellcmd(cmd=cmd, cwd=self.rundir, log_output=True)
+        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Private helper methods
 
