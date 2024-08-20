@@ -314,7 +314,7 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.fs, "Handle files and directories")
+    parser = _add_subparser(subparsers, STR.fs, "Handle filesystem items (files and directories)")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
