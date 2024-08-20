@@ -12,17 +12,15 @@ from uwtools.utils.file import readable, writable
 
 class SHConfig(Config):
     """
-    Concrete class to handle bash config files.
+    Work with key=value shell configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
-        Construct a SHConfig object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)
-        self.parse_include()
+        self._parse_include()
 
     # Private methods
 
@@ -38,6 +36,20 @@ class SHConfig(Config):
         for key, value in cfg.items():
             lines.append("%s=%s" % (key, shlex.quote(str(value))))
         return "\n".join(lines)
+
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 1
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.sh
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
@@ -65,7 +77,7 @@ class SHConfig(Config):
         """
         Dumps the config as key=value lines.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
         self.dump_dict(self.data, path)
@@ -76,21 +88,7 @@ class SHConfig(Config):
         Dumps a provided config dictionary in bash format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return 1
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.sh

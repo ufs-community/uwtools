@@ -6,12 +6,12 @@ import os
 from pathlib import Path
 from typing import Optional, Union
 
-from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
-from uwtools.config.formats.ini import INIConfig as _INIConfig
-from uwtools.config.formats.nml import NMLConfig as _NMLConfig
-from uwtools.config.formats.sh import SHConfig as _SHConfig
-from uwtools.config.formats.yaml import Config as _Config
-from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
+from uwtools.config.formats.base import Config as _Config
+from uwtools.config.formats.fieldtable import FieldTableConfig
+from uwtools.config.formats.ini import INIConfig
+from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.sh import SHConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_external as _validate_external
@@ -42,7 +42,7 @@ def compare(
 
 def get_fieldtable_config(
     config: Union[dict, Optional[Union[Path, str]]] = None, stdin_ok=False
-) -> _FieldTableConfig:
+) -> FieldTableConfig:
     """
     Get a ``FieldTableConfig`` object.
 
@@ -50,13 +50,13 @@ def get_fieldtable_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``FieldTableConfig`` object.
     """
-    return _FieldTableConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
+    return FieldTableConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_ini_config(
     config: Union[dict, Optional[Union[Path, str]]] = None,
     stdin_ok: bool = False,
-) -> _INIConfig:
+) -> INIConfig:
     """
     Get an ``INIConfig`` object.
 
@@ -64,13 +64,13 @@ def get_ini_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``INIConfig`` object.
     """
-    return _INIConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
+    return INIConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_nml_config(
     config: Union[dict, Optional[Union[Path, str]]] = None,
     stdin_ok: bool = False,
-) -> _NMLConfig:
+) -> NMLConfig:
     """
     Get an ``NMLConfig`` object.
 
@@ -78,13 +78,13 @@ def get_nml_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``NMLConfig`` object.
     """
-    return _NMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
+    return NMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_sh_config(
     config: Union[dict, Optional[Union[Path, str]]] = None,
     stdin_ok: bool = False,
-) -> _SHConfig:
+) -> SHConfig:
     """
     Get an ``SHConfig`` object.
 
@@ -92,13 +92,13 @@ def get_sh_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``SHConfig`` object.
     """
-    return _SHConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
+    return SHConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_yaml_config(
     config: Union[dict, Optional[Union[Path, str]]] = None,
     stdin_ok: bool = False,
-) -> _YAMLConfig:
+) -> YAMLConfig:
     """
     Get a ``YAMLConfig`` object.
 
@@ -106,7 +106,7 @@ def get_yaml_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``YAMLConfig`` object.
     """
-    return _YAMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
+    return YAMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def realize(
@@ -160,7 +160,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
 def validate(
     schema_file: Union[Path, str],
-    config: Optional[Union[dict, _YAMLConfig, Path, str]] = None,
+    config: Optional[Union[dict, YAMLConfig, Path, str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -246,3 +246,20 @@ Recognized file extensions are: {extensions}
 """.format(
     extensions=", ".join(_FORMAT.extensions())
 ).strip()
+
+__all__ = [
+    "FieldTableConfig",
+    "INIConfig",
+    "NMLConfig",
+    "SHConfig",
+    "YAMLConfig",
+    "compare",
+    "get_fieldtable_config",
+    "get_ini_config",
+    "get_nml_config",
+    "get_sh_config",
+    "get_yaml_config",
+    "realize",
+    "realize_to_dict",
+    "validate",
+]

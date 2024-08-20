@@ -11,17 +11,15 @@ from uwtools.utils.file import readable, writable
 
 class INIConfig(Config):
     """
-    Concrete class to handle INI config files.
+    Work with INI configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
-        Construct an INIConfig object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)
-        self.parse_include()
+        self._parse_include()
 
     # Private methods
 
@@ -45,6 +43,20 @@ class INIConfig(Config):
             parser.write(sio)
             return sio.getvalue().strip()
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 2
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.ini
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses an INI file.
@@ -64,7 +76,7 @@ class INIConfig(Config):
         """
         Dumps the config in INI format.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         self.dump_dict(self.data, path)
 
@@ -74,21 +86,7 @@ class INIConfig(Config):
         Dumps a provided config dictionary in INI format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return 2
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.ini
