@@ -1,6 +1,6 @@
 usage: uw fs [-h] [--version] ACTION ...
 
-Handle files and directories
+Handle filesystem items (files and directories)
 
 Optional arguments:
   -h, --help
