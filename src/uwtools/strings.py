@@ -86,6 +86,7 @@ class STR:
     file2path: str = "file_2_path"
     file: str = "file"
     filtertopo: str = "filter_topo"
+    fs: str = "fs"
     fv3: str = "fv3"
     globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"

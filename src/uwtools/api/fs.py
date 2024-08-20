@@ -8,7 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
-from uwtools.file import Copier, Linker, MakeDirs
+from uwtools.fs import Copier, Linker, MakeDirs
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
