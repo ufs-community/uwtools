@@ -78,7 +78,7 @@ This tool helps users define the source and destination of files to be copied or
 
 | :any:`CLI documentation with examples<cli_fs_mode>`
 
-There is a video demonstration of the use of the ``uw fs`` tool (previously ``uw file``) available via YouTube.
+There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw file``) available via YouTube.
 
 .. raw:: html
 
