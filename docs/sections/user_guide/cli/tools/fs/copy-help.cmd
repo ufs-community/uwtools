@@ -1,1 +1,1 @@
-uw file copy --help
+uw fs copy --help

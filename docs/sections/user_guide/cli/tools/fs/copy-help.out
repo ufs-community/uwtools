@@ -1,4 +1,4 @@
-usage: uw file copy [-h] [--version] [--config-file PATH] [--target-dir PATH]
+usage: uw fs copy [-h] [--version] [--config-file PATH] [--target-dir PATH]
                     [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run]
                     [--quiet] [--verbose]
                     [KEY ...]

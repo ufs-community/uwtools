@@ -76,9 +76,9 @@ File/Directory Provisioning
 
 This tool helps users define the source and destination of files to be copied or linked, or directories to be created, in the same UW YAML language used by UW drivers.
 
-| :any:`CLI documentation with examples<cli_file_mode>`
+| :any:`CLI documentation with examples<cli_fs_mode>`
 
-There is a video demonstration of the use of the ``uw file`` tool available via YouTube.
+There is a video demonstration of the use of the ``uw fs`` tool (previously ``uw file``) available via YouTube.
 
 .. raw:: html
 

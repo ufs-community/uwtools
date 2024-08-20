@@ -1,5 +1,5 @@
-``uwtools.api.file``
-====================
+``uwtools.api.fs``
+==================
 
-.. automodule:: uwtools.api.file
+.. automodule:: uwtools.api.fs
    :members:

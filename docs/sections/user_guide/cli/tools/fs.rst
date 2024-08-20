@@ -1,13 +1,13 @@
-``file``
-========
+``fs``
+======
 
-.. _cli_file_mode:
+.. _cli_fs_mode:
 
-The ``uw`` mode for handling filesystem files.
+The ``uw`` mode for handling filesystem items (files and directories).
 
-.. literalinclude:: file/help.cmd
+.. literalinclude:: fs/help.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/help.out
+.. literalinclude:: fs/help.out
    :language: text
 
 ``copy``
@@ -15,9 +15,9 @@ The ``uw`` mode for handling filesystem files.
 
 The ``copy`` action stages files in a target directory by copying files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
-.. literalinclude:: file/copy-help.cmd
+.. literalinclude:: fs/copy-help.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/copy-help.out
+.. literalinclude:: fs/copy-help.out
    :language: text
 
 Examples
@@ -25,31 +25,31 @@ Examples
 
 Given ``copy-config.yaml`` containing
 
-.. literalinclude:: file/copy-config.yaml
+.. literalinclude:: fs/copy-config.yaml
    :language: yaml
-.. literalinclude:: file/copy-exec.cmd
+.. literalinclude:: fs/copy-exec.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/copy-exec.out
+.. literalinclude:: fs/copy-exec.out
    :language: text
 
 Here, ``foo`` and ``bar`` are copies of their respective source files.
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
-.. literalinclude:: file/copy-config-timedep.yaml
+.. literalinclude:: fs/copy-config-timedep.yaml
    :language: yaml
-.. literalinclude:: file/copy-exec-timedep.cmd
+.. literalinclude:: fs/copy-exec-timedep.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/copy-exec-timedep.out
+.. literalinclude:: fs/copy-exec-timedep.out
    :language: text
 
 The ``--target-dir`` option is optional when all destination paths are absolute, and will never be applied to absolute destination paths. If any destination paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: file/copy-config.yaml
+.. literalinclude:: fs/copy-config.yaml
    :language: yaml
-.. literalinclude:: file/copy-exec-no-target-dir-err.cmd
+.. literalinclude:: fs/copy-exec-no-target-dir-err.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/copy-exec-no-target-dir-err.out
+.. literalinclude:: fs/copy-exec-no-target-dir-err.out
    :language: text
 
 ``link``
@@ -57,9 +57,9 @@ The ``--target-dir`` option is optional when all destination paths are absolute,
 
 The ``link`` action stages files in a target directory by linking files, directories, or other symbolic links. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
-.. literalinclude:: file/link-help.cmd
+.. literalinclude:: fs/link-help.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/link-help.out
+.. literalinclude:: fs/link-help.out
    :language: text
 
 Examples
@@ -67,31 +67,31 @@ Examples
 
 Given ``link-config.yaml`` containing
 
-.. literalinclude:: file/link-config.yaml
+.. literalinclude:: fs/link-config.yaml
    :language: yaml
-.. literalinclude:: file/link-exec.cmd
+.. literalinclude:: fs/link-exec.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/link-exec.out
+.. literalinclude:: fs/link-exec.out
    :language: text
 
 Here, ``foo`` and ``bar`` are symbolic links.
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
-.. literalinclude:: file/link-config-timedep.yaml
+.. literalinclude:: fs/link-config-timedep.yaml
    :language: yaml
-.. literalinclude:: file/link-exec-timedep.cmd
+.. literalinclude:: fs/link-exec-timedep.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/link-exec-timedep.out
+.. literalinclude:: fs/link-exec-timedep.out
    :language: text
 
 The ``--target-dir`` option is optional when all linkname paths are absolute, and will never be applied to absolute linkname paths. If any linkname paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: file/link-config.yaml
+.. literalinclude:: fs/link-config.yaml
    :language: yaml
-.. literalinclude:: file/link-exec-no-target-dir-err.cmd
+.. literalinclude:: fs/link-exec-no-target-dir-err.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/link-exec-no-target-dir-err.out
+.. literalinclude:: fs/link-exec-no-target-dir-err.out
    :language: text
 
 ``makedirs``
@@ -99,9 +99,9 @@ The ``--target-dir`` option is optional when all linkname paths are absolute, an
 
 The ``makedirs`` action creates directories. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`makedirs block <makedirs_yaml>`.
 
-.. literalinclude:: file/makedirs-help.cmd
+.. literalinclude:: fs/makedirs-help.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/makedirs-help.out
+.. literalinclude:: fs/makedirs-help.out
    :language: text
 
 Examples
@@ -109,27 +109,27 @@ Examples
 
 Given ``makedirs-config.yaml`` containing
 
-.. literalinclude:: file/makedirs-config.yaml
+.. literalinclude:: fs/makedirs-config.yaml
    :language: yaml
-.. literalinclude:: file/makedirs-exec.cmd
+.. literalinclude:: fs/makedirs-exec.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/makedirs-exec.out
+.. literalinclude:: fs/makedirs-exec.out
    :language: text
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
-.. literalinclude:: file/makedirs-config-timedep.yaml
+.. literalinclude:: fs/makedirs-config-timedep.yaml
    :language: yaml
-.. literalinclude:: file/makedirs-exec-timedep.cmd
+.. literalinclude:: fs/makedirs-exec-timedep.cmd
    :emphasize-lines: 2
-.. literalinclude:: file/makedirs-exec-timedep.out
+.. literalinclude:: fs/makedirs-exec-timedep.out
    :language: text
 
 The ``--target-dir`` option is optional when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: file/makedirs-config.yaml
+.. literalinclude:: fs/makedirs-config.yaml
    :language: yaml
-.. literalinclude:: file/makedirs-exec-no-target-dir-err.cmd
+.. literalinclude:: fs/makedirs-exec-no-target-dir-err.cmd
    :emphasize-lines: 1
-.. literalinclude:: file/makedirs-exec-no-target-dir-err.out
+.. literalinclude:: fs/makedirs-exec-no-target-dir-err.out
    :language: text

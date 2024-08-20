@@ -1,1 +1,1 @@
-uw file --help
+uw fs --help

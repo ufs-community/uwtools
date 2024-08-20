@@ -1,1 +1,1 @@
-uw file copy --config-file copy-config.yaml config files
+uw fs copy --config-file copy-config.yaml config files

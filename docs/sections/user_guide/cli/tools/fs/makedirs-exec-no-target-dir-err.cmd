@@ -1,1 +1,1 @@
-uw file makedirs --config-file makedirs-config.yaml config
+uw fs makedirs --config-file makedirs-config.yaml config

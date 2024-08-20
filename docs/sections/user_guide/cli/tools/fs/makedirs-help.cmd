@@ -1,1 +1,1 @@
-uw file makedirs --help
+uw fs makedirs --help

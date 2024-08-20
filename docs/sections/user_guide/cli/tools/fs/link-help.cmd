@@ -1,1 +1,1 @@
-uw file link --help
+uw fs link --help
