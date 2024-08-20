@@ -1,8 +1,7 @@
 usage: uw fs makedirs [-h] [--version] [--config-file PATH]
-                        [--target-dir PATH] [--cycle CYCLE]
-                        [--leadtime LEADTIME] [--dry-run] [--quiet]
-                        [--verbose]
-                        [KEY ...]
+                      [--target-dir PATH] [--cycle CYCLE]
+                      [--leadtime LEADTIME] [--dry-run] [--quiet] [--verbose]
+                      [KEY ...]
 
 Make directories
 
