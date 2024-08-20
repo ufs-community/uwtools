@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import IO, Any, Generator, Optional, Union
 
 from uwtools.exceptions import UWError
-from uwtools.logging import log
 from uwtools.strings import FORMAT
 
 
@@ -52,10 +51,9 @@ def get_file_format(path: Path) -> str:
     suffix = Path(path).suffix.replace(".", "")
     try:
         return FORMAT.formats()[suffix]
-    except KeyError as e:
+    except KeyError:
         msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-        log.critical(msg)
-        raise UWError(msg) from e
+        raise UWError(msg) from None
 
 
 def path_if_it_exists(path: str) -> str:
