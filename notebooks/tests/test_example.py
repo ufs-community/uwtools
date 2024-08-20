@@ -5,7 +5,7 @@ from testbook import testbook
 
 
 # Run all cells of the example notebook.
-@testbook("./example.ipynb", execute=True)
+@testbook("example.ipynb", execute=True)
 def test_get_yaml_config(tb):
 
     # Check output text of the cell that prints the YAMLconfig object.
@@ -26,12 +26,12 @@ def test_get_yaml_config(tb):
 
 def test_template_render():
     # Remove the rendered file if it exists.
-    rendered_path = "./fixtures/rendered_config.yaml"
+    rendered_path = "fixtures/example/ex2-rendered-config.yaml"
     if os.path.exists(rendered_path):
         os.remove(rendered_path)
 
     # Run all cells of the example notebook.
-    with testbook("./example.ipynb", execute=True) as tb:
+    with testbook("example.ipynb", execute=True) as tb:
 
         # Check output text of cells with %%bash cell magics.
         assert (
@@ -54,7 +54,7 @@ def test_template_render():
 
 
 # Run all cells of the example notebook.
-@testbook("./example.ipynb", execute=True)
+@testbook("example.ipynb", execute=True)
 def test_compare(tb):
 
     # Check output text of the cell prints the correct result

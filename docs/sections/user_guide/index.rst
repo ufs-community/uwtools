@@ -17,4 +17,17 @@ User Guide
 
    cli/index
    api/index
+
+.. raw:: html
+
+   <ul>
+   <li>API Jupyter Notebooks
+      <ul>
+         <li><a href="https://mybinder.org/v2/gh/ufs-community/uwtools/notebooks?labpath=notebooks%2Ftemplate.ipynb">Template Tool</a>
+      </ul>
+   </ul>
+
+.. toctree::
+   :maxdepth: 2
+   
    yaml/index
