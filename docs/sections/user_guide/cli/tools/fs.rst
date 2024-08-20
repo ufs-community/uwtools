@@ -43,7 +43,7 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 .. literalinclude:: fs/copy-exec-timedep.out
    :language: text
 
-The ``--target-dir`` option is optional when all destination paths are absolute, and will never be applied to absolute destination paths. If any destination paths are relative, however, it is an error not to provide a target directory:
+The ``--target-dir`` option need not be specified when all destination paths are absolute, and will never be applied to absolute destination paths. If any destination paths are relative, however, it is an error not to provide a target directory:
 
 .. literalinclude:: fs/copy-config.yaml
    :language: yaml
@@ -85,7 +85,7 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 .. literalinclude:: fs/link-exec-timedep.out
    :language: text
 
-The ``--target-dir`` option is optional when all linkname paths are absolute, and will never be applied to absolute linkname paths. If any linkname paths are relative, however, it is an error not to provide a target directory:
+The ``--target-dir`` option need not be specified when all linkname paths are absolute, and will never be applied to absolute linkname paths. If any linkname paths are relative, however, it is an error not to provide a target directory:
 
 .. literalinclude:: fs/link-config.yaml
    :language: yaml
@@ -125,7 +125,7 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 .. literalinclude:: fs/makedirs-exec-timedep.out
    :language: text
 
-The ``--target-dir`` option is optional when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
+The ``--target-dir`` option need not be specified when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
 
 .. literalinclude:: fs/makedirs-config.yaml
    :language: yaml
