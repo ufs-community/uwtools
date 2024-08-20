@@ -14,7 +14,7 @@ from uwtools.utils.file import readable, writable
 
 class NMLConfig(Config):
     """
-    Concrete class to handle Fortran namelist files.
+    Work with Fortran namelist configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None) -> None:
@@ -24,7 +24,7 @@ class NMLConfig(Config):
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)
-        self.parse_include()
+        self._parse_include()
 
     # Private methods
 
@@ -47,6 +47,20 @@ class NMLConfig(Config):
             nml.write(sio, sort=False)
             return sio.getvalue().strip()
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return None
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.nml
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses a Fortran namelist file.
@@ -65,7 +79,7 @@ class NMLConfig(Config):
         """
         Dumps the config in Fortran namelist format.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         self.dump_dict(cfg=self.data, path=path)
 
@@ -75,21 +89,7 @@ class NMLConfig(Config):
         Dumps a provided config dictionary in Fortran namelist format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return None
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.nml

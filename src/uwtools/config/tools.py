@@ -149,7 +149,7 @@ def _ensure_format(
     :raises: UWError if the format cannot be determined.
     """
     if isinstance(config, Config):
-        return config.get_format()
+        return config._get_format()  # pylint: disable=protected-access
     if isinstance(config, Path):
         return fmt or get_file_format(config)
     if isinstance(config, dict):
@@ -211,7 +211,8 @@ def _realize_config_output_setup(
     """
     output_format = _ensure_format("output", output_format, output_file)
     log.debug("Writing output to %s" % (output_file or "stdout"))
-    _validate_format("output", output_format, input_obj.get_format())
+    fmt = input_obj._get_format()  # pylint: disable=protected-access
+    _validate_format("output", output_format, fmt)
     output_data = input_obj.data
     if key_path is not None:
         for key in key_path:
@@ -235,19 +236,21 @@ def _realize_config_update(
     """
     if update_config or update_format:
         update_format = _ensure_format("update", update_format, update_config)
+        fmt = lambda x: x._get_format()  # pylint: disable=protected-access
+        depth_ = lambda x: x._depth  # pylint: disable=protected-access
         if not update_config:
             log.debug("Reading update from stdin")
-        _validate_format("update", update_format, input_obj.get_format())
+        _validate_format("update", update_format, fmt(input_obj))
         update_obj: Config = (
             update_config
             if isinstance(update_config, Config)
             else format_to_config(update_format)(config=update_config)
         )
-        log.debug("Initial input config depth: %s", input_obj.depth)
-        log.debug("Update config depth: %s", update_obj.depth)
-        config_check_depths_update(update_obj, input_obj.get_format())
+        log.debug("Initial input config depth: %s", depth_(input_obj))
+        log.debug("Update config depth: %s", depth_(update_obj))
+        config_check_depths_update(update_obj, fmt(input_obj))
         input_obj.update_from(update_obj)
-        log.debug("Final input config depth: %s", input_obj.depth)
+        log.debug("Final input config depth: %s", depth_(input_obj))
     return input_obj
 
 
@@ -257,7 +260,9 @@ def _realize_config_values_needed(input_obj: Config) -> None:
 
     :param input_obj: The config to update.
     """
-    complete, template = input_obj.characterize_values(input_obj.data, parent="")
+    complete, template = input_obj._characterize_values(  # pylint: disable=protected-access
+        input_obj.data, parent=""
+    )
     if complete:
         log.info("Keys that are complete:")
         for var in complete:
@@ -285,7 +290,8 @@ def _validate_depth(
     """
     target_class = format_to_config(target_format)
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
-    if bad_depth(target_class.get_depth_threshold(), depth(config)):
+    depth_threshold = target_class._get_depth_threshold()  # pylint: disable=protected-access
+    if bad_depth(depth_threshold, depth(config)):
         raise UWConfigError(
             "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
         )
