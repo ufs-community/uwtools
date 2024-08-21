@@ -50,7 +50,7 @@ class SCHISM(AssetsCycleBased):
     @property
     def driver_name(self) -> str:
         """
-        Return the name of this driver.
+        The name of this driver.
         """
         return STR.schism
 

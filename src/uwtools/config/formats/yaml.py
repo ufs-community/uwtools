@@ -154,7 +154,7 @@ class YAMLConfig(Config):
     @property
     def _yaml_loader(self) -> type[yaml.SafeLoader]:
         """
-        Set up the loader with the appropriate constructors.
+        The loader, with appropriate constructors added.
         """
         loader = yaml.SafeLoader
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)

@@ -158,7 +158,7 @@ class Assets(ABC):
     @abstractmethod
     def driver_name(self) -> str:
         """
-        Return the name of this driver.
+        The name of this driver.
         """
 
     # Private helper methods
@@ -387,7 +387,7 @@ class Driver(Assets):
     @property
     def _run_resources(self) -> dict[str, Any]:
         """
-        Return platform configuration data.
+        The platform configuration data.
         """
         if not (platform := self._config_intermediate.get("platform")):
             raise UWConfigError("Required 'platform' block missing in config")
@@ -404,7 +404,7 @@ class Driver(Assets):
     @property
     def _runcmd(self) -> str:
         """
-        Return the full command-line component invocation.
+        The full command-line component invocation.
         """
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])
@@ -461,14 +461,14 @@ class Driver(Assets):
     @property
     def _runscript_path(self) -> Path:
         """
-        Return the path to the runscript.
+        The path to the runscript.
         """
         return self.rundir / f"runscript.{self.driver_name}"
 
     @property
     def _scheduler(self) -> JobScheduler:
         """
-        Return the job scheduler specified by the platform information.
+        The job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._run_resources)
 

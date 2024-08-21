@@ -79,7 +79,7 @@ class Config(ABC, UserDict):
     @property
     def _depth(self) -> int:
         """
-        Return the depth of this config's hierarchy.
+        The depth of this config's hierarchy.
         """
         return depth(self.data)
 

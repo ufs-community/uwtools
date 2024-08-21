@@ -90,7 +90,7 @@ class J2Template:
     @property
     def undeclared_variables(self) -> set[str]:
         """
-        Return the names of variables needed to render the template.
+        The names of variables needed to render the template.
 
         :return: Names of variables needed to render the template.
         """
