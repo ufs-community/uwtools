@@ -71,21 +71,22 @@ This tool helps transform legacy configuration files templated with the atparse 
 
 | :any:`CLI documentation with examples<cli_template_translate_examples>`
 
-File Provisioning
-^^^^^^^^^^^^^^^^^
+File/Directory Provisioning
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This tool helps users define the source and destination of files to be copied or linked, in the same UW YAML language used by UW drivers.
+| **CLI**: ``uw fs -h``
+| **API**: ``import uwtools.api.fs``
 
-| :any:`CLI documentation with examples<cli_file_copy_examples>`
 
+This tool helps users define the source and destination of files to be copied or linked, or directories to be created, in the same UW YAML language used by UW drivers.
 
-There is a video demonstration of the use of the ``uw file`` tool available via YouTube.
+| :any:`CLI documentation with examples<cli_fs_mode>`
+
+There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw file``) available via YouTube.
 
 .. raw:: html
 
    <iframe width="560" height="315" src="https://www.youtube.com/embed/b2HXOlt-Ulw?si=rLWatBFu4mvNR65S" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-|
 
 Rocoto Configurability
 ^^^^^^^^^^^^^^^^^^^^^^

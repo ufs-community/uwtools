@@ -1,1 +1,0 @@
-uw file copy --help

@@ -1,9 +1,9 @@
-usage: uw file copy [-h] [--version] [--config-file PATH] [--target-dir PATH]
-                    [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run]
-                    [--quiet] [--verbose]
-                    [KEY ...]
+usage: uw fs link [-h] [--version] [--config-file PATH] [--target-dir PATH]
+                  [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run] [--quiet]
+                  [--verbose]
+                  [KEY ...]
 
-Copy files
+Link files
 
 Optional arguments:
   -h, --help
