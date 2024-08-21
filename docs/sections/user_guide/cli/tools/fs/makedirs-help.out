@@ -1,9 +1,9 @@
-usage: uw file link [-h] [--version] [--config-file PATH] [--target-dir PATH]
-                    [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run]
-                    [--quiet] [--verbose]
-                    [KEY ...]
+usage: uw fs makedirs [-h] [--version] [--config-file PATH]
+                      [--target-dir PATH] [--cycle CYCLE]
+                      [--leadtime LEADTIME] [--dry-run] [--quiet] [--verbose]
+                      [KEY ...]
 
-Link files
+Make directories
 
 Optional arguments:
   -h, --help
@@ -15,7 +15,7 @@ Optional arguments:
   --target-dir PATH
       Root directory for relative destination paths
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-05-29T12)
+      The cycle in ISO8601 format (e.g. 2024-08-12T00)
   --leadtime LEADTIME
       The leadtime as hours[:minutes[:seconds]]
   --dry-run

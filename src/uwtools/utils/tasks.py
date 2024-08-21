@@ -10,6 +10,19 @@ from typing import Union
 from iotaa import asset, external, task
 
 
+@task
+def directory(path: Path):
+    """
+    A filesystem directory.
+
+    :param path: Path to the directory.
+    """
+    yield "Directory %s" % path
+    yield asset(path, path.is_dir)
+    yield None
+    path.mkdir(parents=True, exist_ok=True)
+
+
 @external
 def executable(program: Union[Path, str]):
     """

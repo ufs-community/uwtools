@@ -19,7 +19,7 @@ import uwtools.api
 import uwtools.api.config
 import uwtools.api.driver
 import uwtools.api.execute
-import uwtools.api.file
+import uwtools.api.fs
 import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
@@ -62,7 +62,7 @@ def main() -> None:
         tools: dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
             STR.execute: _dispatch_execute,
-            STR.file: _dispatch_file,
+            STR.fs: _dispatch_fs,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
@@ -305,27 +305,28 @@ def _dispatch_execute(args: Args) -> bool:
     )
 
 
-# Mode file
+# Mode fs
 
 
-def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
+def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: file
+    Subparser for mode: fs
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.file, "Handle files")
+    parser = _add_subparser(subparsers, STR.fs, "Handle filesystem items (files and directories)")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
-        STR.copy: _add_subparser_file_copy(subparsers),
-        STR.link: _add_subparser_file_link(subparsers),
+        STR.copy: _add_subparser_fs_copy(subparsers),
+        STR.link: _add_subparser_fs_link(subparsers),
+        STR.makedirs: _add_subparser_fs_makedirs(subparsers),
     }
 
 
-def _add_subparser_file_common(parser: Parser) -> ActionChecks:
+def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     """
-    Common subparser code for mode: file {copy link}
+    Common subparser code for mode: fs {copy link makedirs}
 
     :param parser: The parser to configure.
     """
@@ -340,46 +341,57 @@ def _add_subparser_file_common(parser: Parser) -> ActionChecks:
     return checks
 
 
-def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: file copy
+    Subparser for mode: fs copy
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.copy, "Copy files")
-    return _add_subparser_file_common(parser)
+    return _add_subparser_fs_common(parser)
 
 
-def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: file link
+    Subparser for mode: fs link
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.link, "Link files")
-    return _add_subparser_file_common(parser)
+    return _add_subparser_fs_common(parser)
 
 
-def _dispatch_file(args: Args) -> bool:
+def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
     """
-    Dispatch logic for file mode.
+    Subparser for mode: fs makedirs
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.makedirs, "Make directories")
+    return _add_subparser_fs_common(parser)
+
+
+def _dispatch_fs(args: Args) -> bool:
+    """
+    Dispatch logic for fs mode.
 
     :param args: Parsed command-line args.
     """
     actions = {
-        STR.copy: _dispatch_file_copy,
-        STR.link: _dispatch_file_link,
+        STR.copy: _dispatch_fs_copy,
+        STR.link: _dispatch_fs_link,
+        STR.makedirs: _dispatch_fs_makedirs,
     }
     return actions[args[STR.action]](args)
 
 
-def _dispatch_file_copy(args: Args) -> bool:
+def _dispatch_fs_copy(args: Args) -> bool:
     """
-    Dispatch logic for file copy action.
+    Dispatch logic for fs copy action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.file.copy(
+    return uwtools.api.fs.copy(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -390,13 +402,30 @@ def _dispatch_file_copy(args: Args) -> bool:
     )
 
 
-def _dispatch_file_link(args: Args) -> bool:
+def _dispatch_fs_link(args: Args) -> bool:
     """
-    Dispatch logic for file link action.
+    Dispatch logic for fs link action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.file.link(
+    return uwtools.api.fs.link(
+        target_dir=args[STR.targetdir],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
+        keys=args[STR.keys],
+        dry_run=args[STR.dryrun],
+        stdin_ok=True,
+    )
+
+
+def _dispatch_fs_makedirs(args: Args) -> bool:
+    """
+    Dispatch logic for fs makedirs action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.fs.makedirs(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -1115,7 +1144,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     tools = {
         STR.config: partial(_add_subparser_config, subparsers),
         STR.execute: partial(_add_subparser_execute, subparsers),
-        STR.file: partial(_add_subparser_file, subparsers),
+        STR.fs: partial(_add_subparser_fs, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
         STR.template: partial(_add_subparser_template, subparsers),
     }

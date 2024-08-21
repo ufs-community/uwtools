@@ -1,6 +1,6 @@
-usage: uw file [-h] [--version] ACTION ...
+usage: uw fs [-h] [--version] ACTION ...
 
-Handle files
+Handle filesystem items (files and directories)
 
 Optional arguments:
   -h, --help
@@ -14,3 +14,5 @@ Positional arguments:
       Copy files
     link
       Link files
+    makedirs
+      Make directories
