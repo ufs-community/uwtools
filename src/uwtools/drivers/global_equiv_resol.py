@@ -43,7 +43,7 @@ class GlobalEquivResol(DriverTimeInvariant):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        Return the name of this driver.
         """
         return STR.globalequivresol
 
@@ -52,7 +52,7 @@ class GlobalEquivResol(DriverTimeInvariant):
     @property
     def _runcmd(self):
         """
-        Returns the full command-line component invocation.
+        Return the full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
         input_file_path = self.config["input_grid_file"]

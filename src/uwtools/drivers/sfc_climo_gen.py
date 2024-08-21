@@ -57,7 +57,7 @@ class SfcClimoGen(DriverTimeInvariant):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        Return the name of this driver.
         """
         return STR.sfcclimogen
 

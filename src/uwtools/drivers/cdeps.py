@@ -98,7 +98,7 @@ class CDEPS(AssetsCycleBased):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        Return the name of this driver.
         """
         return STR.cdeps
 

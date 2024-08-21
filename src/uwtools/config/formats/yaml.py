@@ -65,7 +65,7 @@ class YAMLConfig(Config):
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the YAML representation of the given dict.
+        Return the YAML representation of the given dict.
 
         :param cfg: The in-memory config object.
         """
@@ -75,14 +75,14 @@ class YAMLConfig(Config):
     @staticmethod
     def _get_depth_threshold() -> Optional[int]:
         """
-        Returns the config's depth threshold.
+        Return the config's depth threshold.
         """
         return None
 
     @staticmethod
     def _get_format() -> str:
         """
-        Returns the config's format name.
+        Return the config's format name.
         """
         return FORMAT.yaml
 
@@ -144,7 +144,7 @@ class YAMLConfig(Config):
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
-        Returns a dictionary with include tags processed.
+        Return a dictionary with include tags processed.
 
         :param loader: The YAML loader.
         :param node: A YAML node.

@@ -32,7 +32,7 @@ class JobScheduler(ABC):
     @property
     def directives(self) -> list[str]:
         """
-        Returns resource-request scheduler directives.
+        Return resource-request scheduler directives.
         """
         pre, sep = self._prefix, self._directive_separator
         ds = []
@@ -53,7 +53,7 @@ class JobScheduler(ABC):
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
         """
-        Returns a configured job scheduler.
+        Return a configured job scheduler.
 
         :param props: Configuration settings for job scheduler.
         :return: A configured job scheduler.
@@ -71,7 +71,7 @@ class JobScheduler(ABC):
 
     def submit_job(self, runscript: Path, submit_file: Optional[Path] = None) -> bool:
         """
-        Submits a job to the scheduler.
+        Submit a job to the scheduler.
 
         :param runscript: Path to the runscript.
         :param submit_file: Path to file to write output of submit command to.
@@ -89,28 +89,28 @@ class JobScheduler(ABC):
     @abstractmethod
     def _directive_separator(self) -> str:
         """
-        Returns the character used to separate directive keys and values.
+        Return the character used to separate directive keys and values.
         """
 
     @property
     @abstractmethod
     def _forbidden_directives(self) -> list[str]:
         """
-        Returns directives that this scheduler does not support.
+        Return directives that this scheduler does not support.
         """
 
     @property
     @abstractmethod
     def _managed_directives(self) -> dict[str, Any]:
         """
-        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        Return a mapping from canonical names to scheduler-specific CLI switches.
         """
 
     @property
     @abstractmethod
     def _prefix(self) -> str:
         """
-        Returns the scheduler's resource-request prefix.
+        Return the scheduler's resource-request prefix.
         """
 
     @property
@@ -124,7 +124,7 @@ class JobScheduler(ABC):
     @abstractmethod
     def _submit_cmd(self) -> str:
         """
-        Returns the scheduler's job-submit executable name.
+        Return the scheduler's job-submit executable name.
         """
 
     def _validate_props(self) -> None:
@@ -149,21 +149,21 @@ class LSF(JobScheduler):
     @property
     def _directive_separator(self) -> str:
         """
-        Returns the character used to separate directive keys and values.
+        Return the character used to separate directive keys and values.
         """
         return " "
 
     @property
     def _forbidden_directives(self) -> list[str]:
         """
-        Returns directives that this scheduler does not support.
+        Return directives that this scheduler does not support.
         """
         return []
 
     @property
     def _managed_directives(self) -> dict[str, Any]:
         """
-        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        Return a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
             _DirectivesOptional.JOB_NAME: "-J",
@@ -181,7 +181,7 @@ class LSF(JobScheduler):
     @property
     def _prefix(self) -> str:
         """
-        Returns the scheduler's resource-request prefix.
+        Return the scheduler's resource-request prefix.
         """
         return "#BSUB"
 
@@ -194,7 +194,7 @@ class LSF(JobScheduler):
     @property
     def _submit_cmd(self) -> str:
         """
-        Returns the scheduler's job-submit executable name.
+        Return the scheduler's job-submit executable name.
         """
         return "bsub"
 
@@ -207,21 +207,21 @@ class PBS(JobScheduler):
     @property
     def _directive_separator(self) -> str:
         """
-        Returns the character used to separate directive keys and values.
+        Return the character used to separate directive keys and values.
         """
         return " "
 
     @property
     def _forbidden_directives(self) -> list[str]:
         """
-        Returns directives that this scheduler does not support.
+        Return directives that this scheduler does not support.
         """
         return []
 
     @property
     def _managed_directives(self) -> dict[str, Any]:
         """
-        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        Return a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
             _DirectivesOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
@@ -258,7 +258,7 @@ class PBS(JobScheduler):
     @property
     def _prefix(self) -> str:
         """
-        Returns the scheduler's resource-request prefix.
+        Return the scheduler's resource-request prefix.
         """
         return "#PBS"
 
@@ -299,7 +299,7 @@ class PBS(JobScheduler):
     @property
     def _submit_cmd(self) -> str:
         """
-        Returns the scheduler's job-submit executable name.
+        Return the scheduler's job-submit executable name.
         """
         return "qsub"
 
@@ -312,14 +312,14 @@ class Slurm(JobScheduler):
     @property
     def _forbidden_directives(self) -> list[str]:
         """
-        Returns directives that this scheduler does not support.
+        Return directives that this scheduler does not support.
         """
         return [_DirectivesOptional.SHELL]
 
     @property
     def _managed_directives(self) -> dict[str, Any]:
         """
-        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        Return a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
             _DirectivesOptional.CORES: "--ntasks",
@@ -343,21 +343,21 @@ class Slurm(JobScheduler):
     @property
     def _directive_separator(self) -> str:
         """
-        Returns the character used to separate directive keys and values.
+        Return the character used to separate directive keys and values.
         """
         return "="
 
     @property
     def _prefix(self) -> str:
         """
-        Returns the scheduler's resource-request prefix.
+        Return the scheduler's resource-request prefix.
         """
         return "#SBATCH"
 
     @property
     def _submit_cmd(self) -> str:
         """
-        Returns the scheduler's job-submit executable name.
+        Return the scheduler's job-submit executable name.
         """
         return "sbatch"
 

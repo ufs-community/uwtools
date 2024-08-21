@@ -77,7 +77,7 @@ class UPP(DriverCycleLeadtimeBased):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        Return the name of this driver.
         """
         return STR.upp
 
@@ -93,7 +93,7 @@ class UPP(DriverCycleLeadtimeBased):
     @property
     def _runcmd(self) -> str:
         """
-        Returns the full command-line component invocation.
+        Return the full command-line component invocation.
         """
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])

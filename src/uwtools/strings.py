@@ -38,14 +38,14 @@ class FORMAT:
     @staticmethod
     def extensions() -> list[str]:
         """
-        Returns recognized filename extensions.
+        Return recognized filename extensions.
         """
         return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 
     @staticmethod
     def formats() -> dict[str, str]:
         """
-        Returns the recognized format names.
+        Return the recognized format names.
         """
         return {
             field.name: str(getattr(FORMAT, field.name))

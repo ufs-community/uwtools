@@ -25,7 +25,7 @@ class Memory:
     @property
     def measurement(self):
         """
-        Returns the measurement (MB, KB, etc.)
+        Return the measurement (MB, KB, etc.)
         """
         if self._measurement is None:
             self._measurement = self._value[-2:]
@@ -34,7 +34,7 @@ class Memory:
     @property
     def quantity(self):
         """
-        Returns the quantity.
+        Return the quantity.
         """
         if self._quantity is None:
             self._quantity = float(self._value[0:-2])
