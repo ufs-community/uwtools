@@ -13,8 +13,8 @@ from uwtools.utils.file import resource_path
 
 def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
     """
-    Determine whether the two given files are identical up to any number of trailing newlines,
-    which are ignored. Print the contents of both files when they do not match.
+    Determine whether the two given files are identical up to any number of trailing newlines, which
+    are ignored. Print the contents of both files when they do not match.
 
     :param path1: Path to first file.
     :param path2: Path to second file.
