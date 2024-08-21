@@ -125,14 +125,12 @@ def realize(
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
-    update_config = _str2path(update_config)
-    assert not isinstance(update_config, str)
     if update_config is None and update_format is not None:  # i.e. updates will be read from stdin
         update_config = _ensure_data_source(update_config, stdin_ok)
     return _realize(
         input_config=_ensure_data_source(_str2path(input_config), stdin_ok),
         input_format=input_format,
-        update_config=update_config,
+        update_config=_str2path(update_config),
         update_format=update_format,
         output_file=_str2path(output_file),
         output_format=output_format,
