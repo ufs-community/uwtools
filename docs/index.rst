@@ -74,6 +74,10 @@ This tool helps transform legacy configuration files templated with the atparse 
 File/Directory Provisioning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+| **CLI**: ``uw fs -h``
+| **API**: ``import uwtools.api.fs``
+
+
 This tool helps users define the source and destination of files to be copied or linked, or directories to be created, in the same UW YAML language used by UW drivers.
 
 | :any:`CLI documentation with examples<cli_fs_mode>`
