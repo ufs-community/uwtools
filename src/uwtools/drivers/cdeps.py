@@ -95,8 +95,8 @@ class CDEPS(AssetsCycleBased):
 
     # Public helper methods
 
-    @property
-    def driver_name(self) -> str:
+    @classmethod
+    def driver_name(cls) -> str:
         """
         Returns the name of this driver.
         """

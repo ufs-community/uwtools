@@ -101,7 +101,7 @@ def test_IODA_provisioned_rundir(driverobj):
 
 
 def test_IODA_driver_name(driverobj):
-    assert driverobj.driver_name == "ioda"
+    assert driverobj.driver_name() == IODA.driver_name() == "ioda"
 
 
 def test_IODA__config_fn(driverobj):

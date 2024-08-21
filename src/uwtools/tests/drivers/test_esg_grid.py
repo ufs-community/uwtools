@@ -124,4 +124,4 @@ def test_ESGGrid_provisioned_rundir(driverobj):
 
 
 def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name == "esg_grid"
+    assert driverobj.driver_name() == ESGGrid.driver_name() == "esg_grid"

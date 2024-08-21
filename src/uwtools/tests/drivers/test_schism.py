@@ -72,4 +72,4 @@ def test_SCHISM_provisioned_rundir(driverobj):
 
 
 def test_SCHISM_driver_name(driverobj):
-    assert driverobj.driver_name == "schism"
+    assert driverobj.driver_name() == SCHISM.driver_name() == "schism"

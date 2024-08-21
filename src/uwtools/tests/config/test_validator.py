@@ -9,7 +9,7 @@ from typing import Any
 from unittest.mock import patch
 
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
@@ -124,6 +124,11 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
+@mark.skip("PM FIXME")
+def test_bundle():
+    pass
+
+
 def test_get_schema_file():
     with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
         assert validator.get_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
@@ -189,6 +194,11 @@ def test__prep_config_file(prep_config_dict, tmp_path):
     cfgobj = validator._prep_config(config=path)
     assert isinstance(cfgobj, YAMLConfig)
     assert cfgobj == {"roses": "red", "color": "red"}
+
+
+@mark.skip("PM FIXME")
+def test__registry():
+    pass
 
 
 def test__validation_errors_bad_enum_value(config, schema):

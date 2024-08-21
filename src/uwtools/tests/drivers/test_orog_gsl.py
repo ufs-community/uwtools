@@ -103,7 +103,7 @@ def test_OrogGSL_topo_data_3os(driverobj):
 
 
 def test_OrogGSL_driver_name(driverobj):
-    assert driverobj.driver_name == "orog_gsl"
+    assert driverobj.driver_name() == OrogGSL.driver_name() == "orog_gsl"
 
 
 def test_OrogGSL__runcmd(driverobj):
