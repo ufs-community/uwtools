@@ -116,7 +116,7 @@ class JobScheduler(ABC):
     @property
     def _processed_props(self) -> dict[str, Any]:
         """
-        Pre-processed runscript directives,
+        Pre-processed runscript directives.
         """
         return self._props
 
@@ -188,7 +188,7 @@ class LSF(JobScheduler):
     @property
     def _processed_props(self) -> dict[str, Any]:
         """
-        Pre-processed runscript directives,
+        Pre-processed runscript directives.
         """
         props = deepcopy(self._props)
         props[_DirectivesOptional.THREADS] = props.get(_DirectivesOptional.THREADS, 1)
@@ -268,7 +268,7 @@ class PBS(JobScheduler):
     @property
     def _processed_props(self) -> dict[str, Any]:
         """
-        Pre-processed runscript directives,
+        Pre-processed runscript directives.
         """
         props = self._props
         props.update(self._select(props))
