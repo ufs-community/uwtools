@@ -100,7 +100,7 @@ def main() -> None:
 
 def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: config
+    Add subparser for mode: config
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -116,7 +116,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: config compare
+    Add subparser for mode: config compare
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -146,7 +146,7 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: config realize
+    Add subparser for mode: config realize
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -172,7 +172,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: config validate
+    Add subparser for mode: config validate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -186,7 +186,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
 
 def _dispatch_config(args: Args) -> bool:
     """
-    Dispatch logic for config mode.
+    Define dispatch logic for config mode.
 
     :param args: Parsed command-line args.
     """
@@ -200,7 +200,7 @@ def _dispatch_config(args: Args) -> bool:
 
 def _dispatch_config_compare(args: Args) -> bool:
     """
-    Dispatch logic for config compare action.
+    Define dispatch logic for config compare action.
 
     :param args: Parsed command-line args.
     """
@@ -214,7 +214,7 @@ def _dispatch_config_compare(args: Args) -> bool:
 
 def _dispatch_config_realize(args: Args) -> bool:
     """
-    Dispatch logic for config realize action.
+    Define dispatch logic for config realize action.
 
     :param args: Parsed command-line args.
     """
@@ -242,7 +242,7 @@ def _dispatch_config_realize(args: Args) -> bool:
 
 def _dispatch_config_validate(args: Args) -> bool:
     """
-    Dispatch logic for config validate action.
+    Define dispatch logic for config validate action.
 
     :param args: Parsed command-line args.
     """
@@ -258,7 +258,7 @@ def _dispatch_config_validate(args: Args) -> bool:
 
 def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: execute
+    Add subparser for mode: execute
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -285,7 +285,7 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
 
 def _dispatch_execute(args: Args) -> bool:
     """
-    Dispatch logic for execute mode.
+    Define dispatch logic for execute mode.
 
     :param args: Parsed command-line args.
     """
@@ -310,7 +310,7 @@ def _dispatch_execute(args: Args) -> bool:
 
 def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: fs
+    Add subparser for mode: fs
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -326,7 +326,7 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     """
-    Common subparser code for mode: fs {copy link makedirs}
+    Perform common subparser setup for mode: fs {copy link makedirs}
 
     :param parser: The parser to configure.
     """
@@ -343,7 +343,7 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
 
 def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: fs copy
+    Add subparser for mode: fs copy
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -353,7 +353,7 @@ def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: fs link
+    Add subparser for mode: fs link
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -363,7 +363,7 @@ def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: fs makedirs
+    Add subparser for mode: fs makedirs
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -373,7 +373,7 @@ def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
 
 def _dispatch_fs(args: Args) -> bool:
     """
-    Dispatch logic for fs mode.
+    Define dispatch logic for fs mode.
 
     :param args: Parsed command-line args.
     """
@@ -387,7 +387,7 @@ def _dispatch_fs(args: Args) -> bool:
 
 def _dispatch_fs_copy(args: Args) -> bool:
     """
-    Dispatch logic for fs copy action.
+    Define dispatch logic for fs copy action.
 
     :param args: Parsed command-line args.
     """
@@ -404,7 +404,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
 
 def _dispatch_fs_link(args: Args) -> bool:
     """
-    Dispatch logic for fs link action.
+    Define dispatch logic for fs link action.
 
     :param args: Parsed command-line args.
     """
@@ -421,7 +421,7 @@ def _dispatch_fs_link(args: Args) -> bool:
 
 def _dispatch_fs_makedirs(args: Args) -> bool:
     """
-    Dispatch logic for fs makedirs action.
+    Define dispatch logic for fs makedirs action.
 
     :param args: Parsed command-line args.
     """
@@ -441,7 +441,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
 
 def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: rocoto
+    Add subparser for mode: rocoto
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -456,7 +456,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: rocoto realize
+    Add subparser for mode: rocoto realize
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -470,7 +470,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: rocoto validate
+    Add subparser for mode: rocoto validate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -483,7 +483,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
 
 def _dispatch_rocoto(args: Args) -> bool:
     """
-    Dispatch logic for rocoto mode.
+    Define dispatch logic for rocoto mode.
 
     :param args: Parsed command-line args.
     """
@@ -496,7 +496,7 @@ def _dispatch_rocoto(args: Args) -> bool:
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
     """
-    Dispatch logic for rocoto realize action. Validate input and output.
+    Define dispatch logic for rocoto realize action. Validate input and output.
 
     :param args: Parsed command-line args.
     """
@@ -509,7 +509,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
     """
-    Dispatch logic for rocoto validate action.
+    Define dispatch logic for rocoto validate action.
 
     :param args: Parsed command-line args.
     """
@@ -521,7 +521,7 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
 
 def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: template
+    Add subparser for mode: template
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -536,7 +536,7 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_template_translate(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: template translate
+    Add subparser for mode: template translate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -550,7 +550,7 @@ def _add_subparser_template_translate(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: template render
+    Add subparser for mode: template render
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -571,7 +571,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
 
 def _dispatch_template(args: Args) -> bool:
     """
-    Dispatch logic for template mode.
+    Define dispatch logic for template mode.
 
     :param args: Parsed command-line args.
     """
@@ -584,7 +584,7 @@ def _dispatch_template(args: Args) -> bool:
 
 def _dispatch_template_render(args: Args) -> bool:
     """
-    Dispatch logic for template render action.
+    Define dispatch logic for template render action.
 
     :param args: Parsed command-line args.
     """
@@ -611,7 +611,7 @@ def _dispatch_template_render(args: Args) -> bool:
 
 def _dispatch_template_translate(args: Args) -> bool:
     """
-    Dispatch logic for template translate action.
+    Define dispatch logic for template translate action.
 
     :param args: Parsed command-line args.
     """
@@ -968,7 +968,7 @@ def _add_subparser_for_driver(
     with_leadtime: Optional[bool] = False,
 ) -> ModeChecks:
     """
-    Subparser for a standalone-driver mode.
+    Add subparser for a standalone-driver mode.
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
@@ -996,7 +996,7 @@ def _add_subparser_for_driver_task(
     with_leadtime: Optional[bool] = False,
 ) -> ActionChecks:
     """
-    Subparser for a driver action.
+    Add subparser for a driver action.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
@@ -1101,7 +1101,7 @@ def _dict_from_key_eq_val_strings(config_items: list[str]) -> dict[str, str]:
 
 def _dispatch_to_driver(name: str, args: Args) -> bool:
     """
-    Dispatch logic for a driver mode.
+    Define dispatch logic for a driver mode.
 
     :param name: Name of the driver to dispatch to.
     :param args: Parsed command-line args.
@@ -1123,7 +1123,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
 
 def _formatter(prog: str) -> HelpFormatter:
     """
-    A standard formatter for help messages.
+    Return a standard formatter for help messages.
     """
     # max_help_positions sets the maximum starting column for option help text.
     return HelpFormatter(prog, max_help_position=6)

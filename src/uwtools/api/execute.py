@@ -88,7 +88,7 @@ def execute(
 
 def tasks(module: Union[Path, str], classname: str) -> dict[str, str]:
     """
-    Returns a mapping from driver task names to their one-line descriptions.
+    Return a mapping from driver task names to their one-line descriptions.
 
     :param module: Name of driver module.
     :param classname: Name of driver class to instantiate.
@@ -104,7 +104,7 @@ def _get_driver_class(
     module: Union[Path, str], classname: str
 ) -> tuple[Optional[Type], Optional[Path]]:
     """
-    Returns the driver class.
+    Return the driver class.
 
     :param module: Name of driver module to load.
     :param classname: Name of driver class to instantiate.
@@ -124,7 +124,7 @@ def _get_driver_class(
 
 def _get_driver_module_explicit(module: Path) -> Optional[ModuleType]:
     """
-    Returns the named module found via explicit lookup of given path.
+    Return the named module found via explicit lookup of given path.
 
     :param module: Name of driver module to load.
     """
@@ -143,7 +143,7 @@ def _get_driver_module_explicit(module: Path) -> Optional[ModuleType]:
 
 def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
     """
-    Returns the named module found via implicit (sys.path-based) lookup.
+    Return the named module found via implicit (sys.path-based) lookup.
 
     :param module: Name of driver module to load.
     """

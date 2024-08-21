@@ -29,7 +29,7 @@ class Shave(DriverTimeInvariant):
     @property
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
         return STR.shave
 
@@ -38,7 +38,7 @@ class Shave(DriverTimeInvariant):
     @property
     def _runcmd(self):
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
         config = self.config["config"]

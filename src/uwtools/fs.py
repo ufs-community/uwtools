@@ -95,14 +95,14 @@ class Stager(ABC):
     @abstractmethod
     def _dst_paths(self) -> list[str]:
         """
-        Returns the paths to files or directories to create.
+        The paths to files or directories to create.
         """
 
     @property
     @abstractmethod
     def _schema(self) -> str:
         """
-        Returns the name of the schema to use for config validation.
+        The name of the schema to use for config validation.
         """
 
     def _validate(self) -> None:
@@ -122,14 +122,14 @@ class FileStager(Stager):
     @property
     def _dst_paths(self) -> list[str]:
         """
-        Returns the paths to files to create.
+        The paths to files to create.
         """
         return list(self._config.keys())
 
     @property
     def _schema(self) -> str:
         """
-        Returns the name of the schema to use for config validation.
+        The name of the schema to use for config validation.
         """
         return "files-to-stage"
 
@@ -183,7 +183,7 @@ class MakeDirs(Stager):
     @property
     def _dst_paths(self) -> list[str]:
         """
-        Returns the paths to directories to create.
+        The paths to directories to create.
         """
         paths: list[str] = self._config[STR.makedirs]
         return paths
@@ -191,6 +191,6 @@ class MakeDirs(Stager):
     @property
     def _schema(self) -> str:
         """
-        Returns the name of the schema to use for config validation.
+        The name of the schema to use for config validation.
         """
         return "makedirs"
