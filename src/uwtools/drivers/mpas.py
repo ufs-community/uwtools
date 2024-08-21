@@ -71,7 +71,7 @@ class MPAS(MPASBase):
     @property
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
         return STR.mpas
 

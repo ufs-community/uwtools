@@ -161,7 +161,7 @@ def _ensure_format(
 
 def _print_config_section(config: dict, key_path: list[str]) -> None:
     """
-    Prints the contents of the located subtree as key=value pairs, one per line.
+    Print the contents of the located subtree as key=value pairs, one per line.
 
     :param config: A config.
     :param key_path: Path of keys to subsection of config file.

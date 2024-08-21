@@ -72,5 +72,5 @@ class JEDIBase(DriverCycleBased):
     @abstractmethod
     def _config_fn(self) -> str:
         """
-        Returns the name of the config file used in execution.
+        The name of the config file used in execution.
         """

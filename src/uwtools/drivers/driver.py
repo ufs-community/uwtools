@@ -99,7 +99,7 @@ class Assets(ABC):
 
     def taskname(self, suffix: str) -> str:
         """
-        Returns a common tag for graph-task log messages.
+        Return a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
@@ -158,7 +158,7 @@ class Assets(ABC):
     @abstractmethod
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
 
     # Private helper methods
@@ -167,7 +167,7 @@ class Assets(ABC):
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
-        Returns the (sub)schema for validating the driver's namelist content.
+        Return the (sub)schema for validating the driver's namelist content.
 
         :param config_keys: Keys leading to the namelist block in the driver config.
         :param schema_keys: Keys leading to the namelist-validating (sub)schema.
@@ -387,7 +387,7 @@ class Driver(Assets):
     @property
     def _run_resources(self) -> dict[str, Any]:
         """
-        Returns platform configuration data.
+        The platform configuration data.
         """
         if not (platform := self._config_intermediate.get("platform")):
             raise UWConfigError("Required 'platform' block missing in config")
@@ -404,7 +404,7 @@ class Driver(Assets):
     @property
     def _runcmd(self) -> str:
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])
@@ -423,7 +423,7 @@ class Driver(Assets):
         scheduler: Optional[JobScheduler] = None,
     ) -> str:
         """
-        Returns a driver runscript.
+        Return a driver runscript.
 
         :param execution: Statements to execute.
         :param envcmds: Shell commands to set up runtime environment.
@@ -461,14 +461,14 @@ class Driver(Assets):
     @property
     def _runscript_path(self) -> Path:
         """
-        Returns the path to the runscript.
+        The path to the runscript.
         """
         return self.rundir / f"runscript.{self.driver_name}"
 
     @property
     def _scheduler(self) -> JobScheduler:
         """
-        Returns the job scheduler specified by the platform information.
+        The job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._run_resources)
 

@@ -49,7 +49,7 @@ def format_to_config(fmt: str) -> Type:
 
 def from_od(d: Union[OrderedDict, dict]) -> dict:
     """
-    Returns a (nested) dict with content equivalent to the given (nested) OrderedDict.
+    Return a (nested) dict with content equivalent to the given (nested) OrderedDict.
 
     :param d: A (possibly nested) OrderedDict.
     """
@@ -69,7 +69,7 @@ def log_and_error(msg: str) -> Exception:
 
 def yaml_to_str(cfg: dict) -> str:
     """
-    Returns a uwtools-conventional YAML representation of the given dict.
+    Return a uwtools-conventional YAML representation of the given dict.
 
     :param cfg: A dict object.
     """

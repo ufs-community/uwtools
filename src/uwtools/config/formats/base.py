@@ -40,7 +40,7 @@ class Config(ABC, UserDict):
 
     def __repr__(self) -> str:
         """
-        Returns the string representation of a Config object.
+        Return the string representation of a Config object.
         """
         return self._dict_to_str(self.data)
 
@@ -79,7 +79,7 @@ class Config(ABC, UserDict):
     @property
     def _depth(self) -> int:
         """
-        Returns the depth of this config's hierarchy.
+        The depth of this config's hierarchy.
         """
         return depth(self.data)
 
@@ -87,7 +87,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the string representation of the given dict.
+        Return the string representation of the given dict.
 
         :param cfg: A dict object.
         """
@@ -96,22 +96,22 @@ class Config(ABC, UserDict):
     @abstractmethod
     def _get_depth_threshold() -> Optional[int]:
         """
-        Returns the config's depth threshold.
+        Return the config's depth threshold.
         """
 
     @staticmethod
     @abstractmethod
     def _get_format() -> str:
         """
-        Returns the config's format name.
+        Return the config's format name.
         """
 
     @abstractmethod
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses a config file.
+        Read and parse a config file.
 
-        Returns the result of loading and parsing the specified config file, or stdin if no file is
+        Return the result of loading and parsing the specified config file, or stdin if no file is
         given.
 
         :param config_file: Path to config file to load.
@@ -218,7 +218,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def dump(self, path: Optional[Path]) -> None:
         """
-        Dumps the config to stdout or a file.
+        Dump the config to stdout or a file.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -227,7 +227,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary to stdout or a file.
+        Dump a provided config dictionary to stdout or a file.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).
@@ -235,7 +235,7 @@ class Config(ABC, UserDict):
 
     def update_from(self, src: Union[dict, UserDict]) -> None:
         """
-        Updates a config.
+        Update a config.
 
         :param src: The dictionary with new data to use.
         """
