@@ -40,7 +40,7 @@ class Config(ABC, UserDict):
 
     def __repr__(self) -> str:
         """
-        Returns the string representation of a Config object.
+        Return the string representation of a Config object.
         """
         return self._dict_to_str(self.data)
 
@@ -79,7 +79,7 @@ class Config(ABC, UserDict):
     @property
     def _depth(self) -> int:
         """
-        Returns the depth of this config's hierarchy.
+        Return the depth of this config's hierarchy.
         """
         return depth(self.data)
 
@@ -87,7 +87,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the string representation of the given dict.
+        Return the string representation of the given dict.
 
         :param cfg: A dict object.
         """
@@ -96,14 +96,14 @@ class Config(ABC, UserDict):
     @abstractmethod
     def _get_depth_threshold() -> Optional[int]:
         """
-        Returns the config's depth threshold.
+        Return the config's depth threshold.
         """
 
     @staticmethod
     @abstractmethod
     def _get_format() -> str:
         """
-        Returns the config's format name.
+        Return the config's format name.
         """
 
     @abstractmethod
@@ -111,7 +111,7 @@ class Config(ABC, UserDict):
         """
         Reads and parses a config file.
 
-        Returns the result of loading and parsing the specified config file, or stdin if no file is
+        Return the result of loading and parsing the specified config file, or stdin if no file is
         given.
 
         :param config_file: Path to config file to load.

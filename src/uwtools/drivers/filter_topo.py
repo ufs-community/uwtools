@@ -65,7 +65,7 @@ class FilterTopo(DriverTimeInvariant):
     @property
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        Return the name of this driver.
         """
         return STR.filtertopo
 

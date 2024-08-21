@@ -28,7 +28,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
 
     def taskname(self, suffix: str) -> str:
         """
-        Returns a common tag for graph-task log messages.
+        Return a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
@@ -39,7 +39,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
     @property
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        Return the name of this driver.
         """
         return STR.makesolomosaic
 
@@ -48,7 +48,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
     @property
     def _runcmd(self):
         """
-        Returns the full command-line component invocation.
+        Return the full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
         flags = " ".join(f"--{k} {v}" for k, v in self.config["config"].items())

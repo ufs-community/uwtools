@@ -27,7 +27,7 @@ class SHConfig(Config):
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the field-table representation of the given dict.
+        Return the field-table representation of the given dict.
 
         :param cfg: A dict object.
         """
@@ -40,14 +40,14 @@ class SHConfig(Config):
     @staticmethod
     def _get_depth_threshold() -> Optional[int]:
         """
-        Returns the config's depth threshold.
+        Return the config's depth threshold.
         """
         return 1
 
     @staticmethod
     def _get_format() -> str:
         """
-        Returns the config's format name.
+        Return the config's format name.
         """
         return FORMAT.sh
 
