@@ -16,7 +16,7 @@ from uwtools.strings import FORMAT
 
 class StdinProxy:
     """
-    Reads stdin once but permits multiple reads of its data.
+    Read stdin once and return its cached data.
     """
 
     def __init__(self) -> None:

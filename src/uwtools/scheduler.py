@@ -71,7 +71,7 @@ class JobScheduler(ABC):
 
     def submit_job(self, runscript: Path, submit_file: Optional[Path] = None) -> bool:
         """
-        Submits a job to the scheduler.
+        Submit a job to the scheduler.
 
         :param runscript: Path to the runscript.
         :param submit_file: Path to file to write output of submit command to.
@@ -243,7 +243,7 @@ class PBS(JobScheduler):
     @staticmethod
     def _placement(items: dict[str, Any]) -> dict[str, Any]:
         """
-        Placement logic.
+        Return provided items with scheduler-specific replacements.
         """
         exclusive = items.get(_DirectivesOptional.EXCLUSIVE)
         placement = items.get(_DirectivesOptional.PLACEMENT)
@@ -284,7 +284,7 @@ class PBS(JobScheduler):
 
     def _select(self, items: dict[str, Any]) -> dict[str, Any]:
         """
-        Select logic.
+        Return provided items with scheduler-specific selections.
         """
         select = []
         if nodes := items.get(_DirectivesOptional.NODES):

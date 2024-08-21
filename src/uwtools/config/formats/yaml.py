@@ -88,7 +88,7 @@ class YAMLConfig(Config):
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses a YAML file.
+        Read and parse a YAML file.
 
         See docs for Config._load().
 
@@ -124,6 +124,7 @@ class YAMLConfig(Config):
 
         :param dumper: The YAML dumper.
         :param data: The f90nml Namelist to serialize.
+        :return: A YAML mapping.
         """
         namelist_dict = data.todict()
         return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
@@ -137,6 +138,7 @@ class YAMLConfig(Config):
 
         :param dumper: The YAML dumper.
         :param data: The OrderedDict to serialize.
+        :return: A YAML mapping.
         """
 
         return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
@@ -167,7 +169,7 @@ class YAMLConfig(Config):
 
     def dump(self, path: Optional[Path] = None) -> None:
         """
-        Dumps the config in YAML format.
+        Dump the config in YAML format.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -176,7 +178,7 @@ class YAMLConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in YAML format.
+        Dump a provided config dictionary in YAML format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).
@@ -187,9 +189,7 @@ class YAMLConfig(Config):
 
 def _write_plain_open_ended(self, *args, **kwargs) -> None:
     """
-    Write YAML without ...
-
-    end-of-stream marker.
+    Write YAML without the "..." end-of-stream marker.
     """
     self.write_plain_base(*args, **kwargs)
     self.open_ended = False

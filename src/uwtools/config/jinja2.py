@@ -19,7 +19,7 @@ _ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemov
 
 class J2Template:
     """
-    Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
+    Read Jinja2 templates from files or strings, and render them using the user-provided values.
     """
 
     def __init__(
@@ -91,8 +91,6 @@ class J2Template:
     def undeclared_variables(self) -> set[str]:
         """
         The names of variables needed to render the template.
-
-        :return: Names of variables needed to render the template.
         """
         j2_parsed = self._j2env.parse(self._template_str)
         return meta.find_undeclared_variables(j2_parsed)

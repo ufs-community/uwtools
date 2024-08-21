@@ -14,7 +14,7 @@ def convert(
     input_file: Optional[Path] = None, output_file: Optional[Path] = None, dry_run: bool = False
 ) -> None:
     """
-    Replaces atparse @[] tokens with Jinja2 {{}} equivalents.
+    Replace atparse @[] tokens with Jinja2 {{}} equivalents.
 
     If no input file is given, stdin is used. If no output file is given, stdout is used. In dry-run
     mode, output is written to stderr.

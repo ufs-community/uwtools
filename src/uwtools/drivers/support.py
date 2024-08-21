@@ -19,7 +19,7 @@ def graph() -> str:
 
 def set_driver_docstring(driver_class: Type) -> None:
     """
-    Appends inherited parameter descriptions to the driver's own docstring.
+    Append inherited parameter descriptions to the driver's own docstring.
 
     :param driver_class: The class whose docstring to update.
     """

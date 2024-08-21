@@ -24,7 +24,7 @@ class CDEPS(AssetsCycleBased):
     @tasks
     def atm(self):
         """
-        Create data atmosphere configuration with all required content.
+        The data atmosphere configuration with all required content.
         """
         yield self.taskname("data atmosphere configuration")
         yield [
@@ -35,7 +35,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def atm_nml(self):
         """
-        Create data atmosphere Fortran namelist file (datm_in).
+        The data atmosphere Fortran namelist file (datm_in).
         """
         fn = "datm_in"
         yield self.taskname(f"namelist file {fn}")
@@ -47,7 +47,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def atm_stream(self):
         """
-        Create data atmosphere stream config file (datm.streams).
+        The data atmosphere stream config file (datm.streams).
         """
         fn = "datm.streams"
         yield self.taskname(f"stream file {fn}")
@@ -60,7 +60,7 @@ class CDEPS(AssetsCycleBased):
     @tasks
     def ocn(self):
         """
-        Create data ocean configuration with all required content.
+        The data ocean configuration with all required content.
         """
         yield self.taskname("data atmosphere configuration")
         yield [
@@ -71,7 +71,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def ocn_nml(self):
         """
-        Create data ocean Fortran namelist file (docn_in).
+        The data ocean Fortran namelist file (docn_in).
         """
         fn = "docn_in"
         yield self.taskname(f"namelist file {fn}")
@@ -83,7 +83,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def ocn_stream(self):
         """
-        Create data ocean stream config file (docn.streams).
+        The data ocean stream config file (docn.streams).
         """
         fn = "docn.streams"
         yield self.taskname(f"stream file {fn}")
