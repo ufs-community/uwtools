@@ -74,10 +74,22 @@ def test_realize():
 
 
 def test_realize_no_update_config():
-    kwargs: dict = {"input_config": {"n": 88}, "output_file": "output.yaml"}
+    input_config = {"n": 88}
+    output_file = Path("output.yaml")
     with patch.object(config, "_realize") as _realize:
-        config.realize(**kwargs)
-    _realize.assert_called_once_with(**kwargs)
+        config.realize(input_config=input_config, output_file=output_file)
+    _realize.assert_called_once_with(
+        input_config=input_config,
+        input_format=None,
+        update_config={},
+        update_format=None,
+        output_file=output_file,
+        output_format=None,
+        key_path=None,
+        values_needed=False,
+        total=False,
+        dry_run=False,
+    )
 
 
 def test_realize_to_dict():

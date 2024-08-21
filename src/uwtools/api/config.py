@@ -125,6 +125,8 @@ def realize(
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
+    if update_config is None and update_format is None:
+        update_config = {}
     return _realize(
         input_config=_ensure_data_source(_str2path(input_config), stdin_ok),
         input_format=input_format,
