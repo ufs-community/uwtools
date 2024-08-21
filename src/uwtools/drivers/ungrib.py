@@ -107,7 +107,7 @@ class Ungrib(DriverCycleBased):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Return the name of this driver.
+        The name of this driver.
         """
         return STR.ungrib
 
@@ -130,7 +130,9 @@ class Ungrib(DriverCycleBased):
 
 def _ext(n):
     """
-    Maps integers to 3-letter string.
+    Return a 3-letter representation of the given integer.
+
+    :param n: The integer to convert to a string representation.
     """
     b = 26
     return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]

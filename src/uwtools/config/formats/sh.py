@@ -53,7 +53,7 @@ class SHConfig(Config):
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses key=value lines from shell code.
+        Read and parse key=value lines from shell code.
 
         See docs for Config._load().
 
@@ -75,7 +75,7 @@ class SHConfig(Config):
 
     def dump(self, path: Optional[Path]) -> None:
         """
-        Dumps the config as key=value lines.
+        Dump the config as key=value lines.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -85,7 +85,7 @@ class SHConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in bash format.
+        Dump a provided config dictionary in bash format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).

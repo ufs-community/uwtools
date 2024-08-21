@@ -59,7 +59,7 @@ class JEDI(JEDIBase):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Return the name of this driver.
+        The name of this driver.
         """
         return STR.jedi
 
@@ -68,14 +68,14 @@ class JEDI(JEDIBase):
     @property
     def _config_fn(self) -> str:
         """
-        Return the name of the config file used in execution.
+        The name of the config file used in execution.
         """
         return "jedi.yaml"
 
     @property
     def _runcmd(self) -> str:
         """
-        Return the full command-line component invocation.
+        The full command-line component invocation.
         """
         execution = self.config[STR.execution]
         jedi_config = self.rundir / self._config_fn

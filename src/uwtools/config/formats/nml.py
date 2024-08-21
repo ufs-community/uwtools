@@ -63,11 +63,12 @@ class NMLConfig(Config):
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses a Fortran namelist file.
+        Read and parse a Fortran namelist file.
 
         See docs for Config._load().
 
         :param config_file: Path to config file to load.
+        :return: The parsed namelist data.
         """
         with readable(config_file) as f:
             config: dict = f90nml.read(f)
@@ -77,7 +78,7 @@ class NMLConfig(Config):
 
     def dump(self, path: Optional[Path]) -> None:
         """
-        Dumps the config in Fortran namelist format.
+        Dump the config in Fortran namelist format.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -86,7 +87,7 @@ class NMLConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: Union[dict, Namelist], path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in Fortran namelist format.
+        Dump a provided config dictionary in Fortran namelist format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).

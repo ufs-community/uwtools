@@ -54,7 +54,7 @@ class FieldTableConfig(YAMLConfig):
 
     def dump(self, path: Optional[Path] = None) -> None:
         """
-        Dumps the config in Field Table format.
+        Dump the config in Field Table format.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -63,7 +63,7 @@ class FieldTableConfig(YAMLConfig):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in Field Table format.
+        Dump a provided config dictionary in Field Table format.
 
         FMS field and tracer managers must be registered in an ASCII table called ``field_table``.
         This table lists field type, target model and methods the querying model will ask for. See

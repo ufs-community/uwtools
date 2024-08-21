@@ -59,7 +59,7 @@ class INIConfig(Config):
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses an INI file.
+        Read and parse an INI file.
 
         See docs for Config._load().
 
@@ -74,7 +74,7 @@ class INIConfig(Config):
 
     def dump(self, path: Optional[Path] = None) -> None:
         """
-        Dumps the config in INI format.
+        Dump the config in INI format.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -83,7 +83,7 @@ class INIConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in INI format.
+        Dump a provided config dictionary in INI format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).

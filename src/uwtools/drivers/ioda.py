@@ -34,7 +34,7 @@ class IODA(JEDIBase):
     @classmethod
     def driver_name(cls) -> str:
         """
-        Return the name of this driver.
+        The name of this driver.
         """
         return STR.ioda
 
@@ -43,14 +43,14 @@ class IODA(JEDIBase):
     @property
     def _config_fn(self) -> str:
         """
-        Return the name of the config file used in execution.
+        The name of the config file used in execution.
         """
         return "ioda.yaml"
 
     @property
     def _runcmd(self) -> str:
         """
-        Return the full command-line component invocation.
+        The full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
         jedi_config = str(self.rundir / self._config_fn)
