@@ -22,16 +22,17 @@ from uwtools.utils.file import resource_path
 
 def bundle(schema: dict) -> dict:
     """
-    Bundle a schema by dereferencing urn:uwtools:* references.
+    Bundle a schema by dereferencing links to other schemas.
 
     :param schema: A JSON Schema.
     :returns: The bundled schema.
     """
+    key = "$ref"
     bundled = {}
     for k, v in schema.items():
         if isinstance(v, dict):
-            if list(v.keys()) == ["$ref"] and v["$ref"].startswith("urn:uwtools:"):
-                bundled[k] = bundle(_registry().get_or_retrieve(v["$ref"]).value.contents)
+            if list(v.keys()) == [key] and v[key].startswith("urn:uwtools:"):
+                bundled[k] = bundle(_registry().get_or_retrieve(v[key]).value.contents)
             else:
                 bundled[k] = bundle(v)
         else:
