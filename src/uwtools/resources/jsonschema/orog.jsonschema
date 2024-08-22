@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "orog_gsl": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "mtnres": {
+              "type": "integer"
+            },
+            "lonb": {
+              "type": "integer"
+            },
+            "latb": {
+              "type": "integer"
+            },
+            "jcap": {
+              "type": "integer"
+            },
+            "NR": {
+              "type": "integer"
+            },
+            "NF1": {
+              "type": "integer"
+            },
+            "NF2": {
+              "type": "integer"
+            },
+            "efac": {
+              "type": "integer"
+            },
+            "blat": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "halo",
+            "input_grid_file",
+            "resolution",
+            "tile",
+            "topo_data_2p5m",
+            "topo_data_30s"
+          ]
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "config",
+        "execution",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "orog_gsl"
+  ],
+  "type": "object"
+}
