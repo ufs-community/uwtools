@@ -1,10 +1,11 @@
 {
   "properties": {
-    "orog_gsl": {
+    "orog": {
       "additionalProperties": false,
       "properties": {
-        "config": {
+        "old_line1_items": {
           "additionalProperties": false,
+          "minProperties": 9,
           "properties": {
             "mtnres": {
               "type": "integer"
@@ -18,13 +19,13 @@
             "jcap": {
               "type": "integer"
             },
-            "NR": {
+            "nr": {
               "type": "integer"
             },
-            "NF1": {
+            "nf1": {
               "type": "integer"
             },
-            "NF2": {
+            "nf2": {
               "type": "integer"
             },
             "efac": {
@@ -33,33 +34,43 @@
             "blat": {
               "type": "integer"
             }
-          },
-          "required": [
-            "halo",
-            "input_grid_file",
-            "resolution",
-            "tile",
-            "topo_data_2p5m",
-            "topo_data_30s"
-          ]
+          }
         },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
+        },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        }
+        "grid_file": {
+          "type": "string"
+        },
+        "mask": {
+          "type": "string"
+        },
+        "merge": {
+          "type": "string"
+        },
+        "orog_file": {
+          "type": "string"
         },
         "rundir": {
           "type": "string"
         }
       },
       "required": [
-        "config",
         "execution",
+        "grid_file",
         "rundir"
       ],
       "type": "object"
     }
   },
   "required": [
-    "orog_gsl"
+    "orog"
   ],
   "type": "object"
 }

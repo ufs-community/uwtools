@@ -30,16 +30,25 @@ class Orog(DriverTimeInvariant):
             for dst, src in self.config.get("files_to_copy", {}).items()
         ]
 
+    @tasks
+    def files_linked(self):
+        """
+        Files linked for run.
+        """
+        yield self.taskname("files linked")
+        yield [
+            symlink(target=Path(target), linkname=self.rundir / linkname)
+            for linkname, target in self.config.get("files_to_link", {}).items()
+        ]
+
     @external
     def grid_file(self):
         """
         The input grid file.
         """
-        grid_file = self.config.get("grid_file")
-        if grid_file is not None:
-            path = Path(grid_file)
+        grid_file = Path(self.config["grid_file"])
         yield self.taskname("Input grid file")
-        yield asset(path, path.is_file) if grid_file else None
+        yield asset(path, path.is_file) if str(grid_file) != "none" else None
 
     @task
     def input_config_file(self):
@@ -50,12 +59,23 @@ class Orog(DriverTimeInvariant):
         yield self.taskname(str(path))
         yield asset(path, path.is_file)
         yield self.grid_file()
-        inputs = self.config.get("config")
+        inputs = self.config.get("old_line1_items")
         if inputs:
-            inputs = " ".join(inputs.values())
+            ordered_entries = [
+              "mtnres",
+              "lonb",
+              "latb",
+              "jcap",
+              "nr",
+              "nf1",
+              "nf2",
+              "efac",
+              "blat",
+              ]
+            inputs = " ".join([inputs[i][1] for i in ordered_entries])
         outgrid = self.config["grid_file"]
         orogfile = self.config.get("orog_file")
-        mask_only = self.config.get("mask", False)
+        mask_only = self.config.get("mask", ".false.")
         merge_file = self.config.get("merge", "none") # string none is intentional
         content = [i for i in inputs, outgrid, orogfile, mask_only, merge_file if i is not None]
         with writable(path) as f:
@@ -69,6 +89,7 @@ class Orog(DriverTimeInvariant):
         yield self.taskname("provisioned run directory")
         yield [
             self.files_copied(),
+            self.files_linked(),
             self.input_config_file(),
             self.runscript(),
         ]
@@ -78,7 +99,7 @@ class Orog(DriverTimeInvariant):
     @property
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
         return STR.orog
 
@@ -94,7 +115,7 @@ class Orog(DriverTimeInvariant):
     @property
     def _runcmd(self):
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
         return "%s < %s" % (executable, self._namelist_path.name)
