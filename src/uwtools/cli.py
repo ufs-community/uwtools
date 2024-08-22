@@ -52,10 +52,9 @@ def main() -> None:
         setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
         args[STR.action] = args.get(STR.action, args[STR.mode])
-        if action := args.get(STR.action):
-            for check in checks[args[STR.mode]][action]:
-                check(args)
-        setup_logging(quiet=bool(args.get(STR.quiet)), verbose=bool(args.get(STR.verbose)))
+        for check in checks[args[STR.mode]].get(args[STR.action], []):
+            check(args)
+        setup_logging(quiet=args.get(STR.quiet, False), verbose=args.get(STR.verbose, False))
     except UWError as e:
         _abort(str(e))
     try:
@@ -1117,9 +1116,11 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     module = import_module("uwtools.api.%s" % name)
-    if STR.showschema in args:
+    if args.get(STR.showschema):
         print(json.dumps(module.schema(), sort_keys=True, indent=2))
         return True
+    if not args.get(STR.action):
+        _abort("No %s specified" % STR.task.upper())
     execute: Callable[..., bool] = module.execute
     kwargs = {
         "task": args[STR.action],
