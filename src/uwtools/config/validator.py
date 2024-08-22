@@ -22,7 +22,7 @@ from uwtools.utils.file import resource_path
 
 def bundle(schema: dict) -> dict:
     """
-    Bundle a schemy by dereferencing urn:uwtools:* references.
+    Bundle a schema by dereferencing urn:uwtools:* references.
 
     :param schema: A JSON Schema.
     :returns: The bundled schema.
