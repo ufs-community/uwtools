@@ -30,7 +30,7 @@ def bundle(schema: dict) -> dict:
     bundled = {}
     for k, v in schema.items():
         if isinstance(v, dict):
-            if list(v.keys()) == ["$ref"]:
+            if list(v.keys()) == ["$ref"] and v["$ref"].startswith("urn:uwtools:"):
                 bundled[k] = bundle(_registry().get_or_retrieve(v["$ref"]).value.contents)
             else:
                 bundled[k] = bundle(v)
