@@ -4,12 +4,13 @@ A driver for UFS_UTILS's orog.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import asset, external, task, tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy
+from uwtools.utils.file import writable
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class Orog(DriverTimeInvariant):
@@ -48,7 +49,7 @@ class Orog(DriverTimeInvariant):
         """
         grid_file = Path(self.config["grid_file"])
         yield self.taskname("Input grid file")
-        yield asset(path, path.is_file) if str(grid_file) != "none" else None
+        yield asset(grid_file, grid_file.is_file) if str(grid_file) != "none" else None
 
     @task
     def input_config_file(self):
@@ -62,24 +63,24 @@ class Orog(DriverTimeInvariant):
         inputs = self.config.get("old_line1_items")
         if inputs:
             ordered_entries = [
-              "mtnres",
-              "lonb",
-              "latb",
-              "jcap",
-              "nr",
-              "nf1",
-              "nf2",
-              "efac",
-              "blat",
-              ]
+                "mtnres",
+                "lonb",
+                "latb",
+                "jcap",
+                "nr",
+                "nf1",
+                "nf2",
+                "efac",
+                "blat",
+            ]
             inputs = " ".join([inputs[i][1] for i in ordered_entries])
         outgrid = self.config["grid_file"]
         orogfile = self.config.get("orog_file")
         mask_only = self.config.get("mask", ".false.")
-        merge_file = self.config.get("merge", "none") # string none is intentional
-        content = [i for i in inputs, outgrid, orogfile, mask_only, merge_file if i is not None]
+        merge_file = self.config.get("merge", "none")  # string none is intentional
+        content = [i for i in [inputs, outgrid, orogfile, mask_only, merge_file] if i is not None]
         with writable(path) as f:
-            f.write("\n".join(content)
+            f.write("\n".join(content))
 
     @tasks
     def provisioned_rundir(self):
@@ -108,7 +109,7 @@ class Orog(DriverTimeInvariant):
     @property
     def _input_config_path(self) -> Path:
         """
-        Path to the input config file
+        Path to the input config file.
         """
         return self.rundir / "INPS"
 
@@ -118,7 +119,7 @@ class Orog(DriverTimeInvariant):
         The full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
-        return "%s < %s" % (executable, self._namelist_path.name)
+        return "%s < %s" % (executable, self._input_config_path.name)
 
 
 set_driver_docstring(Orog)

@@ -1540,7 +1540,7 @@ def test_schema_namelist():
 
 
 def test_schema_orog():
-    config = {
+    config: dict = {
         "old_line1_items": {
             "blat": 0,
             "efac": 0,
@@ -1551,7 +1551,7 @@ def test_schema_orog():
             "nr": 0,
             "nf1": 0,
             "nf2": 0,
-            },
+        },
         "execution": {
             "executable": "/path/to/orog",
         },
@@ -1563,13 +1563,13 @@ def test_schema_orog():
     # Basic correctness:
     assert not errors(config)
     # All 9 config keys are requried:
-    assert f"'{key}' is a required property" in errors(with_del(config, "old_line1_items", "blat"))
+    assert "key is a required property" in errors(with_del(config, "old_line1_items", "blat"))
     # Other config keys are not allowed:
     assert "Additional properties are not allowed" in errors(
         with_set(config, "bar", "old_line_items", "foo")
     )
     # All old_line1_items keys require integer values:
-    for key in config["old_line1_items"]:
+    for key in config.get("old_line1_items", {}):
         assert "is not of type 'integer'\n" in errors(with_set(config, None, "config", key))
     # Some top level keys are required:
     for key in ["execution", "grid_file", "rundir"]:

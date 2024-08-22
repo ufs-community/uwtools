@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-orog driver tests.
+Orog driver tests.
 """
 from pathlib import Path
 from unittest.mock import DEFAULT as D
@@ -10,6 +10,7 @@ from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
+from uwtools.tests.support import regex_logged
 
 # Fixtures
 
@@ -19,7 +20,7 @@ def config(tmp_path):
     afile = tmp_path / "afile"
     afile.touch()
     return {
-        "orog":
+        "orog": {
             "old_line1_items": {
                 "blat": 0,
                 "efac": 0,
@@ -30,9 +31,8 @@ def config(tmp_path):
                 "nr": 0,
                 "nf1": 0,
                 "nf2": 0,
-                },
+            },
             "execution": {
-                "executable": "/path/to/orog",
                 "batchargs": {
                     "walltime": "00:01:00",
                 },
@@ -46,9 +46,8 @@ def config(tmp_path):
                 "baz": str(tmp_path / "baz"),
                 "qux": str(tmp_path / "qux"),
             },
-            "grid_file": str(tmp_path / "grid_file.in" ),
+            "grid_file": str(tmp_path / "grid_file.in"),
             "rundir": str(tmp_path),
-            "rundir": "/path/to/run/dir",
         },
         "platform": {
             "account": "me",
@@ -91,7 +90,7 @@ def test_Orog_files_copied(driverobj):
         Path(src).touch()
     for dst, _ in driverobj.config["files_to_copy"].items():
         assert not (driverobj.rundir / dst).is_file()
-    driverobj.files_copied() 
+    driverobj.files_copied()
     for dst, _ in driverobj.config["files_to_copy"].items():
         assert (driverobj.rundir / dst).is_file()
 
@@ -110,7 +109,7 @@ def test_Orog_grid_file_existence(caplog, driverobj):
     grid_file = driverobj.config["grid_file"]
     driverobj.grid_file()
     assert regex_logged(caplog, f"{grid_file}: State: Not Ready (external asset)")
-    path.touch()
+    grid_file.touch()
     driverobj.grid_file()
     assert regex_logged(caplog, f"{grid_file}: State: Ready (external asset)")
 
@@ -118,7 +117,7 @@ def test_Orog_grid_file_existence(caplog, driverobj):
 def test_Orog_grid_file_nonexistence(caplog, driverobj):
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
-    assert regex_logged(caplog, f"{grid_file}: State: Ready (external asset)")
+    assert regex_logged(caplog, "grid_file: State: Ready (external asset)")
 
 
 def test_Orog_input_config_file_new(driverobj):
@@ -130,6 +129,7 @@ def test_Orog_input_config_file_new(driverobj):
     assert content[0] == driverobj.config["grid_file"]
     assert content[1] == ".false."
     assert content[2] == "none"
+
 
 def test_Orog_input_config_file_old(driverobj):
     driverobj.input_config_file()
@@ -146,7 +146,7 @@ def test_Orog_input_config_file_old(driverobj):
 def test_Orog_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj, files_copied=D, files_linked=D, input_config_file=D, runscript=D
-        )  as mocks:
+    ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
