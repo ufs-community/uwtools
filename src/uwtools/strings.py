@@ -128,6 +128,7 @@ class STR:
     searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     shave: str = "shave"
+    showschema: str = "show_schema"
     stdout: str = "stdout"
     targetdir: str = "target_dir"
     task: str = "task"

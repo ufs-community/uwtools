@@ -830,6 +830,14 @@ def _add_arg_search_path(group: Group) -> None:
     )
 
 
+def _add_arg_show_schema(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.showschema),
+        action="store_true",
+        help="Show driver schema and exit",
+    )
+
+
 def _add_arg_target_dir(
     group: Group, required: bool = False, helpmsg: Optional[str] = None
 ) -> None:
@@ -977,7 +985,8 @@ def _add_subparser_for_driver(
     :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
-    _basic_setup(parser)
+    optional = _basic_setup(parser)
+    _add_arg_show_schema(optional)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
         task: _add_subparser_for_driver_task(
