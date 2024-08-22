@@ -27,12 +27,34 @@ from uwtools.utils.file import FORMAT, _stdinproxy
 # Tests
 
 
-def test_yaml_get_format():
-    assert YAMLConfig.get_format() == FORMAT.yaml
+def test_yaml__add_yaml_representers():
+    YAMLConfig._add_yaml_representers()
+    representers = yaml.Dumper.yaml_representers
+    assert support.UWYAMLConvert in representers
+    assert OrderedDict in representers
+    assert f90nml.Namelist in representers
 
 
-def test_yaml_get_depth_threshold():
-    assert YAMLConfig.get_depth_threshold() is None
+def test_yaml__get_depth_threshold():
+    assert YAMLConfig._get_depth_threshold() is None
+
+
+def test_yaml__get_format():
+    assert YAMLConfig._get_format() == FORMAT.yaml
+
+
+def test_yaml__represent_namelist():
+    YAMLConfig._add_yaml_representers()
+    namelist = f90nml.reads("&namelist\n key = value\n/\n")
+    expected = "{namelist: {key: value}}"
+    assert yaml.dump(namelist, default_flow_style=True).strip() == expected
+
+
+def test_yaml__represent_ordereddict():
+    YAMLConfig._add_yaml_representers()
+    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
+    expected = "{example: {key: value}}"
+    assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected
 
 
 def test_yaml_instantiation_depth():
@@ -186,25 +208,3 @@ def test_yaml_unexpected_error(tmp_path):
         with raises(UWConfigError) as e:
             YAMLConfig(config=cfgfile)
         assert msg in str(e.value)
-
-
-def test_yaml__add_yaml_representers():
-    YAMLConfig._add_yaml_representers()
-    representers = yaml.Dumper.yaml_representers
-    assert support.UWYAMLConvert in representers
-    assert OrderedDict in representers
-    assert f90nml.Namelist in representers
-
-
-def test_yaml__represent_namelist():
-    YAMLConfig._add_yaml_representers()
-    namelist = f90nml.reads("&namelist\n key = value\n/\n")
-    expected = "{namelist: {key: value}}"
-    assert yaml.dump(namelist, default_flow_style=True).strip() == expected
-
-
-def test_yaml__represent_ordereddict():
-    YAMLConfig._add_yaml_representers()
-    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
-    expected = "{example: {key: value}}"
-    assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected

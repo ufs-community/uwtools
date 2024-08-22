@@ -25,7 +25,7 @@ from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
-from uwtools.utils.processing import execute
+from uwtools.utils.processing import run_shell_cmd
 
 # NB: Class docstrings are programmatically defined.
 
@@ -99,7 +99,7 @@ class Assets(ABC):
 
     def taskname(self, suffix: str) -> str:
         """
-        Returns a common tag for graph-task log messages.
+        Return a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
@@ -139,7 +139,7 @@ class Assets(ABC):
         user_values = config_values.get(STR.updatevalues, {})
         if base_file := config_values.get(STR.basefile):
             cfgobj = config_class(base_file)
-            cfgobj.update_values(user_values)
+            cfgobj.update_from(user_values)
             cfgobj.dereference()
             config = cfgobj.data
             dump = partial(cfgobj.dump, path)
@@ -158,7 +158,7 @@ class Assets(ABC):
     @abstractmethod
     def driver_name(self) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
 
     # Private helper methods
@@ -167,7 +167,7 @@ class Assets(ABC):
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
-        Returns the (sub)schema for validating the driver's namelist content.
+        Return the (sub)schema for validating the driver's namelist content.
 
         :param config_keys: Keys leading to the namelist block in the driver config.
         :param schema_keys: Keys leading to the namelist-validating (sub)schema.
@@ -380,14 +380,14 @@ class Driver(Assets):
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self.rundir, log_output=True)
+        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Private helper methods
 
     @property
     def _run_resources(self) -> dict[str, Any]:
         """
-        Returns platform configuration data.
+        The platform configuration data.
         """
         if not (platform := self._config_intermediate.get("platform")):
             raise UWConfigError("Required 'platform' block missing in config")
@@ -404,7 +404,7 @@ class Driver(Assets):
     @property
     def _runcmd(self) -> str:
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])
@@ -423,7 +423,7 @@ class Driver(Assets):
         scheduler: Optional[JobScheduler] = None,
     ) -> str:
         """
-        Returns a driver runscript.
+        Return a driver runscript.
 
         :param execution: Statements to execute.
         :param envcmds: Shell commands to set up runtime environment.
@@ -461,14 +461,14 @@ class Driver(Assets):
     @property
     def _runscript_path(self) -> Path:
         """
-        Returns the path to the runscript.
+        The path to the runscript.
         """
         return self.rundir / f"runscript.{self.driver_name}"
 
     @property
     def _scheduler(self) -> JobScheduler:
         """
-        Returns the job scheduler specified by the platform information.
+        The job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._run_resources)
 
@@ -479,13 +479,8 @@ class Driver(Assets):
         :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
-        else:
-            validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
-            )
-        validate_internal(schema_name=STR.platform, config=self.config_full)
+        Assets._validate(self, schema_file)
+        validate_internal(schema_name=STR.platform, config=self._config_intermediate)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """

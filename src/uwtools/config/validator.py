@@ -21,7 +21,7 @@ from uwtools.utils.file import resource_path
 
 def get_schema_file(schema_name: str) -> Path:
     """
-    Returns the path to the JSON Schema file for a given name.
+    Return the path to the JSON Schema file for a given name.
 
     :param schema_name: Name of uwtools schema to validate the config against.
     """

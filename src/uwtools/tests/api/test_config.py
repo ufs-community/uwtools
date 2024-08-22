@@ -5,11 +5,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import yaml
-from pytest import mark
+from pytest import mark, raises
 
 from uwtools.api import config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.utils.file import FORMAT
 
 
@@ -34,11 +34,11 @@ def test_compare():
 @mark.parametrize(
     "classname,f",
     [
-        ("_FieldTableConfig", config.get_fieldtable_config),
-        ("_INIConfig", config.get_ini_config),
-        ("_NMLConfig", config.get_nml_config),
-        ("_SHConfig", config.get_sh_config),
-        ("_YAMLConfig", config.get_yaml_config),
+        ("FieldTableConfig", config.get_fieldtable_config),
+        ("INIConfig", config.get_ini_config),
+        ("NMLConfig", config.get_nml_config),
+        ("SHConfig", config.get_sh_config),
+        ("YAMLConfig", config.get_yaml_config),
     ],
 )
 def test_get_config(classname, f):
@@ -89,6 +89,31 @@ def test_realize_to_dict():
         config.realize_to_dict(**kwargs)
     realize.assert_called_once_with(
         **dict({**kwargs, **{"output_file": Path(os.devnull), "output_format": FORMAT.yaml}})
+    )
+
+
+def test_realize_update_config_from_stdin():
+    with raises(UWError) as e:
+        config.realize(input_config={}, output_file="output.yaml", update_format="yaml")
+    assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
+
+
+def test_realize_update_config_none():
+    input_config = {"n": 88}
+    output_file = Path("output.yaml")
+    with patch.object(config, "_realize") as _realize:
+        config.realize(input_config=input_config, output_file=output_file)
+    _realize.assert_called_once_with(
+        input_config=input_config,
+        input_format=None,
+        update_config=None,
+        update_format=None,
+        output_file=output_file,
+        output_format=None,
+        key_path=None,
+        values_needed=False,
+        total=False,
+        dry_run=False,
     )
 
 

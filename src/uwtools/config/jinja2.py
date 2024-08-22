@@ -19,7 +19,7 @@ _ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemov
 
 class J2Template:
     """
-    Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
+    Read Jinja2 templates from files or strings, and render them using the user-provided values.
     """
 
     def __init__(
@@ -90,9 +90,7 @@ class J2Template:
     @property
     def undeclared_variables(self) -> set[str]:
         """
-        Returns the names of variables needed to render the template.
-
-        :return: Names of variables needed to render the template.
+        The names of variables needed to render the template.
         """
         j2_parsed = self._j2env.parse(self._template_str)
         return meta.find_undeclared_variables(j2_parsed)
@@ -170,7 +168,7 @@ def render(
     :param searchpath: Paths to search for extra templates.
     :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
-    :return: The rendered template, or None.
+    :return: The unrendered template if values_needed is True, the rendered template, or None.
     """
     _report(locals())
     values = _supplement_values(
@@ -180,11 +178,11 @@ def render(
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and
-    # then return.
+    # then return the unrendered template.
 
     if values_needed:
         _values_needed(undeclared_variables)
-        return None
+        return str(template)
 
     # Render the template. If there are missing values, report them and return an error to the
     # caller.

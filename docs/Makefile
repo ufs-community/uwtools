@@ -2,7 +2,7 @@ BUILDDIR     = build
 LINKCHECKDIR = $(BUILDDIR)/linkcheck
 SOURCEDIR    = .
 SPHINXBUILD  = sphinx-build
-SPHINXOPTS   = -a -n -W
+SPHINXOPTS   = -a -n -W --keep-going
 
 .PHONY: help clean docs examples linkcheck
 

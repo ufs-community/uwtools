@@ -364,7 +364,7 @@ class _RocotoXML:
     @property
     def _doctype(self) -> Optional[str]:
         """
-        Generate the <!DOCTYPE> block with <!ENTITY> definitions.
+        The <!DOCTYPE> block with <!ENTITY> definitions.
 
         :return: The <!DOCTYPE> block if entities are defined, otherwise None.
         """

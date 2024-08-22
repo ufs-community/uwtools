@@ -52,7 +52,7 @@ def args_config_realize():
 
 
 @fixture
-def args_dispatch_file():
+def args_dispatch_fs():
     return {
         "target_dir": "/target/dir",
         "config_file": "/config/file",
@@ -102,17 +102,17 @@ def test__add_subparser_config_validate(subparsers):
 
 
 def test__add_subparser_file(subparsers):
-    cli._add_subparser_file(subparsers)
-    assert actions(subparsers.choices[STR.file]) == [STR.copy, STR.link]
+    cli._add_subparser_fs(subparsers)
+    assert actions(subparsers.choices[STR.fs]) == [STR.copy, STR.link, STR.makedirs]
 
 
 def test__add_subparser_file_copy(subparsers):
-    cli._add_subparser_file_copy(subparsers)
+    cli._add_subparser_fs_copy(subparsers)
     assert subparsers.choices[STR.copy]
 
 
 def test__add_subparser_file_link(subparsers):
-    cli._add_subparser_file_link(subparsers)
+    cli._add_subparser_fs_link(subparsers)
     assert subparsers.choices[STR.link]
 
 
@@ -177,7 +177,7 @@ def test__dispatch_execute():
         "task": "eighty_eight",
         "stdin_ok": True,
     }
-    with patch.object(cli.uwtools.api.driver, "execute") as execute:
+    with patch.object(cli.uwtools.api.execute, "execute") as execute:
         cli._dispatch_execute(args=args)
         execute.assert_called_once_with(
             classname="TestDriver",
@@ -376,35 +376,26 @@ def test__dispatch_config_validate_config_obj():
 
 
 @mark.parametrize(
-    "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
+    "action, funcname",
+    [
+        (STR.copy, "_dispatch_fs_copy"),
+        (STR.link, "_dispatch_fs_link"),
+        (STR.makedirs, "_dispatch_fs_makedirs"),
+    ],
 )
-def test__dispatch_file(action, funcname):
+def test__dispatch_fs(action, funcname):
     args = {STR.action: action}
     with patch.object(cli, funcname) as func:
-        cli._dispatch_file(args)
+        cli._dispatch_fs(args)
     func.assert_called_once_with(args)
 
 
-def test__dispatch_file_copy(args_dispatch_file):
-    args = args_dispatch_file
-    with patch.object(cli.uwtools.api.file, "copy") as copy:
-        cli._dispatch_file_copy(args)
-    copy.assert_called_once_with(
-        target_dir=args["target_dir"],
-        config=args["config_file"],
-        cycle=args["cycle"],
-        leadtime=args["leadtime"],
-        keys=args["keys"],
-        dry_run=args["dry_run"],
-        stdin_ok=args["stdin_ok"],
-    )
-
-
-def test__dispatch_file_link(args_dispatch_file):
-    args = args_dispatch_file
-    with patch.object(cli.uwtools.api.file, "link") as link:
-        cli._dispatch_file_link(args)
-    link.assert_called_once_with(
+@mark.parametrize("action", ["copy", "link", "makedirs"])
+def test__dispatch_fs_action(action, args_dispatch_fs):
+    args = args_dispatch_fs
+    with patch.object(cli.uwtools.api.fs, action) as a:
+        getattr(cli, f"_dispatch_fs_{action}")(args)
+    a.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
         cycle=args["cycle"],

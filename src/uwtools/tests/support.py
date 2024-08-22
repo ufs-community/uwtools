@@ -36,7 +36,7 @@ def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
 
 def fixture_pathobj(suffix: str = "") -> Path:
     """
-    Returns a pathlib Path object to a test-fixture resource file.
+    Return a pathlib Path object to a test-fixture resource file.
 
     :param suffix: A subpath relative to the location of the unit-test fixture resource files. The
         prefix path to the resources files is known to Python and varies based on installation
@@ -49,7 +49,7 @@ def fixture_pathobj(suffix: str = "") -> Path:
 
 def fixture_path(suffix: str = "") -> Path:
     """
-    Returns a POSIX path to a test-fixture resource file.
+    Return a POSIX path to a test-fixture resource file.
 
     :param suffix: A subpath relative to the location of the unit-test fixture resource files. The
         prefix path to the resources files is known to Python and varies based on installation

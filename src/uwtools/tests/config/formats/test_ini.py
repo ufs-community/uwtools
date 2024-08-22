@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.config.formats.ini module.
 """
@@ -15,21 +15,15 @@ from uwtools.utils.file import FORMAT
 # Tests
 
 
-def test_ini_get_format():
-    assert INIConfig.get_format() == FORMAT.ini
+def test_ini__get_depth_threshold():
+    assert INIConfig._get_depth_threshold() == 2
 
 
-def test_ini_get_depth_threshold():
-    assert INIConfig.get_depth_threshold() == 2
+def test_ini__get_format():
+    assert INIConfig._get_format() == FORMAT.ini
 
 
-def test_ini_instantiation_depth():
-    with raises(UWConfigError) as e:
-        INIConfig(config={1: {2: {3: 4}}})
-    assert str(e.value) == "Cannot instantiate depth-2 INIConfig with depth-3 config"
-
-
-def test_ini_parse_include():
+def test_ini__parse_include():
     """
     Test that an INI file handles include tags properly.
     """
@@ -38,6 +32,12 @@ def test_ini_parse_include():
     assert cfgobj["config"]["how_many"] == "17"
     assert cfgobj["config"]["meat"] == "beef"
     assert len(cfgobj["config"]) == 5
+
+
+def test_ini_instantiation_depth():
+    with raises(UWConfigError) as e:
+        INIConfig(config={1: {2: {3: 4}}})
+    assert str(e.value) == "Cannot instantiate depth-2 INIConfig with depth-3 config"
 
 
 @mark.parametrize("func", [repr, str])
