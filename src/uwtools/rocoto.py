@@ -218,6 +218,8 @@ class _RocotoXML:
             self._add_task_dependency_datadep(e, config)
         elif tag == STR.taskdep:
             self._add_task_dependency_taskdep(e, config)
+        elif tag == STR.metataskdep:
+            self._add_task_dependency_metataskdep(e, config)
         elif tag == STR.taskvalid:
             self._add_task_dependency_taskvalid(e, config)
         elif tag == STR.timedep:
@@ -234,6 +236,15 @@ class _RocotoXML:
         """
         e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
         self._set_attrs(e, config)
+
+    def _add_task_dependency_metataskdep(self, e: _Element, config: dict) -> None:
+        """
+        Add a <metataskdep> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._set_attrs(SubElement(e, STR.metataskdep), config)
 
     def _add_task_dependency_sh(
         self, e: _Element, config: dict, name_attr: Optional[str] = None
@@ -437,6 +448,7 @@ class STR:
     log: str = "log"
     memory: str = "memory"
     metatask: str = "metatask"
+    metataskdep: str = "metataskdep"
     name: str = "name"
     nand: str = "nand"
     native: str = "native"
