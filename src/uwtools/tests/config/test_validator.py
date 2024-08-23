@@ -6,10 +6,10 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import yaml
-from pytest import fixture, mark, raises
+from pytest import fixture, raises
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
@@ -124,9 +124,16 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-@mark.skip("PM FIXME")
 def test_bundle():
-    pass
+    schema = {"fruit": {"$ref": "urn:uwtools:a"}}
+    with patch.object(validator, "_registry") as _registry:
+        outer = Mock()
+        outer.value.contents = {"a": {"$ref": "urn:uwtools:attrs"}, "b": {"name": "banana"}}
+        inner = Mock()
+        inner.value.contents = {"name": "apple"}
+        _registry().get_or_retrieve.side_effect = [outer, inner]
+        bundled = validator.bundle(schema)
+    assert bundled == {"fruit": {"a": {"name": "apple"}, "b": {"name": "banana"}}}
 
 
 def test_get_schema_file():
