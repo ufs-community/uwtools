@@ -52,9 +52,9 @@ def main() -> None:
         setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
         args[STR.action] = args.get(STR.action, args[STR.mode])
-        for check in checks[args[STR.mode]][args[STR.action]]:
+        for check in checks[args[STR.mode]].get(args[STR.action], []):
             check(args)
-        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
+        setup_logging(quiet=args.get(STR.quiet, False), verbose=args.get(STR.verbose, False))
     except UWError as e:
         _abort(str(e))
     try:
@@ -830,6 +830,14 @@ def _add_arg_search_path(group: Group) -> None:
     )
 
 
+def _add_arg_show_schema(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.showschema),
+        action="store_true",
+        help="Show driver schema and exit",
+    )
+
+
 def _add_arg_target_dir(
     group: Group, required: bool = False, helpmsg: Optional[str] = None
 ) -> None:
@@ -977,8 +985,9 @@ def _add_subparser_for_driver(
     :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    optional = _basic_setup(parser)
+    _add_arg_show_schema(optional)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper(), required=False)
     return {
         task: _add_subparser_for_driver_task(
             subparsers, task, helpmsg, with_batch, with_cycle, with_leadtime
@@ -1026,7 +1035,7 @@ def _add_subparser_for_driver_task(
     return checks
 
 
-def _add_subparsers(parser: Parser, dest: str, metavar: str) -> Subparsers:
+def _add_subparsers(parser: Parser, dest: str, metavar: str, required: bool = True) -> Subparsers:
     """
     Add subparsers to a parser.
 
@@ -1036,7 +1045,7 @@ def _add_subparsers(parser: Parser, dest: str, metavar: str) -> Subparsers:
     :return: The new subparsers object.
     """
     return parser.add_subparsers(
-        dest=dest, metavar=metavar, required=True, title="Positional arguments"
+        dest=dest, metavar=metavar, required=required, title="Positional arguments"
     )
 
 
@@ -1106,7 +1115,13 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param name: Name of the driver to dispatch to.
     :param args: Parsed command-line args.
     """
-    execute: Callable[..., bool] = import_module("uwtools.api.%s" % name).execute
+    module = import_module("uwtools.api.%s" % name)
+    if args.get(STR.showschema):
+        print(json.dumps(module.schema(), sort_keys=True, indent=2))
+        return True
+    if not args.get(STR.action):
+        _abort("No %s specified" % STR.task.upper())
+    execute: Callable[..., bool] = module.execute
     kwargs = {
         "task": args[STR.action],
         "config": args[STR.cfgfile],

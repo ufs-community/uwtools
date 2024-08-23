@@ -52,3 +52,11 @@ Its contents are described in section :ref:`global_equiv_resol_yaml`.
      $ uw global_equiv_resol run --config-file config.yaml --batch --dry-run
 
 .. include:: /shared/key_path.rst
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: global_equiv_resol/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: global_equiv_resol/show-schema.out
+   :language: text

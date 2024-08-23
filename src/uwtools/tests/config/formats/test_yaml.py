@@ -155,10 +155,10 @@ def test_yaml_constructor_error_not_dict_from_file(tmp_path):
 
 def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
-    with StringIO("a string") as sio, patch.object(sys, "stdin", new=sio):
+    with StringIO("88") as sio, patch.object(sys, "stdin", new=sio):
         with raises(exceptions.UWConfigError) as e:
             YAMLConfig()
-    assert "Parsed a str value from stdin, expected a dict" in str(e.value)
+    assert "Parsed an int value from stdin, expected a dict" in str(e.value)
 
 
 def test_yaml_constructor_error_unregistered_constructor(tmp_path):

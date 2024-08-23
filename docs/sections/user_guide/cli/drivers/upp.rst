@@ -58,3 +58,11 @@ Its contents are described in depth in section :ref:`upp_yaml`.
   .. code-block:: text
 
      $ uw upp provisioned_rundir --config-file config.yaml --cycle 2024-05-06T12 --leadtime 6 --batch
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: upp/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: upp/show-schema.out
+   :language: text

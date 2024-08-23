@@ -6,7 +6,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import yaml
 from pytest import fixture, raises
@@ -124,6 +124,21 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
+def test_bundle():
+    schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
+    with patch.object(validator, "_registry") as _registry:
+        outer, inner = Mock(), Mock()
+        outer.value.contents = {"a": {"$ref": "urn:uwtools:attrs"}, "b": {"name": "banana"}}
+        inner.value.contents = {"name": "apple"}
+        _registry().get_or_retrieve.side_effect = [outer, inner]
+        bundled = validator.bundle(schema)
+    assert bundled == {"fruit": {"a": {"name": "apple"}, "b": {"name": "banana"}}, "flowers": None}
+    assert [_registry().get_or_retrieve.mock_calls[i].args[0] for i in (0, 1)] == [
+        "urn:uwtools:a",
+        "urn:uwtools:attrs",
+    ]
+
+
 def test_get_schema_file():
     with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
         assert validator.get_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
@@ -189,6 +204,18 @@ def test__prep_config_file(prep_config_dict, tmp_path):
     cfgobj = validator._prep_config(config=path)
     assert isinstance(cfgobj, YAMLConfig)
     assert cfgobj == {"roses": "red", "color": "red"}
+
+
+def test__registry(tmp_path):
+    validator._registry.cache_clear()
+    d = {"foo": "bar"}
+    path = tmp_path / "foo-bar.jsonschema"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(d, f)
+    with patch.object(validator, "resource_path", return_value=path) as resource_path:
+        r = validator._registry()
+        assert r.get_or_retrieve("urn:uwtools:foo-bar").value.contents == d
+    resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
 def test__validation_errors_bad_enum_value(config, schema):

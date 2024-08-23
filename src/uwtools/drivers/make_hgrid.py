@@ -26,8 +26,8 @@ class MakeHgrid(DriverTimeInvariant):
 
     # Public helper methods
 
-    @property
-    def driver_name(self) -> str:
+    @classmethod
+    def driver_name(cls) -> str:
         """
         The name of this driver.
         """

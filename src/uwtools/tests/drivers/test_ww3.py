@@ -80,4 +80,4 @@ def test_WaveWatchIII_restart_directory(driverobj):
 
 
 def test_WaveWatchIII_driver_name(driverobj):
-    assert driverobj.driver_name == "ww3"
+    assert driverobj.driver_name() == WaveWatchIII.driver_name() == "ww3"

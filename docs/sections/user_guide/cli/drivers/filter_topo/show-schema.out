@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "filter_topo": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "input_grid_file": {
+              "type": "string"
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "filter_topo"
+  ],
+  "type": "object"
+}

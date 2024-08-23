@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "chgres_cube": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "chgres_cube"
+  ],
+  "type": "object"
+}

@@ -100,9 +100,10 @@ class YAMLConfig(Config):
                 config = yaml.load(f.read(), Loader=loader)
                 if isinstance(config, dict):
                     return config
+                t = type(config).__name__
                 raise UWConfigError(
-                    "Parsed a %s value from %s, expected a dict"
-                    % (type(config).__name__, config_file or "stdin")
+                    "Parsed a%s %s value from %s, expected a dict"
+                    % ("n" if t[0] in "aeiou" else "", t, config_file or "stdin")
                 )
             except yaml.constructor.ConstructorError as e:
                 if e.problem:

@@ -84,7 +84,7 @@ def test_GlobalEquivResol_provisioned_rundir(driverobj):
 
 
 def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name == "global_equiv_resol"
+    assert driverobj.driver_name() == GlobalEquivResol.driver_name() == "global_equiv_resol"
 
 
 def test_GlobalEquivResol__runcmd(driverobj):

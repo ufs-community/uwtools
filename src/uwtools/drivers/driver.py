@@ -19,7 +19,13 @@ from iotaa import asset, dryrun, external, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
-from uwtools.config.validator import get_schema_file, validate, validate_external, validate_internal
+from uwtools.config.validator import (
+    bundle,
+    get_schema_file,
+    validate,
+    validate_external,
+    validate_internal,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -56,9 +62,9 @@ class Assets(ABC):
         self._config_full: dict = config_input.data
         self._config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
         try:
-            self._config: dict = self._config_intermediate[self.driver_name]
+            self._config: dict = self._config_intermediate[self.driver_name()]
         except KeyError as e:
-            raise UWConfigError("Required '%s' block missing in config" % self.driver_name) from e
+            raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
         if controller:
             self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
         self._validate(schema_file)
@@ -74,7 +80,7 @@ class Assets(ABC):
         return " ".join(filter(None, [str(self), cycle, leadtime, "in", self.config[STR.rundir]]))
 
     def __str__(self) -> str:
-        return self.driver_name
+        return self.driver_name()
 
     @property
     def config(self) -> dict:
@@ -97,6 +103,14 @@ class Assets(ABC):
         """
         return Path(self.config[STR.rundir]).absolute()
 
+    @classmethod
+    def schema(cls) -> dict:
+        """
+        Return the driver's schema.
+        """
+        with open(get_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
+            return bundle(json.load(f))
+
     def taskname(self, suffix: str) -> str:
         """
         Return a common tag for graph-task log messages.
@@ -110,7 +124,7 @@ class Assets(ABC):
             if cycle and leadtime is not None
             else cycle.strftime("%Y%m%d %HZ") if cycle else None
         )
-        return " ".join(filter(None, [timestr, self.driver_name, suffix]))
+        return " ".join(filter(None, [timestr, self.driver_name(), suffix]))
 
     # Workflow tasks
 
@@ -154,9 +168,9 @@ class Assets(ABC):
 
     # Public helper methods
 
-    @property
+    @classmethod
     @abstractmethod
-    def driver_name(self) -> str:
+    def driver_name(cls) -> str:
         """
         The name of this driver.
         """
@@ -177,12 +191,12 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = get_schema_file(schema_name=self.driver_name.replace("_", "-"))
+            schema_file = get_schema_file(schema_name=self._schema_name())
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
                 STR.properties,
-                self.driver_name,
+                self.driver_name(),
                 STR.properties,
                 STR.namelist,
                 STR.properties,
@@ -190,6 +204,13 @@ class Assets(ABC):
             ]:
                 schema = schema[schema_key]
         return schema
+
+    @classmethod
+    def _schema_name(cls) -> str:
+        """
+        Return the filename stem for this driver's schema file.
+        """
+        return cls.driver_name().replace("_", "-")
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
@@ -201,9 +222,7 @@ class Assets(ABC):
         if schema_file:
             validate_external(schema_file=schema_file, config=self._config_intermediate)
         else:
-            validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
-            )
+            validate_internal(schema_name=self._schema_name(), config=self._config_intermediate)
 
 
 class AssetsCycleBased(Assets):
@@ -463,7 +482,7 @@ class Driver(Assets):
         """
         The path to the runscript.
         """
-        return self.rundir / f"runscript.{self.driver_name}"
+        return self.rundir / f"runscript.{self.driver_name()}"
 
     @property
     def _scheduler(self) -> JobScheduler:

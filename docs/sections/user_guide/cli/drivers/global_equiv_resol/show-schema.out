@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "global_equiv_resol": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "global_equiv_resol"
+  ],
+  "type": "object"
+}

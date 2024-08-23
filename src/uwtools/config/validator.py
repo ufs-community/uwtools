@@ -3,6 +3,7 @@ Support for validating a config using JSON Schema.
 """
 
 import json
+from functools import cache
 from pathlib import Path
 from typing import Optional, Union
 
@@ -17,6 +18,27 @@ from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
 # Public functions
+
+
+def bundle(schema: dict) -> dict:
+    """
+    Bundle a schema by dereferencing links to other schemas.
+
+    :param schema: A JSON Schema.
+    :returns: The bundled schema.
+    """
+    key = "$ref"
+    bundled = {}
+    for k, v in schema.items():
+        if isinstance(v, dict):
+            if list(v.keys()) == [key] and v[key].startswith("urn:uwtools:"):
+                # i.e. the current key's value is of the form: {"$ref": "urn:uwtools:.*"}
+                bundled[k] = bundle(_registry().get_or_retrieve(v[key]).value.contents)
+            else:
+                bundled[k] = bundle(v)
+        else:
+            bundled[k] = v
+    return bundled
 
 
 def get_schema_file(schema_name: str) -> Path:
@@ -95,13 +117,10 @@ def _prep_config(config: Union[dict, YAMLConfig, Optional[Path]]) -> YAMLConfig:
     return cfgobj
 
 
-def _validation_errors(config: Union[dict, list], schema: dict) -> list[ValidationError]:
+@cache
+def _registry() -> Registry:
     """
-    Identify schema-validation errors.
-
-    :param config: A config to validate.
-    :param schema: JSON Schema to validate the config against.
-    :return: Any validation errors.
+    Return a JSON Schema registry resolving urn:uwtools:* references.
     """
 
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
@@ -111,6 +130,16 @@ def _validation_errors(config: Union[dict, list], schema: dict) -> list[Validati
         with open(resource_path(f"jsonschema/{name}.jsonschema"), "r", encoding="utf-8") as f:
             return Resource(contents=json.load(f), specification=DRAFT202012)  # type: ignore
 
-    registry = Registry(retrieve=retrieve)  # type: ignore
-    validator = Draft202012Validator(schema, registry=registry)
+    return Registry(retrieve=retrieve)  # type: ignore
+
+
+def _validation_errors(config: Union[dict, list], schema: dict) -> list[ValidationError]:
+    """
+    Identify schema-validation errors.
+
+    :param config: A config to validate.
+    :param schema: JSON Schema to validate the config against.
+    :return: Any validation errors.
+    """
+    validator = Draft202012Validator(schema, registry=_registry())
     return list(validator.iter_errors(config))
