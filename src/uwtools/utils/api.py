@@ -38,7 +38,7 @@ def make_execute(
     with_leadtime: Optional[bool] = False,
 ) -> Callable[..., bool]:
     """
-    Returns a function that executes tasks for the given driver.
+    Return a function that executes tasks for the given driver.
 
     :param driver_class: The driver class whose tasks to execute.
     :param with_cycle: Does the driver's constructor take a 'cycle' parameter?

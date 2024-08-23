@@ -58,3 +58,11 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
   .. code-block:: text
 
      $ uw chgres_cube provisioned_rundir --config-file config.yaml --cycle 2023-12-15T18 --batch
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: chgres_cube/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: chgres_cube/show-schema.out
+   :language: text

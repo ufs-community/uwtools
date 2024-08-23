@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "makedirs": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "makedirs"
+  ],
+  "type": "object"
+}

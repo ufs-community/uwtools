@@ -126,7 +126,7 @@ def test_Ungrib_vtable(driverobj):
 
 
 def test_Ungrib_driver_name(driverobj):
-    assert driverobj.driver_name == "ungrib"
+    assert driverobj.driver_name() == Ungrib.driver_name() == "ungrib"
 
 
 def test_Ungrib__gribfile(driverobj):

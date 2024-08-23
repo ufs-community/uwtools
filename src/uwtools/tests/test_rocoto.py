@@ -206,6 +206,15 @@ class Test__RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
+    def test__add_task_dependency_metataskdep(self, instance, root):
+        config = {"metataskdep": {"attrs": {"metatask": "foo"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        child = dependency[0]
+        assert child.tag == "metataskdep"
+        assert child.get("metatask") == "foo"
+
     @mark.parametrize(
         "tag_config",
         [("and", {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}})],

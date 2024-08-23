@@ -59,8 +59,8 @@ def test_tasks():
         def t3(self):
             "@tasks t3"
 
-        @property
-        def driver_name(self):
+        @classmethod
+        def driver_name(cls):
             pass
 
         @property

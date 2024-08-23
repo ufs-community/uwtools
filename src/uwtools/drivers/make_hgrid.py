@@ -26,10 +26,10 @@ class MakeHgrid(DriverTimeInvariant):
 
     # Public helper methods
 
-    @property
-    def driver_name(self) -> str:
+    @classmethod
+    def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
         return STR.makehgrid
 
@@ -38,7 +38,7 @@ class MakeHgrid(DriverTimeInvariant):
     @property
     def _runcmd(self):
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
         config = self.config["config"]

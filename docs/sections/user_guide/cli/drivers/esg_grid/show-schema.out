@@ -1,0 +1,21 @@
+{
+  "$defs": {
+    "base_file": {
+      "type": "string"
+    },
+    "namelist_content": {
+      "additionalproperties": false,
+      "properties": {
+        "regional_grid_nml": {
+          "additionalProperties": false,
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "esg_grid"
+  ],
+  "type": "object"
+}

@@ -65,7 +65,7 @@ class YAMLConfig(Config):
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the YAML representation of the given dict.
+        Return the YAML representation of the given dict.
 
         :param cfg: The in-memory config object.
         """
@@ -75,20 +75,20 @@ class YAMLConfig(Config):
     @staticmethod
     def _get_depth_threshold() -> Optional[int]:
         """
-        Returns the config's depth threshold.
+        Return the config's depth threshold.
         """
         return None
 
     @staticmethod
     def _get_format() -> str:
         """
-        Returns the config's format name.
+        Return the config's format name.
         """
         return FORMAT.yaml
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses a YAML file.
+        Read and parse a YAML file.
 
         See docs for Config._load().
 
@@ -100,9 +100,10 @@ class YAMLConfig(Config):
                 config = yaml.load(f.read(), Loader=loader)
                 if isinstance(config, dict):
                     return config
+                t = type(config).__name__
                 raise UWConfigError(
-                    "Parsed a %s value from %s, expected a dict"
-                    % (type(config).__name__, config_file or "stdin")
+                    "Parsed a%s %s value from %s, expected a dict"
+                    % ("n" if t[0] in "aeiou" else "", t, config_file or "stdin")
                 )
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
@@ -124,6 +125,7 @@ class YAMLConfig(Config):
 
         :param dumper: The YAML dumper.
         :param data: The f90nml Namelist to serialize.
+        :return: A YAML mapping.
         """
         namelist_dict = data.todict()
         return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
@@ -137,13 +139,14 @@ class YAMLConfig(Config):
 
         :param dumper: The YAML dumper.
         :param data: The OrderedDict to serialize.
+        :return: A YAML mapping.
         """
 
         return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
-        Returns a dictionary with include tags processed.
+        Return a dictionary with include tags processed.
 
         :param loader: The YAML loader.
         :param node: A YAML node.
@@ -154,7 +157,7 @@ class YAMLConfig(Config):
     @property
     def _yaml_loader(self) -> type[yaml.SafeLoader]:
         """
-        Set up the loader with the appropriate constructors.
+        The loader, with appropriate constructors added.
         """
         loader = yaml.SafeLoader
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
@@ -167,7 +170,7 @@ class YAMLConfig(Config):
 
     def dump(self, path: Optional[Path] = None) -> None:
         """
-        Dumps the config in YAML format.
+        Dump the config in YAML format.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -176,7 +179,7 @@ class YAMLConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in YAML format.
+        Dump a provided config dictionary in YAML format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).
@@ -187,9 +190,7 @@ class YAMLConfig(Config):
 
 def _write_plain_open_ended(self, *args, **kwargs) -> None:
     """
-    Write YAML without ...
-
-    end-of-stream marker.
+    Write YAML without the "..." end-of-stream marker.
     """
     self.write_plain_base(*args, **kwargs)
     self.open_ended = False

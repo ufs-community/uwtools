@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "ungrib": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+...
+        "vtable"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "ungrib"
+  ],
+  "type": "object"
+}

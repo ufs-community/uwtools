@@ -2,7 +2,7 @@ usage: uw cdeps atm --cycle CYCLE [-h] [--version] [--config-file PATH]
                     [--dry-run] [--graph-file PATH] [--key-path KEY[.KEY...]]
                     [--quiet] [--verbose]
 
-Create data atmosphere configuration with all required content
+The data atmosphere configuration with all required content
 
 Required arguments:
   --cycle CYCLE

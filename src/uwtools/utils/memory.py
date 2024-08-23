@@ -25,7 +25,7 @@ class Memory:
     @property
     def measurement(self):
         """
-        Returns the measurement (MB, KB, etc.)
+        The measurement (MB, KB, etc.)
         """
         if self._measurement is None:
             self._measurement = self._value[-2:]
@@ -34,7 +34,7 @@ class Memory:
     @property
     def quantity(self):
         """
-        Returns the quantity.
+        The quantity.
         """
         if self._quantity is None:
             self._quantity = float(self._value[0:-2])
@@ -42,7 +42,7 @@ class Memory:
 
     def convert(self, measurement: str):
         """
-        Converts the current representation to another measurement.
+        Convert the current representation to another measurement.
         """
         quantity = (MAP[self.measurement] / MAP[measurement.upper()]) * self.quantity
 

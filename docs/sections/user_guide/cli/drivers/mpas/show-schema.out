@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "mpas": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+...
+        "streams"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "mpas"
+  ],
+  "type": "object"
+}

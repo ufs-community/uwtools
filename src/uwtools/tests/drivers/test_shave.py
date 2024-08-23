@@ -81,7 +81,7 @@ def test_Shave_provisioned_rundir(driverobj):
 
 
 def test_Shave_driver_name(driverobj):
-    assert driverobj.driver_name == "shave"
+    assert driverobj.driver_name() == Shave.driver_name() == "shave"
 
 
 def test_Shave__runcmd(driverobj):

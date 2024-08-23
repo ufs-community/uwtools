@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "mpas_init": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_conditions": {
+          "additionalProperties": false,
+          "properties": {
+            "interval_hours": {
+              "minimum": 1,
+...
+        "streams"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "mpas_init"
+  ],
+  "type": "object"
+}

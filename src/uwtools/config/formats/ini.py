@@ -26,7 +26,7 @@ class INIConfig(Config):
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the INI representation of the given dict.
+        Return the INI representation of the given dict.
 
         :param cfg: A dict object.
         """
@@ -46,20 +46,20 @@ class INIConfig(Config):
     @staticmethod
     def _get_depth_threshold() -> Optional[int]:
         """
-        Returns the config's depth threshold.
+        Return the config's depth threshold.
         """
         return 2
 
     @staticmethod
     def _get_format() -> str:
         """
-        Returns the config's format name.
+        Return the config's format name.
         """
         return FORMAT.ini
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses an INI file.
+        Read and parse an INI file.
 
         See docs for Config._load().
 
@@ -74,7 +74,7 @@ class INIConfig(Config):
 
     def dump(self, path: Optional[Path] = None) -> None:
         """
-        Dumps the config in INI format.
+        Dump the config in INI format.
 
         :param path: Path to dump config to (default: stdout).
         """
@@ -83,7 +83,7 @@ class INIConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in INI format.
+        Dump a provided config dictionary in INI format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to (default: stdout).

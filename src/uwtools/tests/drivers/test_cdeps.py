@@ -112,7 +112,7 @@ def test_CDEPS_streams(driverobj, group):
 
 
 def test_CDEPS_driver_name(driverobj):
-    assert driverobj.driver_name == "cdeps"
+    assert driverobj.driver_name() == CDEPS.driver_name() == "cdeps"
 
 
 def test_CDEPS__model_namelist_file(driverobj):

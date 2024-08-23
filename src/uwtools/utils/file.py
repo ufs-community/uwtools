@@ -11,13 +11,12 @@ from pathlib import Path
 from typing import IO, Any, Generator, Optional, Union
 
 from uwtools.exceptions import UWError
-from uwtools.logging import log
 from uwtools.strings import FORMAT
 
 
 class StdinProxy:
     """
-    Reads stdin once but permits multiple reads of its data.
+    Read stdin once and return its cached data.
     """
 
     def __init__(self) -> None:
@@ -43,7 +42,7 @@ def _stdinproxy():
 
 def get_file_format(path: Path) -> str:
     """
-    Returns a standardized file format name given a path/filename.
+    Return a standardized file format name given a path/filename.
 
     :param path: A path or filename.
     :return: One of a set of supported file-format names.
@@ -52,15 +51,14 @@ def get_file_format(path: Path) -> str:
     suffix = Path(path).suffix.replace(".", "")
     try:
         return FORMAT.formats()[suffix]
-    except KeyError as e:
+    except KeyError:
         msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-        log.critical(msg)
-        raise UWError(msg) from e
+        raise UWError(msg) from None
 
 
 def path_if_it_exists(path: str) -> str:
     """
-    Returns the given path as an absolute path if it exists, and raises an exception otherwise.
+    Return the given path as an absolute path if it exists, and raises an exception otherwise.
 
     :param path: The filesystem path to test.
     :return: The same filesystem path as an absolute path.
@@ -93,7 +91,7 @@ def readable(
 
 def resource_path(suffix: str = "") -> Path:
     """
-    Returns a pathlib Path object to a uwtools resource file.
+    Return a pathlib Path object to a uwtools resource file.
 
     :param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
         to the resources files is known to Python and varies based on installation location.

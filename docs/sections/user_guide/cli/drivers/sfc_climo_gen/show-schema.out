@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "sfc_climo_gen": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "sfc_climo_gen"
+  ],
+  "type": "object"
+}
