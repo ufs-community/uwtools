@@ -3,20 +3,20 @@
 
 .. include:: /shared/idempotent.rst
 
-The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``orog
+The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``orog``.
 
-.. literalinclude:: orog
+.. literalinclude:: orog/help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: orog
+.. literalinclude:: orog/help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: orog
+.. literalinclude:: orog/run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: orog
+.. literalinclude:: orog/run-help.out
    :language: text
 
 Examples
