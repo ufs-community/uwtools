@@ -87,6 +87,11 @@ def test_api_graph(module):
 
 
 @mark.parametrize("module", modules)
+def test_api_schema(module):
+    assert module.schema()
+
+
+@mark.parametrize("module", modules)
 def test_api_tasks(module):
     with patch.object(iotaa, "tasknames") as tasknames:
         module.tasks()
