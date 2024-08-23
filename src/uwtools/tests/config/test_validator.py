@@ -125,15 +125,18 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 
 
 def test_bundle():
-    schema = {"fruit": {"$ref": "urn:uwtools:a"}}
+    schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
     with patch.object(validator, "_registry") as _registry:
-        outer = Mock()
+        outer, inner = Mock(), Mock()
         outer.value.contents = {"a": {"$ref": "urn:uwtools:attrs"}, "b": {"name": "banana"}}
-        inner = Mock()
         inner.value.contents = {"name": "apple"}
         _registry().get_or_retrieve.side_effect = [outer, inner]
         bundled = validator.bundle(schema)
-    assert bundled == {"fruit": {"a": {"name": "apple"}, "b": {"name": "banana"}}}
+    assert bundled == {"fruit": {"a": {"name": "apple"}, "b": {"name": "banana"}}, "flowers": None}
+    assert [_registry().get_or_retrieve.mock_calls[i].args[0] for i in (0, 1)] == [
+        "urn:uwtools:a",
+        "urn:uwtools:attrs",
+    ]
 
 
 def test_get_schema_file():
