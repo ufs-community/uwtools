@@ -10,8 +10,10 @@ from uwtools.api import (
     cdeps,
     chgres_cube,
     esg_grid,
+    filter_topo,
     fv3,
     global_equiv_resol,
+    ioda,
     jedi,
     make_hgrid,
     make_solo_mosaic,
@@ -32,8 +34,10 @@ modules = [
     cdeps,
     chgres_cube,
     esg_grid,
+    filter_topo,
     fv3,
     global_equiv_resol,
+    ioda,
     jedi,
     make_hgrid,
     make_solo_mosaic,
@@ -47,7 +51,7 @@ modules = [
     upp,
     ww3,
 ]
-with_cycle = [cdeps, chgres_cube, fv3, jedi, mpas, mpas_init, schism, ungrib, upp, ww3]
+with_cycle = [cdeps, chgres_cube, fv3, ioda, jedi, mpas, mpas_init, schism, ungrib, upp, ww3]
 with_leadtime = [upp]
 
 
