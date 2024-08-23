@@ -7,6 +7,7 @@ import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from pathlib import Path
+from textwrap import dedent
 from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
@@ -570,7 +571,6 @@ def test__dispatch_template_translate_no_optional():
 
 @mark.parametrize("hours", [0, 24, 168])
 def test__dispatch_to_driver(hours):
-    name = "adriver"
     cycle = dt.datetime.now()
     leadtime = dt.timedelta(hours=hours)
     args: dict = {
@@ -582,11 +582,12 @@ def test__dispatch_to_driver(hours):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "show_schema": False,
         "stdin_ok": True,
     }
     adriver = Mock()
     with patch.object(cli, "import_module", return_value=adriver):
-        cli._dispatch_to_driver(name=name, args=args)
+        cli._dispatch_to_driver(name="adriver", args=args)
         adriver.execute.assert_called_once_with(
             batch=True,
             config="/path/to/config",
@@ -598,6 +599,22 @@ def test__dispatch_to_driver(hours):
             task="foo",
             stdin_ok=True,
         )
+
+
+def test__dispatch_to_driver_show_schema(capsys):
+    adriver = Mock()
+    adriver.schema.return_value = {"fruit": {"b": "banana", "a": "apple"}}
+    with patch.object(cli, "import_module", return_value=adriver):
+        assert cli._dispatch_to_driver(name="adriver", args={"show_schema": True}) is True
+    expected = """
+    {
+      "fruit": {
+        "a": "apple",
+        "b": "banana"
+      }
+    }
+    """
+    assert capsys.readouterr().out == dedent(expected).lstrip()
 
 
 @mark.parametrize("quiet", [False, True])
