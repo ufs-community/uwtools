@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "orog": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "orog"
+  ],
+  "type": "object"
+}
