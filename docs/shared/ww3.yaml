@@ -3,4 +3,4 @@ ww3:
     template_file: /path/to/ww3/ww3_shel.nml.IN
     template_values:
       input_forcing_winds: C
-  rundir: /path/to/run/directory
+  rundir: /path/to/run/dir

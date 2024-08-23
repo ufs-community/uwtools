@@ -162,6 +162,12 @@ make_solo_mosaic
 | **CLI**: ``uw make_solo_mosaic -h``
 | **API**: ``import uwtools.api.make_solo_mosaic``
 
+orog
+""""
+
+| **CLI**: ``uw orog -h``
+| **API**: ``import uwtools.api.orog``
+
 orog_gsl
 """"""""
 

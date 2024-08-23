@@ -3,4 +3,4 @@ schism:
     template_file: /path/to/schism/param.nml.IN
     template_values:
       dt: 100
-  rundir: /path/to/run/directory
+  rundir: /path/to/run/dir

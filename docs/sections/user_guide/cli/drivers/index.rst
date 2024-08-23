@@ -18,6 +18,7 @@ Drivers
    make_solo_mosaic
    mpas
    mpas_init
+   orog
    orog_gsl
    sfc_climo_gen
    shave
