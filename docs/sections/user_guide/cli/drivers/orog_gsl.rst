@@ -52,3 +52,11 @@ Its contents are described in section :ref:`orog_gsl_yaml`.
      $ uw orog_gsl run --config-file config.yaml --batch --dry-run
 
 .. include:: /shared/key_path.rst
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: orog_gsl/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: orog_gsl/show-schema.out
+   :language: text

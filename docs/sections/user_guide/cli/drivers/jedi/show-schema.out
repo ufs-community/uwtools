@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "jedi": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration_file": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "jedi"
+  ],
+  "type": "object"
+}

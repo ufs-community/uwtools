@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "make_hgrid": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+...
+        "execution",
+        "rundir"
+      ]
+    }
+  },
+  "required": [
+    "make_hgrid"
+  ],
+  "type": "object"
+}

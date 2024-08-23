@@ -52,3 +52,11 @@ Its contents are described in section :ref:`shave_yaml`.
      $ uw shave run --config-file config.yaml --batch --dry-run
 
 .. include:: /shared/key_path.rst
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: shave/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: shave/show-schema.out
+   :language: text

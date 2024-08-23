@@ -52,3 +52,11 @@ The driver creates a ``runscript.jedi`` file in the directory specified by ``run
      $ uw jedi run --config-file config.yaml --cycle 2024-05-22T12 --batch --dry-run
 
 .. include:: /shared/key_path.rst
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: jedi/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: jedi/show-schema.out
+   :language: text
