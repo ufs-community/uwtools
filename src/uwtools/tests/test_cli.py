@@ -601,6 +601,14 @@ def test__dispatch_to_driver(hours):
         )
 
 
+def test__dispatch_to_driver_no_schema(capsys):
+    adriver = Mock()
+    with patch.object(cli, "import_module", return_value=adriver):
+        with raises(SystemExit):
+            cli._dispatch_to_driver(name="adriver", args={})
+    assert "No TASK specified" in capsys.readouterr().err
+
+
 def test__dispatch_to_driver_show_schema(capsys):
     adriver = Mock()
     adriver.schema.return_value = {"fruit": {"b": "banana", "a": "apple"}}
