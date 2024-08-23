@@ -167,7 +167,7 @@ def test_Orog_provisioned_rundir(driverobj):
 
 
 def test_Orog_driver_name(driverobj):
-    assert driverobj.driver_name == "orog"
+    assert driverobj.driver_name() == Orog.driver_name() == "orog"
 
 
 def test_Orog__runcmd(driverobj):
