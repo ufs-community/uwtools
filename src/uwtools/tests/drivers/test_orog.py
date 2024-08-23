@@ -2,6 +2,7 @@
 """
 Orog driver tests.
 """
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -10,6 +11,7 @@ from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
+from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 
 # Fixtures
@@ -47,7 +49,8 @@ def config(tmp_path):
                 "qux": str(tmp_path / "qux"),
             },
             "grid_file": str(tmp_path / "grid_file.in"),
-            "rundir": str(tmp_path),
+            "orog_file": "none",
+            "rundir": str(tmp_path / "run"),
         },
         "platform": {
             "account": "me",
@@ -105,26 +108,34 @@ def test_Orog_files_linked(driverobj):
         assert (driverobj.rundir / dst).is_symlink()
 
 
-def test_Orog_grid_file_existence(caplog, driverobj):
-    grid_file = driverobj.config["grid_file"]
+@mark.parametrize("exist", [True, False])
+def test_Orog_grid_file_existence(caplog, driverobj, exist):
+    log.setLevel(logging.DEBUG)
+    grid_file = Path(driverobj.config["grid_file"])
+    status = "Input grid file: State: Not Ready (external asset)"
+    if exist:
+        grid_file.touch()
+        status = "Input grid file: State: Ready"
     driverobj.grid_file()
-    assert regex_logged(caplog, f"{grid_file}: State: Not Ready (external asset)")
-    grid_file.touch()
-    driverobj.grid_file()
-    assert regex_logged(caplog, f"{grid_file}: State: Ready (external asset)")
+    assert regex_logged(caplog, status)
 
 
 def test_Orog_grid_file_nonexistence(caplog, driverobj):
+    log.setLevel(logging.INFO)
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
-    assert regex_logged(caplog, "grid_file: State: Ready (external asset)")
+    assert regex_logged(caplog, "Input grid file: State: Ready")
 
 
 def test_Orog_input_config_file_new(driverobj):
     del driverobj._config["old_line1_items"]
+    del driverobj._config["orog_file"]
+    grid_file = Path(driverobj.config["grid_file"])
+    grid_file.touch()
     driverobj.input_config_file()
     with open(driverobj._input_config_path, "r", encoding="utf-8") as inps:
         content = inps.readlines()
+    content = [l.strip("\n") for l in content]
     assert len(content) == 3
     assert content[0] == driverobj.config["grid_file"]
     assert content[1] == ".false."
@@ -132,9 +143,12 @@ def test_Orog_input_config_file_new(driverobj):
 
 
 def test_Orog_input_config_file_old(driverobj):
+    grid_file = Path(driverobj.config["grid_file"])
+    grid_file.touch()
     driverobj.input_config_file()
     with open(driverobj._input_config_path, "r", encoding="utf-8") as inps:
         content = inps.readlines()
+    content = [l.strip("\n") for l in content]
     assert len(content) == 5
     assert len(content[0].split()) == 9
     assert content[1] == driverobj.config["grid_file"]
@@ -159,5 +173,5 @@ def test_Orog_driver_name(driverobj):
 def test_Orog__runcmd(driverobj):
     assert driverobj._runcmd == "%s < %s" % (
         driverobj.config["execution"]["executable"],
-        driverobj._input_config_path,
+        driverobj._input_config_path.name,
     )

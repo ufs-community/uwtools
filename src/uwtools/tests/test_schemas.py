@@ -1563,14 +1563,16 @@ def test_schema_orog():
     # Basic correctness:
     assert not errors(config)
     # All 9 config keys are requried:
-    assert "key is a required property" in errors(with_del(config, "old_line1_items", "blat"))
+    assert "does not have enough properties" in errors(with_del(config, "old_line1_items", "blat"))
     # Other config keys are not allowed:
     assert "Additional properties are not allowed" in errors(
-        with_set(config, "bar", "old_line_items", "foo")
+        with_set(config, "bar", "old_line1_items", "foo")
     )
     # All old_line1_items keys require integer values:
-    for key in config.get("old_line1_items", {}):
-        assert "is not of type 'integer'\n" in errors(with_set(config, None, "config", key))
+    for key in config["old_line1_items"]:
+        assert "is not of type 'integer'\n" in errors(
+            with_set(config, None, "old_line1_items", key)
+        )
     # Some top level keys are required:
     for key in ["execution", "grid_file", "rundir"]:
         assert f"'{key}' is a required property" in errors(with_del(config, key))

@@ -73,7 +73,7 @@ class Orog(DriverTimeInvariant):
                 "efac",
                 "blat",
             ]
-            inputs = " ".join([inputs[i][1] for i in ordered_entries])
+            inputs = " ".join([str(inputs[i]) for i in ordered_entries])
         outgrid = self.config["grid_file"]
         orogfile = self.config.get("orog_file")
         mask_only = self.config.get("mask", ".false.")
