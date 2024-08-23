@@ -196,9 +196,16 @@ def test__prep_config_file(prep_config_dict, tmp_path):
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
-@mark.skip("PM FIXME")
-def test__registry():
-    pass
+def test__registry(tmp_path):
+    validator._registry.cache_clear()
+    d = {"foo": "bar"}
+    path = tmp_path / "foo-bar.jsonschema"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(d, f)
+    with patch.object(validator, "resource_path", return_value=path) as resource_path:
+        r = validator._registry()
+        assert r.get_or_retrieve("urn:uwtools:foo-bar").value.contents == d
+    resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
 def test__validation_errors_bad_enum_value(config, schema):
