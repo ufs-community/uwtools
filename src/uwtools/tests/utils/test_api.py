@@ -21,6 +21,7 @@ def execute_kwargs():
         "dry_run": False,
         "graph_file": "/path/to/g.dot",
         "key_path": None,
+        "schema_file": None,
         "stdin_ok": True,
     }
 

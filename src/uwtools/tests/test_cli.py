@@ -582,6 +582,7 @@ def test__dispatch_to_driver(hours):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "schema_file": None,
         "show_schema": False,
         "stdin_ok": True,
     }
@@ -596,6 +597,7 @@ def test__dispatch_to_driver(hours):
             dry_run=False,
             graph_file=None,
             key_path=["foo", "bar"],
+            schema_file=None,
             task="foo",
             stdin_ok=True,
         )
