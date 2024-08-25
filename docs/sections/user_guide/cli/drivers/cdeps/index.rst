@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the :CDEPS:`cdeps<>` component.
 
-.. literalinclude:: cdeps/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: cdeps/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: cdeps/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: cdeps/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -47,8 +47,8 @@ Its contents are described in depth in section :ref:`cdeps_yaml`. Each of the va
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: cdeps/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: cdeps/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text
