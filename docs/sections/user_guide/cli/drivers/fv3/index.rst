@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running FV3.
 
-.. literalinclude:: fv3/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: fv3/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: fv3/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: fv3/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -56,8 +56,8 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: fv3/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: fv3/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

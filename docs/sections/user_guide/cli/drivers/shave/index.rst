@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``shave``. Documentation for this UFS Utils component is :ufs-utils:`here <shave>`.
 
-.. literalinclude:: shave/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: shave/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: shave/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: shave/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -55,8 +55,8 @@ Its contents are described in section :ref:`shave_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: shave/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: shave/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

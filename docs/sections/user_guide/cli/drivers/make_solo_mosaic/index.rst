@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``make_solo_mosaic``. Documentation for this UFS Utils component is :ufs-utils:`here <make-solo-mosaic>`.
 
-.. literalinclude:: make_solo_mosaic/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: make_solo_mosaic/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: make_solo_mosaic/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: make_solo_mosaic/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -40,10 +40,10 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 ..
   An example runscript:
 
-  .. literalinclude:: make_solo_mosaic/runscript.cmd
+  .. literalinclude:: runscript.cmd
      :language: text
      :emphasize-lines: 5
-  .. literalinclude:: make_solo_mosaic/runscript.out
+  .. literalinclude:: runscript.out
      :language: text
 
 * Run ``make_solo_mosaic`` via a batch job
@@ -64,8 +64,8 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: make_solo_mosaic/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: make_solo_mosaic/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``.
 
-.. literalinclude:: ungrib/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: ungrib/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: ungrib/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: ungrib/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -61,8 +61,8 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: ungrib/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: ungrib/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

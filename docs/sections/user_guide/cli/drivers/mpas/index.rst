@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the MPAS forecast model. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_rundir`` comprises everything needed for a run, and a ``run`` runs the MPAS executable.
 
-.. literalinclude:: mpas/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: mpas/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: mpas/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: mpas/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -61,8 +61,8 @@ Its contents are described in depth in section :ref:`mpas_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: mpas/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: mpas/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

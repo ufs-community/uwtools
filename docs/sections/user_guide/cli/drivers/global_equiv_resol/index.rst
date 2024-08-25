@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``global_equiv_resol``. Documentation for this UFS Utils component is :ufs-utils:`here <global-equiv-resol>`.
 
-.. literalinclude:: global_equiv_resol/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: global_equiv_resol/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: global_equiv_resol/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: global_equiv_resol/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -55,8 +55,8 @@ Its contents are described in section :ref:`global_equiv_resol_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: global_equiv_resol/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: global_equiv_resol/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

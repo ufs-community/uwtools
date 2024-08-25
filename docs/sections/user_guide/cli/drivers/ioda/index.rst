@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the IODA components of the JEDI framework.
 
-.. literalinclude:: ioda/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: ioda/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: ioda/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: ioda/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -55,8 +55,8 @@ The driver creates a ``runscript.ioda`` file in the directory specified by ``run
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: ioda/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: ioda/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

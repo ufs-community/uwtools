@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``make_hgrid``. Documentation for this UFS Utils component is :ufs-utils:`here <make-hgrid>`.
 
-.. literalinclude:: make_hgrid/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: make_hgrid/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: make_hgrid/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: make_hgrid/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -39,10 +39,10 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
 
   An example runscript:
 
-  .. literalinclude:: make_hgrid/runscript.cmd
+  .. literalinclude:: runscript.cmd
      :language: text
      :emphasize-lines: 5
-  .. literalinclude:: make_hgrid/runscript.out
+  .. literalinclude:: runscript.out
      :language: text
 
 * Run ``make_hgrid`` via a batch job
@@ -63,8 +63,8 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: make_hgrid/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: make_hgrid/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

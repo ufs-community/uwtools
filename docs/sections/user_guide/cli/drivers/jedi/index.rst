@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the JEDI framework.
 
-.. literalinclude:: jedi/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: jedi/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: jedi/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: jedi/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -55,8 +55,8 @@ The driver creates a ``runscript.jedi`` file in the directory specified by ``run
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: jedi/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: jedi/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-cube>` component.
 
-.. literalinclude:: chgres_cube/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: chgres_cube/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: chgres_cube/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: chgres_cube/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -61,8 +61,8 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: chgres_cube/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: chgres_cube/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text

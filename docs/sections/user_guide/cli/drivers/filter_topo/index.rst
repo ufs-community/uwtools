@@ -5,18 +5,18 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``filter_topo``. Documentation for this UFS Utils component is :ufs-utils:`here <filter-topo>`.
 
-.. literalinclude:: filter_topo/help.cmd
+.. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: filter_topo/help.out
+.. literalinclude:: help.out
    :language: text
 
 All tasks take the same arguments. For example:
 
-.. literalinclude:: filter_topo/run-help.cmd
+.. literalinclude:: run-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: filter_topo/run-help.out
+.. literalinclude:: run-help.out
    :language: text
 
 Examples
@@ -55,8 +55,8 @@ Its contents are described in section :ref:`filter_topo_yaml`.
 
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
-.. literalinclude:: filter_topo/show-schema.cmd
+.. literalinclude:: show-schema.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: filter_topo/show-schema.out
+.. literalinclude:: show-schema.out
    :language: text
