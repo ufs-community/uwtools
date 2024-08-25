@@ -14,6 +14,7 @@ autoclass_content = "both"
 autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml", "referencing"]
 autodoc_typehints = "description"
 copyright = str(dt.datetime.now().year)
+exclude_patterns = ["**/shared/*.rst"]
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.extlinks", "sphinx.ext.intersphinx"]
 extlinks_detect_hardcoded_links = True
 html_logo = os.path.join("static", "ufs.png")

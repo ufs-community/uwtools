@@ -1,7 +1,7 @@
 ``jedi``
 ========
 
-.. include:: /shared/idempotent.rst
+.. include:: ../shared/idempotent.rst
 
 The ``uw`` mode for configuring and running the JEDI framework.
 

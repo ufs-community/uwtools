@@ -1,7 +1,7 @@
 ``shave``
 =========
 
-.. include:: /shared/idempotent.rst
+.. include:: ../shared/idempotent.rst
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``shave``. Documentation for this UFS Utils component is :ufs-utils:`here <shave>`.
 

@@ -1,7 +1,7 @@
 ``mpas_init``
 =============
 
-.. include:: /shared/idempotent.rst
+.. include:: ../shared/idempotent.rst
 
 The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_rundir`` comprises everything needed for a run, and a ``run`` runs the ``init_atmosphere`` executable.
 

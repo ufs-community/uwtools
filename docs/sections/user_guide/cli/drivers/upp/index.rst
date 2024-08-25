@@ -1,7 +1,7 @@
 ``upp``
 =======
 
-.. include:: /shared/idempotent.rst
+.. include:: ../shared/idempotent.rst
 
 The ``uw`` mode for configuring and running the `UPP <https://epic.noaa.gov/unified-post-processor/>`_ component.
 

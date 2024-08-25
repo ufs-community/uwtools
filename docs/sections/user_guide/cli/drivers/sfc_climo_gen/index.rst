@@ -1,7 +1,7 @@
 ``sfc_climo_gen``
 =================
 
-.. include:: /shared/idempotent.rst
+.. include:: ../shared/idempotent.rst
 
 The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>` component.
 
