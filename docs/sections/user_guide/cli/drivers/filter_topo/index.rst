@@ -5,19 +5,7 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``filter_topo``. Documentation for this UFS Utils component is :ufs-utils:`here <filter-topo>`.
 
-.. literalinclude:: help.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: help.out
-   :language: text
-
-All tasks take the same arguments. For example:
-
-.. literalinclude:: run-help.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: run-help.out
-   :language: text
+.. include:: help.rst
 
 Examples
 ^^^^^^^^
