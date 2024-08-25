@@ -47,10 +47,4 @@ Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
      $ uw sfc_climo_gen provisioned_rundir --config-file config.yaml --batch
 
-* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
-
-.. literalinclude:: show-schema.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: show-schema.out
-   :language: text
+.. include:: schema-options.rst
