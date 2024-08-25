@@ -243,6 +243,22 @@ def test_Assets_validate_key_path(config, controller_schema):
         )
 
 
+@mark.parametrize("should_pass,t", [(True, "integer"), (False, "string")])
+def test_Assets_validate_schema_file(caplog, should_pass, t, tmp_path):
+    path = tmp_path / "test.jsonschema"
+    schema = {"properties": {"concrete": {"properties": {"n": {"type": t}}}}}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    test = lambda: ConcreteAssetsTimeInvariant(config={"concrete": {"n": 1}}, schema_file=path)
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        if should_pass:
+            assert test()
+        else:
+            with raises(UWConfigError):
+                test()
+            assert regex_logged(caplog, "1 is not of type 'string'")
+
+
 @mark.parametrize(
     "base_file,update_values,expected",
     [
