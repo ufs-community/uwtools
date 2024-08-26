@@ -1,5 +1,5 @@
-[2024-08-02T00:43:08]     INFO 0 UW schema-validation errors found
-[2024-08-02T00:43:08]     INFO 0 Rocoto validation errors found
+[2024-08-26T22:54:28]     INFO 0 UW schema-validation errors found in Rocoto config
+[2024-08-26T22:54:28]     INFO 0 Rocoto validation errors found
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE workflow [
   <!ENTITY ACCOUNT "myaccount">

@@ -1,13 +1,12 @@
-[2024-08-02T00:43:09]     INFO Validating config against internal schema: files-to-stage
-[2024-08-02T00:43:09]     INFO 0 UW schema-validation errors found
-[2024-08-02T00:43:09]     INFO File links: Initial state: Not Ready
-[2024-08-02T00:43:09]     INFO File links: Checking requirements
-[2024-08-02T00:43:09]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Initial state: Not Ready
-[2024-08-02T00:43:09]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Checking requirements
-[2024-08-02T00:43:09]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Requirement(s) ready
-[2024-08-02T00:43:09]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Executing
-[2024-08-02T00:43:09]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Final state: Ready
-[2024-08-02T00:43:09]     INFO File links: Final state: Ready
+[2024-08-26T22:54:28]     INFO 0 UW schema-validation errors found in fs config
+[2024-08-26T22:54:28]     INFO File links: Initial state: Not Ready
+[2024-08-26T22:54:28]     INFO File links: Checking requirements
+[2024-08-26T22:54:28]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Initial state: Not Ready
+[2024-08-26T22:54:28]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Checking requirements
+[2024-08-26T22:54:28]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Requirement(s) ready
+[2024-08-26T22:54:28]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Executing
+[2024-08-26T22:54:28]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Final state: Ready
+[2024-08-26T22:54:28]     INFO File links: Final state: Ready
 
 link-dst-timedep
 └── baz-2024-05-29T18 -> ../src/20240529/12/006/baz
