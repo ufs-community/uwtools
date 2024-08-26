@@ -440,7 +440,7 @@ def test_Driver__namelist_schema_custom(driverobj, tmp_path):
         json.dump(schema, f)
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"baz": {"qux": {"validate": True}}}
-        with patch.object(driver, "get_schema_file", return_value=schema_path):
+        with patch.object(driver, "get_internal_schema_file", return_value=schema_path):
             assert (
                 driverobj._namelist_schema(config_keys=["baz", "qux"], schema_keys=["foo", "bar"])
                 == nmlschema
@@ -459,7 +459,7 @@ def test_Driver__namelist_schema_default(driverobj, tmp_path):
         json.dump(schema, f)
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"namelist": {"validate": True}}
-        with patch.object(driver, "get_schema_file", return_value=schema_path):
+        with patch.object(driver, "get_internal_schema_file", return_value=schema_path):
             assert driverobj._namelist_schema() == nmlschema
 
 

@@ -21,7 +21,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import (
     bundle,
-    get_schema_file,
+    get_internal_schema_file,
     validate,
     validate_external,
     validate_internal,
@@ -108,7 +108,9 @@ class Assets(ABC):
         """
         Return the driver's schema.
         """
-        with open(get_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
+        with open(
+            get_internal_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8"
+        ) as f:
             return bundle(json.load(f))
 
     def taskname(self, suffix: str) -> str:
@@ -191,7 +193,7 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = get_schema_file(schema_name=self._schema_name())
+            schema_file = get_internal_schema_file(schema_name=self._schema_name())
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [

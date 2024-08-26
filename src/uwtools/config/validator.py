@@ -48,9 +48,9 @@ def bundle(schema: dict, keys: Optional[list] = None) -> dict:
     return bundled
 
 
-def get_schema_file(schema_name: str) -> Path:
+def get_internal_schema_file(schema_name: str) -> Path:
     """
-    Return the path to the JSON Schema file for a given name.
+    Return the path to the internal JSON Schema file for a given driver name.
 
     :param schema_name: Name of uwtools schema to validate the config against.
     """
@@ -87,7 +87,7 @@ def validate_internal(
     """
 
     log.info("Validating config against internal schema: %s", schema_name)
-    schema_file = get_schema_file(schema_name)
+    schema_file = get_internal_schema_file(schema_name)
     log.debug("Using schema file: %s", schema_file)
     validate_external(config=config, schema_file=schema_file)
 

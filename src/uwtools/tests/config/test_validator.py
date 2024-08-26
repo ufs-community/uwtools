@@ -149,9 +149,9 @@ def test_bundle(caplog):
         assert logged(caplog, msg)
 
 
-def test_get_schema_file():
+def test_get_internal_schema_file():
     with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
-        assert validator.get_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
+        assert validator.get_internal_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
 
 
 def test_validate(config, schema):
