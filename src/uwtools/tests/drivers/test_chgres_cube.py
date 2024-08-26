@@ -148,7 +148,7 @@ def test_ChgresCube_runscript(driverobj):
 
 
 def test_ChgresCube_driver_name(driverobj):
-    assert driverobj.driver_name == "chgres_cube"
+    assert driverobj.driver_name() == ChgresCube.driver_name() == "chgres_cube"
 
 
 def test_ChgresCube_taskname(driverobj):

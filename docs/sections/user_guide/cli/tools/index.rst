@@ -6,6 +6,6 @@ Tools
 
    config
    execute
-   file
+   fs
    rocoto
    template

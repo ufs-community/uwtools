@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import re
 from abc import ABC, abstractmethod
@@ -25,8 +23,6 @@ class Config(ABC, UserDict):
 
     def __init__(self, config: Optional[Union[dict, str, Path]] = None) -> None:
         """
-        Construct a Config object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__()
@@ -36,35 +32,86 @@ class Config(ABC, UserDict):
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
-        if self.get_depth_threshold() and self.depth != self.get_depth_threshold():
+        if self._get_depth_threshold() and self._depth != self._get_depth_threshold():
             raise UWConfigError(
                 "Cannot instantiate depth-%s %s with depth-%s config"
-                % (self.get_depth_threshold(), type(self).__name__, self.depth)
+                % (self._get_depth_threshold(), type(self).__name__, self._depth)
             )
 
     def __repr__(self) -> str:
         """
-        Returns the string representation of a Config object.
+        Return the string representation of a Config object.
         """
         return self._dict_to_str(self.data)
 
     # Private methods
 
+    def _characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
+        """
+        Characterize values as complete or as template placeholders.
+
+        :param values: The dictionary to examine.
+        :param parent: Parent key.
+        :return: Lists of of complete and template-placeholder values.
+        """
+        complete: list[str] = []
+        template: list[str] = []
+        for key, val in values.items():
+            if isinstance(val, dict):
+                complete.append(f"{INDENT}{parent}{key}")
+                c, t = self._characterize_values(val, f"{parent}{key}.")
+                complete, template = complete + c, template + t
+            elif isinstance(val, list):
+                for item in val:
+                    if isinstance(item, dict):
+                        c, t = self._characterize_values(item, parent)
+                        complete, template = complete + c, template + t
+                        complete.append(f"{INDENT}{parent}{key}")
+                    elif "{{" in str(val) or "{%" in str(val):
+                        template.append(f"{INDENT}{parent}{key}: {val}")
+                        break
+            elif "{{" in str(val) or "{%" in str(val):
+                template.append(f"{INDENT}{parent}{key}: {val}")
+            else:
+                complete.append(f"{INDENT}{parent}{key}")
+        return complete, template
+
+    @property
+    def _depth(self) -> int:
+        """
+        The depth of this config's hierarchy.
+        """
+        return depth(self.data)
+
     @classmethod
     @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the string representation of the given dict.
+        Return the string representation of the given dict.
 
         :param cfg: A dict object.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Return the config's depth threshold.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def _get_format() -> str:
+        """
+        Return the config's format name.
         """
 
     @abstractmethod
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses a config file.
+        Read and parse a config file.
 
-        Returns the result of loading and parsing the specified config file, or stdin if no file is
+        Return the result of loading and parsing the specified config file, or stdin if no file is
         given.
 
         :param config_file: Path to config file to load.
@@ -88,37 +135,28 @@ class Config(ABC, UserDict):
             cfg.update(self._load(config_file=config_file))
         return cfg
 
+    def _parse_include(self, ref_dict: Optional[dict] = None) -> None:
+        """
+        Recursively process include directives in a config object.
+
+        Recursively traverse the dictionary, replacing include tags with the contents of the files
+        they specify. Assumes a section/key/value structure. YAML provides this functionality in its
+        own loader.
+
+        :param ref_dict: A config object to process instead of the object's own data.
+        """
+        if ref_dict is None:
+            ref_dict = self.data
+        for key, value in deepcopy(ref_dict).items():
+            if isinstance(value, dict):
+                self._parse_include(ref_dict[key])
+            elif isinstance(value, str):
+                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
+                    filepaths = yaml.safe_load(m[1])
+                    self.update_from(self._load_paths(filepaths))
+                    del ref_dict[key]
+
     # Public methods
-
-    def characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
-        """
-        Characterize values as complete or as template placeholders.
-
-        :param values: The dictionary to examine.
-        :param parent: Parent key.
-        :return: Lists of of complete and template-placeholder values.
-        """
-        complete: list[str] = []
-        template: list[str] = []
-        for key, val in values.items():
-            if isinstance(val, dict):
-                complete.append(f"{INDENT}{parent}{key}")
-                c, t = self.characterize_values(val, f"{parent}{key}.")
-                complete, template = complete + c, template + t
-            elif isinstance(val, list):
-                for item in val:
-                    if isinstance(item, dict):
-                        c, t = self.characterize_values(item, parent)
-                        complete, template = complete + c, template + t
-                        complete.append(f"{INDENT}{parent}{key}")
-                    elif "{{" in str(val) or "{%" in str(val):
-                        template.append(f"{INDENT}{parent}{key}: {val}")
-                        break
-            elif "{{" in str(val) or "{%" in str(val):
-                template.append(f"{INDENT}{parent}{key}: {val}")
-            else:
-                complete.append(f"{INDENT}{parent}{key}")
-        return complete, template
 
     def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
         """
@@ -127,7 +165,7 @@ class Config(ABC, UserDict):
         Assumes a section/key/value structure.
 
         :param dict1: The first dictionary.
-        :param dict2: The second dictionary.
+        :param dict2: The second dictionary (default: this config).
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
@@ -158,13 +196,6 @@ class Config(ABC, UserDict):
 
         return not diffs
 
-    @property
-    def depth(self) -> int:
-        """
-        Returns the depth of this config's hierarchy.
-        """
-        return depth(self.data)
-
     def dereference(self, context: Optional[dict] = None) -> None:
         """
         Render as much Jinja2 syntax as possible.
@@ -187,59 +218,24 @@ class Config(ABC, UserDict):
     @abstractmethod
     def dump(self, path: Optional[Path]) -> None:
         """
-        Dumps the config to stdout or a file.
+        Dump the config to stdout or a file.
 
-        :param path: Path to dump config to.
-        """
-
-    @staticmethod
-    @abstractmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
+        :param path: Path to dump config to (default: stdout).
         """
 
     @staticmethod
     @abstractmethod
     def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary to stdout or a file.
+        Dump a provided config dictionary to stdout or a file.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
 
-    @staticmethod
-    @abstractmethod
-    def get_format() -> str:
+    def update_from(self, src: Union[dict, UserDict]) -> None:
         """
-        Returns the config's format name.
-        """
-
-    def parse_include(self, ref_dict: Optional[dict] = None) -> None:
-        """
-        Recursively process include directives in a config object.
-
-        Recursively traverse the dictionary, replacing include tags with the contents of the files
-        they specify. Assumes a section/key/value structure. YAML provides this functionality in its
-        own loader.
-
-        :param ref_dict: A config object to process instead of the object's own data.
-        """
-        if ref_dict is None:
-            ref_dict = self.data
-        for key, value in deepcopy(ref_dict).items():
-            if isinstance(value, dict):
-                self.parse_include(ref_dict[key])
-            elif isinstance(value, str):
-                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
-                    filepaths = yaml.safe_load(m[1])
-                    self.update_values(self._load_paths(filepaths))
-                    del ref_dict[key]
-
-    def update_values(self, src: Union[dict, Config]) -> None:
-        """
-        Updates a config.
+        Update a config.
 
         :param src: The dictionary with new data to use.
         """
@@ -254,4 +250,4 @@ class Config(ABC, UserDict):
                 else:
                     dst[key] = val
 
-        update(src.data if isinstance(src, Config) else src, self.data)
+        update(src.data if isinstance(src, UserDict) else src, self.data)

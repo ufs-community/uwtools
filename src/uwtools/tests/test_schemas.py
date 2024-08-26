@@ -739,7 +739,7 @@ def test_schema_execution_serial():
 # files-to-stage
 
 
-def test_schema_files_to_stage():
+def test_schema_stage_files():
     errors = schema_validator("files-to-stage")
     # The input must be an dict:
     assert "is not of type 'object'\n" in errors([])
@@ -1210,6 +1210,21 @@ def test_schema_make_solo_mosaic_rundir(make_solo_mosaic_prop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'\n" in errors(88)
+
+
+# makedirs
+
+
+def test_schema_makedirs():
+    errors = schema_validator("makedirs")
+    # The input must be an dict:
+    assert "is not of type 'object'\n" in errors([])
+    # Basic correctness:
+    assert not errors({"makedirs": ["/path/to/dir1", "/path/to/dir2"]})
+    # An empty array is not allowed:
+    assert "[] should be non-empty" in errors({"makedirs": []})
+    # Non-string values are not allowed:
+    assert "True is not of type 'string'\n" in errors({"makedirs": [True]})
 
 
 # mpas

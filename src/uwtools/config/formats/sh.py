@@ -12,24 +12,22 @@ from uwtools.utils.file import readable, writable
 
 class SHConfig(Config):
     """
-    Concrete class to handle bash config files.
+    Work with key=value shell configs.
     """
 
     def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
-        Construct a SHConfig object.
-
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__(config)
-        self.parse_include()
+        self._parse_include()
 
     # Private methods
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the field-table representation of the given dict.
+        Return the field-table representation of the given dict.
 
         :param cfg: A dict object.
         """
@@ -39,9 +37,23 @@ class SHConfig(Config):
             lines.append("%s=%s" % (key, shlex.quote(str(value))))
         return "\n".join(lines)
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Return the config's depth threshold.
+        """
+        return 1
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Return the config's format name.
+        """
+        return FORMAT.sh
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
-        Reads and parses key=value lines from shell code.
+        Read and parse key=value lines from shell code.
 
         See docs for Config._load().
 
@@ -63,9 +75,9 @@ class SHConfig(Config):
 
     def dump(self, path: Optional[Path]) -> None:
         """
-        Dumps the config as key=value lines.
+        Dump the config as key=value lines.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
         self.dump_dict(self.data, path)
@@ -73,24 +85,10 @@ class SHConfig(Config):
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in bash format.
+        Dump a provided config dictionary in bash format.
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return 1
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.sh

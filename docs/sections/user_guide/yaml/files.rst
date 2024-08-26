@@ -3,7 +3,7 @@
 File Blocks
 ===========
 
-File blocks define files to be staged in a target directory as copies or symbolic links. Keys in such blocks specify destination paths relative to the target directory, and values specify source paths.
+File blocks define files to be staged in a target directory as copies or symbolic links. Keys in such blocks specify either absolute destination paths, or destination paths relative to the target directory. Values specify source paths.
 
 Example block:
 

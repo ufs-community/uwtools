@@ -212,7 +212,7 @@ def test_MPASInit_provisioned_rundir(driverobj):
 
 
 def test_MPASInit_driver_name(driverobj):
-    assert driverobj.driver_name == "mpas_init"
+    assert driverobj.driver_name() == MPASInit.driver_name() == "mpas_init"
 
 
 def test_MPASInit_streams_file(config, driverobj):

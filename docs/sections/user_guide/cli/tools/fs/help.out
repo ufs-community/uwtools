@@ -1,0 +1,18 @@
+usage: uw fs [-h] [--version] ACTION ...
+
+Handle filesystem items (files and directories)
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  ACTION
+    copy
+      Copy files
+    link
+      Link files
+    makedirs
+      Make directories

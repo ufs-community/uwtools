@@ -168,7 +168,7 @@ def test_UPP_provisioned_rundir(driverobj):
 
 
 def test_UPP_driver_name(driverobj):
-    assert driverobj.driver_name == "upp"
+    assert driverobj.driver_name() == UPP.driver_name() == "upp"
 
 
 def test_UPP__namelist_path(driverobj):

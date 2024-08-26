@@ -189,7 +189,7 @@ def test_JEDI_validate_only(caplog, driverobj):
 
 
 def test_JEDI_driver_name(driverobj):
-    assert driverobj.driver_name == "jedi"
+    assert driverobj.driver_name() == JEDI.driver_name() == "jedi"
 
 
 def test_JEDI__config_fn(driverobj):

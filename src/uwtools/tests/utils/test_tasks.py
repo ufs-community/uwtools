@@ -16,6 +16,13 @@ def ready(taskval):
 # Tests
 
 
+def test_tasks_directory(tmp_path):
+    p = tmp_path / "foo" / "bar"
+    assert not p.is_dir()
+    assert ready(tasks.directory(path=p))
+    assert p.is_dir()
+
+
 def test_tasks_executable(tmp_path):
     p = tmp_path / "program"
     # Ensure that only our temp directory is on the path:

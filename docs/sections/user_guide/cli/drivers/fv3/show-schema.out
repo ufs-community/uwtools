@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "fv3": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "domain": {
+                "const": "regional"
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "fv3"
+  ],
+  "type": "object"
+}

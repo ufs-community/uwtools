@@ -139,4 +139,4 @@ def test_SfcClimoGen_provisioned_rundir(driverobj):
 
 
 def test_SfcClimoGen_driver_name(driverobj):
-    assert driverobj.driver_name == "sfc_climo_gen"
+    assert driverobj.driver_name() == SfcClimoGen.driver_name() == "sfc_climo_gen"

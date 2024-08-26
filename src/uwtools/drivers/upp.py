@@ -74,10 +74,10 @@ class UPP(DriverCycleLeadtimeBased):
 
     # Public helper methods
 
-    @property
-    def driver_name(self) -> str:
+    @classmethod
+    def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
         return STR.upp
 
@@ -86,14 +86,14 @@ class UPP(DriverCycleLeadtimeBased):
     @property
     def _namelist_path(self) -> Path:
         """
-        Path to the namelist file.
+        The path to the namelist file.
         """
         return self.rundir / "itag"
 
     @property
     def _runcmd(self) -> str:
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])

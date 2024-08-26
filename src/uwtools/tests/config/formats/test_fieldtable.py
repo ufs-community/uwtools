@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.fieldtable module.
 """
@@ -9,7 +9,7 @@ from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
 
-# Tests
+# Fixtures
 
 
 @fixture(scope="module")
@@ -23,12 +23,15 @@ def ref():
         return f.read().strip()
 
 
-def test_fieldtable_get_format():
-    assert FieldTableConfig.get_format() == FORMAT.fieldtable
+# Tests
 
 
-def test_fieldtable_get_depth_threshold():
-    assert FieldTableConfig.get_depth_threshold() is None
+def test_fieldtable__get_depth_threshold():
+    assert FieldTableConfig._get_depth_threshold() is None
+
+
+def test_fieldtable__get_format():
+    assert FieldTableConfig._get_format() == FORMAT.fieldtable
 
 
 def test_fieldtable_instantiation_depth():

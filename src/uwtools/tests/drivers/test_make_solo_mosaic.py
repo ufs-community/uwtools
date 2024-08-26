@@ -71,7 +71,7 @@ def test_MakeSoloMosaic_provisioned_rundir(driverobj):
 
 
 def test_MakeSoloMosaic_driver_name(driverobj):
-    assert driverobj.driver_name == "make_solo_mosaic"
+    assert driverobj.driver_name() == MakeSoloMosaic.driver_name() == "make_solo_mosaic"
 
 
 def test_MakeSoloMosaic__runcmd(driverobj):

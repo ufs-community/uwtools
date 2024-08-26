@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "make_solo_mosaic": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": "string"
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "make_solo_mosaic"
+  ],
+  "type": "object"
+}

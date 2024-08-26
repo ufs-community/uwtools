@@ -38,14 +38,14 @@ class FORMAT:
     @staticmethod
     def extensions() -> list[str]:
         """
-        Returns recognized filename extensions.
+        Return recognized filename extensions.
         """
         return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 
     @staticmethod
     def formats() -> dict[str, str]:
         """
-        Returns the recognized format names.
+        Return the recognized format names.
         """
         return {
             field.name: str(getattr(FORMAT, field.name))
@@ -86,6 +86,7 @@ class STR:
     file2path: str = "file_2_path"
     file: str = "file"
     filtertopo: str = "filter_topo"
+    fs: str = "fs"
     fv3: str = "fv3"
     globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"
@@ -99,6 +100,7 @@ class STR:
     keyvalpairs: str = "key_eq_val_pairs"
     leadtime: str = "leadtime"
     link: str = "link"
+    makedirs: str = "makedirs"
     makehgrid: str = "make_hgrid"
     makesolomosaic: str = "make_solo_mosaic"
     mode: str = "mode"
@@ -126,6 +128,7 @@ class STR:
     searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     shave: str = "shave"
+    showschema: str = "show_schema"
     stdout: str = "stdout"
     targetdir: str = "target_dir"
     task: str = "task"

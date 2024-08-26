@@ -52,3 +52,11 @@ Its contents are described in section :ref:`filter_topo_yaml`.
      $ uw filter_topo run --config-file config.yaml --batch --dry-run
 
 .. include:: /shared/key_path.rst
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: filter_topo/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: filter_topo/show-schema.out
+   :language: text

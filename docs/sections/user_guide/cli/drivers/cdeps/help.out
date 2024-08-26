@@ -1,4 +1,4 @@
-usage: uw cdeps [-h] [--version] TASK ...
+usage: uw cdeps [-h] [--version] [--show-schema] TASK ...
 
 Execute cdeps tasks
 
@@ -7,20 +7,22 @@ Optional arguments:
       Show help and exit
   --version
       Show version info and exit
+  --show-schema
+      Show driver schema and exit
 
 Positional arguments:
   TASK
     atm
-      Create data atmosphere configuration with all required content
+      The data atmosphere configuration with all required content
     atm_nml
-      Create data atmosphere Fortran namelist file (datm_in)
+      The data atmosphere Fortran namelist file (datm_in)
     atm_stream
-      Create data atmosphere stream config file (datm.streams)
+      The data atmosphere stream config file (datm.streams)
     ocn
-      Create data ocean configuration with all required content
+      The data ocean configuration with all required content
     ocn_nml
-      Create data ocean Fortran namelist file (docn_in)
+      The data ocean Fortran namelist file (docn_in)
     ocn_stream
-      Create data ocean stream config file (docn.streams)
+      The data ocean stream config file (docn.streams)
     validate
       Validate the UW driver config

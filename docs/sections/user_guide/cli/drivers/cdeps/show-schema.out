@@ -1,0 +1,21 @@
+{
+  "$defs": {
+    "streams": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^stream0[1-9]$": {
+          "additionalProperties": false,
+          "properties": {
+            "dtlimit": {
+...
+      "required": [
+        "rundir"
+      ]
+    }
+  },
+  "required": [
+    "cdeps"
+  ],
+  "type": "object"
+}

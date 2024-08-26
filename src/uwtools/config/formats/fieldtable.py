@@ -8,8 +8,7 @@ from uwtools.utils.file import writable
 
 class FieldTableConfig(YAMLConfig):
     """
-    This class exists to write out a field_table format given that its configuration has been set by
-    an input YAML file.
+    Work with configs in field_table format.
     """
 
     # Private methods
@@ -17,7 +16,7 @@ class FieldTableConfig(YAMLConfig):
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the field-table representation of the given dict.
+        Return the field-table representation of the given dict.
 
         :param cfg: A dict object.
         """
@@ -37,22 +36,36 @@ class FieldTableConfig(YAMLConfig):
             lines[-1] += " /"
         return "\n".join(lines)
 
+    @staticmethod
+    def _get_depth_threshold() -> Optional[int]:
+        """
+        Return the config's depth threshold.
+        """
+        return None
+
+    @staticmethod
+    def _get_format() -> str:
+        """
+        Return the config's format name.
+        """
+        return FORMAT.fieldtable
+
     # Public methods
 
     def dump(self, path: Optional[Path] = None) -> None:
         """
-        Dumps the config in Field Table format.
+        Dump the config in Field Table format.
 
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         self.dump_dict(self.data, path)
 
     @classmethod
     def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
-        Dumps a provided config dictionary in Field Table format.
+        Dump a provided config dictionary in Field Table format.
 
-        FMS field and tracer managers must be registered in an ASCII table called 'field_table'.
+        FMS field and tracer managers must be registered in an ASCII table called ``field_table``.
         This table lists field type, target model and methods the querying model will ask for. See
         UFS documentation for more information:
 
@@ -60,29 +73,17 @@ class FieldTableConfig(YAMLConfig):
 
         The example format for generating a field file is:
 
-        sphum:
-          longname: specific humidity
-          units: kg/kg
-          profile_type:
-            name: fixed
-            surface_value: 1.e30
+        .. code-block::
+
+           sphum:
+             longname: specific humidity
+             units: kg/kg
+             profile_type:
+               name: fixed
+               surface_value: 1.e30
 
         :param cfg: The in-memory config object to dump.
-        :param path: Path to dump config to.
+        :param path: Path to dump config to (default: stdout).
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def get_depth_threshold() -> Optional[int]:
-        """
-        Returns the config's depth threshold.
-        """
-        return None
-
-    @staticmethod
-    def get_format() -> str:
-        """
-        Returns the config's format name.
-        """
-        return FORMAT.fieldtable

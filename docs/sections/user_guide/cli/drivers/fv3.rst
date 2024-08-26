@@ -53,3 +53,11 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
   .. code-block:: text
 
      $ uw fv3 provisioned_rundir --config-file config.yaml --cycle 2024-02-11T12 --batch
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: fv3/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: fv3/show-schema.out
+   :language: text

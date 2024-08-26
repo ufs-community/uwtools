@@ -23,6 +23,6 @@ class Rand(AssetsTimeInvariant):
         with open(path, "w", encoding="utf-8") as f:
             print(randint(self.config["lo"], self.config["hi"]), file=f)
 
-    @property
-    def driver_name(self):
+    @classmethod
+    def driver_name(cls):
         return "rand"

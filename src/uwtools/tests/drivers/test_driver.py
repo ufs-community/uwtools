@@ -39,8 +39,8 @@ class Common:
     def provisioned_rundir(self):
         pass
 
-    @property
-    def driver_name(self) -> str:
+    @classmethod
+    def driver_name(cls) -> str:
         return "concrete"
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
@@ -218,7 +218,7 @@ def test_Assets_key_path(config, tmp_path):
     assetsobj = ConcreteAssetsTimeInvariant(
         config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
-    assert assetsobj.config == config[assetsobj.driver_name]
+    assert assetsobj.config == config[assetsobj.driver_name()]
 
 
 def test_Assets_leadtime(config):
@@ -271,6 +271,11 @@ def test_Assets__create_user_updated_config_base_file(
 
 def test_Assets__rundir(assetsobj):
     assert assetsobj.rundir == Path(assetsobj.config["rundir"])
+
+
+def test_Assets__schema_name():
+    with patch.object(driver.Assets, "driver_name", return_value="a_driver"):
+        assert driver.Assets._schema_name() == "a-driver"
 
 
 def test_Assets__validate_internal(assetsobj):
@@ -376,9 +381,9 @@ def test_Driver__run_via_local_execution(driverobj):
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_rundir") as prd:
-        with patch.object(driver, "execute") as execute:
+        with patch.object(driver, "run_shell_cmd") as run_shell_cmd:
             driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
+            run_shell_cmd.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
                 cwd=driverobj.rundir,
                 log_output=True,
