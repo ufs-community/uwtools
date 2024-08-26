@@ -56,7 +56,7 @@ class UPP(DriverCycleLeadtimeBased):
             config_class=NMLConfig,
             config_values=self.config[STR.namelist],
             path=path,
-            schema=self._namelist_schema(),
+            schema=self.namelist_schema(),
         )
 
     @tasks

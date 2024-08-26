@@ -175,9 +175,7 @@ class Assets(ABC):
         The name of this driver.
         """
 
-    # Private helper methods
-
-    def _namelist_schema(
+    def namelist_schema(
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
@@ -204,6 +202,8 @@ class Assets(ABC):
             ]:
                 schema = schema[schema_key]
         return schema
+
+    # Private helper methods
 
     @classmethod
     def _schema_name(cls) -> str:
