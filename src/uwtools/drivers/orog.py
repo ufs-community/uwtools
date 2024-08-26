@@ -21,17 +21,6 @@ class Orog(DriverTimeInvariant):
     # Workflow tasks
 
     @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self.taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
     def files_linked(self):
         """
         Files linked for run.
@@ -88,7 +77,6 @@ class Orog(DriverTimeInvariant):
         """
         yield self.taskname("provisioned run directory")
         yield [
-            self.files_copied(),
             self.files_linked(),
             self.input_config_file(),
             self.runscript(),

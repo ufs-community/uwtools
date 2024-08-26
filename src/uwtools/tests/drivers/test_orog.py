@@ -40,13 +40,9 @@ def config(tmp_path):
                 },
                 "executable": "/path/to/orog",
             },
-            "files_to_copy": {
+            "files_to_link": {
                 "foo": str(tmp_path / "foo"),
                 "bar": str(tmp_path / "bar"),
-            },
-            "files_to_link": {
-                "baz": str(tmp_path / "baz"),
-                "qux": str(tmp_path / "qux"),
             },
             "grid_file": str(tmp_path / "grid_file.in"),
             "orog_file": "none",
@@ -86,16 +82,6 @@ def driverobj(config):
 )
 def test_Orog(method):
     assert getattr(Orog, method) is getattr(Driver, method)
-
-
-def test_Orog_files_copied(driverobj):
-    for _, src in driverobj.config["files_to_copy"].items():
-        Path(src).touch()
-    for dst, _ in driverobj.config["files_to_copy"].items():
-        assert not (driverobj.rundir / dst).is_file()
-    driverobj.files_copied()
-    for dst, _ in driverobj.config["files_to_copy"].items():
-        assert (driverobj.rundir / dst).is_file()
 
 
 def test_Orog_files_linked(driverobj):
@@ -159,7 +145,7 @@ def test_Orog_input_config_file_old(driverobj):
 
 def test_Orog_provisioned_rundir(driverobj):
     with patch.multiple(
-        driverobj, files_copied=D, files_linked=D, input_config_file=D, runscript=D
+        driverobj, files_linked=D, input_config_file=D, runscript=D
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

@@ -6,9 +6,6 @@
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
         },
-        "files_to_copy": {
-          "$ref": "urn:uwtools:files-to-stage"
-        },
         "files_to_link": {
           "$ref": "urn:uwtools:files-to-stage"
         },
