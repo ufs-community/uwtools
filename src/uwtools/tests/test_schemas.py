@@ -1556,6 +1556,12 @@ def test_schema_namelist():
 
 def test_schema_orog():
     config: dict = {
+        "execution": {
+            "executable": "/path/to/orog",
+        },
+        "grid_file": "/path/to/grid/file",
+        "mask": False,
+        "merge": "none"
         "old_line1_items": {
             "blat": 0,
             "efac": 0,
@@ -1567,10 +1573,7 @@ def test_schema_orog():
             "nf1": 0,
             "nf2": 0,
         },
-        "execution": {
-            "executable": "/path/to/orog",
-        },
-        "grid_file": "/path/to/grid/file",
+        "orog_file": "/path/to/orog/file",
         "rundir": "/path/to/run/dir",
     }
 
@@ -1593,8 +1596,10 @@ def test_schema_orog():
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Other top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # The mask key requires boolean values:
+    assert "is not of type 'boolean'\n" in errors({"mask": None})
     # Top-level keys require a string value:
-    for key in ["grid_file", "rundir"]:
+    for key in ["grid_file", "rundir", "merge", "orog_file"]:
         assert "is not of type 'string'\n" in errors(with_set(config, None, "rundir"))
 
 

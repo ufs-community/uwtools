@@ -5,7 +5,7 @@ orog
 
 Structured YAML to run the component ``orog`` is validated by JSON Schema and requires the ``orog:`` block, described below. If ``orog`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
-Documentation for the UFS Utils ``orog`` program is :ufs-utils:`here <orog-gsl>`.
+Documentation for the UFS Utils ``orog`` program is :ufs-utils:`here <orog>`.
 
 Here is a prototype UW YAML ``orog:`` block, explained in detail below:
 
@@ -39,7 +39,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 mask:
 ^^^^^
 
-Boolean indicating whether only the land mask will be generated. Defaults to ".false."
+Boolean indicating whether only the land mask will be generated. Defaults to ``false``.
 
 merge:
 ^^^^^^
