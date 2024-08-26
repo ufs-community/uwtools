@@ -144,9 +144,7 @@ def test_Orog_input_config_file_old(driverobj):
 
 
 def test_Orog_provisioned_rundir(driverobj):
-    with patch.multiple(
-        driverobj, files_linked=D, input_config_file=D, runscript=D
-    ) as mocks:
+    with patch.multiple(driverobj, files_linked=D, input_config_file=D, runscript=D) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
