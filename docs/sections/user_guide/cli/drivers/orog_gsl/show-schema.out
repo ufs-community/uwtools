@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "orog_gsl": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "halo": {
+              "type": "integer"
+...
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "orog_gsl"
+  ],
+  "type": "object"
+}

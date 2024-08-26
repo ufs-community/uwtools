@@ -1,0 +1,4 @@
+config:
+  makedirs:
+    - foo
+    - bar

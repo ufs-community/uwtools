@@ -52,3 +52,11 @@ The driver creates a ``runscript.ioda`` file in the directory specified by ``run
      $ uw ioda run --config-file config.yaml --cycle 2024-05-22T12 --batch --dry-run
 
 .. include:: /shared/key_path.rst
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: ioda/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ioda/show-schema.out
+   :language: text

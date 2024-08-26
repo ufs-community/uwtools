@@ -43,6 +43,14 @@ class ConcreteConfig(Config):
     def _dict_to_str(cls, cfg):
         pass
 
+    @staticmethod
+    def _get_depth_threshold():
+        pass
+
+    @staticmethod
+    def _get_format():
+        pass
+
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
@@ -54,16 +62,19 @@ class ConcreteConfig(Config):
     def dump_dict(cfg, path=None):
         pass
 
-    @staticmethod
-    def get_depth_threshold():
-        pass
-
-    @staticmethod
-    def get_format():
-        pass
-
 
 # Tests
+
+
+def test__characterize_values(config):
+    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
+    complete, template = config._characterize_values(values=values, parent="p")
+    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
+    assert template == ["  p3: {{ n }}"]
+
+
+def test__depth(config):
+    assert config._depth == 1
 
 
 def test__load_paths(config, tmp_path):
@@ -76,11 +87,28 @@ def test__load_paths(config, tmp_path):
         assert cfg[path.name] == "present"
 
 
-def test_characterize_values(config):
-    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    complete, template = config.characterize_values(values=values, parent="p")
-    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert template == ["  p3: {{ n }}"]
+def test__parse_include(config):
+    """
+    Test that non-YAML handles include tags properly.
+    """
+    del config["foo"]
+    # Create a symlink for the include file:
+    include_path = fixture_path("fruit_config.yaml")
+    config.data.update(
+        {
+            "config": {
+                "salad_include": f"!INCLUDE [{include_path}]",
+                "meat": "beef",
+                "dressing": "poppyseed",
+            }
+        }
+    )
+    config._parse_include()
+
+    assert config["fruit"] == "papaya"
+    assert config["how_many"] == 17
+    assert config["config"]["meat"] == "beef"
+    assert len(config["config"]) == 2
 
 
 @mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
@@ -109,10 +137,6 @@ def test_compare_config(caplog, fmt, salad_base):
         "salad:            size:  - None + large",
     ]:
         assert logged(caplog, msg)
-
-
-def test_depth(config):
-    assert config.depth == 1
 
 
 def test_dereference(tmp_path):
@@ -177,31 +201,7 @@ def test_invalid_config(fmt2, tmp_path):
     assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
 
 
-def test_parse_include(config):
-    """
-    Test that non-YAML handles include tags properly.
-    """
-    del config["foo"]
-    # Create a symlink for the include file:
-    include_path = fixture_path("fruit_config.yaml")
-    config.data.update(
-        {
-            "config": {
-                "salad_include": f"!INCLUDE [{include_path}]",
-                "meat": "beef",
-                "dressing": "poppyseed",
-            }
-        }
-    )
-    config.parse_include()
-
-    assert config["fruit"] == "papaya"
-    assert config["how_many"] == 17
-    assert config["config"]["meat"] == "beef"
-    assert len(config["config"]) == 2
-
-
-def test_update_values(config):
+def test_update_from(config):
     """
     Test that a config object can be updated.
     """

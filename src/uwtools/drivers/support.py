@@ -12,14 +12,14 @@ from uwtools.drivers.driver import DriverT
 
 def graph() -> str:
     """
-    Returns Graphviz DOT code for the most recently executed task.
+    Return Graphviz DOT code for the most recently executed task.
     """
     return _iotaa.graph()
 
 
 def set_driver_docstring(driver_class: Type) -> None:
     """
-    Appends inherited parameter descriptions to the driver's own docstring.
+    Append inherited parameter descriptions to the driver's own docstring.
 
     :param driver_class: The class whose docstring to update.
     """
@@ -36,7 +36,7 @@ def set_driver_docstring(driver_class: Type) -> None:
 
 def tasks(driver_class: DriverT) -> dict[str, str]:
     """
-    Returns a mapping from task names to their one-line descriptions.
+    Return a mapping from task names to their one-line descriptions.
 
     :param driver_class: Class of driver object to instantiate.
     """

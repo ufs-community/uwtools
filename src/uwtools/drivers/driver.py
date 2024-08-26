@@ -19,13 +19,19 @@ from iotaa import asset, dryrun, external, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
-from uwtools.config.validator import get_schema_file, validate, validate_external, validate_internal
+from uwtools.config.validator import (
+    bundle,
+    get_schema_file,
+    validate,
+    validate_external,
+    validate_internal,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
-from uwtools.utils.processing import execute
+from uwtools.utils.processing import run_shell_cmd
 
 # NB: Class docstrings are programmatically defined.
 
@@ -56,9 +62,9 @@ class Assets(ABC):
         self._config_full: dict = config_input.data
         self._config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
         try:
-            self._config: dict = self._config_intermediate[self.driver_name]
+            self._config: dict = self._config_intermediate[self.driver_name()]
         except KeyError as e:
-            raise UWConfigError("Required '%s' block missing in config" % self.driver_name) from e
+            raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
         if controller:
             self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
         self._validate(schema_file)
@@ -74,7 +80,7 @@ class Assets(ABC):
         return " ".join(filter(None, [str(self), cycle, leadtime, "in", self.config[STR.rundir]]))
 
     def __str__(self) -> str:
-        return self.driver_name
+        return self.driver_name()
 
     @property
     def config(self) -> dict:
@@ -97,9 +103,17 @@ class Assets(ABC):
         """
         return Path(self.config[STR.rundir]).absolute()
 
+    @classmethod
+    def schema(cls) -> dict:
+        """
+        Return the driver's schema.
+        """
+        with open(get_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
+            return bundle(json.load(f))
+
     def taskname(self, suffix: str) -> str:
         """
-        Returns a common tag for graph-task log messages.
+        Return a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
@@ -110,7 +124,7 @@ class Assets(ABC):
             if cycle and leadtime is not None
             else cycle.strftime("%Y%m%d %HZ") if cycle else None
         )
-        return " ".join(filter(None, [timestr, self.driver_name, suffix]))
+        return " ".join(filter(None, [timestr, self.driver_name(), suffix]))
 
     # Workflow tasks
 
@@ -139,7 +153,7 @@ class Assets(ABC):
         user_values = config_values.get(STR.updatevalues, {})
         if base_file := config_values.get(STR.basefile):
             cfgobj = config_class(base_file)
-            cfgobj.update_values(user_values)
+            cfgobj.update_from(user_values)
             cfgobj.dereference()
             config = cfgobj.data
             dump = partial(cfgobj.dump, path)
@@ -154,11 +168,11 @@ class Assets(ABC):
 
     # Public helper methods
 
-    @property
+    @classmethod
     @abstractmethod
-    def driver_name(self) -> str:
+    def driver_name(cls) -> str:
         """
-        Returns the name of this driver.
+        The name of this driver.
         """
 
     # Private helper methods
@@ -167,7 +181,7 @@ class Assets(ABC):
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
-        Returns the (sub)schema for validating the driver's namelist content.
+        Return the (sub)schema for validating the driver's namelist content.
 
         :param config_keys: Keys leading to the namelist block in the driver config.
         :param schema_keys: Keys leading to the namelist-validating (sub)schema.
@@ -177,12 +191,12 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = get_schema_file(schema_name=self.driver_name.replace("_", "-"))
+            schema_file = get_schema_file(schema_name=self._schema_name())
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
                 STR.properties,
-                self.driver_name,
+                self.driver_name(),
                 STR.properties,
                 STR.namelist,
                 STR.properties,
@@ -190,6 +204,13 @@ class Assets(ABC):
             ]:
                 schema = schema[schema_key]
         return schema
+
+    @classmethod
+    def _schema_name(cls) -> str:
+        """
+        Return the filename stem for this driver's schema file.
+        """
+        return cls.driver_name().replace("_", "-")
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
@@ -201,9 +222,7 @@ class Assets(ABC):
         if schema_file:
             validate_external(schema_file=schema_file, config=self._config_intermediate)
         else:
-            validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
-            )
+            validate_internal(schema_name=self._schema_name(), config=self._config_intermediate)
 
 
 class AssetsCycleBased(Assets):
@@ -380,14 +399,14 @@ class Driver(Assets):
         yield asset(path, path.is_file)
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self.rundir, log_output=True)
+        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Private helper methods
 
     @property
     def _run_resources(self) -> dict[str, Any]:
         """
-        Returns platform configuration data.
+        The platform configuration data.
         """
         if not (platform := self._config_intermediate.get("platform")):
             raise UWConfigError("Required 'platform' block missing in config")
@@ -404,7 +423,7 @@ class Driver(Assets):
     @property
     def _runcmd(self) -> str:
         """
-        Returns the full command-line component invocation.
+        The full command-line component invocation.
         """
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])
@@ -423,7 +442,7 @@ class Driver(Assets):
         scheduler: Optional[JobScheduler] = None,
     ) -> str:
         """
-        Returns a driver runscript.
+        Return a driver runscript.
 
         :param execution: Statements to execute.
         :param envcmds: Shell commands to set up runtime environment.
@@ -461,14 +480,14 @@ class Driver(Assets):
     @property
     def _runscript_path(self) -> Path:
         """
-        Returns the path to the runscript.
+        The path to the runscript.
         """
-        return self.rundir / f"runscript.{self.driver_name}"
+        return self.rundir / f"runscript.{self.driver_name()}"
 
     @property
     def _scheduler(self) -> JobScheduler:
         """
-        Returns the job scheduler specified by the platform information.
+        The job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._run_resources)
 
@@ -479,12 +498,7 @@ class Driver(Assets):
         :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
-        else:
-            validate_internal(
-                schema_name=self.driver_name.replace("_", "-"), config=self._config_intermediate
-            )
+        Assets._validate(self, schema_file)
         validate_internal(schema_name=STR.platform, config=self._config_intermediate)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:

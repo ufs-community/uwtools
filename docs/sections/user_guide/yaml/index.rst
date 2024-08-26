@@ -5,9 +5,10 @@ UW YAML
    :maxdepth: 1
 
    components/index
-   platform
    execution
    files
-   updating_values
+   makedirs
+   platform
    rocoto
    tags
+   updating_values

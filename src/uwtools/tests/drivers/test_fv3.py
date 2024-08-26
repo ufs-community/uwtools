@@ -248,7 +248,7 @@ def test_FV3_runscript(driverobj):
 
 
 def test_FV3_driver_name(driverobj):
-    assert driverobj.driver_name == "fv3"
+    assert driverobj.driver_name() == FV3.driver_name() == "fv3"
 
 
 def test_FV3_taskname(driverobj):

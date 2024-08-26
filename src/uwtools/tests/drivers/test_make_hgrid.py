@@ -77,7 +77,7 @@ def test_MakeHgrid_provisioned_rundir(driverobj):
 
 
 def test_MakeHgrid_driver_name(driverobj):
-    assert driverobj.driver_name == "make_hgrid"
+    assert driverobj.driver_name() == MakeHgrid.driver_name() == "make_hgrid"
 
 
 def test_MakeHgrid__runcmd(driverobj):

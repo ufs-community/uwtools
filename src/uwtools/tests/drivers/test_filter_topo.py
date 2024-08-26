@@ -101,4 +101,4 @@ def test_FilterTopo_provisioned_rundir(driverobj):
 
 
 def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name == "filter_topo"
+    assert driverobj.driver_name() == FilterTopo.driver_name() == "filter_topo"

@@ -237,7 +237,7 @@ def test_MPAS_provisioned_rundir(driverobj):
 
 
 def test_MPAS_driver_name(driverobj):
-    assert driverobj.driver_name == "mpas"
+    assert driverobj.driver_name() == MPAS.driver_name() == "mpas"
 
 
 def test_MPAS_streams_file(config, driverobj):

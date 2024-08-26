@@ -58,3 +58,11 @@ The driver creates a ``runscript.esg_grid`` file in the directory specified by `
   .. code-block:: text
 
      $ uw esg_grid provisioned_rundir --config-file config.yaml --batch
+
+* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
+
+.. literalinclude:: esg_grid/show-schema.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: esg_grid/show-schema.out
+   :language: text

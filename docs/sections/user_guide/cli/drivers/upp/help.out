@@ -1,4 +1,4 @@
-usage: uw upp [-h] [--version] TASK ...
+usage: uw upp [-h] [--version] [--show-schema] TASK ...
 
 Execute upp tasks
 
@@ -7,6 +7,8 @@ Optional arguments:
       Show help and exit
   --version
       Show version info and exit
+  --show-schema
+      Show driver schema and exit
 
 Positional arguments:
   TASK
