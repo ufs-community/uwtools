@@ -160,7 +160,7 @@ class Assets(ABC):
         else:
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
-        if validate(schema=schema or {"type": "object"}, config=config):
+        if validate(schema=schema or {"type": "object"}, desc="user-updated config", config=config):
             dump()
             log.debug(f"Wrote config to {path}")
         else:
@@ -219,10 +219,14 @@ class Assets(ABC):
         :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
+        kwargs: dict = {
+            "config": self._config_intermediate,
+            "desc": "%s config" % self.driver_name(),
+        }
         if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
+            validate_external(schema_file=schema_file, **kwargs)
         else:
-            validate_internal(schema_name=self._schema_name(), config=self._config_intermediate)
+            validate_internal(schema_name=self._schema_name(), **kwargs)
 
 
 class AssetsCycleBased(Assets):
@@ -499,7 +503,9 @@ class Driver(Assets):
         :raises: UWConfigError if config fails validation.
         """
         Assets._validate(self, schema_file)
-        validate_internal(schema_name=STR.platform, config=self._config_intermediate)
+        validate_internal(
+            schema_name=STR.platform, desc="platform config", config=self._config_intermediate
+        )
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """

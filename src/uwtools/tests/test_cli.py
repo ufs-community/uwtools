@@ -373,7 +373,7 @@ def test__dispatch_config_validate_config_obj():
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
         STR.config: _dispatch_config_validate_args[STR.infile],
     }
-    _validate_external.assert_called_once_with(**_validate_external_args)
+    _validate_external.assert_called_once_with(**_validate_external_args, desc="config")
 
 
 @mark.parametrize(

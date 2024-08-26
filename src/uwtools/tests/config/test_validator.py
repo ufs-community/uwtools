@@ -155,13 +155,13 @@ def test_internal_schema_file():
 
 
 def test_validate(config, schema):
-    assert validator.validate(schema=schema, config=config)
+    assert validator.validate(schema=schema, desc="test", config=config)
 
 
 def test_validate_fail_bad_enum_val(caplog, config, schema):
     log.setLevel(logging.INFO)
     config["color"] = "yellow"  # invalid enum value
-    assert not validator.validate(schema=schema, config=config)
+    assert not validator.validate(schema=schema, desc="test", config=config)
     assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
@@ -169,7 +169,7 @@ def test_validate_fail_bad_enum_val(caplog, config, schema):
 def test_validate_fail_bad_number_val(caplog, config, schema):
     log.setLevel(logging.INFO)
     config["number"] = "string"  # invalid number value
-    assert not validator.validate(schema=schema, config=config)
+    assert not validator.validate(schema=schema, desc="test", config=config)
     assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
@@ -177,7 +177,7 @@ def test_validate_fail_bad_number_val(caplog, config, schema):
 def test_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
-            validator.validate_internal(schema_name="a", config={"color": "orange"})
+            validator.validate_internal(schema_name="a", desc="test", config={"color": "orange"})
     assert logged(caplog, "Error at color:")
     assert logged(caplog, "  'orange' is not one of ['blue', 'red']")
     assert str(e.value) == "YAML validation errors"
@@ -185,14 +185,14 @@ def test_validate_internal_no(caplog, schema_file):
 
 def test_validate_internal_ok(schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
-        validator.validate_internal(schema_name="a", config={"color": "blue"})
+        validator.validate_internal(schema_name="a", desc="test", config={"color": "blue"})
 
 
 def test_validate_external(assets, config, schema):
     schema_file, _, cfgobj = assets
     with patch.object(validator, "validate") as validate:
-        validator.validate_external(schema_file=schema_file, config=cfgobj)
-    validate.assert_called_once_with(schema=schema, config=config)
+        validator.validate_external(schema_file=schema_file, desc="test", config=cfgobj)
+    validate.assert_called_once_with(schema=schema, desc="test", config=config)
 
 
 def test_prep_config_cfgobj(prep_config_dict):

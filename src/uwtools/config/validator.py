@@ -57,18 +57,19 @@ def internal_schema_file(schema_name: str) -> Path:
     return resource_path("jsonschema") / f"{schema_name}.jsonschema"
 
 
-def validate(schema: dict, config: dict) -> bool:
+def validate(schema: dict, desc: str, config: dict) -> bool:
     """
     Report any errors arising from validation of the given config against the given JSON Schema.
 
     :param schema: The JSON Schema to use for validation.
+    :param desc: A description of the config being validated, for logging.
     :param config: The config to validate.
     :return: Did the YAML file conform to the schema?
     """
     errors = _validation_errors(config, schema)
     log_method = log.error if errors else log.info
-    log_msg = "%s UW schema-validation error%s found"
-    log_method(log_msg, len(errors), "" if len(errors) == 1 else "s")
+    log_msg = "%s UW schema-validation error%s found in %s"
+    log_method(log_msg, len(errors), "" if len(errors) == 1 else "s", desc)
     for error in errors:
         log.error("Error at %s:", " -> ".join(str(k) for k in error.path))
         log.error("%s%s", INDENT, error.message)
@@ -76,36 +77,35 @@ def validate(schema: dict, config: dict) -> bool:
 
 
 def validate_internal(
-    schema_name: str, config: Optional[Union[dict, YAMLConfig, Path]] = None
+    schema_name: str, desc: str, config: Optional[Union[dict, YAMLConfig, Path]] = None
 ) -> None:
     """
     Validate a config against a uwtools-internal schema.
 
     :param schema_name: Name of uwtools schema to validate the config against.
+    :param desc: A description of the config being validated, for logging.
     :param config: The config to validate.
     :raises: UWConfigError if config fails validation.
     """
-
-    log.info("Validating config against internal schema: %s", schema_name)
-    schema_file = internal_schema_file(schema_name)
-    log.debug("Using schema file: %s", schema_file)
-    validate_external(config=config, schema_file=schema_file)
+    validate_external(config=config, schema_file=internal_schema_file(schema_name), desc=desc)
 
 
 def validate_external(
-    schema_file: Path, config: Optional[Union[dict, YAMLConfig, Path]] = None
+    schema_file: Path, desc: str, config: Optional[Union[dict, YAMLConfig, Path]] = None
 ) -> None:
     """
     Validate a YAML config against the JSON Schema in the given schema file.
 
     :param schema_file: The JSON Schema file to use for validation.
+    :param desc: A description of the config being validated, for logging.
     :param config: The config to validate.
     :raises: UWConfigError if config fails validation.
     """
+    log.debug("Using schema file: %s", schema_file)
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     cfgobj = _prep_config(config)
-    if not validate(schema=schema, config=cfgobj.data):
+    if not validate(schema=schema, desc=desc, config=cfgobj.data):
         raise UWConfigError("YAML validation errors")
 
 

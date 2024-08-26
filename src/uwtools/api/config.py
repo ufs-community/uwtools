@@ -179,6 +179,7 @@ def validate(
     try:
         _validate_external(
             schema_file=_str2path(schema_file),
+            desc="config",
             config=_ensure_data_source(_str2path(config), stdin_ok),
         )
     except UWConfigError:
