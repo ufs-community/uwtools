@@ -1561,7 +1561,7 @@ def test_schema_orog():
         },
         "grid_file": "/path/to/grid/file",
         "mask": False,
-        "merge": "none"
+        "merge": "none",
         "old_line1_items": {
             "blat": 0,
             "efac": 0,
