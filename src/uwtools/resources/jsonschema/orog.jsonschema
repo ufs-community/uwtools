@@ -16,7 +16,7 @@
           "type": "string"
         },
         "mask": {
-          "type": "string"
+          "type": "boolean"
         },
         "merge": {
           "type": "string"

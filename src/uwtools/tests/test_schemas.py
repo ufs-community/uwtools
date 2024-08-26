@@ -1580,7 +1580,7 @@ def test_schema_orog():
     errors = schema_validator("orog", "properties", "orog")
     # Basic correctness:
     assert not errors(config)
-    # All 9 config keys are requried:
+    # All 9 config keys are required:
     assert "does not have enough properties" in errors(with_del(config, "old_line1_items", "blat"))
     # Other config keys are not allowed:
     assert "Additional properties are not allowed" in errors(
