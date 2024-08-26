@@ -60,8 +60,7 @@ class Orog(DriverTimeInvariant):
         yield self.taskname(str(path))
         yield asset(path, path.is_file)
         yield self.grid_file()
-        inputs = self.config.get("old_line1_items")
-        if inputs:
+        if inputs := self.config.get("old_line1_items"):
             ordered_entries = [
                 "mtnres",
                 "lonb",
@@ -76,11 +75,11 @@ class Orog(DriverTimeInvariant):
             inputs = " ".join([str(inputs[i]) for i in ordered_entries])
         outgrid = self.config["grid_file"]
         orogfile = self.config.get("orog_file")
-        mask_only = self.config.get("mask", ".false.")
+        mask_only = ".true." if self.config.get("mask") else ".false."
         merge_file = self.config.get("merge", "none")  # string none is intentional
         content = [i for i in [inputs, outgrid, orogfile, mask_only, merge_file] if i is not None]
         with writable(path) as f:
-            f.write("\n".join(content))
+            print("\n".join(content), file=f)
 
     @tasks
     def provisioned_rundir(self):
