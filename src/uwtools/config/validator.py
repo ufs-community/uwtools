@@ -87,6 +87,7 @@ def validate_internal(
     :param config: The config to validate.
     :raises: UWConfigError if config fails validation.
     """
+    log.info("Validating config against internal schema: %s", schema_name)
     validate_external(config=config, schema_file=internal_schema_file(schema_name), desc=desc)
 
 
