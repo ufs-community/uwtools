@@ -102,7 +102,8 @@ def validate_external(
     :param config: The config to validate.
     :raises: UWConfigError if config fails validation.
     """
-    log.debug("Using schema file: %s", schema_file)
+    if not str(schema_file).startswith(str(resource_path())):
+        log.debug("Using schema file: %s", schema_file)
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     cfgobj = _prep_config(config)

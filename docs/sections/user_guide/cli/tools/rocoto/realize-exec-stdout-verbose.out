@@ -1,21 +1,21 @@
-[2024-08-26T23:11:41]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
-[2024-08-26T23:11:41]    DEBUG Using schema file: /home/maddenp/git/uwtools/src/uwtools/resources/jsonschema/rocoto.jsonschema
-[2024-08-26T23:11:41]    DEBUG Dereferencing, current value:
-[2024-08-26T23:11:41]    DEBUG   workflow:
-[2024-08-26T23:11:41]    DEBUG     attrs:
-[2024-08-26T23:11:41]    DEBUG       realtime: false
-[2024-08-26T23:11:41]    DEBUG       scheduler: slurm
-[2024-08-26T23:11:41]    DEBUG     cycledef:
-[2024-08-26T23:11:41]    DEBUG     - attrs:
-[2024-08-26T23:11:41]    DEBUG         group: howdy
+[2024-08-26T23:39:19]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
+[2024-08-26T23:39:19]    DEBUG Dereferencing, current value:
+[2024-08-26T23:39:19]    DEBUG   workflow:
+[2024-08-26T23:39:19]    DEBUG     attrs:
+[2024-08-26T23:39:19]    DEBUG       realtime: false
+[2024-08-26T23:39:19]    DEBUG       scheduler: slurm
+[2024-08-26T23:39:19]    DEBUG     cycledef:
+[2024-08-26T23:39:19]    DEBUG     - attrs:
+[2024-08-26T23:39:19]    DEBUG         group: howdy
+[2024-08-26T23:39:19]    DEBUG       spec: 202209290000 202209300000 06:00:00
 ...
-[2024-08-26T23:11:42]    DEBUG     cycledefs: howdy
-[2024-08-26T23:11:42]    DEBUG   account: '&ACCOUNT;'
-[2024-08-26T23:11:42]    DEBUG   command: echo hello $person
-[2024-08-26T23:11:42]    DEBUG   jobname: hello
-[2024-08-26T23:11:42]    DEBUG   native: --reservation my_reservation
-[2024-08-26T23:11:42]    DEBUG   nodes: 1:ppn=1
-[2024-08-26T23:11:42]    DEBUG   walltime: 00:01:00
-[2024-08-26T23:11:42]    DEBUG   envars:
-[2024-08-26T23:11:42]    DEBUG     person: siri
-[2024-08-26T23:11:42]     INFO 0 Rocoto XML validation errors found
+[2024-08-26T23:39:20]    DEBUG     cycledefs: howdy
+[2024-08-26T23:39:20]    DEBUG   account: '&ACCOUNT;'
+[2024-08-26T23:39:20]    DEBUG   command: echo hello $person
+[2024-08-26T23:39:20]    DEBUG   jobname: hello
+[2024-08-26T23:39:20]    DEBUG   native: --reservation my_reservation
+[2024-08-26T23:39:20]    DEBUG   nodes: 1:ppn=1
+[2024-08-26T23:39:20]    DEBUG   walltime: 00:01:00
+[2024-08-26T23:39:20]    DEBUG   envars:
+[2024-08-26T23:39:20]    DEBUG     person: siri
+[2024-08-26T23:39:20]     INFO 0 Rocoto XML validation errors found
