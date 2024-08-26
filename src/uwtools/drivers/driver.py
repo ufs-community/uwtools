@@ -67,7 +67,8 @@ class Assets(ABC):
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
         if controller:
             self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
-        self._validate(schema_file)
+        self.schema_file = schema_file
+        self._validate()
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
@@ -189,7 +190,7 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = internal_schema_file(schema_name=self._schema_name())
+            schema_file = self.schema_file or internal_schema_file(schema_name=self._schema_name())
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
@@ -212,19 +213,18 @@ class Assets(ABC):
         """
         return cls.driver_name().replace("_", "-")
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self) -> None:
         """
         Perform all necessary schema validation.
 
-        :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
         kwargs: dict = {
             "config": self._config_intermediate,
             "desc": "%s config" % self.driver_name(),
         }
-        if schema_file:
-            validate_external(schema_file=schema_file, **kwargs)
+        if self.schema_file:
+            validate_external(schema_file=self.schema_file, **kwargs)
         else:
             validate_internal(schema_name=self._schema_name(), **kwargs)
 
@@ -495,14 +495,13 @@ class Driver(Assets):
         """
         return JobScheduler.get_scheduler(self._run_resources)
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self) -> None:
         """
         Perform all necessary schema validation.
 
-        :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        Assets._validate(self, schema_file)
+        Assets._validate(self)
         validate_internal(
             schema_name=STR.platform, desc="platform config", config=self._config_intermediate
         )
