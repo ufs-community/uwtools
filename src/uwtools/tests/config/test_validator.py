@@ -124,7 +124,8 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_bundle():
+def test_bundle(caplog):
+    log.setLevel(logging.DEBUG)
     schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
     with patch.object(validator, "_registry") as _registry:
         outer, inner = Mock(), Mock()
@@ -137,6 +138,15 @@ def test_bundle():
         "urn:uwtools:a",
         "urn:uwtools:attrs",
     ]
+    for msg in [
+        "Bundling referenced schema urn:uwtools:a at key path: fruit",
+        "Bundling referenced schema urn:uwtools:attrs at key path: fruit.a",
+        "Bundling str value at key path: fruit.a.name",
+        "Bundling dict value at key path: fruit.b",
+        "Bundling str value at key path: fruit.b.name",
+        "Bundling NoneType value at key path: flowers",
+    ]:
+        assert logged(caplog, msg)
 
 
 def test_get_schema_file():

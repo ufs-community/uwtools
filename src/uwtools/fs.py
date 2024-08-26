@@ -87,7 +87,7 @@ class Stager(ABC):
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):
-            msg = "Expected block not found at key path: %s" % " -> ".join(self._keys)
+            msg = "Expected block not found at key path: %s" % ".".join(self._keys)
             raise UWConfigError(msg)
         self._config = cfg
 

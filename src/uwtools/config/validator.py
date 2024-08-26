@@ -20,23 +20,30 @@ from uwtools.utils.file import resource_path
 # Public functions
 
 
-def bundle(schema: dict) -> dict:
+def bundle(schema: dict, keys: Optional[list] = None) -> dict:
     """
     Bundle a schema by dereferencing links to other schemas.
 
     :param schema: A JSON Schema.
+    :param keys: Keys leading up to this block. Internal use only, do not manually specify.
     :returns: The bundled schema.
     """
-    key = "$ref"
+    ref = "$ref"
     bundled = {}
     for k, v in schema.items():
+        newkeys = [*(keys or []), k]
+        key_path = ".".join(newkeys)
         if isinstance(v, dict):
-            if list(v.keys()) == [key] and v[key].startswith("urn:uwtools:"):
+            if list(v.keys()) == [ref] and v[ref].startswith("urn:uwtools:"):
                 # i.e. the current key's value is of the form: {"$ref": "urn:uwtools:.*"}
-                bundled[k] = bundle(_registry().get_or_retrieve(v[key]).value.contents)
+                uri = v[ref]
+                log.debug("Bundling referenced schema %s at key path: %s", uri, key_path)
+                bundled[k] = bundle(_registry().get_or_retrieve(uri).value.contents, newkeys)
             else:
-                bundled[k] = bundle(v)
+                log.debug("Bundling dict value at key path: %s", key_path)
+                bundled[k] = bundle(v, newkeys)
         else:
+            log.debug("Bundling %s value at key path: %s", type(v).__name__, key_path)
             bundled[k] = v
     return bundled
 
