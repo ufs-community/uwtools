@@ -110,7 +110,7 @@ class Orog(DriverTimeInvariant):
         """
         Path to the input config file.
         """
-        return self.rundir / "INPS"
+        return self.rundir / "orog.cfg"
 
     @property
     def _runcmd(self):
