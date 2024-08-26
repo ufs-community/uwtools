@@ -1,0 +1,1 @@
+conda install -q -y jupyterlab pytest testbook

@@ -1,0 +1,3 @@
+user:
+  name: {{ first }} {{ last }}
+  favorite_food: {{ food }}
