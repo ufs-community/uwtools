@@ -126,6 +126,7 @@ def test_validate(cfg):
         assert config.validate(**kwargs) is False
     _validate_external.assert_called_with(
         schema_file=Path(kwargs["schema_file"]),
+        desc="config",
         config=kwargs["config"],
     )
 
@@ -138,4 +139,6 @@ def test_validate_config_file(cast, tmp_path):
     kwargs: dict = {"schema_file": "schema-file", "config": cast(cfg)}
     with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)
-    _validate_external.assert_called_once_with(schema_file=Path(kwargs["schema_file"]), config=cfg)
+    _validate_external.assert_called_once_with(
+        schema_file=Path(kwargs["schema_file"]), desc="config", config=cfg
+    )

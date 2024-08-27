@@ -87,7 +87,7 @@ class Stager(ABC):
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):
-            msg = "Expected block not found at key path: %s" % " -> ".join(self._keys)
+            msg = "Expected block not found at key path: %s" % ".".join(self._keys)
             raise UWConfigError(msg)
         self._config = cfg
 
@@ -111,7 +111,7 @@ class Stager(ABC):
 
         :raises: UWConfigError if config fails validation.
         """
-        validate_internal(schema_name=self._schema, config=self._config)
+        validate_internal(schema_name=self._schema, desc="fs config", config=self._config)
 
 
 class FileStager(Stager):

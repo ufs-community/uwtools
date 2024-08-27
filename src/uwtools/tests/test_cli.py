@@ -373,7 +373,7 @@ def test__dispatch_config_validate_config_obj():
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
         STR.config: _dispatch_config_validate_args[STR.infile],
     }
-    _validate_external.assert_called_once_with(**_validate_external_args)
+    _validate_external.assert_called_once_with(**_validate_external_args, desc="config")
 
 
 @mark.parametrize(
@@ -582,6 +582,7 @@ def test__dispatch_to_driver(hours):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "schema_file": None,
         "show_schema": False,
         "stdin_ok": True,
     }
@@ -596,6 +597,7 @@ def test__dispatch_to_driver(hours):
             dry_run=False,
             graph_file=None,
             key_path=["foo", "bar"],
+            schema_file=None,
             task="foo",
             stdin_ok=True,
         )

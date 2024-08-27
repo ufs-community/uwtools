@@ -61,4 +61,4 @@ Config ``rand.yaml``
   .. literalinclude:: execute/alt-schema.out
      :language: text
 
-* Other arguments behave identically to the same-named arguments to built-in ``uwtools`` drivers (see :ref:`drivers`).
+* Other arguments behave identically to the same-named arguments to internal ``uwtools`` drivers (see :ref:`drivers`).

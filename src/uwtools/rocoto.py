@@ -62,7 +62,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     valid: bool = schema.validate(tree)
     nerr = len(schema.error_log)
     log_method = log.info if valid else log.error
-    log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
+    log_method("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")
     for err in list(schema.error_log):
         log.error(err)
     if not valid:
@@ -359,7 +359,7 @@ class _RocotoXML:
         :raises: UWConfigError if config fails validation.
         """
         schema_file = resource_path("jsonschema/rocoto.jsonschema")
-        validate_yaml(schema_file=schema_file, config=config)
+        validate_yaml(schema_file=schema_file, desc="Rocoto config", config=config)
 
     @property
     def _doctype(self) -> Optional[str]:

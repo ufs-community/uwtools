@@ -21,7 +21,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import (
     bundle,
-    get_schema_file,
+    internal_schema_file,
     validate,
     validate_external,
     validate_internal,
@@ -67,7 +67,8 @@ class Assets(ABC):
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
         if controller:
             self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
-        self._validate(schema_file)
+        self.schema_file = schema_file
+        self._validate()
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
@@ -106,14 +107,14 @@ class Assets(ABC):
     @classmethod
     def schema(cls) -> dict:
         """
-        Return the driver's schema.
+        Return the driver's internal schema.
         """
-        with open(get_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
+        with open(internal_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
             return bundle(json.load(f))
 
     def taskname(self, suffix: str) -> str:
         """
-        Return a common tag for graph-task log messages.
+        Return a common tag for task-related log messages.
 
         :param suffix: Log-string suffix.
         """
@@ -160,7 +161,7 @@ class Assets(ABC):
         else:
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
-        if validate(schema=schema or {"type": "object"}, config=config):
+        if validate(schema=schema or {"type": "object"}, desc="user-updated config", config=config):
             dump()
             log.debug(f"Wrote config to {path}")
         else:
@@ -175,9 +176,7 @@ class Assets(ABC):
         The name of this driver.
         """
 
-    # Private helper methods
-
-    def _namelist_schema(
+    def namelist_schema(
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
@@ -191,7 +190,7 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = get_schema_file(schema_name=self._schema_name())
+            schema_file = self.schema_file or internal_schema_file(schema_name=self._schema_name())
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
@@ -205,6 +204,8 @@ class Assets(ABC):
                 schema = schema[schema_key]
         return schema
 
+    # Private helper methods
+
     @classmethod
     def _schema_name(cls) -> str:
         """
@@ -212,17 +213,20 @@ class Assets(ABC):
         """
         return cls.driver_name().replace("_", "-")
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self) -> None:
         """
         Perform all necessary schema validation.
 
-        :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
+        kwargs: dict = {
+            "config": self._config_intermediate,
+            "desc": "%s config" % self.driver_name(),
+        }
+        if self.schema_file:
+            validate_external(schema_file=self.schema_file, **kwargs)
         else:
-            validate_internal(schema_name=self._schema_name(), config=self._config_intermediate)
+            validate_internal(schema_name=self._schema_name(), **kwargs)
 
 
 class AssetsCycleBased(Assets):
@@ -491,15 +495,16 @@ class Driver(Assets):
         """
         return JobScheduler.get_scheduler(self._run_resources)
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self) -> None:
         """
         Perform all necessary schema validation.
 
-        :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        Assets._validate(self, schema_file)
-        validate_internal(schema_name=STR.platform, config=self._config_intermediate)
+        Assets._validate(self)
+        validate_internal(
+            schema_name=STR.platform, desc="platform config", config=self._config_intermediate
+        )
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """

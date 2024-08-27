@@ -41,7 +41,7 @@ def execute(
     :param module: Path to driver module or name of module on sys.path.
     :param classname: Name of driver class to instantiate.
     :param task: Name of driver task to execute.
-    :param schema_file: Path to schema file.
+    :param schema_file: The JSON Schema file to use for validation.
     :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.

@@ -1,13 +1,13 @@
-[2024-08-02T00:43:08]     INFO Validating config against internal schema: files-to-stage
-[2024-08-02T00:43:08]     INFO 0 UW schema-validation errors found
-[2024-08-02T00:43:08]     INFO File copies: Initial state: Not Ready
-[2024-08-02T00:43:08]     INFO File copies: Checking requirements
-[2024-08-02T00:43:08]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Initial state: Not Ready
-[2024-08-02T00:43:08]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Checking requirements
-[2024-08-02T00:43:08]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Requirement(s) ready
-[2024-08-02T00:43:08]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Executing
-[2024-08-02T00:43:08]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Final state: Ready
-[2024-08-02T00:43:08]     INFO File copies: Final state: Ready
+[2024-08-26T23:03:42]     INFO Validating config against internal schema: files-to-stage
+[2024-08-26T23:03:43]     INFO 0 UW schema-validation errors found in fs config
+[2024-08-26T23:03:43]     INFO File copies: Initial state: Not Ready
+[2024-08-26T23:03:43]     INFO File copies: Checking requirements
+[2024-08-26T23:03:43]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Initial state: Not Ready
+[2024-08-26T23:03:43]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Checking requirements
+[2024-08-26T23:03:43]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Requirement(s) ready
+[2024-08-26T23:03:43]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Executing
+[2024-08-26T23:03:43]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Final state: Ready
+[2024-08-26T23:03:43]     INFO File copies: Final state: Ready
 
 copy-dst-timedep
 └── baz-2024-05-29T18

@@ -65,6 +65,7 @@ def test_api_execute(module):
         "dry_run": False,
         "graph_file": "/some/g.dot",
         "key_path": None,
+        "schema_file": None,
         "stdin_ok": True,
         "task": "foo",
     }

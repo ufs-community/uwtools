@@ -1,6 +1,7 @@
 usage: uw make_hgrid run [-h] [--version] [--config-file PATH] [--batch]
                          [--dry-run] [--graph-file PATH]
-                         [--key-path KEY[.KEY...]] [--quiet] [--verbose]
+                         [--key-path KEY[.KEY...]] [--schema-file PATH]
+                         [--quiet] [--verbose]
 
 A run
 
@@ -20,6 +21,8 @@ Optional arguments:
   --key-path KEY[.KEY...]
       Dot-separated path of keys leading through the config to the driver's
       configuration block
+  --schema-file PATH
+      Path to schema file to use for validation
   --quiet, -q
       Print no logging messages
   --verbose, -v

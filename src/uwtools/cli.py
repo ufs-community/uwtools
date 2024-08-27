@@ -1032,6 +1032,7 @@ def _add_subparser_for_driver_task(
         helpmsg="Dot-separated path of keys leading through the config "
         "to the driver's configuration block",
     )
+    _add_arg_schema_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -1129,6 +1130,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         "dry_run": args[STR.dryrun],
         "graph_file": args[STR.graphfile],
         "key_path": args[STR.keypath],
+        "schema_file": args[STR.schemafile],
         "stdin_ok": True,
     }
     for k in [STR.batch, STR.cycle, STR.leadtime]:
