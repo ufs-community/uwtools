@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "orog": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "grid_file": {
+          "type": "string"
+        },
+        "mask": {
+          "type": "boolean"
+        },
+        "merge": {
+          "type": "string"
+        },
+        "old_line1_items": {
+          "additionalProperties": false,
+          "minProperties": 9,
+          "properties": {
+            "blat": {
+              "type": "integer"
+            },
+            "efac": {
+              "type": "integer"
+            },
+            "jcap": {
+              "type": "integer"
+            },
+            "latb": {
+              "type": "integer"
+            },
+            "lonb": {
+              "type": "integer"
+            },
+            "mtnres": {
+              "type": "integer"
+            },
+            "nf1": {
+              "type": "integer"
+            },
+            "nf2": {
+              "type": "integer"
+            },
+            "nr": {
+              "type": "integer"
+            }
+          }
+        },
+        "orog_file": {
+          "type": "string"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "grid_file",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "orog"
+  ],
+  "type": "object"
+}

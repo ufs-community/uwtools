@@ -19,6 +19,7 @@ API
    make_solo_mosaic
    mpas
    mpas_init
+   orog
    orog_gsl
    rocoto
    schism

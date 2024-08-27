@@ -18,6 +18,7 @@ Drivers
    make_solo_mosaic/index
    mpas/index
    mpas_init/index
+   orog/index
    orog_gsl/index
    sfc_climo_gen/index
    shave/index
