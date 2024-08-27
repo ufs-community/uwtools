@@ -354,21 +354,6 @@ def test_Driver_leadtime(config):
     assert obj.leadtime == leadtime
 
 
-def test_Driver_namelist_schema_custom(driverobj, tmp_path):
-    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
-    schema = {"foo": {"bar": nmlschema}}
-    schema_path = tmp_path / "test.jsonschema"
-    with open(schema_path, "w", encoding="utf-8") as f:
-        json.dump(schema, f)
-    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
-        dc.return_value = {"baz": {"qux": {"validate": True}}}
-        with patch.object(driver, "internal_schema_file", return_value=schema_path):
-            assert (
-                driverobj.namelist_schema(config_keys=["baz", "qux"], schema_keys=["foo", "bar"])
-                == nmlschema
-            )
-
-
 def test_Driver_namelist_schema_default(driverobj, tmp_path):
     nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
     schema = {
@@ -383,6 +368,20 @@ def test_Driver_namelist_schema_default(driverobj, tmp_path):
         dc.return_value = {"namelist": {"validate": True}}
         with patch.object(driver, "internal_schema_file", return_value=schema_path):
             assert driverobj.namelist_schema() == nmlschema
+
+
+def test_Driver_namelist_schema_external(driverobj, tmp_path):
+    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
+    schema = {"foo": {"bar": nmlschema}}
+    schema_path = tmp_path / "test.jsonschema"
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"baz": {"qux": {"validate": True}}}
+        driverobj.schema_file = schema_path
+        assert nmlschema == driverobj.namelist_schema(
+            config_keys=["baz", "qux"], schema_keys=["foo", "bar"]
+        )
 
 
 def test_Driver_namelist_schema_default_disable(driverobj):
