@@ -1,23 +1,11 @@
 ``orog``
 ========
 
-.. include:: /shared/idempotent.rst
+.. include:: ../shared/idempotent.rst
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``orog``.
 
-.. literalinclude:: orog/help.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: orog/help.out
-   :language: text
-
-All tasks take the same arguments. For example:
-
-.. literalinclude:: orog/run-help.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: orog/run-help.out
-   :language: text
+.. include:: help.rst
 
 Examples
 ^^^^^^^^
@@ -53,10 +41,4 @@ Its contents are described in section :ref:`orog_yaml`.
 
 .. include:: /shared/key_path.rst
 
-* Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
-
-.. literalinclude:: orog/show-schema.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: orog/show-schema.out
-   :language: text
+.. include:: schema-options.rst
