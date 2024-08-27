@@ -1551,6 +1551,58 @@ def test_schema_namelist():
     assert "[] is not of type 'object'\n" in errors({"namelist": []})
 
 
+# orog
+
+
+def test_schema_orog():
+    config: dict = {
+        "execution": {
+            "executable": "/path/to/orog",
+        },
+        "grid_file": "/path/to/grid/file",
+        "mask": False,
+        "merge": "none",
+        "old_line1_items": {
+            "blat": 0,
+            "efac": 0,
+            "jcap": 0,
+            "latb": 0,
+            "lonb": 0,
+            "mtnres": 1,
+            "nr": 0,
+            "nf1": 0,
+            "nf2": 0,
+        },
+        "orog_file": "/path/to/orog/file",
+        "rundir": "/path/to/run/dir",
+    }
+
+    errors = schema_validator("orog", "properties", "orog")
+    # Basic correctness:
+    assert not errors(config)
+    # All 9 config keys are required:
+    assert "does not have enough properties" in errors(with_del(config, "old_line1_items", "blat"))
+    # Other config keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "bar", "old_line1_items", "foo")
+    )
+    # All old_line1_items keys require integer values:
+    for key in config["old_line1_items"]:
+        assert "is not of type 'integer'\n" in errors(
+            with_set(config, None, "old_line1_items", key)
+        )
+    # Some top level keys are required:
+    for key in ["execution", "grid_file", "rundir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # The mask key requires boolean values:
+    assert "is not of type 'boolean'\n" in errors({"mask": None})
+    # Top-level keys require a string value:
+    for key in ["grid_file", "rundir", "merge", "orog_file"]:
+        assert "is not of type 'string'\n" in errors(with_set(config, None, "rundir"))
+
+
 # orog-gsl
 
 
