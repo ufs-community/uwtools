@@ -107,14 +107,14 @@ class Assets(ABC):
     @classmethod
     def schema(cls) -> dict:
         """
-        Return the driver's schema.
+        Return the driver's internal schema.
         """
         with open(internal_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
             return bundle(json.load(f))
 
     def taskname(self, suffix: str) -> str:
         """
-        Return a common tag for graph-task log messages.
+        Return a common tag for task-related log messages.
 
         :param suffix: Log-string suffix.
         """
