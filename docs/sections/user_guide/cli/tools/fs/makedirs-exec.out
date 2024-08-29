@@ -1,18 +1,18 @@
-[2024-08-29T14:50:35]     INFO Validating config against internal schema: makedirs
-[2024-08-29T14:50:35]     INFO 0 UW schema-validation errors found in fs config
-[2024-08-29T14:50:35]     INFO Directories: Initial state: Not Ready
-[2024-08-29T14:50:35]     INFO Directories: Checking requirements
-[2024-08-29T14:50:35]     INFO Directory makedirs-parent/foo: Initial state: Not Ready
-[2024-08-29T14:50:35]     INFO Directory makedirs-parent/foo: Checking requirements
-[2024-08-29T14:50:35]     INFO Directory makedirs-parent/foo: Requirement(s) ready
-[2024-08-29T14:50:35]     INFO Directory makedirs-parent/foo: Executing
-[2024-08-29T14:50:35]     INFO Directory makedirs-parent/foo: Final state: Ready
-[2024-08-29T14:50:35]     INFO Directory makedirs-parent/bar: Initial state: Not Ready
-[2024-08-29T14:50:36]     INFO Directory makedirs-parent/bar: Checking requirements
-[2024-08-29T14:50:36]     INFO Directory makedirs-parent/bar: Requirement(s) ready
-[2024-08-29T14:50:36]     INFO Directory makedirs-parent/bar: Executing
-[2024-08-29T14:50:36]     INFO Directory makedirs-parent/bar: Final state: Ready
-[2024-08-29T14:50:36]     INFO Directories: Final state: Ready
+[2024-08-26T23:03:46]     INFO Validating config against internal schema: makedirs
+[2024-08-26T23:03:46]     INFO 0 UW schema-validation errors found in fs config
+[2024-08-26T23:03:46]     INFO Directories: Initial state: Not Ready
+[2024-08-26T23:03:46]     INFO Directories: Checking requirements
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/foo: Initial state: Not Ready
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/foo: Checking requirements
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/foo: Requirement(s) ready
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/foo: Executing
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/foo: Final state: Ready
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/bar: Initial state: Not Ready
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/bar: Checking requirements
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/bar: Requirement(s) ready
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/bar: Executing
+[2024-08-26T23:03:46]     INFO Directory makedirs-parent/bar: Final state: Ready
+[2024-08-26T23:03:46]     INFO Directories: Final state: Ready
 
 makedirs-parent/
 ├── bar/
