@@ -23,6 +23,22 @@ Or explicit:
 
 Additionally, UW defines the following tags to support use cases not covered by standard tags:
 
+``!datetime``
+^^^^^^^^^^^^^
+
+Converts the tagged node to a Python ``datetime`` object. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   date1: 2024-09-01
+   date2: !datetime "{{ date1 }}"
+
+.. code-block:: text
+
+   % uw config realize -i ../input.yaml --output-format yaml
+   date1: 2024-09-01
+   date2: 2024-09-01 00:00:00
+
 ``!float``
 ^^^^^^^^^^
 
@@ -62,7 +78,7 @@ Parse the tagged file and include its tags. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 
-   values: !INCLUDE [./supplemental.yaml]
+   values: !include [./supplemental.yaml]
 
 and ``supplemental.yaml``:
 
