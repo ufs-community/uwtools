@@ -1,5 +1,5 @@
-[2024-05-23T19:39:15]    DEBUG Command: uw config compare --file-1-path a.nml --file-2-path c.nml --verbose
-[2024-05-23T19:39:15]     INFO - a.nml
-[2024-05-23T19:39:15]     INFO + c.nml
-[2024-05-23T19:39:15]     INFO ---------------------------------------------------------------------
-[2024-05-23T19:39:15]     INFO values:       recipient:  - World + None
+[2024-08-29T14:50:35]    DEBUG Command: uw config compare --file-1-path a.nml --file-2-path c.nml --verbose
+[2024-08-29T14:50:36]     INFO - a.nml
+[2024-08-29T14:50:36]     INFO + c.nml
+[2024-08-29T14:50:36]     INFO ---------------------------------------------------------------------
+[2024-08-29T14:50:36]     INFO values:       recipient:  - World + None
