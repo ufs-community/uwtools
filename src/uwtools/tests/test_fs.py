@@ -112,7 +112,7 @@ def test_Stager__config_block_fail_bad_key_path(assets, source):
     assert str(e.value) == "Failed following YAML key(s): a -> x"
 
 
-@mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
+@mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
 def test_Stager__config_block_fails_bad_type(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val

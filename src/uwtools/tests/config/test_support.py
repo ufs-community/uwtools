@@ -21,7 +21,7 @@ from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 
-@mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)])
+@mark.parametrize("d,n", [({1: 42}, 1), ({1: {2: 42}}, 2), ({1: {2: {3: 42}}}, 3), ({1: {}}, 2)])
 def test_depth(d, n):
     assert support.depth(d) == n
 
@@ -103,13 +103,13 @@ class Test_UWYAMLConvert:
             ts.convert()
 
     def test_int_ok(self, loader):
-        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
-        assert ts.convert() == 88
-        self.comp(ts, "!int '88'")
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="42"))
+        assert ts.convert() == 42
+        self.comp(ts, "!int '42'")
 
     def test___repr__(self, loader):
-        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
-        assert str(ts) == "!int 88"
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="42"))
+        assert str(ts) == "!int 42"
 
 
 class Test_UWYAMLRemove:

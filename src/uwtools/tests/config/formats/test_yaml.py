@@ -155,7 +155,7 @@ def test_yaml_constructor_error_not_dict_from_file(tmp_path):
 
 def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
-    with StringIO("88") as sio, patch.object(sys, "stdin", new=sio):
+    with StringIO("42") as sio, patch.object(sys, "stdin", new=sio):
         with raises(exceptions.UWConfigError) as e:
             YAMLConfig()
     assert "Parsed an int value from stdin, expected a dict" in str(e.value)
@@ -201,7 +201,7 @@ def test_yaml_stdin_plus_relpath_failure(caplog):
 def test_yaml_unexpected_error(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     with open(cfgfile, "w", encoding="utf-8") as f:
-        print("{n: 88}", file=f)
+        print("{n: 42}", file=f)
     with patch.object(yaml, "load") as load:
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)

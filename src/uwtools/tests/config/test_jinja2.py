@@ -108,7 +108,7 @@ def test_dereference_local_values():
     }
 
 
-@mark.parametrize("val", (True, 3.14, 88, None))
+@mark.parametrize("val", (True, 3.14, 42, None))
 def test_dereference_no_op(val):
     # These types of values pass through dereferencing unmodified:
     assert jinja2.dereference(val=val, context={}) == val
@@ -157,7 +157,7 @@ def test_dereference_str_filter_rendered():
 def test_derefrence_str_variable_rendered_mixed():
     # A mixed result remains a str.
     val = "{{ n }} is an {{ t }}"
-    assert jinja2.dereference(val=val, context={"n": 88, "t": "int"}) == "88 is an int"
+    assert jinja2.dereference(val=val, context={"n": 42, "t": "int"}) == "42 is an int"
 
 
 def test_dereference_str_variable_rendered_str():
@@ -290,7 +290,7 @@ def test__deref_convert_no(caplog, tag):
     assert regex_logged(caplog, "Conversion failed")
 
 
-@mark.parametrize("converted,tag,value", [(3.14, "!float", "3.14"), (88, "!int", "88")])
+@mark.parametrize("converted,tag,value", [(3.14, "!float", "3.14"), (42, "!int", "42")])
 def test__deref_convert_ok(caplog, converted, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
@@ -340,10 +340,10 @@ def test__report(caplog):
 Internal arguments when rendering template:
 ---------------------------------------------------------------------
              foo: bar
-longish_variable: 88
+longish_variable: 42
 ---------------------------------------------------------------------
 """.strip()
-    jinja2._report(dict(foo="bar", longish_variable=88))
+    jinja2._report(dict(foo="bar", longish_variable=42))
     assert "\n".join(record.message for record in caplog.records) == expected
 
 
@@ -541,7 +541,7 @@ class Test_J2Template:
             assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
 
     def test_undeclared_variables(self):
-        s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[88] }} {{ k|default(l) }}"
+        s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[42] }} {{ k|default(l) }}"
         uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
         assert J2Template(values={}, template_source=s).undeclared_variables == uvs
 
