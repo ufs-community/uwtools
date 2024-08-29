@@ -22,7 +22,7 @@ Configuration parameters for the ``orog_gsl`` component.
 
   **halo:**
 
-  Halo number (-999 for no halo).
+  Halo number (-439 for no halo).
 
   **input_grid_file:**
 

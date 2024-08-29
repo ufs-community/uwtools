@@ -25,7 +25,7 @@ A compatible YAML block updating the person's street address might then contain:
      person:
        address:
          street: Main St
-         number: 99
+         number: 43
 
 The result would be:
 
@@ -35,7 +35,7 @@ The result would be:
      age: 19
      address:
        city: Boston
-       number: 99
+       number: 43
        state: MA
        street: Main St
      name: Jane

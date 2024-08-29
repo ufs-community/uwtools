@@ -121,7 +121,7 @@ def test_UPP_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
     with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
-        print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
+        print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
     dst = driverobj.rundir / "itag"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
@@ -132,7 +132,7 @@ def test_UPP_namelist_file(caplog, driverobj):
     assert nml["model_inputs"]["datestr"] == datestr
     assert nml["model_inputs"]["grib"] == "grib2"
     assert nml["nampgb"]["kpo"] == 3
-    assert nml["nampgb"]["kpv"] == 88
+    assert nml["nampgb"]["kpv"] == 42
 
 
 def test_UPP_namelist_file_fails_validation(caplog, driverobj):

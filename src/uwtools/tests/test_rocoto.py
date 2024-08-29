@@ -118,18 +118,18 @@ class Test__RocotoXML:
         assert child.text == "bar"
 
     def test__add_compound_time_string_cyclestr(self, instance, root):
-        config = {"attrs": {"bar": "88"}, "cyclestr": {"attrs": {"baz": "99"}, "value": "qux"}}
+        config = {"attrs": {"bar": "42"}, "cyclestr": {"attrs": {"baz": "43"}, "value": "qux"}}
         instance._add_compound_time_string(e=root, config=config, tag="foo")
         child = root[0]
-        assert child.get("bar") == "88"
+        assert child.get("bar") == "42"
         cyclestr = child[0]
-        assert cyclestr.get("baz") == "99"
+        assert cyclestr.get("baz") == "43"
         assert cyclestr.text == "qux"
 
     def test__add_metatask(self, instance, root):
         config = {
             "metatask_foo": "1",
-            "attrs": {"mode": "parallel", "throttle": 88},
+            "attrs": {"mode": "parallel", "throttle": 42},
             "task_bar": "2",
             "var": {"baz": "3", "qux": "4"},
         }
@@ -141,7 +141,7 @@ class Test__RocotoXML:
         assert metatask.tag == "metatask"
         assert metatask.get("mode") == "parallel"
         assert metatask.get("name") == taskname
-        assert metatask.get("throttle") == "88"
+        assert metatask.get("throttle") == "42"
         assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
         mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
         mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")

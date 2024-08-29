@@ -112,7 +112,7 @@ def test_resource_path():
     assert file.resource_path().is_dir()
 
 
-@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+@mark.parametrize("val", [Path("/some/path"), {"foo": 42}])
 def test_str2path_passthrough(val):
     assert file.str2path(val) == val
 
