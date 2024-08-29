@@ -61,7 +61,7 @@ def test_log_and_error(caplog):
 
 
 def test_yaml_to_str(capsys):
-    xs = " ".join("x" * 439)
+    xs = " ".join("x" * 999)
     expected = f"xs: {xs}"
     cfgobj = YAMLConfig({"xs": xs})
     assert repr(cfgobj) == expected

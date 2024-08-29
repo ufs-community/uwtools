@@ -37,7 +37,7 @@ def config(tmp_path):
                         "mask_field": "land_frac",
                         "regional": True,
                         "res": 403,
-                        "stretch_fac": 0.439,
+                        "stretch_fac": 0.999,
                         "topo_field": "orog_filt",
                         "topo_file": "/path/to/topo/file",
                         "zero_ocean": True,

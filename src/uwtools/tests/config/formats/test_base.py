@@ -164,7 +164,7 @@ N: "22"
     with open(path, "w", encoding="utf-8") as f:
         print(yaml, file=f)
     config = YAMLConfig(path)
-    with patch.dict(os.environ, {"N": "439"}, clear=True):
+    with patch.dict(os.environ, {"N": "999"}, clear=True):
         config.dereference()
     assert config == {
         "a": 44,

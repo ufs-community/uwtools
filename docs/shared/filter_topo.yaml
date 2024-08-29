@@ -17,7 +17,7 @@ filter_topo:
         mask_field: land_frac
         regional: true
         res: 403
-        stretch_fac: 0.439
+        stretch_fac: 0.999
         topo_field: orog_filt
         topo_file: /path/to/C403_filtered_orog # filter_topo adds a .tile{n}.nc extension
         zero_ocean: true
