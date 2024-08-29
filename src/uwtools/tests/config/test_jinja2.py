@@ -294,7 +294,7 @@ def test__deref_convert_no(caplog, tag):
 @mark.parametrize(
     "converted,tag,value",
     [
-        (datetime.fromisoformat("2024-09-09 00:00:00"), "!datetime", "2024-09-09 00:00:00"),
+        (datetime(2024, 9, 9, 0, 0), "!datetime", "2024-09-09 00:00:00"),
         (3.14, "!float", "3.14"),
         (42, "!int", "42"),
     ],

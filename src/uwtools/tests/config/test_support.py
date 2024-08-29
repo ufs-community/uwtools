@@ -97,7 +97,7 @@ class Test_UWYAMLConvert:
         ts = support.UWYAMLConvert(
             loader, yaml.ScalarNode(tag="!datetime", value="2024-08-09 12:22:42")
         )
-        assert ts.convert() == datetime.fromisoformat("2024-08-09 12:22:42")
+        assert ts.convert() == datetime(2024, 8, 9, 12, 22, 42)
         self.comp(ts, "!datetime '2024-08-09 12:22:42'")
 
     def test_float_no(self, loader):
