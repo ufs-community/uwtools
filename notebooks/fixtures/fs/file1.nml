@@ -1,0 +1,6 @@
+&animal
+  name = 'zebra'
+  num_legs = 4
+  diet_type = 'herbivore'
+  location = 'Africa'
+/

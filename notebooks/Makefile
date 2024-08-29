@@ -16,3 +16,4 @@ test-nb: lint unittest
 
 unittest:
 	pytest tests
+	rm -rf tmp

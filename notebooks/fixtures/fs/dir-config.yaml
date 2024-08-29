@@ -1,0 +1,3 @@
+makedirs:
+  - foo
+  - bar/baz
