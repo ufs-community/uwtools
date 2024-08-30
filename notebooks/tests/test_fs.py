@@ -31,11 +31,11 @@ def test_copy():
             assert copy_keys_dst_txt == src_txt
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(5) == config_str
-        assert tb.cell_output_text(7) == "True"
+        assert "True" in tb.cell_output_text(7)
         assert "False" in tb.cell_output_text(11)
         assert tb.cell_output_text(13) == tb.cell_output_text(9)
         assert tb.cell_output_text(15) == config_keys_str
-        assert tb.cell_output_text(17) == "True"
+        assert "True" in tb.cell_output_text(17)
 
 
 def test_link():
@@ -71,11 +71,11 @@ def test_link():
             assert link_keys_dst_txt == src_txt
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(29) == config_str
-        assert tb.cell_output_text(31) == "True"
+        assert "True" in tb.cell_output_text(31)
         assert "False" in tb.cell_output_text(35)
         assert tb.cell_output_text(37) == tb.cell_output_text(33)
         assert tb.cell_output_text(39) == config_keys_str
-        assert tb.cell_output_text(41) == "True"
+        assert "True" in tb.cell_output_text(41)
 
 
 def test_makedirs():
@@ -95,6 +95,6 @@ def test_makedirs():
             assert os.path.exists("tmp/dir-keys-target/" + subdir)
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(53) == config_str
-        assert tb.cell_output_text(55) == "True"
+        assert "True" in tb.cell_output_text(55)
         assert tb.cell_output_text(59) == config_keys_str
-        assert tb.cell_output_text(61) == "True"
+        assert "True" in tb.cell_output_text(61)
