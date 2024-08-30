@@ -39,7 +39,7 @@ Converts the tagged node to a Python ``datetime`` object. For example, given ``i
    date1: 2024-09-01
    date2: 2024-09-01 00:00:00
 
-The value provided to the tag must be in ISO 8601 format to be interpreted correctly by the ``!datetime`` tag.
+The value provided to the tag must be in :python:`ISO 8601 format<datetime.html#datetime.datetime.fromisoformat>` to be interpreted correctly by the ``!datetime`` tag.
 
 ``!float``
 ^^^^^^^^^^
