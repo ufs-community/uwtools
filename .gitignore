@@ -3,5 +3,3 @@
 *.swp
 .coverage
 __pycache__
-.ipynb_checkpoints
-notebooks/tmp
