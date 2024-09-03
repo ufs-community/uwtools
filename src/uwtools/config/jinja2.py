@@ -3,6 +3,7 @@ Support for rendering Jinja2 templates.
 """
 
 import os
+from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 from typing import Optional, Union
@@ -14,7 +15,7 @@ from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
-_ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
+_ConfigVal = Union[bool, datetime, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
 
 
 class J2Template:

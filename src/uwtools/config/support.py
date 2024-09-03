@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import math
 from collections import OrderedDict
+from datetime import datetime
 from importlib import import_module
-from typing import Type, Union
+from typing import Callable, Type, Union
 
 import yaml
 
@@ -11,7 +12,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 
-INCLUDE_TAG = "!INCLUDE"
+INCLUDE_TAG = "!include"
 
 
 # Public functions
@@ -107,15 +108,17 @@ class UWYAMLConvert(UWYAMLTag):
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!float", "!int")
+    TAGS = ("!datetime", "!float", "!int")
 
-    def convert(self) -> Union[float, int]:
+    def convert(self) -> Union[datetime, float, int]:
         """
         Return the original YAML value converted to the specified type.
 
         Will raise an exception if the value cannot be represented as the specified type.
         """
-        converters: dict[str, Union[type[float], type[int]]] = dict(zip(self.TAGS, [float, int]))
+        converters: dict[str, Union[Callable[[str], datetime], type[float], type[int]]] = dict(
+            zip(self.TAGS, [datetime.fromisoformat, float, int])
+        )
         return converters[self.tag](self.value)
 
 
