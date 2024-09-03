@@ -5,6 +5,7 @@ Tests for uwtools.config.jinja2 module.
 
 import logging
 import os
+from datetime import datetime
 from io import StringIO
 from textwrap import dedent
 from types import SimpleNamespace as ns
@@ -280,7 +281,7 @@ def test_unrendered(s, status):
     assert jinja2.unrendered(s) is status
 
 
-@mark.parametrize("tag", ["!float", "!int"])
+@mark.parametrize("tag", ["!datetime", "!float", "!int"])
 def test__deref_convert_no(caplog, tag):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
@@ -290,7 +291,14 @@ def test__deref_convert_no(caplog, tag):
     assert regex_logged(caplog, "Conversion failed")
 
 
-@mark.parametrize("converted,tag,value", [(3.14, "!float", "3.14"), (42, "!int", "42")])
+@mark.parametrize(
+    "converted,tag,value",
+    [
+        (datetime(2024, 9, 9, 0, 0), "!datetime", "2024-09-09 00:00:00"),
+        (3.14, "!float", "3.14"),
+        (42, "!int", "42"),
+    ],
+)
 def test__deref_convert_ok(caplog, converted, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)

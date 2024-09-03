@@ -5,6 +5,7 @@ Tests for uwtools.config.jinja2 module.
 
 import logging
 from collections import OrderedDict
+from datetime import datetime
 
 import yaml
 from pytest import fixture, mark, raises
@@ -86,6 +87,18 @@ class Test_UWYAMLConvert:
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
     # demonstrate that those nodes' convert() methods return representations in type type specified
     # by the tag.
+
+    def test_datetime_no(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!datetime", value="foo"))
+        with raises(ValueError):
+            ts.convert()
+
+    def test_datetime_ok(self, loader):
+        ts = support.UWYAMLConvert(
+            loader, yaml.ScalarNode(tag="!datetime", value="2024-08-09 12:22:42")
+        )
+        assert ts.convert() == datetime(2024, 8, 9, 12, 22, 42)
+        self.comp(ts, "!datetime '2024-08-09 12:22:42'")
 
     def test_float_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!float", value="foo"))
