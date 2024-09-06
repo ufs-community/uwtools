@@ -174,10 +174,10 @@ class Assets(ABC):
         :param config_key: Name of config item to delegate to controller.
         """
         if controller:
-            val = self._config_intermediate[controller[0]][config_key]
+            val = self._config_intermediate[controller[0]]
             for key in controller[1:]:
                 val = val[key]
-            self._config[config_key] = val
+            self._config[config_key] = val[config_key]
 
     # Public helper methods
 

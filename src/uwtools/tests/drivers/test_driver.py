@@ -285,6 +285,13 @@ def test_Assets__create_user_updated_config_base_file(
     assert updated == expected
 
 
+def test_Assets__delegate(driverobj):
+    assert "roses" not in driverobj.config
+    driverobj._config_intermediate["plants"] = {"flowers": {"roses": "red"}}
+    driverobj._delegate(["plants", "flowers"], "roses")
+    assert driverobj.config["roses"] == "red"
+
+
 def test_Assets__rundir(assetsobj):
     assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
