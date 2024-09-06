@@ -72,6 +72,10 @@ def test_OrogGSL(method):
     assert getattr(OrogGSL, method) is getattr(Driver, method)
 
 
+def test_OrogGSL_driver_name(driverobj):
+    assert driverobj.driver_name() == OrogGSL.driver_name() == "orog_gsl"
+
+
 def test_OrogGSL_input_config_file(driverobj):
     driverobj.input_config_file()
     inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
@@ -115,10 +119,6 @@ def test_OrogGSL_topo_data_3os(driverobj):
     assert not path.is_file()
     driverobj.topo_data_30s()
     assert path.is_symlink()
-
-
-def test_OrogGSL_driver_name(driverobj):
-    assert driverobj.driver_name() == OrogGSL.driver_name() == "orog_gsl"
 
 
 def test_OrogGSL__runcmd(driverobj):

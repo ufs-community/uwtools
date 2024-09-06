@@ -121,6 +121,10 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
 
 
+def test_JEDI_driver_name(driverobj):
+    assert driverobj.driver_name() == JEDI.driver_name() == "jedi"
+
+
 def test_JEDI_files_copied(driverobj):
     with patch.object(jedi_base, "filecopy") as filecopy:
         driverobj._config["rundir"] = "/path/to/run"
@@ -164,6 +168,10 @@ def test_JEDI_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_JEDI_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z jedi foo"
+
+
 def test_JEDI_validate_only(caplog, driverobj):
 
     @external
@@ -188,10 +196,6 @@ def test_JEDI_validate_only(caplog, driverobj):
     assert regex_logged(caplog, "Config is valid")
 
 
-def test_JEDI_driver_name(driverobj):
-    assert driverobj.driver_name() == JEDI.driver_name() == "jedi"
-
-
 def test_JEDI__config_fn(driverobj):
     assert driverobj._config_fn == "jedi.yaml"
 
@@ -202,7 +206,3 @@ def test_JEDI__runcmd(driverobj):
     assert (
         driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"
     )
-
-
-def test_JEDI_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z jedi foo"

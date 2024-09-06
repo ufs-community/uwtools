@@ -84,6 +84,10 @@ def test_Orog(method):
     assert getattr(Orog, method) is getattr(Driver, method)
 
 
+def test_Orog_driver_name(driverobj):
+    assert driverobj.driver_name() == Orog.driver_name() == "orog"
+
+
 def test_Orog_files_linked(driverobj):
     for _, src in driverobj.config["files_to_link"].items():
         Path(src).touch()
@@ -148,10 +152,6 @@ def test_Orog_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_Orog_driver_name(driverobj):
-    assert driverobj.driver_name() == Orog.driver_name() == "orog"
 
 
 def test_Orog_runscript(driverobj):

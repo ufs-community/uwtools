@@ -51,6 +51,10 @@ def test_WaveWatchIII(method):
     assert getattr(WaveWatchIII, method) is getattr(AssetsCycleBased, method)
 
 
+def test_WaveWatchIII_driver_name(driverobj):
+    assert driverobj.driver_name() == WaveWatchIII.driver_name() == "ww3"
+
+
 def test_WaveWatchIII_namelist_file(driverobj):
     src = driverobj.config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
@@ -77,7 +81,3 @@ def test_WaveWatchIII_restart_directory(driverobj):
     assert not path.is_dir()
     driverobj.restart_directory()
     assert path.is_dir()
-
-
-def test_WaveWatchIII_driver_name(driverobj):
-    assert driverobj.driver_name() == WaveWatchIII.driver_name() == "ww3"

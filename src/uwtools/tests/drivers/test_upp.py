@@ -97,6 +97,10 @@ def test_UPP(method):
     assert getattr(UPP, method) is getattr(Driver, method)
 
 
+def test_UPP_driver_name(driverobj):
+    assert driverobj.driver_name() == UPP.driver_name() == "upp"
+
+
 def test_UPP_files_copied(driverobj):
     for _, src in driverobj.config["files_to_copy"].items():
         Path(src).touch()
@@ -167,8 +171,8 @@ def test_UPP_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_UPP_driver_name(driverobj):
-    assert driverobj.driver_name() == UPP.driver_name() == "upp"
+def test_UPP_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"
 
 
 def test_UPP__namelist_path(driverobj):
@@ -177,7 +181,3 @@ def test_UPP__namelist_path(driverobj):
 
 def test_UPP__runcmd(driverobj):
     assert driverobj._runcmd == "%s < itag" % driverobj.config["execution"]["executable"]
-
-
-def test_UPP_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"

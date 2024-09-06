@@ -43,6 +43,10 @@ def test_CDEPS_atm(driverobj):
     atm_nml.assert_called_once_with()
 
 
+def test_CDEPS_driver_name(driverobj):
+    assert driverobj.driver_name() == CDEPS.driver_name() == "cdeps"
+
+
 @mark.parametrize("group", ["atm", "ocn"])
 def test_CDEPS_nml(caplog, driverobj, group):
     log.setLevel(logging.DEBUG)
@@ -109,10 +113,6 @@ def test_CDEPS_streams(driverobj, group):
     """
     with open(path, "r", encoding="utf-8") as f:
         assert f.read().strip() == dedent(expected).strip()
-
-
-def test_CDEPS_driver_name(driverobj):
-    assert driverobj.driver_name() == CDEPS.driver_name() == "cdeps"
 
 
 def test_CDEPS__model_namelist_file(driverobj):

@@ -156,6 +156,10 @@ def test_MPAS_boundary_files(driverobj, cycle):
     assert all(link.is_symlink() for link in links)
 
 
+def test_MPAS_driver_name(driverobj):
+    assert driverobj.driver_name() == MPAS.driver_name() == "mpas"
+
+
 @mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
@@ -189,6 +193,15 @@ def test_MPAS_namelist_file(caplog, driverobj):
     assert isinstance(nml, f90nml.Namelist)
 
 
+def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
 def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = 120
@@ -201,15 +214,6 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
     assert nml["nhyd_model"]["config_run_duration"] == "5_0:00:00"
-
-
-def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
-    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
-    assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
@@ -234,10 +238,6 @@ def test_MPAS_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_MPAS_driver_name(driverobj):
-    assert driverobj.driver_name() == MPAS.driver_name() == "mpas"
 
 
 def test_MPAS_streams_file(config, driverobj):

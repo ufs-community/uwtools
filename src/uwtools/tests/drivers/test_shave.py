@@ -72,6 +72,10 @@ def test_Shave(method):
     assert getattr(Shave, method) is getattr(Driver, method)
 
 
+def test_Shave_driver_name(driverobj):
+    assert driverobj.driver_name() == Shave.driver_name() == "shave"
+
+
 def test_Shave_input_config_file(driverobj):
     nx = driverobj.config["config"]["nx"]
     ny = driverobj.config["config"]["ny"]
@@ -96,10 +100,6 @@ def test_Shave_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_Shave_driver_name(driverobj):
-    assert driverobj.driver_name() == Shave.driver_name() == "shave"
 
 
 def test_Shave__runcmd(driverobj):

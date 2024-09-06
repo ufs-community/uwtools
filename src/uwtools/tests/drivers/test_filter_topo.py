@@ -83,6 +83,10 @@ def test_FilterTopo(method):
     assert getattr(FilterTopo, method) is getattr(Driver, method)
 
 
+def test_FilterTopo_driver_name(driverobj):
+    assert driverobj.driver_name() == FilterTopo.driver_name() == "filter_topo"
+
+
 def test_FilterTopo_filtered_output_file(driverobj):
     path = Path(driverobj.config["rundir"], "C403_filtered_orog.tile7.nc")
     assert not path.is_file()
@@ -111,7 +115,3 @@ def test_FilterTopo_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name() == FilterTopo.driver_name() == "filter_topo"

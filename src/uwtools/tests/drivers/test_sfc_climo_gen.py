@@ -106,6 +106,10 @@ def test_SfcClimoGen(method):
     assert getattr(SfcClimoGen, method) is getattr(Driver, method)
 
 
+def test_SfcClimoGen_driver_name(driverobj):
+    assert driverobj.driver_name() == SfcClimoGen.driver_name() == "sfc_climo_gen"
+
+
 def test_SfcClimoGen_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "fort.41"
@@ -136,7 +140,3 @@ def test_SfcClimoGen_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_SfcClimoGen_driver_name(driverobj):
-    assert driverobj.driver_name() == SfcClimoGen.driver_name() == "sfc_climo_gen"
