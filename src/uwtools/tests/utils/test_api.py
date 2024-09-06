@@ -26,7 +26,7 @@ def execute_kwargs():
     }
 
 
-@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+@mark.parametrize("val", [Path("/some/path"), {"foo": 42}])
 def test_ensure_data_source_passthrough(val):
     assert api.ensure_data_source(data_source=val, stdin_ok=False) == val
 

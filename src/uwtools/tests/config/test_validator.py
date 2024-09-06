@@ -35,7 +35,7 @@ def config(tmp_path) -> dict[str, Any]:
     return {
         "color": "blue",
         "dir": str(tmp_path),
-        "number": 88,
+        "number": 42,
         "sub": {
             "dir": str(tmp_path),
         },
@@ -59,7 +59,7 @@ def rocoto_assets():
                 "metatask": {
                     "var": {"member": "foo bar baz"},
                     "task": {
-                        "cores": 88,
+                        "cores": 42,
                         "command": "some-command",
                         "walltime": "00:01:00",
                         "dependency": {

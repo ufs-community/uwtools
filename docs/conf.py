@@ -54,6 +54,7 @@ extlinks = {
     "noaa": ("https://www.noaa.gov/%s", "%s"),
     "pylint": ("https://pylint.readthedocs.io/en/stable/%s", "%s"),
     "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
+    "python": ("https://docs.python.org/3/library/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),

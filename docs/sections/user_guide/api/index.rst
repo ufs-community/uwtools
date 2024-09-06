@@ -2,6 +2,8 @@ API
 ===
 
 .. toctree::
+   :maxdepth: 1
+
    cdeps
    chgres_cube
    config

@@ -35,13 +35,13 @@ class Stager(ABC):
         """
         Stage files and directories.
 
-        :param config: YAML-file path, or dict (read stdin if missing or None).
+        :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
         :param target_dir: Path to target directory.
-        :param cycle: A datetime object to make available for use in the config.
-        :param leadtime: A timedelta object to make available for use in the config.
+        :param cycle: A ``datetime`` object to make available for use in the config.
+        :param leadtime: A ``timedelta`` object to make available for use in the config.
         :param keys: YAML keys leading to file dst/src block.
         :param dry_run: Do not copy files.
-        :raises: UWConfigError if config fails validation.
+        :raises: ``UWConfigError`` if config fails validation.
         """
         dryrun(enable=dry_run)
         self._keys = keys or []
