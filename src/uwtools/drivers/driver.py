@@ -168,7 +168,10 @@ class Assets(ABC):
 
     def _delegate(self, controller: Optional[list[str]], config_key: str) -> None:
         """
-        ???
+        Selectively delegate config to controller.
+
+        :param controller: Key(s) leading to block in config controlling run-time values.
+        :param config_key: Name of config item to delegate to controller.
         """
         if controller:
             val = self._config_intermediate[controller[0]][config_key]
@@ -658,7 +661,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
-    :param controller: Name of block in config controlling run-time values.
+    :param controller: Key(s) leading to block in config controlling run-time values.
     """
     setattr(
         class_,
