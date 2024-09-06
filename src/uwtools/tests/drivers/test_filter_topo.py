@@ -21,10 +21,14 @@ from uwtools.drivers.filter_topo import FilterTopo
 def config(tmp_path):
     input_grid_file = tmp_path / "C403_grid.tile7.halo4.nc"
     input_grid_file.touch()
+    orog_output = tmp_path / "out.oro.nc"
+    orog_output.touch()
     return {
         "filter_topo": {
             "config": {
+                "filtered_orog": "C403_filtered_orog.tile7.nc",
                 "input_grid_file": str(input_grid_file),
+                "input_raw_orog": str(orog_output),
             },
             "execution": {
                 "executable": "/path/to/orog_gsl",
@@ -86,6 +90,13 @@ def test_FilterTopo_input_grid_file(driverobj):
     assert path.is_symlink()
 
 
+def test_FilterTopo_filtered_output_file(driverobj):
+    path = Path(driverobj.config["rundir"], "C403_filtered_orog.tile7.nc")
+    assert not path.is_file()
+    driverobj.filtered_output_file()
+    assert path.is_file()
+
+
 def test_FilterTopo_namelist_file(driverobj):
     path = refs(driverobj.namelist_file())
     actual = from_od(f90nml.read(path).todict())
@@ -94,7 +105,9 @@ def test_FilterTopo_namelist_file(driverobj):
 
 
 def test_FilterTopo_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, input_grid_file=D, namelist_file=D, runscript=D) as mocks:
+    with patch.multiple(
+        driverobj, input_grid_file=D, filtered_output_file=D, namelist_file=D, runscript=D
+    ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

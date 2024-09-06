@@ -1,6 +1,7 @@
 """
 A driver for shave.
 """
+
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -29,7 +30,9 @@ class Shave(DriverTimeInvariant):
         config = self.config["config"]
         input_file = Path(config["input_grid_file"])
         yield asset(input_file, input_file.is_file)
-        flags = [config[key] for key in ["nx", "ny", "nhalo", "input_grid_file", "output_grid_file"]]
+        flags = [
+            config[key] for key in ["nx", "ny", "nhalo", "input_grid_file", "output_grid_file"]
+        ]
         content = "{} {} {} '{}' '{}'".format(*flags)
         with writable(path) as f:
             print(content, file=f)
@@ -43,7 +46,7 @@ class Shave(DriverTimeInvariant):
         yield [
             self.input_config_file(),
             self.runscript(),
-            ]
+        ]
 
     # Public helper methods
 

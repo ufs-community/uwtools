@@ -37,7 +37,7 @@ class FilterTopo(DriverTimeInvariant):
         The filtered output file staged from raw input.
         """
         src = Path(self.config["config"]["input_raw_orog"])
-        dst = Path(self.config["config"]["filtered_orog"])
+        dst = self.rundir / self.config["config"]["filtered_orog"]
         yield self.taskname(f"Raw orog input {str(dst)}")
         yield asset(dst, dst.is_file)
         yield filecopy(src=src, dst=dst)

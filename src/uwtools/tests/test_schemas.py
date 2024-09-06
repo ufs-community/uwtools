@@ -758,6 +758,8 @@ def test_schema_filter_topo():
     config = {
         "config": {
             "input_grid_file": "/path/to/grid/file",
+            "filtered_orog": "/path/to/filtered/orog/file",
+            "input_raw_orog": "/path/to/raw/orog/file",
         },
         "execution": {
             "executable": "/path/to/filter_topo",
@@ -791,7 +793,7 @@ def test_schema_filter_topo():
     # Top-level rundir key requires a string value:
     assert "is not of type 'string'\n" in errors(with_set(config, None, "rundir"))
     # All config keys are requried:
-    for key in ["input_grid_file"]:
+    for key in ["filtered_orog", "input_grid_file", "input_raw_orog"]:
         assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
     # Other config keys are not allowed:
     assert "Additional properties are not allowed" in errors(
@@ -1869,9 +1871,10 @@ def test_schema_shave():
     config = {
         "config": {
             "input_grid_file": "/path/to/input_grid_file",
+            "output_grid_file": "/path/to/output_grid_file",
             "nx": 88,
             "ny": 88,
-            "nh4": 1,
+            "nhalo": 1,
         },
         "execution": {"executable": "shave"},
         "rundir": "/tmp",
@@ -1889,16 +1892,19 @@ def test_schema_shave():
 def test_schema_shave_config_properties():
     # Get errors function from schema_validator
     errors = schema_validator("shave", "properties", "shave", "properties", "config")
-    for key in ("input_grid_file", "nx", "ny", "nh4"):
+    for key in ("input_grid_file", "nx", "ny", "nhalo"):
         # All config keys are required:
         assert f"'{key}' is a required property" in errors({})
         # A string value is ok for input_grid_file:
         if key == "input_grid_file":
             assert "not of type 'string'" in str(errors({key: 88}))
-        # nx, ny, and nh4 must be positive integers:
-        elif key in ["nx", "ny", "nh4"]:
+        # nx, ny, and nhalo must be integers:
+        elif key in (keyvals := {"nx": 1, "ny": 1, "nhalo": 0}):
+            minval = keyvals[key]
             assert "not of type 'integer'" in str(errors({key: "/path/"}))
-            assert "0 is less than the minimum of 1" in str(errors({key: 0}))
+            assert f"{minval - 1} is less than the minimum of {minval}" in str(
+                errors({key: minval - 1})
+            )
         # It is an error for the value to be a floating-point value:
         assert "not of type" in str(errors({key: 3.14}))
         # It is an error not to supply a value:

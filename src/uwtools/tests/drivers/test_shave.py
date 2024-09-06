@@ -2,6 +2,7 @@
 """
 Shave driver tests.
 """
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -27,8 +28,9 @@ def config(tmp_path):
                 "executable": "/path/to/shave",
             },
             "config": {
-                "input_grid_file": "/path/to/input/grid/file.nc",
-                "nh4": 1,
+                "input_grid_file": str(tmp_path / "input_file.nc"),
+                "output_grid_file": "/path/to/input/grid/file.nc",
+                "nhalo": 1,
                 "nx": 214,
                 "ny": 128,
             },
@@ -73,6 +75,7 @@ def test_Shave(method):
 def test_Shave_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
+        input_config_file=D,
         runscript=D,
     ) as mocks:
         driverobj.provisioned_rundir()
@@ -84,11 +87,21 @@ def test_Shave_driver_name(driverobj):
     assert driverobj.driver_name() == Shave.driver_name() == "shave"
 
 
-def test_Shave__runcmd(driverobj):
-    cmd = driverobj._runcmd
+def test_Shave_input_config_file(driverobj):
     nx = driverobj.config["config"]["nx"]
     ny = driverobj.config["config"]["ny"]
-    nh4 = driverobj.config["config"]["nh4"]
+    nhalo = driverobj.config["config"]["nhalo"]
     input_file_path = driverobj._config["config"]["input_grid_file"]
-    output_file_path = input_file_path.replace(".nc", "_NH0.nc")
-    assert cmd == f"/path/to/shave {nx} {ny} {nh4} {input_file_path} {output_file_path}"
+    Path(input_file_path).touch()
+    output_file_path = driverobj._config["config"]["output_grid_file"]
+    driverobj.input_config_file()
+    with open(driverobj._input_config_path, "r", encoding="utf-8") as cfg_file:
+        content = cfg_file.readlines()
+    content = [l.strip("\n") for l in content]
+    assert len(content) == 1
+    assert content[0] == f"{nx} {ny} {nhalo} '{input_file_path}' '{output_file_path}'"
+
+
+def test_Shave__runcmd(driverobj):
+    cmd = driverobj._runcmd
+    assert cmd == "/path/to/shave < shave.cfg"

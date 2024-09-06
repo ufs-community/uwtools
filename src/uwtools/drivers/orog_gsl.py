@@ -108,7 +108,7 @@ class OrogGSL(DriverTimeInvariant):
         The full command-line component invocation.
         """
         executable = self.config[STR.execution][STR.executable]
-        return "'%s' < %s" % (executable, self._input_config_path.name)
+        return "%s < %s" % (executable, self._input_config_path.name)
 
 
 set_driver_docstring(OrogGSL)

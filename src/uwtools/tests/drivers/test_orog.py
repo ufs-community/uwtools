@@ -12,6 +12,7 @@ from pytest import fixture, mark
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
 from uwtools.logging import log
+from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
 
 # Fixtures
@@ -76,7 +77,6 @@ def driverobj(config):
         "_validate",
         "_write_runscript",
         "run",
-        "runscript",
         "taskname",
     ],
 )
@@ -98,10 +98,10 @@ def test_Orog_files_linked(driverobj):
 def test_Orog_grid_file_existence(caplog, driverobj, exist):
     log.setLevel(logging.DEBUG)
     grid_file = Path(driverobj.config["grid_file"])
-    status = "Input grid file: State: Not Ready (external asset)"
+    status = f"Input grid file {str(grid_file)}: State: Not Ready (external asset)"
     if exist:
         grid_file.touch()
-        status = "Input grid file: State: Ready"
+        status = f"Input grid file {str(grid_file)}: State: Ready"
     driverobj.grid_file()
     assert regex_logged(caplog, status)
 
@@ -110,7 +110,7 @@ def test_Orog_grid_file_nonexistence(caplog, driverobj):
     log.setLevel(logging.INFO)
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
-    assert regex_logged(caplog, "Input grid file: State: Ready")
+    assert regex_logged(caplog, "Input grid file none: State: Ready")
 
 
 def test_Orog_input_config_file_new(driverobj):
@@ -123,7 +123,7 @@ def test_Orog_input_config_file_new(driverobj):
         content = inps.readlines()
     content = [l.strip("\n") for l in content]
     assert len(content) == 3
-    assert content[0] == driverobj.config["grid_file"]
+    assert content[0] == f"'{driverobj.config["grid_file"]}'"
     assert content[1] == ".false."
     assert content[2] == "none"
 
@@ -137,8 +137,8 @@ def test_Orog_input_config_file_old(driverobj):
     content = [l.strip("\n") for l in content]
     assert len(content) == 5
     assert len(content[0].split()) == 9
-    assert content[1] == driverobj.config["grid_file"]
-    assert content[2] == driverobj.config.get("orog_file")
+    assert content[1] == f"'{driverobj.config["grid_file"]}'"
+    assert content[2] == f"'{driverobj.config.get("orog_file")}'"
     assert content[3] == ".false."
     assert content[4] == "none"
 
@@ -152,6 +152,15 @@ def test_Orog_provisioned_rundir(driverobj):
 
 def test_Orog_driver_name(driverobj):
     assert driverobj.driver_name() == Orog.driver_name() == "orog"
+
+
+def test_Orog_runscript(driverobj):
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_Orog__runcmd(driverobj):
