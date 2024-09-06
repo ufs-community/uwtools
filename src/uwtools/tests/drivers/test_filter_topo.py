@@ -83,18 +83,18 @@ def test_FilterTopo(method):
     assert getattr(FilterTopo, method) is getattr(Driver, method)
 
 
-def test_FilterTopo_input_grid_file(driverobj):
-    path = Path(driverobj.config["rundir"], "C403_grid.tile7.halo4.nc")
-    assert not path.is_file()
-    driverobj.input_grid_file()
-    assert path.is_symlink()
-
-
 def test_FilterTopo_filtered_output_file(driverobj):
     path = Path(driverobj.config["rundir"], "C403_filtered_orog.tile7.nc")
     assert not path.is_file()
     driverobj.filtered_output_file()
     assert path.is_file()
+
+
+def test_FilterTopo_input_grid_file(driverobj):
+    path = Path(driverobj.config["rundir"], "C403_grid.tile7.halo4.nc")
+    assert not path.is_file()
+    driverobj.input_grid_file()
+    assert path.is_symlink()
 
 
 def test_FilterTopo_namelist_file(driverobj):
