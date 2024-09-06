@@ -195,7 +195,7 @@ def test_Assets_controller(config, controller_schema):
         with raises(UWConfigError):
             ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteAssetsTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
+            config=config, schema_file=controller_schema, controller=["controller"]
         )
 
 
@@ -342,7 +342,7 @@ def test_Driver_controller(config, controller_schema):
         with raises(UWConfigError):
             ConcreteDriverTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteDriverTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
+            config=config, schema_file=controller_schema, controller=["controller"]
         )
 
 

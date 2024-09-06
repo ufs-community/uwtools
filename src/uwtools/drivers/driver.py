@@ -49,7 +49,7 @@ class Assets(ABC):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ) -> None:
         config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         config_input.dereference(
@@ -66,7 +66,10 @@ class Assets(ABC):
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
         if controller:
-            self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
+            rundir = self._config_intermediate[controller[0]][STR.rundir]
+            for key in controller[1:]:
+                rundir = rundir[key]
+            self._config[STR.rundir] = rundir
         self.schema_file = schema_file
         self._validate()
         dryrun(enable=dry_run)
@@ -241,7 +244,7 @@ class AssetsCycleBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -274,7 +277,7 @@ class AssetsCycleLeadtimeBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -314,7 +317,7 @@ class AssetsTimeInvariant(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             config=config,
@@ -339,7 +342,7 @@ class Driver(Assets):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -352,7 +355,10 @@ class Driver(Assets):
         )
         self._batch = batch
         if controller:
-            self._config[STR.execution] = self.config_full[controller][STR.execution]
+            execution = self._config_intermediate[controller[0]][STR.execution]
+            for key in controller[1:]:
+                execution = execution[key]
+            self._config[STR.execution] = execution
 
     # Workflow tasks
 
@@ -541,7 +547,7 @@ class DriverCycleBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -576,7 +582,7 @@ class DriverCycleLeadtimeBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -618,7 +624,7 @@ class DriverTimeInvariant(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             config=config,
