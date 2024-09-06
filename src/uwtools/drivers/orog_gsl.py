@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
+from uwtools.utils.file import writable
 from uwtools.utils.tasks import symlink
 
 
@@ -18,6 +19,19 @@ class OrogGSL(DriverTimeInvariant):
     """
 
     # Workflow tasks
+
+    @task
+    def input_config_file(self):
+        """
+        The input config file.
+        """
+        path = self._input_config_path
+        yield self.taskname(str(path))
+        yield asset(path, path.is_file)
+        yield None
+        inputs = [str(self.config["config"][k]) for k in ("tile", "resolution", "halo")]
+        with writable(path) as f:
+            print("\n".join(inputs), file=f)
 
     @task
     def input_grid_file(self):
@@ -40,6 +54,7 @@ class OrogGSL(DriverTimeInvariant):
         """
         yield self.taskname("provisioned run directory")
         yield [
+            self.input_config_file(),
             self.input_grid_file(),
             self.runscript(),
             self.topo_data_2p5m(),
@@ -80,15 +95,20 @@ class OrogGSL(DriverTimeInvariant):
         return STR.oroggsl
 
     # Private helper methods
+    @property
+    def _input_config_path(self) -> Path:
+        """
+        Path to the input config file.
+        """
+        return self.rundir / "orog_gsl.cfg"
 
     @property
     def _runcmd(self):
         """
         The full command-line component invocation.
         """
-        inputs = [str(self.config["config"][k]) for k in ("tile", "resolution", "halo")]
         executable = self.config[STR.execution][STR.executable]
-        return "echo '%s' | %s" % ("\n".join(inputs), executable)
+        return "'%s' < %s" % (executable, self._input_config_path.name)
 
 
 set_driver_docstring(OrogGSL)

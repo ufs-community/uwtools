@@ -37,7 +37,7 @@ class Orog(DriverTimeInvariant):
         The input grid file.
         """
         grid_file = Path(self.config["grid_file"])
-        yield self.taskname("Input grid file")
+        yield self.taskname(f"Input grid file {grid_file}")
         yield asset(grid_file, grid_file.is_file) if str(grid_file) != "none" else None
 
     @task
@@ -62,8 +62,9 @@ class Orog(DriverTimeInvariant):
                 "blat",
             ]
             inputs = " ".join([str(inputs[i]) for i in ordered_entries])
-        outgrid = self.config["grid_file"]
-        orogfile = self.config.get("orog_file")
+        outgrid = "'{}'".format(self.config["grid_file"])
+        if orogfile := self.config.get("orog_file"):
+            orogfile = "'{}'".format(orogfile)
         mask_only = ".true." if self.config.get("mask") else ".false."
         merge_file = self.config.get("merge", "none")  # string none is intentional
         content = [i for i in [inputs, outgrid, orogfile, mask_only, merge_file] if i is not None]
@@ -81,6 +82,23 @@ class Orog(DriverTimeInvariant):
             self.input_config_file(),
             self.runscript(),
         ]
+
+
+    @task
+    def runscript(self):
+        """
+        The runscript.
+        """
+        path = self._runscript_path
+        yield self.taskname(path.name)
+        yield asset(path, path.is_file)
+        yield None
+        envvars = {
+            "KMP_AFFINITY": "disabled",
+            "OMP_NUM_THREADS": self.config.get(STR.execution, {}).get(STR.threads, 1),
+            "OMP_STACKSIZE": "2048m",
+        }
+        self._write_runscript(path=path, envvars=envvars)
 
     # Public helper methods
 

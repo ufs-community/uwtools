@@ -10,7 +10,7 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
-from uwtools.utils.tasks import symlink
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class FilterTopo(DriverTimeInvariant):
@@ -27,9 +27,20 @@ class FilterTopo(DriverTimeInvariant):
         """
         src = Path(self.config["config"]["input_grid_file"])
         dst = Path(self.config[STR.rundir], src.name)
-        yield self.taskname("Input grid")
+        yield self.taskname(f"Input grid {str(src)}")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
+
+    @task
+    def filtered_output_file(self):
+        """
+        The filtered output file staged from raw input.
+        """
+        src = Path(self.config["config"]["input_raw_orog"])
+        dst = Path(self.config["config"]["filtered_orog"])
+        yield self.taskname(f"Raw orog input {str(dst)}")
+        yield asset(dst, dst.is_file)
+        yield filecopy(src=src, dst=dst)
 
     @task
     def namelist_file(self):
@@ -56,6 +67,7 @@ class FilterTopo(DriverTimeInvariant):
         yield self.taskname("provisioned run directory")
         yield [
             self.input_grid_file(),
+            self.filtered_output_file(),
             self.namelist_file(),
             self.runscript(),
         ]
