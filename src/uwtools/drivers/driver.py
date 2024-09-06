@@ -65,11 +65,7 @@ class Assets(ABC):
             self._config: dict = self._config_intermediate[self.driver_name()]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
-        if controller:
-            rundir = self._config_intermediate[controller[0]][STR.rundir]
-            for key in controller[1:]:
-                rundir = rundir[key]
-            self._config[STR.rundir] = rundir
+        self._delegate(controller, STR.rundir)
         self.schema_file = schema_file
         self._validate()
         dryrun(enable=dry_run)
@@ -169,6 +165,16 @@ class Assets(ABC):
             log.debug(f"Wrote config to {path}")
         else:
             log.debug(f"Failed to validate {path}")
+
+    def _delegate(self, controller: Optional[list[str]], config_key: str) -> None:
+        """
+        ???
+        """
+        if controller:
+            val = self._config_intermediate[controller[0]][config_key]
+            for key in controller[1:]:
+                val = val[key]
+            self._config[config_key] = val
 
     # Public helper methods
 
@@ -354,11 +360,7 @@ class Driver(Assets):
             controller=controller,
         )
         self._batch = batch
-        if controller:
-            execution = self._config_intermediate[controller[0]][STR.execution]
-            for key in controller[1:]:
-                execution = execution[key]
-            self._config[STR.execution] = execution
+        self._delegate(controller, STR.execution)
 
     # Workflow tasks
 
