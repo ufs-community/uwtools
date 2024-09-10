@@ -1,44 +1,60 @@
 {
   "$defs": {
     "compoundTimeString": {
-      "anyOf": [
+      "oneOf": [
+        {
+          "$ref": "#/$defs/compoundTimeStringElement"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/compoundTimeStringElement"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "compoundTimeStringElement": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/cycleString"
+        },
         {
           "type": "integer"
         },
         {
           "type": "string"
-        },
-        {
+        }
+      ]
+    },
+    "cycleString": {
+      "additionalProperties": false,
+      "properties": {
+        "cyclestr": {
           "additionalProperties": false,
           "properties": {
-            "cyclestr": {
+            "attrs": {
               "additionalProperties": false,
               "properties": {
-                "attrs": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "offset": {
-                      "$ref": "#/$defs/time"
-                    }
-                  },
-                  "type": "object"
-                },
-                "value": {
-                  "type": "string"
+                "offset": {
+                  "$ref": "#/$defs/time"
                 }
               },
-              "required": [
-                "value"
-              ],
               "type": "object"
+            },
+            "value": {
+              "type": "string"
             }
           },
           "required": [
-            "cyclestr"
+            "value"
           ],
           "type": "object"
         }
-      ]
+      },
+      "required": [
+        "cyclestr"
+      ],
+      "type": "object"
     },
     "dependency": {
       "additionalProperties": false,
