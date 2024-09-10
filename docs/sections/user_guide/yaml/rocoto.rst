@@ -90,7 +90,7 @@ In the example, the resulting log would appear in the XML file as:
 
 The ``attrs:`` block is optional within the ``cyclestr:`` block and can be used to specify the cycle offset.
 
-Wherever a `cyclestr:` block is accepted, a YAML sequence mixing text and `cyclestr:` items may also be provided. For example,
+Wherever a ``cyclestr:`` block is accepted, a YAML sequence mixing text and ``cyclestr:`` blocks may also be provided. For example,
 
 .. code-block:: yaml
 
