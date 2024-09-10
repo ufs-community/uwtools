@@ -133,8 +133,7 @@ class Test__RocotoXML:
             {"cyclestr": {"value": "%s", "attrs": {"offset": "00:06:00"}}},
             ".log",
         ]
-        instance._add_compound_time_string(e=root, config=config, tag="a")
-        expected = "<a>{}</a>".format(
+        xml = "<a>{}</a>".format(
             "".join(
                 [
                     "cycle-",
@@ -145,7 +144,8 @@ class Test__RocotoXML:
                 ]
             )
         )
-        assert etree.tostring(root[0]).decode("utf-8") == expected
+        instance._add_compound_time_string(e=root, config=config, tag="a")
+        assert etree.tostring(root[0]).decode("utf-8") == xml
 
     def test__add_metatask(self, instance, root):
         config = {
