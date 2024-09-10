@@ -115,10 +115,10 @@ class _RocotoXML:
         """
         e = SubElement(e, tag)
         if isinstance(config, dict):
-            if subconfig := config.get(STR.cyclestr):
-                cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = subconfig[STR.value]
-                self._set_attrs(cyclestr, subconfig)
+            subconfig = config[STR.cyclestr]
+            cyclestr = SubElement(e, STR.cyclestr)
+            cyclestr.text = subconfig[STR.value]
+            self._set_attrs(cyclestr, subconfig)
         else:
             e.text = str(config)
         return e
