@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from lxml import etree
+from lxml.builder import E  # type: ignore
 from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -113,15 +114,12 @@ class _RocotoXML:
         :param tag: Name of child element to add.
         :return: The child element.
         """
-        e = SubElement(e, tag)
-        if isinstance(config, dict):
-            subconfig = config[STR.cyclestr]
-            cyclestr = SubElement(e, STR.cyclestr)
-            cyclestr.text = subconfig[STR.value]
-            self._set_attrs(cyclestr, subconfig)
-        else:
-            e.text = str(config)
-        return e
+        config = config if isinstance(config, list) else [config]
+        cyclestr = lambda x: E.cyclestr(x["cyclestr"]["value"], **x["cyclestr"].get("attrs", {}))
+        items = [cyclestr(x) if isinstance(x, dict) else str(x) for x in [tag, *config]]
+        child: _Element = E(*items)  # pylint: disable=not-callable
+        e.append(child)
+        return child
 
     def _add_metatask(self, e: _Element, config: dict, name_attr: str) -> None:
         """
