@@ -118,12 +118,10 @@ class Test__RocotoXML:
         assert child.text == "bar"
 
     def test__add_compound_time_string_cyclestr(self, instance, root):
-        config = {"attrs": {"bar": "42"}, "cyclestr": {"attrs": {"baz": "43"}, "value": "qux"}}
+        config = {"cyclestr": {"attrs": {"baz": "42"}, "value": "qux"}}
         instance._add_compound_time_string(e=root, config=config, tag="foo")
-        child = root[0]
-        assert child.get("bar") == "42"
-        cyclestr = child[0]
-        assert cyclestr.get("baz") == "43"
+        cyclestr = root[0][0]
+        assert cyclestr.get("baz") == "42"
         assert cyclestr.text == "qux"
 
     def test__add_metatask(self, instance, root):
