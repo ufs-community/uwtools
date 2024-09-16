@@ -1,0 +1,4 @@
+keys:
+  to:
+    config:
+      message: "{{ greeting }}, {{ recipient }}!"
