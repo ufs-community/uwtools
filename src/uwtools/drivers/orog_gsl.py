@@ -9,7 +9,6 @@ from iotaa import asset, task, tasks
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
-from uwtools.utils.file import writable
 from uwtools.utils.tasks import symlink
 
 
