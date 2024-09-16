@@ -23,7 +23,7 @@
           ]
         },
         "execution": {
-          "$ref": "urn:uwtools:execution-serial"
+          "$ref": "urn:uwtools:execution"
         },
         "namelist": {
           "additionalProperties": false,

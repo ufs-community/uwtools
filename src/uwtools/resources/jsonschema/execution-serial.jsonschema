@@ -12,9 +12,6 @@
     },
     "executable": {
       "type": "string"
-    },
-    "threads": {
-      "type": "integer"
     }
   },
   "required": [
