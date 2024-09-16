@@ -6,7 +6,7 @@
         "config": {
           "additionalProperties": false,
           "properties": {
-            "input_grid_file": {
+            "filtered_orog": {
               "type": "string"
 ...
         "rundir"

@@ -127,7 +127,7 @@ def test_Orog_input_config_file_new(driverobj):
         content = inps.readlines()
     content = [l.strip("\n") for l in content]
     assert len(content) == 3
-    assert content[0] == f"'{driverobj.config["grid_file"]}'"
+    assert content[0] == "'{}'".format(driverobj.config["grid_file"])
     assert content[1] == ".false."
     assert content[2] == "none"
 

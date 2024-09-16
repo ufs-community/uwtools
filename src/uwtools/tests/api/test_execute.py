@@ -25,7 +25,7 @@ def args():
         config=fixture_path("testdriver.yaml"),
         module=fixture_path("testdriver.py"),
         schema_file=fixture_path("testdriver.jsonschema"),
-        task="eighty_eight",
+        task="forty_two",
     )
 
 
@@ -98,7 +98,7 @@ def test_tasks_fail_no_cycle(args, caplog, kwargs):
 @mark.parametrize("f", [Path, str])
 def test_tasks_pass(args, f):
     tasks = execute.tasks(classname=args.classname, module=f(args.module))
-    assert tasks["eighty_eight"] == "88"
+    assert tasks["forty_two"] == "42"
 
 
 def test__get_driver_class_explicit_fail_bad_class(caplog, args):

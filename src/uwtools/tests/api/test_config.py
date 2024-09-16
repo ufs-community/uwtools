@@ -99,7 +99,7 @@ def test_realize_update_config_from_stdin():
 
 
 def test_realize_update_config_none():
-    input_config = {"n": 88}
+    input_config = {"n": 42}
     output_file = Path("output.yaml")
     with patch.object(config, "_realize") as _realize:
         config.realize(input_config=input_config, output_file=output_file)

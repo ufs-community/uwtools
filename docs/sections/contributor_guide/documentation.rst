@@ -52,7 +52,7 @@ Please follow these guidelines when contributing to the documentation:
 
        .. code-block:: python
 
-          n = 88
+          n = 42
 
   or
 
@@ -62,4 +62,4 @@ Please follow these guidelines when contributing to the documentation:
 
         .. code-block:: python
 
-           n = 88
+           n = 42

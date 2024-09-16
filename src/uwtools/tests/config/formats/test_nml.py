@@ -58,22 +58,22 @@ def test_nml__parse_include_mult_sect():
 
 
 def test_nml_derived_type_dict():
-    nml = NMLConfig(config={"nl": {"o": {"i": 77, "j": 88}}})
-    assert nml["nl"]["o"] == {"i": 77, "j": 88}
+    nml = NMLConfig(config={"nl": {"o": {"i": 41, "j": 42}}})
+    assert nml["nl"]["o"] == {"i": 41, "j": 42}
 
 
 def test_nml_derived_type_file(tmp_path):
     s = """
     &nl
-      o%i = 77
-      o%j = 88
+      o%i = 41
+      o%j = 42
     /
     """
     path = tmp_path / "a.nml"
     with open(path, "w", encoding="utf-8") as f:
         print(dedent(s).strip(), file=f)
     nml = NMLConfig(config=path)
-    assert nml["nl"]["o"] == {"i": 77, "j": 88}
+    assert nml["nl"]["o"] == {"i": 41, "j": 42}
 
 
 def test_nml_dump_dict_dict(data, tmp_path):

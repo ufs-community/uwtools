@@ -30,7 +30,7 @@ class OrogGSL(DriverTimeInvariant):
         yield asset(path, path.is_file)
         yield None
         inputs = [str(self.config["config"][k]) for k in ("tile", "resolution", "halo")]
-        with writable(path) as f:
+        with open(path, "w", encoding="utf-8") as f:
             print("\n".join(inputs), file=f)
 
     @task
@@ -95,6 +95,7 @@ class OrogGSL(DriverTimeInvariant):
         return STR.oroggsl
 
     # Private helper methods
+
     @property
     def _input_config_path(self) -> Path:
         """

@@ -5,6 +5,7 @@ Tests for the uwtools.config.base module.
 import datetime as dt
 import logging
 import os
+from datetime import datetime
 from unittest.mock import patch
 
 import yaml
@@ -25,7 +26,7 @@ from uwtools.utils.file import FORMAT, readable
 @fixture
 def config(tmp_path):
     path = tmp_path / "config.yaml"
-    data = {"foo": 88}
+    data = {"foo": 42}
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(data, f)
     return ConcreteConfig(config=path)
@@ -67,7 +68,7 @@ class ConcreteConfig(Config):
 
 
 def test__characterize_values(config):
-    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
+    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 42}, 5: [{"b": 43}], 6: "string"}
     complete, template = config._characterize_values(values=values, parent="p")
     assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
     assert template == ["  p3: {{ n }}"]
@@ -97,7 +98,7 @@ def test__parse_include(config):
     config.data.update(
         {
             "config": {
-                "salad_include": f"!INCLUDE [{include_path}]",
+                "salad_include": f"!include [{include_path}]",
                 "meat": "beef",
                 "dressing": "poppyseed",
             }
@@ -153,12 +154,15 @@ b:
   c: !int '{{ N | int + 11 }}'
 d: '{{ X }}'
 e:
-  - !int '88'
+  - !int '42'
   - !float '3.14'
+  - !datetime '{{ D }}'
 f:
-  f1: !int '88'
+  f1: !int '42'
   f2: !float '3.14'
+D: 2024-10-10 00:19:00
 N: "22"
+
 """.strip()
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
@@ -166,12 +170,14 @@ N: "22"
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
         config.dereference()
+    print(config["e"])
     assert config == {
         "a": 44,
         "b": {"c": 33},
         "d": "{{ X }}",
-        "e": [88, 3.14],
-        "f": {"f1": 88, "f2": 3.14},
+        "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00")],
+        "f": {"f1": 42, "f2": 3.14},
+        "D": datetime.fromisoformat("2024-10-10 00:19:00"),
         "N": "22",
     }
 
@@ -206,4 +212,4 @@ def test_update_from(config):
     Test that a config object can be updated.
     """
     config.data.update({"a": "11", "b": "12", "c": "13"})
-    assert config == {"foo": 88, "a": "11", "b": "12", "c": "13"}
+    assert config == {"foo": 42, "a": "11", "b": "12", "c": "13"}

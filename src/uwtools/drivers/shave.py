@@ -34,7 +34,7 @@ class Shave(DriverTimeInvariant):
             config[key] for key in ["nx", "ny", "nhalo", "input_grid_file", "output_grid_file"]
         ]
         content = "{} {} {} '{}' '{}'".format(*flags)
-        with writable(path) as f:
+        with open(path, "w", encoding="utf-8") as f:
             print(content, file=f)
 
     @tasks
