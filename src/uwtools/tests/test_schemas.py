@@ -1898,7 +1898,7 @@ def test_schema_shave_config_properties():
         # A string value is ok for input_grid_file:
         if key == "input_grid_file":
             assert "not of type 'string'" in str(errors({key: 42}))
-        # nx, ny, and nhalo must be integers:
+        # nx, ny, and nhalo must be integers >= their respective minimum values:
         elif key in (keyvals := {"nx": 1, "ny": 1, "nhalo": 0}):
             minval = keyvals[key]
             assert "not of type 'integer'" in str(errors({key: "/path/"}))
