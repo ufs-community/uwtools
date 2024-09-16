@@ -49,7 +49,7 @@ class Assets(ABC):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ) -> None:
         config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         config_input.dereference(
@@ -65,8 +65,7 @@ class Assets(ABC):
             self._config: dict = self._config_intermediate[self.driver_name()]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
-        if controller:
-            self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
+        self._delegate(controller, STR.rundir)
         self.schema_file = schema_file
         self._validate()
         dryrun(enable=dry_run)
@@ -167,6 +166,19 @@ class Assets(ABC):
         else:
             log.debug(f"Failed to validate {path}")
 
+    def _delegate(self, controller: Optional[list[str]], config_key: str) -> None:
+        """
+        Selectively delegate config to controller.
+
+        :param controller: Key(s) leading to block in config controlling run-time values.
+        :param config_key: Name of config item to delegate to controller.
+        """
+        if controller:
+            val = self._config_intermediate[controller[0]]
+            for key in controller[1:]:
+                val = val[key]
+            self._config[config_key] = val[config_key]
+
     # Public helper methods
 
     @classmethod
@@ -241,7 +253,7 @@ class AssetsCycleBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -274,7 +286,7 @@ class AssetsCycleLeadtimeBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -314,7 +326,7 @@ class AssetsTimeInvariant(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             config=config,
@@ -339,7 +351,7 @@ class Driver(Assets):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -351,8 +363,7 @@ class Driver(Assets):
             controller=controller,
         )
         self._batch = batch
-        if controller:
-            self._config[STR.execution] = self.config_full[controller][STR.execution]
+        self._delegate(controller, STR.execution)
 
     # Workflow tasks
 
@@ -541,7 +552,7 @@ class DriverCycleBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -576,7 +587,7 @@ class DriverCycleLeadtimeBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -618,7 +629,7 @@ class DriverTimeInvariant(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             config=config,
@@ -650,7 +661,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
-    :param controller: Name of block in config controlling run-time values.
+    :param controller: Key(s) leading to block in config controlling run-time values.
     """
     setattr(
         class_,

@@ -195,7 +195,7 @@ def test_Assets_controller(config, controller_schema):
         with raises(UWConfigError):
             ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteAssetsTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
+            config=config, schema_file=controller_schema, controller=["controller"]
         )
 
 
@@ -285,6 +285,13 @@ def test_Assets__create_user_updated_config_base_file(
     assert updated == expected
 
 
+def test_Assets__delegate(driverobj):
+    assert "roses" not in driverobj.config
+    driverobj._config_intermediate["plants"] = {"flowers": {"roses": "red"}}
+    driverobj._delegate(["plants", "flowers"], "roses")
+    assert driverobj.config["roses"] == "red"
+
+
 def test_Assets__rundir(assetsobj):
     assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
@@ -342,7 +349,7 @@ def test_Driver_controller(config, controller_schema):
         with raises(UWConfigError):
             ConcreteDriverTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteDriverTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
+            config=config, schema_file=controller_schema, controller=["controller"]
         )
 
 

@@ -86,11 +86,29 @@ In the example, the resulting log would appear in the XML file as:
 
 .. code-block:: xml
 
-   <log>
-     <cyclestr>/some/path/to/&FOO;</cyclestr>
-   </log>
+   <log><cyclestr>/some/path/to/&FOO;</cyclestr></log>
 
 The ``attrs:`` block is optional within the ``cyclestr:`` block and can be used to specify the cycle offset.
+
+Wherever a ``cyclestr:`` block is accepted, a YAML sequence mixing text and ``cyclestr:`` blocks may also be provided. For example,
+
+.. code-block:: yaml
+
+   log:
+     - cyclestr:
+         value: "%Y%m%d%H"
+     - -through-
+     - cyclestr:
+         attrs:
+           offset: "06:00:00"
+         value: "%Y%m%d%H"
+     - .log
+
+would be rendered as
+
+.. code-block:: xml
+
+   <log><cyclestr>%Y%m%d%H</cyclestr>-through-<cyclestr offset="06:00:00">%Y%m%d%H</cyclestr>.log</log>
 
 Tasks Section
 -------------
