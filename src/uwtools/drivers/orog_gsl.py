@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
+from uwtools.utils.file import writable
 from uwtools.utils.tasks import symlink
 
 
@@ -29,7 +30,7 @@ class OrogGSL(DriverTimeInvariant):
         yield asset(path, path.is_file)
         yield None
         inputs = [str(self.config["config"][k]) for k in ("tile", "resolution", "halo")]
-        with open(path, "w", encoding="utf-8") as f:
+        with writable(path) as f:
             print("\n".join(inputs), file=f)
 
     @task

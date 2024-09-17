@@ -9,6 +9,8 @@ from iotaa import asset, task, tasks
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
+from uwtools.utils.file import writable
+from uwtools.utils.tasks import file
 
 
 class Shave(DriverTimeInvariant):
@@ -28,12 +30,12 @@ class Shave(DriverTimeInvariant):
         yield asset(path, path.is_file)
         config = self.config["config"]
         input_file = Path(config["input_grid_file"])
-        yield asset(input_file, input_file.is_file)
+        yield file(path=input_file)
         flags = [
             config[key] for key in ["nx", "ny", "nhalo", "input_grid_file", "output_grid_file"]
         ]
         content = "{} {} {} '{}' '{}'".format(*flags)
-        with open(path, "w", encoding="utf-8") as f:
+        with writable(path) as f:
             print(content, file=f)
 
     @tasks
