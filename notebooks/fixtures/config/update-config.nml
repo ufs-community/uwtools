@@ -1,4 +1,4 @@
-&message
+&memo
   sender_id = "{{ id }}"
   message = "{{ greeting }}, {{ recipient }}!"
   sent = .FALSE.
