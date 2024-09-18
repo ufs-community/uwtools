@@ -77,6 +77,10 @@ def test_Ungrib(method):
     assert getattr(Ungrib, method) is getattr(Driver, method)
 
 
+def test_Ungrib_driver_name(driverobj):
+    assert driverobj.driver_name() == Ungrib.driver_name() == "ungrib"
+
+
 def test_Ungrib_gribfiles(driverobj, tmp_path):
     links = []
     cycle_hr = 12
@@ -115,6 +119,10 @@ def test_Ungrib_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_Ungrib_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
+
+
 def test_Ungrib_vtable(driverobj):
     src = driverobj.rundir / "Vtable.GFS.in"
     src.touch()
@@ -125,10 +133,6 @@ def test_Ungrib_vtable(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib_driver_name(driverobj):
-    assert driverobj.driver_name() == Ungrib.driver_name() == "ungrib"
-
-
 def test_Ungrib__gribfile(driverobj):
     src = driverobj.rundir / "GRIBFILE.AAA.in"
     src.touch()
@@ -136,10 +140,6 @@ def test_Ungrib__gribfile(driverobj):
     assert not dst.is_symlink()
     driverobj._gribfile(src, dst)
     assert dst.is_symlink()
-
-
-def test_Ungrib_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
 
 
 def test__ext():

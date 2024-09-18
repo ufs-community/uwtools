@@ -12,6 +12,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    input_config_file
+      The input config file
     provisioned_rundir
       Run directory provisioned with all required content
     run

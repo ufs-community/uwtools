@@ -1,6 +1,8 @@
 filter_topo:
   config:
+    filtered_orog: C403_filtered_orog.tile7.nc
     input_grid_file: /path/to/C403_grid.tile7.halo6.nc
+    input_raw_orog: /path/to/out.oro.nc
   execution:
     batchargs:
       cores: 1

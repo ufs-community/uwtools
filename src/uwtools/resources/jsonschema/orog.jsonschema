@@ -4,7 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "execution": {
-          "$ref": "urn:uwtools:execution-serial"
+          "$ref": "urn:uwtools:execution"
         },
         "files_to_link": {
           "$ref": "urn:uwtools:files-to-stage"

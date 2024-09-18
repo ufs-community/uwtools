@@ -84,6 +84,10 @@ def test_ESGGrid(method):
     assert getattr(ESGGrid, method) is getattr(Driver, method)
 
 
+def test_ESGGrid_driver_name(driverobj):
+    assert driverobj.driver_name() == ESGGrid.driver_name() == "esg_grid"
+
+
 def test_ESGGrid_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "regional_grid.nml"
@@ -121,7 +125,3 @@ def test_ESGGrid_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name() == ESGGrid.driver_name() == "esg_grid"
