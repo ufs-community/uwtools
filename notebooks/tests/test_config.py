@@ -44,7 +44,7 @@ def test_realize():
     with open("fixtures/config/get-config.yaml", "r", encoding="utf-8") as f:
         config_str = f.read().rstrip()
         config_dict = yaml.safe_load(config_str)
-    with open("fixtures/config/update-config.nml", "r", encoding="utf-8") as f:
+    with open("fixtures/config/base-config.nml", "r", encoding="utf-8") as f:
         update_config_str = f.read().rstrip()
     with open("fixtures/config/keys-config.yaml", "r", encoding="utf-8") as f:
         keys_config_str = f.read().rstrip()
