@@ -72,9 +72,9 @@ def test_realize_to_dict():
     with open("fixtures/config/get-config.yaml", "r", encoding="utf-8") as f:
         config_str = f.read().rstrip()
     with testbook("config.ipynb", execute=True) as tb:
-        assert tb.cell_output_text(53) == config_str
+        assert tb.cell_output_text(51) == config_str
         assert (
-            "'id': '456'" in tb.cell_output_text(55)
-            and "'greeting': 'Hello'" in tb.cell_output_text(55)
-            and "'recipient': 'World'" in tb.cell_output_text(55)
+            "'id': '456'" in tb.cell_output_text(53)
+            and "'greeting': 'Hello'" in tb.cell_output_text(53)
+            and "'recipient': 'World'" in tb.cell_output_text(53)
         )
