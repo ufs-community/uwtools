@@ -31,6 +31,10 @@ def test_realize():
     with open("fixtures/config/keys-config.yaml", "r", encoding="utf-8") as f:
         keys_config_str = f.read().rstrip()
     with testbook("config.ipynb", execute=True) as tb:
+        with open("tmp/updated-config.nml", "r", encoding="utf-8") as f:
+            updated_config = f.read().rstrip()
+        with open("tmp/config-total.nml", "r", encoding="utf-8") as f:
+            total_config = f.read().rstrip()
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(21) == str(config_dict)
         assert tb.cell_output_text(23) == config_str
@@ -38,34 +42,26 @@ def test_realize():
         for item in config_dict.items():
             assert item[0] + "=" + item[1] in tb.cell_output_text(27)
         assert tb.cell_output_text(29) == update_config_str
-        assert (
-            "'sender_id': '{{ id }}'" in tb.cell_output_text(31)
-            and "'message': 'Salutations, Mars!'" in tb.cell_output_text(31)
-            and "'sent': True" in tb.cell_output_text(31)
+        updated_dict = (
+            "'sender_id': '{{ id }}'",
+            "'message': 'Salutations, Mars!'",
+            "'sent': True",
         )
-        assert (
-            "sender_id = '{{ id }}'" in tb.cell_output_text(33)
-            and "message = 'Salutations, Mars!'" in tb.cell_output_text(33)
-            and "sent = .true." in tb.cell_output_text(33)
-        )
+        assert all(x in tb.cell_output_text(31) for x in updated_dict)
+        assert tb.cell_output_text(33) == updated_config
         assert tb.cell_output_text(35) == keys_config_str
-        assert "message: Good morning, Venus!" in tb.cell_output_text(37)
+        assert tb.cell_output_text(37) == "message: Good morning, Venus!"
         assert tb.cell_output_text(39) == update_config_str
-        assert "memo.sender_id: {{ id }}" in tb.cell_output_text(
-            41
-        ) and "memo.message: {{ greeting }}, {{ recipient }}!" in tb.cell_output_text(41)
+        expected_log = (
+            "memo.sender_id: {{ id }}",
+            "memo.message: {{ greeting }}, {{ recipient }}!",
+        )
+        assert all(x in tb.cell_output_text(41) for x in expected_log)
         assert tb.cell_output_text(43) == update_config_str
         assert tb.cell_output_text(45) == "Config could not be totally realized"
-        assert (
-            "'sender_id': '321'" in tb.cell_output_text(47)
-            and "'message': 'Salutations, Mars!'" in tb.cell_output_text(47)
-            and "'sent': True" in tb.cell_output_text(47)
-        )
-        assert (
-            "sender_id = '321'" in tb.cell_output_text(49)
-            and "message = 'Salutations, Mars!'" in tb.cell_output_text(49)
-            and "sent = .true." in tb.cell_output_text(49)
-        )
+        total_dict = ("'sender_id': '321'", "'message': 'Salutations, Mars!'", "'sent': True")
+        assert all(x in tb.cell_output_text(47) for x in total_dict)
+        assert tb.cell_output_text(49) == total_config
 
 
 def test_realize_to_dict():
@@ -73,8 +69,5 @@ def test_realize_to_dict():
         config_str = f.read().rstrip()
     with testbook("config.ipynb", execute=True) as tb:
         assert tb.cell_output_text(51) == config_str
-        assert (
-            "'id': '456'" in tb.cell_output_text(53)
-            and "'greeting': 'Hello'" in tb.cell_output_text(53)
-            and "'recipient': 'World'" in tb.cell_output_text(53)
-        )
+        config_out = ("'id': '456'", "'greeting': 'Hello'", "'recipient': 'World'")
+        assert all(x in tb.cell_output_text(53) for x in config_out)
