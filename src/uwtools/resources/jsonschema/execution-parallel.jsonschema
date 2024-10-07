@@ -1,0 +1,34 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "batchargs": {
+      "$ref": "urn:uwtools:batchargs"
+    },
+    "envcmds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "executable": {
+      "type": "string"
+    },
+    "mpiargs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mpicmd": {
+      "type": "string"
+    },
+    "threads": {
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "executable"
+  ],
+  "type": "object"
+}
