@@ -527,9 +527,8 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
     # Some entries are required:
     for key in ["mosaic_file_target_grid", "vcoord_file_target_grid"]:
         assert "is a required property" in errors(with_del(config, key))
-    # Additional entries of namelist-compatible types are permitted:
-    for val in [[1, 2, 3], True, 42, 3.14, "bar"]:
-        assert not errors(with_set(config, val, "foo"))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
     # Namelist values must be of the correct type:
     # boolean:
     for key in [
@@ -590,6 +589,7 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
     ]:
         assert "is not of type 'array', 'string'\n" in errors(with_set(config, None, key))
         assert "is not of type 'string'\n" in errors(with_set(config, [1, 2, 3], key))
+        assert not errors(with_set(config, ["foo", "bar", "baz"], key))
 
 
 # esg-grid

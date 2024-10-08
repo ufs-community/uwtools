@@ -8,22 +8,23 @@ chgres_cube:
   namelist:
     update_values:
       config:
+        fix_dir_target_grid: /path/to/fix_lam
+        mosaic_file_target_grid: C432.mosaic.halo4.nc
+        orog_dir_target_grid: /path/to/fix_lam
+        orog_files_target_grid: C432.oro_data.tile7.halo4.nc
+        vcoord_file_target_grid: /path/to/global_hyblev.l65.txt
+        varmap_file: /path/to/varmap_table
+        data_dir_input_grid: /path/to/data/{{ cycle.strftime('%Y%M%d%H') }}
+        grib2_file_input_grid: a.file.gb2
         atm_files_input_grid: atm.t{{cycle.strftime('%H') }}z.nc
-        convert_atm: true
-        convert_nst: true
-        convert_sfc: true
+        sfc_files_input_grid: sfc.t{{cycle.strftime('%H') }}z.nc
         cycle_day: !int "{{ cycle.strftime('%d') }}"
         cycle_hour: !int "{{ cycle.strftime('%H') }}"
         cycle_mon: !int "{{ cycle.strftime('%m') }}"
-        data_dir_input_grid: /path/to/data/{{ cycle.strftime('%Y%M%d%H') }}
-        fix_dir_target_grid: /path/to/fixdir
-        grib2_file_input_grid: a.file.gb2
-        mosaic_file_target_grid: /path/to/mosaic/C432.mosaic.halo4.nc
-        orog_files_target_grid: /path/to/orog/C432.oro_data.tile7.halo4.nc
-        sfc_files_input_grid: sfc.t{{cycle.strftime('%H') }}z.nc
-        varmap_file: /path/to/varmap_table
-        vcoord_file_target_grid: /path/to/global_hyblev.l65.txt
-    validate: true
+        convert_atm: true
+        convert_nst: false
+        convert_sfc: true
+        validate: true
   rundir: /path/to/dir
 platform:
   account: me

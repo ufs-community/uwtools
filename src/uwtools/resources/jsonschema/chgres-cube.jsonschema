@@ -27,14 +27,7 @@
             "update_values": {
               "properties": {
                 "config": {
-                  "additionalProperties": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "number",
-                      "string"
-                    ]
-                  },
+                  "additionalProperties": false,
                   "properties": {
                     "atm_core_files_input_grid": {
                       "items": {
@@ -92,6 +85,7 @@
                     },
                     "external_model": {
                       "enum": [
+                        "FV3GFS",
                         "GFS",
                         "HRRR",
                         "NAM",
