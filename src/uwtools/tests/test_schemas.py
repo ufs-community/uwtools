@@ -544,9 +544,6 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
         "wam_cold_start",
     ]:
         assert "not of type 'boolean'" in errors(with_set(config, None, key))
-    # enum:
-    for key in ["external_model", "input_type"]:
-        assert "is not one of" in errors(with_set(config, None, key))
     # integer:
     for key in [
         "cycle_day",

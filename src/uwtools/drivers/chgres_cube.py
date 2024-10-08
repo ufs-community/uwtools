@@ -35,7 +35,11 @@ class ChgresCube(DriverCycleBased):
             input_files.append(base_file)
         if update_values := namelist.get(STR.updatevalues):
             config_files = update_values["config"]
-            file_keys = ["mosaic_file_target_grid","orog_files_input_grid", "orog_files_target_grid"]
+            file_keys = [
+                "mosaic_file_target_grid",
+                "orog_files_input_grid",
+                "orog_files_target_grid",
+            ]
             dir_keys = ["fix_dir_target_grid", "orog_dir_input_grid", "orog_dir_target_grid"]
             for file_key, dir_key in zip(file_keys, dir_keys):
                 full_path = Path(config_files[dir_key]) / config_files[file_key]
@@ -51,7 +55,6 @@ class ChgresCube(DriverCycleBased):
             for k in [
                 "atm_core_files_input_grid",
                 "atm_tracer_files_input_grid",
-                "orog_files_input_grid",
                 "varmap_file",
                 "vcoord_file_target_grid",
             ]:

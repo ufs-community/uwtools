@@ -59,7 +59,11 @@ def config(tmp_path):
                         "grib2_file_input_grid": str(afile),
                         "mosaic_file_input_grid": str(afile),
                         "mosaic_file_target_grid": str(afile),
-                        "orog_dir_target_file": "/path/to/dir"
+                        "nst_files_input_grid": str(afile),
+                        "orog_dir_input_grid": "/path/to/dir",
+                        "orog_dir_target_grid": "/path/to/dir",
+                        "orog_files_input_grid": str(afile),
+                        "orog_files_target_grid": str(afile),
                         "sfc_files_input_grid": str(afile),
                         "varmap_file": str(afile),
                         "vcoord_file_target_grid": str(afile),
