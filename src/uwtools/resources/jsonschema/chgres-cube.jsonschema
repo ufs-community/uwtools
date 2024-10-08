@@ -84,14 +84,6 @@
                       "type": "string"
                     },
                     "external_model": {
-                      "enum": [
-                        "FV3GFS",
-                        "GFS",
-                        "HRRR",
-                        "NAM",
-                        "RAP",
-                        "UKMET"
-                      ],
                       "type": "string"
                     },
                     "fix_dir_target_grid": {
