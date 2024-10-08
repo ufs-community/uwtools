@@ -670,7 +670,7 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
 # execution-parallel
 
 
-def test_schema_execution():
+def test_schema_parallel_execution():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
@@ -692,7 +692,7 @@ def test_schema_execution():
     )
 
 
-def test_schema_execution_executable():
+def test_schema_parallel_execution_executable():
     errors = schema_validator("execution-parallel", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
@@ -700,7 +700,7 @@ def test_schema_execution_executable():
     assert "42 is not of type 'string'\n" in errors(42)
 
 
-def test_schema_execution_mpiargs():
+def test_schema_parallel_execution_mpiargs():
     errors = schema_validator("execution-parallel", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
@@ -710,7 +710,7 @@ def test_schema_execution_mpiargs():
     assert "42 is not of type 'string'\n" in errors(["string1", 42])
 
 
-def test_schema_execution_threads():
+def test_schema_parallel_execution_threads():
     errors = schema_validator("execution-parallel", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(1)
