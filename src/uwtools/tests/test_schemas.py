@@ -667,15 +667,15 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
     assert "42 is not of type 'string'\n" in errors(42)
 
 
-# execution
+# execution-parallel
 
 
-def test_schema_execution():
+def test_schema_parallel_execution():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
-    errors = schema_validator("execution")
+    errors = schema_validator("execution-parallel")
     # Basic correctness:
     assert not errors(config)
     # batchargs may optionally be specified:
@@ -692,16 +692,16 @@ def test_schema_execution():
     )
 
 
-def test_schema_execution_executable():
-    errors = schema_validator("execution", "properties", "executable")
+def test_schema_parallel_execution_executable():
+    errors = schema_validator("execution-parallel", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
     # Anything else is not:
     assert "42 is not of type 'string'\n" in errors(42)
 
 
-def test_schema_execution_mpiargs():
-    errors = schema_validator("execution", "properties", "mpiargs")
+def test_schema_parallel_execution_mpiargs():
+    errors = schema_validator("execution-parallel", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
     # mpiargs may be empty:
@@ -710,8 +710,8 @@ def test_schema_execution_mpiargs():
     assert "42 is not of type 'string'\n" in errors(["string1", 42])
 
 
-def test_schema_execution_threads():
-    errors = schema_validator("execution", "properties", "threads")
+def test_schema_parallel_execution_threads():
+    errors = schema_validator("execution-parallel", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(1)
     assert not errors(4)
@@ -725,7 +725,7 @@ def test_schema_execution_threads():
 def test_schema_execution_serial():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
-    errors = schema_validator("execution")
+    errors = schema_validator("execution-serial")
     # Basic correctness:
     assert not errors(config)
     # batchargs may optionally be specified:

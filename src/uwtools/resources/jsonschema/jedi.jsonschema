@@ -29,7 +29,7 @@
           "type": "object"
         },
         "execution": {
-          "$ref": "urn:uwtools:execution"
+          "$ref": "urn:uwtools:execution-parallel"
         },
         "files_to_copy": {
           "$ref": "urn:uwtools:files-to-stage"
