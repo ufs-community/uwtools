@@ -72,6 +72,20 @@ def test_OrogGSL(method):
     assert getattr(OrogGSL, method) is getattr(Driver, method)
 
 
+def test_OrogGSL_driver_name(driverobj):
+    assert driverobj.driver_name() == OrogGSL.driver_name() == "orog_gsl"
+
+
+def test_OrogGSL_input_config_file(driverobj):
+    driverobj.input_config_file()
+    inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
+    with open(driverobj._input_config_path, "r", encoding="utf-8") as cfg_file:
+        content = cfg_file.readlines()
+    content = [l.strip("\n") for l in content]
+    assert len(content) == 3
+    assert content == inputs
+
+
 def test_OrogGSL_input_grid_file(driverobj):
     path = Path(driverobj.config["rundir"], "C403_grid.tile7.halo4.nc")
     assert not path.is_file()
@@ -81,7 +95,12 @@ def test_OrogGSL_input_grid_file(driverobj):
 
 def test_OrogGSL_provisioned_rundir(driverobj):
     with patch.multiple(
-        driverobj, input_grid_file=D, runscript=D, topo_data_2p5m=D, topo_data_30s=D
+        driverobj,
+        input_config_file=D,
+        input_grid_file=D,
+        runscript=D,
+        topo_data_2p5m=D,
+        topo_data_30s=D,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
@@ -102,13 +121,8 @@ def test_OrogGSL_topo_data_3os(driverobj):
     assert path.is_symlink()
 
 
-def test_OrogGSL_driver_name(driverobj):
-    assert driverobj.driver_name() == OrogGSL.driver_name() == "orog_gsl"
-
-
 def test_OrogGSL__runcmd(driverobj):
-    inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
-    assert driverobj._runcmd == "echo '%s' | %s" % (
-        "\n".join(inputs),
+    assert driverobj._runcmd == "%s < %s" % (
         driverobj.config["execution"]["executable"],
+        driverobj._input_config_path.name,
     )

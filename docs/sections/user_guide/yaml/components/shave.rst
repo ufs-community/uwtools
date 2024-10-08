@@ -27,7 +27,7 @@ Describes the required parameters to run a ``shave`` configuration.
 
   Name of the grid file with extra points to be shaved.
 
-  **nh4:**
+  **nhalo:**
 
   The number of halo rows/columns.
 
@@ -38,6 +38,10 @@ Describes the required parameters to run a ``shave`` configuration.
   **ny:**
 
   The j/y dimensions of the compute domain (not including halo)
+
+  **output_grid_file:**
+
+  The path to the output file.
 
 rundir:
 ^^^^^^^

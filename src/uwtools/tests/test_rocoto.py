@@ -6,6 +6,7 @@ Tests for uwtools.rocoto module.
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
+from lxml import etree
 from pytest import fixture, mark, raises
 
 from uwtools import rocoto
@@ -110,21 +111,41 @@ class Test__RocotoXML:
         cfgfile, _ = assets
         assert rocoto._RocotoXML(config=YAMLConfig(cfgfile))._root.tag == "workflow"
 
-    def test__add_compound_time_string_basic(self, instance, root):
-        config = "bar"
+    @mark.parametrize("config", ["bar", 42])
+    def test__add_compound_time_string_basic(self, config, instance, root):
         instance._add_compound_time_string(e=root, config=config, tag="foo")
         child = root[0]
         assert child.tag == "foo"
-        assert child.text == "bar"
+        assert child.text == str(config)
 
     def test__add_compound_time_string_cyclestr(self, instance, root):
-        config = {"attrs": {"bar": "42"}, "cyclestr": {"attrs": {"baz": "43"}, "value": "qux"}}
+        config = {"cyclestr": {"attrs": {"baz": "42"}, "value": "qux"}}
         instance._add_compound_time_string(e=root, config=config, tag="foo")
-        child = root[0]
-        assert child.get("bar") == "42"
-        cyclestr = child[0]
-        assert cyclestr.get("baz") == "43"
+        cyclestr = root[0][0]
+        assert cyclestr.get("baz") == "42"
         assert cyclestr.text == "qux"
+
+    def test__add_compound_time_string_list(self, instance, root):
+        config = [
+            "cycle-",
+            {"cyclestr": {"value": "%s"}},
+            "-valid-",
+            {"cyclestr": {"value": "%s", "attrs": {"offset": "00:06:00"}}},
+            ".log",
+        ]
+        xml = "<a>{}</a>".format(
+            "".join(
+                [
+                    "cycle-",
+                    "<cyclestr>%s</cyclestr>",
+                    "-valid-",
+                    '<cyclestr offset="00:06:00">%s</cyclestr>',
+                    ".log",
+                ]
+            )
+        )
+        instance._add_compound_time_string(e=root, config=config, tag="a")
+        assert etree.tostring(root[0]).decode("utf-8") == xml
 
     def test__add_metatask(self, instance, root):
         config = {

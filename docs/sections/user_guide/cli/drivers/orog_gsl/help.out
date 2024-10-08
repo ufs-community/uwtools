@@ -12,6 +12,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    input_config_file
+      The input config file
     input_grid_file
       The input grid file
     provisioned_rundir

@@ -69,15 +69,15 @@ def test_MakeHgrid(method):
     assert getattr(MakeHgrid, method) is getattr(Driver, method)
 
 
+def test_MakeHgrid_driver_name(driverobj):
+    assert driverobj.driver_name() == MakeHgrid.driver_name() == "make_hgrid"
+
+
 def test_MakeHgrid_provisioned_rundir(driverobj):
     with patch.multiple(driverobj, runscript=D) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_MakeHgrid_driver_name(driverobj):
-    assert driverobj.driver_name() == MakeHgrid.driver_name() == "make_hgrid"
 
 
 def test_MakeHgrid__runcmd(driverobj):

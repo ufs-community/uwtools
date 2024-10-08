@@ -104,6 +104,10 @@ def test_ChgresCube(method):
     assert getattr(ChgresCube, method) is getattr(Driver, method)
 
 
+def test_ChgresCube_driver_name(driverobj):
+    assert driverobj.driver_name() == ChgresCube.driver_name() == "chgres_cube"
+
+
 def test_ChgresCube_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "fort.41"
@@ -146,10 +150,6 @@ def test_ChgresCube_runscript(driverobj):
         args = ("envcmds", "envvars", "execution", "scheduler")
         types = [list, dict, list, Slurm]
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_ChgresCube_driver_name(driverobj):
-    assert driverobj.driver_name() == ChgresCube.driver_name() == "chgres_cube"
 
 
 def test_ChgresCube_taskname(driverobj):

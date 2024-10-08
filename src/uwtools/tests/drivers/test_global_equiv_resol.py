@@ -64,6 +64,10 @@ def test_GlobalEquivResol(method):
     assert getattr(GlobalEquivResol, method) is getattr(Driver, method)
 
 
+def test_GlobalEquivResol_driver_name(driverobj):
+    assert driverobj.driver_name() == GlobalEquivResol.driver_name() == "global_equiv_resol"
+
+
 def test_GlobalEquivResol_input_file(driverobj):
     path = Path(driverobj.config["input_grid_file"])
     assert not driverobj.input_file().ready()
@@ -81,10 +85,6 @@ def test_GlobalEquivResol_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name() == GlobalEquivResol.driver_name() == "global_equiv_resol"
 
 
 def test_GlobalEquivResol__runcmd(driverobj):

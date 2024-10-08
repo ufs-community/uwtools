@@ -4,12 +4,12 @@ orog:
       cores: 1
       walltime: 00:05:00
     executable: /path/to/orog
-    files_to_link:
-      fort.15: /path/to/fix/thirty.second.antarctic.new.bin
-      landcover30.fixed: /path/to/fix/landcover30.fixed
-      fort.235: /path/to/fix/gmted2010.30sec.int
-    grid_file: /path/to/netcdf/grid/file
-    rundir: /path/to/run/dir
+  files_to_link:
+    fort.15: /path/to/fix/thirty.second.antarctic.new.bin
+    landcover30.fixed: /path/to/fix/landcover30.fixed
+    fort.235: /path/to/fix/gmted2010.30sec.int
+  grid_file: /path/to/netcdf/grid/file
+  rundir: /path/to/run/dir
 platform:
   account: me
   scheduler: slurm

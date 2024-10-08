@@ -126,6 +126,10 @@ def test_FV3_diag_table_warn(caplog, driverobj):
     assert logged(caplog, "No 'diag_table' defined in config")
 
 
+def test_FV3_driver_name(driverobj):
+    assert driverobj.driver_name() == FV3.driver_name() == "fv3"
+
+
 def test_FV3_field_table(driverobj):
     src = driverobj.rundir / "field_table.in"
     src.touch()
@@ -245,10 +249,6 @@ def test_FV3_runscript(driverobj):
         args = ("envcmds", "envvars", "execution", "scheduler")
         types = [list, dict, list, Slurm]
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_FV3_driver_name(driverobj):
-    assert driverobj.driver_name() == FV3.driver_name() == "fv3"
 
 
 def test_FV3_taskname(driverobj):

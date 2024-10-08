@@ -137,6 +137,10 @@ def test_MPASInit_boundary_files(cycle, driverobj):
     assert all(link.is_symlink() for link in links)
 
 
+def test_MPASInit_driver_name(driverobj):
+    assert driverobj.driver_name() == MPASInit.driver_name() == "mpas_init"
+
+
 @mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
@@ -209,10 +213,6 @@ def test_MPASInit_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_MPASInit_driver_name(driverobj):
-    assert driverobj.driver_name() == MPASInit.driver_name() == "mpas_init"
 
 
 def test_MPASInit_streams_file(config, driverobj):

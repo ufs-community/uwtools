@@ -12,6 +12,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    filtered_output_file
+      The filtered output file staged from raw input
     input_grid_file
       The input grid file
     namelist_file

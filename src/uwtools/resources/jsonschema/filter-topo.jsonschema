@@ -6,12 +6,20 @@
         "config": {
           "additionalProperties": false,
           "properties": {
+            "filtered_orog": {
+              "type": "string"
+            },
             "input_grid_file": {
+              "type": "string"
+            },
+            "input_raw_orog": {
               "type": "string"
             }
           },
           "required": [
-            "input_grid_file"
+            "filtered_orog",
+            "input_grid_file",
+            "input_raw_orog"
           ]
         },
         "execution": {
