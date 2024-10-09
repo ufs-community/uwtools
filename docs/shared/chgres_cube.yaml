@@ -10,16 +10,16 @@ chgres_cube:
       config:
         atm_files_input_grid: atm.t{{cycle.strftime('%H') }}z.nc
         convert_atm: true
-        convert_nst: false
+        convert_nst: true
         convert_sfc: true
         cycle_day: !int "{{ cycle.strftime('%d') }}"
         cycle_hour: !int "{{ cycle.strftime('%H') }}"
         cycle_mon: !int "{{ cycle.strftime('%m') }}"
         data_dir_input_grid: /path/to/data/{{ cycle.strftime('%Y%M%d%H') }}
-        fix_dir_target_grid: /path/to/fix_lam
+        fix_dir_target_grid: /path/to/fixdir
         grib2_file_input_grid: a.file.gb2
-        mosaic_file_target_grid: C432.mosaic.halo4.nc
-        orog_dir_target_grid: /path/to/fix_lam
+        mosaic_file_target_grid: /path/to/mosaic/C432.mosaic.halo4.nc
+        orog_dir_target_grid: /path/to/fixdir
         orog_files_target_grid: C432.oro_data.tile7.halo4.nc
         sfc_files_input_grid: sfc.t{{cycle.strftime('%H') }}z.nc
         varmap_file: /path/to/varmap_table
