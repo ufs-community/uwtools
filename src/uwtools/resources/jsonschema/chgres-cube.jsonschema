@@ -28,6 +28,58 @@
               "properties": {
                 "config": {
                   "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "data_dir_input_grid",
+                        "atm_files_input_grid"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "data_dir_input_grid",
+                        "grib2_files_input_grid"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "data_dir_input_grid",
+                        "nst_files_input_grid"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "data_dir_input_grid",
+                        "sfc_files_input_grid"
+                      ]
+                    }
+                  ],
+                  "dependencies": {
+                    "atm_files_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "grib2_file_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "nst_files_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "orog_dir_input_grid": [
+                      "orog_files_input_grid"
+                    ],
+                    "orog_dir_target_grid": [
+                      "orog_files_target_grid"
+                    ],
+                    "orog_files_input_grid": [
+                      "orog_files_dir_grid"
+                    ],
+                    "orog_files_target_grid": [
+                      "orog_dir_target_grid"
+                    ],
+                    "sfc_files_input_grid": [
+                      "data_dir_input_grid"
+                    ]
+                  },
                   "properties": {
                     "atm_core_files_input_grid": {
                       "items": {
