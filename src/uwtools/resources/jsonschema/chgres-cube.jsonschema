@@ -28,32 +28,6 @@
               "properties": {
                 "config": {
                   "additionalProperties": false,
-                  "anyOf": [
-                    {
-                      "required": [
-                        "data_dir_input_grid",
-                        "atm_files_input_grid"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "data_dir_input_grid",
-                        "grib2_files_input_grid"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "data_dir_input_grid",
-                        "nst_files_input_grid"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "data_dir_input_grid",
-                        "sfc_files_input_grid"
-                      ]
-                    }
-                  ],
                   "dependencies": {
                     "atm_core_files_input_grid": [
                       "data_dir_input_grid"
