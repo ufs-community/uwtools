@@ -48,7 +48,7 @@ def config(tmp_path):
                 "update_values": {
                     "config": {
                         "atm_core_files_input_grid": [str(afile), str(afile)],
-                        "atm_files_input_grid": str(afile),
+                        "atm_files_input_grid": [str(afile), str(afile)],
                         "atm_tracer_files_input_grid": str(afile),
                         "atm_weight_file": str(afile),
                         "convert_atm": True,
@@ -59,6 +59,11 @@ def config(tmp_path):
                         "grib2_file_input_grid": str(afile),
                         "mosaic_file_input_grid": str(afile),
                         "mosaic_file_target_grid": str(afile),
+                        "orog_dir_input_grid": "/path/to/dir",
+                        "orog_files_input_grid": [str(afile), str(afile)],
+                        "orog_dir_target_grid": "/path/to/dir",
+                        "orog_files_target_grid": str(afile),
+                        "nst_files_input_grid": str(afile),
                         "sfc_files_input_grid": str(afile),
                         "varmap_file": str(afile),
                         "vcoord_file_target_grid": str(afile),

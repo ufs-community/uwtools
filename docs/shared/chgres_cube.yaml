@@ -19,7 +19,8 @@ chgres_cube:
         fix_dir_target_grid: /path/to/fixdir
         grib2_file_input_grid: a.file.gb2
         mosaic_file_target_grid: /path/to/mosaic/C432.mosaic.halo4.nc
-        orog_files_target_grid: /path/to/orog/C432.oro_data.tile7.halo4.nc
+        orog_dir_target_grid: /path/to/fixdir
+        orog_files_target_grid: C432.oro_data.tile7.halo4.nc
         sfc_files_input_grid: sfc.t{{cycle.strftime('%H') }}z.nc
         varmap_file: /path/to/varmap_table
         vcoord_file_target_grid: /path/to/global_hyblev.l65.txt
