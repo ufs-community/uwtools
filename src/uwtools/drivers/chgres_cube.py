@@ -39,6 +39,7 @@ class ChgresCube(DriverCycleBased):
                 input_files.append(config_files[k])
             for k in [
                 "atm_core_files_input_grid",
+                "atm_files_input_grid",
                 "atm_tracer_files_input_grid",
                 "grib2_file_input_grid",
                 "nst_files_input_grid",
