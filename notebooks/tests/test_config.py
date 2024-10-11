@@ -71,3 +71,62 @@ def test_realize_to_dict():
         assert tb.cell_output_text(51) == config_str
         config_out = ("'id': '456'", "'greeting': 'Hello'", "'recipient': 'World'")
         assert all(x in tb.cell_output_text(53) for x in config_out)
+
+
+def test_compare():
+    with open("fixtures/config/base-config.nml", "r", encoding="utf-8") as f:
+        base_cfg = f.read().rstrip()
+    with open("fixtures/config/alt-config.nml", "r", encoding="utf-8") as f:
+        alt_cfg = f.read().rstrip()
+    with open("tmp/config-copy.nml", "r", encoding="utf-8") as f:
+        cp_cfg = f.read().rstrip()
+    with testbook("config.ipynb", execute=True) as tb:
+        assert base_cfg in tb.cell_output_text(57)
+        assert alt_cfg in tb.cell_output_text(57)
+        diff_cmp = (
+            "INFO - fixtures/config/base-config.nml",
+            "INFO + fixtures/config/alt-config.nml",
+            "INFO memo:            sent:  - False + True",
+            "False",
+        )
+        assert all(x in tb.cell_output_text(59) for x in diff_cmp)
+        assert base_cfg == cp_cfg  # cell 61 creates this copy
+        same_cmp = ("INFO - fixtures/config/base-config.nml", "INFO + tmp/config-copy.nml", "True")
+        assert all(x in tb.cell_output_text(63) for x in same_cmp)
+
+
+def test_validate():
+    with open("fixtures/config/validate.jsonschema", "r", encoding="utf-8") as f:
+        schema = f.read().rstrip()
+    with testbook("config.ipynb", execute=True) as tb:
+        assert tb.cell_output_text(67) == schema
+        valid_out = ("INFO 0 UW schema-validation errors found", "True")
+        assert all(x in tb.cell_output_text(69) for x in valid_out)
+        invalid_out = (
+            "ERROR 1 UW schema-validation error found",
+            "ERROR   47 is not of type 'string'",
+            "False",
+        )
+        assert all(x in tb.cell_output_text(71) for x in invalid_out)
+
+
+def test_cfg_classes():
+    with open("fixtures/config/fruit-config.ini", "r", encoding="utf-8") as f:
+        cfg = f.read().rstrip()
+    with testbook("config.ipynb", execute=True) as tb:
+        with open("tmp/fruits.ini", "r", encoding="utf-8") as f:
+            dump = f.read().rstrip()
+        assert tb.cell_output_text(75) == cfg
+        assert tb.cell_output_text(77) == "True"
+        diff_cmp = (
+            "INFO fruit count:          grapes:  - {{ grape_count }} + 8",
+            "INFO fruit count:           kiwis:  - 2 + 1",
+            "False",
+        )
+        assert all(x in tb.cell_output_text(79) for x in diff_cmp)
+        assert "grapes = 15" in tb.cell_output_text(81)
+        assert tb.cell_output_text(85) == dump
+        dump_dict = ("[fruit count]", "oranges = 4", "blueberries = 9")
+        assert all(x in tb.cell_output_text(87) for x in dump_dict)
+        updated_vals = ("kiwis = 4", "raspberries = 12")
+        assert all(x in tb.cell_output_text(89) for x in updated_vals)

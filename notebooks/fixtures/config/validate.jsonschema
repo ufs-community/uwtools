@@ -1,0 +1,15 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "greeting": {
+      "type": "string"
+    },
+    "recipient": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "greeting", "recipient"
+  ],
+  "type": "object"
+}
