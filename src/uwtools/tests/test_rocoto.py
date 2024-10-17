@@ -12,7 +12,7 @@ from pytest import fixture, mark, raises
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError, UWError
-from uwtools.tests.support import fixture_path
+from uwtools.tests.support import fixture_path, schema_validator
 
 # Fixtures
 
@@ -171,10 +171,12 @@ class Test__RocotoXML:
         config = {
             "attrs": {"foo": "1", "bar": "2"},
             "account": "baz",
-            "dependency": "qux",
+            "dependency": {"taskdep": "task_foo"},
             "envars": {"A": "apple"},
         }
+        errors = schema_validator("rocoto", "$defs", "task")
         taskname = "test-task"
+        assert not errors(config)
         with patch.multiple(instance, _add_task_dependency=D, _add_task_envar=D) as mocks:
             instance._add_task(e=root, config=config, name_attr=taskname)
         task = root[0]
@@ -193,6 +195,8 @@ class Test__RocotoXML:
 
     def test__add_task_dependency_and(self, instance, root):
         config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"task": "foo"}}}}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -208,6 +212,8 @@ class Test__RocotoXML:
         age = "00:00:02:00"
         minsize = "1K"
         config = {"datadep": {"attrs": {"age": age, "minsize": minsize}, "value": value}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -229,6 +235,8 @@ class Test__RocotoXML:
 
     def test__add_task_dependency_metataskdep(self, instance, root):
         config = {"metataskdep": {"attrs": {"metatask": "foo"}}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -238,10 +246,12 @@ class Test__RocotoXML:
 
     @mark.parametrize(
         "tag_config",
-        [("and", {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}})],
+        [("and", {"strneq": {"left": "&RUN_GSI;", "right": "YES"}})],
     )
     def test__add_task_dependency_operator(self, instance, root, tag_config):
         tag, config = tag_config
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency_child(e=root, config=config, tag=tag)
         for tag, _ in config.items():
             assert tag == next(iter(config))
@@ -249,6 +259,8 @@ class Test__RocotoXML:
     def test__add_task_dependency_operator_datadep_operand(self, instance, root):
         value = "/some/file"
         config = {"value": value}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors({"datadep": config})
         instance._add_task_dependency_child(e=root, config=config, tag="datadep")
         e = root[0]
         assert e.tag == "datadep"
@@ -257,6 +269,8 @@ class Test__RocotoXML:
     def test__add_task_dependency_operator_task_operand(self, instance, root):
         taskname = "some-task"
         config = {"attrs": {"task": taskname}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors({"taskdep": config})
         instance._add_task_dependency_child(e=root, config=config, tag="taskdep")
         e = root[0]
         assert e.tag == "taskdep"
@@ -265,6 +279,8 @@ class Test__RocotoXML:
     def test__add_task_dependency_operator_timedep_operand(self, instance, root):
         value = 20230103120000
         config = value
+        errors = schema_validator("rocoto", "$defs", "compoundTimeString")
+        assert not errors(config)
         instance._add_task_dependency_child(e=root, config=config, tag="timedep")
         e = root[0]
         assert e.tag == "timedep"
@@ -272,6 +288,8 @@ class Test__RocotoXML:
 
     def test__add_task_dependency_sh(self, instance, root):
         config = {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "ls"}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -283,31 +301,38 @@ class Test__RocotoXML:
         assert sh.text == "ls"
 
     def test__add_task_dependency_streq(self, instance, root):
-        config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
+        config = {"streq": {"left": "&RUN_GSI;", "right": "YES"}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
         streq = dependency[0]
         assert streq.tag == "streq"
-        assert streq.get("left") == "&RUN_GSI;"
+        assert streq[0].text == "&RUN_GSI;"
+        assert streq[1].text == "YES"
 
     @mark.parametrize(
         "config",
         [
-            ("streq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
-            ("strneq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
+            ("streq", {"left": "&RUN_GSI;", "right": "YES"}),
+            ("strneq", {"left": "&RUN_GSI;", "right": "YES"}),
         ],
     )
     def test__add_task_dependency_strequality(self, config, instance, root):
+        errors = schema_validator("rocoto", "$defs", "dependency")
         tag, config = config
+        assert not errors({tag: config})
         instance._add_task_dependency_strequality(e=root, config=config, tag=tag)
         element = root[0]
         assert tag == element.tag
-        for attr, val in config["attrs"].items():
-            assert element.get(attr) == val
+        for idx, val in enumerate(config.values()):
+            assert element[idx].text == val
 
     def test__add_task_dependency_taskdep(self, instance, root):
         config = {"taskdep": {"attrs": {"task": "foo"}}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -317,6 +342,8 @@ class Test__RocotoXML:
 
     def test__add_task_dependency_taskvalid(self, instance, root):
         config = {"taskvalid": {"attrs": {"task": "foo"}}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -334,6 +361,8 @@ class Test__RocotoXML:
     )
     def test__add_task_dependency_timedep(self, instance, root, value):
         config = {"timedep": value}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
