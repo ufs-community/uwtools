@@ -165,15 +165,15 @@ class Test__RocotoXML:
             },
         }
         errors = schema_validator("rocoto", "$defs")
-        taskname = "metatask_test"
-        assert not errors({taskname: config})
+        metataskname = "metatask_test"
+        assert not errors({metataskname: config})
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
-            orig(e=root, config=config, name_attr=taskname)
+            orig(e=root, config=config, name_attr=metataskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
         assert metatask.get("mode") == "parallel"
-        assert metatask.get("name") == taskname
+        assert metatask.get("name") == metataskname
         assert metatask.get("throttle") == "42"
         assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
         mocks["_add_metatask"].assert_called_once_with(
@@ -195,9 +195,9 @@ class Test__RocotoXML:
             "command": "echo hello",
             "cores": 2,
         }
-        errors = schema_validator("rocoto", "$defs", "task")
-        taskname = "test-task"
-        assert not errors(config)
+        taskname = "task_test"
+        errors = schema_validator("rocoto", "$defs")
+        assert not errors({taskname: config})
         with patch.multiple(instance, _add_task_dependency=D, _add_task_envar=D) as mocks:
             instance._add_task(e=root, config=config, name_attr=taskname)
         task = root[0]
