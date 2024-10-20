@@ -119,10 +119,12 @@ class Test__RocotoXML:
         assert child.text == str(config)
 
     def test__add_compound_time_string_cyclestr(self, instance, root):
-        config = {"cyclestr": {"attrs": {"baz": "42"}, "value": "qux"}}
+        config = {"cyclestr": {"attrs": {"offset": "00:05:00"}, "value": "qux"}}
+        errors = schema_validator("rocoto", "$defs", "cycleString")
+        assert not errors(config)
         instance._add_compound_time_string(e=root, config=config, tag="foo")
         cyclestr = root[0][0]
-        assert cyclestr.get("baz") == "42"
+        assert cyclestr.get("offset") == "00:05:00"
         assert cyclestr.text == "qux"
 
     def test__add_compound_time_string_list(self, instance, root):
@@ -133,6 +135,8 @@ class Test__RocotoXML:
             {"cyclestr": {"value": "%s", "attrs": {"offset": "00:06:00"}}},
             ".log",
         ]
+        errors = schema_validator("rocoto", "$defs", "compoundTimeString")
+        assert not errors(config)
         xml = "<a>{}</a>".format(
             "".join(
                 [
@@ -149,12 +153,20 @@ class Test__RocotoXML:
 
     def test__add_metatask(self, instance, root):
         config = {
-            "metatask_foo": "1",
             "attrs": {"mode": "parallel", "throttle": 42},
-            "task_bar": "2",
             "var": {"baz": "3", "qux": "4"},
+            "metatask_nest": {
+                "var": {"bar": "1 2 3"},
+                "task_bar": {
+                    "cores": 2,
+                    "walltime": "00:10:00",
+                    "command": "echo hello",
+                },
+            },
         }
-        taskname = "test-metatask"
+        errors = schema_validator("rocoto", "$defs")
+        taskname = "metatask_test"
+        assert not errors({taskname: config})
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
             orig(e=root, config=config, name_attr=taskname)
@@ -164,15 +176,24 @@ class Test__RocotoXML:
         assert metatask.get("name") == taskname
         assert metatask.get("throttle") == "42"
         assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
-        mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
-        mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")
+        mocks["_add_metatask"].assert_called_once_with(
+            metatask,
+            {
+                "var": {"bar": "1 2 3"},
+                "task_bar": {"cores": 2, "walltime": "00:10:00", "command": "echo hello"},
+            },
+            "nest",
+        )
 
     def test__add_task(self, instance, root):
         config = {
             "attrs": {"foo": "1", "bar": "2"},
             "account": "baz",
-            "dependency": {"taskdep": "task_foo"},
+            "dependency": {"taskdep": {"attrs": {"task": "task_foo"}}},
             "envars": {"A": "apple"},
+            "walltime": "00:12:00",
+            "command": "echo hello",
+            "cores": 2,
         }
         errors = schema_validator("rocoto", "$defs", "task")
         taskname = "test-task"
@@ -184,7 +205,9 @@ class Test__RocotoXML:
         assert task.get("name") == taskname
         assert task.get("foo") == "1"
         assert task.get("bar") == "2"
-        mocks["_add_task_dependency"].assert_called_once_with(task, "qux")
+        mocks["_add_task_dependency"].assert_called_once_with(
+            task, {"taskdep": {"attrs": {"task": "task_foo"}}}
+        )
         mocks["_add_task_envar"].assert_called_once_with(task, "A", "apple")
 
     @mark.parametrize("cores", [1, "1"])
@@ -418,29 +441,39 @@ class Test__RocotoXML:
     def test__add_workflow(self, instance):
         config = {
             "workflow": {
-                "attrs": {"foo": "1", "bar": "2"},
-                "cycledef": "3",
-                "log": "4",
-                "tasks": "5",
+                "attrs": {"realtime": True, "scheduler": "slurm"},
+                "cycledef": [],
+                "log": "1",
+                "tasks": {
+                    "task_foo": {
+                        "command": "echo hello",
+                        "cores": 1,
+                        "walltime": "00:01:00",
+                    },
+                },
             }
         }
+        errors = schema_validator("rocoto")
+        assert not errors(config)
         with patch.multiple(
             instance, _add_workflow_cycledef=D, _add_workflow_log=D, _add_workflow_tasks=D
         ) as mocks:
             instance._add_workflow(config=config)
         workflow = instance._root
         assert workflow.tag == "workflow"
-        assert workflow.get("foo") == "1"
-        assert workflow.get("bar") == "2"
-        mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, "3")
+        assert workflow.get("realtime") == "True"
+        assert workflow.get("scheduler") == "slurm"
+        mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, [])
         mocks["_add_workflow_log"].assert_called_once_with(workflow, config["workflow"])
-        mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
+        mocks["_add_workflow_tasks"].assert_called_once_with(workflow, config["workflow"]["tasks"])
 
     def test__add_workflow_cycledef(self, instance, root):
         config: list[dict] = [
             {"attrs": {"group": "g1"}, "spec": "t1"},
             {"attrs": {"group": "g2"}, "spec": "t2"},
         ]
+        errors = schema_validator("rocoto", "$defs")
+        assert not errors({"cycledef": config})
         instance._add_workflow_cycledef(e=root, config=config)
         for i, item in enumerate(config):
             assert root[i].get("group") == item["attrs"]["group"]
