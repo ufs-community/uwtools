@@ -1,1 +1,1 @@
-uw schism --help
+uw ww3 --help
