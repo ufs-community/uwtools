@@ -1,2 +1,1 @@
-uw global_equiv_resol --show-schema >schema
-head schema && echo ... && tail schema
+uw global_equiv_resol --show-schema | head -n20

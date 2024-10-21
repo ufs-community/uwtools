@@ -8,14 +8,13 @@
           "properties": {
             "halo": {
               "type": "integer"
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "orog_gsl"
-  ],
-  "type": "object"
-}
+            },
+            "input_grid_file": {
+              "type": "string"
+            },
+            "resolution": {
+              "type": "integer"
+            },
+            "tile": {
+              "maximum": 7,
+              "minimum": 1,

@@ -1,2 +1,1 @@
-uw fv3 --show-schema >schema
-head schema && echo ... && tail schema
+uw fv3 --show-schema | head -n20

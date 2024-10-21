@@ -1,2 +1,1 @@
-uw ungrib --show-schema >schema
-head schema && echo ... && tail schema
+uw ungri --show-schema | head -n20

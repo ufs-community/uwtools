@@ -1,2 +1,1 @@
-uw cdeps --show-schema >schema
-head schema && echo ... && tail schema
+uw cdeps --show-schema | head -n20

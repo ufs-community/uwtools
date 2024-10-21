@@ -8,14 +8,13 @@
           "properties": {
             "filtered_orog": {
               "type": "string"
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "filter_topo"
-  ],
-  "type": "object"
-}
+            },
+            "input_grid_file": {
+              "type": "string"
+            },
+            "input_raw_orog": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "filtered_orog",

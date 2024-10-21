@@ -1,2 +1,1 @@
-uw esg_grid --show-schema >schema
-head schema && echo ... && tail schema
+uw esg_grid --show-schema | head -n20

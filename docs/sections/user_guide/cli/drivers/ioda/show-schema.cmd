@@ -1,2 +1,1 @@
-uw ioda --show-schema >schema
-head schema && echo ... && tail schema
+uw ioda --show-schema | head -n20

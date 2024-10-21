@@ -1,2 +1,1 @@
-uw jedi --show-schema >schema
-head schema && echo ... && tail schema
+uw jedi --show-schema | head -n20

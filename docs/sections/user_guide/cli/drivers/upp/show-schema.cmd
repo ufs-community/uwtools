@@ -1,2 +1,1 @@
-uw upp --show-schema >schema
-head schema && echo ... && tail schema
+uw upp --show-schema | head -n20

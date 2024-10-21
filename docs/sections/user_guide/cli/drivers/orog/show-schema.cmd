@@ -1,2 +1,1 @@
-uw orog --show-schema >schema
-head schema && echo ... && tail schema
+uw orog --show-schema | head -n20

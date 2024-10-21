@@ -8,14 +8,13 @@
           "anyOf": [
             {
               "required": [
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "jedi"
-  ],
-  "type": "object"
-}
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
