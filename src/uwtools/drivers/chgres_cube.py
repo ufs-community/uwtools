@@ -35,7 +35,7 @@ class ChgresCube(DriverCycleBased):
             input_files.append(base_file)
         if update_values := namelist.get(STR.updatevalues):
             config_files = update_values["config"]
-            for k in ["mosaic_file_target_grid", "vcoord_file_target_grid"]:
+            for k in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
                 input_files.append(config_files[k])
             for k in [
                 "atm_core_files_input_grid",
@@ -43,17 +43,26 @@ class ChgresCube(DriverCycleBased):
                 "atm_tracer_files_input_grid",
                 "grib2_file_input_grid",
                 "nst_files_input_grid",
-                "orog_files_input_grid",
-                "orog_files_target_grid",
                 "sfc_files_input_grid",
-                "varmap_file",
             ]:
                 if k in config_files:
+                    grid_path = Path(config_files["data_dir_input_grid"])
                     v = config_files[k]
                     if isinstance(v, str):
-                        input_files.append(v)
+                        input_files.append(grid_path / v)
                     else:
-                        input_files += v
+                        input_files.extend([grid_path / f for f in v])
+            for k in [
+                "orog_files_input_grid",
+                "orog_files_target_grid",
+            ]:
+                if k in config_files:
+                    grid_path = Path(config_files[k.replace("files", "dir")])
+                    v = config_files[k]
+                    if isinstance(v, str):
+                        input_files.append(grid_path / v)
+                    else:
+                        input_files.extend([grid_path / f for f in v])
         yield [file(Path(input_file)) for input_file in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
