@@ -1,2 +1,20 @@
-usage: uw [-h] [--version] MODE ...
-uw: error: argument MODE: invalid choice: 'ungri' (choose from 'cdeps', 'chgres_cube', 'config', 'esg_grid', 'execute', 'filter_topo', 'fs', 'fv3', 'global_equiv_resol', 'ioda', 'jedi', 'make_hgrid', 'make_solo_mosaic', 'mpas', 'mpas_init', 'orog', 'orog_gsl', 'rocoto', 'schism', 'sfc_climo_gen', 'shave', 'template', 'ungrib', 'upp', 'ww3')
+{
+  "properties": {
+    "ungrib": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+              "properties": {
+                "cores": {
+                  "type": "integer"
+                },
+                "debug": {
+                  "type": "boolean"
+                },
+                "exclusive": {
+                  "type": "boolean"
+                },
