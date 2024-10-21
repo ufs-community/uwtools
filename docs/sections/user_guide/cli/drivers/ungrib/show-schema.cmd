@@ -1,1 +1,2 @@
-uw ungrib --show-schema | head -n20
+uw ungrib --show-schema >schema
+head -n20 schema

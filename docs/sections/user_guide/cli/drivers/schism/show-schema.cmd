@@ -1,1 +1,2 @@
-uw schism --show-schema | head -n20
+uw schism --show-schema >schema
+head -n20 schema

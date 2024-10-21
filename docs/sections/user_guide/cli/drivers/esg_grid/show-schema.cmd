@@ -1,1 +1,2 @@
-uw esg_grid --show-schema | head -n20
+uw esg_grid --show-schema >schema
+head -n20 schema

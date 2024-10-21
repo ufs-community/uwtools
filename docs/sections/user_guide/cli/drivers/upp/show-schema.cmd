@@ -1,1 +1,2 @@
-uw upp --show-schema | head -n20
+uw upp --show-schema >schema
+head -n20 schema

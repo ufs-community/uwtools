@@ -1,1 +1,2 @@
-uw jedi --show-schema | head -n20
+uw jedi --show-schema >schema
+head -n20 schema

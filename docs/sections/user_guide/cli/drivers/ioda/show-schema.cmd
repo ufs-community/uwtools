@@ -1,1 +1,2 @@
-uw ioda --show-schema | head -n20
+uw ioda --show-schema >schema
+head -n20 schema
