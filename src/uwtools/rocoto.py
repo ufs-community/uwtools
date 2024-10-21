@@ -261,7 +261,9 @@ class _RocotoXML:
         :param config: Configuration data for the tag.
         :param tag: Name of new element to add.
         """
-        self._set_attrs(SubElement(e, tag), config)
+        e = SubElement(e, tag)
+        for k, v in config.items():
+            self._add_compound_time_string(e, v, k)
 
     def _add_task_dependency_taskdep(self, e: _Element, config: dict) -> None:
         """
