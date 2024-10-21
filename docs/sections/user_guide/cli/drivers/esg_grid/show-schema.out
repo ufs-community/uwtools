@@ -8,14 +8,13 @@
       "properties": {
         "regional_grid_nml": {
           "additionalProperties": false,
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "esg_grid"
-  ],
-  "type": "object"
-}
+          "properties": {
+            "delx": {
+              "type": "number"
+            },
+            "dely": {
+              "type": "number"
+            },
+            "lx": {
+              "type": "number"
+            },

@@ -1,20 +1,20 @@
 {
   "properties": {
-    "filter_topo": {
+    "schism": {
       "additionalProperties": false,
       "properties": {
-        "config": {
+        "namelist": {
           "additionalProperties": false,
           "properties": {
-            "filtered_orog": {
+            "template_file": {
               "type": "string"
             },
-            "input_grid_file": {
-              "type": "string"
-            },
-            "input_raw_orog": {
-              "type": "string"
+            "template_values": {
+              "minProperties": 1,
+              "type": "object"
             }
           },
           "required": [
-            "filtered_orog",
+            "template_file"
+          ],
+          "type": "object"

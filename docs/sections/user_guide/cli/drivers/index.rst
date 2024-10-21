@@ -20,7 +20,9 @@ Drivers
    mpas_init/index
    orog/index
    orog_gsl/index
+   schism/index
    sfc_climo_gen/index
    shave/index
    ungrib/index
    upp/index
+   ww3/index
