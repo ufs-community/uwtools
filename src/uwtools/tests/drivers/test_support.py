@@ -73,6 +73,7 @@ def test_tasks():
     assert support.tasks(SomeDriver) == {
         "run": "A run.",
         "runscript": "The runscript.",
+        "show_output": "Display the output to be created by this component.",
         "t1": "@external t1",
         "t2": "@task t2",
         "t3": "@tasks t3",

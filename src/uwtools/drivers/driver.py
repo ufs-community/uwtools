@@ -393,6 +393,15 @@ class Driver(Assets):
         yield None
         self._write_runscript(path)
 
+    @external
+    def show_output(self):
+        """
+        Display the output to be created by this component.
+        """
+        yield self.taskname("expected output")
+        print(json.dumps(self.output, indent=2, sort_keys=True))
+        yield asset(None, lambda: True)
+
     @task
     def _run_via_batch_submission(self):
         """
