@@ -26,7 +26,7 @@ from uwtools.config.validator import (
     validate_external,
     validate_internal,
 )
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
@@ -416,7 +416,16 @@ class Driver(Assets):
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
-    # Private helper methods
+    # Public methods
+
+    @property
+    def output(self) -> dict[str, Union[str, list[str]]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        raise UWNotImplementedError("The output() method is not yet implemented for this driver")
+
+    # Private methods
 
     @property
     def _run_resources(self) -> dict[str, Any]:

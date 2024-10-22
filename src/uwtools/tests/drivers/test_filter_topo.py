@@ -8,11 +8,12 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.config.support import from_od
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.filter_topo import FilterTopo
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -106,6 +107,12 @@ def test_FilterTopo_namelist_file(driverobj):
     actual = from_od(f90nml.read(path).todict())
     expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected
+
+
+def test_FilterTopo_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_FilterTopo_provisioned_rundir(driverobj):

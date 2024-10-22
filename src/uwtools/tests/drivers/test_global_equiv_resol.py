@@ -6,10 +6,11 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.global_equiv_resol import GlobalEquivResol
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -74,6 +75,12 @@ def test_GlobalEquivResol_input_file(driverobj):
     path.parent.mkdir()
     path.touch()
     assert driverobj.input_file().ready()
+
+
+def test_GlobalEquivResol_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_GlobalEquivResol_provisioned_rundir(driverobj):

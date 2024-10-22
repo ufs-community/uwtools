@@ -7,10 +7,11 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
@@ -145,6 +146,12 @@ def test_Orog_input_config_file_old(driverobj):
     assert content[2] == "'{}'".format(driverobj.config["orog_file"])
     assert content[3] == ".false."
     assert content[4] == "none"
+
+
+def test_Orog_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_Orog_provisioned_rundir(driverobj):

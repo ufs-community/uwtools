@@ -10,12 +10,13 @@ from unittest.mock import Mock, call, patch
 
 import yaml
 from iotaa import asset, external
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi, jedi_base
 from uwtools.drivers.jedi import JEDI
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 
@@ -152,6 +153,12 @@ def test_JEDI_files_linked(driverobj):
             call(target=Path("/path/to/foo"), linkname=Path("/path/to/run/foo"))
             in symlink.call_args_list
         )
+
+
+def test_JEDI_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_JEDI_provisioned_rundir(driverobj):

@@ -19,7 +19,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
@@ -395,6 +395,26 @@ def test_Driver_namelist_schema_default_disable(driverobj):
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"namelist": {"validate": False}}
         assert driverobj.namelist_schema() == {"type": "object"}
+
+
+@mark.parametrize(
+    "cls",
+    [
+        ConcreteDriverCycleBased,
+        ConcreteDriverCycleLeadtimeBased,
+        ConcreteDriverTimeInvariant,
+    ],
+)
+def test_Driver_output(cls, config):
+    kwargs = {"config": config}
+    if cls != ConcreteDriverTimeInvariant:
+        kwargs["cycle"] = dt.datetime(2024, 10, 22, 12)
+    if cls == ConcreteDriverCycleLeadtimeBased:
+        kwargs["leadtime"] = 6
+    obj = cls(**kwargs)
+    with raises(UWNotImplementedError) as e:
+        assert obj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 @mark.parametrize("batch", [True, False])

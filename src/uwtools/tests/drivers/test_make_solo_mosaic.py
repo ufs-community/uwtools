@@ -4,10 +4,11 @@ make_solo_mosaic driver tests.
 """
 from unittest.mock import patch
 
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.make_solo_mosaic import MakeSoloMosaic
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -66,6 +67,12 @@ def test_MakeSoloMosaic(method):
 
 def test_MakeSoloMosaic_driver_name(driverobj):
     assert driverobj.driver_name() == MakeSoloMosaic.driver_name() == "make_solo_mosaic"
+
+
+def test_MakeSoloMosaic_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_MakeSoloMosaic_provisioned_rundir(driverobj):

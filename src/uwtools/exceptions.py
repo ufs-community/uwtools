@@ -21,6 +21,12 @@ class UWConfigRealizeError(UWConfigError):
     """
 
 
+class UWNotImplementedError(UWError):
+    """
+    Exception for signaling that uwtools has not (yet) implemented something.
+    """
+
+
 class UWTemplateRenderError(UWError):
     """
     Exception for issues arising from template rendering.
