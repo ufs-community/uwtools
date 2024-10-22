@@ -90,6 +90,7 @@ def leadtime():
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
     ],

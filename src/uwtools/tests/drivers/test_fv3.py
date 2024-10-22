@@ -95,6 +95,7 @@ def truetask():
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
     ],
 )

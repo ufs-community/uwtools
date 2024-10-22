@@ -98,6 +98,7 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "taskname",
