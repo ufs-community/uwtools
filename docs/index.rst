@@ -85,7 +85,7 @@ There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw f
 
 .. raw:: html
 
-   <iframe src="https://www.youtube.com/embed/b2HXOlt-Ulw" height="315" width="560" frameborder="0" allowfullscreen></iframe>
+   <iframe src="https://www.youtube.com/embed/b2HXOlt-Ulw" allowfullscreen frameborder="0" height="315" width="560"></iframe>
 
 Rocoto Configurability
 ^^^^^^^^^^^^^^^^^^^^^^
