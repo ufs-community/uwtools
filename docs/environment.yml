@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - linkchecker 10.4.*
-  - python >=3.9,<3.13
+  - python >=3.9,<3.13 # keep in sync with meta.yaml run req
   - sphinx_rtd_theme 3.0.*
   - sphinxcontrib-bibtex 2.6.*
   - tree
