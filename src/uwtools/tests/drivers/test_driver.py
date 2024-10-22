@@ -19,7 +19,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
@@ -68,7 +68,11 @@ class ConcreteDriverCycleLeadtimeBased(Common, driver.DriverCycleLeadtimeBased):
 
 
 class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
-    pass
+
+    @property
+    def output(self):
+        # The dict keys are intentionally out-of-alphabetical-order to test JSON sorting.
+        return {"bar": ["/path/to/bar1", "/path/to/bar2"], "foo": "/path/to/foo"}
 
 
 def write(path, x):
@@ -397,6 +401,22 @@ def test_Driver_namelist_schema_default_disable(driverobj):
         assert driverobj.namelist_schema() == {"type": "object"}
 
 
+def test_Driver_output(config):
+    driverobj = ConcreteDriverTimeInvariant(config)
+    assert driverobj.output == {"foo": "/path/to/foo", "bar": ["/path/to/bar1", "/path/to/bar2"]}
+
+
+@mark.parametrize("cls", [ConcreteDriverCycleBased, ConcreteDriverCycleLeadtimeBased])
+def test_Driver_output_not_implemented(cls, config):
+    kwargs = {"config": config, "cycle": dt.datetime(2024, 10, 22, 12)}
+    if cls == ConcreteDriverCycleLeadtimeBased:
+        kwargs["leadtime"] = 6
+    driverobj = cls(**kwargs)
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
+
+
 @mark.parametrize("batch", [True, False])
 def test_Driver_run(batch, driverobj):
     driverobj._batch = batch
@@ -421,6 +441,45 @@ def test_Driver_runscript(arg, driverobj, type_):
         driverobj.runscript()
         runscript.assert_called_once()
         assert isinstance(runscript.call_args.kwargs[arg], type_)
+
+
+def test_driver_show_output(capsys, config):
+    ConcreteDriverTimeInvariant(config).show_output()
+    expected = """
+    {
+      "bar": [
+        "/path/to/bar1",
+        "/path/to/bar2"
+      ],
+      "foo": "/path/to/foo"
+    }
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+@mark.parametrize(
+    "base_file,update_values,expected",
+    [
+        (False, False, {}),
+        (False, True, {"a": 33}),
+        (True, False, {"a": 11, "b": 22}),
+        (True, True, {"a": 33, "b": 22}),
+    ],
+)
+def test_Driver__create_user_updated_config_base_file(
+    base_file, driverobj, expected, tmp_path, update_values
+):
+    path = tmp_path / "updated.yaml"
+    if not base_file:
+        del driverobj._config["base_file"]
+    if not update_values:
+        del driverobj._config["update_values"]
+    ConcreteDriverTimeInvariant._create_user_updated_config(
+        config_class=YAMLConfig, config_values=driverobj.config, path=path
+    )
+    with open(path, "r", encoding="utf-8") as f:
+        updated = yaml.safe_load(f)
+    assert updated == expected
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -450,31 +509,6 @@ def test_Driver__run_via_local_execution(driverobj):
                 log_output=True,
             )
         prd.assert_called_once_with()
-
-
-@mark.parametrize(
-    "base_file,update_values,expected",
-    [
-        (False, False, {}),
-        (False, True, {"a": 33}),
-        (True, False, {"a": 11, "b": 22}),
-        (True, True, {"a": 33, "b": 22}),
-    ],
-)
-def test_Driver__create_user_updated_config_base_file(
-    base_file, driverobj, expected, tmp_path, update_values
-):
-    path = tmp_path / "updated.yaml"
-    if not base_file:
-        del driverobj._config["base_file"]
-    if not update_values:
-        del driverobj._config["update_values"]
-    ConcreteDriverTimeInvariant._create_user_updated_config(
-        config_class=YAMLConfig, config_values=driverobj.config, path=path
-    )
-    with open(path, "r", encoding="utf-8") as f:
-        updated = yaml.safe_load(f)
-    assert updated == expected
 
 
 def test_Driver__run_resources_fail(driverobj):

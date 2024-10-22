@@ -22,6 +22,8 @@ Positional arguments:
       A run
     runscript
       The runscript
+    show_output
+      Show the output to be created by this component
     topo_data_2p5m
       Global topographic data on 2.5-minute lat-lon grid
     topo_data_30s

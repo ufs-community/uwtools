@@ -10,10 +10,11 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path, logged, regex_logged
@@ -112,6 +113,7 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "streams_file",
@@ -198,6 +200,12 @@ def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+
+
+def test_MPASInit_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_MPASInit_provisioned_rundir(driverobj):

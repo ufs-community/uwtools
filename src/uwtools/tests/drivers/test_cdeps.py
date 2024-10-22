@@ -17,6 +17,7 @@ from pytest import fixture, mark
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers import cdeps
 from uwtools.drivers.cdeps import CDEPS
+from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.tests.test_schemas import CDEPS_CONFIG
@@ -33,6 +34,14 @@ def driverobj(tmp_path):
 
 
 # Tests
+
+
+@mark.parametrize(
+    "method",
+    ["taskname", "_validate"],
+)
+def test_CDEPS(method):
+    assert getattr(CDEPS, method) is getattr(AssetsCycleBased, method)
 
 
 def test_CDEPS_atm(driverobj):
