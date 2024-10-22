@@ -71,7 +71,8 @@ class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
 
     @property
     def output(self):
-        return {"foo": "/path/to/foo", "bar": ["/path/to/bar1", "/path/to/bar2"]}
+        # The dict keys are intentionally out-of-alphabetical-order to test JSON sorting.
+        return {"bar": ["/path/to/bar1", "/path/to/bar2"], "foo": "/path/to/foo"}
 
 
 def write(path, x):
