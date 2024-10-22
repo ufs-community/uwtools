@@ -396,7 +396,7 @@ class Driver(Assets):
     @external
     def show_output(self):
         """
-        Display the output to be created by this component.
+        Show the output to be created by this component.
         """
         yield self.taskname("expected output")
         print(json.dumps(self.output, indent=2, sort_keys=True))
