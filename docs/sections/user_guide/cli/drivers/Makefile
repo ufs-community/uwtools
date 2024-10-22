@@ -5,4 +5,4 @@ SUBDIRS = $(filter-out ./shared,$(shell find . -maxdepth 1 -mindepth 1 -type d |
 all: $(SUBDIRS)
 
 $(SUBDIRS):
-	$(MAKE) -C $@ -j
+	@$(MAKE) -C $@ -j
