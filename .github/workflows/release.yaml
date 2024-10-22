@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install conda
         run: .github/scripts/install-conda.sh
-      - name: Documentation Link Check
-        run: .github/scripts/link-check.sh
+      - name: Make Docs
+        run: .github/scripts/make-docs.sh
       - name: Format Check
         run: .github/scripts/format-check.sh
       - name: Make Package

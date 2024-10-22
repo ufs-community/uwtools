@@ -6,4 +6,4 @@ OUTPUTS  = $(COMMANDS:cmd=out)
 all: $(OUTPUTS)
 
 $(OUTPUTS):
-	bash $(basename $@).cmd >$@ 2>&1 | true
+	@bash $(basename $@).cmd >$@ 2>&1 | true
