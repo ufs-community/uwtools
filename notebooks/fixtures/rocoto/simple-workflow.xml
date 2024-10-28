@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<workflow realtime="False" scheduler="slurm">
+  <cycledef>202410290000 202410300000 06:00:00</cycledef>
+  <log>logs/test.log</log>
+  <task name="greet">
+    <cores>1</cores>
+    <walltime>00:00:10</walltime>
+    <command>echo Hello, World!</command>
+    <jobname>greet</jobname>
+  </task>
+</workflow>
