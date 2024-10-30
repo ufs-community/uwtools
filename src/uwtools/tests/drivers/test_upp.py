@@ -25,6 +25,7 @@ from uwtools.tests.support import logged, regex_logged
 def config(tmp_path):
     return {
         "upp": {
+            "control_file": "/path/to/postxconfig-NT.txt",
             "execution": {
                 "batchargs": {
                     "cores": 1,

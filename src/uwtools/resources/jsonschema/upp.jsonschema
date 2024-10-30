@@ -3,6 +3,9 @@
     "upp": {
       "additionalProperties": false,
       "properties": {
+        "control_file": {
+          "type": "string"
+        },
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
         },
@@ -187,6 +190,7 @@
         }
       },
       "required": [
+        "control_file",
         "execution",
         "namelist",
         "rundir"
