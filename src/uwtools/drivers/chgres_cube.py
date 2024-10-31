@@ -7,13 +7,13 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.driver import DriverCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class ChgresCube(DriverCycleBased):
+class ChgresCube(DriverCycleLeadtimeBased):
     """
     A driver for chgres_cube.
     """
