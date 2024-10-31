@@ -161,8 +161,8 @@ def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
 
 
 def test_UPP_output(driverobj, tmp_path):
-    fields = ["?"] * (UPP.FIELDS_PER_BLOCK - 1)
-    parameters = ["?"] * UPP.PARAMS_PER_VAR
+    fields = ["?"] * (UPP.FIELDS - 1)
+    parameters = ["?"] * UPP.PARAMS
     # fmt: off
     control_data = [
         "2",                # number of blocks

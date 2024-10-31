@@ -22,9 +22,9 @@ class UPP(DriverCycleLeadtimeBased):
 
     # Facts specific to the supported UPP version:
 
-    FIELDS_PER_BLOCK = 16
-    GEN_PROC_TYPE_IDX = 8
-    PARAMS_PER_VAR = 42
+    FIELDS = 16
+    GENPROCTYPE = 8
+    PARAMS = 42
 
     # Workflow tasks
 
@@ -125,11 +125,9 @@ class UPP(DriverCycleLeadtimeBased):
         for _ in range(nblocks):
             identifier = cfg[0]
             paths.append(str(self.rundir / (identifier + suffix)))
-            fields, cfg = cfg[: self.FIELDS_PER_BLOCK], cfg[self.FIELDS_PER_BLOCK :]
-            _, cfg = (
-                (cfg[0], cfg[1:]) if fields[self.GEN_PROC_TYPE_IDX] == "ens_fcst" else (None, cfg)
-            )
-            cfg = cfg[self.PARAMS_PER_VAR * nvars.pop() :]
+            fields, cfg = cfg[: self.FIELDS], cfg[self.FIELDS :]
+            _, cfg = (cfg[0], cfg[1:]) if fields[self.GENPROCTYPE] == "ens_fcst" else (None, cfg)
+            cfg = cfg[self.PARAMS * nvars.pop() :]
         return {"gribfiles": paths}
 
     # Private helper methods
