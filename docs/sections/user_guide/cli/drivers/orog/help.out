@@ -24,5 +24,7 @@ Positional arguments:
       A run
     runscript
       The runscript
+    show_output
+      Show the output to be created by this component
     validate
       Validate the UW driver config

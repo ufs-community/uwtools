@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+from pathlib import Path
+import re
+import yaml
+
+path = Path(__file__).parent / "environment.yml"
+with open(path, "r", encoding="utf-8") as f:
+    deps = yaml.safe_load(f)["dependencies"]
+specs = []
+for dep in deps:
+    m = re.match(r"([^ ]+) *(.*)", dep)
+    assert m
+    pkg, ver = m.groups()
+    if re.match(r"^\d", ver):
+        ver = f"={ver}"
+    specs.append(f"'{pkg}{ver}'")
+print(" ".join(sorted(specs)))

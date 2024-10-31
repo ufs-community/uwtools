@@ -21,7 +21,6 @@ html_logo = os.path.join("static", "ufs.png")
 html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
-linkcheck_ignore = [r"https://github.com/.*#.*"]
 nitpick_ignore_regex = [("py:class", r"^uwtools\..*"), ("py:class", "f90nml.Namelist")]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
@@ -58,6 +57,7 @@ extlinks = {
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
+    "schism": ("https://schism-dev.github.io/schism/master/%s", "%s"),
     "sfc-climo-gen": ("https://ufs-community.github.io/UFS_UTILS/sfc_climo_gen/%s", "%s"),
     "shell-redirection": ("https://www.gnu.org/software/bash/manual/html_node/Redirections.html%s", "%s"),
     "ufs": ("https://ufs.epic.noaa.gov/%s", "%s"),
@@ -65,6 +65,7 @@ extlinks = {
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
     "weather-model-io": ("https://ufs-weather-model.readthedocs.io/en/latest/InputsOutputs.html#%s", "%s"),
+    "ww3": ("https://polar.ncep.noaa.gov/waves/wavewatch/%s", "%s"),
 }
 
 def setup(app):

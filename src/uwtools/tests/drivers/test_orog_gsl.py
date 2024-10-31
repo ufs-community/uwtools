@@ -6,10 +6,11 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog_gsl import OrogGSL
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -63,6 +64,7 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "taskname",
@@ -91,6 +93,12 @@ def test_OrogGSL_input_grid_file(driverobj):
     assert not path.is_file()
     driverobj.input_grid_file()
     assert path.is_symlink()
+
+
+def test_OrogGSL_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_OrogGSL_provisioned_rundir(driverobj):

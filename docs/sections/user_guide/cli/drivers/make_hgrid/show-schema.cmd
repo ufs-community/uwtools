@@ -1,2 +1,2 @@
 uw make_hgrid --show-schema >schema
-head schema && echo ... && tail schema
+head -n20 schema

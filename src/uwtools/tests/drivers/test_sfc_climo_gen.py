@@ -9,11 +9,12 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import asset, external, refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers import sfc_climo_gen
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 
@@ -97,6 +98,7 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "taskname",
@@ -129,6 +131,12 @@ def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  'string' is not of type 'integer'")
+
+
+def test_SfcClimoGen_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_SfcClimoGen_provisioned_rundir(driverobj):

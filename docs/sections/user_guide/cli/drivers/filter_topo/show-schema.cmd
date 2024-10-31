@@ -1,2 +1,2 @@
 uw filter_topo --show-schema >schema
-head schema && echo ... && tail schema
+head -n20 schema

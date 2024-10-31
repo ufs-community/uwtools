@@ -8,14 +8,13 @@
           "properties": {
             "interval_hours": {
               "minimum": 1,
-...
-        "streams"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "mpas_init"
-  ],
-  "type": "object"
-}
+              "type": "integer"
+            },
+            "length": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
