@@ -14,7 +14,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.upp import UPP
-from uwtools.exceptions import UWNotImplementedError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -91,7 +91,6 @@ def leadtime():
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
     ],
@@ -161,10 +160,34 @@ def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
-def test_UPP_output(driverobj):
-    with raises(UWNotImplementedError) as e:
+def test_UPP_output(driverobj, tmp_path):
+    fields = ["?"] * (UPP.FIELDS_PER_BLOCK - 1)
+    parameters = ["?"] * UPP.PARAMS_PER_VAR
+    # fmt: off
+    control_data = [
+        "2",                # number of blocks
+        "1",                # number variables in 2nd block
+        "2",                # number variables in 1st block
+        "FOO",              # identifier of 1st block
+        *fields,            # fields of 1st block
+        *(parameters * 2) , # variable parameters of 1st block
+        "BAR",              # identifier of 2nd block
+        *fields,            # fields of 2nd block
+        *parameters,        # variable parameters of 2nd block
+    ]
+    # fmt: on
+    control_file = tmp_path / "postxconfig-NT.txt"
+    with open(control_file, "w", encoding="utf-8") as f:
+        print("\n".join(control_data), file=f)
+    driverobj._config["control_file"] = str(control_file)
+    expected = {"gribfiles": [str(driverobj.rundir / ("%s.GrbF24" % x)) for x in ("FOO", "BAR")]}
+    assert driverobj.output == expected
+
+
+def test_UPP_output_fail(driverobj):
+    with raises(UWConfigError) as e:
         assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert str(e.value) == "Could not open UPP control file %s" % driverobj.config["control_file"]
 
 
 def test_UPP_provisioned_rundir(driverobj):

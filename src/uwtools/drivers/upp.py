@@ -2,7 +2,7 @@
 A driver for UPP.
 """
 
-import math
+from math import log10
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -19,6 +19,12 @@ class UPP(DriverCycleLeadtimeBased):
     """
     A driver for UPP.
     """
+
+    # Facts specific to the supported UPP version:
+
+    FIELDS_PER_BLOCK = 16
+    GEN_PROC_TYPE_IDX = 8
+    PARAMS_PER_VAR = 42
 
     # Workflow tasks
 
@@ -99,16 +105,12 @@ class UPP(DriverCycleLeadtimeBased):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        # Define facts specific to the supported UPP version.
-        FIELDS_PER_BLOCK = 16
-        GEN_PROC_TYPE_IDX = 8
-        PARAMS_PER_VAR = 42
         # Derive values from the current driver config. GRIB output filename suffixes include the
         # forecast leadtime, zero-padded to at least 2 digits (more if necessary). Avoid taking the
         # log of zero.
         cf = self.config["control_file"]
         leadtime = int(self.leadtime.total_seconds() / 3600)
-        suffix = ".GrbF%0{}d".format(max(2, int(math.log10(leadtime or 1)) + 1)) % leadtime
+        suffix = ".GrbF%0{}d".format(max(2, int(log10(leadtime or 1)) + 1)) % leadtime
         # Read the control file into an array of lines. Get the number of blocks (one per output
         # GRIB file) and the number of variables per block. For each block, construct a filename
         # from the block's identifier and the suffix defined above.
@@ -123,9 +125,11 @@ class UPP(DriverCycleLeadtimeBased):
         for _ in range(nblocks):
             identifier = cfg[0]
             paths.append(str(self.rundir / (identifier + suffix)))
-            fields, cfg = cfg[:FIELDS_PER_BLOCK], cfg[FIELDS_PER_BLOCK:]
-            _, cfg = (cfg[0], cfg[1:]) if fields[GEN_PROC_TYPE_IDX] == "ens_fcst" else (None, cfg)
-            cfg = cfg[PARAMS_PER_VAR * nvars.pop() :]
+            fields, cfg = cfg[: self.FIELDS_PER_BLOCK], cfg[self.FIELDS_PER_BLOCK :]
+            _, cfg = (
+                (cfg[0], cfg[1:]) if fields[self.GEN_PROC_TYPE_IDX] == "ens_fcst" else (None, cfg)
+            )
+            cfg = cfg[self.PARAMS_PER_VAR * nvars.pop() :]
         return {"gribfiles": paths}
 
     # Private helper methods
