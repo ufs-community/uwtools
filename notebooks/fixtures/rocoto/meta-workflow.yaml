@@ -1,0 +1,16 @@
+workflow:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledef:
+    - spec: 202410290000 202410300000 06:00:00
+  log: logs/test.log
+  tasks:
+    metatask_breakfast:
+      var:
+        food: biscuits OJ hashbrowns
+        prepare: bake pour fry
+      task_#food#:
+        command: "echo It's time for breakfast, #prepare# the #food#!"
+        cores: 1
+        walltime: 00:00:03
