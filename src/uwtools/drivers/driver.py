@@ -401,7 +401,10 @@ class Driver(Assets):
         Show the output to be created by this component.
         """
         yield self.taskname("expected output")
-        print(json.dumps(self.output, indent=2, sort_keys=True))
+        try:
+            print(json.dumps(self.output, indent=2, sort_keys=True))
+        except UWConfigError as e:
+            log.error(e)
         yield asset(None, lambda: True)
 
     @task
