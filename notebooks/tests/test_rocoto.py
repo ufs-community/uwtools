@@ -65,9 +65,9 @@ def test_building_workflows():
         assert all(x in tb.cell_output_text(27) for x in valid_out)
         assert tb.cell_output_text(29) == tasks_deps_xml
         assert tb.cell_output_text(31) == meta_yaml
-        assert tb.cell_output_text(33) == meta_nested_yaml
-        assert all(x in tb.cell_output_text(35) for x in valid_out)
-        assert tb.cell_output_text(37) == meta_xml
+        assert all(x in tb.cell_output_text(33) for x in valid_out)
+        assert tb.cell_output_text(35) == meta_xml
+        assert tb.cell_output_text(37) == meta_nested_yaml
 
 
 def test_validate():
