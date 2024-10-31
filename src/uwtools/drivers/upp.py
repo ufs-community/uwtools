@@ -22,9 +22,9 @@ class UPP(DriverCycleLeadtimeBased):
 
     # Facts specific to the supported UPP version:
 
-    FIELDS = 16
-    GENPROCTYPE = 8
-    PARAMS = 42
+    GENPROCTYPE_IDX = 8
+    NFIELDS = 16
+    NPARAMS = 42
 
     # Workflow tasks
 
@@ -116,18 +116,22 @@ class UPP(DriverCycleLeadtimeBased):
         # from the block's identifier and the suffix defined above.
         try:
             with open(cf, "r", encoding="utf-8") as f:
-                cfg = f.read().split("\n")
+                lines = f.read().split("\n")
         except (FileNotFoundError, PermissionError) as e:
             raise UWConfigError(f"Could not open UPP control file {cf}") from e
-        nblocks, cfg = int(cfg[0]), cfg[1:]
-        nvars, cfg = list(map(int, cfg[:nblocks])), cfg[nblocks:]
+        nblocks, lines = int(lines[0]), lines[1:]
+        nvars, lines = list(map(int, lines[:nblocks])), lines[nblocks:]
         paths = []
         for _ in range(nblocks):
-            identifier = cfg[0]
+            identifier = lines[0]
             paths.append(str(self.rundir / (identifier + suffix)))
-            fields, cfg = cfg[: self.FIELDS], cfg[self.FIELDS :]
-            _, cfg = (cfg[0], cfg[1:]) if fields[self.GENPROCTYPE] == "ens_fcst" else (None, cfg)
-            cfg = cfg[self.PARAMS * nvars.pop() :]
+            fields, lines = lines[: self.NFIELDS], lines[self.NFIELDS :]
+            _, lines = (
+                (lines[0], lines[1:])
+                if fields[self.GENPROCTYPE_IDX] == "ens_fcst"
+                else (None, lines)
+            )
+            lines = lines[self.NPARAMS * nvars.pop() :]
         return {"gribfiles": paths}
 
     # Private helper methods
