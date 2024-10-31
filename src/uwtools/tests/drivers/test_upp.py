@@ -168,12 +168,12 @@ def test_UPP_output(driverobj, tmp_path):
         "2",                # number of blocks
         "1",                # number variables in 2nd block
         "2",                # number variables in 1st block
-        "FOO",              # identifier of 1st block
-        *fields,            # fields of 1st block
-        *(parameters * 2) , # variable parameters of 1st block
-        "BAR",              # identifier of 2nd block
-        *fields,            # fields of 2nd block
-        *parameters,        # variable parameters of 2nd block
+        "FOO",              # 1st block identifier
+        *fields,            # 1st block fields
+        *(parameters * 2) , # 1st block variable parameters
+        "BAR",              # 2nd block identifier
+        *fields,            # 2nd block fields
+        *parameters,        # 2nd block variable parameters
     ]
     # fmt: on
     control_file = tmp_path / "postxconfig-NT.txt"
