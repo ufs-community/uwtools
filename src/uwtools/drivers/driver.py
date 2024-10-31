@@ -33,6 +33,8 @@ from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
+OutputT = dict[str, Union[str, list[str]]]
+
 # NB: Class docstrings are programmatically defined.
 
 
@@ -428,7 +430,7 @@ class Driver(Assets):
     # Public methods
 
     @property
-    def output(self) -> dict[str, Union[str, list[str]]]:
+    def output(self) -> OutputT:
         """
         Returns a description of the file(s) created when this component runs.
         """
