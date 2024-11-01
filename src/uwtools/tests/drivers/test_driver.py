@@ -457,6 +457,13 @@ def test_driver_show_output(capsys, config):
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
+def test_driver_show_output_fail(caplog, config):
+    with patch.object(ConcreteDriverTimeInvariant, "output", new_callable=PropertyMock) as output:
+        output.side_effect = UWConfigError("FAIL")
+        ConcreteDriverTimeInvariant(config).show_output()
+    assert "FAIL" in caplog.messages
+
+
 @mark.parametrize(
     "base_file,update_values,expected",
     [

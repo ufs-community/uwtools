@@ -3,6 +3,9 @@
     "upp": {
       "additionalProperties": false,
       "properties": {
+        "control_file": {
+          "type": "string"
+        },
         "execution": {
           "additionalProperties": false,
           "properties": {
@@ -13,8 +16,5 @@
                   "type": "integer"
                 },
                 "debug": {
-                  "type": "boolean"
-                },
-                "exclusive": {
                   "type": "boolean"
                 },

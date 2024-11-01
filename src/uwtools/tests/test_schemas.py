@@ -1952,6 +1952,7 @@ def test_schema_ungrib_rundir(ungrib_prop):
 
 def test_schema_upp():
     config = {
+        "control_file": "/path/to/postxconfig-NT.txt",
         "execution": {
             "batchargs": {
                 "cores": 1,
@@ -1977,13 +1978,19 @@ def test_schema_upp():
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "namelist", "rundir"):
+    for key in ("control_file", "execution", "namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Other top-level keys are optional:
     assert not errors({**config, "files_to_copy": {"dst": "src"}})
     assert not errors({**config, "files_to_link": {"dst": "src"}})
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_upp_control_file(upp_prop):
+    errors = upp_prop("control_file")
+    # A string value is required:
+    assert "is not of type 'string'" in errors(None)
 
 
 def test_schema_upp_namelist(upp_prop):
