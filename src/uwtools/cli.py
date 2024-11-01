@@ -1206,7 +1206,6 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             _add_subparser_for_driver, component, subparsers, with_batch=True, with_cycle=True
         )
         for component in [
-            STR.chgrescube,
             STR.fv3,
             STR.ioda,
             STR.jedi,
@@ -1225,6 +1224,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             with_leadtime=True,
         )
         for component in [
+            STR.chgrescube,
             STR.upp,
         ]
     }

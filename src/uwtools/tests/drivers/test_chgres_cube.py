@@ -82,8 +82,13 @@ def config(tmp_path):
 
 
 @fixture
-def driverobj(config, cycle):
-    return ChgresCube(config=config, cycle=cycle, batch=True)
+def driverobj(config, cycle, leadtime):
+    return ChgresCube(config=config, cycle=cycle, leadtime=leadtime, batch=True)
+
+
+@fixture
+def leadtime():
+    return dt.timedelta(hours=24)
 
 
 # Tests
@@ -165,4 +170,4 @@ def test_ChgresCube_runscript(driverobj):
 
 
 def test_ChgresCube_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z chgres_cube foo"
+    assert driverobj.taskname("foo") == "20240202 18:00:00 chgres_cube foo"
