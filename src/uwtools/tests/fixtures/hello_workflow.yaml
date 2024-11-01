@@ -15,9 +15,9 @@ workflow:
     task_hello:
       attrs:
         cycledefs: howdy
-        maxtries: "2"
+        maxtries: 2
       account: "&ACCOUNT;"
-      command: "echo hello $person"
+      command: "echo account for $person is &ACCOUNT; && true"
       jobname:
         cyclestr:
           attrs:
@@ -34,7 +34,7 @@ workflow:
       task_hello_#member#:
         attrs:
           cycledefs: howdy
-          maxtries: "1"
+          maxtries: 1
         account: "&ACCOUNT;"
         command: "echo hello #member#"
         nodes: 1:ppn=1
