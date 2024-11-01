@@ -2,7 +2,6 @@
 A driver for UPP.
 """
 
-from math import log10
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -105,20 +104,16 @@ class UPP(DriverCycleLeadtimeBased):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        # Derive values from the current driver config. GRIB output filename suffixes include the
-        # forecast leadtime, zero-padded to at least 2 digits (more if necessary). Avoid taking the
-        # log of zero.
-        cf = self.config["control_file"]
-        leadtime = int(self.leadtime.total_seconds() / 3600)
-        suffix = ".GrbF%0{}d".format(max(2, int(log10(leadtime or 1)) + 1)) % leadtime
         # Read the control file into an array of lines. Get the number of blocks (one per output
         # GRIB file) and the number of variables per block. For each block, construct a filename
         # from the block's identifier and the suffix defined above.
+        cf = self.config["control_file"]
         try:
             with open(cf, "r", encoding="utf-8") as f:
                 lines = f.read().split("\n")
         except (FileNotFoundError, PermissionError) as e:
             raise UWConfigError(f"Could not open UPP control file {cf}") from e
+        suffix = ".GrbF%02d" % int(self.leadtime.total_seconds() / 3600)
         nblocks, lines = int(lines[0]), lines[1:]
         nvars, lines = list(map(int, lines[:nblocks])), lines[nblocks:]
         paths = []
