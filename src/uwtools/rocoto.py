@@ -92,7 +92,7 @@ class _RocotoXML:
         xml = etree.tostring(
             self._root, pretty_print=True, encoding="utf-8", xml_declaration=True
         ).decode()
-        xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
+        xml = re.sub(r"&amp;([^&]+;)", r"&\1", xml)
         xml = self._insert_doctype(xml)
         return xml
 
