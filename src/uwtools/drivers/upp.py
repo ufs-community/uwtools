@@ -7,7 +7,7 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import DriverCycleLeadtimeBased, OutputT
+from uwtools.drivers.driver import DriverCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
@@ -100,7 +100,7 @@ class UPP(DriverCycleLeadtimeBased):
         return STR.upp
 
     @property
-    def output(self) -> OutputT:
+    def output(self) -> dict[str, list[str]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
