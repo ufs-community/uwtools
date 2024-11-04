@@ -110,7 +110,7 @@ def dereference(
     values; render strings; convert values tagged with explicit types; and return objects of other
     types unmodified. Rendering may fail for valid reasons -- notably a replacement value not being
     available in the given context object. In such cases, return the original value: Any unrendered
-    Jinja2 syntax it contains may may be rendered by later processing with better context.
+    Jinja2 syntax it contains may be rendered by later processing with better context.
 
     When rendering dict values, replacement values will be taken from, in priority order
       1. The full context dict
@@ -335,7 +335,7 @@ def _supplement_values(
     env: bool = False,
 ) -> dict:
     """
-    Optionally supplement values from given source with overrides and/or environment vairables.
+    Optionally supplement values from given source with overrides and/or environment variables.
 
     :param values_src: Source of values to render the template.
     :param values_format: Format of values when sourced from file.
