@@ -186,8 +186,7 @@ class Config(ABC, UserDict):
         for sect, items in dict1.items():
             for key, right in items.items():
                 if (left := dict2.get(sect, {}).get(key, missing)) != right:
-                    if key not in diffs.get(sect, {}):
-                        diffs.setdefault(sect, {})[key] = diff(left, right)
+                    diffs.setdefault(sect, {})[key] = diff(left, right)
 
         for sect, keys in diffs.items():
             for key in keys:
