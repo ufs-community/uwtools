@@ -169,25 +169,18 @@ class Config(ABC, UserDict):
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
+        diff = lambda a, b: f" - {a} + {b}"
         diffs: dict = {}
 
         for sect, items in dict2.items():
             for key, val in items.items():
                 if val != dict1.get(sect, {}).get(key, ""):
-                    try:
-                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
+                    diffs.setdefault(sect, {})[key] = diff(val, dict1.get(sect, {}).get(key))
 
         for sect, items in dict1.items():
             for key, val in items.items():
                 if val != dict2.get(sect, {}).get(key, "") and diffs.get(sect, {}).get(key) is None:
-                    try:
-                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
+                    diffs.setdefault(sect, {})[key] = diff(dict2.get(sect, {}).get(key), val)
 
         for sect, keys in diffs.items():
             for key in keys:
