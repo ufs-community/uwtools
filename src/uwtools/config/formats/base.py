@@ -174,19 +174,14 @@ class Config(ABC, UserDict):
                 return "None"  # "<missing>" PM FIXME
 
         dict2 = self.data if dict2 is None else dict2
-        diff = lambda lval, rval: f" - {lval} + {rval}"
         diffs: dict = {}
         missing = Missing()
 
-        for sect, items in dict2.items():
-            for key, lval in items.items():
-                if (rval := dict1.get(sect, {}).get(key, missing)) != lval:
-                    diffs.setdefault(sect, {})[key] = diff(lval, rval)
-
-        for sect, items in dict1.items():
-            for key, rval in items.items():
-                if (lval := dict2.get(sect, {}).get(key, missing)) != rval:
-                    diffs.setdefault(sect, {})[key] = diff(lval, rval)
+        for da, db, s in [(dict2, dict1, " - {a} + {b}"), (dict1, dict2, " - {b} + {a}")]:
+            for sect, items in da.items():
+                for key, a in items.items():
+                    if (b := db.get(sect, {}).get(key, missing)) != a:
+                        diffs.setdefault(sect, {})[key] = s.format(a=a, b=b)
 
         for sect, keys in diffs.items():
             for key in keys:
