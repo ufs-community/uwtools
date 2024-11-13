@@ -171,7 +171,7 @@ class Config(ABC, UserDict):
 
         class Missing:  # pylint: disable=missing-class-docstring
             def __repr__(self):
-                return "None"  # "<missing>" PM FIXME
+                return "<missing>"
 
         dict2 = self.data if dict2 is None else dict2
         diffs: dict = {}

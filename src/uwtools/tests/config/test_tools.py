@@ -130,7 +130,7 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
     assert not tools.compare_configs(
         config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
     )
-    assert logged(caplog, "baz:             qux:  - None + 43")
+    assert logged(caplog, "baz:             qux:  - <missing> + 43")
 
 
 def test_compare_configs_bad_format(caplog):
