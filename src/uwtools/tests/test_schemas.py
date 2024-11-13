@@ -297,6 +297,29 @@ def ww3_prop():
     return partial(schema_validator, "ww3", "properties", "ww3", "properties")
 
 
+# Helpers
+
+
+def non_empty_dict(errors: list[str]) -> bool:
+    for msg in [
+        "{} does not have enough properties",  # jsonschema [4.18.0,4.20.*]
+        "{} should be non-empty",  # jsonschema [4.21.0,?]
+    ]:
+        if msg in errors:
+            return True
+    return False
+
+
+def non_empty_list(errors: list[str]) -> bool:
+    for msg in [
+        "[] is too short",  # jsonschema [4.18.0,4.20.*]
+        "[] should be non-empty",  # jsonschema [4.21.0,?]
+    ]:
+        if msg in errors:
+            return True
+    return False
+
+
 # batchargs
 
 
@@ -743,7 +766,7 @@ def test_schema_stage_files():
     # A str -> str dict is ok:
     assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
     # An empty dict is not allowed:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # Non-string values are not allowed:
     assert "True is not of type 'string'\n" in errors({"file1": True})
 
@@ -949,7 +972,7 @@ def test_schema_fv3_model_configure_update_values(fv3_prop):
     # Other types are not, e.g.:
     assert "None is not of type 'boolean', 'number', 'string'\n" in errors({"null": None})
     # At least one entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
 
 
 def test_schema_fv3_namelist(fv3_prop):
@@ -979,9 +1002,9 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # At least one val/var pair is required:
-    assert "{} should be non-empty" in errors({"nml": {}})
+    assert non_empty_dict(errors({"nml": {}}))
 
 
 def test_schema_fv3_rundir(fv3_prop):
@@ -1052,7 +1075,7 @@ def test_schema_ioda_configuration_file(ioda_prop):
     assert not errors(bf)
     assert not errors(uv)
     # update_values cannot be empty:
-    assert "should be non-empty" in errors({"update_values": {}})
+    assert non_empty_dict(errors({"update_values": {}}))
 
 
 def test_schema_ioda_rundir(ioda_prop):
@@ -1096,7 +1119,7 @@ def test_schema_jedi_configuration_file(jedi_prop):
     assert not errors(bf)
     assert not errors(uv)
     # update_values cannot be empty:
-    assert "should be non-empty" in errors({"update_values": {}})
+    assert non_empty_dict(errors({"update_values": {}}))
 
 
 def test_schema_jedi_rundir(jedi_prop):
@@ -1221,7 +1244,7 @@ def test_schema_makedirs():
     # Basic correctness:
     assert not errors({"makedirs": ["/path/to/dir1", "/path/to/dir2"]})
     # An empty array is not allowed:
-    assert "[] should be non-empty" in errors({"makedirs": []})
+    assert non_empty_list(errors({"makedirs": []}))
     # Non-string values are not allowed:
     assert "True is not of type 'string'\n" in errors({"makedirs": [True]})
 
@@ -1308,9 +1331,9 @@ def test_schema_mpas_namelist_update_values(mpas_prop):
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # At least one val/var pair is required:
-    assert "{} should be non-empty" in errors({"nml": {}})
+    assert non_empty_dict(errors({"nml": {}}))
 
 
 def test_schema_mpas_rundir(mpas_prop):
@@ -1396,9 +1419,9 @@ def test_schema_mpas_init_namelist_update_values(mpas_init_prop):
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # At least one val/var pair is required:
-    assert "{} should be non-empty" in errors({"nml": {}})
+    assert non_empty_dict(errors({"nml": {}}))
 
 
 def test_schema_mpas_init_rundir(mpas_init_prop):
@@ -1477,7 +1500,7 @@ def test_schema_mpas_streams_properties_values_array(mpas_streams):
         for prop in ["files", "streams", "vars", "var_arrays", "var_structs"]:
             assert "is not of type 'array'\n" in errors({k: {**v, prop: None}})
             assert "is not of type 'string'\n" in errors({k: {**v, prop: [None]}})
-            assert "should be non-empty" in errors({k: {**v, prop: []}})
+            assert non_empty_list(errors({k: {**v, prop: []}}))
 
 
 def test_schema_mpas_streams_properties_boolean(mpas_streams):
@@ -1541,9 +1564,9 @@ def test_schema_namelist():
     assert errormsg % "None" in errors({"namelist": {"nonetype": None}})
     assert errormsg % "{}" in errors({"namelist": {"dict": {}}})
     # Needs at least one namelist value:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # Needs at least one name-value value:
-    assert "{} should be non-empty" in errors({"namelist": {}})
+    assert non_empty_dict(errors({"namelist": {}}))
     # Namelist level must be a mapping:
     assert "[] is not of type 'object'\n" in errors([])
     # Name-value level level must be a mapping:
