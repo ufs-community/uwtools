@@ -302,8 +302,8 @@ def ww3_prop():
 
 def non_empty_dict(errors: list[str]) -> bool:
     for msg in [
-        "{} does not have enough properties",  # jsonschema [4.18,4.20.*]
-        "{} should be non-empty",  # jsonschema [4.21.*,?]
+        "{} does not have enough properties",  # jsonschema [4.18.0,4.20.*]
+        "{} should be non-empty",  # jsonschema [4.21.0,?]
     ]:
         if msg in errors:
             return True
@@ -312,8 +312,8 @@ def non_empty_dict(errors: list[str]) -> bool:
 
 def non_empty_list(errors: list[str]) -> bool:
     for msg in [
-        "[] is too short",  # jsonschema [4.18.*,4.20.*]
-        "[] should be non-empty",  # jsonschema [4.21.*,?]
+        "[] is too short",  # jsonschema [4.18.0,4.20.*]
+        "[] should be non-empty",  # jsonschema [4.21.0,?]
     ]:
         if msg in errors:
             return True
