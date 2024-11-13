@@ -168,18 +168,24 @@ class Config(ABC, UserDict):
         :param dict2: The second dictionary (default: this config).
         :return: True if the configs are identical, False otherwise.
         """
+
+        class Missing:  # pylint: disable=missing-class-docstring
+            def __repr__(self):
+                return "None"  # "<missing>" PM FIXME
+
         dict2 = self.data if dict2 is None else dict2
         diff = lambda a, b: f" - {a} + {b}"
         diffs: dict = {}
+        missing = Missing()
 
         for sect, items in dict2.items():
-            for key, val in items.items():
-                if val != dict1.get(sect, {}).get(key, ""):
-                    diffs.setdefault(sect, {})[key] = diff(val, dict1.get(sect, {}).get(key))
+            for key, left in items.items():
+                if (right := dict1.get(sect, {}).get(key, missing)) != left:
+                    diffs.setdefault(sect, {})[key] = diff(left, right)
 
         for sect, items in dict1.items():
             for key, val in items.items():
-                if val != dict2.get(sect, {}).get(key, "") and diffs.get(sect, {}).get(key) is None:
+                if val != dict2.get(sect, {}).get(key, missing) and key not in diffs.get(sect, {}):
                     diffs.setdefault(sect, {})[key] = diff(dict2.get(sect, {}).get(key), val)
 
         for sect, keys in diffs.items():
