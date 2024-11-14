@@ -1,0 +1,28 @@
+user:
+  ACCOUNT: ""
+  MACHINE: ""
+workflow:
+  EXPTDIR: ""
+task_make_ics:
+  chgres_cube:
+    namelist:
+      update_values:
+        config:
+          cycle_day: !int "{{ cycle.strftime('%d') }}"
+          cycle_hour: !int "{{ cycle.strftime('%H') }}"
+          cycle_mon: !int "{{ cycle.strftime('%m') }}"
+          convert_atm: true
+          convert_nst: true
+          convert_sfc: true
+          data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
+          external_model: "{{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }}"
+          input_type: "gaussian_nemsio"
+          tg3_from_soil: false
+          tracers:
+            - sphum
+            - liq_wat
+          tracers_input:
+            - spfh
+            - clwmr
+          varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
+    rundir: '{{ workflow.EXPTDIR }}/make_ics'

@@ -1,0 +1,5 @@
+user:
+  ACCOUNT: zrtrr
+  MACHINE: hera
+workflow: 
+  EXPTDIR: /path/to/my/output
