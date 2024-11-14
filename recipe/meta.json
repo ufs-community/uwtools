@@ -1,6 +1,6 @@
 {
-  "build": "py_0",
-  "buildnum": "0",
+  "build": "py_1",
+  "buildnum": "1",
   "name": "uwtools",
   "packages": {
     "dev": [
@@ -11,7 +11,7 @@
       "isort =5.13.*",
       "jinja2 =3.1.*",
       "jq =1.7.*",
-      "jsonschema =4.23.*",
+      "jsonschema >=4.18,<4.24",
       "lxml =5.2.*",
       "make >=3.8",
       "mypy =1.10.*",
@@ -27,7 +27,7 @@
       "f90nml =1.4.*",
       "iotaa =0.8.*",
       "jinja2 =3.1.*",
-      "jsonschema =4.23.*",
+      "jsonschema >=4.18,<4.24",
       "lxml =5.2.*",
       "python >=3.9,<3.13",
       "pyyaml =6.0.*"
