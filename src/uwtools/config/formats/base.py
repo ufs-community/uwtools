@@ -169,7 +169,8 @@ class Config(ABC, UserDict):
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
-        ldiffs, rdiffs = set(), set()
+        ldiffs: set[tuple] = set()
+        rdiffs: set[tuple] = set()
         missing = namedtuple("missing", [])
         setattr(missing, "__str__", lambda _: "")
         for left, right, diffs in [(dict2, dict1, ldiffs), (dict1, dict2, rdiffs)]:
@@ -183,7 +184,7 @@ class Config(ABC, UserDict):
         )
         lines.insert(0, ("Section", "Key", "Value -", "Type -", "Value +", "Type +"))
         widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
-        dashes = ["-" * w for w in widths]
+        dashes: tuple = tuple("-" * w for w in widths)
         lines = [dashes, lines[0], dashes, *lines[1:]]
         for line in lines:
             log.info(" ".join(s.ljust(w) for s, w in zip(line, widths)))
