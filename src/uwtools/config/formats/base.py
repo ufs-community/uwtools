@@ -89,6 +89,25 @@ class Config(ABC, UserDict):
                 msg = "Depth-%s %s exceeds max comparison depth (%s)"
                 raise UWConfigError(msg % (current, name, maxdepth))
 
+    @staticmethod
+    def _compare_config_collect_diffs(dict1: dict, dict2: dict) -> tuple[set[tuple], set[tuple]]:
+        """
+        Returns sets of diff1-vs-diff2 and diff2-vs-diff1 diffs.
+
+        :param dict1: The first dictionary.
+        :param dict2: The second dictionary (default: this config).
+        """
+        diffs1v2: set[tuple] = set()
+        diffs2v1: set[tuple] = set()
+        missing = namedtuple("missing", [])
+        setattr(missing, "__str__", lambda _: "")
+        for left, right, diffs in [(dict1, dict2, diffs1v2), (dict2, dict1, diffs2v1)]:
+            for sect, items in left.items():
+                for key, a in items.items():
+                    if (b := right.get(sect, {}).get(key, missing())) != a:
+                        diffs.add((sect, key, a, b))
+        return diffs1v2, diffs2v1
+
     @property
     def _depth(self) -> int:
         """
@@ -184,15 +203,7 @@ class Config(ABC, UserDict):
         """
         dict2 = self.data if dict2 is None else dict2
         self._compare_config_check_depths(dict1, dict2)
-        diffs1v2: set[tuple] = set()
-        diffs2v1: set[tuple] = set()
-        missing = namedtuple("missing", [])
-        setattr(missing, "__str__", lambda _: "")
-        for left, right, diffs in [(dict1, dict2, diffs1v2), (dict2, dict1, diffs2v1)]:
-            for sect, items in left.items():
-                for key, a in items.items():
-                    if (b := right.get(sect, {}).get(key, missing())) != a:
-                        diffs.add((sect, key, a, b))
+        diffs1v2, diffs2v1 = self._compare_config_collect_diffs(dict1, dict2)
         if lines := sorted(
             (s, k, str(a), type(a).__name__, str(b), type(b).__name__)
             for s, k, a, b in {(s, k, b, a) for s, k, a, b in diffs1v2} | diffs2v1
