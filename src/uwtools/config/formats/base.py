@@ -175,12 +175,11 @@ class Config(ABC, UserDict):
 
         dict2 = self.data if dict2 is None else dict2
         diffs: dict = {}
-        missing = Missing()
 
         for da, db, s in [(dict2, dict1, " - {a} + {b}"), (dict1, dict2, " - {b} + {a}")]:
             for sect, items in da.items():
                 for key, a in items.items():
-                    if (b := db.get(sect, {}).get(key, missing)) != a:
+                    if (b := db.get(sect, {}).get(key, Missing())) != a:
                         diffs.setdefault(sect, {})[key] = s.format(a=a, b=b)
 
         for sect, keys in diffs.items():
