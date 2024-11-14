@@ -6,6 +6,7 @@ import datetime as dt
 import logging
 import os
 from datetime import datetime
+from textwrap import dedent
 from unittest.mock import patch
 
 import yaml
@@ -132,12 +133,24 @@ def test_compare_config(caplog, fmt, salad_base):
     assert not cfgobj.compare_config(cfgobj, salad_base)
     assert not cfgobj.compare_config(salad_base)
     # Expect to see the following differences logged:
-    for msg in [
-        "salad:        how_many:  - 12 <%s> + <missing>" % ("str" if fmt == FORMAT.ini else "int"),
-        "salad:        dressing:  - balsamic <str> + italian <str>",
-        "salad:            size:  - <missing> + large <str>",
-    ]:
-        assert logged(caplog, msg)
+    ini = """
+    -------- --------- --------- -------- -------- --------
+    Section  Key       Value -   Type -   Value +  Type +  
+    -------- --------- --------- -------- -------- --------
+    salad    dressing  balsamic  str      italian  str     
+    salad    how_many  12        str               missing 
+    salad    size                missing  large    str     
+    """  # Note whitespace -------------------------> ^^^^^
+    other = """
+    -------- --------- --------- -------- -------- --------
+    Section  Key       Value -   Type -   Value +  Type +  
+    -------- --------- --------- -------- -------- --------
+    salad    dressing  balsamic  str      italian  str     
+    salad    how_many  12        int               missing 
+    salad    size                missing  large    str     
+    """  # Note whitespace -------------------------> ^^^^^
+    for line in dedent(ini if fmt == FORMAT.ini else other).strip("\n").split("\n"):
+        assert logged(caplog, line)
 
 
 def test_dereference(tmp_path):

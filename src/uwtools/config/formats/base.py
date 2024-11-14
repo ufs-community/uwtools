@@ -182,13 +182,15 @@ class Config(ABC, UserDict):
             (s, k, str(a), type(a).__name__, str(b), type(b).__name__)
             for s, k, a, b in ldiffs | {(s, k, b, a) for s, k, a, b in rdiffs}
         )
+        if not lines:
+            return True
         lines.insert(0, ("Section", "Key", "Value -", "Type -", "Value +", "Type +"))
         widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
         dashes: tuple = tuple("-" * w for w in widths)
         lines = [dashes, lines[0], dashes, *lines[1:]]
         for line in lines:
             log.info(" ".join(s.ljust(w) for s, w in zip(line, widths)))
-        return not diffs
+        return False
 
     def dereference(self, context: Optional[dict] = None) -> None:
         """
