@@ -26,7 +26,10 @@ from uwtools.tests.support import logged, regex_logged
 def config(tmp_path):
     return {
         "fv3": {
-            "domain": "global",
+            "diag_table": {
+                "template_file": "/path/to/tmpl",
+            },
+            "domain": "regional",
             "execution": {
                 "batchargs": {
                     "walltime": "00:02:00",
@@ -116,16 +119,11 @@ def test_FV3_boundary_files(driverobj):
 def test_FV3_diag_table(driverobj):
     src = driverobj.rundir / "diag_table.in"
     src.touch()
-    driverobj._config["diag_table"] = src
+    driverobj._config["diag_table"] = {"template_file": src}
     dst = driverobj.rundir / "diag_table"
     assert not dst.is_file()
     driverobj.diag_table()
     assert dst.is_file()
-
-
-def test_FV3_diag_table_warn(caplog, driverobj):
-    driverobj.diag_table()
-    assert logged(caplog, "No 'diag_table' defined in config")
 
 
 def test_FV3_driver_name(driverobj):

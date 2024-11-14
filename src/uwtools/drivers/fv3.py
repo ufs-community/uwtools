@@ -3,7 +3,6 @@ A driver for the FV3 model.
 """
 
 from pathlib import Path
-from shutil import copy
 
 from iotaa import asset, task, tasks
 
@@ -12,7 +11,6 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.support import set_driver_docstring
-from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -61,7 +59,7 @@ class FV3(DriverCycleBased):
             overrides={
                 **self.config[fn].get("template_values", {}),
                 "cycle": self.cycle,
-            }
+            },
         )
 
     @task
