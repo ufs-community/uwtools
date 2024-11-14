@@ -178,18 +178,17 @@ class Config(ABC, UserDict):
                 for key, a in items.items():
                     if (b := right.get(sect, {}).get(key, missing())) != a:
                         diffs.add((sect, key, a, b))
-        lines = sorted(
+        if lines := sorted(
             (s, k, str(a), type(a).__name__, str(b), type(b).__name__)
             for s, k, a, b in diffs2v1 | {(s, k, b, a) for s, k, a, b in diffs1v2}
-        )
-        if not lines:
-            return True
-        lines.insert(0, ("Section", "Key", "Value -", "Type -", "Value +", "Type +"))
-        widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
-        dashes: tuple = tuple("-" * w for w in widths)
-        for line in [dashes, lines[0], dashes, *lines[1:]]:
-            log.info(" ".join(s.ljust(w) for s, w in zip(line, widths)))
-        return False
+        ):
+            lines.insert(0, ("Section", "Key", "Value -", "Type -", "Value +", "Type +"))
+            widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
+            dashes: tuple = tuple("-" * w for w in widths)
+            for line in [dashes, lines[0], dashes, *lines[1:]]:
+                log.info(" ".join(s.ljust(w) for s, w in zip(line, widths)))
+            return False
+        return True
 
     def dereference(self, context: Optional[dict] = None) -> None:
         """
