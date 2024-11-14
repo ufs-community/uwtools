@@ -9,7 +9,7 @@ from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
-from uwtools.logging import MSGWIDTH, log
+from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_file_format
 
@@ -34,7 +34,6 @@ def compare_configs(
     cfg_2: Config = format_to_config(config_2_format)(config_2_path)
     log.info("- %s", config_1_path)
     log.info("+ %s", config_2_path)
-    log.info("-" * MSGWIDTH)
     return cfg_1.compare_config(cfg_2.data)
 
 

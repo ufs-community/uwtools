@@ -169,21 +169,25 @@ class Config(ABC, UserDict):
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
-        diffs: dict = {}
-        fmt = lambda o: ("%s <%s>" % (str(o), type(o).__name__)).strip()
+        ldiffs, rdiffs = set(), set()
         missing = namedtuple("missing", [])
         setattr(missing, "__str__", lambda _: "")
-
-        for da, db, s in [(dict2, dict1, " - {a} + {b}"), (dict1, dict2, " - {b} + {a}")]:
-            for sect, items in da.items():
+        for left, right, diffs in [(dict2, dict1, ldiffs), (dict1, dict2, rdiffs)]:
+            for sect, items in left.items():
                 for key, a in items.items():
-                    if (b := db.get(sect, {}).get(key, missing())) != a:
-                        diffs.setdefault(sect, {})[key] = s.format(a=fmt(a), b=fmt(b))
-
-        for sect, keys in diffs.items():
-            for key in keys:
-                log.info(f"{sect}: {key:>15}: {keys[key]}")
-
+                    if (b := right.get(sect, {}).get(key, missing())) != a:
+                        diffs.add((sect, key, a, b))
+        fmt = lambda o: ("%s <%s>" % (str(o), type(o).__name__)).strip()
+        lines = sorted(
+            (s, k, fmt(a), fmt(b))
+            for s, k, a, b in ldiffs | {(s, k, b, a) for s, k, a, b in rdiffs}
+        )
+        lines.insert(0, ("Section", "Key", "Value 1", "Value 2"))
+        widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
+        dashes = ["-" * w for w in widths]
+        lines = [dashes, lines[0], dashes, *lines[1:]]
+        for line in lines:
+            log.info(" ".join(s.center(w) for s, w in zip(line, widths)))
         return not diffs
 
     def dereference(self, context: Optional[dict] = None) -> None:
