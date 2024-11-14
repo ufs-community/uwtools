@@ -133,9 +133,9 @@ def test_compare_config(caplog, fmt, salad_base):
     assert not cfgobj.compare_config(salad_base)
     # Expect to see the following differences logged:
     for msg in [
-        "salad:        how_many:  - 12 + <missing>",
-        "salad:        dressing:  - balsamic + italian",
-        "salad:            size:  - <missing> + large",
+        "salad:        how_many:  - 12 <%s> + <missing>" % ("str" if fmt == FORMAT.ini else "int"),
+        "salad:        dressing:  - balsamic <str> + italian <str>",
+        "salad:            size:  - <missing> + large <str>",
     ]:
         assert logged(caplog, msg)
 

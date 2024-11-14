@@ -170,14 +170,15 @@ class Config(ABC, UserDict):
         """
         dict2 = self.data if dict2 is None else dict2
         diffs: dict = {}
+        fmt = lambda o: ("%s <%s>" % (str(o), type(o).__name__)).strip()
         missing = namedtuple("missing", [])
-        setattr(missing, "__str__", lambda _: "<missing>")
+        setattr(missing, "__str__", lambda _: "")
 
         for da, db, s in [(dict2, dict1, " - {a} + {b}"), (dict1, dict2, " - {b} + {a}")]:
             for sect, items in da.items():
                 for key, a in items.items():
                     if (b := db.get(sect, {}).get(key, missing())) != a:
-                        diffs.setdefault(sect, {})[key] = s.format(a=a, b=b)
+                        diffs.setdefault(sect, {})[key] = s.format(a=fmt(a), b=fmt(b))
 
         for sect, keys in diffs.items():
             for key in keys:
