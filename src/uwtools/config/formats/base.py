@@ -76,6 +76,19 @@ class Config(ABC, UserDict):
                 complete.append(f"{INDENT}{parent}{key}")
         return complete, template
 
+    @staticmethod
+    def _compare_config_check_depths(dict1: dict, dict2: dict) -> None:
+        """
+        :param dict1: The first dictionary.
+        :param dict2: The second dictionary.
+        :raises: UWConfigError for too-deep dicts.
+        """
+        maxdepth = 2
+        for d, name in [(dict1, "dict1"), (dict2, "dict2")]:
+            if (current := depth(d)) > maxdepth:
+                msg = "Depth-%s %s exceeds max comparison depth (%s)"
+                raise UWConfigError(msg % (current, name, maxdepth))
+
     @property
     def _depth(self) -> int:
         """
@@ -166,9 +179,11 @@ class Config(ABC, UserDict):
 
         :param dict1: The first dictionary.
         :param dict2: The second dictionary (default: this config).
+        :raises: UWConfigError for too-deep dicts.
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
+        self._compare_config_check_depths(dict1, dict2)
         diffs1v2: set[tuple] = set()
         diffs2v1: set[tuple] = set()
         missing = namedtuple("missing", [])

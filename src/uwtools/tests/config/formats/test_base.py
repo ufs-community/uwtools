@@ -75,6 +75,18 @@ def test__characterize_values(config):
     assert template == ["  p3: {{ n }}"]
 
 
+def test__compare_config_check_depths():
+    d = {1: {2: 3}}
+    assert Config._compare_config_check_depths(d, d) is None
+
+
+def test__compare_config_check_depths_fail():
+    d = {1: {2: {3: 4}}}
+    with raises(UWConfigError) as e:
+        Config._compare_config_check_depths(d, d)
+    assert str(e.value) == "Depth-3 dict1 exceeds max comparison depth (2)"
+
+
 def test__depth(config):
     assert config._depth == 1
 
