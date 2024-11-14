@@ -72,6 +72,12 @@ class INIConfig(Config):
 
     # Public methods
 
+    def as_dict(self) -> dict:
+        """
+        Returns a pure dict version of the config.
+        """
+        return self.data
+
     def dump(self, path: Optional[Path] = None) -> None:
         """
         Dump the config in INI format.

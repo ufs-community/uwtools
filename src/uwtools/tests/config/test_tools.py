@@ -118,11 +118,22 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
     expected = """
-    -------- ---- -------- ------- -------- -------
-    Section  Key  Value -  Type -  Value +  Type + 
-    -------- ---- -------- ------- -------- -------
-    baz      qux  43       int     11       int    
-    """  # Note whitespace ------------------> ^^^^
+    - %s
+    + %s
+    ---------------------------------------------------------------------
+    ? => info, -/+ => line only in - or + file, blank => matching line
+    ---------------------------------------------------------------------
+      baz:
+    -   qux: 43
+    ?        ^^
+    +   qux: 11
+    ?        ^^
+      foo:
+        bar: 42
+    """ % (
+        str(a),
+        str(b),
+    )
     for line in dedent(expected).strip("\n").split("\n"):
         assert logged(caplog, line)
 
@@ -138,11 +149,19 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
         config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
     )
     expected = """
-    -------- ---- -------- -------- -------- -------
-    Section  Key  Value -  Type -   Value +  Type + 
-    -------- ---- -------- -------- -------- -------
-    baz      qux           missing  43       int    
-    """  # Note whitespace -------------------> ^^^^
+    - %s
+    + %s
+    ---------------------------------------------------------------------
+    ? => info, -/+ => line only in - or + file, blank => matching line
+    ---------------------------------------------------------------------
+    + baz:
+    +   qux: 43
+      foo:
+        bar: 42
+    """ % (
+        str(b),
+        str(a),
+    )
     for line in dedent(expected).strip("\n").split("\n"):
         assert logged(caplog, line)
 

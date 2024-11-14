@@ -57,6 +57,9 @@ class ConcreteConfig(Config):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
 
+    def as_dict(self):
+        return self.data
+
     def dump(self, path=None):
         pass
 
@@ -73,18 +76,6 @@ def test__characterize_values(config):
     complete, template = config._characterize_values(values=values, parent="p")
     assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
     assert template == ["  p3: {{ n }}"]
-
-
-def test__compare_config_check_depths():
-    d = {1: {2: 3}}
-    assert Config._compare_config_check_depths(d, d) is None
-
-
-def test__compare_config_check_depths_fail():
-    d = {1: {2: {3: 4}}}
-    with raises(UWConfigError) as e:
-        Config._compare_config_check_depths(d, d)
-    assert str(e.value) == "Depth-3 dict1 exceeds max comparison depth (2)"
 
 
 def test__depth(config):
@@ -125,7 +116,7 @@ def test__parse_include(config):
     assert len(config["config"]) == 2
 
 
-@mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@mark.parametrize("fmt", [FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -142,26 +133,60 @@ def test_compare_config(caplog, fmt, salad_base):
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
     del salad_base["salad"]["how_many"]
-    assert not cfgobj.compare_config(cfgobj, salad_base)
     assert not cfgobj.compare_config(salad_base)
     # Expect to see the following differences logged:
-    ini = """
-    -------- --------- --------- -------- -------- --------
-    Section  Key       Value -   Type -   Value +  Type +  
-    -------- --------- --------- -------- -------- --------
-    salad    dressing  balsamic  str      italian  str     
-    salad    how_many  12        str               missing 
-    salad    size                missing  large    str     
-    """  # Note whitespace -------------------------> ^^^^^
-    other = """
-    -------- --------- --------- -------- -------- --------
-    Section  Key       Value -   Type -   Value +  Type +  
-    -------- --------- --------- -------- -------- --------
-    salad    dressing  balsamic  str      italian  str     
-    salad    how_many  12        int               missing 
-    salad    size                missing  large    str     
-    """  # Note whitespace -------------------------> ^^^^^
-    for line in dedent(ini if fmt == FORMAT.ini else other).strip("\n").split("\n"):
+    expected = """
+    ---------------------------------------------------------------------
+    ? => info, -/+ => line only in - or + file, blank => matching line
+    ---------------------------------------------------------------------
+      salad:
+        base: kale
+    -   dressing: balsamic
+    ?             ^  ^ ^^^
+    +   dressing: italian
+    ?             ^^  ^ ^
+        fruit: banana
+    -   how_many: 12
+    +   size: large
+        vegetable: tomato
+    """
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
+
+
+def test_compare_config_ini(caplog, salad_base):
+    """
+    Compare two config objects.
+    """
+    log.setLevel(logging.INFO)
+    cfgobj = tools.format_to_config("ini")(fixture_path("simple.ini"))
+    salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
+    assert cfgobj.compare_config(salad_base) is True
+    # Expect no differences:
+    assert not caplog.records
+    caplog.clear()
+    # Create differences in base dict:
+    salad_base["salad"]["dressing"] = "italian"
+    salad_base["salad"]["size"] = "large"
+    del salad_base["salad"]["how_many"]
+    assert not cfgobj.compare_config(cfgobj.as_dict(), salad_base)
+    # Expect to see the following differences logged:
+    expected = """
+    ---------------------------------------------------------------------
+    ? => info, -/+ => line only in - or + file, blank => matching line
+    ---------------------------------------------------------------------
+      salad:
+        base: kale
+    -   dressing: italian
+    ?             ^^   ^^
+    +   dressing: balsamic
+    ?             ^  +++ ^
+        fruit: banana
+    -   size: large
+    +   how_many: '12'
+        vegetable: tomato
+    """
+    for line in dedent(expected).strip("\n").split("\n"):
         assert logged(caplog, line)
 
 

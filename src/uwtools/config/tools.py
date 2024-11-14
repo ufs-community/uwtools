@@ -34,7 +34,7 @@ def compare_configs(
     cfg_2: Config = format_to_config(config_2_format)(config_2_path)
     log.info("- %s", config_1_path)
     log.info("+ %s", config_2_path)
-    return cfg_1.compare_config(cfg_2.data)
+    return cfg_1.compare_config(cfg_2.as_dict())
 
 
 def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str) -> None:

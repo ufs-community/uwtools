@@ -1,8 +1,11 @@
+import difflib
 import os
 import re
 from abc import ABC, abstractmethod
-from collections import UserDict, namedtuple
+from collections import UserDict
 from copy import deepcopy
+from io import StringIO
+from math import inf
 from pathlib import Path
 from typing import Optional, Union
 
@@ -11,7 +14,7 @@ import yaml
 from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error, yaml_to_str
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import INDENT, log
+from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
 
 
@@ -77,36 +80,24 @@ class Config(ABC, UserDict):
         return complete, template
 
     @staticmethod
-    def _compare_config_check_depths(dict1: dict, dict2: dict) -> None:
+    def _compare_config_get_lines(d: dict) -> list[str]:
         """
-        :param dict1: The first dictionary.
-        :param dict2: The second dictionary.
-        :raises: UWConfigError for too-deep dicts.
+        Returns a line-by-line YAML representation of the given dict.
+
+        :param d: A dict object.
         """
-        maxdepth = 2
-        for d, name in [(dict1, "dict1"), (dict2, "dict2")]:
-            if (current := depth(d)) > maxdepth:
-                msg = "Depth-%s %s exceeds max comparison depth (%s)"
-                raise UWConfigError(msg % (current, name, maxdepth))
+        sio = StringIO()
+        yaml.safe_dump(d, stream=sio, default_flow_style=False, indent=2, width=inf)
+        return sio.getvalue().splitlines(keepends=True)
 
     @staticmethod
-    def _compare_config_collect_diffs(dict1: dict, dict2: dict) -> tuple[set[tuple], set[tuple]]:
+    def _compare_config_log_header() -> None:
         """
-        Returns sets of diff1-vs-diff2 and diff2-vs-diff1 diffs.
-
-        :param dict1: The first dictionary.
-        :param dict2: The second dictionary (default: this config).
+        Log a visual header and description of diff markers.
         """
-        diffs1v2: set[tuple] = set()
-        diffs2v1: set[tuple] = set()
-        missing = namedtuple("missing", [])
-        setattr(missing, "__str__", lambda _: "")
-        for left, right, diffs in [(dict1, dict2, diffs1v2), (dict2, dict1, diffs2v1)]:
-            for sect, items in left.items():
-                for key, a in items.items():
-                    if (b := right.get(sect, {}).get(key, missing())) != a:
-                        diffs.add((sect, key, a, b))
-        return diffs1v2, diffs2v1
+        log.info("-" * MSGWIDTH)
+        log.info("? => info, -/+ => line only in - or + file, blank => matching line")
+        log.info("-" * MSGWIDTH)
 
     @property
     def _depth(self) -> int:
@@ -190,7 +181,15 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
+    @abstractmethod
+    def as_dict(self) -> dict:
+        """
+        Returns a pure dict version of the config.
+        """
+
+    def compare_config(
+        self, dict1: dict, dict2: Optional[dict] = None, header: Optional[bool] = True
+    ) -> bool:
         """
         Compare two config dictionaries.
 
@@ -201,20 +200,16 @@ class Config(ABC, UserDict):
         :raises: UWConfigError for too-deep dicts.
         :return: True if the configs are identical, False otherwise.
         """
-        dict2 = self.data if dict2 is None else dict2
-        self._compare_config_check_depths(dict1, dict2)
-        diffs1v2, diffs2v1 = self._compare_config_collect_diffs(dict1, dict2)
-        if lines := sorted(
-            (s, k, str(a), type(a).__name__, str(b), type(b).__name__)
-            for s, k, a, b in {(s, k, b, a) for s, k, a, b in diffs1v2} | diffs2v1
-        ):
-            lines.insert(0, ("Section", "Key", "Value -", "Type -", "Value +", "Type +"))
-            widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
-            dashes: tuple = tuple("-" * w for w in widths)
-            for line in [dashes, lines[0], dashes, *lines[1:]]:
-                log.info(" ".join(s.ljust(w) for s, w in zip(line, widths)))
-            return False
-        return True
+        dict2 = self.as_dict() if dict2 is None else dict2
+        lines1, lines2 = map(self._compare_config_get_lines, [dict1, dict2])
+        difflines = list(difflib.ndiff(lines2, lines1))
+        if all(line[0] == " " for line in difflines):  # i.e. no +/-/? lines
+            return True
+        if header:
+            self._compare_config_log_header()
+        for diffline in difflines:
+            log.info(diffline.rstrip())
+        return False
 
     def dereference(self, context: Optional[dict] = None) -> None:
         """
