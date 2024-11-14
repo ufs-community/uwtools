@@ -168,13 +168,12 @@ class Config(ABC, UserDict):
         :param dict2: The second dictionary (default: this config).
         :return: True if the configs are identical, False otherwise.
         """
+        dict2 = self.data if dict2 is None else dict2
+        diffs: dict = {}
 
         class Missing:  # pylint: disable=missing-class-docstring
             def __repr__(self):
                 return "<missing>"
-
-        dict2 = self.data if dict2 is None else dict2
-        diffs: dict = {}
 
         for da, db, s in [(dict2, dict1, " - {a} + {b}"), (dict1, dict2, " - {b} + {a}")]:
             for sect, items in da.items():
