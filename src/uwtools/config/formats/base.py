@@ -169,26 +169,25 @@ class Config(ABC, UserDict):
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
-        ldiffs: set[tuple] = set()
-        rdiffs: set[tuple] = set()
+        diffs2v1: set[tuple] = set()
+        diffs1v2: set[tuple] = set()
         missing = namedtuple("missing", [])
         setattr(missing, "__str__", lambda _: "")
-        for left, right, diffs in [(dict2, dict1, ldiffs), (dict1, dict2, rdiffs)]:
+        for left, right, diffs in [(dict2, dict1, diffs2v1), (dict1, dict2, diffs1v2)]:
             for sect, items in left.items():
                 for key, a in items.items():
                     if (b := right.get(sect, {}).get(key, missing())) != a:
                         diffs.add((sect, key, a, b))
         lines = sorted(
             (s, k, str(a), type(a).__name__, str(b), type(b).__name__)
-            for s, k, a, b in ldiffs | {(s, k, b, a) for s, k, a, b in rdiffs}
+            for s, k, a, b in diffs2v1 | {(s, k, b, a) for s, k, a, b in diffs1v2}
         )
         if not lines:
             return True
         lines.insert(0, ("Section", "Key", "Value -", "Type -", "Value +", "Type +"))
         widths = [max(len(line[i]) + 1 for line in lines) for i in range(len(lines[0]))]
         dashes: tuple = tuple("-" * w for w in widths)
-        lines = [dashes, lines[0], dashes, *lines[1:]]
-        for line in lines:
+        for line in [dashes, lines[0], dashes, *lines[1:]]:
             log.info(" ".join(s.ljust(w) for s, w in zip(line, widths)))
         return False
 
