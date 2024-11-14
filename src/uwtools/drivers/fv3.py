@@ -7,6 +7,7 @@ from shutil import copy
 
 from iotaa import asset, task, tasks
 
+from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
@@ -34,7 +35,7 @@ class FV3(DriverCycleBased):
         endhour = self.config["length"] + offset + 1
         interval = lbcs["interval_hours"]
         symlinks = {}
-        for n in [7] if self.config["domain"] == "global" else range(1, 7):
+        for n in [7] if self.config["domain"] == "regional" else range(1, 7):
             for boundary_hour in range(offset, endhour, interval):
                 target = Path(lbcs["path"].format(tile=n, forecast_hour=boundary_hour))
                 linkname = (
@@ -52,12 +53,16 @@ class FV3(DriverCycleBased):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
-        yield None
-        if src := self.config.get(fn):
-            path.parent.mkdir(parents=True, exist_ok=True)
-            copy(src=src, dst=path)
-        else:
-            log.warning("No '%s' defined in config", fn)
+        template_file = Path(self.config[fn].get("template_file"))
+        yield file(template_file)
+        render(
+            input_file=template_file,
+            output_file=path,
+            overrides={
+                **self.config[fn].get("template_values", {}),
+                "cycle": self.cycle,
+            }
+        )
 
     @task
     def field_table(self):
