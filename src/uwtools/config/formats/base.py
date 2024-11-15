@@ -197,7 +197,6 @@ class Config(ABC, UserDict):
 
         :param dict1: The first dictionary.
         :param dict2: The second dictionary (default: this config).
-        :raises: UWConfigError for too-deep dicts.
         :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.as_dict() if dict2 is None else dict2
