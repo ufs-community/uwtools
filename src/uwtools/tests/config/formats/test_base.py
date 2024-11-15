@@ -169,12 +169,9 @@ def test_compare_config_ini(caplog, salad_base):
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
     del salad_base["salad"]["how_many"]
-    assert not cfgobj.compare_config(cfgobj.as_dict(), salad_base)
+    assert not cfgobj.compare_config(cfgobj.as_dict(), salad_base, header=False)
     # Expect to see the following differences logged:
     expected = """
-    ---------------------------------------------------------------------
-    ? => info, -/+ => line only in - or + file, blank => matching line
-    ---------------------------------------------------------------------
       salad:
         base: kale
     -   dressing: italian
@@ -188,6 +185,13 @@ def test_compare_config_ini(caplog, salad_base):
     """
     for line in dedent(expected).strip("\n").split("\n"):
         assert logged(caplog, line)
+    anomalous = """
+    ---------------------------------------------------------------------
+    ? => info, -/+ => line only in - or + file, blank => matching line
+    ---------------------------------------------------------------------
+    """
+    for line in dedent(anomalous).strip("\n").split("\n"):
+        assert not logged(caplog, line)
 
 
 def test_dereference(tmp_path):
