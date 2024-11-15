@@ -15,7 +15,7 @@ task_make_ics:
           convert_nst: true
           convert_sfc: true
           data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
-          external_model: "{{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }}"
+          external_model: "FV3GFS"
           input_type: "gaussian_nemsio"
           tg3_from_soil: false
           tracers:
