@@ -96,7 +96,7 @@ class Config(ABC, UserDict):
         Log a visual header and description of diff markers.
         """
         log.info("-" * MSGWIDTH)
-        log.info("-/+ = line unique to - or + file | ? = info | blank = matching line")
+        log.info("↓ ? = info | -/+ = line unique to - or + file | blank = matching line")
         log.info("-" * MSGWIDTH)
 
     @property

@@ -137,7 +137,7 @@ def test_compare_config(caplog, fmt, salad_base):
     # Expect to see the following differences logged:
     expected = """
     ---------------------------------------------------------------------
-    -/+ = line unique to - or + file | ? = info | blank = matching line
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
     ---------------------------------------------------------------------
       salad:
         base: kale
@@ -187,7 +187,7 @@ def test_compare_config_ini(caplog, salad_base):
         assert logged(caplog, line)
     anomalous = """
     ---------------------------------------------------------------------
-    -/+ = line unique to - or + file | ? = info | blank = matching line
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
     ---------------------------------------------------------------------
     """
     for line in dedent(anomalous).strip("\n").split("\n"):
