@@ -20,7 +20,7 @@ def test_config_exp():
             "ACCOUNT: zrtrr",
             "convert_nst: false",
             "data_dir_input_grid: /path/to/my/output/make_ics",
-            "varmap_file: '{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt'",
+            "varmap_file: /path/to/ufs-srweather-app/parm/",
             "rundir: /path/to/my/output/make_ics",
         )
         assert all(x in tb.cell_output_text(11) for x in updated_cfg)
