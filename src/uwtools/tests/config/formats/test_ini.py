@@ -1,16 +1,29 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.ini module.
 """
 
 import filecmp
+from textwrap import dedent
 
-from pytest import mark, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.ini import INIConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
+
+# Fixtures
+
+
+@fixture
+def dumpkit(tmp_path):
+    expected = """
+    [section]
+    key = value
+    """
+    return {"section": {"key": "value"}}, dedent(expected).strip(), tmp_path / "config.ini"
+
 
 # Tests
 
@@ -64,3 +77,25 @@ def test_ini_simple(salad_base, tmp_path):
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
     assert cfgobj == expected
+
+
+def test_ini_as_dict():
+    d1 = {"section": {"key": "value"}}
+    config = INIConfig(d1)
+    d2 = config.as_dict()
+    assert d2 == d1
+    assert isinstance(d2, dict)
+
+
+def test_ini_dump(dumpkit):
+    d, expected, path = dumpkit
+    INIConfig(d).dump(path)
+    with open(path, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected
+
+
+def test_ini_dump_dict(dumpkit):
+    d, expected, path = dumpkit
+    INIConfig.dump_dict(d, path=path)
+    with open(path, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected

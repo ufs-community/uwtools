@@ -117,7 +117,25 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
     assert not tools.compare_configs(
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
-    assert logged(caplog, "baz:             qux:  - 43 + 11")
+    expected = """
+    - %s
+    + %s
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+      baz:
+    -   qux: 43
+    ?        ^^
+    +   qux: 11
+    ?        ^^
+      foo:
+        bar: 42
+    """ % (
+        str(a),
+        str(b),
+    )
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
 
 
 def test_compare_configs_missing_key(compare_configs_assets, caplog):
@@ -130,7 +148,22 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
     assert not tools.compare_configs(
         config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
     )
-    assert logged(caplog, "baz:             qux:  - None + 43")
+    expected = """
+    - %s
+    + %s
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+    + baz:
+    +   qux: 43
+      foo:
+        bar: 42
+    """ % (
+        str(b),
+        str(a),
+    )
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
 
 
 def test_compare_configs_bad_format(caplog):

@@ -12,6 +12,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    control_file
+      The GRIB control file
     files_copied
       Files copied for run
     files_linked
