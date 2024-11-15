@@ -121,7 +121,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
     - %s
     + %s
     ---------------------------------------------------------------------
-    ? => info, -/+ => line only in - or + file, blank => matching line
+    -/+ = line unique to - or + file | ? = info | blank = matching line
     ---------------------------------------------------------------------
       baz:
     -   qux: 43
@@ -152,7 +152,7 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
     - %s
     + %s
     ---------------------------------------------------------------------
-    ? => info, -/+ => line only in - or + file, blank => matching line
+    -/+ = line unique to - or + file | ? = info | blank = matching line
     ---------------------------------------------------------------------
     + baz:
     +   qux: 43
