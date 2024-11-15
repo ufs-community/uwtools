@@ -236,6 +236,11 @@ mpas
 | **CLI**: ``uw mpas -h``
 | **API**: ``import uwtools.api.mpas``
 
+Jupyter Notebooks
+-----------------
+
+.. include:: /shared/binder_links.rst
+
 ------------------
 
 **Disclaimer**
