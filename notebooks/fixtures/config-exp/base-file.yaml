@@ -5,6 +5,8 @@ workflow:
   EXPTDIR: ""
 task_make_ics:
   chgres_cube:
+    execution:
+      executable: "execdir/chgres_cube"
     namelist:
       update_values:
         config:
@@ -17,6 +19,7 @@ task_make_ics:
           data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
           external_model: "FV3GFS"
           input_type: "gaussian_nemsio"
+          mosaic_file_target_grid: "path/to/example_mosaic.halo.nc"
           tg3_from_soil: false
           tracers:
             - sphum
@@ -25,4 +28,5 @@ task_make_ics:
             - spfh
             - clwmr
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
+          vcoord_file_target_grid: "path/to/global_hyblev.165.txt"
     rundir: '{{ workflow.EXPTDIR }}/make_ics'

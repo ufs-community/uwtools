@@ -5,9 +5,11 @@ task_make_ics:
         config:
           convert_nst: False
           external_model: "HRRR"
-          geofrid_file_input_grid: "/path/to/fix/geo_em.d01.nc_HRRRX"
+          geogrid_file_input_grid: "/path/to/fix/geo_em.d01.nc_HRRRX"
           input_type: "grib2"
           nsoil_out: 9
           tg3_from_soil: True
-          tracers: ""
-          tracers_input: ""
+          tracers: 
+            - ""
+          tracers_input: 
+            - ""
