@@ -1,3 +1,6 @@
+Jupyter Notebooks
+-----------------
+
 * Jupyter Notebook Tutorials (API)
 
    * `Config Tool <https://mybinder.org/v2/gh/ufs-community/uwtools/notebooks?labpath=notebooks%2Fconfig.ipynb>`_

@@ -9,7 +9,4 @@ User Guide
    api/index
    yaml/index
 
-Jupyter Notebooks
------------------
-
 .. include:: /shared/binder_links.rst
