@@ -1,8 +1,3 @@
-user:
-  ACCOUNT: ""
-  MACHINE: ""
-workflow:
-  EXPTDIR: ""
 task_make_ics:
   chgres_cube:
     execution:
@@ -17,7 +12,7 @@ task_make_ics:
           convert_nst: true
           convert_sfc: true
           data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
-          external_model: "FV3GFS"
+          external_model: "GFS"
           input_type: "gaussian_nemsio"
           mosaic_file_target_grid: "path/to/example_mosaic.halo.nc"
           tg3_from_soil: false

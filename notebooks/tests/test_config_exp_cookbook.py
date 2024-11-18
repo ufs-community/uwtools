@@ -1,34 +1,35 @@
 from testbook import testbook
+from uwtools.config.formats.yaml import YAMLConfig
 
 
 def test_config_exp():
     with open("fixtures/config-exp/base-file.yaml", "r", encoding="utf-8") as f:
         base_cfg = f.read().rstrip()
-    with open("fixtures/config-exp/hrrr-ics.yaml", "r", encoding="utf-8") as f:
-        hrrr_ics = f.read().rstrip()
     with open("fixtures/config-exp/fv3-rap-physics.yaml", "r", encoding="utf-8") as f:
         fv3_rap_phys = f.read().rstrip()
     with open("fixtures/config-exp/user.yaml", "r", encoding="utf-8") as f:
         user_cfg = f.read().rstrip()
     with testbook("config-exp-cookbook.ipynb", execute=True) as tb:
         assert tb.cell_output_text(1) == ""
-        assert tb.cell_output_text(2) == base_cfg
-        assert tb.cell_output_text(4) == hrrr_ics
-        assert tb.cell_output_text(6) == fv3_rap_phys
-        assert tb.cell_output_text(8) == user_cfg
-        assert tb.cell_output_text(10) == ""
+        assert tb.cell_output_text(3) == base_cfg
+        assert tb.cell_output_text(5) == fv3_rap_phys
+        assert tb.cell_output_text(7) == user_cfg
+        assert tb.cell_output_text(9) == str(YAMLConfig("fixtures/config-exp/base-file.yaml"))
         updated_cfg = (
-            "ACCOUNT: zrtrr",
-            "convert_nst: false",
+            "cycle_day: !int '{{ cycle.strftime(''%d'') }}'",
+            "varmap_file: '{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt'",
+            "PARMdir: /path/to/ufs-srweather-app/parm",
+        )
+        assert all(x in tb.cell_output_text(11) for x in updated_cfg)
+        deref_cfg = (
             "data_dir_input_grid: /path/to/my/output/make_ics",
-            "varmap_file: /path/to/ufs-srweather-app/parm/",
             "rundir: /path/to/my/output/make_ics",
         )
-        assert all(x in tb.cell_output_text(12) for x in updated_cfg)
+        assert all(x in tb.cell_output_text(13) for x in deref_cfg)
         validate_out = (
             "INFO Validating config against internal schema: chgres-cube",
             "INFO 0 UW schema-validation errors found",
             "INFO Validating config against internal schema: platform",
             "chgres_cube valid schema: State: Ready",
         )
-        assert all(x in tb.cell_output_text(14) for x in validate_out)
+        assert all(x in tb.cell_output_text(15) for x in validate_out)
