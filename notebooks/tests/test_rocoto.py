@@ -77,11 +77,11 @@ def test_validate():
         err_xml = f.read().rstrip()
     with testbook("rocoto.ipynb", execute=True) as tb:
         assert tb.cell_output_text(41) == simple_xml
-        valid_out = ("INFO 0 Rocoto validation errors found", "True")
+        valid_out = ("INFO 0 Rocoto XML validation errors found", "True")
         assert all(x in tb.cell_output_text(43) for x in valid_out)
         assert tb.cell_output_text(45) == err_xml
         err_out = (
-            "ERROR 4 Rocoto validation errors found",
+            "ERROR 4 Rocoto XML validation errors found",
             "Element workflow failed to validate attributes",
             "Expecting an element cycledef, got nothing",
             "Invalid sequence in interleave",
