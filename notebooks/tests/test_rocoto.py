@@ -12,7 +12,7 @@ def test_building_simple_workflow():
         assert tb.cell_output_text(5) == simple_yaml
         valid_out = (
             "INFO 0 UW schema-validation errors found",
-            "INFO 0 Rocoto validation errors found",
+            "INFO 0 Rocoto XML validation errors found",
             "True",
         )
         assert all(x in tb.cell_output_text(7) for x in valid_out)
@@ -55,7 +55,7 @@ def test_building_workflows():
         assert tb.cell_output_text(17) == ent_cs_yaml
         valid_out = (
             "INFO 0 UW schema-validation errors found",
-            "INFO 0 Rocoto validation errors found",
+            "INFO 0 Rocoto XML validation errors found",
             "True",
         )
         assert all(x in tb.cell_output_text(19) for x in valid_out)
