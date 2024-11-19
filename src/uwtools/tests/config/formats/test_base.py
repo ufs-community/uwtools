@@ -157,6 +157,7 @@ e:
   - !int '42'
   - !float '3.14'
   - !datetime '{{ D }}'
+  - !bool "False"
 f:
   f1: !int '42'
   f2: !float '3.14'
@@ -175,7 +176,7 @@ N: "22"
         "a": 44,
         "b": {"c": 33},
         "d": "{{ X }}",
-        "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00")],
+        "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00"), False],
         "f": {"f1": 42, "f2": 3.14},
         "D": datetime.fromisoformat("2024-10-10 00:19:00"),
         "N": "22",
