@@ -236,6 +236,8 @@ mpas
 | **CLI**: ``uw mpas -h``
 | **API**: ``import uwtools.api.mpas``
 
+.. include:: /shared/binder_links.rst
+
 ------------------
 
 **Disclaimer**
