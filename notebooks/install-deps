@@ -1,1 +1,1 @@
-conda install -q -y jupyterlab pytest testbook
+conda install -q -y --override-channels --repodata-fn repodata.json "jupyterlab<4.4" "testbook<0.5"
