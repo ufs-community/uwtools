@@ -2,19 +2,19 @@ from testbook import testbook
 from uwtools.config.formats.yaml import YAMLConfig
 
 
-def test_config_exp():
-    with open("fixtures/config-exp/base-file.yaml", "r", encoding="utf-8") as f:
+def test_exp_config():
+    with open("fixtures/exp-config/base-file.yaml", "r", encoding="utf-8") as f:
         base_cfg = f.read().rstrip()
-    with open("fixtures/config-exp/fv3-rap-physics.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/exp-config/fv3-rap-physics.yaml", "r", encoding="utf-8") as f:
         fv3_rap_phys = f.read().rstrip()
-    with open("fixtures/config-exp/user.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/exp-config/user.yaml", "r", encoding="utf-8") as f:
         user_cfg = f.read().rstrip()
-    with testbook("config-exp-cookbook.ipynb", execute=True) as tb:
+    with testbook("exp-config-cb.ipynb", execute=True) as tb:
         assert tb.cell_output_text(1) == ""
         assert tb.cell_output_text(3) == base_cfg
         assert tb.cell_output_text(5) == fv3_rap_phys
         assert tb.cell_output_text(7) == user_cfg
-        assert tb.cell_output_text(9) == str(YAMLConfig("fixtures/config-exp/base-file.yaml"))
+        assert tb.cell_output_text(9) == str(YAMLConfig("fixtures/exp-config/base-file.yaml"))
         updated_cfg = (
             "cycle_day: !int '{{ cycle.strftime(''%d'') }}'",
             "varmap_file: '{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt'",

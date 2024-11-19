@@ -10,4 +10,4 @@ Jupyter Notebooks
 
 * Cookbooks
 
-   * `Configuring an Experiment with UW Tools <https://mybinder.org/v2/gh/ufs-community/uwtools/notebooks?labpath=notebooks%2Fconfig-exp-cookbook.ipynb>`_
+   * `Configuring an Experiment with UW Tools <https://mybinder.org/v2/gh/ufs-community/uwtools/notebooks?labpath=notebooks%2Fexp-config-cb.ipynb>`_
