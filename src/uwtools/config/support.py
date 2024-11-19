@@ -108,7 +108,7 @@ class UWYAMLConvert(UWYAMLTag):
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!datetime", "!float", "!int")
+    TAGS = ("!bool", "!datetime", "!float", "!int")
 
     def convert(self) -> Union[datetime, float, int]:
         """
@@ -117,7 +117,7 @@ class UWYAMLConvert(UWYAMLTag):
         Will raise an exception if the value cannot be represented as the specified type.
         """
         converters: dict[str, Union[Callable[[str], datetime], type[float], type[int]]] = dict(
-            zip(self.TAGS, [datetime.fromisoformat, float, int])
+                zip(self.TAGS, [lambda x: x.lower() == "true", datetime.fromisoformat, float, int])
         )
         return converters[self.tag](self.value)
 
