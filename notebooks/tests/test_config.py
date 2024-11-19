@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import yaml
 from testbook import testbook
 
@@ -83,13 +85,19 @@ def test_compare():
     with testbook("config.ipynb", execute=True) as tb:
         assert base_cfg in tb.cell_output_text(57)
         assert alt_cfg in tb.cell_output_text(57)
-        diff_cmp = (
-            "INFO - fixtures/config/base-config.nml",
-            "INFO + fixtures/config/alt-config.nml",
-            "INFO memo:            sent:  - False + True",
-            "False",
-        )
-        assert all(x in tb.cell_output_text(59) for x in diff_cmp)
+        diff_cmp = """
+        INFO - fixtures/config/base-config.nml
+        INFO + fixtures/config/alt-config.nml
+        INFO ---------------------------------------------------------------------
+        INFO ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+        INFO ---------------------------------------------------------------------
+        INFO   memo:
+        INFO     message: '{{ greeting }}, {{ recipient }}!'
+        INFO     sender_id: '{{ id }}'
+        INFO -   sent: false
+        INFO +   sent: true
+        """
+        assert all(x in tb.cell_output_text(59) for x in dedent(diff_cmp).strip().split("\n"))
         assert base_cfg == cp_cfg  # cell 61 creates this copy
         same_cmp = ("INFO - fixtures/config/base-config.nml", "INFO + tmp/config-copy.nml", "True")
         assert all(x in tb.cell_output_text(63) for x in same_cmp)
@@ -122,12 +130,20 @@ def test_cfg_classes():
             dump = f.read().rstrip()
         assert tb.cell_output_text(79) == cfg
         assert tb.cell_output_text(81) == "True"
-        diff_cmp = (
-            "INFO fruit count:          grapes:  - {{ grape_count }} + 8",
-            "INFO fruit count:           kiwis:  - 2 + 1",
-            "False",
-        )
-        assert all(x in tb.cell_output_text(83) for x in diff_cmp)
+        diff_cmp = """
+        INFO ---------------------------------------------------------------------
+        INFO ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+        INFO ---------------------------------------------------------------------
+        INFO   fruit count:
+        INFO     apples: '3'
+        INFO -   grapes: '{{ grape_count }}'
+        INFO +   grapes: '8'
+        INFO -   kiwis: '2'
+        INFO ?           ^
+        INFO +   kiwis: '1'
+        INFO ?           ^
+        """
+        assert all(x in tb.cell_output_text(83) for x in dedent(diff_cmp).strip().split("\n"))
         assert "grapes = 15" in tb.cell_output_text(85)
         assert tb.cell_output_text(89) == dump
         dump_dict = ("[fruit count]", "oranges = 4", "blueberries = 9")
