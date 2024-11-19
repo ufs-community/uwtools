@@ -1249,21 +1249,6 @@ def test_schema_makedirs():
     assert "True is not of type 'string'\n" in errors({"makedirs": [True]})
 
 
-# makedirs
-
-
-def test_schema_makedirs():
-    errors = schema_validator("makedirs")
-    # The input must be an dict:
-    assert "is not of type 'object'\n" in errors([])
-    # Basic correctness:
-    assert not errors({"makedirs": ["/path/to/dir1", "/path/to/dir2"]})
-    # An empty array is not allowed:
-    assert "[] should be non-empty" in errors({"makedirs": []})
-    # Non-string values are not allowed:
-    assert "True is not of type 'string'\n" in errors({"makedirs": [True]})
-
-
 # mpas
 
 
