@@ -10,10 +10,11 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.upp import UPP
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -24,6 +25,7 @@ from uwtools.tests.support import logged, regex_logged
 def config(tmp_path):
     return {
         "upp": {
+            "control_file": "/path/to/postxconfig-NT.txt",
             "execution": {
                 "batchargs": {
                     "cores": 1,
@@ -97,6 +99,10 @@ def test_UPP(method):
     assert getattr(UPP, method) is getattr(Driver, method)
 
 
+def test_UPP_driver_name(driverobj):
+    assert driverobj.driver_name() == UPP.driver_name() == "upp"
+
+
 def test_UPP_files_copied(driverobj):
     for _, src in driverobj.config["files_to_copy"].items():
         Path(src).touch()
@@ -121,7 +127,7 @@ def test_UPP_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
     with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
-        print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
+        print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
     dst = driverobj.rundir / "itag"
     assert not dst.is_file()
     path = Path(refs(driverobj.namelist_file()))
@@ -132,7 +138,7 @@ def test_UPP_namelist_file(caplog, driverobj):
     assert nml["model_inputs"]["datestr"] == datestr
     assert nml["model_inputs"]["grib"] == "grib2"
     assert nml["nampgb"]["kpo"] == 3
-    assert nml["nampgb"]["kpv"] == 88
+    assert nml["nampgb"]["kpv"] == 42
 
 
 def test_UPP_namelist_file_fails_validation(caplog, driverobj):
@@ -154,6 +160,36 @@ def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
+def test_UPP_output(driverobj, tmp_path):
+    fields = ["?"] * (UPP.NFIELDS - 1)
+    parameters = ["?"] * UPP.NPARAMS
+    # fmt: off
+    control_data = [
+        "2",                # number of blocks
+        "1",                # number variables in 2nd block
+        "2",                # number variables in 1st block
+        "FOO",              # 1st block identifier
+        *fields,            # 1st block fields
+        *(parameters * 2) , # 1st block variable parameters
+        "BAR",              # 2nd block identifier
+        *fields,            # 2nd block fields
+        *parameters,        # 2nd block variable parameters
+    ]
+    # fmt: on
+    control_file = tmp_path / "postxconfig-NT.txt"
+    with open(control_file, "w", encoding="utf-8") as f:
+        print("\n".join(control_data), file=f)
+    driverobj._config["control_file"] = str(control_file)
+    expected = {"gribfiles": [str(driverobj.rundir / ("%s.GrbF24" % x)) for x in ("FOO", "BAR")]}
+    assert driverobj.output == expected
+
+
+def test_UPP_output_fail(driverobj):
+    with raises(UWConfigError) as e:
+        assert driverobj.output
+    assert str(e.value) == "Could not open UPP control file %s" % driverobj.config["control_file"]
+
+
 def test_UPP_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
@@ -167,8 +203,8 @@ def test_UPP_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_UPP_driver_name(driverobj):
-    assert driverobj.driver_name() == UPP.driver_name() == "upp"
+def test_UPP_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"
 
 
 def test_UPP__namelist_path(driverobj):
@@ -177,7 +213,3 @@ def test_UPP__namelist_path(driverobj):
 
 def test_UPP__runcmd(driverobj):
     assert driverobj._runcmd == "%s < itag" % driverobj.config["execution"]["executable"]
-
-
-def test_UPP_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"

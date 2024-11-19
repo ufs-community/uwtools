@@ -9,10 +9,11 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.esg_grid import ESGGrid
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -75,6 +76,7 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "taskname",
@@ -82,6 +84,10 @@ def driverobj(config):
 )
 def test_ESGGrid(method):
     assert getattr(ESGGrid, method) is getattr(Driver, method)
+
+
+def test_ESGGrid_driver_name(driverobj):
+    assert driverobj.driver_name() == ESGGrid.driver_name() == "esg_grid"
 
 
 def test_ESGGrid_namelist_file(caplog, driverobj):
@@ -112,6 +118,12 @@ def test_ESGGrid_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
+def test_ESGGrid_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
+
+
 def test_ESGGrid_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
@@ -121,7 +133,3 @@ def test_ESGGrid_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name() == ESGGrid.driver_name() == "esg_grid"

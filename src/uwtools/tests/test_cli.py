@@ -175,7 +175,7 @@ def test__dispatch_execute():
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
-        "task": "eighty_eight",
+        "task": "forty_two",
         "stdin_ok": True,
     }
     with patch.object(cli.uwtools.api.execute, "execute") as execute:
@@ -183,7 +183,7 @@ def test__dispatch_execute():
         execute.assert_called_once_with(
             classname="TestDriver",
             module="testdriver",
-            task="eighty_eight",
+            task="forty_two",
             schema_file="/path/to/testdriver.jsonschema",
             key_path=["foo", "bar"],
             dry_run=False,
@@ -373,7 +373,7 @@ def test__dispatch_config_validate_config_obj():
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
         STR.config: _dispatch_config_validate_args[STR.infile],
     }
-    _validate_external.assert_called_once_with(**_validate_external_args)
+    _validate_external.assert_called_once_with(**_validate_external_args, desc="config")
 
 
 @mark.parametrize(
@@ -475,7 +475,7 @@ def test__dispatch_template_render_fail(valsneeded):
         STR.outfile: 2,
         STR.valsfile: 3,
         STR.valsfmt: 4,
-        STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.keyvalpairs: ["foo=42", "bar=43"],
         STR.env: 5,
         STR.searchpath: 6,
         STR.valsneeded: valsneeded,
@@ -519,7 +519,7 @@ def test__dispatch_template_render_yaml():
         STR.outfile: 2,
         STR.valsfile: 3,
         STR.valsfmt: 4,
-        STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.keyvalpairs: ["foo=42", "bar=43"],
         STR.env: 5,
         STR.searchpath: 6,
         STR.valsneeded: 7,
@@ -532,7 +532,7 @@ def test__dispatch_template_render_yaml():
         output_file=2,
         values_src=3,
         values_format=4,
-        overrides={"foo": "88", "bar": "99"},
+        overrides={"foo": "42", "bar": "43"},
         env=5,
         searchpath=6,
         values_needed=7,
@@ -582,6 +582,7 @@ def test__dispatch_to_driver(hours):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "schema_file": None,
         "show_schema": False,
         "stdin_ok": True,
     }
@@ -596,6 +597,7 @@ def test__dispatch_to_driver(hours):
             dry_run=False,
             graph_file=None,
             key_path=["foo", "bar"],
+            schema_file=None,
             task="foo",
             stdin_ok=True,
         )
@@ -682,7 +684,7 @@ def test_main_fail_exception_log():
 
 
 def test__parse_args():
-    raw_args = ["testing", "--bar", "88"]
+    raw_args = ["testing", "--bar", "42"]
     with patch.object(cli, "Parser") as Parser:
         cli._parse_args(raw_args)
         Parser.assert_called_once()

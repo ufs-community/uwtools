@@ -3,7 +3,7 @@
 schism
 ======
 
-Structured YAML to configure SCHISM as part of a compiled coupled executable is validated by JSON Schema and requires the ``schism:`` block, described below.
+Structured YAML to configure :schism:`SCHISM<>` as part of a compiled coupled executable is validated by JSON Schema and requires the ``schism:`` block, described below.
 
 Here is a prototype UW YAML ``schism:`` block, explained in detail below:
 

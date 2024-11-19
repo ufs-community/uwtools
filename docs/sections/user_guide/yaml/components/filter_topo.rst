@@ -20,9 +20,17 @@ config:
 
 Configuration parameters for the ``orog_gsl`` component.
 
+  **filtered_orog:**
+
+  Name of the filtered output file.
+
   **input_grid_file:**
 
   Path to the tiled input grid file.
+
+  **input_raw_orog:**
+
+  Path to the raw orography file. The output of the ``orog`` driver.
 
 namelist:
 ^^^^^^^^^

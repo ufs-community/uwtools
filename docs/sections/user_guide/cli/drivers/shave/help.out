@@ -12,11 +12,15 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    input_config_file
+      The input config file
     provisioned_rundir
       Run directory provisioned with all required content
     run
       A run
     runscript
       The runscript
+    show_output
+      Show the output to be created by this component
     validate
       Validate the UW driver config

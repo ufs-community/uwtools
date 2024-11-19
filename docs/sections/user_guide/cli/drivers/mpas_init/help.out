@@ -26,6 +26,8 @@ Positional arguments:
       A run
     runscript
       The runscript
+    show_output
+      Show the output to be created by this component
     streams_file
       The streams file
     validate

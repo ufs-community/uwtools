@@ -1,5 +1,5 @@
 &config
-  salad_include = '!INCLUDE [./fruit_config.nml]'
+  salad_include = '!include [./fruit_config.nml]'
   meat = beef
   dressing = poppyseed
 /

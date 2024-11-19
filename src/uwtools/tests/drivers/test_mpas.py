@@ -12,10 +12,11 @@ import f90nml  # type: ignore
 import yaml
 from iotaa import refs
 from lxml import etree
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.mpas import MPAS
 from uwtools.drivers.mpas_base import MPASBase
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged, regex_logged
 
@@ -130,6 +131,7 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "streams_file",
@@ -154,6 +156,10 @@ def test_MPAS_boundary_files(driverobj, cycle):
         path.touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
+
+
+def test_MPAS_driver_name(driverobj):
+    assert driverobj.driver_name() == MPAS.driver_name() == "mpas"
 
 
 @mark.parametrize(
@@ -189,6 +195,15 @@ def test_MPAS_namelist_file(caplog, driverobj):
     assert isinstance(nml, f90nml.Namelist)
 
 
+def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
 def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = 120
@@ -203,15 +218,6 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     assert nml["nhyd_model"]["config_run_duration"] == "5_0:00:00"
 
 
-def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
-    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
-    assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
-
-
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
@@ -219,6 +225,12 @@ def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+
+
+def test_MPAS_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_MPAS_provisioned_rundir(driverobj):
@@ -234,10 +246,6 @@ def test_MPAS_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_MPAS_driver_name(driverobj):
-    assert driverobj.driver_name() == MPAS.driver_name() == "mpas"
 
 
 def test_MPAS_streams_file(config, driverobj):

@@ -41,6 +41,10 @@ def test_set_driver_docstring():
 def test_tasks():
 
     class SomeDriver(DriverTimeInvariant):
+        @classmethod
+        def driver_name(cls):
+            pass
+
         def provisioned_rundir(self):
             pass
 
@@ -59,10 +63,6 @@ def test_tasks():
         def t3(self):
             "@tasks t3"
 
-        @classmethod
-        def driver_name(cls):
-            pass
-
         @property
         def _resources(self):
             pass
@@ -73,6 +73,7 @@ def test_tasks():
     assert support.tasks(SomeDriver) == {
         "run": "A run.",
         "runscript": "The runscript.",
+        "show_output": "Show the output to be created by this component.",
         "t1": "@external t1",
         "t2": "@task t2",
         "t3": "@tasks t3",

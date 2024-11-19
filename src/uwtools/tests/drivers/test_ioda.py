@@ -6,10 +6,11 @@ import datetime as dt
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.ioda import IODA
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -79,12 +80,23 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
     ],
 )
 def test_IODA(method):
     assert getattr(IODA, method) is getattr(JEDIBase, method)
+
+
+def test_IODA_driver_name(driverobj):
+    assert driverobj.driver_name() == IODA.driver_name() == "ioda"
+
+
+def test_IODA_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_IODA_provisioned_rundir(driverobj):
@@ -100,8 +112,8 @@ def test_IODA_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_IODA_driver_name(driverobj):
-    assert driverobj.driver_name() == IODA.driver_name() == "ioda"
+def test_IODA_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240501 06Z ioda foo"
 
 
 def test_IODA__config_fn(driverobj):
@@ -111,7 +123,3 @@ def test_IODA__config_fn(driverobj):
 def test_IODA__runcmd(driverobj):
     config = str(driverobj.rundir / driverobj._config_fn)
     assert driverobj._runcmd == f"/path/to/bufr2ioda.x {config}"
-
-
-def test_IODA_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240501 06Z ioda foo"

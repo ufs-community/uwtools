@@ -21,12 +21,12 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import (
     bundle,
-    get_schema_file,
+    internal_schema_file,
     validate,
     validate_external,
     validate_internal,
 )
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
@@ -49,7 +49,7 @@ class Assets(ABC):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ) -> None:
         config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         config_input.dereference(
@@ -65,9 +65,9 @@ class Assets(ABC):
             self._config: dict = self._config_intermediate[self.driver_name()]
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % self.driver_name()) from e
-        if controller:
-            self._config[STR.rundir] = self._config_intermediate[controller][STR.rundir]
-        self._validate(schema_file)
+        self._delegate(controller, STR.rundir)
+        self.schema_file = schema_file
+        self._validate()
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
@@ -106,14 +106,14 @@ class Assets(ABC):
     @classmethod
     def schema(cls) -> dict:
         """
-        Return the driver's schema.
+        Return the driver's internal schema.
         """
-        with open(get_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
+        with open(internal_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
             return bundle(json.load(f))
 
     def taskname(self, suffix: str) -> str:
         """
-        Return a common tag for graph-task log messages.
+        Return a common tag for task-related log messages.
 
         :param suffix: Log-string suffix.
         """
@@ -160,11 +160,24 @@ class Assets(ABC):
         else:
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
-        if validate(schema=schema or {"type": "object"}, config=config):
+        if validate(schema=schema or {"type": "object"}, desc="user-updated config", config=config):
             dump()
             log.debug(f"Wrote config to {path}")
         else:
             log.debug(f"Failed to validate {path}")
+
+    def _delegate(self, controller: Optional[list[str]], config_key: str) -> None:
+        """
+        Selectively delegate config to controller.
+
+        :param controller: Key(s) leading to block in config controlling run-time values.
+        :param config_key: Name of config item to delegate to controller.
+        """
+        if controller:
+            val = self._config_intermediate[controller[0]]
+            for key in controller[1:]:
+                val = val[key]
+            self._config[config_key] = val[config_key]
 
     # Public helper methods
 
@@ -175,9 +188,7 @@ class Assets(ABC):
         The name of this driver.
         """
 
-    # Private helper methods
-
-    def _namelist_schema(
+    def namelist_schema(
         self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
@@ -191,7 +202,7 @@ class Assets(ABC):
         for config_key in config_keys or [STR.namelist]:
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
-            schema_file = get_schema_file(schema_name=self._schema_name())
+            schema_file = self.schema_file or internal_schema_file(schema_name=self._schema_name())
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
             for schema_key in schema_keys or [
@@ -205,6 +216,8 @@ class Assets(ABC):
                 schema = schema[schema_key]
         return schema
 
+    # Private helper methods
+
     @classmethod
     def _schema_name(cls) -> str:
         """
@@ -212,17 +225,20 @@ class Assets(ABC):
         """
         return cls.driver_name().replace("_", "-")
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self) -> None:
         """
         Perform all necessary schema validation.
 
-        :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        if schema_file:
-            validate_external(schema_file=schema_file, config=self._config_intermediate)
+        kwargs: dict = {
+            "config": self._config_intermediate,
+            "desc": "%s config" % self.driver_name(),
+        }
+        if self.schema_file:
+            validate_external(schema_file=self.schema_file, **kwargs)
         else:
-            validate_internal(schema_name=self._schema_name(), config=self._config_intermediate)
+            validate_internal(schema_name=self._schema_name(), **kwargs)
 
 
 class AssetsCycleBased(Assets):
@@ -237,7 +253,7 @@ class AssetsCycleBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -270,7 +286,7 @@ class AssetsCycleLeadtimeBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -310,7 +326,7 @@ class AssetsTimeInvariant(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             config=config,
@@ -335,7 +351,7 @@ class Driver(Assets):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -347,8 +363,7 @@ class Driver(Assets):
             controller=controller,
         )
         self._batch = batch
-        if controller:
-            self._config[STR.execution] = self.config_full[controller][STR.execution]
+        self._delegate(controller, STR.execution)
 
     # Workflow tasks
 
@@ -378,6 +393,18 @@ class Driver(Assets):
         yield None
         self._write_runscript(path)
 
+    @external
+    def show_output(self):
+        """
+        Show the output to be created by this component.
+        """
+        yield self.taskname("expected output")
+        try:
+            print(json.dumps(self.output, indent=2, sort_keys=True))
+        except UWConfigError as e:
+            log.error(e)
+        yield asset(None, lambda: True)
+
     @task
     def _run_via_batch_submission(self):
         """
@@ -401,7 +428,16 @@ class Driver(Assets):
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
-    # Private helper methods
+    # Public methods
+
+    @property
+    def output(self) -> Union[dict[str, str], dict[str, list[str]]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        raise UWNotImplementedError("The output() method is not yet implemented for this driver")
+
+    # Private methods
 
     @property
     def _run_resources(self) -> dict[str, Any]:
@@ -491,15 +527,16 @@ class Driver(Assets):
         """
         return JobScheduler.get_scheduler(self._run_resources)
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self) -> None:
         """
         Perform all necessary schema validation.
 
-        :param schema_file: The JSON Schema file to use for validation.
         :raises: UWConfigError if config fails validation.
         """
-        Assets._validate(self, schema_file)
-        validate_internal(schema_name=STR.platform, config=self._config_intermediate)
+        Assets._validate(self)
+        validate_internal(
+            schema_name=STR.platform, desc="platform config", config=self._config_intermediate
+        )
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """
@@ -536,7 +573,7 @@ class DriverCycleBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -571,7 +608,7 @@ class DriverCycleLeadtimeBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -613,7 +650,7 @@ class DriverTimeInvariant(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[str] = None,
+        controller: Optional[list[str]] = None,
     ):
         super().__init__(
             config=config,
@@ -645,7 +682,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
-    :param controller: Name of block in config controlling run-time values.
+    :param controller: Key(s) leading to block in config controlling run-time values.
     """
     setattr(
         class_,

@@ -32,7 +32,7 @@ from uwtools.utils.file import writable
 
 @fixture
 def compare_configs_assets(tmp_path):
-    d = {"foo": {"bar": 88}, "baz": {"qux": 99}}
+    d = {"foo": {"bar": 42}, "baz": {"qux": 43}}
     a = tmp_path / "a"
     b = tmp_path / "b"
     with writable(a) as f:
@@ -50,7 +50,7 @@ def realize_config_testobj(realize_config_yaml_input):
 @fixture
 def realize_config_yaml_input(tmp_path):
     path = tmp_path / "a.yaml"
-    d = {1: {2: {3: 88}}}  # depth 3
+    d = {1: {2: {3: 42}}}  # depth 3
     with writable(path) as f:
         yaml.dump(d, f)
     return path
@@ -117,7 +117,25 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
     assert not tools.compare_configs(
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
-    assert logged(caplog, "baz:             qux:  - 99 + 11")
+    expected = """
+    - %s
+    + %s
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+      baz:
+    -   qux: 43
+    ?        ^^
+    +   qux: 11
+    ?        ^^
+      foo:
+        bar: 42
+    """ % (
+        str(a),
+        str(b),
+    )
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
 
 
 def test_compare_configs_missing_key(compare_configs_assets, caplog):
@@ -130,7 +148,22 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
     assert not tools.compare_configs(
         config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
     )
-    assert logged(caplog, "baz:             qux:  - None + 99")
+    expected = """
+    - %s
+    + %s
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+    + baz:
+    +   qux: 43
+      foo:
+        bar: 42
+    """ % (
+        str(b),
+        str(a),
+    )
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
 
 
 def test_compare_configs_bad_format(caplog):
@@ -544,7 +577,7 @@ def test__ensure_format_bad_no_path_no_format():
 
 
 def test__ensure_format_config_obj():
-    config = NMLConfig({"nl": {"n": 88}})
+    config = NMLConfig({"nl": {"n": 42}})
     assert tools._ensure_format(desc="foo", config=config) == FORMAT.nml
 
 
@@ -653,7 +686,7 @@ def test__realize_config_input_setup_ini_stdin(caplog):
     data = """
     [section]
     foo = bar
-    baz = 88
+    baz = 42
     """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
@@ -662,7 +695,7 @@ def test__realize_config_input_setup_ini_stdin(caplog):
         sio.seek(0)
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.ini)
-    assert input_obj.data == {"section": {"foo": "bar", "baz": "88"}}  # note: 88 is str, not int
+    assert input_obj.data == {"section": {"foo": "bar", "baz": "42"}}  # note: 42 is str, not int
     assert logged(caplog, "Reading input from stdin")
 
 
@@ -780,24 +813,24 @@ def test__realize_config_output_setup(caplog, tmp_path):
 
 
 def test__realize_config_update_cfgobj(realize_config_testobj):
-    assert realize_config_testobj[1][2][3] == 88
-    update_config = YAMLConfig(config={1: {2: {3: 99}}})
+    assert realize_config_testobj[1][2][3] == 42
+    update_config = YAMLConfig(config={1: {2: {3: 43}}})
     o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
-    assert o[1][2][3] == 99
+    assert o[1][2][3] == 43
 
 
 def test__realize_config_update_stdin(caplog, realize_config_testobj):
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    assert realize_config_testobj[1][2][3] == 88
+    assert realize_config_testobj[1][2][3] == 42
     with StringIO() as sio:
-        print("{1: {2: {3: 99}}}", file=sio)
+        print("{1: {2: {3: 43}}}", file=sio)
         sio.seek(0)
         with patch.object(sys, "stdin", new=sio):
             o = tools._realize_config_update(
                 input_obj=realize_config_testobj, update_format=FORMAT.yaml
             )
-    assert o[1][2][3] == 99
+    assert o[1][2][3] == 43
     assert logged(caplog, "Reading update from stdin")
 
 
@@ -806,13 +839,13 @@ def test__realize_config_update_noop(realize_config_testobj):
 
 
 def test__realize_config_update_file(realize_config_testobj, tmp_path):
-    assert realize_config_testobj[1][2][3] == 88
-    values = {1: {2: {3: 99}}}
+    assert realize_config_testobj[1][2][3] == 42
+    values = {1: {2: {3: 43}}}
     update_config = tmp_path / "config.yaml"
     with open(update_config, "w", encoding="utf-8") as f:
         yaml.dump(values, f)
     o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
-    assert o[1][2][3] == 99
+    assert o[1][2][3] == 43
 
 
 def test__realize_config_values_needed(caplog, tmp_path):

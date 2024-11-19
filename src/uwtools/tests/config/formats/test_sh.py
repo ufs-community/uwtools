@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.sh module.
 """
@@ -6,12 +6,23 @@ Tests for uwtools.config.formats.sh module.
 from textwrap import dedent
 from typing import Any
 
-from pytest import mark, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.sh import SHConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
+
+# Fixtures
+
+
+@fixture
+def dumpkit(tmp_path):
+    expected = """
+    key=value
+    """
+    return {"key": "value"}, dedent(expected).strip(), tmp_path / "config.yaml"
+
 
 # Tests
 
@@ -68,3 +79,25 @@ def test_sh(salad_base):
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
     assert cfgobj == expected
+
+
+def test_sh_as_dict():
+    d1 = {"a": 1}
+    config = SHConfig(d1)
+    d2 = config.as_dict()
+    assert d2 == d1
+    assert isinstance(d2, dict)
+
+
+def test_sh_dump(dumpkit):
+    d, expected, path = dumpkit
+    SHConfig(d).dump(path)
+    with open(path, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected
+
+
+def test_sh_dump_dict(dumpkit):
+    d, expected, path = dumpkit
+    SHConfig.dump_dict(d, path=path)
+    with open(path, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected

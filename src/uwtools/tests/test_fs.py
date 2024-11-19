@@ -104,7 +104,7 @@ def test_Linker(assets, source):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_Stager__config_block_fail_bad_keypath(assets, source):
+def test_Stager__config_block_fail_bad_key_path(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
@@ -112,10 +112,10 @@ def test_Stager__config_block_fail_bad_keypath(assets, source):
     assert str(e.value) == "Failed following YAML key(s): a -> x"
 
 
-@mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
+@mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
 def test_Stager__config_block_fails_bad_type(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:
         ConcreteStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
-    assert str(e.value) == "Expected block not found at key path: a -> b"
+    assert str(e.value) == "Expected block not found at key path: a.b"

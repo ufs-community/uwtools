@@ -21,11 +21,12 @@ def execute_kwargs():
         "dry_run": False,
         "graph_file": "/path/to/g.dot",
         "key_path": None,
+        "schema_file": None,
         "stdin_ok": True,
     }
 
 
-@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+@mark.parametrize("val", [Path("/some/path"), {"foo": 42}])
 def test_ensure_data_source_passthrough(val):
     assert api.ensure_data_source(data_source=val, stdin_ok=False) == val
 

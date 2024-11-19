@@ -1,20 +1,21 @@
-[2024-05-23T19:39:16]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-[2024-05-23T19:39:16]    DEBUG Dereferencing, current value:
-[2024-05-23T19:39:16]    DEBUG   values:
-[2024-05-23T19:39:16]    DEBUG     greeting: Hello
-[2024-05-23T19:39:16]    DEBUG     recipient: World
-[2024-05-23T19:39:16]    DEBUG [dereference] Rendering: Hello
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendered: Hello
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendering: greeting
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendered: greeting
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendering: World
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendered: World
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendering: recipient
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendered: recipient
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendering: values
-[2024-05-23T19:39:17]    DEBUG [dereference] Rendered: values
-[2024-05-23T19:39:17]    DEBUG Dereferencing, final value:
-[2024-05-23T19:39:17]    DEBUG   values:
-[2024-05-23T19:39:17]    DEBUG     greeting: Hello
-[2024-05-23T19:39:17]    DEBUG     recipient: World
-[2024-05-23T19:39:17]     INFO 0 UW schema-validation errors found
+[2024-08-26T22:54:28]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
+[2024-08-26T22:54:28]    DEBUG Using schema file: schema.jsonschema
+[2024-08-26T22:54:28]    DEBUG Dereferencing, current value:
+[2024-08-26T22:54:28]    DEBUG   values:
+[2024-08-26T22:54:28]    DEBUG     greeting: Hello
+[2024-08-26T22:54:28]    DEBUG     recipient: World
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendering: Hello
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendered: Hello
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendering: greeting
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendered: greeting
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendering: World
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendered: World
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendering: recipient
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendered: recipient
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendering: values
+[2024-08-26T22:54:28]    DEBUG [dereference] Rendered: values
+[2024-08-26T22:54:28]    DEBUG Dereferencing, final value:
+[2024-08-26T22:54:28]    DEBUG   values:
+[2024-08-26T22:54:28]    DEBUG     greeting: Hello
+[2024-08-26T22:54:28]    DEBUG     recipient: World
+[2024-08-26T22:54:29]     INFO 0 UW schema-validation errors found in config

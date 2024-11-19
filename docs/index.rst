@@ -77,7 +77,6 @@ File/Directory Provisioning
 | **CLI**: ``uw fs -h``
 | **API**: ``import uwtools.api.fs``
 
-
 This tool helps users define the source and destination of files to be copied or linked, or directories to be created, in the same UW YAML language used by UW drivers.
 
 | :any:`CLI documentation with examples<cli_fs_mode>`
@@ -86,7 +85,7 @@ There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw f
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/b2HXOlt-Ulw?si=rLWatBFu4mvNR65S" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+   <iframe src="https://www.youtube.com/embed/b2HXOlt-Ulw" allowfullscreen frameborder="0" height="315" width="560"></iframe>
 
 Rocoto Configurability
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -162,6 +161,12 @@ make_solo_mosaic
 | **CLI**: ``uw make_solo_mosaic -h``
 | **API**: ``import uwtools.api.make_solo_mosaic``
 
+orog
+""""
+
+| **CLI**: ``uw orog -h``
+| **API**: ``import uwtools.api.orog``
+
 orog_gsl
 """"""""
 
@@ -235,8 +240,6 @@ mpas
 
 | **CLI**: ``uw mpas -h``
 | **API**: ``import uwtools.api.mpas``
-
-.. include:: /shared/binder_links.rst
 
 ------------------
 

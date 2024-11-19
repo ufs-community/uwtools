@@ -30,7 +30,7 @@
           "type": "string"
         },
         "execution": {
-          "$ref": "urn:uwtools:execution"
+          "$ref": "urn:uwtools:execution-parallel"
         },
         "field_table": {
           "additionalProperties": false,

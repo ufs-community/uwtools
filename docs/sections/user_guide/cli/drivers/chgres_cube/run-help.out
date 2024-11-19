@@ -1,12 +1,15 @@
-usage: uw chgres_cube run --cycle CYCLE [-h] [--version] [--config-file PATH]
-                          [--batch] [--dry-run] [--graph-file PATH]
-                          [--key-path KEY[.KEY...]] [--quiet] [--verbose]
+usage: uw chgres_cube run --cycle CYCLE --leadtime LEADTIME [-h] [--version]
+                          [--config-file PATH] [--batch] [--dry-run]
+                          [--graph-file PATH] [--key-path KEY[.KEY...]]
+                          [--schema-file PATH] [--quiet] [--verbose]
 
 A run
 
 Required arguments:
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-05-23T18)
+      The cycle in ISO8601 format (e.g. 2024-10-31T18)
+  --leadtime LEADTIME
+      The leadtime as hours[:minutes[:seconds]]
 
 Optional arguments:
   -h, --help
@@ -24,6 +27,8 @@ Optional arguments:
   --key-path KEY[.KEY...]
       Dot-separated path of keys leading through the config to the driver's
       configuration block
+  --schema-file PATH
+      Path to schema file to use for validation
   --quiet, -q
       Print no logging messages
   --verbose, -v

@@ -4,7 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "execution": {
-          "$ref": "urn:uwtools:execution"
+          "$ref": "urn:uwtools:execution-parallel"
         },
         "namelist": {
           "additionalProperties": false,
@@ -27,12 +27,31 @@
             "update_values": {
               "properties": {
                 "config": {
-                  "additionalProperties": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "number",
-                      "string"
+                  "additionalProperties": false,
+                  "dependencies": {
+                    "atm_core_files_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "atm_files_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "atm_tracer_files_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "grib2_file_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "nst_files_input_grid": [
+                      "data_dir_input_grid"
+                    ],
+                    "orog_files_input_grid": [
+                      "orog_dir_input_grid"
+                    ],
+                    "orog_files_target_grid": [
+                      "orog_dir_target_grid"
+                    ],
+                    "sfc_files_input_grid": [
+                      "data_dir_input_grid"
                     ]
                   },
                   "properties": {
@@ -91,13 +110,6 @@
                       "type": "string"
                     },
                     "external_model": {
-                      "enum": [
-                        "GFS",
-                        "HRRR",
-                        "NAM",
-                        "RAP",
-                        "UKMET"
-                      ],
                       "type": "string"
                     },
                     "fix_dir_target_grid": {

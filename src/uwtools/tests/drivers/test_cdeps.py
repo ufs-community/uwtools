@@ -17,6 +17,7 @@ from pytest import fixture, mark
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers import cdeps
 from uwtools.drivers.cdeps import CDEPS
+from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.tests.test_schemas import CDEPS_CONFIG
@@ -35,12 +36,24 @@ def driverobj(tmp_path):
 # Tests
 
 
+@mark.parametrize(
+    "method",
+    ["taskname", "_validate"],
+)
+def test_CDEPS(method):
+    assert getattr(CDEPS, method) is getattr(AssetsCycleBased, method)
+
+
 def test_CDEPS_atm(driverobj):
     with patch.object(CDEPS, "atm_nml") as atm_nml:
         with patch.object(CDEPS, "atm_stream") as atm_stream:
             driverobj.atm()
         atm_stream.assert_called_once_with()
     atm_nml.assert_called_once_with()
+
+
+def test_CDEPS_driver_name(driverobj):
+    assert driverobj.driver_name() == CDEPS.driver_name() == "cdeps"
 
 
 @mark.parametrize("group", ["atm", "ocn"])
@@ -109,10 +122,6 @@ def test_CDEPS_streams(driverobj, group):
     """
     with open(path, "r", encoding="utf-8") as f:
         assert f.read().strip() == dedent(expected).strip()
-
-
-def test_CDEPS_driver_name(driverobj):
-    assert driverobj.driver_name() == CDEPS.driver_name() == "cdeps"
 
 
 def test_CDEPS__model_namelist_file(driverobj):

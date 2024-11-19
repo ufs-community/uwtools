@@ -8,14 +8,13 @@
           "properties": {
             "batchargs": {
               "additionalProperties": true,
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "chgres_cube"
-  ],
-  "type": "object"
-}
+              "properties": {
+                "cores": {
+                  "type": "integer"
+                },
+                "debug": {
+                  "type": "boolean"
+                },
+                "exclusive": {
+                  "type": "boolean"
+                },

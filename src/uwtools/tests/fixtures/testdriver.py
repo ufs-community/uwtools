@@ -9,12 +9,12 @@ class TestDriver(AssetsCycleBased):
     """
 
     @task
-    def eighty_eight(self):
+    def forty_two(self):
         """
-        88
+        42
         """
-        yield "88"
-        yield asset(88, lambda: True)
+        yield "42"
+        yield asset(42, lambda: True)
         yield None
 
     @classmethod

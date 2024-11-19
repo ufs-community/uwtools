@@ -19,7 +19,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
@@ -36,12 +36,12 @@ class Common:
         yield "atask"
         yield asset("atask", lambda: True)
 
-    def provisioned_rundir(self):
-        pass
-
     @classmethod
     def driver_name(cls) -> str:
         return "concrete"
+
+    def provisioned_rundir(self):
+        pass
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         pass
@@ -68,7 +68,11 @@ class ConcreteDriverCycleLeadtimeBased(Common, driver.DriverCycleLeadtimeBased):
 
 
 class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
-    pass
+
+    @property
+    def output(self):
+        # The dict keys are intentionally out-of-alphabetical-order to test JSON sorting.
+        return {"bar": ["/path/to/bar1", "/path/to/bar2"], "foo": "/path/to/foo"}
 
 
 def write(path, x):
@@ -195,7 +199,7 @@ def test_Assets_controller(config, controller_schema):
         with raises(UWConfigError):
             ConcreteAssetsTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteAssetsTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
+            config=config, schema_file=controller_schema, controller=["controller"]
         )
 
 
@@ -243,6 +247,22 @@ def test_Assets_validate_key_path(config, controller_schema):
         )
 
 
+@mark.parametrize("should_pass,t", [(True, "integer"), (False, "string")])
+def test_Assets_validate_schema_file(caplog, should_pass, t, tmp_path):
+    path = tmp_path / "test.jsonschema"
+    schema = {"properties": {"concrete": {"properties": {"n": {"type": t}}}}}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    test = lambda: ConcreteAssetsTimeInvariant(config={"concrete": {"n": 1}}, schema_file=path)
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        if should_pass:
+            assert test()
+        else:
+            with raises(UWConfigError):
+                test()
+            assert regex_logged(caplog, "1 is not of type 'string'")
+
+
 @mark.parametrize(
     "base_file,update_values,expected",
     [
@@ -269,6 +289,13 @@ def test_Assets__create_user_updated_config_base_file(
     assert updated == expected
 
 
+def test_Assets__delegate(driverobj):
+    assert "roses" not in driverobj.config
+    driverobj._config_intermediate["plants"] = {"flowers": {"roses": "red"}}
+    driverobj._delegate(["plants", "flowers"], "roses")
+    assert driverobj.config["roses"] == "red"
+
+
 def test_Assets__rundir(assetsobj):
     assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
@@ -284,6 +311,7 @@ def test_Assets__validate_internal(assetsobj):
             assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
+            "desc": "concrete config",
             "config": assetsobj.config_full,
         }
 
@@ -295,6 +323,7 @@ def test_Assets__validate_external(config):
             assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
+            "desc": "concrete config",
             "config": assetsobj.config_full,
         }
 
@@ -324,7 +353,7 @@ def test_Driver_controller(config, controller_schema):
         with raises(UWConfigError):
             ConcreteDriverTimeInvariant(config=config, schema_file=controller_schema)
         assert ConcreteDriverTimeInvariant(
-            config=config, schema_file=controller_schema, controller="controller"
+            config=config, schema_file=controller_schema, controller=["controller"]
         )
 
 
@@ -334,6 +363,58 @@ def test_Driver_leadtime(config):
     obj = ConcreteDriverCycleLeadtimeBased(config=config, cycle=cycle, leadtime=leadtime)
     assert obj.cycle == cycle
     assert obj.leadtime == leadtime
+
+
+def test_Driver_namelist_schema_default(driverobj, tmp_path):
+    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
+    schema = {
+        "properties": {
+            "concrete": {"properties": {"namelist": {"properties": {"update_values": nmlschema}}}}
+        }
+    }
+    schema_path = tmp_path / "test.jsonschema"
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"namelist": {"validate": True}}
+        with patch.object(driver, "internal_schema_file", return_value=schema_path):
+            assert driverobj.namelist_schema() == nmlschema
+
+
+def test_Driver_namelist_schema_external(driverobj, tmp_path):
+    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
+    schema = {"foo": {"bar": nmlschema}}
+    schema_path = tmp_path / "test.jsonschema"
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"baz": {"qux": {"validate": True}}}
+        driverobj.schema_file = schema_path
+        assert nmlschema == driverobj.namelist_schema(
+            config_keys=["baz", "qux"], schema_keys=["foo", "bar"]
+        )
+
+
+def test_Driver_namelist_schema_default_disable(driverobj):
+    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"namelist": {"validate": False}}
+        assert driverobj.namelist_schema() == {"type": "object"}
+
+
+def test_Driver_output(config):
+    driverobj = ConcreteDriverTimeInvariant(config)
+    assert driverobj.output == {"foo": "/path/to/foo", "bar": ["/path/to/bar1", "/path/to/bar2"]}
+
+
+@mark.parametrize("cls", [ConcreteDriverCycleBased, ConcreteDriverCycleLeadtimeBased])
+def test_Driver_output_not_implemented(cls, config):
+    kwargs = {"config": config, "cycle": dt.datetime(2024, 10, 22, 12)}
+    if cls == ConcreteDriverCycleLeadtimeBased:
+        kwargs["leadtime"] = 6
+    driverobj = cls(**kwargs)
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 @mark.parametrize("batch", [True, False])
@@ -360,6 +441,52 @@ def test_Driver_runscript(arg, driverobj, type_):
         driverobj.runscript()
         runscript.assert_called_once()
         assert isinstance(runscript.call_args.kwargs[arg], type_)
+
+
+def test_driver_show_output(capsys, config):
+    ConcreteDriverTimeInvariant(config).show_output()
+    expected = """
+    {
+      "bar": [
+        "/path/to/bar1",
+        "/path/to/bar2"
+      ],
+      "foo": "/path/to/foo"
+    }
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_driver_show_output_fail(caplog, config):
+    with patch.object(ConcreteDriverTimeInvariant, "output", new_callable=PropertyMock) as output:
+        output.side_effect = UWConfigError("FAIL")
+        ConcreteDriverTimeInvariant(config).show_output()
+    assert "FAIL" in caplog.messages
+
+
+@mark.parametrize(
+    "base_file,update_values,expected",
+    [
+        (False, False, {}),
+        (False, True, {"a": 33}),
+        (True, False, {"a": 11, "b": 22}),
+        (True, True, {"a": 33, "b": 22}),
+    ],
+)
+def test_Driver__create_user_updated_config_base_file(
+    base_file, driverobj, expected, tmp_path, update_values
+):
+    path = tmp_path / "updated.yaml"
+    if not base_file:
+        del driverobj._config["base_file"]
+    if not update_values:
+        del driverobj._config["update_values"]
+    ConcreteDriverTimeInvariant._create_user_updated_config(
+        config_class=YAMLConfig, config_values=driverobj.config, path=path
+    )
+    with open(path, "r", encoding="utf-8") as f:
+        updated = yaml.safe_load(f)
+    assert updated == expected
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -389,68 +516,6 @@ def test_Driver__run_via_local_execution(driverobj):
                 log_output=True,
             )
         prd.assert_called_once_with()
-
-
-@mark.parametrize(
-    "base_file,update_values,expected",
-    [
-        (False, False, {}),
-        (False, True, {"a": 33}),
-        (True, False, {"a": 11, "b": 22}),
-        (True, True, {"a": 33, "b": 22}),
-    ],
-)
-def test_Driver__create_user_updated_config_base_file(
-    base_file, driverobj, expected, tmp_path, update_values
-):
-    path = tmp_path / "updated.yaml"
-    if not base_file:
-        del driverobj._config["base_file"]
-    if not update_values:
-        del driverobj._config["update_values"]
-    ConcreteDriverTimeInvariant._create_user_updated_config(
-        config_class=YAMLConfig, config_values=driverobj.config, path=path
-    )
-    with open(path, "r", encoding="utf-8") as f:
-        updated = yaml.safe_load(f)
-    assert updated == expected
-
-
-def test_Driver__namelist_schema_custom(driverobj, tmp_path):
-    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
-    schema = {"foo": {"bar": nmlschema}}
-    schema_path = tmp_path / "test.jsonschema"
-    with open(schema_path, "w", encoding="utf-8") as f:
-        json.dump(schema, f)
-    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
-        dc.return_value = {"baz": {"qux": {"validate": True}}}
-        with patch.object(driver, "get_schema_file", return_value=schema_path):
-            assert (
-                driverobj._namelist_schema(config_keys=["baz", "qux"], schema_keys=["foo", "bar"])
-                == nmlschema
-            )
-
-
-def test_Driver__namelist_schema_default(driverobj, tmp_path):
-    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
-    schema = {
-        "properties": {
-            "concrete": {"properties": {"namelist": {"properties": {"update_values": nmlschema}}}}
-        }
-    }
-    schema_path = tmp_path / "test.jsonschema"
-    with open(schema_path, "w", encoding="utf-8") as f:
-        json.dump(schema, f)
-    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
-        dc.return_value = {"namelist": {"validate": True}}
-        with patch.object(driver, "get_schema_file", return_value=schema_path):
-            assert driverobj._namelist_schema() == nmlschema
-
-
-def test_Driver__namelist_schema_default_disable(driverobj):
-    with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
-        dc.return_value = {"namelist": {"validate": False}}
-        assert driverobj._namelist_schema() == {"type": "object"}
 
 
 def test_Driver__run_resources_fail(driverobj):
@@ -508,6 +573,10 @@ def test_Driver__runscript(driverobj):
     )
 
 
+def test_Driver__runscript_done_file(driverobj):
+    assert driverobj._runscript_done_file == "runscript.concrete.done"
+
+
 def test_Driver__runscript_execution_only(driverobj):
     expected = """
     #!/bin/bash
@@ -516,10 +585,6 @@ def test_Driver__runscript_execution_only(driverobj):
     bar
     """
     assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
-
-
-def test_Driver__runscript_done_file(driverobj):
-    assert driverobj._runscript_done_file == "runscript.concrete.done"
 
 
 def test_Driver__runscript_path(driverobj):
@@ -534,20 +599,6 @@ def test_Driver__scheduler(driverobj):
         JobScheduler.get_scheduler.assert_called_with(driverobj._run_resources)
 
 
-def test_Driver__validate_internal(assetsobj):
-    with patch.object(assetsobj, "_validate", driver.Driver._validate):
-        with patch.object(driver, "validate_internal") as validate_internal:
-            assetsobj._validate(assetsobj)
-        assert validate_internal.call_args_list[0].kwargs == {
-            "schema_name": "concrete",
-            "config": assetsobj.config_full,
-        }
-        assert validate_internal.call_args_list[1].kwargs == {
-            "schema_name": "platform",
-            "config": assetsobj.config_full,
-        }
-
-
 def test_Driver__validate_external(config):
     schema_file = Path("/path/to/jsonschema")
     with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Driver._validate):
@@ -555,6 +606,23 @@ def test_Driver__validate_external(config):
             assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
+            "desc": "concrete config",
+            "config": assetsobj.config_full,
+        }
+
+
+def test_Driver__validate_internal(assetsobj):
+    with patch.object(assetsobj, "_validate", driver.Driver._validate):
+        with patch.object(driver, "validate_internal") as validate_internal:
+            assetsobj._validate(assetsobj)
+        assert validate_internal.call_args_list[0].kwargs == {
+            "schema_name": "concrete",
+            "desc": "concrete config",
+            "config": assetsobj.config_full,
+        }
+        assert validate_internal.call_args_list[1].kwargs == {
+            "schema_name": "platform",
+            "desc": "platform config",
             "config": assetsobj.config_full,
         }
 

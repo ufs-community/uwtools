@@ -8,14 +8,13 @@
           "allOf": [
             {
               "if": {
-...
-        "execution",
-        "rundir"
-      ]
-    }
-  },
-  "required": [
-    "make_hgrid"
-  ],
-  "type": "object"
-}
+                "properties": {
+                  "grid_type": {
+                    "const": "from_file"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "my_grid_file"
+                ]

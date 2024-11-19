@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from lxml import etree
+from lxml.builder import E  # type: ignore
 from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -62,7 +63,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     valid: bool = schema.validate(tree)
     nerr = len(schema.error_log)
     log_method = log.info if valid else log.error
-    log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
+    log_method("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")
     for err in list(schema.error_log):
         log.error(err)
     if not valid:
@@ -91,7 +92,7 @@ class _RocotoXML:
         xml = etree.tostring(
             self._root, pretty_print=True, encoding="utf-8", xml_declaration=True
         ).decode()
-        xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
+        xml = re.sub(r"&amp;([^&]+;)", r"&\1", xml)
         xml = self._insert_doctype(xml)
         return xml
 
@@ -113,16 +114,12 @@ class _RocotoXML:
         :param tag: Name of child element to add.
         :return: The child element.
         """
-        e = SubElement(e, tag)
-        if isinstance(config, dict):
-            self._set_attrs(e, config)
-            if subconfig := config.get(STR.cyclestr, {}):
-                cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = subconfig[STR.value]
-                self._set_attrs(cyclestr, subconfig)
-        else:
-            e.text = str(config)
-        return e
+        config = config if isinstance(config, list) else [config]
+        cyclestr = lambda x: E.cyclestr(x["cyclestr"]["value"], **x["cyclestr"].get("attrs", {}))
+        items = [cyclestr(x) if isinstance(x, dict) else str(x) for x in [tag, *config]]
+        child: _Element = E(*items)  # pylint: disable=not-callable
+        e.append(child)
+        return child
 
     def _add_metatask(self, e: _Element, config: dict, name_attr: str) -> None:
         """
@@ -264,7 +261,9 @@ class _RocotoXML:
         :param config: Configuration data for the tag.
         :param tag: Name of new element to add.
         """
-        self._set_attrs(SubElement(e, tag), config)
+        e = SubElement(e, tag)
+        for k, v in config.items():
+            self._add_compound_time_string(e, v, k)
 
     def _add_task_dependency_taskdep(self, e: _Element, config: dict) -> None:
         """
@@ -359,7 +358,7 @@ class _RocotoXML:
         :raises: UWConfigError if config fails validation.
         """
         schema_file = resource_path("jsonschema/rocoto.jsonschema")
-        validate_yaml(schema_file=schema_file, config=config)
+        validate_yaml(schema_file=schema_file, desc="Rocoto config", config=config)
 
     @property
     def _doctype(self) -> Optional[str]:

@@ -111,6 +111,7 @@ class STR:
     mpiargs: str = "mpiargs"
     mpicmd: str = "mpicmd"
     namelist: str = "namelist"
+    orog: str = "orog"
     oroggsl: str = "orog_gsl"
     outfile: str = "output_file"
     outfmt: str = "output_format"

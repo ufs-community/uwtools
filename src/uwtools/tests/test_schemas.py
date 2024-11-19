@@ -297,6 +297,29 @@ def ww3_prop():
     return partial(schema_validator, "ww3", "properties", "ww3", "properties")
 
 
+# Helpers
+
+
+def non_empty_dict(errors: list[str]) -> bool:
+    for msg in [
+        "{} does not have enough properties",  # jsonschema [4.18.0,4.20.*]
+        "{} should be non-empty",  # jsonschema [4.21.0,?]
+    ]:
+        if msg in errors:
+            return True
+    return False
+
+
+def non_empty_list(errors: list[str]) -> bool:
+    for msg in [
+        "[] is too short",  # jsonschema [4.18.0,4.20.*]
+        "[] should be non-empty",  # jsonschema [4.21.0,?]
+    ]:
+        if msg in errors:
+            return True
+    return False
+
+
 # batchargs
 
 
@@ -308,7 +331,7 @@ def test_schema_batchargs():
     # Managed properties are fine:
     assert not errors({"queue": "string", "walltime": "00:05:00"})
     # But so are unknown ones:
-    assert not errors({"--foo": 88, "walltime": "00:05:00"})
+    assert not errors({"--foo": 42, "walltime": "00:05:00"})
     # It just has to be a map:
     assert "[] is not of type 'object'\n" in errors([])
     # The "threads" argument is not allowed: It will be propagated, if set, from execution.threads.
@@ -510,7 +533,7 @@ def test_schema_chgres_cube_namelist(chgres_cube_config, chgres_cube_prop):
     # Just base_file is ok:
     assert not errors(with_del(namelist, "update_values"))
     # base_file must be a string:
-    assert "88 is not of type 'string'\n" in errors(with_set(namelist, 88, "base_file"))
+    assert "42 is not of type 'string'\n" in errors(with_set(namelist, 42, "base_file"))
     # Just update_values is ok:
     assert not errors(with_del(namelist, "base_file"))
     # config is required with update_values:
@@ -527,9 +550,8 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
     # Some entries are required:
     for key in ["mosaic_file_target_grid", "vcoord_file_target_grid"]:
         assert "is a required property" in errors(with_del(config, key))
-    # Additional entries of namelist-compatible types are permitted:
-    for val in [[1, 2, 3], True, 88, 3.14, "bar"]:
-        assert not errors(with_set(config, val, "foo"))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
     # Namelist values must be of the correct type:
     # boolean:
     for key in [
@@ -545,9 +567,6 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
         "wam_cold_start",
     ]:
         assert "not of type 'boolean'" in errors(with_set(config, None, key))
-    # enum:
-    for key in ["external_model", "input_type"]:
-        assert "is not one of" in errors(with_set(config, None, key))
     # integer:
     for key in [
         "cycle_day",
@@ -590,6 +609,7 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
     ]:
         assert "is not of type 'array', 'string'\n" in errors(with_set(config, None, key))
         assert "is not of type 'string'\n" in errors(with_set(config, [1, 2, 3], key))
+        assert not errors(with_set(config, ["foo", "bar", "baz"], key))
 
 
 # esg-grid
@@ -620,7 +640,7 @@ def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
     # Just base_file is ok:
     assert not errors(esg_namelist)
     # base_file must be a string:
-    assert "not valid" in errors({**esg_namelist, "base_file": 88})
+    assert "not valid" in errors({**esg_namelist, "base_file": 42})
     # Just update_values is ok, if it is complete:
     assert not errors(with_del(esg_namelist, "base_file"))
     # If base_file is not supplied, any missing namelist key is an error:
@@ -639,13 +659,13 @@ def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
 def test_schema_esg_grid_namelist_content(key):
     config: dict = {
         "regional_grid_nml": {
-            "delx": 88,
-            "dely": 88,
-            "lx": 88,
-            "ly": 88,
-            "pazi": 88,
-            "plat": 88,
-            "plon": 88,
+            "delx": 42,
+            "dely": 42,
+            "lx": 42,
+            "ly": 42,
+            "pazi": 42,
+            "plat": 42,
+            "plon": 42,
         }
     }
     errors = partial(schema_validator("esg-grid", "$defs", "namelist_content"))
@@ -664,18 +684,18 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
     errors = esg_grid_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
-# execution
+# execution-parallel
 
 
-def test_schema_execution():
+def test_schema_parallel_execution():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
-    errors = schema_validator("execution")
+    errors = schema_validator("execution-parallel")
     # Basic correctness:
     assert not errors(config)
     # batchargs may optionally be specified:
@@ -692,26 +712,26 @@ def test_schema_execution():
     )
 
 
-def test_schema_execution_executable():
-    errors = schema_validator("execution", "properties", "executable")
+def test_schema_parallel_execution_executable():
+    errors = schema_validator("execution-parallel", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
     # Anything else is not:
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
-def test_schema_execution_mpiargs():
-    errors = schema_validator("execution", "properties", "mpiargs")
+def test_schema_parallel_execution_mpiargs():
+    errors = schema_validator("execution-parallel", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
     # mpiargs may be empty:
     assert not errors([])
     # String values are expected:
-    assert "88 is not of type 'string'\n" in errors(["string1", 88])
+    assert "42 is not of type 'string'\n" in errors(["string1", 42])
 
 
-def test_schema_execution_threads():
-    errors = schema_validator("execution", "properties", "threads")
+def test_schema_parallel_execution_threads():
+    errors = schema_validator("execution-parallel", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(1)
     assert not errors(4)
@@ -725,7 +745,7 @@ def test_schema_execution_threads():
 def test_schema_execution_serial():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
-    errors = schema_validator("execution")
+    errors = schema_validator("execution-serial")
     # Basic correctness:
     assert not errors(config)
     # batchargs may optionally be specified:
@@ -746,7 +766,7 @@ def test_schema_stage_files():
     # A str -> str dict is ok:
     assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
     # An empty dict is not allowed:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # Non-string values are not allowed:
     assert "True is not of type 'string'\n" in errors({"file1": True})
 
@@ -758,6 +778,8 @@ def test_schema_filter_topo():
     config = {
         "config": {
             "input_grid_file": "/path/to/grid/file",
+            "filtered_orog": "/path/to/filtered/orog/file",
+            "input_raw_orog": "/path/to/raw/orog/file",
         },
         "execution": {
             "executable": "/path/to/filter_topo",
@@ -791,7 +813,7 @@ def test_schema_filter_topo():
     # Top-level rundir key requires a string value:
     assert "is not of type 'string'\n" in errors(with_set(config, None, "rundir"))
     # All config keys are requried:
-    for key in ["input_grid_file"]:
+    for key in ["filtered_orog", "input_grid_file", "input_raw_orog"]:
         assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
     # Other config keys are not allowed:
     assert "Additional properties are not allowed" in errors(
@@ -883,7 +905,7 @@ def test_schema_fv3_diag_table(fv3_prop):
     # String value is ok:
     assert not errors("/path/to/file")
     # Anything else is not:
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 def test_schema_fv3_domain(fv3_prop):
@@ -912,7 +934,7 @@ def test_schema_fv3_lateral_boundary_conditions(fv3_prop):
     assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "offset"))
     assert "'s' is not of type 'integer'\n" in errors(with_set(config, "s", "offset"))
     # path must be a string:
-    assert "88 is not of type 'string'\n" in errors(with_set(config, 88, "path"))
+    assert "42 is not of type 'string'\n" in errors(with_set(config, 42, "path"))
 
 
 def test_schema_fv3_length(fv3_prop):
@@ -929,12 +951,12 @@ def test_schema_fv3_length(fv3_prop):
 
 def test_schema_fv3_model_configure(fv3_prop):
     base_file = {"base_file": "/some/path"}
-    update_values = {"update_values": {"foo": 88}}
+    update_values = {"update_values": {"foo": 42}}
     errors = fv3_prop("model_configure")
     # Just base_file is ok:
     assert not errors(base_file)
     # But base_file must be a string:
-    assert "88 is not of type 'string'\n" in errors({"base_file": 88})
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
     # Just update_values is ok:
     assert not errors(update_values)
     # A combination of base_file and update_values is ok:
@@ -946,11 +968,11 @@ def test_schema_fv3_model_configure(fv3_prop):
 def test_schema_fv3_model_configure_update_values(fv3_prop):
     errors = fv3_prop("model_configure", "properties", "update_values")
     # boolean, number, and string values are ok:
-    assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    assert not errors({"bool": True, "int": 42, "float": 3.14, "string": "foo"})
     # Other types are not, e.g.:
     assert "None is not of type 'boolean', 'number', 'string'\n" in errors({"null": None})
     # At least one entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
 
 
 def test_schema_fv3_namelist(fv3_prop):
@@ -960,7 +982,7 @@ def test_schema_fv3_namelist(fv3_prop):
     # Just base_file is ok:
     assert not errors(base_file)
     # base_file must be a string:
-    assert "88 is not of type 'string'\n" in errors({"base_file": 88})
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
     # Just update_values is ok:
     assert not errors(update_values)
     # A combination of base_file and update_values is ok:
@@ -973,23 +995,23 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
     errors = fv3_prop("namelist", "properties", "update_values")
     # array, boolean, number, and string values are ok:
     assert not errors(
-        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 42, "float": 3.14, "string": "foo"}}
     )
     # Other types are not, e.g.:
     assert "None is not of type 'array', 'boolean', 'number', 'string'\n" in errors(
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # At least one val/var pair is required:
-    assert "{} should be non-empty" in errors({"nml": {}})
+    assert non_empty_dict(errors({"nml": {}}))
 
 
 def test_schema_fv3_rundir(fv3_prop):
     errors = fv3_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # global-equiv-resol
@@ -1016,7 +1038,7 @@ def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
     errors = global_equiv_resol_prop(schema_entry)
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # ioda
@@ -1053,14 +1075,14 @@ def test_schema_ioda_configuration_file(ioda_prop):
     assert not errors(bf)
     assert not errors(uv)
     # update_values cannot be empty:
-    assert "should be non-empty" in errors({"update_values": {}})
+    assert non_empty_dict(errors({"update_values": {}}))
 
 
 def test_schema_ioda_rundir(ioda_prop):
     errors = ioda_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # jedi
@@ -1097,14 +1119,14 @@ def test_schema_jedi_configuration_file(jedi_prop):
     assert not errors(bf)
     assert not errors(uv)
     # update_values cannot be empty:
-    assert "should be non-empty" in errors({"update_values": {}})
+    assert non_empty_dict(errors({"update_values": {}}))
 
 
 def test_schema_jedi_rundir(jedi_prop):
     errors = jedi_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # make-hgrid
@@ -1166,7 +1188,7 @@ def test_schema_make_hgrid_rundir(make_hgrid_prop):
     errors = make_hgrid_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # make-solo-mosaic
@@ -1195,7 +1217,7 @@ def test_schema_make_solo_mosaic_config(make_solo_mosaic_prop):
         assert f"'{key}' is a required property" in errors({})
         # A string value is ok for dir:
         if key == "dir":
-            assert "not of type 'string'" in str(errors({key: 88}))
+            assert "not of type 'string'" in str(errors({key: 42}))
         # num_tiles must be an integer:
         else:
             assert "not of type 'integer'" in str(errors({key: "/path/"}))
@@ -1209,7 +1231,22 @@ def test_schema_make_solo_mosaic_rundir(make_solo_mosaic_prop):
     errors = make_solo_mosaic_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
+
+
+# makedirs
+
+
+def test_schema_makedirs():
+    errors = schema_validator("makedirs")
+    # The input must be an dict:
+    assert "is not of type 'object'\n" in errors([])
+    # Basic correctness:
+    assert not errors({"makedirs": ["/path/to/dir1", "/path/to/dir2"]})
+    # An empty array is not allowed:
+    assert non_empty_list(errors({"makedirs": []}))
+    # Non-string values are not allowed:
+    assert "True is not of type 'string'\n" in errors({"makedirs": [True]})
 
 
 # makedirs
@@ -1267,7 +1304,7 @@ def test_schema_mpas_lateral_boundary_conditions(mpas_prop):
     assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "offset"))
     assert "'s' is not of type 'integer'\n" in errors(with_set(config, "s", "offset"))
     # path must be a string:
-    assert "88 is not of type 'string'\n" in errors(with_set(config, 88, "path"))
+    assert "42 is not of type 'string'\n" in errors(with_set(config, 42, "path"))
 
 
 def test_schema_mpas_length(mpas_prop):
@@ -1289,7 +1326,7 @@ def test_schema_mpas_namelist(mpas_prop):
     # Just base_file is ok:
     assert not errors(base_file)
     # base_file must be a string:
-    assert "88 is not of type 'string'\n" in errors({"base_file": 88})
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
     # Just update_values is ok:
     assert not errors(update_values)
     # A combination of base_file and update_values is ok:
@@ -1302,23 +1339,23 @@ def test_schema_mpas_namelist_update_values(mpas_prop):
     errors = mpas_prop("namelist", "properties", "update_values")
     # array, boolean, number, and string values are ok:
     assert not errors(
-        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 42, "float": 3.14, "string": "foo"}}
     )
     # Other types are not, e.g.:
     assert "None is not of type 'array', 'boolean', 'number', 'string'\n" in errors(
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # At least one val/var pair is required:
-    assert "{} should be non-empty" in errors({"nml": {}})
+    assert non_empty_dict(errors({"nml": {}}))
 
 
 def test_schema_mpas_rundir(mpas_prop):
     errors = mpas_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # mpas-init
@@ -1363,7 +1400,7 @@ def test_schema_mpas_init_boundary_conditions(mpas_init_prop):
     assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "offset"))
     assert "'s' is not of type 'integer'\n" in errors(with_set(config, "s", "offset"))
     # path must be a string:
-    assert "88 is not of type 'string'\n" in errors(with_set(config, 88, "path"))
+    assert "42 is not of type 'string'\n" in errors(with_set(config, 42, "path"))
     # length must be a positive int
     assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "length"))
     assert "-1 is less than the minimum of 1" in errors(with_set(config, -1, "length"))
@@ -1377,7 +1414,7 @@ def test_schema_mpas_init_namelist(mpas_init_prop):
     # Just base_file is ok:
     assert not errors(base_file)
     # base_file must be a string:
-    assert "88 is not of type 'string'\n" in errors({"base_file": 88})
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
     # Just update_values is ok:
     assert not errors(update_values)
     # A combination of base_file and update_values is ok:
@@ -1390,23 +1427,23 @@ def test_schema_mpas_init_namelist_update_values(mpas_init_prop):
     errors = mpas_init_prop("namelist", "properties", "update_values")
     # array, boolean, number, and string values are ok:
     assert not errors(
-        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 42, "float": 3.14, "string": "foo"}}
     )
     # Other types are not, e.g.:
     assert "None is not of type 'array', 'boolean', 'number', 'string'\n" in errors(
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # At least one val/var pair is required:
-    assert "{} should be non-empty" in errors({"nml": {}})
+    assert non_empty_dict(errors({"nml": {}}))
 
 
 def test_schema_mpas_init_rundir(mpas_init_prop):
     errors = mpas_init_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # mpas-streams
@@ -1478,7 +1515,7 @@ def test_schema_mpas_streams_properties_values_array(mpas_streams):
         for prop in ["files", "streams", "vars", "var_arrays", "var_structs"]:
             assert "is not of type 'array'\n" in errors({k: {**v, prop: None}})
             assert "is not of type 'string'\n" in errors({k: {**v, prop: [None]}})
-            assert "should be non-empty" in errors({k: {**v, prop: []}})
+            assert non_empty_list(errors({k: {**v, prop: []}}))
 
 
 def test_schema_mpas_streams_properties_boolean(mpas_streams):
@@ -1532,7 +1569,7 @@ def test_schema_namelist():
                 "array": [1, 2, 3],
                 "boolean": True,
                 "float": 3.14,
-                "integer": 88,
+                "integer": 42,
                 "string": "foo",
             }
         }
@@ -1542,13 +1579,65 @@ def test_schema_namelist():
     assert errormsg % "None" in errors({"namelist": {"nonetype": None}})
     assert errormsg % "{}" in errors({"namelist": {"dict": {}}})
     # Needs at least one namelist value:
-    assert "{} should be non-empty" in errors({})
+    assert non_empty_dict(errors({}))
     # Needs at least one name-value value:
-    assert "{} should be non-empty" in errors({"namelist": {}})
+    assert non_empty_dict(errors({"namelist": {}}))
     # Namelist level must be a mapping:
     assert "[] is not of type 'object'\n" in errors([])
     # Name-value level level must be a mapping:
     assert "[] is not of type 'object'\n" in errors({"namelist": []})
+
+
+# orog
+
+
+def test_schema_orog():
+    config: dict = {
+        "execution": {
+            "executable": "/path/to/orog",
+        },
+        "grid_file": "/path/to/grid/file",
+        "mask": False,
+        "merge": "none",
+        "old_line1_items": {
+            "blat": 0,
+            "efac": 0,
+            "jcap": 0,
+            "latb": 0,
+            "lonb": 0,
+            "mtnres": 1,
+            "nr": 0,
+            "nf1": 0,
+            "nf2": 0,
+        },
+        "orog_file": "/path/to/orog/file",
+        "rundir": "/path/to/run/dir",
+    }
+
+    errors = schema_validator("orog", "properties", "orog")
+    # Basic correctness:
+    assert not errors(config)
+    # All 9 config keys are required:
+    assert "does not have enough properties" in errors(with_del(config, "old_line1_items", "blat"))
+    # Other config keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "bar", "old_line1_items", "foo")
+    )
+    # All old_line1_items keys require integer values:
+    for key in config["old_line1_items"]:
+        assert "is not of type 'integer'\n" in errors(
+            with_set(config, None, "old_line1_items", key)
+        )
+    # Some top level keys are required:
+    for key in ["execution", "grid_file", "rundir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # The mask key requires boolean values:
+    assert "is not of type 'boolean'\n" in errors({"mask": None})
+    # Top-level keys require a string value:
+    for key in ["grid_file", "rundir", "merge", "orog_file"]:
+        assert "is not of type 'string'\n" in errors(with_set(config, None, "rundir"))
 
 
 # orog-gsl
@@ -1664,7 +1753,7 @@ def test_schema_rocoto_metatask_attrs():
     assert not errors({"mode": "serial"})
     assert "'foo' is not one of ['parallel', 'serial']" in errors({"mode": "foo"})
     # Positive int is ok for throttle:
-    assert not errors({"throttle": 88})
+    assert not errors({"throttle": 42})
     assert not errors({"throttle": 0})
     assert "-1 is less than the minimum of 0" in errors({"throttle": -1})
     assert "'foo' is not of type 'integer'\n" in errors({"throttle": "foo"})
@@ -1753,7 +1842,7 @@ def test_schema_schism_rundir(schism_prop):
     errors = schism_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # sfc-climo-gen
@@ -1782,7 +1871,7 @@ def test_schema_sfc_climo_gen_namelist(sfc_climo_gen_prop):
     # Just base_file is ok:
     assert not errors(base_file)
     # base_file must be a string:
-    assert "88 is not of type 'string'\n" in errors({"base_file": 88})
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
     # Just update_values is ok:
     assert not errors(update_values)
     # config is required with update_values:
@@ -1796,7 +1885,7 @@ def test_schema_sfc_climo_gen_namelist(sfc_climo_gen_prop):
 def test_schema_sfc_climo_gen_namelist_update_values(sfc_climo_gen_prop):
     errors = sfc_climo_gen_prop("namelist", "properties", "update_values", "properties", "config")
     # array, boolean, number, and string values are ok:
-    assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    assert not errors({"array": [1, 2, 3], "bool": True, "int": 42, "float": 3.14, "string": "foo"})
     # Other types are not, e.g.:
     assert "None is not of type 'array', 'boolean', 'number', 'string'\n" in errors({"null": None})
     # No minimum number of entries is required:
@@ -1807,7 +1896,7 @@ def test_schema_sfc_climo_gen_rundir(sfc_climo_gen_prop):
     errors = sfc_climo_gen_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # shave
@@ -1817,9 +1906,10 @@ def test_schema_shave():
     config = {
         "config": {
             "input_grid_file": "/path/to/input_grid_file",
-            "nx": 88,
-            "ny": 88,
-            "nh4": 1,
+            "output_grid_file": "/path/to/output_grid_file",
+            "nx": 42,
+            "ny": 42,
+            "nhalo": 1,
         },
         "execution": {"executable": "shave"},
         "rundir": "/tmp",
@@ -1837,16 +1927,19 @@ def test_schema_shave():
 def test_schema_shave_config_properties():
     # Get errors function from schema_validator
     errors = schema_validator("shave", "properties", "shave", "properties", "config")
-    for key in ("input_grid_file", "nx", "ny", "nh4"):
+    for key in ("input_grid_file", "nx", "ny", "nhalo"):
         # All config keys are required:
         assert f"'{key}' is a required property" in errors({})
         # A string value is ok for input_grid_file:
         if key == "input_grid_file":
-            assert "not of type 'string'" in str(errors({key: 88}))
-        # nx, ny, and nh4 must be positive integers:
-        elif key in ["nx", "ny", "nh4"]:
+            assert "not of type 'string'" in str(errors({key: 42}))
+        # nx, ny, and nhalo must be integers >= their respective minimum values:
+        elif key in (keyvals := {"nx": 1, "ny": 1, "nhalo": 0}):
+            minval = keyvals[key]
             assert "not of type 'integer'" in str(errors({key: "/path/"}))
-            assert "0 is less than the minimum of 1" in str(errors({key: 0}))
+            assert f"{minval - 1} is less than the minimum of {minval}" in str(
+                errors({key: minval - 1})
+            )
         # It is an error for the value to be a floating-point value:
         assert "not of type" in str(errors({key: 3.14}))
         # It is an error not to supply a value:
@@ -1857,7 +1950,7 @@ def test_schema_shave_rundir(shave_prop):
     errors = shave_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # ungrib
@@ -1889,7 +1982,7 @@ def test_schema_ungrib_rundir(ungrib_prop):
     errors = ungrib_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # upp
@@ -1897,6 +1990,7 @@ def test_schema_ungrib_rundir(ungrib_prop):
 
 def test_schema_upp():
     config = {
+        "control_file": "/path/to/postxconfig-NT.txt",
         "execution": {
             "batchargs": {
                 "cores": 1,
@@ -1922,13 +2016,19 @@ def test_schema_upp():
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "namelist", "rundir"):
+    for key in ("control_file", "execution", "namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Other top-level keys are optional:
     assert not errors({**config, "files_to_copy": {"dst": "src"}})
     assert not errors({**config, "files_to_link": {"dst": "src"}})
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_upp_control_file(upp_prop):
+    errors = upp_prop("control_file")
+    # A string value is required:
+    assert "is not of type 'string'" in errors(None)
 
 
 def test_schema_upp_namelist(upp_prop):
@@ -1959,10 +2059,10 @@ def test_schema_upp_namelist(upp_prop):
         assert "too long" in errors(
             {"update_values": {"model_inputs": {key: "c" * (maxpathlen + 1)}}}
         )
-        assert "not of type 'string'" in errors({"update_values": {"model_inputs": {key: 88}}})
+        assert "not of type 'string'" in errors({"update_values": {"model_inputs": {key: 42}}})
     # model_inputs: Only one grib value is supported:
     assert "not one of ['grib2']" in errors({"update_values": {"model_inputs": {"grib": "grib1"}}})
-    assert "not of type 'string'" in errors({"update_values": {"model_inputs": {"grib": 88}}})
+    assert "not of type 'string'" in errors({"update_values": {"model_inputs": {"grib": 42}}})
     # model_inputs: Only certain ioform values are supported:
     assert "not one of ['binarynemsio', 'netcdf']" in errors(
         {"update_values": {"model_inputs": {"ioform": "jpg"}}}
@@ -1995,15 +2095,15 @@ def test_schema_upp_namelist(upp_prop):
         "write_ifi_debug_files",
     ]:
         assert not errors({"update_values": {"nampgb": {key: True}}})
-        assert "not of type 'boolean'" in errors({"update_values": {"nampgb": {key: 88}}})
+        assert "not of type 'boolean'" in errors({"update_values": {"nampgb": {key: 42}}})
     # nampgb: String pathnames have a max length:
     for key in ["filenameaer"]:
         assert not errors({"update_values": {"nampgb": {key: "c" * maxpathlen}}})
         assert "too long" in errors({"update_values": {"nampgb": {key: "c" * (maxpathlen + 1)}}})
-        assert "not of type 'string'" in errors({"update_values": {"nampgb": {key: 88}}})
+        assert "not of type 'string'" in errors({"update_values": {"nampgb": {key: 42}}})
     # nampgb: Some integer keys are supported:
     for key in ["kpo", "kpv", "kth", "numx"]:
-        assert not errors({"update_values": {"nampgb": {key: 88}}})
+        assert not errors({"update_values": {"nampgb": {key: 42}}})
         assert "not of type 'integer'" in errors({"update_values": {"nampgb": {key: True}}})
     # nampgb: Some arrays of numbers are supported:
     nitems = 70
@@ -2025,7 +2125,7 @@ def test_schema_upp_rundir(upp_prop):
     errors = upp_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)
 
 
 # ww3
@@ -2070,4 +2170,4 @@ def test_schema_ww3_rundir(ww3_prop):
     errors = ww3_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
-    assert "88 is not of type 'string'\n" in errors(88)
+    assert "42 is not of type 'string'\n" in errors(42)

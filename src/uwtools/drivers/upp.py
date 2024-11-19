@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -18,7 +19,23 @@ class UPP(DriverCycleLeadtimeBased):
     A driver for UPP.
     """
 
+    # Facts specific to the supported UPP version:
+
+    GENPROCTYPE_IDX = 8
+    NFIELDS = 16
+    NPARAMS = 42
+
     # Workflow tasks
+
+    @tasks
+    def control_file(self):
+        """
+        The GRIB control file.
+        """
+        yield self.taskname("GRIB control file")
+        yield filecopy(
+            src=Path(self.config["control_file"]), dst=self.rundir / "postxconfig-NT.txt"
+        )
 
     @tasks
     def files_copied(self):
@@ -56,7 +73,7 @@ class UPP(DriverCycleLeadtimeBased):
             config_class=NMLConfig,
             config_values=self.config[STR.namelist],
             path=path,
-            schema=self._namelist_schema(),
+            schema=self.namelist_schema(),
         )
 
     @tasks
@@ -66,6 +83,7 @@ class UPP(DriverCycleLeadtimeBased):
         """
         yield self.taskname("provisioned run directory")
         yield [
+            self.control_file(),
             self.files_copied(),
             self.files_linked(),
             self.namelist_file(),
@@ -80,6 +98,36 @@ class UPP(DriverCycleLeadtimeBased):
         The name of this driver.
         """
         return STR.upp
+
+    @property
+    def output(self) -> dict[str, list[str]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        # Read the control file into an array of lines. Get the number of blocks (one per output
+        # GRIB file) and the number of variables per block. For each block, construct a filename
+        # from the block's identifier and the suffix defined above.
+        cf = self.config["control_file"]
+        try:
+            with open(cf, "r", encoding="utf-8") as f:
+                lines = f.read().split("\n")
+        except (FileNotFoundError, PermissionError) as e:
+            raise UWConfigError(f"Could not open UPP control file {cf}") from e
+        suffix = ".GrbF%02d" % int(self.leadtime.total_seconds() / 3600)
+        nblocks, lines = int(lines[0]), lines[1:]
+        nvars, lines = list(map(int, lines[:nblocks])), lines[nblocks:]
+        paths = []
+        for _ in range(nblocks):
+            identifier = lines[0]
+            paths.append(str(self.rundir / (identifier + suffix)))
+            fields, lines = lines[: self.NFIELDS], lines[self.NFIELDS :]
+            _, lines = (
+                (lines[0], lines[1:])
+                if fields[self.GENPROCTYPE_IDX] == "ens_fcst"
+                else (None, lines)
+            )
+            lines = lines[self.NPARAMS * nvars.pop() :]
+        return {"gribfiles": paths}
 
     # Private helper methods
 

@@ -1,6 +1,6 @@
 usage: uw cdeps atm --cycle CYCLE [-h] [--version] [--config-file PATH]
                     [--dry-run] [--graph-file PATH] [--key-path KEY[.KEY...]]
-                    [--quiet] [--verbose]
+                    [--schema-file PATH] [--quiet] [--verbose]
 
 The data atmosphere configuration with all required content
 
@@ -22,6 +22,8 @@ Optional arguments:
   --key-path KEY[.KEY...]
       Dot-separated path of keys leading through the config to the driver's
       configuration block
+  --schema-file PATH
+      Path to schema file to use for validation
   --quiet, -q
       Print no logging messages
   --verbose, -v

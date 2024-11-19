@@ -1,2 +1,2 @@
 uw orog_gsl --show-schema >schema
-head schema && echo ... && tail schema
+head -n20 schema

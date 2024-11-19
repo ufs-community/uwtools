@@ -10,10 +10,11 @@ from unittest.mock import patch
 
 import yaml
 from iotaa import asset, external, refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged, regex_logged
@@ -94,6 +95,7 @@ def truetask():
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
     ],
 )
@@ -124,6 +126,10 @@ def test_FV3_diag_table(driverobj):
 def test_FV3_diag_table_warn(caplog, driverobj):
     driverobj.diag_table()
     assert logged(caplog, "No 'diag_table' defined in config")
+
+
+def test_FV3_driver_name(driverobj):
+    assert driverobj.driver_name() == FV3.driver_name() == "fv3"
 
 
 def test_FV3_field_table(driverobj):
@@ -207,6 +213,12 @@ def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
+def test_FV3_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
+
+
 @mark.parametrize("domain", ("global", "regional"))
 def test_FV3_provisioned_rundir(domain, driverobj):
     driverobj._config["domain"] = domain
@@ -245,10 +257,6 @@ def test_FV3_runscript(driverobj):
         args = ("envcmds", "envvars", "execution", "scheduler")
         types = [list, dict, list, Slurm]
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_FV3_driver_name(driverobj):
-    assert driverobj.driver_name() == FV3.driver_name() == "fv3"
 
 
 def test_FV3_taskname(driverobj):
