@@ -3,8 +3,11 @@
     "upp": {
       "additionalProperties": false,
       "properties": {
+        "control_file": {
+          "type": "string"
+        },
         "execution": {
-          "$ref": "urn:uwtools:execution"
+          "$ref": "urn:uwtools:execution-parallel"
         },
         "files_to_copy": {
           "$ref": "urn:uwtools:files-to-stage"
@@ -187,6 +190,7 @@
         }
       },
       "required": [
+        "control_file",
         "execution",
         "namelist",
         "rundir"

@@ -5,6 +5,8 @@ Tests for the uwtools.config.base module.
 import datetime as dt
 import logging
 import os
+from datetime import datetime
+from textwrap import dedent
 from unittest.mock import patch
 
 import yaml
@@ -25,7 +27,7 @@ from uwtools.utils.file import FORMAT, readable
 @fixture
 def config(tmp_path):
     path = tmp_path / "config.yaml"
-    data = {"foo": 88}
+    data = {"foo": 42}
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(data, f)
     return ConcreteConfig(config=path)
@@ -55,6 +57,9 @@ class ConcreteConfig(Config):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
 
+    def as_dict(self):
+        return self.data
+
     def dump(self, path=None):
         pass
 
@@ -67,7 +72,7 @@ class ConcreteConfig(Config):
 
 
 def test__characterize_values(config):
-    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
+    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 42}, 5: [{"b": 43}], 6: "string"}
     complete, template = config._characterize_values(values=values, parent="p")
     assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
     assert template == ["  p3: {{ n }}"]
@@ -97,7 +102,7 @@ def test__parse_include(config):
     config.data.update(
         {
             "config": {
-                "salad_include": f"!INCLUDE [{include_path}]",
+                "salad_include": f"!include [{include_path}]",
                 "meat": "beef",
                 "dressing": "poppyseed",
             }
@@ -111,7 +116,7 @@ def test__parse_include(config):
     assert len(config["config"]) == 2
 
 
-@mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@mark.parametrize("fmt", [FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -128,15 +133,65 @@ def test_compare_config(caplog, fmt, salad_base):
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
     del salad_base["salad"]["how_many"]
-    assert not cfgobj.compare_config(cfgobj, salad_base)
     assert not cfgobj.compare_config(salad_base)
     # Expect to see the following differences logged:
-    for msg in [
-        "salad:        how_many:  - 12 + None",
-        "salad:        dressing:  - balsamic + italian",
-        "salad:            size:  - None + large",
-    ]:
-        assert logged(caplog, msg)
+    expected = """
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+      salad:
+        base: kale
+    -   dressing: balsamic
+    ?             ^  ^ ^^^
+    +   dressing: italian
+    ?             ^^  ^ ^
+        fruit: banana
+    -   how_many: 12
+    +   size: large
+        vegetable: tomato
+    """
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
+
+
+def test_compare_config_ini(caplog, salad_base):
+    """
+    Compare two config objects.
+    """
+    log.setLevel(logging.INFO)
+    cfgobj = tools.format_to_config("ini")(fixture_path("simple.ini"))
+    salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
+    assert cfgobj.compare_config(salad_base) is True
+    # Expect no differences:
+    assert not caplog.records
+    caplog.clear()
+    # Create differences in base dict:
+    salad_base["salad"]["dressing"] = "italian"
+    salad_base["salad"]["size"] = "large"
+    del salad_base["salad"]["how_many"]
+    assert not cfgobj.compare_config(cfgobj.as_dict(), salad_base, header=False)
+    # Expect to see the following differences logged:
+    expected = """
+      salad:
+        base: kale
+    -   dressing: italian
+    ?             ^^   ^^
+    +   dressing: balsamic
+    ?             ^  +++ ^
+        fruit: banana
+    -   size: large
+    +   how_many: '12'
+        vegetable: tomato
+    """
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
+    anomalous = """
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+    """
+    for line in dedent(anomalous).strip("\n").split("\n"):
+        assert not logged(caplog, line)
 
 
 def test_dereference(tmp_path):
@@ -153,12 +208,15 @@ b:
   c: !int '{{ N | int + 11 }}'
 d: '{{ X }}'
 e:
-  - !int '88'
+  - !int '42'
   - !float '3.14'
+  - !datetime '{{ D }}'
 f:
-  f1: !int '88'
+  f1: !int '42'
   f2: !float '3.14'
+D: 2024-10-10 00:19:00
 N: "22"
+
 """.strip()
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
@@ -166,12 +224,14 @@ N: "22"
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
         config.dereference()
+    print(config["e"])
     assert config == {
         "a": 44,
         "b": {"c": 33},
         "d": "{{ X }}",
-        "e": [88, 3.14],
-        "f": {"f1": 88, "f2": 3.14},
+        "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00")],
+        "f": {"f1": 42, "f2": 3.14},
+        "D": datetime.fromisoformat("2024-10-10 00:19:00"),
         "N": "22",
     }
 
@@ -206,4 +266,4 @@ def test_update_from(config):
     Test that a config object can be updated.
     """
     config.data.update({"a": "11", "b": "12", "c": "13"})
-    assert config == {"foo": 88, "a": "11", "b": "12", "c": "13"}
+    assert config == {"foo": 42, "a": "11", "b": "12", "c": "13"}

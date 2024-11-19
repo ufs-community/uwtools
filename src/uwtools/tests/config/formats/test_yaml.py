@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.yaml module.
 """
@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
-from pytest import mark, raises
+from pytest import fixture, mark, raises
 
 from uwtools import exceptions
 from uwtools.config import support
@@ -23,6 +23,18 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged
 from uwtools.utils.file import FORMAT, _stdinproxy
+
+# Fixtures
+
+
+@fixture
+def dumpkit(tmp_path):
+    expected = """
+    section:
+      key: value
+    """
+    return {"section": {"key": "value"}}, dedent(expected).strip(), tmp_path / "config.yaml"
+
 
 # Tests
 
@@ -155,7 +167,7 @@ def test_yaml_constructor_error_not_dict_from_file(tmp_path):
 
 def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
-    with StringIO("88") as sio, patch.object(sys, "stdin", new=sio):
+    with StringIO("42") as sio, patch.object(sys, "stdin", new=sio):
         with raises(exceptions.UWConfigError) as e:
             YAMLConfig()
     assert "Parsed an int value from stdin, expected a dict" in str(e.value)
@@ -201,10 +213,32 @@ def test_yaml_stdin_plus_relpath_failure(caplog):
 def test_yaml_unexpected_error(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     with open(cfgfile, "w", encoding="utf-8") as f:
-        print("{n: 88}", file=f)
+        print("{n: 42}", file=f)
     with patch.object(yaml, "load") as load:
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)
         with raises(UWConfigError) as e:
             YAMLConfig(config=cfgfile)
         assert msg in str(e.value)
+
+
+def test_yaml_as_dict():
+    d1 = {"section": {"key": "value"}}
+    config = YAMLConfig(d1)
+    d2 = config.as_dict()
+    assert d2 == d1
+    assert isinstance(d2, dict)
+
+
+def test_yaml_dump(dumpkit):
+    d, expected, path = dumpkit
+    YAMLConfig(d).dump(path)
+    with open(path, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected
+
+
+def test_yaml_dump_dict(dumpkit):
+    d, expected, path = dumpkit
+    YAMLConfig.dump_dict(d, path=path)
+    with open(path, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected

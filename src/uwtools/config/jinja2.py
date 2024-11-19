@@ -3,6 +3,7 @@ Support for rendering Jinja2 templates.
 """
 
 import os
+from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 from typing import Optional, Union
@@ -14,7 +15,7 @@ from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
-_ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
+_ConfigVal = Union[bool, datetime, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
 
 
 class J2Template:
@@ -109,7 +110,7 @@ def dereference(
     values; render strings; convert values tagged with explicit types; and return objects of other
     types unmodified. Rendering may fail for valid reasons -- notably a replacement value not being
     available in the given context object. In such cases, return the original value: Any unrendered
-    Jinja2 syntax it contains may may be rendered by later processing with better context.
+    Jinja2 syntax it contains may be rendered by later processing with better context.
 
     When rendering dict values, replacement values will be taken from, in priority order
       1. The full context dict
@@ -334,7 +335,7 @@ def _supplement_values(
     env: bool = False,
 ) -> dict:
     """
-    Optionally supplement values from given source with overrides and/or environment vairables.
+    Optionally supplement values from given source with overrides and/or environment variables.
 
     :param values_src: Source of values to render the template.
     :param values_format: Format of values when sourced from file.

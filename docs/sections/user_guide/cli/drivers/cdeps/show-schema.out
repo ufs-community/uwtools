@@ -8,14 +8,13 @@
           "additionalProperties": false,
           "properties": {
             "dtlimit": {
-...
-      "required": [
-        "rundir"
-      ]
-    }
-  },
-  "required": [
-    "cdeps"
-  ],
-  "type": "object"
-}
+              "type": "number"
+            },
+            "mapalgo": {
+              "type": "string"
+            },
+            "readmode": {
+              "enum": [
+                "single"
+              ]
+            },

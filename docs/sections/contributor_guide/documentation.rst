@@ -44,7 +44,7 @@ Please follow these guidelines when contributing to the documentation:
 * In [[sub]sub]section titles, capitalize all "principal" words. In practice this usually means all words but articles (a, an, the), logicals (and, etc.), and prepositions (for, of, etc.). Always fully capitalize acronyms (e.g., YAML).
 * Never capitalize proper names when their owners do not (e.g., write `"pandas" <https://pandas.pydata.org/>`_, not "Pandas", even at the start of a sentence) or when referring to a software artifact (e.g., write ``numpy`` when referring to the library, and "NumPy" when referring to the project).
 * When referring to YAML constructs, `block` refers to an entry whose value is a nested collection of key/value pairs, while `entry` refers to a single key/value pair.
-* When using the ``.. code-block::`` directive, align the actual code with the word ``code``. Also, when ``.. code-block::`` directives appear in bulleted or numberd lists, align them with the text following the space to the right of the bullet/number. For example:
+* When using the ``.. code-block::`` directive, align the actual code with the word ``code``. Also, when ``.. code-block::`` directives appear in bulleted or numbered lists, align them with the text following the space to the right of the bullet/number. For example:
 
   .. code-block:: text
 
@@ -52,7 +52,7 @@ Please follow these guidelines when contributing to the documentation:
 
        .. code-block:: python
 
-          n = 88
+          n = 42
 
   or
 
@@ -62,4 +62,4 @@ Please follow these guidelines when contributing to the documentation:
 
         .. code-block:: python
 
-           n = 88
+           n = 42

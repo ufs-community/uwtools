@@ -5,6 +5,7 @@ Tests for uwtools.config.jinja2 module.
 
 import logging
 from collections import OrderedDict
+from datetime import datetime
 
 import yaml
 from pytest import fixture, mark, raises
@@ -21,7 +22,7 @@ from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 
-@mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)])
+@mark.parametrize("d,n", [({1: 42}, 1), ({1: {2: 42}}, 2), ({1: {2: {3: 42}}}, 3), ({1: {}}, 2)])
 def test_depth(d, n):
     assert support.depth(d) == n
 
@@ -87,6 +88,18 @@ class Test_UWYAMLConvert:
     # demonstrate that those nodes' convert() methods return representations in type type specified
     # by the tag.
 
+    def test_datetime_no(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!datetime", value="foo"))
+        with raises(ValueError):
+            ts.convert()
+
+    def test_datetime_ok(self, loader):
+        ts = support.UWYAMLConvert(
+            loader, yaml.ScalarNode(tag="!datetime", value="2024-08-09 12:22:42")
+        )
+        assert ts.convert() == datetime(2024, 8, 9, 12, 22, 42)
+        self.comp(ts, "!datetime '2024-08-09 12:22:42'")
+
     def test_float_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!float", value="foo"))
         with raises(ValueError):
@@ -103,13 +116,13 @@ class Test_UWYAMLConvert:
             ts.convert()
 
     def test_int_ok(self, loader):
-        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
-        assert ts.convert() == 88
-        self.comp(ts, "!int '88'")
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="42"))
+        assert ts.convert() == 42
+        self.comp(ts, "!int '42'")
 
     def test___repr__(self, loader):
-        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
-        assert str(ts) == "!int 88"
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="42"))
+        assert str(ts) == "!int 42"
 
 
 class Test_UWYAMLRemove:

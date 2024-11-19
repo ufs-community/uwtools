@@ -1,4 +1,5 @@
 upp:
+  control_file: /path/to/postxconfig-NT.txt
   execution:
     batchargs:
       export: NONE
@@ -12,8 +13,6 @@ upp:
     mpiargs:
       - "--ntasks $SLURM_CPUS_ON_NODE"
     mpicmd: srun
-  files_to_copy:
-    postxconfig-NT.txt: /path/to/postxconfig-NT.txt
   files_to_link:
     eta_micro_lookup.dat: /path/to/nam_micro_lookup.dat
     params_grib2_tbl_new: /path/to/params_grib2_tbl_new

@@ -51,6 +51,10 @@ def test_SCHISM(method):
     assert getattr(SCHISM, method) is getattr(AssetsCycleBased, method)
 
 
+def test_SCHISM_driver_name(driverobj):
+    assert driverobj.driver_name() == SCHISM.driver_name() == "schism"
+
+
 def test_SCHISM_namelist_file(driverobj):
     src = driverobj.config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
@@ -69,7 +73,3 @@ def test_SCHISM_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_SCHISM_driver_name(driverobj):
-    assert driverobj.driver_name() == SCHISM.driver_name() == "schism"

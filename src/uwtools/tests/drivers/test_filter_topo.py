@@ -8,11 +8,12 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.config.support import from_od
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.filter_topo import FilterTopo
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -21,10 +22,14 @@ from uwtools.drivers.filter_topo import FilterTopo
 def config(tmp_path):
     input_grid_file = tmp_path / "C403_grid.tile7.halo4.nc"
     input_grid_file.touch()
+    orog_output = tmp_path / "out.oro.nc"
+    orog_output.touch()
     return {
         "filter_topo": {
             "config": {
+                "filtered_orog": "C403_filtered_orog.tile7.nc",
                 "input_grid_file": str(input_grid_file),
+                "input_raw_orog": str(orog_output),
             },
             "execution": {
                 "executable": "/path/to/orog_gsl",
@@ -70,6 +75,7 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "taskname",
@@ -77,6 +83,17 @@ def driverobj(config):
 )
 def test_FilterTopo(method):
     assert getattr(FilterTopo, method) is getattr(Driver, method)
+
+
+def test_FilterTopo_driver_name(driverobj):
+    assert driverobj.driver_name() == FilterTopo.driver_name() == "filter_topo"
+
+
+def test_FilterTopo_filtered_output_file(driverobj):
+    path = Path(driverobj.config["rundir"], "C403_filtered_orog.tile7.nc")
+    assert not path.is_file()
+    driverobj.filtered_output_file()
+    assert path.is_file()
 
 
 def test_FilterTopo_input_grid_file(driverobj):
@@ -93,12 +110,16 @@ def test_FilterTopo_namelist_file(driverobj):
     assert actual == expected
 
 
+def test_FilterTopo_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
+
+
 def test_FilterTopo_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, input_grid_file=D, namelist_file=D, runscript=D) as mocks:
+    with patch.multiple(
+        driverobj, input_grid_file=D, filtered_output_file=D, namelist_file=D, runscript=D
+    ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_FilterTopo_driver_name(driverobj):
-    assert driverobj.driver_name() == FilterTopo.driver_name() == "filter_topo"

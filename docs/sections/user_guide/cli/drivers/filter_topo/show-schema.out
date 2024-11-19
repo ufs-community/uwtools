@@ -6,16 +6,15 @@
         "config": {
           "additionalProperties": false,
           "properties": {
+            "filtered_orog": {
+              "type": "string"
+            },
             "input_grid_file": {
               "type": "string"
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "filter_topo"
-  ],
-  "type": "object"
-}
+            },
+            "input_raw_orog": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "filtered_orog",

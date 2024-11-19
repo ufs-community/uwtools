@@ -73,6 +73,12 @@ class SHConfig(Config):
 
     # Public methods
 
+    def as_dict(self) -> dict:
+        """
+        Returns a pure dict version of the config.
+        """
+        return self.data
+
     def dump(self, path: Optional[Path]) -> None:
         """
         Dump the config as key=value lines.

@@ -12,6 +12,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    control_file
+      The GRIB control file
     files_copied
       Files copied for run
     files_linked
@@ -24,5 +26,7 @@ Positional arguments:
       A run
     runscript
       The runscript
+    show_output
+      Show the output to be created by this component
     validate
       Validate the UW driver config

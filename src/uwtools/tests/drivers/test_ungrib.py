@@ -7,11 +7,12 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers import ungrib
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.ungrib import Ungrib
+from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -69,12 +70,17 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
     ],
 )
 def test_Ungrib(method):
     assert getattr(Ungrib, method) is getattr(Driver, method)
+
+
+def test_Ungrib_driver_name(driverobj):
+    assert driverobj.driver_name() == Ungrib.driver_name() == "ungrib"
 
 
 def test_Ungrib_gribfiles(driverobj, tmp_path):
@@ -102,6 +108,12 @@ def test_Ungrib_namelist_file(driverobj):
     assert nml["share"]["end_date"] == "2024-02-02_06:00:00"
 
 
+def test_Ungrib_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
+
+
 def test_Ungrib_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
@@ -115,6 +127,10 @@ def test_Ungrib_provisioned_rundir(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_Ungrib_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
+
+
 def test_Ungrib_vtable(driverobj):
     src = driverobj.rundir / "Vtable.GFS.in"
     src.touch()
@@ -125,10 +141,6 @@ def test_Ungrib_vtable(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib_driver_name(driverobj):
-    assert driverobj.driver_name() == Ungrib.driver_name() == "ungrib"
-
-
 def test_Ungrib__gribfile(driverobj):
     src = driverobj.rundir / "GRIBFILE.AAA.in"
     src.touch()
@@ -136,10 +148,6 @@ def test_Ungrib__gribfile(driverobj):
     assert not dst.is_symlink()
     driverobj._gribfile(src, dst)
     assert dst.is_symlink()
-
-
-def test_Ungrib_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
 
 
 def test__ext():

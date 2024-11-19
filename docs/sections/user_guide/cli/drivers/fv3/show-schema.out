@@ -8,14 +8,13 @@
             "properties": {
               "domain": {
                 "const": "regional"
-...
-        "rundir"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "lateral_boundary_conditions"
+            ]
+          }
+        }
       ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "fv3"
-  ],
-  "type": "object"
-}

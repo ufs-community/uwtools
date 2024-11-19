@@ -52,6 +52,7 @@ def make_execute(
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -64,6 +65,7 @@ def make_execute(
             dry_run=dry_run,
             graph_file=graph_file,
             key_path=key_path,
+            schema_file=schema_file,
             stdin_ok=stdin_ok,
         )
 
@@ -75,6 +77,7 @@ def make_execute(
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -87,6 +90,7 @@ def make_execute(
             dry_run=dry_run,
             graph_file=graph_file,
             key_path=key_path,
+            schema_file=schema_file,
             stdin_ok=stdin_ok,
         )
 
@@ -99,6 +103,7 @@ def make_execute(
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -111,6 +116,7 @@ def make_execute(
             dry_run=dry_run,
             graph_file=graph_file,
             key_path=key_path,
+            schema_file=schema_file,
             stdin_ok=stdin_ok,
         )
 
@@ -146,6 +152,7 @@ def _execute(
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[str]] = None,
+    schema_file: Optional[Union[Path, str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -163,6 +170,7 @@ def _execute(
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
     :param key_path: Path of keys to subsection of config file.
+    :param schema_file: The JSON Schema file to use for validation.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
@@ -170,6 +178,7 @@ def _execute(
         config=ensure_data_source(str2path(config), stdin_ok),
         dry_run=dry_run,
         key_path=key_path,
+        schema_file=schema_file,
     )
     accepted = set(getfullargspec(driver_class).args)
     for arg in ["batch", "cycle", "leadtime"]:

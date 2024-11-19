@@ -10,12 +10,13 @@ from unittest.mock import Mock, call, patch
 
 import yaml
 from iotaa import asset, external
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi, jedi_base
 from uwtools.drivers.jedi import JEDI
 from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 
@@ -89,6 +90,7 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
     ],
@@ -121,6 +123,10 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
 
 
+def test_JEDI_driver_name(driverobj):
+    assert driverobj.driver_name() == JEDI.driver_name() == "jedi"
+
+
 def test_JEDI_files_copied(driverobj):
     with patch.object(jedi_base, "filecopy") as filecopy:
         driverobj._config["rundir"] = "/path/to/run"
@@ -150,6 +156,12 @@ def test_JEDI_files_linked(driverobj):
         )
 
 
+def test_JEDI_output(driverobj):
+    with raises(UWNotImplementedError) as e:
+        assert driverobj.output
+    assert str(e.value) == "The output() method is not yet implemented for this driver"
+
+
 def test_JEDI_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
@@ -162,6 +174,10 @@ def test_JEDI_provisioned_rundir(driverobj):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
+
+
+def test_JEDI_taskname(driverobj):
+    assert driverobj.taskname("foo") == "20240201 18Z jedi foo"
 
 
 def test_JEDI_validate_only(caplog, driverobj):
@@ -188,10 +204,6 @@ def test_JEDI_validate_only(caplog, driverobj):
     assert regex_logged(caplog, "Config is valid")
 
 
-def test_JEDI_driver_name(driverobj):
-    assert driverobj.driver_name() == JEDI.driver_name() == "jedi"
-
-
 def test_JEDI__config_fn(driverobj):
     assert driverobj._config_fn == "jedi.yaml"
 
@@ -202,7 +214,3 @@ def test_JEDI__runcmd(driverobj):
     assert (
         driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"
     )
-
-
-def test_JEDI_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z jedi foo"

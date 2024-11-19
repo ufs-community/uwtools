@@ -35,13 +35,13 @@ class Stager(ABC):
         """
         Stage files and directories.
 
-        :param config: YAML-file path, or dict (read stdin if missing or None).
+        :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
         :param target_dir: Path to target directory.
-        :param cycle: A datetime object to make available for use in the config.
-        :param leadtime: A timedelta object to make available for use in the config.
+        :param cycle: A ``datetime`` object to make available for use in the config.
+        :param leadtime: A ``timedelta`` object to make available for use in the config.
         :param keys: YAML keys leading to file dst/src block.
         :param dry_run: Do not copy files.
-        :raises: UWConfigError if config fails validation.
+        :raises: ``UWConfigError`` if config fails validation.
         """
         dryrun(enable=dry_run)
         self._keys = keys or []
@@ -87,7 +87,7 @@ class Stager(ABC):
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):
-            msg = "Expected block not found at key path: %s" % " -> ".join(self._keys)
+            msg = "Expected block not found at key path: %s" % ".".join(self._keys)
             raise UWConfigError(msg)
         self._config = cfg
 
@@ -111,7 +111,7 @@ class Stager(ABC):
 
         :raises: UWConfigError if config fails validation.
         """
-        validate_internal(schema_name=self._schema, config=self._config)
+        validate_internal(schema_name=self._schema, desc="fs config", config=self._config)
 
 
 class FileStager(Stager):

@@ -19,6 +19,7 @@ from uwtools.api import (
     make_solo_mosaic,
     mpas,
     mpas_init,
+    orog,
     orog_gsl,
     schism,
     sfc_climo_gen,
@@ -43,6 +44,7 @@ modules = [
     make_solo_mosaic,
     mpas,
     mpas_init,
+    orog,
     orog_gsl,
     schism,
     sfc_climo_gen,
@@ -63,6 +65,7 @@ def test_api_execute(module):
         "dry_run": False,
         "graph_file": "/some/g.dot",
         "key_path": None,
+        "schema_file": None,
         "stdin_ok": True,
         "task": "foo",
     }

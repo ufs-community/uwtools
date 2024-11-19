@@ -86,11 +86,29 @@ In the example, the resulting log would appear in the XML file as:
 
 .. code-block:: xml
 
-   <log>
-     <cyclestr>/some/path/to/&FOO;</cyclestr>
-   </log>
+   <log><cyclestr>/some/path/to/&FOO;</cyclestr></log>
 
 The ``attrs:`` block is optional within the ``cyclestr:`` block and can be used to specify the cycle offset.
+
+Wherever a ``cyclestr:`` block is accepted, a YAML sequence mixing text and ``cyclestr:`` blocks may also be provided. For example,
+
+.. code-block:: yaml
+
+   log:
+     - cyclestr:
+         value: "%Y%m%d%H"
+     - -through-
+     - cyclestr:
+         attrs:
+           offset: "06:00:00"
+         value: "%Y%m%d%H"
+     - .log
+
+would be rendered as
+
+.. code-block:: xml
+
+   <log><cyclestr>%Y%m%d%H</cyclestr>-through-<cyclestr offset="06:00:00">%Y%m%d%H</cyclestr>.log</log>
 
 Tasks Section
 -------------
@@ -113,7 +131,7 @@ Let's dissect the following task example:
      walltime: 00:01:00
      envars:
        person: siri
-     dependencies:
+     dependency:
 
 Each task is named by its UW YAML key. Blocks under ``tasks:`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
 
@@ -139,7 +157,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
      <value>siri</value>
    </envar>
 
-``dependencies:`` -- [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
+``dependency:`` -- [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
 
 The other keys not specifically mentioned here follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
 
@@ -162,7 +180,7 @@ Each of the dependencies that requires attributes (the ``key="value"`` parts ins
      ...
    task_goodbye:
      command: "goodbye"
-     dependencies:
+     dependency:
         taskdep:
           attrs:
             task: hello
@@ -191,7 +209,7 @@ Because UW YAML represents a hash table (a dictionary in Python), each key at th
    task_hello:
      command: "hello world"
      ...
-     dependencies:
+     dependency:
        and:
          datadep_foo:
            value: "foo.txt"

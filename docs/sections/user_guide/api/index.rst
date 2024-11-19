@@ -2,6 +2,8 @@ API
 ===
 
 .. toctree::
+   :maxdepth: 1
+
    cdeps
    chgres_cube
    config
@@ -19,6 +21,7 @@ API
    make_solo_mosaic
    mpas
    mpas_init
+   orog
    orog_gsl
    rocoto
    schism

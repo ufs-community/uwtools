@@ -9,8 +9,8 @@
             "input_grid_file": {
               "type": "string"
             },
-            "nh4": {
-              "minimum": 1,
+            "nhalo": {
+              "minimum": 0,
               "type": "integer"
             },
             "nx": {
@@ -20,13 +20,17 @@
             "ny": {
               "minimum": 1,
               "type": "integer"
+            },
+            "output_grid_file": {
+              "type": "string"
             }
           },
           "required": [
             "input_grid_file",
-            "nh4",
+            "nhalo",
             "nx",
-            "ny"
+            "ny",
+            "output_grid_file"
           ]
         },
         "execution": {

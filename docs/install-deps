@@ -1,1 +1,1 @@
-conda install -q -y $(python -c "import yaml; f=open('$(dirname ${BASH_SOURCE[0]})/environment.yml'); print(' '.join(yaml.safe_load(f)['dependencies']))")
+conda install -q -y $($(dirname ${BASH_SOURCE[0]})/deps)

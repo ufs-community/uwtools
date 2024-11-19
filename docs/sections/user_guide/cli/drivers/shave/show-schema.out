@@ -8,14 +8,13 @@
           "properties": {
             "input_grid_file": {
               "type": "string"
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "shave"
-  ],
-  "type": "object"
-}
+            },
+            "nhalo": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "nx": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "ny": {

@@ -1,0 +1,20 @@
+{
+  "properties": {
+    "orog": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+              "properties": {
+                "cores": {
+                  "type": "integer"
+                },
+                "debug": {
+                  "type": "boolean"
+                },
+                "exclusive": {
+                  "type": "boolean"
+                },

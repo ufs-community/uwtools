@@ -8,14 +8,13 @@
           "properties": {
             "dir": {
               "type": "string"
-...
-        "rundir"
-      ],
-      "type": "object"
-    }
-  },
-  "required": [
-    "make_solo_mosaic"
-  ],
-  "type": "object"
-}
+            },
+            "mosaic_name": {
+              "type": "string"
+            },
+            "num_tiles": {
+              "type": "integer"
+            },
+            "periodx": {
+              "type": "integer"
+            },
