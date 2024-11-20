@@ -51,7 +51,7 @@ class FV3(DriverCycleBased):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield asset(path, path.is_file)
-        template_file = Path(self.config[fn].get("template_file"))
+        template_file = Path(self.config[fn]["template_file"])
         yield file(template_file)
         render(
             input_file=template_file,
