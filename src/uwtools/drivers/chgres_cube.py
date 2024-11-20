@@ -63,7 +63,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
                         input_files.append(grid_path / v)
                     else:
                         input_files.extend([grid_path / f for f in v])
-        yield [file(Path(input_file)) for input_file in input_files]
+        yield [file(Path(input_file), key_path) for input_file, key_path in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
