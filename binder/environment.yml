@@ -1,0 +1,6 @@
+name: default
+channels:
+  - conda-forge
+  - ufs-community
+dependencies:
+  - uwtools

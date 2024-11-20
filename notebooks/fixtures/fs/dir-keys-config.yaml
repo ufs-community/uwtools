@@ -1,0 +1,6 @@
+path:
+  to:
+    dirs:
+      makedirs:
+        - foo/bar
+        - baz

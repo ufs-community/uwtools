@@ -1,0 +1,31 @@
+workflow:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledef:
+    - spec: 202410290000 202410300000 06:00:00
+  log: logs/test.log
+  tasks:
+    task_bacon:
+      command: "echo Cooking bacon..."
+      cores: 1
+      walltime: 00:00:10
+    task_eggs:
+      command: "echo Cooking eggs..."
+      nodes: 1:ppn=4
+      walltime: 00:00:10
+      dependency:
+        datadep:
+          value: eggs_recipe.txt
+    task_serve:
+      command: "echo Serving breakfast..."
+      cores: 2
+      walltime: 00:00:01
+      dependency:
+        and:
+          taskdep_eggs:
+            attrs:
+              task: bacon
+          taskdep_bacon:
+            attrs:
+              task: eggs
