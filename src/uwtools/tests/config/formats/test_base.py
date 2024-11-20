@@ -179,8 +179,8 @@ N: "22"
         "b": {"c": 33},
         "d": "{{ X }}",
         "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00"), False],
-        "g": True,
         "f": {"f1": 42, "f2": 3.14, "f3": True},
+        "g": True,
         "D": datetime.fromisoformat("2024-10-10 00:19:00"),
         "N": "22",
     }

@@ -281,7 +281,7 @@ def test_unrendered(s, status):
     assert jinja2.unrendered(s) is status
 
 
-@mark.parametrize("tag", ["!datetime", "!float", "!int", "!bool"])
+@mark.parametrize("tag", ["!bool", "!datetime", "!float", "!int"])
 def test__deref_convert_no(caplog, tag):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
