@@ -7,6 +7,7 @@ import f90nml  # type: ignore
 from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
+from uwtools.config.support import from_od
 from uwtools.config.tools import config_check_depths_dump
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -75,6 +76,13 @@ class NMLConfig(Config):
             return config
 
     # Public methods
+
+    def as_dict(self) -> dict:
+        """
+        Returns a pure dict version of the config.
+        """
+        d = self.data
+        return from_od(d.todict()) if isinstance(d, Namelist) else d
 
     def dump(self, path: Optional[Path]) -> None:
         """

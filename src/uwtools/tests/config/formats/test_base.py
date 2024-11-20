@@ -6,6 +6,7 @@ import datetime as dt
 import logging
 import os
 from datetime import datetime
+from textwrap import dedent
 from unittest.mock import patch
 
 import yaml
@@ -55,6 +56,9 @@ class ConcreteConfig(Config):
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
+
+    def as_dict(self):
+        return self.data
 
     def dump(self, path=None):
         pass
@@ -112,7 +116,7 @@ def test__parse_include(config):
     assert len(config["config"]) == 2
 
 
-@mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@mark.parametrize("fmt", [FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -129,15 +133,65 @@ def test_compare_config(caplog, fmt, salad_base):
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
     del salad_base["salad"]["how_many"]
-    assert not cfgobj.compare_config(cfgobj, salad_base)
     assert not cfgobj.compare_config(salad_base)
     # Expect to see the following differences logged:
-    for msg in [
-        "salad:        how_many:  - 12 + None",
-        "salad:        dressing:  - balsamic + italian",
-        "salad:            size:  - None + large",
-    ]:
-        assert logged(caplog, msg)
+    expected = """
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+      salad:
+        base: kale
+    -   dressing: balsamic
+    ?             ^  ^ ^^^
+    +   dressing: italian
+    ?             ^^  ^ ^
+        fruit: banana
+    -   how_many: 12
+    +   size: large
+        vegetable: tomato
+    """
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
+
+
+def test_compare_config_ini(caplog, salad_base):
+    """
+    Compare two config objects.
+    """
+    log.setLevel(logging.INFO)
+    cfgobj = tools.format_to_config("ini")(fixture_path("simple.ini"))
+    salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
+    assert cfgobj.compare_config(salad_base) is True
+    # Expect no differences:
+    assert not caplog.records
+    caplog.clear()
+    # Create differences in base dict:
+    salad_base["salad"]["dressing"] = "italian"
+    salad_base["salad"]["size"] = "large"
+    del salad_base["salad"]["how_many"]
+    assert not cfgobj.compare_config(cfgobj.as_dict(), salad_base, header=False)
+    # Expect to see the following differences logged:
+    expected = """
+      salad:
+        base: kale
+    -   dressing: italian
+    ?             ^^   ^^
+    +   dressing: balsamic
+    ?             ^  +++ ^
+        fruit: banana
+    -   size: large
+    +   how_many: '12'
+        vegetable: tomato
+    """
+    for line in dedent(expected).strip("\n").split("\n"):
+        assert logged(caplog, line)
+    anomalous = """
+    ---------------------------------------------------------------------
+    ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+    ---------------------------------------------------------------------
+    """
+    for line in dedent(anomalous).strip("\n").split("\n"):
+        assert not logged(caplog, line)
 
 
 def test_dereference(tmp_path):

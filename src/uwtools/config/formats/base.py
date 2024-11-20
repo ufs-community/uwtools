@@ -1,8 +1,11 @@
+import difflib
 import os
 import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
+from io import StringIO
+from math import inf
 from pathlib import Path
 from typing import Optional, Union
 
@@ -11,7 +14,7 @@ import yaml
 from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error, yaml_to_str
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import INDENT, log
+from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
 
 
@@ -75,6 +78,26 @@ class Config(ABC, UserDict):
             else:
                 complete.append(f"{INDENT}{parent}{key}")
         return complete, template
+
+    @staticmethod
+    def _compare_config_get_lines(d: dict) -> list[str]:
+        """
+        Returns a line-by-line YAML representation of the given dict.
+
+        :param d: A dict object.
+        """
+        sio = StringIO()
+        yaml.safe_dump(d, stream=sio, default_flow_style=False, indent=2, width=inf)
+        return sio.getvalue().splitlines(keepends=True)
+
+    @staticmethod
+    def _compare_config_log_header() -> None:
+        """
+        Log a visual header and description of diff markers.
+        """
+        log.info("-" * MSGWIDTH)
+        log.info("↓ ? = info | -/+ = line unique to - or + file | blank = matching line")
+        log.info("-" * MSGWIDTH)
 
     @property
     def _depth(self) -> int:
@@ -158,7 +181,15 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
+    @abstractmethod
+    def as_dict(self) -> dict:
+        """
+        Returns a pure dict version of the config.
+        """
+
+    def compare_config(
+        self, dict1: dict, dict2: Optional[dict] = None, header: Optional[bool] = True
+    ) -> bool:
         """
         Compare two config dictionaries.
 
@@ -168,33 +199,16 @@ class Config(ABC, UserDict):
         :param dict2: The second dictionary (default: this config).
         :return: True if the configs are identical, False otherwise.
         """
-        dict2 = self.data if dict2 is None else dict2
-        diffs: dict = {}
-
-        for sect, items in dict2.items():
-            for key, val in items.items():
-                if val != dict1.get(sect, {}).get(key, ""):
-                    try:
-                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
-
-        for sect, items in dict1.items():
-            for key, val in items.items():
-                if val != dict2.get(sect, {}).get(key, "") and diffs.get(sect, {}).get(key) is None:
-                    try:
-                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
-
-        for sect, keys in diffs.items():
-            for key in keys:
-                msg = f"{sect}: {key:>15}: {keys[key]}"
-                log.info(msg)
-
-        return not diffs
+        dict2 = self.as_dict() if dict2 is None else dict2
+        lines1, lines2 = map(self._compare_config_get_lines, [dict1, dict2])
+        difflines = list(difflib.ndiff(lines2, lines1))
+        if all(line[0] == " " for line in difflines):  # i.e. no +/-/? lines
+            return True
+        if header:
+            self._compare_config_log_header()
+        for diffline in difflines:
+            log.info(diffline.rstrip())
+        return False
 
     def dereference(self, context: Optional[dict] = None) -> None:
         """
