@@ -35,6 +35,7 @@ class Common:
     def atask(self):
         yield "atask"
         yield asset("atask", lambda: True)
+        yield None
 
     @classmethod
     def driver_name(cls) -> str:

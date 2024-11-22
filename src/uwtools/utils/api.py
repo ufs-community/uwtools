@@ -177,7 +177,6 @@ def _execute(
     """
     kwargs = dict(
         config=ensure_data_source(str2path(config), stdin_ok),
-        dry_run=dry_run,
         key_path=key_path,
         schema_file=schema_file,
     )
@@ -186,7 +185,8 @@ def _execute(
         if arg in accepted:
             kwargs[arg] = locals()[arg]
     obj = driver_class(**kwargs)
-    node = getattr(obj, task)()
+    task = getattr(obj, task)
+    node = task(dry_run=dry_run)
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
             print(graph(node), file=f)

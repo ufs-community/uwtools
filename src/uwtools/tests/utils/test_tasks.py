@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 from uwtools.utils import tasks
 
-
 # Tests
 
 

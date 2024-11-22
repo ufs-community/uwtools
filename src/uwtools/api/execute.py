@@ -70,7 +70,6 @@ def execute(
             return False
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
-        dry_run=dry_run,
         key_path=key_path,
         schema_file=schema_file or module_path.with_suffix(".jsonschema"),
     )
@@ -80,7 +79,8 @@ def execute(
             kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
-    node = getattr(driverobj, task)()
+    task = getattr(driverobj, task)
+    node = task(dry_run=dry_run)
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
             print(graph(node), file=f)

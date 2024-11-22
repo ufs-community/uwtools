@@ -18,7 +18,6 @@ def execute_kwargs():
         "task": "atask",
         "config": "/some/config",
         "batch": True,
-        "dry_run": False,
         "graph_file": "/path/to/g.dot",
         "key_path": None,
         "schema_file": None,
@@ -49,9 +48,9 @@ def test_make_execute(execute_kwargs):
     assert ":param driver_class:" not in func.__doc__
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
-        assert func(**execute_kwargs) is True
+        assert func(**execute_kwargs, dry_run=True) is True
         _execute.assert_called_once_with(
-            driver_class=TestDriver, cycle=None, leadtime=None, **execute_kwargs
+            driver_class=TestDriver, dry_run=True, cycle=None, leadtime=None, **execute_kwargs
         )
 
 
@@ -64,8 +63,8 @@ def test_make_execute_cycle(execute_kwargs):
     assert ":param driver_class:" not in func.__doc__
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
-        assert func(**execute_kwargs) is True
-        _execute.assert_called_once_with(driver_class=TestDriver, leadtime=None, **execute_kwargs)
+        assert func(**execute_kwargs, dry_run=True) is True
+        _execute.assert_called_once_with(driver_class=TestDriver, dry_run=True, leadtime=None, **execute_kwargs)
 
 
 def test_make_execute_cycle_leadtime(execute_kwargs):
@@ -79,8 +78,8 @@ def test_make_execute_cycle_leadtime(execute_kwargs):
     assert ":param driver_class:" not in func.__doc__
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
-        assert func(**execute_kwargs) is True
-        _execute.assert_called_once_with(driver_class=TestDriver, **execute_kwargs)
+        assert func(**execute_kwargs, dry_run=True) is True
+        _execute.assert_called_once_with(driver_class=TestDriver, dry_run=True, **execute_kwargs)
 
 
 def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
