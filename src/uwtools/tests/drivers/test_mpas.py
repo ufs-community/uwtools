@@ -232,15 +232,15 @@ def test_MPAS_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_MPAS_provisioned_rundir(driverobj, oktask):
+def test_MPAS_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        boundary_files=oktask,
-        files_copied=oktask,
-        files_linked=oktask,
-        namelist_file=oktask,
-        runscript=oktask,
-        streams_file=oktask,
+        boundary_files=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
+        streams_file=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

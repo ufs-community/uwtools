@@ -189,13 +189,13 @@ def test_UPP_output_fail(driverobj):
     assert str(e.value) == "Could not open UPP control file %s" % driverobj.config["control_file"]
 
 
-def test_UPP_provisioned_rundir(driverobj, oktask):
+def test_UPP_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        files_copied=oktask,
-        files_linked=oktask,
-        namelist_file=oktask,
-        runscript=oktask,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

@@ -100,14 +100,14 @@ def test_OrogGSL_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_OrogGSL_provisioned_rundir(driverobj, oktask):
+def test_OrogGSL_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_config_file=oktask,
-        input_grid_file=oktask,
-        runscript=oktask,
-        topo_data_2p5m=oktask,
-        topo_data_30s=oktask,
+        input_config_file=ready_task,
+        input_grid_file=ready_task,
+        runscript=ready_task,
+        topo_data_2p5m=ready_task,
+        topo_data_30s=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

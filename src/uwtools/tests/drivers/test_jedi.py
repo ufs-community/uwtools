@@ -161,14 +161,14 @@ def test_JEDI_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_JEDI_provisioned_rundir(driverobj, oktask):
+def test_JEDI_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        configuration_file=oktask,
-        files_copied=oktask,
-        files_linked=oktask,
-        runscript=oktask,
-        validate_only=oktask,
+        configuration_file=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        runscript=ready_task,
+        validate_only=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

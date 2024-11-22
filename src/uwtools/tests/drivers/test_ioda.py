@@ -98,13 +98,13 @@ def test_IODA_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_IODA_provisioned_rundir(driverobj, oktask):
+def test_IODA_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        configuration_file=oktask,
-        files_copied=oktask,
-        files_linked=oktask,
-        runscript=oktask,
+        configuration_file=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

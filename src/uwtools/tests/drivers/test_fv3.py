@@ -219,19 +219,19 @@ def test_FV3_output(driverobj):
 
 
 @mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_rundir(domain, driverobj, oktask):
+def test_FV3_provisioned_rundir(domain, driverobj, ready_task):
     driverobj._config["domain"] = domain
     with patch.multiple(
         driverobj,
-        boundary_files=oktask,
-        diag_table=oktask,
-        field_table=oktask,
-        files_copied=oktask,
-        files_linked=oktask,
-        model_configure=oktask,
-        namelist_file=oktask,
-        restart_directory=oktask,
-        runscript=oktask,
+        boundary_files=ready_task,
+        diag_table=ready_task,
+        field_table=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        model_configure=ready_task,
+        namelist_file=ready_task,
+        restart_directory=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     excluded = ["boundary_files"] if domain == "global" else []

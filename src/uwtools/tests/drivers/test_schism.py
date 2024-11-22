@@ -64,10 +64,10 @@ def test_SCHISM_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_SCHISM_provisioned_rundir(driverobj, oktask):
+def test_SCHISM_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        namelist_file=oktask,
+        namelist_file=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

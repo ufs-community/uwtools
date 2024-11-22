@@ -115,13 +115,13 @@ def test_FilterTopo_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_FilterTopo_provisioned_rundir(driverobj, oktask):
+def test_FilterTopo_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_grid_file=oktask,
-        filtered_output_file=oktask,
-        namelist_file=oktask,
-        runscript=oktask,
+        input_grid_file=ready_task,
+        filtered_output_file=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

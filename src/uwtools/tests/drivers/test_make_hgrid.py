@@ -80,8 +80,8 @@ def test_MakeHgrid_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_MakeHgrid_provisioned_rundir(driverobj, oktask):
-    with patch.multiple(driverobj, runscript=oktask) as mocks:
+def test_MakeHgrid_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(driverobj, runscript=ready_task) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

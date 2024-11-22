@@ -83,11 +83,11 @@ def test_GlobalEquivResol_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_GlobalEquivResol_provisioned_rundir(driverobj, oktask):
+def test_GlobalEquivResol_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_file=oktask,
-        runscript=oktask,
+        input_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

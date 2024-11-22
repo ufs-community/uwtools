@@ -11,10 +11,10 @@ from pytest import fixture
 
 
 @fixture
-def oktask():
+def ready_task():
     @external
-    def ok():
+    def t():
         yield "ok"
         yield asset(None, lambda: True)
 
-    return ok
+    return t
