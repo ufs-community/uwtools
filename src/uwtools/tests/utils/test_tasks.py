@@ -6,12 +6,6 @@ from unittest.mock import patch
 
 from uwtools.utils import tasks
 
-# Helpers
-
-
-def ready(taskval):
-    return taskval.ready()
-
 
 # Tests
 
@@ -19,7 +13,7 @@ def ready(taskval):
 def test_tasks_directory(tmp_path):
     p = tmp_path / "foo" / "bar"
     assert not p.is_dir()
-    assert ready(tasks.directory(path=p))
+    assert tasks.directory(path=p).ready
     assert p.is_dir()
 
 
@@ -28,47 +22,47 @@ def test_tasks_executable(tmp_path):
     # Ensure that only our temp directory is on the path:
     with patch.dict(os.environ, {"PATH": str(tmp_path)}, clear=True):
         # Program does not exist:
-        assert not ready(tasks.executable(program=p))
+        assert not tasks.executable(program=p).ready
         # Program exists but is not executable:
         p.touch()
-        assert not ready(tasks.executable(program=p))
+        assert not tasks.executable(program=p).ready
         # Program exists and is executable:
         os.chmod(p, os.stat(p).st_mode | stat.S_IEXEC)  # set executable bits
-        assert ready(tasks.executable(program=p))
+        assert tasks.executable(program=p).ready
 
 
 def test_tasks_existing_missing(tmp_path):
     path = tmp_path / "x"
-    assert not ready(tasks.existing(path=path))
+    assert not tasks.existing(path=path).ready
 
 
 def test_tasks_existing_present_directory(tmp_path):
     path = tmp_path / "directory"
     path.mkdir()
-    assert ready(tasks.existing(path=path))
+    assert tasks.existing(path=path).ready
 
 
 def test_tasks_existing_present_file(tmp_path):
     path = tmp_path / "file"
     path.touch()
-    assert ready(tasks.existing(path=path))
+    assert tasks.existing(path=path).ready
 
 
 def test_tasks_existing_present_symlink(tmp_path):
     path = tmp_path / "symlink"
     path.symlink_to(os.devnull)
-    assert ready(tasks.existing(path=path))
+    assert tasks.existing(path=path).ready
 
 
 def test_tasks_file_missing(tmp_path):
     path = tmp_path / "file"
-    assert not ready(tasks.file(path=path))
+    assert not tasks.file(path=path).ready
 
 
 def test_tasks_file_present(tmp_path):
     path = tmp_path / "file"
     path.touch()
-    assert ready(tasks.file(path=path))
+    assert tasks.file(path=path).ready
 
 
 def test_tasks_filecopy_simple(tmp_path):
