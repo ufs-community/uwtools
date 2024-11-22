@@ -5,7 +5,7 @@ A driver for the MPAS Atmosphere component.
 from datetime import timedelta
 from pathlib import Path
 
-from iotaa import asset, task
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
@@ -21,7 +21,7 @@ class MPAS(MPASBase):
 
     # Workflow tasks
 
-    @task
+    @tasks
     def boundary_files(self):
         """
         Boundary files.

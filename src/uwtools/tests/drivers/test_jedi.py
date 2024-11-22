@@ -5,7 +5,7 @@ JEDI driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
 import yaml
 from iotaa import asset, external
@@ -188,9 +188,8 @@ def test_JEDI_validate_only(caplog, driverobj):
 
     logging.getLogger().setLevel(logging.INFO)
     with patch.object(jedi, "file", file):
-        with patch.object(jedi, "run") as run:
-            result = Mock(output="", success=True)
-            run.return_value = result
+        with patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
+            run_shell_cmd.return_value = (True, None)
             driverobj.validate_only()
             cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
             cmds = [
@@ -199,7 +198,7 @@ def test_JEDI_validate_only(caplog, driverobj):
                 "time %s --validate-only %s 2>&1"
                 % (driverobj.config["execution"]["executable"], cfgfile),
             ]
-            run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
+            run_shell_cmd.assert_called_once_with(" && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
 
 

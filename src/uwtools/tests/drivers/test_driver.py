@@ -139,7 +139,7 @@ def assetsobj(config):
 
 @fixture
 def driverobj(config):
-    return ConcreteDriverTimeInvariant(config=config)
+    return ConcreteDriverTimeInvariant(config=config, batch=True)
 
 
 # Assets Tests
@@ -236,7 +236,7 @@ def test_Assets_leadtime(config):
 def test_Assets_validate(assetsobj, caplog):
     log.setLevel(logging.INFO)
     assetsobj.validate()
-    assert regex_logged(caplog, "State: Ready")
+    assert regex_logged(caplog, "Ready")
 
 
 def test_Assets_validate_key_path(config, controller_schema):

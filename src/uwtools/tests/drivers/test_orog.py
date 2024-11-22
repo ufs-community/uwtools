@@ -106,7 +106,7 @@ def test_Orog_grid_file_existence(caplog, driverobj, exist):
     status = f"Input grid file {str(grid_file)}: Not ready [external asset]"
     if exist:
         grid_file.touch()
-        status = f"Input grid file {str(grid_file)}: State: Ready"
+        status = f"Input grid file {str(grid_file)}: Ready"
     driverobj.grid_file()
     assert regex_logged(caplog, status)
 
@@ -115,7 +115,7 @@ def test_Orog_grid_file_nonexistence(caplog, driverobj):
     log.setLevel(logging.INFO)
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
-    assert regex_logged(caplog, "Input grid file none: State: Ready")
+    assert regex_logged(caplog, "Input grid file none: Ready")
 
 
 def test_Orog_input_config_file_new(driverobj):
