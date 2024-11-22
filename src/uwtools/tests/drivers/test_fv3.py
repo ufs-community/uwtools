@@ -178,7 +178,7 @@ def test_FV3_model_configure(base_file_exists, caplog, driverobj):
         assert dst.is_file()
     else:
         assert not dst.is_file()
-        assert regex_logged(caplog, f"{src}: State: Not Ready (external asset)")
+        assert regex_logged(caplog, f"{src}: Not ready [external asset]")
 
 
 def test_FV3_namelist_file(caplog, driverobj):
@@ -209,7 +209,7 @@ def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+    assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
 
 
 def test_FV3_output(driverobj):

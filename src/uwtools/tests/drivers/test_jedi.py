@@ -119,7 +119,7 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
-    assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
+    assert regex_logged(caplog, f"{base_file}: Not ready [external asset]")
 
 
 def test_JEDI_driver_name(driverobj):

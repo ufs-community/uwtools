@@ -156,7 +156,7 @@ def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+    assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
 
 
 def test_UPP_output(driverobj, tmp_path):

@@ -103,7 +103,7 @@ def test_Orog_files_linked(driverobj):
 def test_Orog_grid_file_existence(caplog, driverobj, exist):
     log.setLevel(logging.DEBUG)
     grid_file = Path(driverobj.config["grid_file"])
-    status = f"Input grid file {str(grid_file)}: State: Not Ready (external asset)"
+    status = f"Input grid file {str(grid_file)}: Not ready [external asset]"
     if exist:
         grid_file.touch()
         status = f"Input grid file {str(grid_file)}: State: Ready"
