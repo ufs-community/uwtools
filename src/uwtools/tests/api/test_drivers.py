@@ -28,7 +28,6 @@ from uwtools.api import (
     upp,
     ww3,
 )
-from uwtools.drivers import support
 from uwtools.utils import api
 
 modules = [
@@ -82,11 +81,6 @@ def test_api_execute(module):
             leadtime=kwargs["leadtime"] if module in with_leadtime else None,
             **kwbase
         )
-
-
-@mark.parametrize("module", modules)
-def test_api_graph(module):
-    assert module.graph is support.graph
 
 
 @mark.parametrize("module", modules)

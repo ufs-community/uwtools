@@ -1,7 +1,8 @@
 # pylint: disable=missing-function-docstring
 
-import logging as py_logging
 from unittest.mock import patch
+
+from uwtools.api import logging as uw_logging
 
 
 def test_use_uwtools_logger():

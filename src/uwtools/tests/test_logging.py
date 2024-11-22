@@ -1,7 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access
-"""
-Tests for uwtools.logging module.
-"""
+# pylint: disable=missing-function-docstring
 
 import logging
 import os
@@ -50,15 +47,3 @@ def test_setup_logging_verbose():
             format=ANY,
             level=logging.DEBUG,
         )
-
-
-def test_use_logger():
-    with patch.object(uwtools.logging, "log", uwtools.logging._Logger()):
-        with patch.object(uwtools.logging.iotaa, "logset") as logset:
-            # Initially, uwtools logging uses the Python root logger:
-            assert uwtools.logging.log.logger == logging.getLogger()
-            # But the logger can be swapped to use a logger of choice:
-            test_logger = logging.getLogger("test-logger")
-            uwtools.logging.use_logger(test_logger)
-            assert uwtools.logging.log.logger == test_logger
-            logset.assert_called_once_with(test_logger)
