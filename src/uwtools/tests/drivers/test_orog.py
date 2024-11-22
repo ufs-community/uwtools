@@ -4,7 +4,6 @@ Orog driver tests.
 """
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -155,8 +154,10 @@ def test_Orog_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_Orog_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, files_linked=D, input_config_file=D, runscript=D) as mocks:
+def test_Orog_provisioned_rundir(driverobj, oktask):
+    with patch.multiple(
+        driverobj, files_linked=oktask, input_config_file=oktask, runscript=oktask
+    ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

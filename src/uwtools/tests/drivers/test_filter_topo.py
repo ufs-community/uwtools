@@ -3,7 +3,6 @@
 filter_topo driver tests.
 """
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
@@ -116,9 +115,13 @@ def test_FilterTopo_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_FilterTopo_provisioned_rundir(driverobj):
+def test_FilterTopo_provisioned_rundir(driverobj, oktask):
     with patch.multiple(
-        driverobj, input_grid_file=D, filtered_output_file=D, namelist_file=D, runscript=D
+        driverobj,
+        input_grid_file=oktask,
+        filtered_output_file=oktask,
+        namelist_file=oktask,
+        runscript=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

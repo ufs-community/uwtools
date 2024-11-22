@@ -5,7 +5,6 @@ FV3 driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
@@ -220,19 +219,19 @@ def test_FV3_output(driverobj):
 
 
 @mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_rundir(domain, driverobj):
+def test_FV3_provisioned_rundir(domain, driverobj, oktask):
     driverobj._config["domain"] = domain
     with patch.multiple(
         driverobj,
-        boundary_files=D,
-        diag_table=D,
-        field_table=D,
-        files_copied=D,
-        files_linked=D,
-        model_configure=D,
-        namelist_file=D,
-        restart_directory=D,
-        runscript=D,
+        boundary_files=oktask,
+        diag_table=oktask,
+        field_table=oktask,
+        files_copied=oktask,
+        files_linked=oktask,
+        model_configure=oktask,
+        namelist_file=oktask,
+        restart_directory=oktask,
+        runscript=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     excluded = ["boundary_files"] if domain == "global" else []

@@ -4,7 +4,6 @@ ESGGrid driver tests.
 """
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
@@ -124,11 +123,11 @@ def test_ESGGrid_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_ESGGrid_provisioned_rundir(driverobj):
+def test_ESGGrid_provisioned_rundir(driverobj, oktask):
     with patch.multiple(
         driverobj,
-        namelist_file=D,
-        runscript=D,
+        namelist_file=oktask,
+        runscript=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

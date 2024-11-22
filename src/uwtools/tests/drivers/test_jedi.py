@@ -5,7 +5,6 @@ JEDI driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, call, patch
 
 import yaml
@@ -162,14 +161,14 @@ def test_JEDI_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_JEDI_provisioned_rundir(driverobj):
+def test_JEDI_provisioned_rundir(driverobj, oktask):
     with patch.multiple(
         driverobj,
-        configuration_file=D,
-        files_copied=D,
-        files_linked=D,
-        runscript=D,
-        validate_only=D,
+        configuration_file=oktask,
+        files_copied=oktask,
+        files_linked=oktask,
+        runscript=oktask,
+        validate_only=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

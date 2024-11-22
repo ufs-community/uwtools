@@ -5,7 +5,6 @@ UPP driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
@@ -190,13 +189,13 @@ def test_UPP_output_fail(driverobj):
     assert str(e.value) == "Could not open UPP control file %s" % driverobj.config["control_file"]
 
 
-def test_UPP_provisioned_rundir(driverobj):
+def test_UPP_provisioned_rundir(driverobj, oktask):
     with patch.multiple(
         driverobj,
-        files_copied=D,
-        files_linked=D,
-        namelist_file=D,
-        runscript=D,
+        files_copied=oktask,
+        files_linked=oktask,
+        namelist_file=oktask,
+        runscript=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

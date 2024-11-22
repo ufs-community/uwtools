@@ -5,7 +5,6 @@ MPASInit driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
@@ -208,15 +207,15 @@ def test_MPASInit_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_MPASInit_provisioned_rundir(driverobj):
+def test_MPASInit_provisioned_rundir(driverobj, oktask):
     with patch.multiple(
         driverobj,
-        boundary_files=D,
-        files_copied=D,
-        files_linked=D,
-        namelist_file=D,
-        runscript=D,
-        streams_file=D,
+        boundary_files=oktask,
+        files_copied=oktask,
+        files_linked=oktask,
+        namelist_file=oktask,
+        runscript=oktask,
+        streams_file=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

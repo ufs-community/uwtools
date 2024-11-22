@@ -3,7 +3,6 @@
 global_equiv_resol driver tests.
 """
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -84,11 +83,11 @@ def test_GlobalEquivResol_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_GlobalEquivResol_provisioned_rundir(driverobj):
+def test_GlobalEquivResol_provisioned_rundir(driverobj, oktask):
     with patch.multiple(
         driverobj,
-        input_file=D,
-        runscript=D,
+        input_file=oktask,
+        runscript=oktask,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
