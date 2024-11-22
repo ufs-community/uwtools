@@ -47,12 +47,11 @@ def test_copy_pass(kwargs):
 
 def test_link_fail(kwargs):
     paths = kwargs["config"]["a"]["b"]
-    for p in paths:
-        assert not Path(p).exists()
+    assert not any(Path(p).exists() for p in paths)
     Path(list(paths.values())[0]).unlink()
     assert fs.link(**kwargs) is False
-    # assert not Path(list(paths.keys())[0]).exists()
-    # assert Path(list(paths.keys())[1]).is_symlink()
+    assert not Path(list(paths.keys())[0]).exists()
+    assert Path(list(paths.keys())[1]).is_symlink()
 
 
 def test_link_pass(kwargs):

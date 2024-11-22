@@ -33,6 +33,15 @@ def driverobj(tmp_path):
     )
 
 
+# Helpers
+
+
+@iotaa.external
+def ok():
+    yield "ok"
+    yield iotaa.asset(None, lambda: True)
+
+
 # Tests
 
 
@@ -45,8 +54,8 @@ def test_CDEPS(method):
 
 
 def test_CDEPS_atm(driverobj):
-    with patch.object(CDEPS, "atm_nml") as atm_nml:
-        with patch.object(CDEPS, "atm_stream") as atm_stream:
+    with patch.object(CDEPS, "atm_nml", wraps=ok()) as atm_nml:
+        with patch.object(CDEPS, "atm_stream", wraps=ok()) as atm_stream:
             driverobj.atm()
         atm_stream.assert_called_once_with()
     atm_nml.assert_called_once_with()
@@ -70,11 +79,6 @@ def test_CDEPS_nml(caplog, driverobj, group):
 
 
 def test_CDEPS_ocn(driverobj):
-    @iotaa.external
-    def ok():
-        yield "ok"
-        yield iotaa.asset(None, lambda: True)
-
     with patch.object(CDEPS, "ocn_nml", wraps=ok()) as ocn_nml:
         with patch.object(CDEPS, "ocn_stream", wraps=ok()) as ocn_stream:
             driverobj.ocn()
