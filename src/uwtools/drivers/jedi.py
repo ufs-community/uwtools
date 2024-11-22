@@ -5,11 +5,12 @@ A driver for the jedi component.
 import logging
 from pathlib import Path
 
-from iotaa import asset, refs, run, task, tasks
+from iotaa import asset, refs, task, tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
+from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
 
 
@@ -49,8 +50,8 @@ class JEDI(JEDIBase):
         cmd = "time %s --validate-only %s 2>&1" % (refs(executable), refs(config))
         if envcmds := self.config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
-        result = run(taskname, cmd)
-        if result.success:
+        success, _ = run_shell_cmd(cmd)
+        if success:
             logging.info("%s: Config is valid", taskname)
             a.ready = lambda: True
 

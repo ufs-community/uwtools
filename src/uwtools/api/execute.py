@@ -10,7 +10,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
-from uwtools.drivers.support import graph
+from iotaa import graph
+
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
 from uwtools.strings import STR
@@ -79,10 +80,10 @@ def execute(
             kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
-    getattr(driverobj, task)()
+    node = getattr(driverobj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
-            print(graph(), file=f)
+            print(graph(node), file=f)
     return True
 
 
@@ -154,4 +155,4 @@ def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
         return None
 
 
-__all__ = ["execute", "graph", "tasks"]
+__all__ = ["execute", "tasks"]

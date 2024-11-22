@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Union
 
-from iotaa import dryrun, tasks
+from iotaa import tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
@@ -43,7 +43,7 @@ class Stager(ABC):
         :param dry_run: Do not copy files.
         :raises: ``UWConfigError`` if config fails validation.
         """
-        dryrun(enable=dry_run)
+        self._dry_run = dry_run
         self._keys = keys or []
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
@@ -146,7 +146,10 @@ class Copier(FileStager):
         """
         dst = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._config.items()]
+        yield [
+            filecopy(src=Path(v), dst=dst(k), dry_run=self._dry_run)
+            for k, v in self._config.items()
+        ]
 
 
 class Linker(FileStager):
@@ -161,7 +164,10 @@ class Linker(FileStager):
         """
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
+        yield [
+            symlink(target=Path(v), linkname=linkname(k), dry_run=self._dry_run)
+            for k, v in self._config.items()
+        ]
 
 
 class MakeDirs(Stager):
@@ -176,7 +182,9 @@ class MakeDirs(Stager):
         """
         yield "Directories"
         yield [
-            directory(path=Path(self._target_dir / p if self._target_dir else p))
+            directory(
+                path=Path(self._target_dir / p if self._target_dir else p), dry_run=self._dry_run
+            )
             for p in self._config[STR.makedirs]
         ]
 

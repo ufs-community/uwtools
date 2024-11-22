@@ -209,7 +209,7 @@ def _realize_config_output_setup(
     :return: The unrealized data to output and the output format name.
     """
     output_format = _ensure_format("output", output_format, output_file)
-    log.debug("Writing output to %s" % (output_file or "stdout"))
+    log.debug("Writing output to %s", output_file or "stdout")
     fmt = input_obj._get_format()  # pylint: disable=protected-access
     _validate_format("output", output_format, fmt)
     output_data = input_obj.data

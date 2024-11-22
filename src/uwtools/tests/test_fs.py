@@ -2,7 +2,6 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 
-import iotaa
 import yaml
 from pytest import fixture, mark, raises
 
@@ -66,7 +65,6 @@ def test_Copier_config_file_dry_run(assets):
     fs.Copier(target_dir=dstdir, config=cfgdict, keys=["a", "b"], dry_run=True).go()
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    iotaa.dryrun(False)
 
 
 def test_Copier_no_targetdir_abspath_pass(assets):

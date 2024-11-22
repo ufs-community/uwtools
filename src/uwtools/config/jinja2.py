@@ -293,7 +293,7 @@ def _log_missing_values(missing: list[str]) -> None:
     """
     log.error("Value(s) required to render template not provided:")
     for key in missing:
-        log.error(f"{INDENT}{key}")
+        log.error("%s%s", INDENT, key)
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -368,7 +368,7 @@ def _values_needed(undeclared_variables: set[str]) -> None:
     """
     log.info("Value(s) needed to render this template are:")
     for var in sorted(undeclared_variables):
-        log.info(f"{INDENT}{var}")
+        log.info("%s%s", INDENT, var)
 
 
 def _write_template(output_file: Optional[Path], rendered_template: str) -> str:

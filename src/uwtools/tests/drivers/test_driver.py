@@ -133,12 +133,12 @@ def controller_schema(tmp_path):
 
 @fixture
 def assetsobj(config):
-    return ConcreteAssetsTimeInvariant(config=config, dry_run=False)
+    return ConcreteAssetsTimeInvariant(config=config)
 
 
 @fixture
 def driverobj(config):
-    return ConcreteDriverTimeInvariant(config=config, dry_run=False, batch=True)
+    return ConcreteDriverTimeInvariant(config=config)
 
 
 # Assets Tests
@@ -209,19 +209,18 @@ def test_Assets_cycle(config):
     assert obj.cycle == cycle
 
 
-@mark.parametrize("val", (True, False))
-def test_Assets_dry_run(config, val):
-    with patch.object(driver, "dryrun") as dryrun:
-        ConcreteAssetsTimeInvariant(config=config, dry_run=val)
-        dryrun.assert_called_once_with(enable=val)
+# @mark.parametrize("val", (True, False))
+def test_Assets_dry_run():  # (config, val):
+    assert False
+    # with patch.object(driver, "dryrun") as dryrun:
+    #     ConcreteAssetsTimeInvariant(config=config)
+    #     dryrun.assert_called_once_with(enable=val)
 
 
 def test_Assets_key_path(config, tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.dump({"foo": {"bar": config}}))
-    assetsobj = ConcreteAssetsTimeInvariant(
-        config=config_file, dry_run=False, key_path=["foo", "bar"]
-    )
+    assetsobj = ConcreteAssetsTimeInvariant(config=config_file, key_path=["foo", "bar"])
     assert assetsobj.config == config[assetsobj.driver_name()]
 
 
@@ -673,7 +672,6 @@ def test__add_docstring():
             "config",
             "controller",
             "cycle",
-            "dry_run",
             "key_path",
             "leadtime",
             "schema_file",
