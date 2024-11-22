@@ -1,18 +1,15 @@
-[2024-08-26T23:03:42]     INFO Validating config against internal schema: files-to-stage
-[2024-08-26T23:03:43]     INFO 0 UW schema-validation errors found in fs config
-[2024-08-26T23:03:43]     INFO File links: Initial state: Not Ready
-[2024-08-26T23:03:43]     INFO File links: Checking requirements
-[2024-08-26T23:03:43]     INFO Link link-dst/foo -> src/foo: Initial state: Not Ready
-[2024-08-26T23:03:43]     INFO Link link-dst/foo -> src/foo: Checking requirements
-[2024-08-26T23:03:43]     INFO Link link-dst/foo -> src/foo: Requirement(s) ready
-[2024-08-26T23:03:43]     INFO Link link-dst/foo -> src/foo: Executing
-[2024-08-26T23:03:43]     INFO Link link-dst/foo -> src/foo: Final state: Ready
-[2024-08-26T23:03:43]     INFO Link link-dst/subdir/bar -> src/bar: Initial state: Not Ready
-[2024-08-26T23:03:43]     INFO Link link-dst/subdir/bar -> src/bar: Checking requirements
-[2024-08-26T23:03:43]     INFO Link link-dst/subdir/bar -> src/bar: Requirement(s) ready
-[2024-08-26T23:03:43]     INFO Link link-dst/subdir/bar -> src/bar: Executing
-[2024-08-26T23:03:43]     INFO Link link-dst/subdir/bar -> src/bar: Final state: Ready
-[2024-08-26T23:03:43]     INFO File links: Final state: Ready
+[2024-11-22T23:09:13]     INFO Validating config against internal schema: files-to-stage
+[2024-11-22T23:09:13]     INFO 0 UW schema-validation errors found in fs config
+[2024-11-22T23:09:13]     INFO Filesystem item src/foo: Ready
+[2024-11-22T23:09:13]     INFO Filesystem item src/bar: Ready
+[2024-11-22T23:09:13]     INFO Link link-dst/foo -> src/foo: Executing
+[2024-11-22T23:09:13]     INFO Link link-dst/foo -> src/foo: Ready
+[2024-11-22T23:09:13]     INFO Link link-dst/subdir/bar -> src/bar: Executing
+[2024-11-22T23:09:13]     INFO Link link-dst/subdir/bar -> src/bar: Ready
+[2024-11-22T23:09:13]  WARNING File links: Not ready
+[2024-11-22T23:09:13]  WARNING File links: Requires:
+[2024-11-22T23:09:13]  WARNING File links: ✔ Link link-dst/foo -> src/foo
+[2024-11-22T23:09:13]  WARNING File links: ✔ Link link-dst/subdir/bar -> src/bar
 
 link-dst
 ├── foo -> ../src/foo

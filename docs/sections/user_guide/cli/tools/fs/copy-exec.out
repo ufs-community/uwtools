@@ -1,18 +1,15 @@
-[2024-08-26T23:03:41]     INFO Validating config against internal schema: files-to-stage
-[2024-08-26T23:03:41]     INFO 0 UW schema-validation errors found in fs config
-[2024-08-26T23:03:41]     INFO File copies: Initial state: Not Ready
-[2024-08-26T23:03:41]     INFO File copies: Checking requirements
-[2024-08-26T23:03:41]     INFO Copy src/foo -> copy-dst/foo: Initial state: Not Ready
-[2024-08-26T23:03:41]     INFO Copy src/foo -> copy-dst/foo: Checking requirements
-[2024-08-26T23:03:41]     INFO Copy src/foo -> copy-dst/foo: Requirement(s) ready
-[2024-08-26T23:03:41]     INFO Copy src/foo -> copy-dst/foo: Executing
-[2024-08-26T23:03:41]     INFO Copy src/foo -> copy-dst/foo: Final state: Ready
-[2024-08-26T23:03:41]     INFO Copy src/bar -> copy-dst/subdir/bar: Initial state: Not Ready
-[2024-08-26T23:03:41]     INFO Copy src/bar -> copy-dst/subdir/bar: Checking requirements
-[2024-08-26T23:03:41]     INFO Copy src/bar -> copy-dst/subdir/bar: Requirement(s) ready
-[2024-08-26T23:03:41]     INFO Copy src/bar -> copy-dst/subdir/bar: Executing
-[2024-08-26T23:03:41]     INFO Copy src/bar -> copy-dst/subdir/bar: Final state: Ready
-[2024-08-26T23:03:41]     INFO File copies: Final state: Ready
+[2024-11-22T23:09:13]     INFO Validating config against internal schema: files-to-stage
+[2024-11-22T23:09:13]     INFO 0 UW schema-validation errors found in fs config
+[2024-11-22T23:09:14]     INFO File src/foo: Ready
+[2024-11-22T23:09:14]     INFO File src/bar: Ready
+[2024-11-22T23:09:14]     INFO Copy src/foo -> copy-dst/foo: Executing
+[2024-11-22T23:09:14]     INFO Copy src/foo -> copy-dst/foo: Ready
+[2024-11-22T23:09:14]     INFO Copy src/bar -> copy-dst/subdir/bar: Executing
+[2024-11-22T23:09:14]     INFO Copy src/bar -> copy-dst/subdir/bar: Ready
+[2024-11-22T23:09:14]  WARNING File copies: Not ready
+[2024-11-22T23:09:14]  WARNING File copies: Requires:
+[2024-11-22T23:09:14]  WARNING File copies: ✔ Copy src/foo -> copy-dst/foo
+[2024-11-22T23:09:14]  WARNING File copies: ✔ Copy src/bar -> copy-dst/subdir/bar
 
 copy-dst
 ├── foo
