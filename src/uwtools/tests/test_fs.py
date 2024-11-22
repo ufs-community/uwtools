@@ -63,7 +63,7 @@ def test_Copier_config_file_dry_run(assets):
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
     copier = fs.Copier(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
-    copier.go(dry_run=True)  # pylint: disable=unexpected-keyword-arg
+    copier.go(dry_run=True)
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
 

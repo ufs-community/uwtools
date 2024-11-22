@@ -137,13 +137,13 @@ class Copier(FileStager):
     """
 
     @tasks
-    def go(self):
+    def go(self, dry_run: Optional[bool] = False):
         """
         Copy files.
         """
         dst = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._config.items()]
+        yield [filecopy(src=Path(v), dst=dst(k), dry_run=dry_run) for k, v in self._config.items()]
 
 
 class Linker(FileStager):
@@ -152,13 +152,16 @@ class Linker(FileStager):
     """
 
     @tasks
-    def go(self):
+    def go(self, dry_run: Optional[bool] = False):
         """
         Link files.
         """
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
+        yield [
+            symlink(target=Path(v), linkname=linkname(k), dry_run=dry_run)
+            for k, v in self._config.items()
+        ]
 
 
 class MakeDirs(Stager):
@@ -167,13 +170,13 @@ class MakeDirs(Stager):
     """
 
     @tasks
-    def go(self):
+    def go(self, dry_run: Optional[bool] = False):
         """
         Make directories.
         """
         yield "Directories"
         yield [
-            directory(path=Path(self._target_dir / p if self._target_dir else p))
+            directory(path=Path(self._target_dir / p if self._target_dir else p), dry_run=dry_run)
             for p in self._config[STR.makedirs]
         ]
 
