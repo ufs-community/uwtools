@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import refs
+import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.drivers.mpas_base import MPASBase
@@ -177,7 +177,7 @@ def test_MPASInit_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -186,7 +186,7 @@ def test_MPASInit_namelist_file(caplog, driverobj):
 def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -196,7 +196,7 @@ def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "Not ready [external asset]")
 

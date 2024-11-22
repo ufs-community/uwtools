@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import refs
+import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.config.support import from_od
@@ -103,7 +103,7 @@ def test_FilterTopo_input_grid_file(driverobj):
 
 
 def test_FilterTopo_namelist_file(driverobj):
-    path = refs(driverobj.namelist_file())
+    path = iotaa.refs(driverobj.namelist_file())
     actual = from_od(f90nml.read(path).todict())
     expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected

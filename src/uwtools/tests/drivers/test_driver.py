@@ -13,8 +13,8 @@ from textwrap import dedent
 from typing import Optional
 from unittest.mock import Mock, PropertyMock, patch
 
+import iotaa
 import yaml
-from iotaa import asset, task
 from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -31,10 +31,10 @@ class Common:
 
     __test__ = False
 
-    @task
+    @iotaa.task
     def atask(self):
         yield "atask"
-        yield asset("atask", lambda: True)
+        yield iotaa.asset("atask", lambda: True)
         yield None
 
     @classmethod

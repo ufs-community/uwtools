@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import asset, external, refs
+import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.drivers import sfc_climo_gen
@@ -20,10 +20,10 @@ from uwtools.tests.support import logged
 # Helpers
 
 
-@external
+@iotaa.external
 def ready(x):
     yield x
-    yield asset(x, lambda: True)
+    yield iotaa.asset(x, lambda: True)
 
 
 # Fixtures
@@ -116,7 +116,7 @@ def test_SfcClimoGen_namelist_file(caplog, driverobj):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready):
-        path = Path(refs(driverobj.namelist_file()))
+        path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -126,7 +126,7 @@ def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready):
-        path = Path(refs(driverobj.namelist_file()))
+        path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  'string' is not of type 'integer'")

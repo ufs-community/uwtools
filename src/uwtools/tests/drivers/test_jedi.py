@@ -7,8 +7,8 @@ import logging
 from pathlib import Path
 from unittest.mock import call, patch
 
+import iotaa
 import yaml
-from iotaa import asset, external
 from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -181,10 +181,10 @@ def test_JEDI_taskname(driverobj):
 
 def test_JEDI_validate_only(caplog, driverobj):
 
-    @external
+    @iotaa.external
     def file(path: Path):
         yield "Mocked file task for %s" % path
-        yield asset(path, lambda: True)
+        yield iotaa.asset(path, lambda: True)
 
     logging.getLogger().setLevel(logging.INFO)
     with patch.object(jedi, "file", file):

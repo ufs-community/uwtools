@@ -8,8 +8,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore
+import iotaa
 import yaml
-from iotaa import refs
 from lxml import etree
 from pytest import fixture, mark, raises
 
@@ -187,7 +187,7 @@ def test_MPAS_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -197,7 +197,7 @@ def test_MPAS_namelist_file(caplog, driverobj):
 def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -209,7 +209,7 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     driverobj = MPAS(config=config, cycle=cycle)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -221,7 +221,7 @@ def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
 
