@@ -79,8 +79,7 @@ def execute(
             kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
-    task = getattr(driverobj, task)
-    node = task(dry_run=dry_run)
+    node = getattr(driverobj, task)(dry_run=dry_run)
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
             print(graph(node), file=f)

@@ -185,8 +185,7 @@ def _execute(
         if arg in accepted:
             kwargs[arg] = locals()[arg]
     obj = driver_class(**kwargs)
-    task = getattr(obj, task)
-    node = task(dry_run=dry_run)
+    node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
             print(graph(node), file=f)

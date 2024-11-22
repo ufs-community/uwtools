@@ -64,7 +64,9 @@ def test_make_execute_cycle(execute_kwargs):
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
         assert func(**execute_kwargs, dry_run=True) is True
-        _execute.assert_called_once_with(driver_class=TestDriver, dry_run=True, leadtime=None, **execute_kwargs)
+        _execute.assert_called_once_with(
+            driver_class=TestDriver, dry_run=True, leadtime=None, **execute_kwargs
+        )
 
 
 def test_make_execute_cycle_leadtime(execute_kwargs):
