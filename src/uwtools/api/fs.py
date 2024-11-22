@@ -4,9 +4,9 @@ API access to ``uwtools`` file and directory management tools.
 
 import datetime as dt
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
-from iotaa import Asset
+import iotaa
 
 from uwtools.fs import Copier, Linker, MakeDirs
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
@@ -39,9 +39,9 @@ def copy(
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
-        dry_run=dry_run,
     )
-    assets: list[Asset] = stager.go()  # type: ignore
+    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
+    assets = cast(list[iotaa.Asset], iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
 
@@ -72,10 +72,10 @@ def link(
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
-        dry_run=dry_run,
     )
-    assets: list[Asset] = stager.go()  # type: ignore
-    return all(asset.ready() for asset in assets)
+    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
+    assets = cast(list[iotaa.Asset], iotaa.assets(node))
+    return all(asset.ready for asset in assets)
 
 
 def makedirs(
@@ -105,10 +105,10 @@ def makedirs(
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
-        dry_run=dry_run,
     )
-    assets: list[Asset] = stager.go()  # type: ignore
-    return all(asset.ready() for asset in assets)
+    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
+    assets = cast(list[iotaa.Asset], iotaa.assets(node))
+    return all(asset.ready for asset in assets)
 
 
 __all__ = ["Copier", "Linker", "MakeDirs", "copy", "link", "makedirs"]

@@ -62,7 +62,8 @@ def test_Copier_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    fs.Copier(target_dir=dstdir, config=cfgdict, keys=["a", "b"], dry_run=True).go()
+    copier = fs.Copier(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
+    copier.go(dry_run=True)  # pylint: disable=unexpected-keyword-arg
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
 
@@ -71,8 +72,8 @@ def test_Copier_no_targetdir_abspath_pass(assets):
     dstdir, cfgdict, _ = assets
     old = cfgdict["a"]["b"]
     cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
-    assets = fs.Copier(config=cfgdict).go()
-    assert all(asset.ready() for asset in assets)  # type: ignore
+    fs.Copier(config=cfgdict).go()
+    assert all(path.is_file() for path in [dstdir / "foo", dstdir / "bar"])
 
 
 def test_Copier_no_targetdir_relpath_fail(assets):
