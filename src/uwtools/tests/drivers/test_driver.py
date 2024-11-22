@@ -210,14 +210,6 @@ def test_Assets_cycle(config):
     assert obj.cycle == cycle
 
 
-# @mark.parametrize("val", (True, False))
-def test_Assets_dry_run():  # (config, val):
-    assert False
-    # with patch.object(driver, "dryrun") as dryrun:
-    #     ConcreteAssetsTimeInvariant(config=config)
-    #     dryrun.assert_called_once_with(enable=val)
-
-
 def test_Assets_key_path(config, tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.dump({"foo": {"bar": config}}))

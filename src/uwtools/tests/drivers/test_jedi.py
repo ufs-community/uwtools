@@ -127,7 +127,7 @@ def test_JEDI_driver_name(driverobj):
 
 
 def test_JEDI_files_copied(driverobj):
-    with patch.object(jedi_base, "filecopy") as filecopy:
+    with patch.object(jedi_base, "filecopy", wraps=jedi_base.filecopy) as filecopy:
         driverobj._config["rundir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
@@ -141,7 +141,7 @@ def test_JEDI_files_copied(driverobj):
 
 
 def test_JEDI_files_linked(driverobj):
-    with patch.object(jedi_base, "symlink") as symlink:
+    with patch.object(jedi_base, "symlink", wraps=jedi_base.symlink) as symlink:
         driverobj._config["rundir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2
