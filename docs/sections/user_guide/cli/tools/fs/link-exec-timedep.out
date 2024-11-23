@@ -1,11 +1,9 @@
-[2024-11-22T23:09:15]     INFO Validating config against internal schema: files-to-stage
-[2024-11-22T23:09:15]     INFO 0 UW schema-validation errors found in fs config
-[2024-11-22T23:09:16]     INFO Filesystem item src/20240529/12/006/baz: Ready
-[2024-11-22T23:09:16]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Executing
-[2024-11-22T23:09:16]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Ready
-[2024-11-22T23:09:16]  WARNING File links: Not ready
-[2024-11-22T23:09:16]  WARNING File links: Requires:
-[2024-11-22T23:09:16]  WARNING File links: ✔ Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz
+[2024-11-23T00:30:44]     INFO Validating config against internal schema: files-to-stage
+[2024-11-23T00:30:44]     INFO 0 UW schema-validation errors found in fs config
+[2024-11-23T00:30:44]     INFO Filesystem item src/20240529/12/006/baz: Ready
+[2024-11-23T00:30:44]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Executing
+[2024-11-23T00:30:44]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Ready
+[2024-11-23T00:30:44]     INFO File links: Ready
 
 link-dst-timedep
 └── baz-2024-05-29T18 -> ../src/20240529/12/006/baz

@@ -1,15 +1,12 @@
-[2024-11-22T23:09:13]     INFO Validating config against internal schema: files-to-stage
-[2024-11-22T23:09:13]     INFO 0 UW schema-validation errors found in fs config
-[2024-11-22T23:09:13]     INFO Filesystem item src/foo: Ready
-[2024-11-22T23:09:13]     INFO Filesystem item src/bar: Ready
-[2024-11-22T23:09:13]     INFO Link link-dst/foo -> src/foo: Executing
-[2024-11-22T23:09:13]     INFO Link link-dst/foo -> src/foo: Ready
-[2024-11-22T23:09:13]     INFO Link link-dst/subdir/bar -> src/bar: Executing
-[2024-11-22T23:09:13]     INFO Link link-dst/subdir/bar -> src/bar: Ready
-[2024-11-22T23:09:13]  WARNING File links: Not ready
-[2024-11-22T23:09:13]  WARNING File links: Requires:
-[2024-11-22T23:09:13]  WARNING File links: ✔ Link link-dst/foo -> src/foo
-[2024-11-22T23:09:13]  WARNING File links: ✔ Link link-dst/subdir/bar -> src/bar
+[2024-11-23T00:30:43]     INFO Validating config against internal schema: files-to-stage
+[2024-11-23T00:30:43]     INFO 0 UW schema-validation errors found in fs config
+[2024-11-23T00:30:44]     INFO Filesystem item src/foo: Ready
+[2024-11-23T00:30:44]     INFO Filesystem item src/bar: Ready
+[2024-11-23T00:30:44]     INFO Link link-dst/foo -> src/foo: Executing
+[2024-11-23T00:30:44]     INFO Link link-dst/foo -> src/foo: Ready
+[2024-11-23T00:30:44]     INFO Link link-dst/subdir/bar -> src/bar: Executing
+[2024-11-23T00:30:44]     INFO Link link-dst/subdir/bar -> src/bar: Ready
+[2024-11-23T00:30:44]     INFO File links: Ready
 
 link-dst
 ├── foo -> ../src/foo

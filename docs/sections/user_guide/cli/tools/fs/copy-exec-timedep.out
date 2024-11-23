@@ -1,11 +1,9 @@
-[2024-11-22T23:09:15]     INFO Validating config against internal schema: files-to-stage
-[2024-11-22T23:09:15]     INFO 0 UW schema-validation errors found in fs config
-[2024-11-22T23:09:16]     INFO File src/20240529/12/006/baz: Ready
-[2024-11-22T23:09:16]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Executing
-[2024-11-22T23:09:16]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Ready
-[2024-11-22T23:09:16]  WARNING File copies: Not ready
-[2024-11-22T23:09:16]  WARNING File copies: Requires:
-[2024-11-22T23:09:16]  WARNING File copies: ✔ Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18
+[2024-11-23T00:30:43]     INFO Validating config against internal schema: files-to-stage
+[2024-11-23T00:30:43]     INFO 0 UW schema-validation errors found in fs config
+[2024-11-23T00:30:44]     INFO File src/20240529/12/006/baz: Ready
+[2024-11-23T00:30:44]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Executing
+[2024-11-23T00:30:44]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Ready
+[2024-11-23T00:30:44]     INFO File copies: Ready
 
 copy-dst-timedep
 └── baz-2024-05-29T18
