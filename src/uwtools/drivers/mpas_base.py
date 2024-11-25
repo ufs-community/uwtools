@@ -62,14 +62,16 @@ class MPASBase(DriverCycleBased):
         Run directory provisioned with all required content.
         """
         yield self.taskname("provisioned run directory")
-        yield [
-            self.boundary_files(),
+        required = [
             self.files_copied(),
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),
             self.streams_file(),
         ]
+        if self.config["domain"] == "regional":
+            required.append(self.boundary_files())
+        yield required
 
     @task
     def streams_file(self):

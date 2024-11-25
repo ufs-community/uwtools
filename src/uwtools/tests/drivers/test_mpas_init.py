@@ -32,6 +32,7 @@ def config(tmp_path):
                 "offset": 0,
                 "path": str(tmp_path / "input_path"),
             },
+            "domain": "regional",
             "execution": {
                 "batchargs": {
                     "walltime": "01:30:00",
@@ -208,7 +209,9 @@ def test_MPASInit_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_MPASInit_provisioned_rundir(driverobj):
+@mark.parametrize("domain", ("global", "regional"))
+def test_MPASInit_provisioned_rundir(domain, driverobj):
+    driverobj._config["domain"] = domain
     with patch.multiple(
         driverobj,
         boundary_files=D,
@@ -219,8 +222,12 @@ def test_MPASInit_provisioned_rundir(driverobj):
         streams_file=D,
     ) as mocks:
         driverobj.provisioned_rundir()
+    excluded = ["boundary_files"] if domain == "global" else []
     for m in mocks:
-        mocks[m].assert_called_once_with()
+        if m in excluded:
+            mocks[m].assert_not_called()
+        else:
+            mocks[m].assert_called_once_with()
 
 
 def test_MPASInit_streams_file(config, driverobj):
