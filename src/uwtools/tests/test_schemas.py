@@ -862,6 +862,7 @@ def test_schema_filter_topo():
 
 def test_schema_fv3():
     config = {
+        "diag_table": {"template_file": "/path"},
         "domain": "regional",
         "execution": {"executable": "fv3"},
         "field_table": {"base_file": "/path"},
@@ -887,7 +888,6 @@ def test_schema_fv3():
     assert not errors(
         {
             **config,
-            "diag_table": "/path",
             "files_to_copy": {"fn": "/path"},
             "files_to_link": {"fn": "/path"},
             "model_configure": {"base_file": "/path"},
@@ -903,9 +903,9 @@ def test_schema_fv3():
 def test_schema_fv3_diag_table(fv3_prop):
     errors = fv3_prop("diag_table")
     # String value is ok:
-    assert not errors("/path/to/file")
+    assert not errors({"template_file": "/path/to/file", "template_values": {"foo": "bar"}})
     # Anything else is not:
-    assert "42 is not of type 'string'\n" in errors(42)
+    assert "42 is not of type 'object'\n" in errors(42)
 
 
 def test_schema_fv3_domain(fv3_prop):

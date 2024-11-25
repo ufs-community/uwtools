@@ -88,6 +88,16 @@ class Test_UWYAMLConvert:
     # demonstrate that those nodes' convert() methods return representations in type type specified
     # by the tag.
 
+    def test_bool_bad(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!bool", value="foo"))
+        with raises(KeyError):
+            ts.convert()
+
+    @mark.parametrize("value, expected", [("False", False), ("True", True)])
+    def test_bool_values(self, expected, loader, value):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!bool", value=value))
+        assert ts.convert() == expected
+
     def test_datetime_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!datetime", value="foo"))
         with raises(ValueError):

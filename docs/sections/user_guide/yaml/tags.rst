@@ -23,6 +23,23 @@ Or explicit:
 
 Additionally, UW defines the following tags to support use cases not covered by standard tags:
 
+``!bool``
+^^^^^^^^^
+
+Converts the tagged node to a Python ``boolean`` object. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   flag1: True
+   flag2: !bool "{{ flag1 }}"
+
+.. code-block:: text
+
+   % uw config realize -i ../input.yaml --output-format yaml
+   flag1: True
+   flag2: True
+
+
 ``!datetime``
 ^^^^^^^^^^^^^
 

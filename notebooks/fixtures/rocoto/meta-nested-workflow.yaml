@@ -1,0 +1,18 @@
+workflow:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledef:
+    - spec: 202410290000 202410300000 06:00:00
+  log: logs/test.log
+  tasks:
+    metatask_process:
+      var:
+        process: bake cool store
+      metatask_process_food:
+        var:
+          food: cookies cakes
+        task_#process#_#food#:
+          command: "echo It's time to #process# the #food#."
+          nodes: 1:ppn=4
+          walltime: 00:00:30

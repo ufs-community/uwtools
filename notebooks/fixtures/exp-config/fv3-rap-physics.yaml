@@ -1,0 +1,6 @@
+task_make_ics:
+  chgres_cube:
+    namelist:
+      update_values:
+        config:
+          varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt"

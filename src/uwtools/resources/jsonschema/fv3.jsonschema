@@ -20,7 +20,20 @@
       ],
       "properties": {
         "diag_table": {
-          "type": "string"
+          "additionalProperties": false,
+          "properties": {
+            "template_file": {
+              "type": "string"
+            },
+            "template_values": {
+              "minProperties": 1,
+              "type": "object"
+            }
+          },
+          "required": [
+            "template_file"
+          ],
+          "type": "object"
         },
         "domain": {
           "enum": [
@@ -142,6 +155,7 @@
         }
       },
       "required": [
+        "diag_table",
         "domain",
         "execution",
         "field_table",

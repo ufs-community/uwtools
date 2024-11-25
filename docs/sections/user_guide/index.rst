@@ -8,3 +8,5 @@ User Guide
    cli/index
    api/index
    yaml/index
+
+.. include:: /shared/binder_links.rst
