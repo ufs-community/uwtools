@@ -1364,7 +1364,6 @@ def test_schema_mpas_init(mpas_streams):
             "offset": 0,
             "path": "/path/to/bcs",
         },
-        "domain": "regional",
         "execution": {"executable": "mpas_init"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "rundir": "path/to/rundir",
@@ -1374,18 +1373,10 @@ def test_schema_mpas_init(mpas_streams):
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("domain", "execution", "namelist", "rundir", "streams"):
+    for key in ("execution", "namelist", "rundir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
-    # lateral_boundary_conditions are optional when domain is global:
-    assert not errors({**with_del(config, "boundary_conditions"), "domain": "global"})
-
-
-def test_schema_mpas_init_domain(mpas_prop):
-    errors = mpas_prop("domain")
-    # There is a fixed set of domain values:
-    assert "'foo' is not one of ['global', 'regional']" in errors("foo")
 
 
 def test_schema_mpas_init_boundary_conditions(mpas_init_prop):

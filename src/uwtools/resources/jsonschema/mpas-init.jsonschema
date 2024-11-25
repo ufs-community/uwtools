@@ -2,22 +2,6 @@
   "properties": {
     "mpas_init": {
       "additionalProperties": false,
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "domain": {
-                "const": "regional"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "boundary_conditions"
-            ]
-          }
-        }
-      ],
       "properties": {
         "boundary_conditions": {
           "additionalProperties": false,
@@ -45,13 +29,6 @@
             "path"
           ],
           "type": "object"
-        },
-        "domain": {
-          "enum": [
-            "global",
-            "regional"
-          ],
-          "type": "string"
         },
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
@@ -97,7 +74,6 @@
         }
       },
       "required": [
-        "domain",
         "execution",
         "namelist",
         "rundir",
