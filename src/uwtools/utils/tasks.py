@@ -46,13 +46,14 @@ def existing(path: Path):
 
 
 @external
-def file(path: Path, key_path: str = ""):
+def file(path: Path, pathstr: str = ""):
     """
     An existing file or symlink to an existing file.
 
     :param path: Path to the file.
     """
-    yield "File %s%s" % (path, key_path)
+    prefix = pathstr + ": " if pathstr else ""
+    yield "%sFile %s" % (prefix, path)
     yield asset(path, path.is_file)
 
 

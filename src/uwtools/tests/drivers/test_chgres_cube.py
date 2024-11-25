@@ -147,6 +147,16 @@ def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
+def test_ChgresCube_namelist_file_missing_base_file_path_logging(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
+    path = Path(refs(driverobj.namelist_file(log_path=True)))
+    assert not path.exists()
+    assert regex_logged(caplog, "namelist -> base_file: ")
+    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+
+
 def test_ChgresCube_output(driverobj):
     with raises(UWNotImplementedError) as e:
         assert driverobj.output

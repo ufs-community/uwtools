@@ -21,7 +21,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
     # Workflow tasks
 
     @task
-    def namelist_file(self):
+    def namelist_file(self, log_path: bool = False):
         """
         The namelist file.
         """
@@ -30,13 +30,18 @@ class ChgresCube(DriverCycleLeadtimeBased):
         path = self.rundir / fn
         yield asset(path, path.is_file)
         input_files = []
+        pathstr = ""
         namelist = self.config[STR.namelist]
         if base_file := namelist.get(STR.basefile):
-            input_files.append(base_file)
+            if log_path:
+                pathstr = " -> ".join([STR.namelist, STR.basefile])
+            input_files.append((pathstr, base_file))
         if update_values := namelist.get(STR.updatevalues):
             config_files = update_values["config"]
             for k in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
-                input_files.append(config_files[k])
+                if log_path:
+                    pathstr = " -> ".join([STR.namelist, STR.updatevalues, "config", k])
+                input_files.append((pathstr, config_files[k]))
             for k in [
                 "atm_core_files_input_grid",
                 "atm_files_input_grid",
@@ -48,10 +53,12 @@ class ChgresCube(DriverCycleLeadtimeBased):
                 if k in config_files:
                     grid_path = Path(config_files["data_dir_input_grid"])
                     v = config_files[k]
+                    if log_path:
+                        pathstr = " -> ".join([STR.namelist, STR.updatevalues, "config", k])
                     if isinstance(v, str):
-                        input_files.append(grid_path / v)
+                        input_files.append((pathstr, grid_path / v))
                     else:
-                        input_files.extend([grid_path / f for f in v])
+                        input_files.extend([(pathstr, grid_path / f) for f in v])
             for k in [
                 "orog_files_input_grid",
                 "orog_files_target_grid",
@@ -59,11 +66,13 @@ class ChgresCube(DriverCycleLeadtimeBased):
                 if k in config_files:
                     grid_path = Path(config_files[k.replace("files", "dir")])
                     v = config_files[k]
+                    if log_path:
+                        pathstr = " -> ".join([STR.namelist, STR.updatevalues, "config", k])
                     if isinstance(v, str):
-                        input_files.append(grid_path / v)
+                        input_files.append((pathstr, grid_path / v))
                     else:
-                        input_files.extend([grid_path / f for f in v])
-        yield [file(Path(input_file), key_path) for input_file, key_path in input_files]
+                        input_files.extend([(pathstr, grid_path / f) for f in v])
+        yield [file(Path(input_file), pathstr) for pathstr, input_file in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
