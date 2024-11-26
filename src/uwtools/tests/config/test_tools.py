@@ -255,7 +255,8 @@ def test_realize_config_double_tag(tmp_path):
     """
     with open(path_out, "r", encoding="utf-8") as f:
         assert f.read().strip() == dedent(expected).strip()
-    
+
+
 def test_realize_config_dry_run(caplog):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
