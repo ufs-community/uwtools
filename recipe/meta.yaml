@@ -12,6 +12,7 @@ build:
 requirements:
   build:
     - pip
+    - setuptools
   run:
     - f90nml 1.4.*
     - iotaa 0.8.*
