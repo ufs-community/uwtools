@@ -8,11 +8,12 @@ run_tests() {
   devpkgs=$(jq .packages.dev[] recipe/meta.json | tr -d ' "')
   conda create --yes --name $env --quiet python=$PYTHON_VERSION $devpkgs
   conda activate $env
+  . notebooks/install-deps
   set -x
   python --version
   git clean -dfx
   pip install --editable src # sets new Python version in entry-point scripts
-  make test
+  make test && make test-nb
   status=$?
   set +x
   conda deactivate

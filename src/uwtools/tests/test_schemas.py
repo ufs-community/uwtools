@@ -862,6 +862,7 @@ def test_schema_filter_topo():
 
 def test_schema_fv3():
     config = {
+        "diag_table": {"template_file": "/path"},
         "domain": "regional",
         "execution": {"executable": "fv3"},
         "field_table": {"base_file": "/path"},
@@ -887,7 +888,6 @@ def test_schema_fv3():
     assert not errors(
         {
             **config,
-            "diag_table": "/path",
             "files_to_copy": {"fn": "/path"},
             "files_to_link": {"fn": "/path"},
             "model_configure": {"base_file": "/path"},
@@ -903,9 +903,9 @@ def test_schema_fv3():
 def test_schema_fv3_diag_table(fv3_prop):
     errors = fv3_prop("diag_table")
     # String value is ok:
-    assert not errors("/path/to/file")
+    assert not errors({"template_file": "/path/to/file", "template_values": {"foo": "bar"}})
     # Anything else is not:
-    assert "42 is not of type 'string'\n" in errors(42)
+    assert "42 is not of type 'object'\n" in errors(42)
 
 
 def test_schema_fv3_domain(fv3_prop):
@@ -1254,7 +1254,9 @@ def test_schema_makedirs():
 
 def test_schema_mpas(mpas_streams):
     config = {
+        "domain": "regional",
         "execution": {"executable": "atmosphere_model"},
+        "lateral_boundary_conditions": {"interval_hours": 3, "offset": 3, "path": "/path/to/lbcs"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "rundir": "path/to/rundir",
         "streams": mpas_streams,
@@ -1263,10 +1265,18 @@ def test_schema_mpas(mpas_streams):
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "namelist", "rundir", "streams"):
+    for key in ("domain", "execution", "namelist", "rundir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # lateral_boundary_conditions are optional when domain is global:
+    assert not errors({**with_del(config, "lateral_boundary_conditions"), "domain": "global"})
+
+
+def test_schema_mpas_domain(mpas_prop):
+    errors = mpas_prop("domain")
+    # There is a fixed set of domain values:
+    assert "'foo' is not one of ['global', 'regional']" in errors("foo")
 
 
 def test_schema_mpas_lateral_boundary_conditions(mpas_prop):
@@ -1348,6 +1358,12 @@ def test_schema_mpas_rundir(mpas_prop):
 
 def test_schema_mpas_init(mpas_streams):
     config = {
+        "boundary_conditions": {
+            "interval_hours": 6,
+            "length": 12,
+            "offset": 0,
+            "path": "/path/to/bcs",
+        },
         "execution": {"executable": "mpas_init"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "rundir": "path/to/rundir",

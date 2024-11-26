@@ -17,11 +17,6 @@ An MPAS build provides prototype versions of certain required runtime files. Her
 UW YAML for the ``mpas_init:`` Block
 ------------------------------------
 
-execution:
-^^^^^^^^^^
-
-See :ref:`this page <execution_yaml>` for details.
-
 boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -42,6 +37,11 @@ Describes the boundary condition files needed for the forecast. These will most 
   **path:**
 
 An absolute path to the output of the ``ungrib`` tool that will be used to prepare MPAS-ready initial and lateral boundary conditions. The names of the files are specified in the ``streams.init_atmosphere`` XML file, and may be specified in the ``streams: values:`` block of the driver YAML.
+
+execution:
+^^^^^^^^^^
+
+See :ref:`this page <execution_yaml>` for details.
 
 files_to_copy:
 ^^^^^^^^^^^^^^

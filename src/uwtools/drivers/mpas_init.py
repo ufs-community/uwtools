@@ -68,6 +68,21 @@ class MPASInit(MPASBase):
             schema=self.namelist_schema(),
         )
 
+    @tasks
+    def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
+        yield self.taskname("provisioned run directory")
+        yield [
+            self.boundary_files(),
+            self.files_copied(),
+            self.files_linked(),
+            self.namelist_file(),
+            self.runscript(),
+            self.streams_file(),
+        ]
+
     # Public helper methods
 
     @classmethod

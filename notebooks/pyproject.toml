@@ -1,0 +1,21 @@
+[tool.black]
+line-length = 100
+
+[tool.isort]
+line_length = 100
+profile = "black"
+
+[tool.pylint.main]
+recursive = true
+
+[tool.pylint."messages control"]
+disable = [
+  "missing-function-docstring",
+  "missing-module-docstring",
+]
+enable = [
+  "useless-suppression",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]

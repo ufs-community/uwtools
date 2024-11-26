@@ -1,0 +1,3 @@
+file1-copy.nml: fixtures/fs/file1.nml
+data/file2-copy.txt: fixtures/fs/file2.txt
+data/file3-copy.csv: fixtures/fs/file3.csv

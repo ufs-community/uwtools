@@ -17,15 +17,20 @@ An MPAS build provides prototype versions of certain required runtime files. Her
 UW YAML for the ``mpas:`` Block
 -------------------------------
 
+domain:
+^^^^^^^
+
+Accepted values are ``global`` and ``regional``.
+
 execution:
 ^^^^^^^^^^
 
 See :ref:`this page <execution_yaml>` for details.
 
-boundary_conditions:
-^^^^^^^^^^^^^^^^^^^^
+lateral_boundary_conditions:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Describes the boundary condition files needed for the forecast. These will be the output from the ``init_atmosphere`` executable, which may be run using the ``mpas_init`` UW driver. Please see its documentation :ref:`here <mpas_init_yaml>`.
+Describes the boundary condition files needed for a regional forecast. This section is not used when ``domain`` is set to ``global``. These will be the output from the ``init_atmosphere`` executable, which may be run using the ``mpas_init`` UW driver. Please see its documentation :ref:`here <mpas_init_yaml>`.
 
   **interval_hours:**
 

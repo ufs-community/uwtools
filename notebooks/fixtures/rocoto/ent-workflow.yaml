@@ -1,0 +1,14 @@
+workflow:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledef:
+    - spec: 202410290000 202410300000 06:00:00
+  entities:
+    LOG: "2024-10-29/test06:00:00.log"
+  log: logs/&LOG;
+  tasks:
+    task_greet:
+      command: echo Hello, World!
+      cores: 1
+      walltime: 00:00:10

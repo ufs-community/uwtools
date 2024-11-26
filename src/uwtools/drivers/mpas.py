@@ -5,7 +5,7 @@ A driver for the MPAS Atmosphere component.
 from datetime import timedelta
 from pathlib import Path
 
-from iotaa import asset, task
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
@@ -65,6 +65,23 @@ class MPAS(MPASBase):
             path=path,
             schema=self.namelist_schema(),
         )
+
+    @tasks
+    def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
+        yield self.taskname("provisioned run directory")
+        required = [
+            self.files_copied(),
+            self.files_linked(),
+            self.namelist_file(),
+            self.runscript(),
+            self.streams_file(),
+        ]
+        if self.config["domain"] == "regional":
+            required.append(self.boundary_files())
+        yield required
 
     # Public helper methods
 

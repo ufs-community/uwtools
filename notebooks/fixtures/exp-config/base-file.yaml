@@ -1,0 +1,27 @@
+task_make_ics:
+  chgres_cube:
+    execution:
+      executable: "execdir/chgres_cube"
+    namelist:
+      update_values:
+        config:
+          cycle_day: !int "{{ cycle.strftime('%d') }}"
+          cycle_hour: !int "{{ cycle.strftime('%H') }}"
+          cycle_mon: !int "{{ cycle.strftime('%m') }}"
+          convert_atm: true
+          convert_nst: true
+          convert_sfc: true
+          data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
+          external_model: "GFS"
+          input_type: "gaussian_nemsio"
+          mosaic_file_target_grid: "path/to/example_mosaic.halo.nc"
+          tg3_from_soil: false
+          tracers:
+            - sphum
+            - liq_wat
+          tracers_input:
+            - spfh
+            - clwmr
+          varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
+          vcoord_file_target_grid: "path/to/global_hyblev.165.txt"
+    rundir: '{{ workflow.EXPTDIR }}/make_ics'
