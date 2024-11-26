@@ -32,10 +32,12 @@ class ChgresCube(DriverCycleLeadtimeBased):
         input_files = []
         namelist = self.config[STR.namelist]
         if base_file := namelist.get(STR.basefile):
-            input_files.append((base_file, STR.basefile))
+            pathstr = ".".join([STR.namelist, STR.basefile])
+            input_files.append((base_file, pathstr))
         if update_values := namelist.get(STR.updatevalues):
             config_files = update_values["config"]
             for k in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
+                pathstr = ".".join(["config", k])
                 input_files.append((config_files[k], k))
             for k in [
                 "atm_core_files_input_grid",
@@ -48,10 +50,11 @@ class ChgresCube(DriverCycleLeadtimeBased):
                 if k in config_files:
                     grid_path = Path(config_files["data_dir_input_grid"])
                     v = config_files[k]
+                    pathstr = ".".join(["config", k])
                     if isinstance(v, str):
-                        input_files.append((grid_path / v, k))
+                        input_files.append((grid_path / v, pathstr))
                     else:
-                        input_files.extend([(grid_path / f, k) for f in v])
+                        input_files.extend([(grid_path / f, pathstr) for f in v])
             for k in [
                 "orog_files_input_grid",
                 "orog_files_target_grid",
@@ -59,10 +62,11 @@ class ChgresCube(DriverCycleLeadtimeBased):
                 if k in config_files:
                     grid_path = Path(config_files[k.replace("files", "dir")])
                     v = config_files[k]
+                    pathstr = ".".join(["config", k])
                     if isinstance(v, str):
-                        input_files.append((grid_path / v, k))
+                        input_files.append((grid_path / v, pathstr))
                     else:
-                        input_files.extend([(grid_path / f, k) for f in v])
+                        input_files.extend([(grid_path / f, pathstr) for f in v])
         yield [file(Path(input_file), pathstr) for input_file, pathstr in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
