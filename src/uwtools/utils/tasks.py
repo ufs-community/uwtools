@@ -53,7 +53,7 @@ def file(path: Path, context: str = ""):
     :param path: Path to the file.
     :param context: Optional additional context for the file.
     """
-    suffix = " (" + context + ")" if context else ""
+    suffix = f" ({context})" if context else ""
     yield "File %s%s" % (path, suffix)
     yield asset(path, path.is_file)
 
