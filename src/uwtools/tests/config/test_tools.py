@@ -235,6 +235,27 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
         )
 
 
+def test_realize_config_double_tag(tmp_path):
+    config = """
+    a: 2
+    b: 7
+    foo: !int "{{ a * b }}"
+    bar: !int "{{ foo }}"
+    """
+    path_in = tmp_path / "in.yaml"
+    path_out = tmp_path / "out.yaml"
+    with open(path_in, "w", encoding="utf-8") as f:
+        print(dedent(config).strip(), file=f)
+    tools.realize_config(input_config=path_in, output_file=path_out)
+    expected = """
+    a: 2
+    b: 7
+    foo: 14
+    bar: 14
+    """
+    with open(path_out, "r", encoding="utf-8") as f:
+        assert f.read().strip() == dedent(expected).strip()
+    
 def test_realize_config_dry_run(caplog):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
