@@ -26,7 +26,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
         The namelist file.
         """
 
-        def update_input_files(k):
+        def update_input_files(k, config_files, input_files):
             v = config_files[k]
             context = ".".join(["config", k])
             if isinstance(v, str):
@@ -58,14 +58,14 @@ class ChgresCube(DriverCycleLeadtimeBased):
             ]:
                 if k in config_files:
                     grid_path = Path(config_files["data_dir_input_grid"])
-                    update_input_files(k)
+                    update_input_files(k, config_files, input_files)
             for k in [
                 "orog_files_input_grid",
                 "orog_files_target_grid",
             ]:
                 if k in config_files:
                     grid_path = Path(config_files[k.replace("files", "dir")])
-                    update_input_files(k)
+                    update_input_files(k, config_files, input_files)
         yield [file(Path(input_file), context) for input_file, context in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
