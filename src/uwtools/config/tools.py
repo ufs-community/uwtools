@@ -121,7 +121,7 @@ def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
     pathstr = "<unknown>"
     for key in key_path:
         keys.append(key)
-        pathstr = " -> ".join(keys)
+        pathstr = ".".join(keys)
         try:
             subconfig = config[key]
         except KeyError as e:

@@ -109,7 +109,7 @@ def test_Stager__config_block_fail_bad_key_path(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
         ConcreteStager(target_dir=dstdir, config=config, keys=["a", "x"])
-    assert str(e.value) == "Failed following YAML key(s): a -> x"
+    assert str(e.value) == "Failed following YAML key(s): a.x"
 
 
 @mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
