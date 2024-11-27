@@ -235,7 +235,7 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
         )
 
 
-def test_realize_config_double_tag(tmp_path):
+def test_realize_config_double_tag_flat(tmp_path):
     config = """
     a: 1
     b: 2
@@ -252,6 +252,30 @@ def test_realize_config_double_tag(tmp_path):
     b: 2
     foo: 3
     bar: 3
+    """
+    with open(path_out, "r", encoding="utf-8") as f:
+        assert f.read().strip() == dedent(expected).strip()
+
+
+def test_realize_config_double_tag_nest(tmp_path):
+    config = """
+    a: 1
+    b: 2
+    qux:
+      foo: !int "{{ a + b }}"
+      bar: !int "{{ foo }}"
+    """
+    path_in = tmp_path / "in.yaml"
+    path_out = tmp_path / "out.yaml"
+    with open(path_in, "w", encoding="utf-8") as f:
+        print(dedent(config).strip(), file=f)
+    tools.realize_config(input_config=path_in, output_file=path_out)
+    expected = """
+    a: 1
+    b: 2
+    qux:
+      foo: 3
+      bar: 3
     """
     with open(path_out, "r", encoding="utf-8") as f:
         assert f.read().strip() == dedent(expected).strip()
