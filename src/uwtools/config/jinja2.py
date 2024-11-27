@@ -278,7 +278,7 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     try:
         rendered = _register_filters(env).from_string(val).render(context)
         if isinstance(yaml.safe_load(rendered), UWYAMLConvert):
-            raise UWConfigRealizeError(f"Rendering deferred: {rendered}")
+            raise UWConfigRealizeError(f"Rendering delayed: {rendered}")
         _deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught
         rendered = val
