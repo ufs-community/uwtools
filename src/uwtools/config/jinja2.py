@@ -132,10 +132,9 @@ def dereference(
             else:
                 kd, vd = [dereference(x, context, {**val, **rendered}, [*keys, k]) for x in (k, v)]
                 rendered[kd] = vd
-        return rendered
-    if isinstance(val, list):
-        return [dereference(v, context) for v in val]
-    if isinstance(val, str):
+    elif isinstance(val, list):
+        rendered = [dereference(v, context) for v in val]
+    elif isinstance(val, str):
         _deref_debug("Rendering", val)
         rendered = _deref_render(val, context, local)
     elif isinstance(val, UWYAMLConvert):
