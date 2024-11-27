@@ -10,9 +10,9 @@ from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
     UWYAMLConvert,
-    UWYAMLRemove,
     from_od,
     log_and_error,
+    uw_yaml_loader,
     yaml_to_str,
 )
 from uwtools.exceptions import UWConfigError
@@ -158,7 +158,7 @@ class YAMLConfig(Config):
         """
         A loader with all UW constructors added.
         """
-        loader = self.loader()
+        loader = uw_yaml_loader()
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
         return loader
 
@@ -188,17 +188,6 @@ class YAMLConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-    @staticmethod
-    def loader() -> type[yaml.SafeLoader]:
-        """
-        A loader with basic UW constructors added.
-        """
-        loader = yaml.SafeLoader
-        for tag_class in (UWYAMLConvert, UWYAMLRemove):
-            for tag in getattr(tag_class, "TAGS"):
-                loader.add_constructor(tag, tag_class)
-        return loader
 
 
 def _write_plain_open_ended(self, *args, **kwargs) -> None:

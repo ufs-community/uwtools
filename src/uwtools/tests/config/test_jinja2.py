@@ -16,9 +16,8 @@ from jinja2 import DebugUndefined, Environment, TemplateNotFound, UndefinedError
 from pytest import fixture, mark, raises
 
 from uwtools.config import jinja2
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import UWYAMLConvert, UWYAMLRemove
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, uw_yaml_loader
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -317,7 +316,7 @@ def test__deref_debug(caplog):
 
 
 def test__deref_render_held(caplog):
-    val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=YAMLConfig.loader())
+    val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=uw_yaml_loader())
     assert jinja2._deref_render(val=val, context=context) == val
     assert not regex_logged(caplog, "Rendered")
     assert regex_logged(caplog, "Held")
