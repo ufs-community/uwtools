@@ -141,7 +141,7 @@ def test_dereference_remove(caplog):
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
     assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
-    assert regex_logged(caplog, "Removing value at: a > b > d")
+    assert regex_logged(caplog, "Removing value at: a.b.d")
 
 
 def test_dereference_str_expression_rendered():
