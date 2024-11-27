@@ -11,7 +11,7 @@ from typing import Optional, Union
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config, walk_key_path
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
@@ -122,7 +122,6 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
-    assert walk_key_path is not None  # PM RM
     rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
