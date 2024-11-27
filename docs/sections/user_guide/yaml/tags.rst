@@ -95,7 +95,7 @@ and ``constants.yaml``:
      e: 2.718
      pi: 3.141
 
-Values from files later in the sequence overwrite their predecessors, and full-value replacement, not structural merging, is performed. For example, giben ``numbers.yaml``:
+Values from files later in the sequence overwrite their predecessors, and full-value replacement, not structural merging, is performed. For example, given ``numbers.yaml``:
 
 .. code-block:: yaml
 
