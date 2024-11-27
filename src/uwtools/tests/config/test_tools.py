@@ -263,36 +263,36 @@ def test_realize_config_double_tag_flat(tmp_path):
 
 def test_realize_config_double_tag_nest(tmp_path):
     config = """
-    a: 1
-    b: 2
+    a: 1.0
+    b: 2.0
     qux:
-      foo: !int "{{ a + b }}"
-      bar: !int "{{ foo }}"
+      foo: !float "{{ a + b }}"
+      bar: !float "{{ foo }}"
     """
     expected = """
-    a: 1
-    b: 2
+    a: 1.0
+    b: 2.0
     qux:
-      foo: 3
-      bar: 3
+      foo: 3.0
+      bar: 3.0
     """
     help_realize_config_double_tag(config, expected, tmp_path)
 
 
 def test_realize_config_double_tag_nest_forwrad_reference(tmp_path):
     config = """
-    a: 1
-    b: 2
-    bar: !int "{{ qux.foo }}"
+    a: true
+    b: false
+    bar: !bool "{{ qux.foo }}"
     qux:
-      foo: !int "{{ a + b }}"
+      foo: !bool "{{ a or b }}"
     """
     expected = """
-    a: 1
-    b: 2
-    bar: 3
+    a: true
+    b: false
+    bar: true
     qux:
-      foo: 3
+      foo: true
     """
     help_realize_config_double_tag(config, expected, tmp_path)
 
