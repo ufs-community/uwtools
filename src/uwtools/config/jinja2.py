@@ -8,10 +8,12 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional, Union
 
+import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
+from uwtools.exceptions import UWConfigRealizeError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
@@ -275,6 +277,8 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     context = {**(local or {}), **context}
     try:
         rendered = _register_filters(env).from_string(val).render(context)
+        if isinstance(yaml.safe_load(rendered), UWYAMLConvert):
+            raise UWConfigRealizeError(f"Rendering deferred: {rendered}")
         _deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught
         rendered = val

@@ -281,6 +281,30 @@ def test_realize_config_double_tag_nest(tmp_path):
         assert f.read().strip() == dedent(expected).strip()
 
 
+def test_realize_config_double_tag_nest_reverse(tmp_path):
+    config = """
+    a: 1
+    b: 2
+    bar: !int "{{ qux.foo }}"
+    qux:
+      foo: !int "{{ a + b }}"
+    """
+    path_in = tmp_path / "in.yaml"
+    path_out = tmp_path / "out.yaml"
+    with open(path_in, "w", encoding="utf-8") as f:
+        print(dedent(config).strip(), file=f)
+    tools.realize_config(input_config=path_in, output_file=path_out)
+    expected = """
+    a: 1
+    b: 2
+    bar: 3
+    qux:
+      foo: 3
+    """
+    with open(path_out, "r", encoding="utf-8") as f:
+        assert f.read().strip() == dedent(expected).strip()
+
+
 def test_realize_config_dry_run(caplog):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
