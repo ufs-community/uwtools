@@ -26,7 +26,7 @@ Additionally, UW defines the following tags to support use cases not covered by 
 ``!bool``
 ^^^^^^^^^
 
-Converts the tagged node to a Python ``boolean`` object. For example, given ``input.yaml``:
+Converts the tagged node to a Python ``bool`` object. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 
