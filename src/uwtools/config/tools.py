@@ -7,7 +7,7 @@ from typing import Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
-from uwtools.config.support import depth, format_to_config, log_and_error
+from uwtools.config.support import depth, format_to_config, log_and_error, walk_key_path
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
@@ -107,29 +107,6 @@ def realize_config(
     output_class = format_to_config(output_format)
     output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
-
-
-def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
-    """
-    Navigate to the sub-config at the end of the path of given keys.
-
-    :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
-    :return: The sub-config and a string representation of the key path.
-    """
-    keys = []
-    pathstr = "<unknown>"
-    for key in key_path:
-        keys.append(key)
-        pathstr = ".".join(keys)
-        try:
-            subconfig = config[key]
-        except KeyError as e:
-            raise log_and_error(f"Bad config path: {pathstr}") from e
-        if not isinstance(subconfig, dict):
-            raise log_and_error(f"Value at {pathstr} must be a dictionary")
-        config = subconfig
-    return config, pathstr
 
 
 # Private functions

@@ -18,7 +18,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.tools import walk_key_path
+from uwtools.config.support import walk_key_path
 from uwtools.config.validator import (
     bundle,
     internal_schema_file,
