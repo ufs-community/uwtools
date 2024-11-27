@@ -130,7 +130,9 @@ def dereference(
             if isinstance(v, UWYAMLRemove):
                 _deref_debug("Removing value at", " > ".join([*keys, k]))
             else:
-                new[dereference(k, context)] = dereference(v, context, local=val, keys=[*keys, k])
+                k_deref = dereference(k, context)
+                v_deref = dereference(v, context, local=val, keys=[*keys, k])
+                new[k_deref] = v_deref
         return new
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
