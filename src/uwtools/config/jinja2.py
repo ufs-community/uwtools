@@ -122,6 +122,7 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
+    assert walk_key_path is not None  # PM RM
     rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
@@ -130,7 +131,15 @@ def dereference(
             if isinstance(v, UWYAMLRemove):
                 _deref_debug("Removing value at", ".".join([*keys, k]))
             else:
-                kd, vd = [dereference(x, context, {**val, **rendered}, [*keys, k]) for x in (k, v)]
+                kd, vd = [
+                    dereference(
+                        val=x,
+                        context={**context, **rendered} if context == val else context,
+                        local={**val, **rendered},
+                        keys=[*keys, k],
+                    )
+                    for x in (k, v)
+                ]
                 rendered[kd] = vd
     elif isinstance(val, list):
         rendered = [dereference(v, context) for v in val]
