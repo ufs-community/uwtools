@@ -133,7 +133,12 @@ def dereference(
                 _deref_debug("Removing value at", ".".join([*keys, k]))
             else:
                 kd, vd = [
-                    dereference(val=x, context=context, local={**val, **rendered}, keys=[*keys, k])
+                    dereference(
+                        val=x,
+                        context=context,
+                        local={**val, **rendered},
+                        keys=[*keys, k],
+                    )
                     for x in (k, v)
                 ]
                 rendered[kd] = vd
