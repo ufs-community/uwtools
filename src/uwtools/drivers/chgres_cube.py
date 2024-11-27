@@ -25,6 +25,15 @@ class ChgresCube(DriverCycleLeadtimeBased):
         """
         The namelist file.
         """
+
+        def update_input_files(k, config_files, input_files):
+            v = config_files[k]
+            context = ".".join(["config", k])
+            if isinstance(v, str):
+                input_files.append((grid_path / v, context))
+            else:
+                input_files.extend([(grid_path / f, context) for f in v])
+
         fn = "fort.41"
         yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
@@ -32,11 +41,13 @@ class ChgresCube(DriverCycleLeadtimeBased):
         input_files = []
         namelist = self.config[STR.namelist]
         if base_file := namelist.get(STR.basefile):
-            input_files.append(base_file)
+            context = ".".join([STR.namelist, STR.basefile])
+            input_files.append((base_file, context))
         if update_values := namelist.get(STR.updatevalues):
             config_files = update_values["config"]
             for k in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
-                input_files.append(config_files[k])
+                context = ".".join(["config", k])
+                input_files.append((config_files[k], context))
             for k in [
                 "atm_core_files_input_grid",
                 "atm_files_input_grid",
@@ -47,23 +58,15 @@ class ChgresCube(DriverCycleLeadtimeBased):
             ]:
                 if k in config_files:
                     grid_path = Path(config_files["data_dir_input_grid"])
-                    v = config_files[k]
-                    if isinstance(v, str):
-                        input_files.append(grid_path / v)
-                    else:
-                        input_files.extend([grid_path / f for f in v])
+                    update_input_files(k, config_files, input_files)
             for k in [
                 "orog_files_input_grid",
                 "orog_files_target_grid",
             ]:
                 if k in config_files:
                     grid_path = Path(config_files[k.replace("files", "dir")])
-                    v = config_files[k]
-                    if isinstance(v, str):
-                        input_files.append(grid_path / v)
-                    else:
-                        input_files.extend([grid_path / f for f in v])
-        yield [file(Path(input_file)) for input_file in input_files]
+                    update_input_files(k, config_files, input_files)
+        yield [file(Path(input_file), context) for input_file, context in input_files]
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,

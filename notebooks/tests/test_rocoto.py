@@ -20,9 +20,9 @@ def test_building_simple_workflow():
         assert tb.cell_output_text(11) == err_yaml
         err_out = (
             "ERROR 3 UW schema-validation errors found",
-            "ERROR Error at workflow -> attrs:",
+            "ERROR Error at workflow.attrs:",
             "ERROR   'realtime' is a required property",
-            "ERROR Error at workflow -> tasks -> task_greet:",
+            "ERROR Error at workflow.tasks.task_greet:",
             "ERROR   'command' is a required property",
             "ERROR Error at workflow:",
             "ERROR   'log' is a required property",

@@ -83,7 +83,7 @@ class Stager(ABC):
         for key in self._keys:
             nav.append(key)
             if key not in cfg:
-                raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
+                raise UWConfigError("Failed following YAML key(s): %s" % ".".join(nav))
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):
