@@ -16,7 +16,7 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
@@ -59,23 +59,6 @@ def test_log_and_error(caplog):
         raise support.log_and_error(msg)
     assert msg in str(e.value)
     assert logged(caplog, msg)
-
-
-def test_walk_key_path_fail_bad_key_path():
-    with raises(UWError) as e:
-        support.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "x"])
-    assert str(e.value) == "Bad config path: a.x"
-
-
-def test_walk_key_path_fail_bad_leaf_value():
-    with raises(UWError) as e:
-        support.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b", "c"])
-    assert str(e.value) == "Value at a.b.c must be a dictionary"
-
-
-def test_walk_key_path_pass():
-    expected = ({"c": "cherry"}, "a.b")
-    assert support.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b"]) == expected
 
 
 def test_yaml_to_str(capsys):
