@@ -122,17 +122,17 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
-    rendered: _ConfigVal = val  # fall-back value
+    rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
-        new: dict = {}
+        rendered = {}
         for k, v in val.items():
             if isinstance(v, UWYAMLRemove):
                 _deref_debug("Removing value at", ".".join([*keys, k]))
             else:
-                kd, vd = [dereference(x, context, {**val, **new}, [*keys, k]) for x in (k, v)]
-                new[kd] = vd
-        return new
+                kd, vd = [dereference(x, context, {**val, **rendered}, [*keys, k]) for x in (k, v)]
+                rendered[kd] = vd
+        return rendered
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
@@ -144,6 +144,7 @@ def dereference(
         rendered = _deref_convert(val)
     else:
         _deref_debug("Accepting", val)
+        rendered = val
     return rendered
 
 
