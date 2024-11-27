@@ -94,10 +94,9 @@ class YAMLConfig(Config):
 
         :param config_file: Path to config file to load.
         """
-        loader = self._yaml_loader
         with readable(config_file) as f:
             try:
-                config = yaml.load(f.read(), Loader=loader)
+                config = yaml.load(f.read(), Loader=self._yaml_loader)
                 if isinstance(config, dict):
                     return config
                 t = type(config).__name__
@@ -157,13 +156,10 @@ class YAMLConfig(Config):
     @property
     def _yaml_loader(self) -> type[yaml.SafeLoader]:
         """
-        The loader, with appropriate constructors added.
+        A loader with all UW constructors added.
         """
-        loader = yaml.SafeLoader
+        loader = self.loader()
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
-        for tag_class in (UWYAMLConvert, UWYAMLRemove):
-            for tag in getattr(tag_class, "TAGS"):
-                loader.add_constructor(tag, tag_class)
         return loader
 
     # Public methods
@@ -192,6 +188,17 @@ class YAMLConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
+
+    @staticmethod
+    def loader() -> type[yaml.SafeLoader]:
+        """
+        A loader with basic UW constructors added.
+        """
+        loader = yaml.SafeLoader
+        for tag_class in (UWYAMLConvert, UWYAMLRemove):
+            for tag in getattr(tag_class, "TAGS"):
+                loader.add_constructor(tag, tag_class)
+        return loader
 
 
 def _write_plain_open_ended(self, *args, **kwargs) -> None:
