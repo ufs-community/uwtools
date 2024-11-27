@@ -237,9 +237,9 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
 
 def test_realize_config_double_tag(tmp_path):
     config = """
-    a: 2
-    b: 7
-    foo: !int "{{ a * b }}"
+    a: 1
+    b: 2
+    foo: !int "{{ a + b }}"
     bar: !int "{{ foo }}"
     """
     path_in = tmp_path / "in.yaml"
@@ -248,10 +248,10 @@ def test_realize_config_double_tag(tmp_path):
         print(dedent(config).strip(), file=f)
     tools.realize_config(input_config=path_in, output_file=path_out)
     expected = """
-    a: 2
-    b: 7
-    foo: 14
-    bar: 14
+    a: 1
+    b: 2
+    foo: 3
+    bar: 3
     """
     with open(path_out, "r", encoding="utf-8") as f:
         assert f.read().strip() == dedent(expected).strip()
