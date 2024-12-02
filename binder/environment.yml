@@ -4,3 +4,4 @@ channels:
   - ufs-community
 dependencies:
   - uwtools
+  - tree
