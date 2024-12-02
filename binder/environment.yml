@@ -3,5 +3,5 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
-  - uwtools
   - tree
+  - uwtools
