@@ -143,7 +143,7 @@ def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml (namelist.base_file): Not Ready [external asset]")
+    assert regex_logged(caplog, "missing.nml (namelist.base_file): Not ready [external asset]")
 
 
 def test_ChgresCube_output(driverobj):

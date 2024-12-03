@@ -49,5 +49,3 @@ disable = [
 enable = [
   "useless-suppression",
 ]
-
-[tool.pytest.ini_options]
