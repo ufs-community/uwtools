@@ -41,7 +41,7 @@ def copy(
         keys=keys,
     )
     node = stager.go(dry_run=dry_run)
-    assets = cast(list[iotaa.Asset], iotaa.assets(node))
+    assets = cast(list, iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
 
@@ -74,7 +74,7 @@ def link(
         keys=keys,
     )
     node = stager.go(dry_run=dry_run)
-    assets = cast(list[iotaa.Asset], iotaa.assets(node))
+    assets = cast(list, iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
 
@@ -107,7 +107,7 @@ def makedirs(
         keys=keys,
     )
     node = stager.go(dry_run=dry_run)
-    assets = cast(list[iotaa.Asset], iotaa.assets(node))
+    assets = cast(list, iotaa.assets(node))
     return all(asset.ready for asset in assets)
 
 
