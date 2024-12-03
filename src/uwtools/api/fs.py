@@ -40,7 +40,7 @@ def copy(
         leadtime=leadtime,
         keys=keys,
     )
-    node = stager.go(dry_run=dry_run)
+    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
     assets = cast(list, iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
@@ -73,7 +73,7 @@ def link(
         leadtime=leadtime,
         keys=keys,
     )
-    node = stager.go(dry_run=dry_run)
+    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
     assets = cast(list, iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
@@ -106,7 +106,7 @@ def makedirs(
         leadtime=leadtime,
         keys=keys,
     )
-    node = stager.go(dry_run=dry_run)
+    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
     assets = cast(list, iotaa.assets(node))
     return all(asset.ready for asset in assets)
 
