@@ -18,7 +18,7 @@ def copy(
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
-    dry_run: bool = False,
+    dry_run: bool = False,  # pylint: disable=unused-argument
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -40,7 +40,7 @@ def copy(
         leadtime=leadtime,
         keys=keys,
     )
-    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
+    node = stager.go(dry_run=dry_run)
     assets = cast(list, iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
@@ -51,7 +51,7 @@ def link(
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
-    dry_run: bool = False,
+    dry_run: bool = False,  # pylint: disable=unused-argument
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -73,7 +73,7 @@ def link(
         leadtime=leadtime,
         keys=keys,
     )
-    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
+    node = stager.go(dry_run=dry_run)
     assets = cast(list, iotaa.assets(node))
     return all(asset.ready() for asset in assets)
 
@@ -84,7 +84,7 @@ def makedirs(
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
-    dry_run: bool = False,
+    dry_run: bool = False,  # pylint: disable=unused-argument
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -106,7 +106,7 @@ def makedirs(
         leadtime=leadtime,
         keys=keys,
     )
-    node = stager.go(dry_run=dry_run)  # pylint: disable=unexpected-keyword-arg
+    node = stager.go(dry_run=dry_run)
     assets = cast(list, iotaa.assets(node))
     return all(asset.ready for asset in assets)
 
