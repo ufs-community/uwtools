@@ -8,10 +8,12 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional, Union
 
+import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config, uw_yaml_loader
+from uwtools.exceptions import UWConfigRealizeError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
@@ -122,19 +124,19 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
-    rendered: _ConfigVal = val  # fall-back value
+    rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
-        new = {}
+        rendered = {}
         for k, v in val.items():
             if isinstance(v, UWYAMLRemove):
-                _deref_debug("Removing value at", " > ".join([*keys, k]))
+                _deref_debug("Removing value at", ".".join([*keys, k]))
             else:
-                new[dereference(k, context)] = dereference(v, context, local=val, keys=[*keys, k])
-        return new
-    if isinstance(val, list):
-        return [dereference(v, context) for v in val]
-    if isinstance(val, str):
+                kd, vd = [dereference(x, context, val, [*keys, k]) for x in (k, v)]
+                rendered[kd] = vd
+    elif isinstance(val, list):
+        rendered = [dereference(v, context) for v in val]
+    elif isinstance(val, str):
         _deref_debug("Rendering", val)
         rendered = _deref_render(val, context, local)
     elif isinstance(val, UWYAMLConvert):
@@ -143,6 +145,7 @@ def dereference(
         rendered = _deref_convert(val)
     else:
         _deref_debug("Accepting", val)
+        rendered = val
     return rendered
 
 
@@ -266,6 +269,9 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     context = {**(local or {}), **context}
     try:
         rendered = _register_filters(env).from_string(val).render(context)
+        if isinstance(yaml.load(rendered, Loader=uw_yaml_loader()), UWYAMLConvert):
+            _deref_debug("Held", rendered)
+            raise UWConfigRealizeError()
         _deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught
         rendered = val

@@ -59,6 +59,16 @@ def realize_config_yaml_input(tmp_path):
 # Helpers
 
 
+def help_realize_config_double_tag(config, expected, tmp_path):
+    path_in = tmp_path / "in.yaml"
+    path_out = tmp_path / "out.yaml"
+    with open(path_in, "w", encoding="utf-8") as f:
+        print(dedent(config).strip(), file=f)
+    tools.realize_config(input_config=path_in, output_file=path_out)
+    with open(path_out, "r", encoding="utf-8") as f:
+        assert f.read().strip() == dedent(expected).strip()
+
+
 def help_realize_config_fmt2fmt(input_file, input_format, update_file, update_format, tmpdir):
     input_file = fixture_path(input_file)
     update_file = fixture_path(update_file)
@@ -233,6 +243,58 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
             input_format=FORMAT.yaml,
             output_format=FORMAT.sh,
         )
+
+
+def test_realize_config_double_tag_flat(tmp_path):
+    config = """
+    a: 1
+    b: 2
+    foo: !int "{{ a + b }}"
+    bar: !int "{{ foo }}"
+    """
+    expected = """
+    a: 1
+    b: 2
+    foo: 3
+    bar: 3
+    """
+    help_realize_config_double_tag(config, expected, tmp_path)
+
+
+def test_realize_config_double_tag_nest(tmp_path):
+    config = """
+    a: 1.0
+    b: 2.0
+    qux:
+      foo: !float "{{ a + b }}"
+      bar: !float "{{ foo }}"
+    """
+    expected = """
+    a: 1.0
+    b: 2.0
+    qux:
+      foo: 3.0
+      bar: 3.0
+    """
+    help_realize_config_double_tag(config, expected, tmp_path)
+
+
+def test_realize_config_double_tag_nest_forwrad_reference(tmp_path):
+    config = """
+    a: true
+    b: false
+    bar: !bool "{{ qux.foo }}"
+    qux:
+      foo: !bool "{{ a or b }}"
+    """
+    expected = """
+    a: true
+    b: false
+    bar: true
+    qux:
+      foo: true
+    """
+    help_realize_config_double_tag(config, expected, tmp_path)
 
 
 def test_realize_config_dry_run(caplog):

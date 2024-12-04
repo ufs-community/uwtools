@@ -17,7 +17,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import UWYAMLConvert, UWYAMLRemove
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, uw_yaml_loader
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -141,7 +141,7 @@ def test_dereference_remove(caplog):
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
     assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
-    assert regex_logged(caplog, "Removing value at: a > b > d")
+    assert regex_logged(caplog, "Removing value at: a.b.d")
 
 
 def test_dereference_str_expression_rendered():
@@ -313,6 +313,13 @@ def test__deref_debug(caplog):
     log.setLevel(logging.DEBUG)
     jinja2._deref_debug(action="Frobnicated", val="foo")
     assert logged(caplog, "[dereference] Frobnicated: foo")
+
+
+def test__deref_render_held(caplog):
+    val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=uw_yaml_loader())
+    assert jinja2._deref_render(val=val, context=context) == val
+    assert not regex_logged(caplog, "Rendered")
+    assert regex_logged(caplog, "Held")
 
 
 def test__deref_render_no(caplog, deref_render_assets):
