@@ -10,9 +10,9 @@ from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
     UWYAMLConvert,
-    UWYAMLRemove,
     from_od,
     log_and_error,
+    uw_yaml_loader,
     yaml_to_str,
 )
 from uwtools.exceptions import UWConfigError
@@ -94,10 +94,9 @@ class YAMLConfig(Config):
 
         :param config_file: Path to config file to load.
         """
-        loader = self._yaml_loader
         with readable(config_file) as f:
             try:
-                config = yaml.load(f.read(), Loader=loader)
+                config = yaml.load(f.read(), Loader=self._yaml_loader)
                 if isinstance(config, dict):
                     return config
                 t = type(config).__name__
@@ -157,13 +156,10 @@ class YAMLConfig(Config):
     @property
     def _yaml_loader(self) -> type[yaml.SafeLoader]:
         """
-        The loader, with appropriate constructors added.
+        A loader with all UW constructors added.
         """
-        loader = yaml.SafeLoader
+        loader = uw_yaml_loader()
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
-        for tag_class in (UWYAMLConvert, UWYAMLRemove):
-            for tag in getattr(tag_class, "TAGS"):
-                loader.add_constructor(tag, tag_class)
         return loader
 
     # Public methods
