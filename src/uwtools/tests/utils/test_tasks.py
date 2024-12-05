@@ -1,14 +1,16 @@
 # pylint: disable=missing-function-docstring
 
+import logging
 import os
 import stat
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from iotaa import asset, external
 from pytest import mark, raises
 
 from uwtools.exceptions import UWConfigError
+from uwtools.tests.support import logged
 from uwtools.utils import tasks
 
 # Helpers
@@ -49,36 +51,53 @@ def test_tasks_executable(tmp_path):
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_existing_local_missing(prefix, tmp_path):
+def test_tasks_existing_local_missing(caplog, prefix, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     base = tmp_path / "x"
     path = prefix + str(base) if prefix else base
     assert not ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: State: Not Ready (external asset)" % base)
 
 
-def test_tasks_existing_local_present_directory(tmp_path):
+def test_tasks_existing_local_present_directory(caplog, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     path = tmp_path / "directory"
     path.mkdir()
     assert ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: State: Ready" % path)
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_existing_local_present_file(prefix, tmp_path):
+def test_tasks_existing_local_present_file(caplog, prefix, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     base = tmp_path / "file"
     base.touch()
     path = prefix + str(base) if prefix else base
     assert ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: State: Ready" % base)
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_existing_local_present_symlink(prefix, tmp_path):
+def test_tasks_existing_local_present_symlink(caplog, prefix, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     base = tmp_path / "symlink"
     base.symlink_to(os.devnull)
     path = prefix + str(base) if prefix else base
     assert ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: State: Ready" % base)
 
 
-def test_tasks_existing_remote():
-    pass  # PM FIXME
+@mark.parametrize("scheme", ["http", "https"])
+@mark.parametrize("code,expected", [(200, True), (404, False)])
+def test_tasks_existing_remote(caplog, code, expected, scheme):
+    logging.getLogger().setLevel(logging.INFO)
+    path = f"{scheme}://foo.com/obj"
+    with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
+        state = ready(tasks.existing(path=path))
+        assert state is expected
+    head.assert_called_with(path, allow_redirects=True, timeout=3)
+    msg = "Remote object %s: State: %s" % (path, "Ready" if state else "Not Ready (external asset)")
+    assert logged(caplog, msg)
 
 
 def test_tasks_file_missing(tmp_path):

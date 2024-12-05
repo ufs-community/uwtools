@@ -58,7 +58,7 @@ def existing(path: Union[Path, str]):
     elif scheme in SCHEMES.http:
         path = str(path)
         ready = lambda: requests.head(path, allow_redirects=True, timeout=3).status_code == 200
-        yield "Remote item %s" % path
+        yield "Remote object %s" % path
         yield asset(path, ready)
     else:
         _bad_scheme(scheme)
