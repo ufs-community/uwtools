@@ -5,12 +5,16 @@ Common iotaa tasks.
 import os
 from pathlib import Path
 from shutil import copy, which
-from typing import Union
+from types import SimpleNamespace as ns
+from typing import NoReturn, Union
 from urllib.parse import urlparse
 
+import requests
 from iotaa import asset, external, task
 
 from uwtools.exceptions import UWConfigError
+
+SCHEMES = ns(http=("http", "https"), local=("", "file"))
 
 
 @task
@@ -38,14 +42,24 @@ def executable(program: Union[Path, str]):
 
 
 @external
-def existing(path: Path):
+def existing(path: Union[Path, str]):
     """
-    An existing filesystem item (file, directory, or symlink).
+    An existing file, directory, symlink, or remote object.
 
     :param path: Path to the item.
+    :raises: UWConfigError for unsupported URL schemes.
     """
-    yield "Filesystem item %s" % path
-    yield asset(path, path.exists)
+    scheme = urlparse(str(path)).scheme
+    if scheme in SCHEMES.local:
+        path = Path(path)
+        yield "Filesystem item %s" % path
+        yield asset(path, path.exists)
+    elif scheme in SCHEMES.http:
+        path = str(path)
+        yield "Remote item %s" % path
+        yield asset(path, lambda: requests.head(path, timeout=5).status_code == 200)
+    else:
+        _bad_scheme(scheme)
 
 
 @external
@@ -61,17 +75,6 @@ def file(path: Path, context: str = ""):
     yield asset(path, path.is_file)
 
 
-# >>> urlparse("path/to/file")
-# ParseResult(scheme='', netloc='', path='path/to/file', params='', query='', fragment='')
-# >>> urlparse("/path/to/file")
-# ParseResult(scheme='', netloc='', path='/path/to/file', params='', query='', fragment='')
-# >>> urlparse("file:///path/to/file")
-# ParseResult(scheme='file', netloc='', path='/path/to/file', params='', query='', fragment='')
-# >>> urlparse("https://foo.com/path/to/file")
-# ParseResult(scheme='https', netloc='foo.com', path='/path/to/file', params='', query='',
-#   fragment='')
-
-
 @task
 def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     """
@@ -79,17 +82,21 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
 
     :param src: Path to the source file.
     :param dst: Path to the destination file to create.
+    :raises: UWConfigError for unsupported URL schemes.
     """
     yield "Copy %s -> %s" % (src, dst)
     yield asset(Path(dst), Path(dst).is_file)
+    dst = Path(dst)  # currently no support for remote destinations
     scheme = urlparse(str(src)).scheme
-    if scheme in ("", "file"):
-        src, dst = map(Path, [src, dst])
+    if scheme in SCHEMES.local:
+        src = Path(src)
         yield file(src)
         dst.parent.mkdir(parents=True, exist_ok=True)
         copy(src, dst)
+    elif scheme in SCHEMES.http:
+        pass
     else:
-        raise UWConfigError(f"Support for scheme '{scheme}' not implemented")
+        _bad_scheme(scheme)
 
 
 @task
@@ -108,3 +115,16 @@ def symlink(target: Path, linkname: Path):
         src=target if target.is_absolute() else os.path.relpath(target, linkname.parent),
         dst=linkname,
     )
+
+
+# Private helpers
+
+
+def _bad_scheme(scheme: str) -> NoReturn:
+    """
+    Fail on an unsupported URL scheme.
+
+    :param scheme: The scheme.
+    :raises: UWConfigError.
+    """
+    raise UWConfigError(f"Support for scheme '{scheme}' not implemented")
