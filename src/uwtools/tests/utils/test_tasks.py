@@ -100,6 +100,13 @@ def test_tasks_existing_remote(caplog, code, expected, scheme):
     assert logged(caplog, msg)
 
 
+def test_tasks_existing_bad_scheme():
+    path = "foo://bucket/a/b"
+    with raises(UWConfigError) as e:
+        tasks.existing(path=path)
+    assert str(e.value) == "Support for scheme 'foo' not implemented"
+
+
 def test_tasks_file_missing(tmp_path):
     path = tmp_path / "file"
     assert not ready(tasks.file(path=path))
