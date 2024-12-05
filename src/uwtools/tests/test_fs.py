@@ -99,39 +99,64 @@ def test_fs_Linker(assets, source):
 
 
 @mark.parametrize(
-    "path,target_dir,msg",
+    "path,target_dir,msg,fail_expected",
     [
         (
             "/other/path",
             "/some/path",
             "Path '%s' must be relative when target directory is specified",
+            True,
         ),
         (
             "s3://bucket/a/b",
             None,
             "Non-filesystem destination path '%s' not currently supported",
+            True,
         ),
         (
             "relpath",
             None,
             "Relative path '%s' requires target directory to be specified",
+            True,
         ),
         (
             "file://foo.com/a/b",
             "/some/path",
             "Non-filesystem path '%s' invalid when target directory is specified",
+            True,
+        ),
+        (
+            "other/path",
+            "/some/path",
+            None,
+            False,
+        ),
+        (
+            "other/path",
+            "file:///some/path",
+            None,
+            False,
         ),
     ],
 )
-def test_fs_Stager__check_destination_paths_fail(path, target_dir, msg):
+def test_fs_Stager__check_destination_paths_fail(path, target_dir, msg, fail_expected):
     obj = Mock(_dst_paths=[path], _target_dir=target_dir)
-    with raises(UWConfigError) as e:
-        fs.Stager._check_destination_paths(obj)
-    assert str(e.value) == msg % path
+    if fail_expected:
+        with raises(UWConfigError) as e:
+            fs.Stager._check_destination_paths(obj)
+        assert str(e.value) == msg % path
 
 
-def test_fs_Stager__check_target_dir_fail_bad_scheme():
-    pass
+@mark.parametrize(
+    "path,fail_expected",
+    [("s3://bucket/a/b", True), ("/some/path", False), ("file:///some/path", False)],
+)
+def test_fs_Stager__check_target_dir_fail_bad_scheme(path, fail_expected):
+    obj = Mock(_target_dir="s3://bucket/a/b")
+    if fail_expected:
+        with raises(UWConfigError) as e:
+            fs.Stager._check_target_dir(obj)
+        assert str(e.value) == "Non-filesystem path '%s' invalid as target directory" % path
 
 
 @mark.parametrize("source", ("dict", "file"))

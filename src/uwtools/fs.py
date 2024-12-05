@@ -58,7 +58,7 @@ class Stager(ABC):
         self._config = yaml_config.data
         self._set_config_block()
         self._validate()
-        # self._check_target_dir()
+        self._check_target_dir()
         self._check_destination_paths()
 
     def _check_destination_paths(self) -> None:
@@ -89,7 +89,11 @@ class Stager(ABC):
 
         :raises: UWConfigError when a bad path is detected.
         """
-        if self._target_dir and (scheme := urlparse(self._target_dir).scheme) and scheme != "file":
+        if (
+            self._target_dir
+            and (scheme := urlparse(str(self._target_dir)).scheme)
+            and scheme != "file"
+        ):
             msg = "Non-filesystem path '%s' invalid as target directory"
             raise UWConfigError(msg % self._target_dir)
 
