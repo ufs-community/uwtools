@@ -164,14 +164,31 @@ class Copier(FileStager):
     Stage files by copying.
     """
 
+    # >>> urlparse("path/to/file")
+    # ParseResult(scheme='', netloc='', path='path/to/file', params='', query='', fragment='')
+    # >>> urlparse("/path/to/file")
+    # ParseResult(scheme='', netloc='', path='/path/to/file', params='', query='', fragment='')
+    # >>> urlparse("file:///path/to/file")
+    # ParseResult(scheme='file', netloc='', path='/path/to/file', params='', query='', fragment='')
+    # >>> urlparse("https://foo.com/path/to/file")
+    # ParseResult(scheme='https', netloc='foo.com',
+    #   path='/path/to/file', params='', query='', fragment='')
+
     @tasks
     def go(self):
         """
         Copy files.
         """
-        dst = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._config.items()]
+        reqs = []
+        for dst, src in self._config.items():
+            dst = Path((self._target_dir or "")) / dst
+            info = {x: urlparse(str(x)) for x in (dst, src)}
+            dst, src = [
+                Path(info[x].path) if info[x].scheme == "file" else Path(x) for x in (dst, src)
+            ]
+            reqs.append(filecopy(src=src, dst=dst))
+        yield reqs
 
 
 class Linker(FileStager):

@@ -3,7 +3,8 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
-from unittest.mock import Mock
+from pathlib import Path
+from unittest.mock import Mock, patch
 
 import iotaa
 import yaml
@@ -60,6 +61,18 @@ def test_fs_Copier(assets, source):
     fs.Copier(target_dir=dstdir, config=config, keys=["a", "b"]).go()
     assert (dstdir / "foo").is_file()
     assert (dstdir / "subdir" / "bar").is_file()
+
+
+@mark.parametrize(
+    "dst,target_dir",
+    [("/dst/file", None), ("file:///dst/file", None), ("file", "/dst"), ("file", "file:///dst")],
+)
+def test_fs_Copier_scheme_file(dst, target_dir):
+    src = "/src/file"
+    obj = Mock(_config={dst: src}, _target_dir=target_dir)
+    with patch.object(fs, "filecopy") as filecopy:
+        fs.Copier.go(obj)
+        filecopy.assert_called_once_with(src=Path(src), dst=Path("/dst/file"))
 
 
 def test_fs_Copier_config_file_dry_run(assets):
