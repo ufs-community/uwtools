@@ -130,14 +130,6 @@ def test_fs_Stager__check_destination_paths_fail_scheme_with_target_dir():
     assert str(e.value) == f"Path '{path}' invalid when target directory is specified"
 
 
-# def test_fs_Copier_no_targetdir_relpath_fail(assets):
-#     _, cfgdict, _ = assets
-#     with raises(UWConfigError) as e:
-#         fs.Copier(config=cfgdict, keys=["a", "b"]).go()
-#     errmsg = "Relative path '%s' requires target directory to be specified"
-#     assert errmsg % "foo" in str(e.value)
-
-
 @mark.parametrize("source", ("dict", "file"))
 def test_fs_Stager__config_block_fail_bad_key_path(assets, source):
     dstdir, cfgdict, cfgfile = assets
