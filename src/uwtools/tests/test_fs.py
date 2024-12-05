@@ -49,7 +49,7 @@ class ConcreteStager(fs.Stager):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_Copier(assets, source):
+def test_fs_Copier(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -59,7 +59,7 @@ def test_Copier(assets, source):
     assert (dstdir / "subdir" / "bar").is_file()
 
 
-def test_Copier_config_file_dry_run(assets):
+def test_fs_Copier_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
@@ -69,7 +69,7 @@ def test_Copier_config_file_dry_run(assets):
     iotaa.dryrun(False)
 
 
-def test_Copier_no_targetdir_abspath_pass(assets):
+def test_fs_Copier_no_targetdir_abspath_pass(assets):
     dstdir, cfgdict, _ = assets
     old = cfgdict["a"]["b"]
     cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
@@ -77,23 +77,23 @@ def test_Copier_no_targetdir_abspath_pass(assets):
     assert all(asset.ready() for asset in assets)  # type: ignore
 
 
-def test_Copier_no_targetdir_relpath_fail(assets):
+def test_fs_Copier_no_targetdir_relpath_fail(assets):
     _, cfgdict, _ = assets
     with raises(UWConfigError) as e:
         fs.Copier(config=cfgdict, keys=["a", "b"]).go()
-    errmsg = "Relative path '%s' requires the target directory to be specified"
+    errmsg = "Relative path '%s' requires target directory to be specified"
     assert errmsg % "foo" in str(e.value)
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_FilerStager(assets, source):
+def test_fs_FilerStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert fs.FileStager(target_dir=dstdir, config=config, keys=["a", "b"])
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_Linker(assets, source):
+def test_fs_Linker(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -104,7 +104,7 @@ def test_Linker(assets, source):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_Stager__config_block_fail_bad_key_path(assets, source):
+def test_fs_Stager__config_block_fail_bad_key_path(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
@@ -113,7 +113,7 @@ def test_Stager__config_block_fail_bad_key_path(assets, source):
 
 
 @mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
-def test_Stager__config_block_fails_bad_type(assets, val):
+def test_fs_Stager__config_block_fails_bad_type(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:

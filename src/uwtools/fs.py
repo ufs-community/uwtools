@@ -6,6 +6,7 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Union
+from urllib.parse import urlparse
 
 from iotaa import dryrun, tasks
 
@@ -57,20 +58,34 @@ class Stager(ABC):
         self._config = yaml_config.data
         self._set_config_block()
         self._validate()
-        self._check_paths()
+        self._check_destination_paths()
 
-    def _check_paths(self) -> None:
+    def _check_destination_paths(self) -> None:
         """
-        Check that all paths are absolute if no target directory is specified.
+        Check that destination paths are valid.
 
-        :parm paths: The paths to check.
-        :raises: UWConfigError if no target directory is specified and a relative path is.
+        :raises: UWConfigError when a bad path is detected.
         """
-        if not self._target_dir:
-            errmsg = "Relative path '%s' requires the target directory to be specified"
-            for dst in self._dst_paths:
-                if not Path(dst).is_absolute():
-                    raise UWConfigError(errmsg % dst)
+        msg = [
+            "Path '%s' invalid when target directory is specified",
+            "Non-filesystem destination path '%s' not currently supported",
+            "Relative path '%s' requires target directory to be specified",
+        ]
+        errors = []
+        report = lambda dst, i: errors.append(msg[i] % dst)
+        for dst in self._dst_paths:
+            scheme = urlparse(dst).scheme
+            if self._target_dir:
+                if scheme:
+                    report(dst, 0)
+            else:
+                if scheme and scheme != "file":
+                    report(dst, 1)
+                else:
+                    if not Path(dst).is_absolute():
+                        report(dst, 2)
+        if errors:
+            raise UWConfigError("\n".join(errors))
 
     def _set_config_block(self) -> None:
         """
