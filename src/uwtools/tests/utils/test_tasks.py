@@ -136,6 +136,20 @@ def test_tasks_filecopy_directory_hierarchy(tmp_path):
     assert dst.is_file()
 
 
+def test_tasks_filecopy_source_http(tmp_path):
+    src = "http://foo.com/obj"
+    dst = tmp_path / "a-file"
+    assert not dst.is_file()
+    with patch.object(tasks, "existing", exists):
+        with patch.object(tasks, "requests") as requests:
+            response = requests.get()
+            response.status_code = 200
+            response.content = "data".encode("utf-8")
+            tasks.filecopy(src=src, dst=dst)
+        requests.get.assert_called_with(src, allow_redirects=True, timeout=3)
+    assert dst.is_file()
+
+
 @mark.parametrize(
     "src,ok",
     [("/src/file", True), ("file:///src/file", True), ("foo://bucket/a/b", False)],
