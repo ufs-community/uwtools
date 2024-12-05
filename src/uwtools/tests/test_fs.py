@@ -64,15 +64,26 @@ def test_fs_Copier(assets, source):
 
 
 @mark.parametrize(
-    "dst,target_dir",
-    [("/dst/file", None), ("file:///dst/file", None), ("file", "/dst"), ("file", "file:///dst")],
+    "dst,src,target_dir",
+    [
+        ("/dst/file", "/src/file", None),
+        ("file:///dst/file", "/src/file", None),
+        ("file", "/src/file", "/dst"),
+        ("file", "/src/file", "file:///dst"),
+    ],
 )
-def test_fs_Copier_scheme_file(dst, target_dir):
-    src = "/src/file"
+def test_fs_Copier_schemes(dst, src, target_dir):
     obj = Mock(_config={dst: src}, _target_dir=target_dir)
     with patch.object(fs, "filecopy") as filecopy:
         fs.Copier.go(obj)
         filecopy.assert_called_once_with(src=Path(src), dst=Path("/dst/file"))
+
+
+def test_fs_Copier_schemes_fail():
+    obj = Mock(_config={"/dst/file": "foo://x/y/z"}, _target_dir=None)
+    with raises(UWConfigError) as e:
+        fs.Copier.go(obj)
+    assert str(e.value) == "Support for scheme 'foo' not implemented"
 
 
 def test_fs_Copier_config_file_dry_run(assets):

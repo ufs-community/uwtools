@@ -184,10 +184,11 @@ class Copier(FileStager):
         for dst, src in self._config.items():
             dst = Path((self._target_dir or "")) / dst
             info = {x: urlparse(str(x)) for x in (dst, src)}
-            dst, src = [
-                Path(info[x].path) if info[x].scheme == "file" else Path(x) for x in (dst, src)
-            ]
-            reqs.append(filecopy(src=src, dst=dst))
+            dst, src = [info[x].path if info[x].scheme == "file" else x for x in (dst, src)]
+            if (scheme := info[src].scheme) in ("", "file"):
+                reqs.append(filecopy(src=Path(src), dst=Path(dst)))
+            else:
+                raise UWConfigError(f"Support for scheme '{scheme}' not implemented")
         yield reqs
 
 
