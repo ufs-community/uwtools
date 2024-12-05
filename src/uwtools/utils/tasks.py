@@ -14,7 +14,6 @@ from iotaa import asset, external, task
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.utils.file import writable
 
 SCHEMES = ns(http=("http", "https"), local=("", "file"))
 
@@ -102,7 +101,7 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
         yield existing(src)
         response = requests.get(src, allow_redirects=True, timeout=3)
         if (code := response.status_code) == 200:
-            with writable(dst) as f:
+            with open(dst, "wb") as f:
                 f.write(response.content)
         else:
             log.error("Could not get '%s', HTTP status was: %s", src, code)
