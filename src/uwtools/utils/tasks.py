@@ -49,9 +49,10 @@ def existing(path: Union[Path, str]):
     :param path: Path to the item.
     :raises: UWConfigError for unsupported URL schemes.
     """
-    scheme = urlparse(str(path)).scheme
+    info = urlparse(str(path))
+    scheme = info.scheme
     if scheme in SCHEMES.local:
-        path = Path(path)
+        path = Path(info.path if scheme == "file" else path)
         yield "Filesystem item %s" % path
         yield asset(path, path.exists)
     elif scheme in SCHEMES.http:

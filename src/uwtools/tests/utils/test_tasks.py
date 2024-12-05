@@ -48,27 +48,37 @@ def test_tasks_executable(tmp_path):
         assert ready(tasks.executable(program=p))
 
 
-def test_tasks_existing_missing(tmp_path):
-    path = tmp_path / "x"
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_existing_local_missing(prefix, tmp_path):
+    base = tmp_path / "x"
+    path = prefix + str(base) if prefix else base
     assert not ready(tasks.existing(path=path))
 
 
-def test_tasks_existing_present_directory(tmp_path):
+def test_tasks_existing_local_present_directory(tmp_path):
     path = tmp_path / "directory"
     path.mkdir()
     assert ready(tasks.existing(path=path))
 
 
-def test_tasks_existing_present_file(tmp_path):
-    path = tmp_path / "file"
-    path.touch()
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_existing_local_present_file(prefix, tmp_path):
+    base = tmp_path / "file"
+    base.touch()
+    path = prefix + str(base) if prefix else base
     assert ready(tasks.existing(path=path))
 
 
-def test_tasks_existing_present_symlink(tmp_path):
-    path = tmp_path / "symlink"
-    path.symlink_to(os.devnull)
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_existing_local_present_symlink(prefix, tmp_path):
+    base = tmp_path / "symlink"
+    base.symlink_to(os.devnull)
+    path = prefix + str(base) if prefix else base
     assert ready(tasks.existing(path=path))
+
+
+def test_tasks_existing_remote():
+    pass  # PM FIXME
 
 
 def test_tasks_file_missing(tmp_path):
