@@ -55,10 +55,10 @@ def existing(path: Union[Path, str]):
         yield "Filesystem item %s" % path
         yield asset(path, path.exists)
     elif scheme in SCHEMES.http:
-        okcodes = (200, 301)
         path = str(path)
+        ready = lambda: requests.head(path, allow_redirects=True, timeout=3).status_code == 200
         yield "Remote item %s" % path
-        yield asset(path, lambda: requests.head(path, timeout=3).status_code in okcodes)
+        yield asset(path, ready)
     else:
         _bad_scheme(scheme)
 
