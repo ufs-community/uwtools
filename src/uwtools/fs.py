@@ -164,16 +164,6 @@ class Copier(FileStager):
     Stage files by copying.
     """
 
-    # >>> urlparse("path/to/file")
-    # ParseResult(scheme='', netloc='', path='path/to/file', params='', query='', fragment='')
-    # >>> urlparse("/path/to/file")
-    # ParseResult(scheme='', netloc='', path='/path/to/file', params='', query='', fragment='')
-    # >>> urlparse("file:///path/to/file")
-    # ParseResult(scheme='file', netloc='', path='/path/to/file', params='', query='', fragment='')
-    # >>> urlparse("https://foo.com/path/to/file")
-    # ParseResult(scheme='https', netloc='foo.com',
-    #   path='/path/to/file', params='', query='', fragment='')
-
     @tasks
     def go(self):
         """
@@ -185,11 +175,7 @@ class Copier(FileStager):
             dst = Path((self._target_dir or "")) / dst
             info = {x: urlparse(str(x)) for x in (dst, src)}
             dst, src = [info[x].path if info[x].scheme == "file" else x for x in (dst, src)]
-            scheme = info[src].scheme
-            if scheme in ("", "file"):
-                reqs.append(filecopy(src=Path(src), dst=Path(dst)))
-            else:
-                raise UWConfigError(f"Support for scheme '{scheme}' not implemented")
+            reqs.append(filecopy(src=src, dst=dst))
         yield reqs
 
 

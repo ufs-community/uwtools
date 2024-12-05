@@ -6,8 +6,11 @@ import os
 from pathlib import Path
 from shutil import copy, which
 from typing import Union
+from urllib.parse import urlparse
 
 from iotaa import asset, external, task
+
+from uwtools.exceptions import UWConfigError
 
 
 @task
@@ -58,8 +61,19 @@ def file(path: Path, context: str = ""):
     yield asset(path, path.is_file)
 
 
+# >>> urlparse("path/to/file")
+# ParseResult(scheme='', netloc='', path='path/to/file', params='', query='', fragment='')
+# >>> urlparse("/path/to/file")
+# ParseResult(scheme='', netloc='', path='/path/to/file', params='', query='', fragment='')
+# >>> urlparse("file:///path/to/file")
+# ParseResult(scheme='file', netloc='', path='/path/to/file', params='', query='', fragment='')
+# >>> urlparse("https://foo.com/path/to/file")
+# ParseResult(scheme='https', netloc='foo.com', path='/path/to/file', params='', query='',
+#   fragment='')
+
+
 @task
-def filecopy(src: Path, dst: Path):
+def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     """
     A copy of an existing file.
 
@@ -67,10 +81,15 @@ def filecopy(src: Path, dst: Path):
     :param dst: Path to the destination file to create.
     """
     yield "Copy %s -> %s" % (src, dst)
-    yield asset(dst, dst.is_file)
-    yield file(src)
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    copy(src, dst)
+    yield asset(Path(dst), Path(dst).is_file)
+    scheme = urlparse(str(src)).scheme
+    if scheme in ("", "file"):
+        src, dst = map(Path, [src, dst])
+        yield file(src)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        copy(src, dst)
+    else:
+        raise UWConfigError(f"Support for scheme '{scheme}' not implemented")
 
 
 @task

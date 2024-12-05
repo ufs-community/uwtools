@@ -2,11 +2,22 @@
 
 import os
 import stat
+from pathlib import Path
 from unittest.mock import patch
 
+from iotaa import asset, external
+from pytest import mark, raises
+
+from uwtools.exceptions import UWConfigError
 from uwtools.utils import tasks
 
 # Helpers
+
+
+@external
+def exists(x):
+    yield x
+    yield asset(x, lambda: True)
 
 
 def ready(taskval):
@@ -87,6 +98,25 @@ def test_tasks_filecopy_directory_hierarchy(tmp_path):
     assert not dst.is_file()
     tasks.filecopy(src=src, dst=dst)
     assert dst.is_file()
+
+
+@mark.parametrize(
+    "src,ok",
+    [("/src/file", True), ("file:///src/file", True), ("foo://bucket/a/b", False)],
+)
+def test_tasks_filecopy_source_local(src, ok):
+    dst = "/dst/file"
+    if ok:
+        with patch.object(tasks, "file", exists):
+            with patch.object(tasks, "copy") as copy:
+                with patch.object(tasks.Path, "mkdir") as mkdir:
+                    tasks.filecopy(src=src, dst=dst)
+        mkdir.assert_called_once_with(parents=True, exist_ok=True)
+        copy.assert_called_once_with(Path(src), Path(dst))
+    else:
+        with raises(UWConfigError) as e:
+            tasks.filecopy(src=src, dst=dst)
+        assert str(e.value) == "Support for scheme 'foo' not implemented"
 
 
 def test_tasks_symlink_simple(tmp_path):

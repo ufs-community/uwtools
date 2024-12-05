@@ -3,8 +3,7 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
-from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import iotaa
 import yaml
@@ -63,29 +62,6 @@ def test_fs_Copier(assets, source):
     assert (dstdir / "subdir" / "bar").is_file()
 
 
-@mark.parametrize(
-    "dst,src,target_dir",
-    [
-        ("/dst/file", "/src/file", None),
-        ("file:///dst/file", "/src/file", None),
-        ("file", "/src/file", "/dst"),
-        ("file", "/src/file", "file:///dst"),
-    ],
-)
-def test_fs_Copier_schemes(dst, src, target_dir):
-    obj = Mock(_config={dst: src}, _target_dir=target_dir)
-    with patch.object(fs, "filecopy") as filecopy:
-        fs.Copier.go(obj)
-        filecopy.assert_called_once_with(src=Path(src), dst=Path("/dst/file"))
-
-
-def test_fs_Copier_schemes_fail():
-    obj = Mock(_config={"/dst/file": "foo://x/y/z"}, _target_dir=None)
-    with raises(UWConfigError) as e:
-        fs.Copier.go(obj)
-    assert str(e.value) == "Support for scheme 'foo' not implemented"
-
-
 def test_fs_Copier_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
@@ -132,7 +108,7 @@ def test_fs_Linker(assets, source):
             True,
         ),
         (
-            "s3://bucket/a/b",
+            "foo://bucket/a/b",
             None,
             "Non-filesystem destination path '%s' not currently supported",
             True,
@@ -163,10 +139,10 @@ def test_fs_Stager__check_destination_paths_fail(path, target_dir, msg, fail_exp
 
 @mark.parametrize(
     "path,fail_expected",
-    [("s3://bucket/a/b", True), ("/some/path", False), ("file:///some/path", False)],
+    [("foo://bucket/a/b", True), ("/some/path", False), ("file:///some/path", False)],
 )
 def test_fs_Stager__check_target_dir_fail_bad_scheme(path, fail_expected):
-    obj = Mock(_target_dir="s3://bucket/a/b")
+    obj = Mock(_target_dir="foo://bucket/a/b")
     if fail_expected:
         with raises(UWConfigError) as e:
             fs.Stager._check_target_dir(obj)
