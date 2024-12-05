@@ -103,7 +103,7 @@ def test_fs_Stager__check_destination_paths_fail_absolute_with_target_dir():
     obj = Mock(_dst_paths=[path], _target_dir="/some/path")
     with raises(UWConfigError) as e:
         fs.Stager._check_destination_paths(obj)
-    assert str(e.value) == f"When target directory is specified, path '{path}' must be relative"
+    assert str(e.value) == f"Path '{path}' must be relative when target directory is specified"
 
 
 def test_fs_Stager__check_destination_paths_fail_bad_scheme():
@@ -127,7 +127,9 @@ def test_fs_Stager__check_destination_paths_fail_scheme_with_target_dir():
     obj = Mock(_dst_paths=[path], _target_dir="/some/path")
     with raises(UWConfigError) as e:
         fs.Stager._check_destination_paths(obj)
-    assert str(e.value) == f"Path '{path}' invalid when target directory is specified"
+    assert (
+        str(e.value) == f"Non-filesystem path '{path}' invalid when target directory is specified"
+    )
 
 
 @mark.parametrize("source", ("dict", "file"))

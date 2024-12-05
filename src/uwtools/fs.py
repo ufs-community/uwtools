@@ -73,14 +73,19 @@ class Stager(ABC):
                 msg = "Non-filesystem destination path '%s' not currently supported"
                 raise UWConfigError(msg % dst)
             if self._target_dir and scheme:
-                msg = "Path '%s' invalid when target directory is specified"
+                msg = "Non-filesystem path '%s' invalid when target directory is specified"
                 raise UWConfigError(msg % dst)
             if self._target_dir and absolute:
-                msg = "When target directory is specified, path '%s' must be relative"
+                msg = "Path '%s' must be relative when target directory is specified"
                 raise UWConfigError(msg % dst)
             if not self._target_dir and not absolute:
                 msg = "Relative path '%s' requires target directory to be specified"
                 raise UWConfigError(msg % dst)
+
+    def _check_target_dir(self) -> None:
+        """
+        PM WRITEME.
+        """
 
     def _set_config_block(self) -> None:
         """
