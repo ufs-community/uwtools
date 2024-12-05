@@ -18,7 +18,7 @@ def copy(
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
-    dry_run: bool = False,  # pylint: disable=unused-argument
+    dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -51,7 +51,7 @@ def link(
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
-    dry_run: bool = False,  # pylint: disable=unused-argument
+    dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -84,7 +84,7 @@ def makedirs(
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
-    dry_run: bool = False,  # pylint: disable=unused-argument
+    dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
     """

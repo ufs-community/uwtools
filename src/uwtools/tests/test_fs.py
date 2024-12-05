@@ -1,6 +1,4 @@
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=redefined-outer-name
+# pylint: disable=missing-class-docstring,missing-function-docstring,redefined-outer-name
 
 import yaml
 from pytest import fixture, mark, raises
