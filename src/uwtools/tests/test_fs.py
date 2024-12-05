@@ -1,6 +1,9 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
+
+from unittest.mock import Mock
 
 import iotaa
 import yaml
@@ -77,14 +80,6 @@ def test_fs_Copier_no_targetdir_abspath_pass(assets):
     assert all(asset.ready() for asset in assets)  # type: ignore
 
 
-def test_fs_Copier_no_targetdir_relpath_fail(assets):
-    _, cfgdict, _ = assets
-    with raises(UWConfigError) as e:
-        fs.Copier(config=cfgdict, keys=["a", "b"]).go()
-    errmsg = "Relative path '%s' requires target directory to be specified"
-    assert errmsg % "foo" in str(e.value)
-
-
 @mark.parametrize("source", ("dict", "file"))
 def test_fs_FilerStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
@@ -101,6 +96,46 @@ def test_fs_Linker(assets, source):
     fs.Linker(target_dir=dstdir, config=config, keys=["a", "b"]).go()
     assert (dstdir / "foo").is_symlink()
     assert (dstdir / "subdir" / "bar").is_symlink()
+
+
+def test_fs_Stager__check_destination_paths_fail_absolute_with_target_dir():
+    path = "/other/path"
+    obj = Mock(_dst_paths=[path], _target_dir="/some/path")
+    with raises(UWConfigError) as e:
+        fs.Stager._check_destination_paths(obj)
+    assert str(e.value) == f"When target directory is specified, path '{path}' must be relative"
+
+
+def test_fs_Stager__check_destination_paths_fail_bad_scheme():
+    path = "s3://bucket/a/b"
+    obj = Mock(_dst_paths=[path], _target_dir=None)
+    with raises(UWConfigError) as e:
+        fs.Stager._check_destination_paths(obj)
+    assert str(e.value) == f"Non-filesystem destination path '{path}' not currently supported"
+
+
+def test_fs_Stager__check_destination_paths_fail_need_target_dir():
+    path = "relpath"
+    obj = Mock(_dst_paths=[path], _target_dir=None)
+    with raises(UWConfigError) as e:
+        fs.Stager._check_destination_paths(obj)
+    assert str(e.value) == f"Relative path '{path}' requires target directory to be specified"
+
+
+def test_fs_Stager__check_destination_paths_fail_scheme_with_target_dir():
+    path = "file://foo.com/a/b"
+    obj = Mock(_dst_paths=[path], _target_dir="/some/path")
+    with raises(UWConfigError) as e:
+        fs.Stager._check_destination_paths(obj)
+    assert str(e.value) == f"Path '{path}' invalid when target directory is specified"
+
+
+# def test_fs_Copier_no_targetdir_relpath_fail(assets):
+#     _, cfgdict, _ = assets
+#     with raises(UWConfigError) as e:
+#         fs.Copier(config=cfgdict, keys=["a", "b"]).go()
+#     errmsg = "Relative path '%s' requires target directory to be specified"
+#     assert errmsg % "foo" in str(e.value)
 
 
 @mark.parametrize("source", ("dict", "file"))

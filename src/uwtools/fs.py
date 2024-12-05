@@ -66,26 +66,21 @@ class Stager(ABC):
 
         :raises: UWConfigError when a bad path is detected.
         """
-        msg = [
-            "Path '%s' invalid when target directory is specified",
-            "Non-filesystem destination path '%s' not currently supported",
-            "Relative path '%s' requires target directory to be specified",
-        ]
-        errors = []
-        report = lambda dst, i: errors.append(msg[i] % dst)
         for dst in self._dst_paths:
             scheme = urlparse(dst).scheme
-            if self._target_dir:
-                if scheme:
-                    report(dst, 0)
-            else:
-                if scheme and scheme != "file":
-                    report(dst, 1)
-                else:
-                    if not Path(dst).is_absolute():
-                        report(dst, 2)
-        if errors:
-            raise UWConfigError("\n".join(errors))
+            absolute = Path(dst).is_absolute()
+            if scheme and scheme != "file":
+                msg = "Non-filesystem destination path '%s' not currently supported"
+                raise UWConfigError(msg % dst)
+            if self._target_dir and scheme:
+                msg = "Path '%s' invalid when target directory is specified"
+                raise UWConfigError(msg % dst)
+            if self._target_dir and absolute:
+                msg = "When target directory is specified, path '%s' must be relative"
+                raise UWConfigError(msg % dst)
+            if not self._target_dir and not absolute:
+                msg = "Relative path '%s' requires target directory to be specified"
+                raise UWConfigError(msg % dst)
 
     def _set_config_block(self) -> None:
         """
