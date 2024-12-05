@@ -125,18 +125,8 @@ def test_fs_Linker(assets, source):
             "Non-filesystem path '%s' invalid when target directory is specified",
             True,
         ),
-        (
-            "other/path",
-            "/some/path",
-            None,
-            False,
-        ),
-        (
-            "other/path",
-            "file:///some/path",
-            None,
-            False,
-        ),
+        ("other/path", "/some/path", None, False),
+        ("other/path", "file:///some/path", None, False),
     ],
 )
 def test_fs_Stager__check_destination_paths_fail(path, target_dir, msg, fail_expected):
