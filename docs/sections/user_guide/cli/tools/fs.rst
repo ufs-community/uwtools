@@ -25,7 +25,7 @@ Source paths prefixed with ``http://`` or ``https://`` will be copied from their
 Examples
 ^^^^^^^^
 
-Given ``copy-config.yaml`` containing a mapping from local-filesystem destination paths to source paths.
+Given ``copy-config.yaml`` containing a mapping from local-filesystem destination paths to source paths
 
 .. literalinclude:: fs/copy-config.yaml
    :language: yaml
@@ -34,7 +34,7 @@ Given ``copy-config.yaml`` containing a mapping from local-filesystem destinatio
 .. literalinclude:: fs/copy-exec.out
    :language: text
 
-Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and ``gpl`` is a copy of the upstream network source of the GNU General Public License.
+Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and ``gpl`` is a copy of the upstream network source.
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
