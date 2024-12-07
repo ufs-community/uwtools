@@ -10,6 +10,7 @@ from iotaa import asset, external
 from pytest import mark, raises
 
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils import tasks
 
@@ -52,7 +53,7 @@ def test_tasks_executable(tmp_path):
 
 @mark.parametrize("prefix", ["", "file://"])
 def test_tasks_existing_local_missing(caplog, prefix, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     base = tmp_path / "x"
     path = prefix + str(base) if prefix else base
     assert not ready(tasks.existing(path=path))
@@ -60,7 +61,7 @@ def test_tasks_existing_local_missing(caplog, prefix, tmp_path):
 
 
 def test_tasks_existing_local_present_directory(caplog, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     path = tmp_path / "directory"
     path.mkdir()
     assert ready(tasks.existing(path=path))
@@ -69,7 +70,7 @@ def test_tasks_existing_local_present_directory(caplog, tmp_path):
 
 @mark.parametrize("prefix", ["", "file://"])
 def test_tasks_existing_local_present_file(caplog, prefix, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     base = tmp_path / "file"
     base.touch()
     path = prefix + str(base) if prefix else base
@@ -79,7 +80,7 @@ def test_tasks_existing_local_present_file(caplog, prefix, tmp_path):
 
 @mark.parametrize("prefix", ["", "file://"])
 def test_tasks_existing_local_present_symlink(caplog, prefix, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     base = tmp_path / "symlink"
     base.symlink_to(os.devnull)
     path = prefix + str(base) if prefix else base
@@ -90,7 +91,7 @@ def test_tasks_existing_local_present_symlink(caplog, prefix, tmp_path):
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize("code,expected", [(200, True), (404, False)])
 def test_tasks_existing_remote(caplog, code, expected, scheme):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     path = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
         state = ready(tasks.existing(path=path))
@@ -136,18 +137,20 @@ def test_tasks_filecopy_directory_hierarchy(tmp_path):
     assert dst.is_file()
 
 
-def test_tasks_filecopy_source_http(tmp_path):
-    src = "http://foo.com/obj"
+@mark.parametrize("code,expected", [(200, True), (404, False)])
+@mark.parametrize("src", ["http://foo.com/obj", "https://foo.com/obj"])
+def test_tasks_filecopy_source_http(code, expected, src, tmp_path):
+    log.setLevel(logging.INFO)
     dst = tmp_path / "a-file"
     assert not dst.is_file()
     with patch.object(tasks, "existing", exists):
         with patch.object(tasks, "requests") as requests:
             response = requests.get()
-            response.status_code = 200
+            response.status_code = code
             response.content = "data".encode("utf-8")
             tasks.filecopy(src=src, dst=dst)
         requests.get.assert_called_with(src, allow_redirects=True, timeout=3)
-    assert dst.is_file()
+    assert dst.is_file() is expected
 
 
 @mark.parametrize(
