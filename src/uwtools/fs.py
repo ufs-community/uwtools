@@ -70,7 +70,7 @@ class Stager(ABC):
         for dst in self._dst_paths:
             scheme = urlparse(dst).scheme
             absolute = scheme or Path(dst).is_absolute()
-            if scheme and scheme != "file":
+            if scheme and scheme != STR.url_scheme_file:
                 msg = "Non-filesystem destination path '%s' not currently supported"
                 raise UWConfigError(msg % dst)
             if self._target_dir and scheme:
@@ -92,7 +92,7 @@ class Stager(ABC):
         if (
             self._target_dir
             and (scheme := urlparse(str(self._target_dir)).scheme)
-            and scheme != "file"
+            and scheme != STR.url_scheme_file
         ):
             msg = "Non-filesystem path '%s' invalid as target directory"
             raise UWConfigError(msg % self._target_dir)
@@ -174,7 +174,9 @@ class Copier(FileStager):
         for dst, src in self._config.items():
             dst = Path((self._target_dir or "")) / dst
             info = {x: urlparse(str(x)) for x in (dst, src)}
-            dst, src = [info[x].path if info[x].scheme == "file" else x for x in (dst, src)]
+            dst, src = [
+                info[x].path if info[x].scheme == STR.url_scheme_file else x for x in (dst, src)
+            ]
             reqs.append(filecopy(src=src, dst=dst))
         yield reqs
 
