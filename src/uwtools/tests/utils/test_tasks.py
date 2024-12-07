@@ -159,17 +159,17 @@ def test_tasks_filecopy_source_http(code, expected, src, tmp_path):
 )
 def test_tasks_filecopy_source_local(src, ok):
     dst = "/dst/file"
-    if ok:
-        with patch.object(tasks, "file", exists):
-            with patch.object(tasks, "copy") as copy:
-                with patch.object(tasks.Path, "mkdir") as mkdir:
+    with patch.object(tasks.Path, "mkdir") as mkdir:
+        if ok:
+            with patch.object(tasks, "file", exists):
+                with patch.object(tasks, "copy") as copy:
                     tasks.filecopy(src=src, dst=dst)
-        mkdir.assert_called_once_with(parents=True, exist_ok=True)
-        copy.assert_called_once_with(Path(src), Path(dst))
-    else:
-        with raises(UWConfigError) as e:
-            tasks.filecopy(src=src, dst=dst)
-        assert str(e.value) == "Support for scheme 'foo' not implemented"
+            copy.assert_called_once_with(Path(src), Path(dst))
+        else:
+            with raises(UWConfigError) as e:
+                tasks.filecopy(src=src, dst=dst)
+            assert str(e.value) == "Support for scheme 'foo' not implemented"
+    mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
 
 def test_tasks_symlink_simple(tmp_path):

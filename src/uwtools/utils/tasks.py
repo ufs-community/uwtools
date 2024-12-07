@@ -90,11 +90,11 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     yield "Copy %s -> %s" % (src, dst)
     yield asset(Path(dst), Path(dst).is_file)
     dst = Path(dst)  # currently no support for remote destinations
+    dst.parent.mkdir(parents=True, exist_ok=True)
     scheme = urlparse(str(src)).scheme
     if scheme in SCHEMES.local:
         src = Path(src)
         yield file(src)
-        dst.parent.mkdir(parents=True, exist_ok=True)
         copy(src, dst)
     elif scheme in SCHEMES.http:
         src = str(src)
