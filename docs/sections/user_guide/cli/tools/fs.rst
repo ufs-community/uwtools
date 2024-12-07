@@ -15,6 +15,8 @@ The ``uw`` mode for handling filesystem items (files and directories).
 
 The ``copy`` action stages files in a target directory by copying files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
+Source paths prefixed with ``http://`` or ``https://`` will be copied from their upstream network locations to the local filesystem.
+
 .. literalinclude:: fs/copy-help.cmd
    :emphasize-lines: 1
 .. literalinclude:: fs/copy-help.out
@@ -23,7 +25,7 @@ The ``copy`` action stages files in a target directory by copying files. Any ``K
 Examples
 ^^^^^^^^
 
-Given ``copy-config.yaml`` containing
+Given ``copy-config.yaml`` containing a mapping from local-filesystem destination paths to source paths
 
 .. literalinclude:: fs/copy-config.yaml
    :language: yaml
@@ -32,7 +34,7 @@ Given ``copy-config.yaml`` containing
 .. literalinclude:: fs/copy-exec.out
    :language: text
 
-Here, ``foo`` and ``bar`` are copies of their respective source files.
+Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and ``gpl`` is a copy of the upstream network source.
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 

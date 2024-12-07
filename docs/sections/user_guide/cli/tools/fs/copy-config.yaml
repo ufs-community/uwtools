@@ -1,4 +1,5 @@
 config:
   files:
     foo: src/foo
+    licenses/gpl: https://www.gnu.org/licenses/gpl-3.0.txt
     subdir/bar: src/bar
