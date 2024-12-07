@@ -69,7 +69,7 @@ class Stager(ABC):
         """
         for dst in self._dst_paths:
             scheme = urlparse(dst).scheme
-            absolute = Path(dst).is_absolute()
+            absolute = scheme or Path(dst).is_absolute()
             if scheme and scheme != "file":
                 msg = "Non-filesystem destination path '%s' not currently supported"
                 raise UWConfigError(msg % dst)
