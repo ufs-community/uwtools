@@ -171,14 +171,14 @@ class Copier(FileStager):
         """
         yield "File copies"
         yield [
-            filecopy(src=self._local(src), dst=self._local(self._target_dir) / self._local(dst))
+            filecopy(src=self._simple(src), dst=self._simple(self._target_dir) / self._simple(dst))
             for dst, src in self._config.items()
         ]
 
     @staticmethod
-    def _local(path: Union[Path, str]) -> Path:
+    def _simple(path: Union[Path, str]) -> Path:
         """
-        Convert a path, potentially prefixed with scheme file://, into a simple path.
+        Convert a path, potentially prefixed with scheme file://, into a simple filesystem path.
 
         :param path: The path to convert.
         """

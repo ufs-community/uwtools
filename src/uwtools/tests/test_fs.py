@@ -81,11 +81,11 @@ def test_fs_Copier_go_no_targetdir_abspath_pass(assets):
     assert all(asset.ready() for asset in assets)  # type: ignore
 
 
-def test_fs_Copier__local():
-    assert fs.Copier._local("relative/path") == Path("relative/path")
-    assert fs.Copier._local("/absolute/path") == Path("/absolute/path")
-    assert fs.Copier._local("file:///absolute/path") == Path("/absolute/path")
-    assert fs.Copier._local("") == Path("")
+def test_fs_Copier__simple():
+    assert fs.Copier._simple("relative/path") == Path("relative/path")
+    assert fs.Copier._simple("/absolute/path") == Path("/absolute/path")
+    assert fs.Copier._simple("file:///absolute/path") == Path("/absolute/path")
+    assert fs.Copier._simple("") == Path("")
 
 
 @mark.parametrize("source", ("dict", "file"))
