@@ -3,6 +3,7 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
+from pathlib import Path
 from unittest.mock import Mock
 
 import iotaa
@@ -52,7 +53,7 @@ class ConcreteStager(fs.Stager):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_fs_Copier(assets, source):
+def test_fs_Copier_go(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -62,7 +63,7 @@ def test_fs_Copier(assets, source):
     assert (dstdir / "subdir" / "bar").is_file()
 
 
-def test_fs_Copier_config_file_dry_run(assets):
+def test_fs_Copier_go_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
@@ -72,12 +73,19 @@ def test_fs_Copier_config_file_dry_run(assets):
     iotaa.dryrun(False)
 
 
-def test_fs_Copier_no_targetdir_abspath_pass(assets):
+def test_fs_Copier_go_no_targetdir_abspath_pass(assets):
     dstdir, cfgdict, _ = assets
     old = cfgdict["a"]["b"]
     cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
     assets = fs.Copier(config=cfgdict).go()
     assert all(asset.ready() for asset in assets)  # type: ignore
+
+
+def test_fs_Copier__local():
+    assert fs.Copier._local("relative/path") == Path("relative/path")
+    assert fs.Copier._local("/absolute/path") == Path("/absolute/path")
+    assert fs.Copier._local("file:///absolute/path") == Path("/absolute/path")
+    assert fs.Copier._local("") == Path("")
 
 
 @mark.parametrize("source", ("dict", "file"))

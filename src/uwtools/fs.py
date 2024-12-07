@@ -170,15 +170,19 @@ class Copier(FileStager):
         Copy files.
         """
         yield "File copies"
-        reqs = []
-        for dst, src in self._config.items():
-            dst = Path((self._target_dir or "")) / dst
-            info = {x: urlparse(str(x)) for x in (dst, src)}
-            dst, src = [
-                info[x].path if info[x].scheme == STR.url_scheme_file else x for x in (dst, src)
-            ]
-            reqs.append(filecopy(src=src, dst=dst))
-        yield reqs
+        yield [
+            filecopy(src=self._local(src), dst=self._local(self._target_dir) / self._local(dst))
+            for dst, src in self._config.items()
+        ]
+
+    @staticmethod
+    def _local(path: Union[Path, str]) -> Path:
+        """
+        Convert a path, potentially prefixed with scheme file://, into a simple path.
+
+        :param path: The path to convert.
+        """
+        return Path(urlparse(str(path)).path)
 
 
 class Linker(FileStager):
