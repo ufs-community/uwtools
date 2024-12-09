@@ -10,13 +10,13 @@ from typing import Optional, Union
 from iotaa import dryrun, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
-from uwtools.config.tools import walk_key_path
 
 
 class Stager(ABC):
