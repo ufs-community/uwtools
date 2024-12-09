@@ -44,7 +44,6 @@ class Stager(ABC):
         :raises: ``UWConfigError`` if config fails validation.
         """
         dryrun(enable=dry_run)
-        self._key_path = key_path or []
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
         yaml_config.dereference(
@@ -54,7 +53,7 @@ class Stager(ABC):
                 **yaml_config.data,
             }
         )
-        self._config, _ = walk_key_path(yaml_config.data, self._key_path)
+        self._config, _ = walk_key_path(yaml_config.data, key_path or [])
         self._validate()
         self._check_paths()
 
