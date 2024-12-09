@@ -16,6 +16,7 @@ from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
+from uwtools.config.tools import walk_key_path
 
 
 class Stager(ABC):
@@ -29,7 +30,7 @@ class Stager(ABC):
         target_dir: Optional[Union[str, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
-        keys: Optional[list[str]] = None,
+        key_path: Optional[list[Union[str, int]]] = None,
         dry_run: bool = False,
     ) -> None:
         """
@@ -39,12 +40,12 @@ class Stager(ABC):
         :param target_dir: Path to target directory.
         :param cycle: A ``datetime`` object to make available for use in the config.
         :param leadtime: A ``timedelta`` object to make available for use in the config.
-        :param keys: YAML keys leading to file dst/src block.
+        :param key_path: Path of keys to config block to use.
         :param dry_run: Do not copy files.
         :raises: ``UWConfigError`` if config fails validation.
         """
         dryrun(enable=dry_run)
-        self._keys = keys or []
+        self._key_path = key_path or []
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
         yaml_config.dereference(
@@ -54,7 +55,7 @@ class Stager(ABC):
                 **yaml_config.data,
             }
         )
-        self._config = yaml_config.data
+        self._config = walk_key_path(yaml_config.data, self._key_path)
         self._set_config_block()
         self._validate()
         self._check_paths()
@@ -71,25 +72,6 @@ class Stager(ABC):
             for dst in self._dst_paths:
                 if not Path(dst).is_absolute():
                     raise UWConfigError(errmsg % dst)
-
-    def _set_config_block(self) -> None:
-        """
-        Navigate keys to a config block.
-
-        :raises: UWConfigError if no target directory is specified and a relative path is.
-        """
-        cfg = self._config
-        nav = []
-        for key in self._keys:
-            nav.append(key)
-            if key not in cfg:
-                raise UWConfigError("Failed following YAML key(s): %s" % ".".join(nav))
-            log.debug("Following config key '%s'", key)
-            cfg = cfg[key]
-        if not isinstance(cfg, dict):
-            msg = "Expected block not found at key path: %s" % ".".join(self._keys)
-            raise UWConfigError(msg)
-        self._config = cfg
 
     @property
     @abstractmethod
@@ -124,7 +106,7 @@ class FileStager(Stager):
         """
         The paths to files to create.
         """
-        return list(self._config.keys())
+        return list(self._config.key_path())
 
     @property
     def _schema(self) -> str:

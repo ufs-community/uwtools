@@ -679,7 +679,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param leadtime: The leadtime.
     :param config: Path to config file (read stdin if missing or None).
     :param dry_run: Run in dry-run mode?
-    :param key_path: Keys leading through the config to the driver's configuration block.
+    :param key_path: Keys of keys to driver config block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
     :param controller: Key(s) leading to block in config controlling run-time values.

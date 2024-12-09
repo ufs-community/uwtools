@@ -169,7 +169,7 @@ def _execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :param schema_file: The JSON Schema file to use for validation.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.

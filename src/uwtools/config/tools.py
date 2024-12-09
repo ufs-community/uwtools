@@ -114,7 +114,7 @@ def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
     Navigate to the sub-config at the end of the path of given keys.
 
     :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :return: The sub-config and a string representation of the key path.
     """
     keys = []
@@ -163,7 +163,7 @@ def _print_config_section(config: dict, key_path: list[str]) -> None:
     Print the contents of the located subtree as key=value pairs, one per line.
 
     :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     """
     config, pathstr = walk_key_path(config, key_path)
     output_lines = []
@@ -205,7 +205,7 @@ def _realize_config_output_setup(
     :param input_obj: The input Config object.
     :param output_file: Output config destination (None => write to stdout).
     :param output_format: Format of the output config.
-    :param key_path: Path through keys to the desired output block.
+    :param key_path: Path of keys to config block to use.
     :return: The unrealized data to output and the output format name.
     """
     output_format = _ensure_format("output", output_format, output_file)
@@ -344,7 +344,7 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config.
 :param output_file: Output config destination (None => write to ``stdout``).
 :param output_format: Format of the output config.
-:param key_path: Path through keys to the desired output block.
+:param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.

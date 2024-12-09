@@ -280,8 +280,7 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_graph_file(optional)
     _add_arg_key_path(
         optional,
-        helpmsg="Dot-separated path of keys leading through the config "
-        "to the driver's configuration block",
+        helpmsg="Dot-separated path of keys to driver config block"
     )
     return {STR.execute: _add_args_verbosity(optional)}
 
@@ -339,8 +338,8 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
     checks = _add_args_verbosity(optional)
-    _add_arg_keys(optional)
     return checks
 
 
@@ -399,7 +398,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        keys=args[STR.keys],
+        key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
@@ -416,7 +415,7 @@ def _dispatch_fs_link(args: Args) -> bool:
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        keys=args[STR.keys],
+        key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
@@ -433,7 +432,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        keys=args[STR.keys],
+        key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
@@ -756,15 +755,6 @@ def _add_arg_key_path(group: Group, helpmsg: str) -> None:
     )
 
 
-def _add_arg_keys(group: Group) -> None:
-    group.add_argument(
-        STR.keys,
-        help="YAML key leading to file dst/src block",
-        metavar="KEY",
-        nargs="*",
-    )
-
-
 def _add_arg_leadtime(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.leadtime),
@@ -1031,8 +1021,7 @@ def _add_subparser_for_driver_task(
     _add_arg_graph_file(optional)
     _add_arg_key_path(
         optional,
-        helpmsg="Dot-separated path of keys leading through the config "
-        "to the driver's configuration block",
+        helpmsg="Dot-separated path of keys to driver config block",
     )
     _add_arg_schema_file(optional)
     checks = _add_args_verbosity(optional)

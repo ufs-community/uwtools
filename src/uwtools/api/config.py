@@ -239,7 +239,7 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config (optional if file's extension is recognized).
 :param output_file: Output config file (``None`` => write to ``stdout``).
 :param output_format: Format of the output config (optional if file's extension is recognized).
-:param key_path: Path through keys to the desired output block.
+:param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
