@@ -13,7 +13,6 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
@@ -55,8 +54,7 @@ class Stager(ABC):
                 **yaml_config.data,
             }
         )
-        self._config = walk_key_path(yaml_config.data, self._key_path)
-        self._set_config_block()
+        self._config, _ = walk_key_path(yaml_config.data, self._key_path)
         self._validate()
         self._check_paths()
 
@@ -106,7 +104,7 @@ class FileStager(Stager):
         """
         The paths to files to create.
         """
-        return list(self._config.key_path())
+        return list(self._config.keys())
 
     @property
     def _schema(self) -> str:
