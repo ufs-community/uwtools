@@ -8,6 +8,7 @@ from inspect import getfullargspec
 from pathlib import Path
 from typing import Callable, Optional, TypeVar, Union
 
+from uwtools.config.support import YAMLKey
 from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.exceptions import UWError
@@ -51,7 +52,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
@@ -76,7 +77,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
@@ -102,7 +103,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
@@ -151,7 +152,7 @@ def _execute(
     batch: bool = False,  # pylint: disable=unused-argument
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     schema_file: Optional[Union[Path, str]] = None,
     stdin_ok: bool = False,
 ) -> bool:

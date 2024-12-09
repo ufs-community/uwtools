@@ -109,7 +109,7 @@ def test_Stager__config_block_fail_bad_key_path(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
         ConcreteStager(target_dir=dstdir, config=config, key_path=["a", "x"])
-    assert str(e.value) == "Failed following YAML key(s): a.x"
+    assert str(e.value) == "Bad config path: a.x"
 
 
 @mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
@@ -118,4 +118,4 @@ def test_Stager__config_block_fails_bad_type(assets, val):
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:
         ConcreteStager(target_dir=dstdir, config=cfgdict, key_path=["a", "b"])
-    assert str(e.value) == "Expected block not found at key path: a.b"
+    assert str(e.value) == "Value at a.b must be a dictionary"

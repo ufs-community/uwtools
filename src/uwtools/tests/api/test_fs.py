@@ -21,7 +21,7 @@ def kwargs(tmp_path):
         "config": config,
         "cycle": dt.datetime.now(),
         "leadtime": dt.timedelta(hours=6),
-        "keys": ["a", "b"],
+        "key_path": ["a", "b"],
         "dry_run": False,
     }
 

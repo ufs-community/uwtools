@@ -10,6 +10,7 @@ from typing import Optional, Union
 from iotaa import dryrun, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import YAMLKey
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
@@ -29,7 +30,7 @@ class Stager(ABC):
         target_dir: Optional[Union[str, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
-        key_path: Optional[list[Union[str, int]]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         dry_run: bool = False,
     ) -> None:
         """

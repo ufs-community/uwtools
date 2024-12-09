@@ -18,6 +18,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import YAMLKey
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import (
     bundle,
@@ -47,9 +48,9 @@ class Assets(ABC):
         leadtime: Optional[timedelta] = None,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ) -> None:
         config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         config_input.dereference(
@@ -166,7 +167,7 @@ class Assets(ABC):
         else:
             log.debug(f"Failed to validate {path}")
 
-    def _delegate(self, controller: Optional[list[str]], config_key: str) -> None:
+    def _delegate(self, controller: Optional[list[YAMLKey]], config_key: str) -> None:
         """
         Selectively delegate config to controller.
 
@@ -189,7 +190,7 @@ class Assets(ABC):
         """
 
     def namelist_schema(
-        self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
+        self, config_keys: Optional[list[YAMLKey]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
         Return the (sub)schema for validating the driver's namelist content.
@@ -251,9 +252,9 @@ class AssetsCycleBased(Assets):
         cycle: datetime,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -284,9 +285,9 @@ class AssetsCycleLeadtimeBased(Assets):
         leadtime: timedelta,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -324,9 +325,9 @@ class AssetsTimeInvariant(Assets):
         self,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             config=config,
@@ -348,10 +349,10 @@ class Driver(Assets):
         leadtime: Optional[timedelta] = None,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -570,10 +571,10 @@ class DriverCycleBased(Driver):
         cycle: datetime,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -605,10 +606,10 @@ class DriverCycleLeadtimeBased(Driver):
         leadtime: timedelta,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -647,10 +648,10 @@ class DriverTimeInvariant(Driver):
         self,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
-        controller: Optional[list[str]] = None,
+        controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             config=config,

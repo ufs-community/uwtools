@@ -666,65 +666,6 @@ def test__ensure_format_explicitly_specified_with_path():
     )
 
 
-def test__print_config_section_ini(capsys):
-    config_obj = INIConfig(fixture_path("simple3.ini"))
-    section = ["dessert"]
-    tools._print_config_section(config_obj.data, section)
-    actual = capsys.readouterr().out
-    expected = """
-    flavor={{ flavor }}
-    servings=0
-    side=False
-    type=pie
-    """
-    assert actual.strip() == dedent(expected).strip()
-
-
-def test__print_config_section_ini_missing_section():
-    config_obj = INIConfig(fixture_path("simple3.ini"))
-    section = ["sandwich"]
-    msg = "Bad config path: sandwich"
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert msg in str(e.value)
-
-
-def test__print_config_section_yaml(capsys):
-    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["sgs_tke", "profile_type"]
-    tools._print_config_section(config_obj.data, section)
-    actual = capsys.readouterr().out
-    expected = """
-    name=fixed
-    surface_value=0.0
-    """
-    assert actual.strip() == dedent(expected).strip()
-
-
-def test__print_config_section_yaml_for_nonscalar():
-    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["o3mr"]
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert "Non-scalar value" in str(e.value)
-
-
-def test__print_config_section_yaml_list():
-    config_obj = YAMLConfig(fixture_path("srw_example.yaml"))
-    section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert "must be a dictionary" in str(e.value)
-
-
-def test__print_config_section_yaml_not_dict():
-    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["sgs_tke", "units"]
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert "must be a dictionary" in str(e.value)
-
-
 def test__realize_config_input_setup_ini_cfgobj():
     data = {"section": {"foo": "bar"}}
     cfgobj = INIConfig(config=data)

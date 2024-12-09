@@ -10,6 +10,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
+from uwtools.config.support import YAMLKey
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
@@ -28,7 +29,7 @@ def execute(
     batch: Optional[bool] = False,  # pylint: disable=unused-argument
     dry_run: Optional[bool] = False,
     graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     stdin_ok: Optional[bool] = False,
 ) -> bool:
     """

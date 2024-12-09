@@ -8,6 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
+from uwtools.config.support import YAMLKey
 from uwtools.fs import Copier, Linker, MakeDirs
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
@@ -17,7 +18,7 @@ def copy(
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
@@ -50,7 +51,7 @@ def link(
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
@@ -83,7 +84,7 @@ def makedirs(
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
