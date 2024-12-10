@@ -4,7 +4,7 @@
 # pylint: disable=redefined-outer-name
 
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import iotaa
 import yaml
@@ -52,8 +52,19 @@ class ConcreteStager(fs.Stager):
 # Tests
 
 
+@mark.parametrize("src_fn", [str, Path])
+@mark.parametrize("dst_fn", [str, Path])
+@mark.parametrize("td_fn", [str, Path])
+def test_fs_Copier_go(src_fn, dst_fn, td_fn):
+    src, td, dst = src_fn("/src/file"), td_fn("/dst"), dst_fn("file")
+    obj = Mock(_config={dst: src}, _simple=fs.Copier._simple, _target_dir=td)
+    with patch.object(fs, "filecopy") as filecopy:
+        fs.Copier.go(obj)
+    filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"))
+
+
 @mark.parametrize("source", ("dict", "file"))
-def test_fs_Copier_go(assets, source):
+def test_fs_Copier_go_live(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -63,7 +74,7 @@ def test_fs_Copier_go(assets, source):
     assert (dstdir / "subdir" / "bar").is_file()
 
 
-def test_fs_Copier_go_config_file_dry_run(assets):
+def test_fs_Copier_go_live_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
@@ -73,7 +84,7 @@ def test_fs_Copier_go_config_file_dry_run(assets):
     iotaa.dryrun(False)
 
 
-def test_fs_Copier_go_no_targetdir_abspath_pass(assets):
+def test_fs_Copier_go_live_no_targetdir_abspath_pass(assets):
     dstdir, cfgdict, _ = assets
     old = cfgdict["a"]["b"]
     cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
