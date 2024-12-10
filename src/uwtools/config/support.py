@@ -13,7 +13,7 @@ from uwtools.logging import log
 from uwtools.strings import FORMAT
 
 INCLUDE_TAG = "!include"
-
+YAMLKey = Union[bool, float, int, str]
 
 # Public functions
 

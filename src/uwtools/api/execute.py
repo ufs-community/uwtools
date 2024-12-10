@@ -10,6 +10,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
+from uwtools.config.support import YAMLKey
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
@@ -28,7 +29,7 @@ def execute(
     batch: Optional[bool] = False,  # pylint: disable=unused-argument
     dry_run: Optional[bool] = False,
     graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     stdin_ok: Optional[bool] = False,
 ) -> bool:
     """
@@ -48,7 +49,7 @@ def execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
