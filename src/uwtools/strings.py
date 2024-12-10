@@ -142,6 +142,7 @@ class STR:
     updatefmt: str = "update_format"
     updatevalues: str = "update_values"
     upp: str = "upp"
+    url_scheme_file: str = "file"
     validate: str = "validate"
     valsfile: str = "values_file"
     valsfmt: str = "values_format"
