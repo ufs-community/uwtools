@@ -31,7 +31,6 @@ class Stager(ABC):
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
         key_path: Optional[list[YAMLKey]] = None,
-        dry_run: bool = False,
     ) -> None:
         """
         Stage files and directories.
@@ -41,7 +40,6 @@ class Stager(ABC):
         :param cycle: A ``datetime`` object to make available for use in the config.
         :param leadtime: A ``timedelta`` object to make available for use in the config.
         :param key_path: Path of keys to config block to use.
-        :param dry_run: Do not copy files.
         :raises: ``UWConfigError`` if config fails validation.
         """
         self._target_dir = str2path(target_dir)

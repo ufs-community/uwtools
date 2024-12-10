@@ -47,7 +47,6 @@ class Assets(ABC):
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -250,7 +249,6 @@ class AssetsCycleBased(Assets):
         self,
         cycle: datetime,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -282,7 +280,6 @@ class AssetsCycleLeadtimeBased(Assets):
         cycle: datetime,
         leadtime: timedelta,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -321,7 +318,6 @@ class AssetsTimeInvariant(Assets):
     def __init__(
         self,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -344,7 +340,6 @@ class Driver(Assets):
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -565,7 +560,6 @@ class DriverCycleBased(Driver):
         self,
         cycle: datetime,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -599,7 +593,6 @@ class DriverCycleLeadtimeBased(Driver):
         cycle: datetime,
         leadtime: timedelta,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -640,7 +633,6 @@ class DriverTimeInvariant(Driver):
     def __init__(
         self,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -671,7 +663,6 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param cycle: The cycle.
     :param leadtime: The leadtime.
     :param config: Path to config file (read stdin if missing or None).
-    :param dry_run: Run in dry-run mode?
     :param key_path: Keys of keys to driver config block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.
