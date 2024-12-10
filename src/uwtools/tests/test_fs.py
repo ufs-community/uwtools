@@ -85,7 +85,7 @@ def test_Copier_no_targetdir_relpath_fail(assets):
     _, cfgdict, _ = assets
     with raises(UWConfigError) as e:
         fs.Copier(config=cfgdict, key_path=["a", "b"]).go()
-    errmsg = "Relative path '%s' requires the target directory to be specified"
+    errmsg = "Relative path '%s' requires target directory to be specified"
     assert errmsg % "foo" in str(e.value)
 
 
