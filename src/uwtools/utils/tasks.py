@@ -53,7 +53,7 @@ def existing(path: Union[Path, str]):
     info = urlparse(str(path))
     scheme = info.scheme
     if scheme in SCHEMES.local:
-        path = Path(info.path if scheme == "file" else path)
+        path = _local_path(path)
         yield "Filesystem item %s" % path
         yield asset(path, path.exists)
     elif scheme in SCHEMES.http:
@@ -62,17 +62,18 @@ def existing(path: Union[Path, str]):
         yield "Remote object %s" % path
         yield asset(path, ready)
     else:
-        _bad_scheme(scheme)
+        _bad_scheme(path, scheme)
 
 
 @external
-def file(path: Path, context: str = ""):
+def file(path: Union[Path, str], context: str = ""):
     """
     An existing file or symlink to an existing file.
 
     :param path: Path to the file.
     :param context: Optional additional context for the file.
     """
+    path = _local_path(path)
     suffix = f" ({context})" if context else ""
     yield "File %s%s" % (path, suffix)
     yield asset(path, path.is_file)
@@ -89,14 +90,14 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     """
     yield "Copy %s -> %s" % (src, dst)
     yield asset(Path(dst), Path(dst).is_file)
-    dst = Path(dst)  # currently no support for remote destinations
-    scheme = urlparse(str(src)).scheme
-    if scheme in SCHEMES.local:
-        src = Path(src)
+    dst = _local_path(dst)  # currently no support for remote destinations
+    src_scheme = urlparse(str(src)).scheme
+    if src_scheme in SCHEMES.local:
+        src = _local_path(src)
         yield file(src)
         dst.parent.mkdir(parents=True, exist_ok=True)
         copy(src, dst)
-    elif scheme in SCHEMES.http:
+    elif src_scheme in SCHEMES.http:
         src = str(src)
         yield existing(src)
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -107,17 +108,18 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
         else:
             log.error("Could not get '%s', HTTP status was: %s", src, code)
     else:
-        _bad_scheme(scheme)
+        _bad_scheme(src, src_scheme)
 
 
 @task
-def symlink(target: Path, linkname: Path):
+def symlink(target: Union[Path, str], linkname: Union[Path, str]):
     """
     A symbolic link.
 
     :param target: The existing file or directory.
     :param linkname: The symlink to create.
     """
+    target, linkname = map(_local_path, [target, linkname])
     yield "Link %s -> %s" % (linkname, target)
     yield asset(linkname, linkname.exists)
     yield existing(target)
@@ -131,11 +133,25 @@ def symlink(target: Path, linkname: Path):
 # Private helpers
 
 
-def _bad_scheme(scheme: str) -> NoReturn:
+def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
     """
     Fail on an unsupported URL scheme.
 
+    :param path: The path with a bad scheme.
     :param scheme: The scheme.
     :raises: UWConfigError.
     """
-    raise UWConfigError(f"Support for scheme '{scheme}' not implemented")
+    raise UWConfigError(f"Scheme '{scheme}' in '{path}' not supported")
+
+
+def _local_path(path: Union[Path, str]) -> Path:
+    """
+    Ensure path is local and return simple version.
+
+    :param path: The local path to check.
+    :raises: UWConfigError if a non-local scheme is specified.
+    """
+    info = urlparse(str(path))
+    if info.scheme and info.scheme not in SCHEMES.local:
+        _bad_scheme(path, info.scheme)
+    return Path(info.path)

@@ -1,9 +1,10 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 
 import logging
 import os
 import stat
 from pathlib import Path
+from typing import Union
 from unittest.mock import Mock, patch
 
 from iotaa import asset, external
@@ -105,17 +106,21 @@ def test_tasks_existing_bad_scheme():
     path = "foo://bucket/a/b"
     with raises(UWConfigError) as e:
         tasks.existing(path=path)
-    assert str(e.value) == "Support for scheme 'foo' not implemented"
+    assert str(e.value) == f"Scheme 'foo' in '{path}' not supported"
 
 
-def test_tasks_file_missing(tmp_path):
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_file_missing(prefix, tmp_path):
     path = tmp_path / "file"
+    path = "%s%s" % (prefix, path) if prefix else path
     assert not ready(tasks.file(path=path))
 
 
-def test_tasks_file_present(tmp_path):
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_file_present(prefix, tmp_path):
     path = tmp_path / "file"
     path.touch()
+    path = "%s%s" % (prefix, path) if prefix else path
     assert ready(tasks.file(path=path))
 
 
@@ -165,26 +170,52 @@ def test_tasks_filecopy_source_local(src, ok):
                 with patch.object(tasks, "copy") as copy:
                     tasks.filecopy(src=src, dst=dst)
             mkdir.assert_called_once_with(parents=True, exist_ok=True)
-            copy.assert_called_once_with(Path(src), Path(dst))
+            copy.assert_called_once_with(Path("/src/file"), Path(dst))
         else:
             with raises(UWConfigError) as e:
                 tasks.filecopy(src=src, dst=dst)
-            assert str(e.value) == "Support for scheme 'foo' not implemented"
+            assert str(e.value) == f"Scheme 'foo' in '{src}' not supported"
 
 
-def test_tasks_symlink_simple(tmp_path):
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_symlink_simple(prefix, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
     target.touch()
     assert not link.is_file()
-    tasks.symlink(target=target, linkname=link)
+    t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
+    tasks.symlink(target=t2, linkname=l2)
     assert link.is_symlink()
 
 
-def test_tasks_symlink_directory_hierarchy(tmp_path):
+@mark.parametrize("prefix", ["", "file://"])
+def test_tasks_symlink_directory_hierarchy(prefix, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "foo" / "bar" / "link"
     target.touch()
     assert not link.is_file()
-    tasks.symlink(target=target, linkname=link)
+    t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
+    tasks.symlink(target=t2, linkname=l2)
     assert link.is_symlink()
+
+
+def test__bad_scheme():
+    path = "foo://bucket/a/b"
+    with raises(UWConfigError) as e:
+        tasks.existing(path=path)
+    assert str(e.value) == f"Scheme 'foo' in '{path}' not supported"
+
+
+def test__local_path_fail():
+    path = "foo://bucket/a/b"
+    with patch.object(tasks, "_bad_scheme") as _bad_scheme:
+        tasks._local_path(path)
+    _bad_scheme.assert_called_once_with(path, "foo")
+
+
+@mark.parametrize("prefix", ["", "file://"])
+@mark.parametrize("wrapper", [str, Path])
+def test__local_path_pass(prefix, wrapper):
+    path = "/some/file"
+    p2: Union[str, Path] = str(f"{prefix}{path}") if wrapper == str else Path(path)
+    assert tasks._local_path(p2) == Path(path)
