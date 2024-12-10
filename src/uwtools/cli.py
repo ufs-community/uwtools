@@ -94,7 +94,8 @@ def main() -> None:
         modes = {**tools, **drivers}
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
-        log.error(str(e))
+        for line in str(e).split("\n"):
+            log.error(line)
         sys.exit(1)
 
 
