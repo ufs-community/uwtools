@@ -1,1 +1,1 @@
-uw fs link --config-file link-config.yaml config files
+uw fs link --config-file link-config.yaml --key-path config.files

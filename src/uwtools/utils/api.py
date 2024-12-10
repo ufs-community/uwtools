@@ -10,6 +10,7 @@ from typing import Callable, Optional, TypeVar, Union
 
 from iotaa import graph
 
+from uwtools.config.support import YAMLKey
 from uwtools.drivers.driver import DriverT
 from uwtools.exceptions import UWError
 from uwtools.utils.file import str2path
@@ -52,7 +53,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
@@ -77,7 +78,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
@@ -103,7 +104,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
@@ -152,7 +153,7 @@ def _execute(
     batch: bool = False,  # pylint: disable=unused-argument
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     schema_file: Optional[Union[Path, str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
@@ -170,7 +171,7 @@ def _execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :param schema_file: The JSON Schema file to use for validation.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.

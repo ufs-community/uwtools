@@ -7,7 +7,7 @@ from typing import Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
-from uwtools.config.support import depth, format_to_config, log_and_error
+from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
@@ -81,7 +81,7 @@ def realize_config(
     update_format: Optional[str] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -109,19 +109,19 @@ def realize_config(
     return input_obj.data
 
 
-def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
+def walk_key_path(config: dict, key_path: list[YAMLKey]) -> tuple[dict, str]:
     """
     Navigate to the sub-config at the end of the path of given keys.
 
     :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :return: The sub-config and a string representation of the key path.
     """
     keys = []
     pathstr = "<unknown>"
     for key in key_path:
         keys.append(key)
-        pathstr = ".".join(keys)
+        pathstr = ".".join(str(key) for key in keys)
         try:
             subconfig = config[key]
         except KeyError as e:
@@ -158,22 +158,6 @@ def _ensure_format(
     return fmt
 
 
-def _print_config_section(config: dict, key_path: list[str]) -> None:
-    """
-    Print the contents of the located subtree as key=value pairs, one per line.
-
-    :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
-    """
-    config, pathstr = walk_key_path(config, key_path)
-    output_lines = []
-    for key, value in config.items():
-        if type(value) not in (bool, float, int, str):
-            raise log_and_error(f"Non-scalar value {value} found at {pathstr}")
-        output_lines.append(f"{key}={value}")
-    print("\n".join(sorted(output_lines)))
-
-
 def _realize_config_input_setup(
     input_config: Optional[Union[Config, Path, dict]] = None, input_format: Optional[str] = None
 ) -> Config:
@@ -197,7 +181,7 @@ def _realize_config_output_setup(
     input_obj: Config,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
 ) -> tuple[dict, str]:
     """
     Set up config-realize output.
@@ -205,7 +189,7 @@ def _realize_config_output_setup(
     :param input_obj: The input Config object.
     :param output_file: Output config destination (None => write to stdout).
     :param output_format: Format of the output config.
-    :param key_path: Path through keys to the desired output block.
+    :param key_path: Path of keys to config block to use.
     :return: The unrealized data to output and the output format name.
     """
     output_format = _ensure_format("output", output_format, output_file)
@@ -344,7 +328,7 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config.
 :param output_file: Output config destination (None => write to ``stdout``).
 :param output_format: Format of the output config.
-:param key_path: Path through keys to the desired output block.
+:param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.

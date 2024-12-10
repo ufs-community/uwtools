@@ -96,7 +96,6 @@ class STR:
     ioda: str = "ioda"
     jedi: str = "jedi"
     keypath: str = "key_path"
-    keys: str = "keys"
     keyvalpairs: str = "key_eq_val_pairs"
     leadtime: str = "leadtime"
     link: str = "link"

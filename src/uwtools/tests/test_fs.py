@@ -51,7 +51,7 @@ def test_Copier(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    fs.Copier(target_dir=dstdir, config=config, keys=["a", "b"]).go()
+    fs.Copier(target_dir=dstdir, config=config, key_path=["a", "b"]).go()
     assert (dstdir / "foo").is_file()
     assert (dstdir / "subdir" / "bar").is_file()
 
@@ -60,7 +60,7 @@ def test_Copier_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    copier = fs.Copier(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
+    copier = fs.Copier(target_dir=dstdir, config=cfgdict, key_path=["a", "b"])
     copier.go(dry_run=True)
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
@@ -77,7 +77,7 @@ def test_Copier_no_targetdir_abspath_pass(assets):
 def test_Copier_no_targetdir_relpath_fail(assets):
     _, cfgdict, _ = assets
     with raises(UWConfigError) as e:
-        fs.Copier(config=cfgdict, keys=["a", "b"]).go()
+        fs.Copier(config=cfgdict, key_path=["a", "b"]).go()
     errmsg = "Relative path '%s' requires the target directory to be specified"
     assert errmsg % "foo" in str(e.value)
 
@@ -86,7 +86,7 @@ def test_Copier_no_targetdir_relpath_fail(assets):
 def test_FilerStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
-    assert fs.FileStager(target_dir=dstdir, config=config, keys=["a", "b"])
+    assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
 
 
 @mark.parametrize("source", ("dict", "file"))
@@ -95,7 +95,7 @@ def test_Linker(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    fs.Linker(target_dir=dstdir, config=config, keys=["a", "b"]).go()
+    fs.Linker(target_dir=dstdir, config=config, key_path=["a", "b"]).go()
     assert (dstdir / "foo").is_symlink()
     assert (dstdir / "subdir" / "bar").is_symlink()
 
@@ -105,8 +105,8 @@ def test_Stager__config_block_fail_bad_key_path(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
-        ConcreteStager(target_dir=dstdir, config=config, keys=["a", "x"])
-    assert str(e.value) == "Failed following YAML key(s): a.x"
+        ConcreteStager(target_dir=dstdir, config=config, key_path=["a", "x"])
+    assert str(e.value) == "Bad config path: a.x"
 
 
 @mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
@@ -114,5 +114,5 @@ def test_Stager__config_block_fails_bad_type(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:
-        ConcreteStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
-    assert str(e.value) == "Expected block not found at key path: a.b"
+        ConcreteStager(target_dir=dstdir, config=cfgdict, key_path=["a", "b"])
+    assert str(e.value) == "Value at a.b must be a dictionary"
