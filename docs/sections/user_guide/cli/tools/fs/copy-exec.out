@@ -1,16 +1,29 @@
-[2024-11-23T00:30:43]     INFO Validating config against internal schema: files-to-stage
-[2024-11-23T00:30:43]     INFO 0 UW schema-validation errors found in fs config
-[2024-11-23T00:30:44]     INFO File src/foo: Ready
-[2024-11-23T00:30:44]     INFO File src/bar: Ready
-[2024-11-23T00:30:44]     INFO Copy src/foo -> copy-dst/foo: Executing
-[2024-11-23T00:30:44]     INFO Copy src/foo -> copy-dst/foo: Ready
-[2024-11-23T00:30:44]     INFO Copy src/bar -> copy-dst/subdir/bar: Executing
-[2024-11-23T00:30:44]     INFO Copy src/bar -> copy-dst/subdir/bar: Ready
-[2024-11-23T00:30:44]     INFO File copies: Ready
+[2024-12-07T01:01:56]     INFO Validating config against internal schema: files-to-stage
+[2024-12-07T01:01:56]     INFO 0 UW schema-validation errors found in fs config
+[2024-12-07T01:01:56]     INFO File copies: Initial state: Not Ready
+[2024-12-07T01:01:56]     INFO File copies: Checking requirements
+[2024-12-07T01:01:56]     INFO Copy src/foo -> copy-dst/foo: Initial state: Not Ready
+[2024-12-07T01:01:56]     INFO Copy src/foo -> copy-dst/foo: Checking requirements
+[2024-12-07T01:01:56]     INFO Copy src/foo -> copy-dst/foo: Requirement(s) ready
+[2024-12-07T01:01:56]     INFO Copy src/foo -> copy-dst/foo: Executing
+[2024-12-07T01:01:56]     INFO Copy src/foo -> copy-dst/foo: Final state: Ready
+[2024-12-07T01:01:56]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Initial state: Not Ready
+[2024-12-07T01:01:56]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Checking requirements
+[2024-12-07T01:01:58]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Requirement(s) ready
+[2024-12-07T01:01:58]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Executing
+[2024-12-07T01:01:58]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Final state: Ready
+[2024-12-07T01:01:58]     INFO Copy src/bar -> copy-dst/subdir/bar: Initial state: Not Ready
+[2024-12-07T01:01:58]     INFO Copy src/bar -> copy-dst/subdir/bar: Checking requirements
+[2024-12-07T01:01:58]     INFO Copy src/bar -> copy-dst/subdir/bar: Requirement(s) ready
+[2024-12-07T01:01:58]     INFO Copy src/bar -> copy-dst/subdir/bar: Executing
+[2024-12-07T01:01:58]     INFO Copy src/bar -> copy-dst/subdir/bar: Final state: Ready
+[2024-12-07T01:01:58]     INFO File copies: Final state: Ready
 
 copy-dst
 ├── foo
+├── licenses
+│   └── gpl
 └── subdir
     └── bar
 
-2 directories, 2 files
+3 directories, 3 files
