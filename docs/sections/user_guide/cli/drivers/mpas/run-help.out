@@ -23,8 +23,7 @@ Optional arguments:
   --graph-file PATH
       Path to Graphviz DOT output [experimental]
   --key-path KEY[.KEY...]
-      Dot-separated path of keys leading through the config to the driver's
-      configuration block
+      Dot-separated path of keys to driver config block
   --schema-file PATH
       Path to schema file to use for validation
   --quiet, -q
