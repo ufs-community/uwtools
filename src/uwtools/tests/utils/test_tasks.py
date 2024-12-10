@@ -8,10 +8,6 @@ from typing import Union
 from unittest.mock import Mock, patch
 
 import iotaa
-
-from uwtools.utils import tasks
-
-
 from iotaa import asset, external
 from pytest import mark, raises
 
@@ -29,11 +25,6 @@ def exists(x):
     yield asset(x, lambda: True)
 
 
-def ready(taskval):
-    return taskval.ready()
-
-
->>>>>>> main
 # Tests
 
 
@@ -57,13 +48,14 @@ def test_tasks_executable(tmp_path):
         os.chmod(p, os.stat(p).st_mode | stat.S_IEXEC)  # set executable bits
         assert iotaa.ready(tasks.executable(program=p))
 
+
 @mark.parametrize("prefix", ["", "file://"])
 def test_tasks_existing_local_missing(caplog, prefix, tmp_path):
     log.setLevel(logging.INFO)
     base = tmp_path / "x"
     path = prefix + str(base) if prefix else base
-    assert not ready(tasks.existing(path=path))
-    assert logged(caplog, "Filesystem item %s: State: Not Ready (external asset)" % base)
+    assert not iotaa.ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: Not ready [external asset]" % base)
 
 
 def test_tasks_existing_local_present_directory(caplog, tmp_path):
@@ -71,6 +63,7 @@ def test_tasks_existing_local_present_directory(caplog, tmp_path):
     path = tmp_path / "directory"
     path.mkdir()
     assert iotaa.ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: Ready" % path)
 
 
 def test_tasks_existing_missing(tmp_path):
@@ -84,12 +77,12 @@ def test_tasks_existing_present_file(tmp_path):
     assert iotaa.ready(tasks.existing(path=path))
 
 
-def test_tasks_existing_present_symlink(tmp_path):
+def test_tasks_existing_present_symlink(caplog, tmp_path):
+    log.setLevel(logging.INFO)
     path = tmp_path / "symlink"
     path.symlink_to(os.devnull)
     assert iotaa.ready(tasks.existing(path=path))
-    assert ready(tasks.existing(path=path))
-    assert logged(caplog, "Filesystem item %s: State: Ready" % path)
+    assert logged(caplog, "Filesystem item %s: Ready" % path)
 
 
 @mark.parametrize("prefix", ["", "file://"])
@@ -98,8 +91,8 @@ def test_tasks_existing_local_present_file(caplog, prefix, tmp_path):
     base = tmp_path / "file"
     base.touch()
     path = prefix + str(base) if prefix else base
-    assert ready(tasks.existing(path=path))
-    assert logged(caplog, "Filesystem item %s: State: Ready" % base)
+    assert iotaa.ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: Ready" % base)
 
 
 @mark.parametrize("prefix", ["", "file://"])
@@ -108,8 +101,8 @@ def test_tasks_existing_local_present_symlink(caplog, prefix, tmp_path):
     base = tmp_path / "symlink"
     base.symlink_to(os.devnull)
     path = prefix + str(base) if prefix else base
-    assert ready(tasks.existing(path=path))
-    assert logged(caplog, "Filesystem item %s: State: Ready" % base)
+    assert iotaa.ready(tasks.existing(path=path))
+    assert logged(caplog, "Filesystem item %s: Ready" % base)
 
 
 @mark.parametrize("scheme", ["http", "https"])
@@ -118,10 +111,10 @@ def test_tasks_existing_remote(caplog, code, expected, scheme):
     log.setLevel(logging.INFO)
     path = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
-        state = ready(tasks.existing(path=path))
+        state = iotaa.ready(tasks.existing(path=path))
         assert state is expected
     head.assert_called_with(path, allow_redirects=True, timeout=3)
-    msg = "Remote object %s: State: %s" % (path, "Ready" if state else "Not Ready (external asset)")
+    msg = "Remote object %s: %s" % (path, "Ready" if state else "Not ready [external asset]")
     assert logged(caplog, msg)
 
 
@@ -137,7 +130,6 @@ def test_tasks_file_missing(prefix, tmp_path):
     path = tmp_path / "file"
     path = "%s%s" % (prefix, path) if prefix else path
     assert not iotaa.ready(tasks.file(path=path))
-    assert not ready(tasks.file(path=path))
 
 
 @mark.parametrize("prefix", ["", "file://"])
@@ -146,7 +138,6 @@ def test_tasks_file_present(prefix, tmp_path):
     path.touch()
     path = "%s%s" % (prefix, path) if prefix else path
     assert iotaa.ready(tasks.file(path=path))
-    assert ready(tasks.file(path=path))
 
 
 def test_tasks_filecopy_simple(tmp_path):
