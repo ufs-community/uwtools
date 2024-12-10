@@ -151,7 +151,7 @@ class Copier(FileStager):
         """
         yield "File copies"
         yield [
-            filecopy(src=self._simple(src), dst=self._simple(self._target_dir) / self._simple(dst))
+            filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
             for dst, src in self._config.items()
         ]
 
