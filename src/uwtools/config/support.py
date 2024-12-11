@@ -68,6 +68,17 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
+def uw_yaml_loader() -> type[yaml.SafeLoader]:
+    """
+    A loader with basic UW constructors added.
+    """
+    loader = yaml.SafeLoader
+    for tag_class in (UWYAMLConvert, UWYAMLRemove):
+        for tag in getattr(tag_class, "TAGS"):
+            loader.add_constructor(tag, tag_class)
+    return loader
+
+
 def yaml_to_str(cfg: dict) -> str:
     """
     Return a uwtools-conventional YAML representation of the given dict.
