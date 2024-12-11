@@ -17,7 +17,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import UWYAMLConvert, UWYAMLRemove
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, uw_yaml_loader
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -141,7 +141,7 @@ def test_dereference_remove(caplog):
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
     assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
-    assert regex_logged(caplog, "Removing value at: a > b > d")
+    assert regex_logged(caplog, "Removing value at: a.b.d")
 
 
 def test_dereference_str_expression_rendered():
@@ -165,6 +165,12 @@ def test_dereference_str_variable_rendered_str():
     # A pure str result remains a str.
     val = "{{ greeting }}"
     assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
+
+
+def test_deref_debug(caplog):
+    log.setLevel(logging.DEBUG)
+    jinja2.deref_debug(action="Frobnicated", val="foo")
+    assert logged(caplog, "[dereference] Frobnicated: foo")
 
 
 def test_register_filters_env():
@@ -309,13 +315,16 @@ def test__deref_convert_ok(caplog, converted, tag, value):
     assert not regex_logged(caplog, "Conversion failed")
 
 
-def test__deref_debug(caplog):
+def test__deref_render_held(caplog):
     log.setLevel(logging.DEBUG)
-    jinja2._deref_debug(action="Frobnicated", val="foo")
-    assert logged(caplog, "[dereference] Frobnicated: foo")
+    val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=uw_yaml_loader())
+    assert jinja2._deref_render(val=val, context=context) == val
+    assert regex_logged(caplog, "Rendered")
+    assert regex_logged(caplog, "Held")
 
 
 def test__deref_render_no(caplog, deref_render_assets):
+    log.setLevel(logging.DEBUG)
     val, context, _ = deref_render_assets
     assert jinja2._deref_render(val=val, context=context) == val
     assert not regex_logged(caplog, "Rendered")
@@ -323,19 +332,30 @@ def test__deref_render_no(caplog, deref_render_assets):
 
 
 def test__deref_render_ok(caplog, deref_render_assets):
+    log.setLevel(logging.DEBUG)
     val, context, local = deref_render_assets
     assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
     assert regex_logged(caplog, "Rendered")
     assert not regex_logged(caplog, "Rendering failed")
 
 
+def test__deref_render_unloadable_val(caplog):
+    log.setLevel(logging.DEBUG)
+    val = "&XMLENTITY;"
+    assert jinja2._deref_render(val='{{ "%s" if True }}' % val, context={}) == val
+    assert regex_logged(caplog, "Rendered")
+    assert not regex_logged(caplog, "Rendering failed")
+
+
 def test__dry_run_template(caplog):
+    log.setLevel(logging.DEBUG)
     jinja2._dry_run_template("roses are red\nviolets are blue")
     assert logged(caplog, "roses are red")
     assert logged(caplog, "violets are blue")
 
 
 def test__log_missing_values(caplog):
+    log.setLevel(logging.DEBUG)
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
     assert logged(caplog, "Value(s) required to render template not provided:")

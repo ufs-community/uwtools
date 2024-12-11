@@ -8,10 +8,11 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional, Union
 
+import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config, uw_yaml_loader
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
@@ -122,28 +123,39 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
-    rendered: _ConfigVal = val  # fall-back value
+    rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
-        new = {}
+        rendered = {}
         for k, v in val.items():
             if isinstance(v, UWYAMLRemove):
-                _deref_debug("Removing value at", " > ".join([*keys, k]))
+                deref_debug("Removing value at", ".".join([*keys, k]))
             else:
-                new[dereference(k, context)] = dereference(v, context, local=val, keys=[*keys, k])
-        return new
-    if isinstance(val, list):
-        return [dereference(v, context) for v in val]
-    if isinstance(val, str):
-        _deref_debug("Rendering", val)
+                kd, vd = [dereference(x, context, val, [*keys, k]) for x in (k, v)]
+                rendered[kd] = vd
+    elif isinstance(val, list):
+        rendered = [dereference(v, context) for v in val]
+    elif isinstance(val, str):
+        deref_debug("Rendering", val)
         rendered = _deref_render(val, context, local)
     elif isinstance(val, UWYAMLConvert):
-        _deref_debug("Rendering", val.value)
+        deref_debug("Rendering", val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
     else:
-        _deref_debug("Accepting", val)
+        deref_debug("Accepting", val)
+        rendered = val
     return rendered
+
+
+def deref_debug(action: str, val: Optional[_ConfigVal] = "") -> None:
+    """
+    Log a debug-level message related to dereferencing.
+
+    :param action: The dereferencing activity being performed.
+    :param val: The value being dereferenced.
+    """
+    log.debug("[dereference] %s: %s", action, val)
 
 
 def render(
@@ -231,23 +243,13 @@ def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     :return: The value translated to the specified type.
     """
     converted: _ConfigVal = val  # fall-back value
-    _deref_debug("Converting", val.value)
+    deref_debug("Converting", val.value)
     try:
         converted = val.convert()
-        _deref_debug("Converted", converted)
+        deref_debug("Converted", converted)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        _deref_debug("Conversion failed", str(e))
+        deref_debug("Conversion failed", str(e))
     return converted
-
-
-def _deref_debug(action: str, val: _ConfigVal) -> None:
-    """
-    Log a debug-level message related to dereferencing.
-
-    :param action: The dereferencing activity being performed.
-    :param val: The value being dereferenced.
-    """
-    log.debug("[dereference] %s: %s", action, val)
 
 
 def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
@@ -266,10 +268,22 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     context = {**(local or {}), **context}
     try:
         rendered = _register_filters(env).from_string(val).render(context)
-        _deref_debug("Rendered", rendered)
+        deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught
         rendered = val
-        _deref_debug("Rendering failed", str(e))
+        deref_debug("Rendering failed", val)
+        for line in str(e).split("\n"):
+            deref_debug(line)
+    try:
+        loaded = yaml.load(rendered, Loader=uw_yaml_loader())
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        loaded = None
+        deref_debug("Loading rendered value as YAML", rendered)
+        for line in str(e).split("\n"):
+            deref_debug(line)
+    if isinstance(loaded, UWYAMLConvert):
+        rendered = val
+        deref_debug("Held", rendered)
     return rendered
 
 
