@@ -167,6 +167,12 @@ def test_dereference_str_variable_rendered_str():
     assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
 
 
+def test_deref_debug(caplog):
+    log.setLevel(logging.DEBUG)
+    jinja2.deref_debug(action="Frobnicated", val="foo")
+    assert logged(caplog, "[dereference] Frobnicated: foo")
+
+
 def test_register_filters_env():
     s = "hello {{ 'RECIPIENT' | env }}"
     template = jinja2._register_filters(Environment(undefined=DebugUndefined)).from_string(s)
@@ -309,20 +315,16 @@ def test__deref_convert_ok(caplog, converted, tag, value):
     assert not regex_logged(caplog, "Conversion failed")
 
 
-def test__deref_debug(caplog):
-    log.setLevel(logging.DEBUG)
-    jinja2._deref_debug(action="Frobnicated", val="foo")
-    assert logged(caplog, "[dereference] Frobnicated: foo")
-
-
 def test__deref_render_held(caplog):
+    log.setLevel(logging.DEBUG)
     val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=uw_yaml_loader())
     assert jinja2._deref_render(val=val, context=context) == val
-    assert not regex_logged(caplog, "Rendered")
+    assert regex_logged(caplog, "Rendered")
     assert regex_logged(caplog, "Held")
 
 
 def test__deref_render_no(caplog, deref_render_assets):
+    log.setLevel(logging.DEBUG)
     val, context, _ = deref_render_assets
     assert jinja2._deref_render(val=val, context=context) == val
     assert not regex_logged(caplog, "Rendered")
@@ -330,6 +332,7 @@ def test__deref_render_no(caplog, deref_render_assets):
 
 
 def test__deref_render_ok(caplog, deref_render_assets):
+    log.setLevel(logging.DEBUG)
     val, context, local = deref_render_assets
     assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
     assert regex_logged(caplog, "Rendered")
@@ -337,12 +340,14 @@ def test__deref_render_ok(caplog, deref_render_assets):
 
 
 def test__dry_run_template(caplog):
+    log.setLevel(logging.DEBUG)
     jinja2._dry_run_template("roses are red\nviolets are blue")
     assert logged(caplog, "roses are red")
     assert logged(caplog, "violets are blue")
 
 
 def test__log_missing_values(caplog):
+    log.setLevel(logging.DEBUG)
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
     assert logged(caplog, "Value(s) required to render template not provided:")
