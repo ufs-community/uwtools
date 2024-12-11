@@ -341,7 +341,7 @@ def test__deref_render_ok(caplog, deref_render_assets):
 
 def test__deref_render_unloadable_val(caplog):
     log.setLevel(logging.DEBUG)
-    val = "&PARTITION_DEFAULT;"
+    val = "&XMLENTITY;"
     assert jinja2._deref_render(val='{{ "%s" if True }}' % val, context={}) == val
     assert regex_logged(caplog, "Rendered")
     assert not regex_logged(caplog, "Rendering failed")
