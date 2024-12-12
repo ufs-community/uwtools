@@ -59,7 +59,7 @@ def args_dispatch_fs():
         "config_file": "/config/file",
         "cycle": dt.datetime.now(),
         "leadtime": dt.timedelta(hours=6),
-        "keys": ["a", "b"],
+        "key_path": ["a", "b"],
         "dry_run": False,
         "stdin_ok": True,
     }
@@ -401,7 +401,7 @@ def test__dispatch_fs_action(action, args_dispatch_fs):
         config=args["config_file"],
         cycle=args["cycle"],
         leadtime=args["leadtime"],
-        keys=args["keys"],
+        key_path=args["key_path"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
     )

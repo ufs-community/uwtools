@@ -59,6 +59,16 @@ def realize_config_yaml_input(tmp_path):
 # Helpers
 
 
+def help_realize_config_double_tag(config, expected, tmp_path):
+    path_in = tmp_path / "in.yaml"
+    path_out = tmp_path / "out.yaml"
+    with open(path_in, "w", encoding="utf-8") as f:
+        print(dedent(config).strip(), file=f)
+    tools.realize_config(input_config=path_in, output_file=path_out)
+    with open(path_out, "r", encoding="utf-8") as f:
+        assert f.read().strip() == dedent(expected).strip()
+
+
 def help_realize_config_fmt2fmt(input_file, input_format, update_file, update_format, tmpdir):
     input_file = fixture_path(input_file)
     update_file = fixture_path(update_file)
@@ -233,6 +243,58 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
             input_format=FORMAT.yaml,
             output_format=FORMAT.sh,
         )
+
+
+def test_realize_config_double_tag_flat(tmp_path):
+    config = """
+    a: 1
+    b: 2
+    foo: !int "{{ a + b }}"
+    bar: !int "{{ foo }}"
+    """
+    expected = """
+    a: 1
+    b: 2
+    foo: 3
+    bar: 3
+    """
+    help_realize_config_double_tag(config, expected, tmp_path)
+
+
+def test_realize_config_double_tag_nest(tmp_path):
+    config = """
+    a: 1.0
+    b: 2.0
+    qux:
+      foo: !float "{{ a + b }}"
+      bar: !float "{{ foo }}"
+    """
+    expected = """
+    a: 1.0
+    b: 2.0
+    qux:
+      foo: 3.0
+      bar: 3.0
+    """
+    help_realize_config_double_tag(config, expected, tmp_path)
+
+
+def test_realize_config_double_tag_nest_forwrad_reference(tmp_path):
+    config = """
+    a: true
+    b: false
+    bar: !bool "{{ qux.foo }}"
+    qux:
+      foo: !bool "{{ a or b }}"
+    """
+    expected = """
+    a: true
+    b: false
+    bar: true
+    qux:
+      foo: true
+    """
+    help_realize_config_double_tag(config, expected, tmp_path)
 
 
 def test_realize_config_dry_run(caplog):
@@ -602,65 +664,6 @@ def test__ensure_format_explicitly_specified_with_path():
         tools._ensure_format(desc="foo", fmt=FORMAT.ini, config=Path("/tmp/config.yaml"))
         == FORMAT.ini
     )
-
-
-def test__print_config_section_ini(capsys):
-    config_obj = INIConfig(fixture_path("simple3.ini"))
-    section = ["dessert"]
-    tools._print_config_section(config_obj.data, section)
-    actual = capsys.readouterr().out
-    expected = """
-    flavor={{ flavor }}
-    servings=0
-    side=False
-    type=pie
-    """
-    assert actual.strip() == dedent(expected).strip()
-
-
-def test__print_config_section_ini_missing_section():
-    config_obj = INIConfig(fixture_path("simple3.ini"))
-    section = ["sandwich"]
-    msg = "Bad config path: sandwich"
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert msg in str(e.value)
-
-
-def test__print_config_section_yaml(capsys):
-    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["sgs_tke", "profile_type"]
-    tools._print_config_section(config_obj.data, section)
-    actual = capsys.readouterr().out
-    expected = """
-    name=fixed
-    surface_value=0.0
-    """
-    assert actual.strip() == dedent(expected).strip()
-
-
-def test__print_config_section_yaml_for_nonscalar():
-    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["o3mr"]
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert "Non-scalar value" in str(e.value)
-
-
-def test__print_config_section_yaml_list():
-    config_obj = YAMLConfig(fixture_path("srw_example.yaml"))
-    section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert "must be a dictionary" in str(e.value)
-
-
-def test__print_config_section_yaml_not_dict():
-    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["sgs_tke", "units"]
-    with raises(UWConfigError) as e:
-        tools._print_config_section(config_obj.data, section)
-    assert "must be a dictionary" in str(e.value)
 
 
 def test__realize_config_input_setup_ini_cfgobj():

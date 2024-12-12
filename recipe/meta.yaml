@@ -12,6 +12,7 @@ build:
 requirements:
   build:
     - pip
+    - setuptools
   run:
     - f90nml 1.4.*
     - iotaa 0.8.*
@@ -20,6 +21,7 @@ requirements:
     - lxml 5.3.*
     - python >=3.9,<3.13
     - pyyaml 6.0.*
+    - requests 2.32.*
 test:
   requires:
     - black 24.8.*

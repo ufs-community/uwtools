@@ -17,11 +17,11 @@ def kwargs(tmp_path):
         f.touch()
     config = {"a": {"b": {str(dstdir / "f1"): str(srcfile1), str(dstdir / "f2"): str(srcfile2)}}}
     return {
-        "target_dir": dstdir,
+        "target_dir": None,
         "config": config,
         "cycle": dt.datetime.now(),
         "leadtime": dt.timedelta(hours=6),
-        "keys": ["a", "b"],
+        "key_path": ["a", "b"],
         "dry_run": False,
     }
 

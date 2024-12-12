@@ -6,13 +6,15 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Union
+from urllib.parse import urlparse
 
 from iotaa import dryrun, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import YAMLKey
+from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
@@ -29,7 +31,7 @@ class Stager(ABC):
         target_dir: Optional[Union[str, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
-        keys: Optional[list[str]] = None,
+        key_path: Optional[list[YAMLKey]] = None,
         dry_run: bool = False,
     ) -> None:
         """
@@ -39,12 +41,11 @@ class Stager(ABC):
         :param target_dir: Path to target directory.
         :param cycle: A ``datetime`` object to make available for use in the config.
         :param leadtime: A ``timedelta`` object to make available for use in the config.
-        :param keys: YAML keys leading to file dst/src block.
+        :param key_path: Path of keys to config block to use.
         :param dry_run: Do not copy files.
         :raises: ``UWConfigError`` if config fails validation.
         """
         dryrun(enable=dry_run)
-        self._keys = keys or []
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
         yaml_config.dereference(
@@ -54,42 +55,46 @@ class Stager(ABC):
                 **yaml_config.data,
             }
         )
-        self._config = yaml_config.data
-        self._set_config_block()
+        self._config, _ = walk_key_path(yaml_config.data, key_path or [])
         self._validate()
-        self._check_paths()
+        self._check_target_dir()
+        self._check_destination_paths()
 
-    def _check_paths(self) -> None:
+    def _check_destination_paths(self) -> None:
         """
-        Check that all paths are absolute if no target directory is specified.
+        Check that destination paths are valid.
 
-        :parm paths: The paths to check.
-        :raises: UWConfigError if no target directory is specified and a relative path is.
+        :raises: UWConfigError when a bad path is detected.
         """
-        if not self._target_dir:
-            errmsg = "Relative path '%s' requires the target directory to be specified"
-            for dst in self._dst_paths:
-                if not Path(dst).is_absolute():
-                    raise UWConfigError(errmsg % dst)
+        for dst in self._dst_paths:
+            scheme = urlparse(dst).scheme
+            absolute = scheme or Path(dst).is_absolute()
+            if scheme and scheme != STR.url_scheme_file:
+                msg = "Non-filesystem destination path '%s' not currently supported"
+                raise UWConfigError(msg % dst)
+            if self._target_dir and scheme:
+                msg = "Non-filesystem path '%s' invalid when target directory is specified"
+                raise UWConfigError(msg % dst)
+            if self._target_dir and absolute:
+                msg = "Path '%s' must be relative when target directory is specified"
+                raise UWConfigError(msg % dst)
+            if not self._target_dir and not absolute:
+                msg = "Relative path '%s' requires target directory to be specified"
+                raise UWConfigError(msg % dst)
 
-    def _set_config_block(self) -> None:
+    def _check_target_dir(self) -> None:
         """
-        Navigate keys to a config block.
+        Check that target directory is valid.
 
-        :raises: UWConfigError if no target directory is specified and a relative path is.
+        :raises: UWConfigError when a bad path is detected.
         """
-        cfg = self._config
-        nav = []
-        for key in self._keys:
-            nav.append(key)
-            if key not in cfg:
-                raise UWConfigError("Failed following YAML key(s): %s" % ".".join(nav))
-            log.debug("Following config key '%s'", key)
-            cfg = cfg[key]
-        if not isinstance(cfg, dict):
-            msg = "Expected block not found at key path: %s" % ".".join(self._keys)
-            raise UWConfigError(msg)
-        self._config = cfg
+        if (
+            self._target_dir
+            and (scheme := urlparse(str(self._target_dir)).scheme)
+            and scheme != STR.url_scheme_file
+        ):
+            msg = "Non-filesystem path '%s' invalid as target directory"
+            raise UWConfigError(msg % self._target_dir)
 
     @property
     @abstractmethod
@@ -144,9 +149,20 @@ class Copier(FileStager):
         """
         Copy files.
         """
-        dst = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._config.items()]
+        yield [
+            filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
+            for dst, src in self._config.items()
+        ]
+
+    @staticmethod
+    def _simple(path: Union[Path, str]) -> Path:
+        """
+        Convert a path, potentially prefixed with scheme file://, into a simple filesystem path.
+
+        :param path: The path to convert.
+        """
+        return Path(urlparse(str(path)).path)
 
 
 class Linker(FileStager):

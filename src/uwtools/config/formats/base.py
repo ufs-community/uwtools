@@ -216,9 +216,9 @@ class Config(ABC, UserDict):
         """
 
         def logstate(state: str) -> None:
-            log.debug("Dereferencing, %s value:", state)
+            jinja2.deref_debug("Dereferencing, %s value:" % state)
             for line in yaml_to_str(self.data).split("\n"):
-                log.debug("%s%s", INDENT, line)
+                jinja2.deref_debug("%s%s" % (INDENT, line))
 
         while True:
             logstate("current")

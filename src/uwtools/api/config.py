@@ -12,6 +12,7 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import YAMLKey
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_external as _validate_external
@@ -116,7 +117,7 @@ def realize(
     update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -146,7 +147,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
     input_format: Optional[str] = None,
     update_config: Optional[Union[dict, _Config, Path, str]] = None,
     update_format: Optional[str] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -239,7 +240,7 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config (optional if file's extension is recognized).
 :param output_file: Output config file (``None`` => write to ``stdout``).
 :param output_format: Format of the output config (optional if file's extension is recognized).
-:param key_path: Path through keys to the desired output block.
+:param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.

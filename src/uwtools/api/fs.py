@@ -8,6 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
+from uwtools.config.support import YAMLKey
 from uwtools.fs import Copier, Linker, MakeDirs
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
@@ -17,7 +18,7 @@ def copy(
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    keys: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
@@ -28,7 +29,7 @@ def copy(
     :param target_dir: Path to target directory.
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
-    :param keys: YAML keys leading to file dst/src block.
+    :param key_path: Path of keys to config block to use.
     :param dry_run: Do not copy files.
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all copies were created.
@@ -38,7 +39,7 @@ def copy(
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
-        keys=keys,
+        key_path=key_path,
         dry_run=dry_run,
     )
     assets: list[Asset] = stager.go()  # type: ignore
@@ -50,7 +51,7 @@ def link(
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    keys: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
@@ -61,7 +62,7 @@ def link(
     :param target_dir: Path to target directory.
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
-    :param keys: YAML keys leading to file dst/src block.
+    :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all links were created.
@@ -71,7 +72,7 @@ def link(
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
-        keys=keys,
+        key_path=key_path,
         dry_run=dry_run,
     )
     assets: list[Asset] = stager.go()  # type: ignore
@@ -83,7 +84,7 @@ def makedirs(
     target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    keys: Optional[list[str]] = None,
+    key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
@@ -94,7 +95,7 @@ def makedirs(
     :param target_dir: Path to target directory.
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
-    :param keys: YAML keys leading to file dst/src block.
+    :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all directories were made.
@@ -104,7 +105,7 @@ def makedirs(
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
-        keys=keys,
+        key_path=key_path,
         dry_run=dry_run,
     )
     assets: list[Asset] = stager.go()  # type: ignore

@@ -13,7 +13,7 @@ from uwtools.logging import log
 from uwtools.strings import FORMAT
 
 INCLUDE_TAG = "!include"
-
+YAMLKey = Union[bool, float, int, str]
 
 # Public functions
 
@@ -66,6 +66,17 @@ def log_and_error(msg: str) -> Exception:
     """
     log.error(msg)
     return UWConfigError(msg)
+
+
+def uw_yaml_loader() -> type[yaml.SafeLoader]:
+    """
+    A loader with basic UW constructors added.
+    """
+    loader = yaml.SafeLoader
+    for tag_class in (UWYAMLConvert, UWYAMLRemove):
+        for tag in getattr(tag_class, "TAGS"):
+            loader.add_constructor(tag, tag_class)
+    return loader
 
 
 def yaml_to_str(cfg: dict) -> str:
