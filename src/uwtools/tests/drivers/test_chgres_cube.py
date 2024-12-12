@@ -149,7 +149,7 @@ def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
 
 def test_ChgresCube_output(driverobj):
     files = ["out.atm.tile7.nc", "out.sfc.tile7.nc"]
-    expected = {"NetCDFfiles": [str(driverobj.rundir / file) for file in files]}
+    expected = {"netcdffiles": [str(driverobj.rundir / file) for file in files]}
     assert driverobj.output == expected
 
 
