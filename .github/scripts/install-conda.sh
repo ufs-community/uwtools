@@ -6,4 +6,4 @@ wget --no-verbose -O $installer $url
 bash $installer -bfp $CI_CONDA_DIR
 set +ux
 ci_conda_activate
-conda install --quiet --yes --channel maddenp --repodata-fn repodata.json anaconda-client condev
+conda install --quiet --yes --channel maddenp --repodata-fn repodata.json anaconda-client condev jq
