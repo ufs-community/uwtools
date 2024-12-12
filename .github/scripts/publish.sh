@@ -13,5 +13,5 @@ ids=(
   a6f1f3ab481647dc492ab577cb7e60522efded549caf0544ba863d0a72958179/68747470733a2f2f616e61636f6e64612e6f72672f7566732d636f6d6d756e6974792f7577746f6f6c732f6261646765732f6c61746573745f72656c656173655f646174652e737667
 )
 for id in ${ids[*]}; do
-  curl -X PURGE https://camo.githubusercontent.com/$id | jq .
+  curl -s -X PURGE https://camo.githubusercontent.com/$id | jq .
 done
