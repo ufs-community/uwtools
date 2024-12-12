@@ -117,7 +117,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
         """
         output_types = ["atm", "sfc"]
         paths = [f"{self.rundir}/out.{t}.tile7.nc" for t in output_types]
-        return {"NetCDFfiles": paths}
+        return {"netcdffiles": paths}
 
 
 set_driver_docstring(ChgresCube)
