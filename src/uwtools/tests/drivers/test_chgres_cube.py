@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore
+import iotaa
 from pytest import fixture, mark
 
 from uwtools.drivers.chgres_cube import ChgresCube
