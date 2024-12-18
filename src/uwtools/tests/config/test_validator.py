@@ -162,7 +162,7 @@ def test_validate_fail_bad_enum_val(caplog, config, schema):
     log.setLevel(logging.INFO)
     config["color"] = "yellow"  # invalid enum value
     assert not validator.validate(schema=schema, desc="test", config=config)
-    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
 
@@ -170,7 +170,7 @@ def test_validate_fail_bad_number_val(caplog, config, schema):
     log.setLevel(logging.INFO)
     config["number"] = "string"  # invalid number value
     assert not validator.validate(schema=schema, desc="test", config=config)
-    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 

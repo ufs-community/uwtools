@@ -1,5 +1,5 @@
 [2024-08-26T23:03:41]     INFO Validating config against internal schema: files-to-stage
-[2024-08-26T23:03:41]     INFO 0 UW schema-validation errors found in fs config
+[2024-08-26T23:03:41]     INFO 0 schema-validation errors found in fs config
 [2024-08-26T23:03:41]     INFO File links: Initial state: Not Ready
 [2024-08-26T23:03:41]     INFO File links: Checking requirements
 [2024-08-26T23:03:41]     INFO Link link-dst-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Initial state: Not Ready

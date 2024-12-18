@@ -112,10 +112,10 @@ def test_validate():
     with testbook("config.ipynb", execute=True) as tb:
         assert tb.cell_output_text(69) == cfg
         assert tb.cell_output_text(71) == schema
-        valid_out = ("INFO 0 UW schema-validation errors found", "True")
+        valid_out = ("INFO 0 schema-validation errors found", "True")
         assert all(x in tb.cell_output_text(73) for x in valid_out)
         invalid_out = (
-            "ERROR 1 UW schema-validation error found",
+            "ERROR 1 schema-validation error found",
             "ERROR   47 is not of type 'string'",
             "False",
         )

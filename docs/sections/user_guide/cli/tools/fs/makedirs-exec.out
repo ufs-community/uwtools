@@ -1,5 +1,5 @@
 [2024-08-26T23:03:46]     INFO Validating config against internal schema: makedirs
-[2024-08-26T23:03:46]     INFO 0 UW schema-validation errors found in fs config
+[2024-08-26T23:03:46]     INFO 0 schema-validation errors found in fs config
 [2024-08-26T23:03:46]     INFO Directories: Initial state: Not Ready
 [2024-08-26T23:03:46]     INFO Directories: Checking requirements
 [2024-08-26T23:03:46]     INFO Directory makedirs-parent/foo: Initial state: Not Ready

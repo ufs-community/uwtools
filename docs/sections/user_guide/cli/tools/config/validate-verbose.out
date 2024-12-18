@@ -18,4 +18,4 @@
 [2024-11-27T05:24:34]    DEBUG   values:
 [2024-11-27T05:24:34]    DEBUG     greeting: Hello
 [2024-11-27T05:24:34]    DEBUG     recipient: World
-[2024-11-27T05:24:34]     INFO 0 UW schema-validation errors found in config
+[2024-11-27T05:24:34]     INFO 0 schema-validation errors found in config

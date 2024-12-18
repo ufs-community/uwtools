@@ -11,7 +11,7 @@ def test_building_simple_workflow():
             simple_xml = f.read().rstrip()
         assert tb.cell_output_text(5) == simple_yaml
         valid_out = (
-            "INFO 0 UW schema-validation errors found",
+            "INFO 0 schema-validation errors found",
             "INFO 0 Rocoto XML validation errors found",
             "True",
         )
@@ -19,7 +19,7 @@ def test_building_simple_workflow():
         assert tb.cell_output_text(9) == simple_xml
         assert tb.cell_output_text(11) == err_yaml
         err_out = (
-            "ERROR 3 UW schema-validation errors found",
+            "ERROR 3 schema-validation errors found",
             "ERROR Error at workflow.attrs:",
             "ERROR   'realtime' is a required property",
             "ERROR Error at workflow.tasks.task_greet:",
@@ -54,7 +54,7 @@ def test_building_workflows():
         assert tb.cell_output_text(15) == ent_yaml
         assert tb.cell_output_text(17) == ent_cs_yaml
         valid_out = (
-            "INFO 0 UW schema-validation errors found",
+            "INFO 0 schema-validation errors found",
             "INFO 0 Rocoto XML validation errors found",
             "True",
         )
