@@ -4,6 +4,6 @@ CI_CONDA_DIR=/tmp/conda
 CI_CONDA_SH=$CI_CONDA_DIR/etc/profile.d/conda.sh
 
 ci_conda_activate() {
-  source $CI_CONDA_SH
+  . $CI_CONDA_SH
   conda activate
 }
