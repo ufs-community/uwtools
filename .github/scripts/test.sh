@@ -20,7 +20,7 @@ run_tests() {
   return $status
 }
 
-source $(dirname ${BASH_SOURCE[0]})/common.sh
+. $(dirname ${BASH_SOURCE[0]})/common.sh
 ci_conda_activate
 for version in ${SUPPORTED_PYTHON_VERSIONS[*]}; do
   PYTHON_VERSION=$version
