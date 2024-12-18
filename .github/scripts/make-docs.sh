@@ -1,6 +1,6 @@
 set -ae
-source $(dirname ${BASH_SOURCE[0]})/common.sh
+. $(dirname ${BASH_SOURCE[0]})/common.sh
 ci_conda_activate
 cd docs
-source install-deps
+. install-deps
 make docs

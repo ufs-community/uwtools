@@ -1,6 +1,6 @@
 {
   "build": "py_0",
-  "buildnum": "0",
+  "buildnum": 0,
   "name": "uwtools",
   "packages": {
     "dev": [

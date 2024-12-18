@@ -210,6 +210,13 @@ class Config(ABC, UserDict):
             log.info(diffline.rstrip())
         return False
 
+    @property
+    def config_file(self) -> Optional[Path]:
+        """
+        Return the path to the config file from which this object was instantiated, if applicable.
+        """
+        return self._config_file
+
     def dereference(self, context: Optional[dict] = None) -> None:
         """
         Render as much Jinja2 syntax as possible.
