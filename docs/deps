@@ -14,5 +14,5 @@ for dep in deps:
     pkg, ver = m.groups()
     if re.match(r"^\d", ver):
         ver = f"={ver}"
-    specs.append(f"'{pkg}{ver}'")
+    specs.append(f"{pkg}{ver}")
 print(" ".join(sorted(specs)))
