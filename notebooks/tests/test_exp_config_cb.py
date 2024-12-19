@@ -28,7 +28,7 @@ def test_exp_config():
         assert all(x in tb.cell_output_text(13) for x in deref_cfg)
         validate_out = (
             "INFO Validating config against internal schema: chgres-cube",
-            "INFO 0 UW schema-validation errors found",
+            "INFO 0 schema-validation errors found",
             "INFO Validating config against internal schema: platform",
             "chgres_cube valid schema: State: Ready",
         )

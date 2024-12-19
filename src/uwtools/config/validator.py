@@ -68,7 +68,7 @@ def validate(schema: dict, desc: str, config: dict) -> bool:
     """
     errors = _validation_errors(config, schema)
     log_method = log.error if errors else log.info
-    log_msg = "%s UW schema-validation error%s found in %s"
+    log_msg = "%s schema-validation error%s found in %s"
     log_method(log_msg, len(errors), "" if len(errors) == 1 else "s", desc)
     for error in errors:
         log.error("Error at %s:", ".".join(str(k) for k in error.path))
