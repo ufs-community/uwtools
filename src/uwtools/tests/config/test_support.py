@@ -130,6 +130,16 @@ class Test_UWYAMLConvert:
         assert ts.convert() == 42
         self.comp(ts, "!int '42'")
 
+    def test_list_no(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="False"))
+        with raises(TypeError):
+            ts.convert()
+
+    def test_list_ok(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="[1, 2, 3]"))
+        assert ts.convert() == [1, 2, 3]
+        self.comp(ts, "!list '[1, 2, 3]'")
+
     def test___repr__(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="42"))
         assert str(ts) == "!int 42"

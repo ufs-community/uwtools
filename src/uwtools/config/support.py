@@ -119,20 +119,33 @@ class UWYAMLConvert(UWYAMLTag):
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!bool", "!datetime", "!float", "!int")
+    TAGS = ("!bool", "!datetime", "!float", "!int", "!list")
 
-    def convert(self) -> Union[datetime, float, int]:
+    def convert(self) -> Union[datetime, float, int, list]:
         """
         Return the original YAML value converted to the specified type.
 
         Will raise an exception if the value cannot be represented as the specified type.
         """
         converters: dict[
-            str, Union[Callable[[str], bool], Callable[[str], datetime], type[float], type[int]]
+            str,
+            Union[
+                Callable[[str], bool],
+                Callable[[str], datetime],
+                type[float],
+                type[int],
+                Callable[[str], list],
+            ],
         ] = dict(
             zip(
                 self.TAGS,
-                [lambda x: {"True": True, "False": False}[x], datetime.fromisoformat, float, int],
+                [
+                    lambda x: {"True": True, "False": False}[x],
+                    datetime.fromisoformat,
+                    float,
+                    int,
+                    lambda x: list(yaml.safe_load(x.strip())),
+                ],
             )
         )
         return converters[self.tag](self.value)

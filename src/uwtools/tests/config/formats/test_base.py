@@ -216,13 +216,16 @@ e:
   - !int '42'
   - !float '3.14'
   - !datetime '{{ D }}'
+  - !list "[ a0, a1, a2, ]"
   - !bool "False"
 f:
   f1: !int '42'
   f2: !float '3.14'
   f3: True
+  f4: !list "[ a0, a1, a2, ]"
 g: !bool '{{ f.f3 }}'
 D: 2024-10-10 00:19:00
+L: !list "[ a0, a1, a2, ]"
 N: "22"
 
 """.strip()
@@ -237,10 +240,11 @@ N: "22"
         "a": 44,
         "b": {"c": 33},
         "d": "{{ X }}",
-        "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00"), False],
-        "f": {"f1": 42, "f2": 3.14, "f3": True},
+        "e": [42, 3.14, datetime.fromisoformat("2024-10-10 00:19:00"), ["a0", "a1", "a2"], False],
+        "f": {"f1": 42, "f2": 3.14, "f3": True, "f4": ["a0", "a1", "a2"]},
         "g": True,
         "D": datetime.fromisoformat("2024-10-10 00:19:00"),
+        "L": ["a0", "a1", "a2"],
         "N": "22",
     }
 
