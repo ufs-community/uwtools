@@ -5,6 +5,7 @@ Tests for uwtools.config.validator module.
 import json
 import logging
 from pathlib import Path
+from textwrap import dedent
 from typing import Any
 from unittest.mock import Mock, patch
 
@@ -172,6 +173,25 @@ def test_validate_fail_bad_number_val(caplog, config, schema):
     assert not validator.validate(schema=schema, desc="test", config=config)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+
+
+def test_validate_fail_top_level(caplog):
+    schema = {
+        "additionalProperties": False,
+        "properties": {"n": {"type": "integer"}},
+        "required": ["n"],
+        "type": "object",
+    }
+    config = {"x": 42}
+    assert not validator.validate(schema=schema, desc="test", config=config)
+    expected = """
+    2 schema-validation errors found in test
+    Error at top level:
+      Additional properties are not allowed ('x' was unexpected)
+    Error at top level:
+      'n' is a required property
+    """
+    assert all(line in caplog.messages for line in dedent(expected).strip().split("\n"))
 
 
 def test_validate_internal_no(caplog, schema_file):
