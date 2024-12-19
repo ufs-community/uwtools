@@ -1,5 +1,5 @@
 [2024-12-07T01:01:56]     INFO Validating config against internal schema: files-to-stage
-[2024-12-07T01:01:56]     INFO 0 UW schema-validation errors found in fs config
+[2024-12-07T01:01:56]     INFO 0 schema-validation errors found in fs config
 [2024-12-07T01:01:56]     INFO File copies: Initial state: Not Ready
 [2024-12-07T01:01:56]     INFO File copies: Checking requirements
 [2024-12-07T01:01:56]     INFO Copy src/foo -> copy-dst/foo: Initial state: Not Ready
