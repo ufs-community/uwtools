@@ -1,4 +1,4 @@
-[2024-11-22T23:09:15]     INFO 0 UW schema-validation errors found in rand config
+[2024-11-22T23:09:15]     INFO 0 schema-validation errors found in rand config
 [2024-11-22T23:09:16]     INFO rand Random-integer file: Executing
 [2024-11-22T23:09:16]     INFO rand Random-integer file: Ready
 Random integer is 6
