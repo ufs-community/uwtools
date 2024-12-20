@@ -110,6 +110,16 @@ class Test_UWYAMLConvert:
         assert ts.convert() == datetime(2024, 8, 9, 12, 22, 42)
         self.comp(ts, "!datetime '2024-08-09 12:22:42'")
 
+    def test_dict_no(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!dict", value="False"))
+        with raises(TypeError):
+            ts.convert()
+
+    def test_dict_ok(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!dict", value="{a: 0, b: 1}"))
+        assert ts.convert() == {"a": 0, "b": 1}
+        self.comp(ts, "!dict '{a: 0, b: 1}'")
+
     def test_float_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!float", value="foo"))
         with raises(ValueError):

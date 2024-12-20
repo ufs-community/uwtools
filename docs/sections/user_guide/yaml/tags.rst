@@ -58,6 +58,24 @@ Converts the tagged node to a Python ``datetime`` object. For example, given ``i
 
 The value provided to the tag must be in :python:`ISO 8601 format<datetime.html#datetime.datetime.fromisoformat>` to be interpreted correctly by the ``!datetime`` tag.
 
+``!dict``
+^^^^^^^^
+
+Converts the tagged node to a Python ``dict`` value. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   d1: {'a0': 0, 'b1': 1, 'c2': 2}
+   d2: !dict "{{ '{' }}{% for n in range(3) %} b{{ n }}: {{ n }},{% endfor %}{{ '}' }}"
+   d3: !dict "{ b0: 0, b1: 1, b2: 2,}"
+
+.. code-block:: text
+
+   $ uw config realize --input-file input.yaml --output-format yaml
+   d1: {'a0': 0, 'b1': 1, 'c2': 2}
+   d2: {'b0': 0, 'b1': 1, 'b2': 2}
+   d3: {'c0': 0, 'c1': 1, 'c2': 2}
+
 ``!float``
 ^^^^^^^^^^
 
@@ -139,6 +157,24 @@ Converts the tagged node to a Python ``int`` value. For example, given ``input.y
    f1: 3
    f2: 11
    f2: 140
+
+``!list``
+^^^^^^^^
+
+Converts the tagged node to a Python ``list`` value. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   l1: [1, 2, 3]
+   l2: !list "[{% for n in range(3) %} a{{ n }},{% endfor %} ]"
+   l3: !list "[ a, b, c, ]"
+
+.. code-block:: text
+
+   $ uw config realize --input-file input.yaml --output-format yaml
+   l1: [1, 2, 3]
+   l2: ['a0', 'a1', 'a2']
+   l3: ['a', 'b', 'c']
 
 ``!remove``
 ^^^^^^^^^^^

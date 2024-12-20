@@ -119,9 +119,9 @@ class UWYAMLConvert(UWYAMLTag):
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!bool", "!datetime", "!float", "!int", "!list")
+    TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
 
-    def convert(self) -> Union[datetime, float, int, list]:
+    def convert(self) -> Union[datetime, dict, float, int, list]:
         """
         Return the original YAML value converted to the specified type.
 
@@ -132,6 +132,7 @@ class UWYAMLConvert(UWYAMLTag):
             Union[
                 Callable[[str], bool],
                 Callable[[str], datetime],
+                Callable[[str], dict],
                 type[float],
                 type[int],
                 Callable[[str], list],
@@ -142,9 +143,10 @@ class UWYAMLConvert(UWYAMLTag):
                 [
                     lambda x: {"True": True, "False": False}[x],
                     datetime.fromisoformat,
+                    lambda x: dict(yaml.safe_load(x)),
                     float,
                     int,
-                    lambda x: list(yaml.safe_load(x.strip())),
+                    lambda x: list(yaml.safe_load(x)),
                 ],
             )
         )

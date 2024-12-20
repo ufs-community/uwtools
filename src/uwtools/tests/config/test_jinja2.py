@@ -287,7 +287,7 @@ def test_unrendered(s, status):
     assert jinja2.unrendered(s) is status
 
 
-@mark.parametrize("tag", ["!bool", "!datetime", "!float", "!int"])
+@mark.parametrize("tag", ["!bool", "!datetime", "!dict", "!float", "!int"])
 def test__deref_convert_no(caplog, tag):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
@@ -302,8 +302,10 @@ def test__deref_convert_no(caplog, tag):
     [
         (True, "!bool", "True"),
         (datetime(2024, 9, 9, 0, 0), "!datetime", "2024-09-09 00:00:00"),
+        ({"a": 0, "b": 1}, "!dict", "{a: 0, b: 1}"),
         (3.14, "!float", "3.14"),
         (42, "!int", "42"),
+        ([0, 1, 2], "!list", "[0, 1, 2]"),
     ],
 )
 def test__deref_convert_ok(caplog, converted, tag, value):
