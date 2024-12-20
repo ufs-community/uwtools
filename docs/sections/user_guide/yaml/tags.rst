@@ -59,7 +59,7 @@ Converts the tagged node to a Python ``datetime`` object. For example, given ``i
 The value provided to the tag must be in :python:`ISO 8601 format<datetime.html#datetime.datetime.fromisoformat>` to be interpreted correctly by the ``!datetime`` tag.
 
 ``!dict``
-^^^^^^^^
+^^^^^^^^^
 
 Converts the tagged node to a Python ``dict`` value. For example, given ``input.yaml``:
 
@@ -159,7 +159,7 @@ Converts the tagged node to a Python ``int`` value. For example, given ``input.y
    f2: 140
 
 ``!list``
-^^^^^^^^
+^^^^^^^^^
 
 Converts the tagged node to a Python ``list`` value. For example, given ``input.yaml``:
 
