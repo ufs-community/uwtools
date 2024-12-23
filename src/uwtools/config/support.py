@@ -141,7 +141,7 @@ class UWYAMLConvert(UWYAMLTag):
             zip(
                 self.TAGS,
                 [
-                    lambda x: {"True": True, "False": False}[x],
+                    lambda x: bool(yaml.safe_load(x)),
                     datetime.fromisoformat,
                     lambda x: dict(yaml.safe_load(x)),
                     float,
