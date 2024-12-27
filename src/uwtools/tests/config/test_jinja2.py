@@ -310,6 +310,7 @@ def test__deref_convert_no(caplog, tag, value):
     "converted,tag,value",
     [
         (True, "!bool", "True"),
+        (False, "!bool", "0"),
         (datetime(2024, 9, 9, 0, 0), "!datetime", "2024-09-09 00:00:00"),
         ({"a": 0, "b": 1}, "!dict", "{a: 0, b: 1}"),
         ({"a": 0, "b": 1}, "!dict", "[[a, 0], [b, 1]]"),

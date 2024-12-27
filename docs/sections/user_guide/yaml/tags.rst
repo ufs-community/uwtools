@@ -32,12 +32,14 @@ Converts the tagged node to a Python ``bool`` object. For example, given ``input
 
    flag1: True
    flag2: !bool "{{ flag1 }}"
+   flag3: !bool 0
 
 .. code-block:: text
 
    $ uw config realize -i ../input.yaml --output-format yaml
    flag1: True
    flag2: True
+   flag3: False
 
 
 ``!datetime``
