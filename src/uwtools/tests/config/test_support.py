@@ -85,7 +85,7 @@ class Test_UWYAMLConvert:
         return yaml.SafeLoader("")
 
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
-    # demonstrate that those nodes' convert() methods return representations in type type specified
+    # demonstrate that those nodes' convert() methods return representations in the type specified
     # by the tag.
 
     def test_datetime_no(self, loader):
