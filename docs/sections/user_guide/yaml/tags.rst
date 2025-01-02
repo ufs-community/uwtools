@@ -171,14 +171,14 @@ Converts the tagged node to a Python ``list`` value. For example, given ``input.
 
    l1: [1, 2, 3]
    l2: !list "[{% for n in range(3) %} a{{ n }},{% endfor %} ]"
-   l3: !list "[ a, b, c, ]"
+   l3: !list "[ a0, a1, a2, ]"
 
 .. code-block:: text
 
    $ uw config realize --input-file input.yaml --output-format yaml
    l1: [1, 2, 3]
    l2: ['a0', 'a1', 'a2']
-   l3: ['a', 'b', 'c']
+   l3: ['a0', 'a1', 'a2']
 
 ``!remove``
 ^^^^^^^^^^^

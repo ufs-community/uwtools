@@ -210,15 +210,15 @@ def test_dereference(tmp_path):
     yaml = """
 a: !int '{{ b.c + 11 }}'
 b:
-  c: !int '{{ N | int + 11 }}'
+  c: !int '{{ l | int + 11 }}'
 d: '{{ X }}'
 e:
   - !bool "False"
-  - !datetime '{{ D }}'
-  - !float '3.14'
-  - !int '42'
+  - !datetime '{{ i }}'
   - !dict "{ b0: 0, b1: 1, b2: 2,}"
   - !dict "[ ['c0',0], ['c1',1], ['c2',2], ]"
+  - !float '3.14'
+  - !int '42'
   - !list "[ a0, a1, a2, ]"
 f:
   f1: True
@@ -229,10 +229,10 @@ f:
   f6: !list "[ 0, 1, 2, ]"
 g: !bool '{{ f.f3 }}'
 h: !bool 0
-D: 2024-10-10 00:19:00
-I: !dict "{ b0: 0, b1: 1, b2: 2,}"
-L: !list "[ a0, a1, a2, ]"
-N: "22"
+i: 2024-10-10 00:19:00
+j: !dict "{ b0: 0, b1: 1, b2: 2,}"
+k: !list "[ a0, a1, a2, ]"
+l: "22"
 
 """.strip()
     path = tmp_path / "config.yaml"
@@ -249,10 +249,10 @@ N: "22"
         "e": [
             False,
             datetime.fromisoformat("2024-10-10 00:19:00"),
-            3.14,
-            42,
             {"b0": 0, "b1": 1, "b2": 2},
             {"c0": 0, "c1": 1, "c2": 2},
+            3.14,
+            42,
             ["a0", "a1", "a2"],
         ],
         "f": {
@@ -265,10 +265,10 @@ N: "22"
         },
         "g": True,
         "h": False,
-        "D": datetime.fromisoformat("2024-10-10 00:19:00"),
-        "I": {"b0": 0, "b1": 1, "b2": 2},
-        "L": ["a0", "a1", "a2"],
-        "N": "22",
+        "i": datetime.fromisoformat("2024-10-10 00:19:00"),
+        "j": {"b0": 0, "b1": 1, "b2": 2},
+        "k": ["a0", "a1", "a2"],
+        "l": "22",
     }
 
 
