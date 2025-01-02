@@ -67,16 +67,18 @@ Converts the tagged node to a Python ``dict`` value. For example, given ``input.
 
 .. code-block:: yaml
 
-   d1: {'a0': 0, 'b1': 1, 'c2': 2}
-   d2: !dict "{{ '{' }}{% for n in range(3) %} b{{ n }}: {{ n }},{% endfor %}{{ '}' }}"
-   d3: !dict "{ b0: 0, b1: 1, b2: 2,}"
+   d1: {'k0': 0, 'k1': 1, 'k2': 2}
+   d2: !dict "{ k0: 0, k1: 1, k2: 2 }"
+   d3: !dict "{{ '{' }}{% for n in range(3) %} k{{ n }}:{{ n }},{% endfor %}{{ '}' }}"
+   d4: !dict "[{% for n in range(3) %}[k{{ n }},{{ n }}],{% endfor %}]"
 
 .. code-block:: text
 
    $ uw config realize --input-file input.yaml --output-format yaml
-   d1: {'a0': 0, 'b1': 1, 'c2': 2}
-   d2: {'b0': 0, 'b1': 1, 'b2': 2}
-   d3: {'c0': 0, 'c1': 1, 'c2': 2}
+   d1: {'k0': 0, 'k1': 1, 'k2': 2}
+   d2: {'k0': 0, 'k1': 1, 'k2': 2}
+   d3: {'k0': 0, 'k1': 1, 'k2': 2}
+   d4: {'k0': 0, 'k1': 1, 'k2': 2}
 
 ``!float``
 ^^^^^^^^^^
