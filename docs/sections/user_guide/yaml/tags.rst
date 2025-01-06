@@ -21,7 +21,9 @@ Or explicit:
    integer: !!int "3"
    float: !!float "3.14"
 
-Additionally, UW defines the following tags to support use cases not covered by standard tags:
+Additionally, UW defines the following tags to support use cases not covered by standard tags. Where standard YAML tags are applied to their values immediately, application of UW YAML tags is delayed until after Jinja2 expressions in tagged values are dereferenced.
+
+**NB** Values tagged with UW YAML tags must be strings. Use quotes as necessary to ensure that they are.
 
 ``!bool``
 ^^^^^^^^^
@@ -32,7 +34,7 @@ Converts the tagged node to a Python ``bool`` object. For example, given ``input
 
    flag1: True
    flag2: !bool "{{ flag1 }}"
-   flag3: !bool 0
+   flag3: !bool "0"
 
 .. code-block:: text
 

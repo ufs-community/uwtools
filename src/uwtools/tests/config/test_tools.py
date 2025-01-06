@@ -279,7 +279,7 @@ def test_realize_config_double_tag_nest(tmp_path):
     help_realize_config_double_tag(config, expected, tmp_path)
 
 
-def test_realize_config_double_tag_nest_forwrad_reference(tmp_path):
+def test_realize_config_double_tag_nest_forward_reference(tmp_path):
     config = """
     a: true
     b: false

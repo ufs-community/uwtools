@@ -332,7 +332,7 @@ def test__deref_convert_ok(caplog, converted, tag, value):
 
 def test__deref_render_held(caplog):
     log.setLevel(logging.DEBUG)
-    val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=uw_yaml_loader())
+    val, context = "!int '{{ a }}'", yaml.load("a: !int '42'", Loader=uw_yaml_loader())
     assert jinja2._deref_render(val=val, context=context) == val
     assert regex_logged(caplog, "Rendered")
     assert regex_logged(caplog, "Held")
