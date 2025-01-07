@@ -10,7 +10,7 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
@@ -125,7 +125,7 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_bundle(caplog):
+def test_config_validator_bundle(caplog):
     log.setLevel(logging.DEBUG)
     schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
     with patch.object(validator, "_registry") as _registry:
@@ -150,16 +150,16 @@ def test_bundle(caplog):
         assert logged(caplog, msg)
 
 
-def test_internal_schema_file():
+def test_config_validator_internal_schema_file():
     with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
         assert validator.internal_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
 
 
-def test_validate(config, schema):
+def test_config_validator_validate(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
-def test_validate_fail_bad_enum_val(caplog, config, schema):
+def test_config_validator_validate_fail_bad_enum_val(caplog, config, schema):
     log.setLevel(logging.INFO)
     config["color"] = "yellow"  # invalid enum value
     assert not validator.validate(schema=schema, desc="test", config=config)
@@ -167,7 +167,7 @@ def test_validate_fail_bad_enum_val(caplog, config, schema):
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
 
-def test_validate_fail_bad_number_val(caplog, config, schema):
+def test_config_validator_validate_fail_bad_number_val(caplog, config, schema):
     log.setLevel(logging.INFO)
     config["number"] = "string"  # invalid number value
     assert not validator.validate(schema=schema, desc="test", config=config)
@@ -175,7 +175,7 @@ def test_validate_fail_bad_number_val(caplog, config, schema):
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 
-def test_validate_fail_top_level(caplog):
+def test_config_validator_validate_fail_top_level(caplog):
     schema = {
         "additionalProperties": False,
         "properties": {"n": {"type": "integer"}},
@@ -194,7 +194,7 @@ def test_validate_fail_top_level(caplog):
     assert all(line in caplog.messages for line in dedent(expected).strip().split("\n"))
 
 
-def test_validate_internal_no(caplog, schema_file):
+def test_config_validator_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
             validator.validate_internal(schema_name="a", desc="test", config={"color": "orange"})
@@ -203,31 +203,31 @@ def test_validate_internal_no(caplog, schema_file):
     assert str(e.value) == "YAML validation errors"
 
 
-def test_validate_internal_ok(schema_file):
+def test_config_validator_validate_internal_ok(schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         validator.validate_internal(schema_name="a", desc="test", config={"color": "blue"})
 
 
-def test_validate_external(assets, config, schema):
+def test_config_validator_validate_external(assets, config, schema):
     schema_file, _, cfgobj = assets
     with patch.object(validator, "validate") as validate:
         validator.validate_external(schema_file=schema_file, desc="test", config=cfgobj)
     validate.assert_called_once_with(schema=schema, desc="test", config=config)
 
 
-def test_prep_config_cfgobj(prep_config_dict):
+def test_config_validator_prep_config_cfgobj(prep_config_dict):
     cfgobj = validator._prep_config(config=YAMLConfig(config=prep_config_dict))
     assert isinstance(cfgobj, dict)
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
-def test__prep_config_dict(prep_config_dict):
+def test_config_validator__prep_config_dict(prep_config_dict):
     cfgobj = validator._prep_config(config=prep_config_dict)
     assert isinstance(cfgobj, dict)
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
-def test__prep_config_file(prep_config_dict, tmp_path):
+def test_config_validator__prep_config_file(prep_config_dict, tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(prep_config_dict, f)
@@ -236,7 +236,12 @@ def test__prep_config_file(prep_config_dict, tmp_path):
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
-def test__registry(tmp_path):
+@mark.parametrize("val", [True, 3.14, 42, [1, 2, 3], "foo", None])
+def test_config_validator__prep_config_other(val):
+    assert validator._prep_config(config=val) == val
+
+
+def test_config_validator__registry(tmp_path):
     validator._registry.cache_clear()
     d = {"foo": "bar"}
     path = tmp_path / "foo-bar.jsonschema"
@@ -248,15 +253,15 @@ def test__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-def test__validation_errors_bad_enum_value(config, schema):
+def test_config_validator__validation_errors_bad_enum_value(config, schema):
     config["color"] = "yellow"
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test__validation_errors_bad_number_value(config, schema):
+def test_config_validator__validation_errors_bad_number_value(config, schema):
     config["number"] = "string"
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test__validation_errors_pass(config, schema):
+def test_config_validator__validation_errors_pass(config, schema):
     assert not validator._validation_errors(config, schema)
