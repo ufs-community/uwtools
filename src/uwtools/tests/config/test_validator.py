@@ -155,7 +155,21 @@ def test_config_validator_internal_schema_file():
         assert validator.internal_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
 
 
-def test_config_validator_validate(config, schema):
+@mark.parametrize(
+    "schema,config",
+    [
+        ({"type": "boolean"}, True),  # bool
+        ({"type": "number"}, 3.14),  # float
+        ({"type": "integer"}, 42),  # int
+        ({"type": "array"}, [1, 2, 3]),  # list
+        ({"type": "string"}, "foo"),  # str
+    ],
+)
+def test_config_validator_validate_alt_types(schema, config):
+    assert validator.validate(schema=schema, desc="test", config=config) is True
+
+
+def test_config_validator_validate_dict(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
