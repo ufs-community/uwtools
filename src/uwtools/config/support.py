@@ -122,7 +122,7 @@ class UWYAMLConvert(UWYAMLTag):
     """
 
     TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
-    ValT = Union[bool, datetime, dict, float, int, list]
+    TaggedValT = Union[bool, datetime, dict, float, int, list]
 
     def __init__(self, loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
         super().__init__(loader, node)
@@ -144,14 +144,14 @@ class UWYAMLConvert(UWYAMLTag):
         return str(self.converted)
 
     @property
-    def converted(self) -> UWYAMLConvert.ValT:
+    def converted(self) -> UWYAMLConvert.TaggedValT:
         """
         Return the original YAML value converted to the type speficied by the tag.
 
         :raises: Appropriate exception if the value cannot be represented as the required type.
         """
         load_as = lambda t, v: t(yaml.safe_load(v))
-        converters: list[Callable[..., UWYAMLConvert.ValT]] = [
+        converters: list[Callable[..., UWYAMLConvert.TaggedValT]] = [
             partial(load_as, bool),
             datetime.fromisoformat,
             partial(load_as, dict),
