@@ -45,7 +45,7 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     """
     Set up logging.
 
-    :param quiet: Supress all logging output.
+    :param quiet: Suppress all logging output.
     :param verbose: Log all messages.
     """
     logger = logging.getLogger()
