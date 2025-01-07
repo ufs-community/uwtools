@@ -231,8 +231,8 @@ N: "22"
         print(yaml, file=f)
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
-        config.dereference()
-    print(config["e"])
+        retval = config.dereference()
+    assert retval is config
     assert config == {
         "a": 44,
         "b": {"c": 33},
