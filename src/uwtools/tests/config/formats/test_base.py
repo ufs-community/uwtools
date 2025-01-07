@@ -195,7 +195,7 @@ def test_compare_config_ini(caplog, salad_base):
 
 
 def test_config_from_config(config):
-    assert isinstance(config, ConcreteConfig)
+    assert config.config_file.name == "config.yaml"
     assert ConcreteConfig(config).data == config.data
 
 

@@ -34,7 +34,7 @@ class Config(ABC, UserDict):
             self._config_file = None
             self.update(config)
         elif isinstance(config, Config):
-            self._config_file = None
+            self._config_file = config._config_file
             self.update(config.data)
         else:
             self._config_file = str2path(config) if config else None
