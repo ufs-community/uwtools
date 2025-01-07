@@ -217,13 +217,13 @@ def test_validate_external(assets, config, schema):
 
 def test_prep_config_cfgobj(prep_config_dict):
     cfgobj = validator._prep_config(config=YAMLConfig(config=prep_config_dict))
-    assert isinstance(cfgobj, YAMLConfig)
+    assert isinstance(cfgobj, dict)
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
 def test__prep_config_dict(prep_config_dict):
     cfgobj = validator._prep_config(config=prep_config_dict)
-    assert isinstance(cfgobj, YAMLConfig)
+    assert isinstance(cfgobj, dict)
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
@@ -232,7 +232,7 @@ def test__prep_config_file(prep_config_dict, tmp_path):
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(prep_config_dict, f)
     cfgobj = validator._prep_config(config=path)
-    assert isinstance(cfgobj, YAMLConfig)
+    assert isinstance(cfgobj, dict)
     assert cfgobj == {"roses": "red", "color": "red"}
 
 
