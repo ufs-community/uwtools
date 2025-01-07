@@ -194,7 +194,12 @@ def test_compare_config_ini(caplog, salad_base):
         assert not logged(caplog, line)
 
 
-def test_config_file(config):
+def test_config_from_config(config):
+    assert isinstance(config, ConcreteConfig)
+    assert ConcreteConfig(config).data == config.data
+
+
+def test_config_from_file(config):
     assert config.config_file.name == "config.yaml"
     assert config.config_file.is_file()
 
