@@ -21,7 +21,9 @@ Or explicit:
    integer: !!int "3"
    float: !!float "3.14"
 
-Additionally, UW defines the following tags to support use cases not covered by standard tags:
+Additionally, UW defines the following tags to support use cases not covered by standard tags. Where standard YAML tags are applied to their values immediately, application of UW YAML tags is delayed until after Jinja2 expressions in tagged values are dereferenced.
+
+**NB** Values tagged with UW YAML tags must be strings. Use quotes as necessary to ensure that they are.
 
 ``!bool``
 ^^^^^^^^^
@@ -32,12 +34,14 @@ Converts the tagged node to a Python ``bool`` object. For example, given ``input
 
    flag1: True
    flag2: !bool "{{ flag1 }}"
+   flag3: !bool "0"
 
 .. code-block:: text
 
    $ uw config realize -i ../input.yaml --output-format yaml
    flag1: True
    flag2: True
+   flag3: False
 
 
 ``!datetime``
@@ -57,6 +61,26 @@ Converts the tagged node to a Python ``datetime`` object. For example, given ``i
    date2: 2024-09-01 00:00:00
 
 The value provided to the tag must be in :python:`ISO 8601 format<datetime.html#datetime.datetime.fromisoformat>` to be interpreted correctly by the ``!datetime`` tag.
+
+``!dict``
+^^^^^^^^^
+
+Converts the tagged node to a Python ``dict`` value. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   d1: {'k0': 0, 'k1': 1, 'k2': 2}
+   d2: !dict "{ k0: 0, k1: 1, k2: 2 }"
+   d3: !dict "{{ '{' }}{% for n in range(3) %} k{{ n }}:{{ n }},{% endfor %}{{ '}' }}"
+   d4: !dict "[{% for n in range(3) %}[k{{ n }},{{ n }}],{% endfor %}]"
+
+.. code-block:: text
+
+   $ uw config realize --input-file input.yaml --output-format yaml
+   d1: {'k0': 0, 'k1': 1, 'k2': 2}
+   d2: {'k0': 0, 'k1': 1, 'k2': 2}
+   d3: {'k0': 0, 'k1': 1, 'k2': 2}
+   d4: {'k0': 0, 'k1': 1, 'k2': 2}
 
 ``!float``
 ^^^^^^^^^^
@@ -139,6 +163,24 @@ Converts the tagged node to a Python ``int`` value. For example, given ``input.y
    f1: 3
    f2: 11
    f2: 140
+
+``!list``
+^^^^^^^^^
+
+Converts the tagged node to a Python ``list`` value. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   l1: [1, 2, 3]
+   l2: !list "[{% for n in range(3) %} a{{ n }},{% endfor %} ]"
+   l3: !list "[ a0, a1, a2, ]"
+
+.. code-block:: text
+
+   $ uw config realize --input-file input.yaml --output-format yaml
+   l1: [1, 2, 3]
+   l2: ['a0', 'a1', 'a2']
+   l3: ['a0', 'a1', 'a2']
 
 ``!remove``
 ^^^^^^^^^^^
