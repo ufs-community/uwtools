@@ -272,7 +272,7 @@ l: "22"
     }
 
 
-def test_derefernce_context_override(tmp_path):
+def test_dereference_context_override(tmp_path):
     log.setLevel(logging.DEBUG)
     yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
     path = tmp_path / "config.yaml"
