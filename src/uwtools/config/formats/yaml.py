@@ -10,10 +10,10 @@ from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
     UWYAMLConvert,
+    dict_to_yaml_str,
     from_od,
     log_and_error,
     uw_yaml_loader,
-    yaml_to_str,
 )
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
@@ -70,7 +70,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object.
         """
         cls._add_yaml_representers()
-        return yaml_to_str(cfg)
+        return dict_to_yaml_str(cfg)
 
     @staticmethod
     def _get_depth_threshold() -> Optional[int]:

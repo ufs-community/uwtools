@@ -148,14 +148,16 @@ def dereference(
     return rendered
 
 
-def deref_debug(action: str, val: Optional[_ConfigVal] = "") -> None:
+def deref_debug(action: str, val: Optional[_ConfigVal] = None) -> None:
     """
     Log a debug-level message related to dereferencing.
 
     :param action: The dereferencing activity being performed.
     :param val: The value being dereferenced.
     """
-    log.debug("[dereference] %s: %s", action, val)
+    tag = "[dereference]"
+    args = ("%s %s", tag, action) if val is None else ("%s %s: %s", tag, action, val)
+    log.debug(*args)
 
 
 def render(
@@ -224,9 +226,9 @@ def unrendered(s: str) -> bool:
     """
     try:
         Environment(undefined=StrictUndefined).from_string(s).render({})
-        return False
     except UndefinedError:
         return True
+    return False
 
 
 # Private functions
@@ -245,10 +247,11 @@ def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     converted: _ConfigVal = val  # fall-back value
     deref_debug("Converting", val.value)
     try:
-        converted = val.convert()
-        deref_debug("Converted", converted)
+        converted = val.converted
     except Exception as e:  # pylint: disable=broad-exception-caught
         deref_debug("Conversion failed", str(e))
+    else:
+        deref_debug("Converted", converted)
     return converted
 
 
@@ -264,16 +267,18 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
-    env = Environment(undefined=StrictUndefined)
+    env = _register_filters(Environment(undefined=StrictUndefined))
+    template = env.from_string(val)
     context = {**(local or {}), **context}
     try:
-        rendered = _register_filters(env).from_string(val).render(context)
-        deref_debug("Rendered", rendered)
+        rendered = template.render(context)
     except Exception as e:  # pylint: disable=broad-exception-caught
         rendered = val
         deref_debug("Rendering failed", val)
         for line in str(e).split("\n"):
             deref_debug(line)
+    else:
+        deref_debug("Rendered", rendered)
     try:
         loaded = yaml.load(rendered, Loader=uw_yaml_loader())
     except Exception as e:  # pylint: disable=broad-exception-caught

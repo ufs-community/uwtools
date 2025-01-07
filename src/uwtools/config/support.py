@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 from collections import OrderedDict
 from datetime import datetime
+from functools import partial
 from importlib import import_module
 from typing import Callable, Type, Union
 
@@ -79,13 +80,14 @@ def uw_yaml_loader() -> type[yaml.SafeLoader]:
     return loader
 
 
-def yaml_to_str(cfg: dict) -> str:
+def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     """
     Return a uwtools-conventional YAML representation of the given dict.
 
-    :param cfg: A dict object.
+    :param d: A dict object.
+    :param sort: Sort dict/mapping keys?
     """
-    return yaml.dump(cfg, default_flow_style=False, sort_keys=False, width=math.inf).strip()
+    return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
 
 
 class UWYAMLTag:
@@ -119,23 +121,45 @@ class UWYAMLConvert(UWYAMLTag):
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!bool", "!datetime", "!float", "!int")
+    TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
+    TaggedValT = Union[bool, datetime, dict, float, int, list]
 
-    def convert(self) -> Union[datetime, float, int]:
-        """
-        Return the original YAML value converted to the specified type.
-
-        Will raise an exception if the value cannot be represented as the specified type.
-        """
-        converters: dict[
-            str, Union[Callable[[str], bool], Callable[[str], datetime], type[float], type[int]]
-        ] = dict(
-            zip(
-                self.TAGS,
-                [lambda x: {"True": True, "False": False}[x], datetime.fromisoformat, float, int],
+    def __init__(self, loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        super().__init__(loader, node)
+        if not isinstance(self.value, str):
+            hint = (
+                "%s %s" % (node.tag, node.value)
+                if node.start_mark is None
+                else node.start_mark.buffer.replace("\n\x00", "")
             )
-        )
-        return converters[self.tag](self.value)
+            raise UWConfigError(
+                "Value tagged %s must be type 'str' (not '%s') in: %s"
+                % (node.tag, node.value.__class__.__name__, hint)
+            )
+
+    def __repr__(self) -> str:
+        return "%s %s" % (self.tag, self.converted)
+
+    def __str__(self) -> str:
+        return str(self.converted)
+
+    @property
+    def converted(self) -> UWYAMLConvert.TaggedValT:
+        """
+        Return the original YAML value converted to the type speficied by the tag.
+
+        :raises: Appropriate exception if the value cannot be represented as the required type.
+        """
+        load_as = lambda t, v: t(yaml.safe_load(v))
+        converters: list[Callable[..., UWYAMLConvert.TaggedValT]] = [
+            partial(load_as, bool),
+            datetime.fromisoformat,
+            partial(load_as, dict),
+            float,
+            int,
+            partial(load_as, list),
+        ]
+        return dict(zip(UWYAMLConvert.TAGS, converters))[self.tag](self.value)
 
 
 class UWYAMLRemove(UWYAMLTag):

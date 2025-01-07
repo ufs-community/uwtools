@@ -287,11 +287,20 @@ def test_unrendered(s, status):
     assert jinja2.unrendered(s) is status
 
 
-@mark.parametrize("tag", ["!bool", "!datetime", "!float", "!int"])
-def test__deref_convert_no(caplog, tag):
+@mark.parametrize(
+    "tag,value",
+    [
+        ("!datetime", "foo"),
+        ("!dict", "foo"),
+        ("!float", "foo"),
+        ("!int", "foo"),
+        ("!list", "null"),
+    ],
+)
+def test__deref_convert_no(caplog, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value="foo"))
+    val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == val
     assert not regex_logged(caplog, "Converted")
     assert regex_logged(caplog, "Conversion failed")
@@ -301,9 +310,15 @@ def test__deref_convert_no(caplog, tag):
     "converted,tag,value",
     [
         (True, "!bool", "True"),
+        (False, "!bool", "0"),
         (datetime(2024, 9, 9, 0, 0), "!datetime", "2024-09-09 00:00:00"),
+        ({"a": 0, "b": 1}, "!dict", "{a: 0, b: 1}"),
+        ({"a": 0, "b": 1}, "!dict", "[[a, 0], [b, 1]]"),
         (3.14, "!float", "3.14"),
         (42, "!int", "42"),
+        ([0, 1, 2], "!list", "[0, 1, 2]"),
+        (["f", "o", "o"], "!list", "foo"),
+        ([0, 1, 2], "!list", "{0: a, 1: b, 2: c}"),
     ],
 )
 def test__deref_convert_ok(caplog, converted, tag, value):
@@ -317,7 +332,7 @@ def test__deref_convert_ok(caplog, converted, tag, value):
 
 def test__deref_render_held(caplog):
     log.setLevel(logging.DEBUG)
-    val, context = "!int '{{ a }}'", yaml.load("a: !int '{{ 42 }}'", Loader=uw_yaml_loader())
+    val, context = "!int '{{ a }}'", yaml.load("a: !int '42'", Loader=uw_yaml_loader())
     assert jinja2._deref_render(val=val, context=context) == val
     assert regex_logged(caplog, "Rendered")
     assert regex_logged(caplog, "Held")
