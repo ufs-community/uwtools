@@ -19,6 +19,9 @@ from uwtools.utils.file import resource_path
 
 # Public functions
 
+JSONValueT = Union[bool, dict, float, int, list, str, None]
+ConfigT = Optional[Union[JSONValueT, Path, YAMLConfig]]
+
 
 def bundle(schema: dict, keys: Optional[list] = None) -> dict:
     """
@@ -57,7 +60,7 @@ def internal_schema_file(schema_name: str) -> Path:
     return resource_path("jsonschema") / f"{schema_name}.jsonschema"
 
 
-def validate(schema: dict, desc: str, config: dict) -> bool:
+def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
     """
     Report any errors arising from validation of the given config against the given JSON Schema.
 
@@ -77,9 +80,7 @@ def validate(schema: dict, desc: str, config: dict) -> bool:
     return not bool(errors)
 
 
-def validate_internal(
-    schema_name: str, desc: str, config: Optional[Union[dict, YAMLConfig, Path]] = None
-) -> None:
+def validate_internal(schema_name: str, desc: str, config: ConfigT = None) -> None:
     """
     Validate a config against a uwtools-internal schema.
 
@@ -92,9 +93,7 @@ def validate_internal(
     validate_external(config=config, schema_file=internal_schema_file(schema_name), desc=desc)
 
 
-def validate_external(
-    schema_file: Path, desc: str, config: Optional[Union[dict, YAMLConfig, Path]] = None
-) -> None:
+def validate_external(schema_file: Path, desc: str, config: ConfigT = None) -> None:
     """
     Validate a YAML config against the JSON Schema in the given schema file.
 
@@ -107,24 +106,25 @@ def validate_external(
         log.debug("Using schema file: %s", schema_file)
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
-    cfgobj = _prep_config(config)
-    if not validate(schema=schema, desc=desc, config=cfgobj.data):
+    if not validate(schema=schema, desc=desc, config=_prep_config(config)):
         raise UWConfigError("YAML validation errors")
 
 
 # Private functions
 
 
-def _prep_config(config: Union[dict, YAMLConfig, Optional[Path]]) -> YAMLConfig:
+def _prep_config(config: ConfigT) -> JSONValueT:
     """
-    Ensure a dereferenced YAMLConfig object for various input types.
+    Ensure a dereferenced JSON-compatible value for various input types.
 
     :param config: The config to validate.
-    :return: A dereferenced YAMLConfig object based on the input config.
+    :return: A JSON-compatible value, dereferenced if necessary.
     """
-    cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
-    cfgobj.dereference()
-    return cfgobj
+    if isinstance(config, (dict, Path)):
+        config = YAMLConfig(config)
+    if isinstance(config, YAMLConfig):
+        return config.dereference().data
+    return config
 
 
 @cache
@@ -143,7 +143,7 @@ def _registry() -> Registry:
     return Registry(retrieve=retrieve)  # type: ignore
 
 
-def _validation_errors(config: Union[dict, list], schema: dict) -> list[ValidationError]:
+def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
     """
     Identify schema-validation errors.
 

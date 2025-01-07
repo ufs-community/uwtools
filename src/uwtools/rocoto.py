@@ -350,7 +350,7 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config: Union[dict, YAMLConfig, Optional[Path]]) -> None:
+    def _config_validate(self, config: Optional[Union[dict, Path, YAMLConfig]]) -> None:
         """
         Validate the given YAML config.
 

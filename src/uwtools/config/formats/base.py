@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import difflib
 import os
 import re
@@ -217,7 +219,7 @@ class Config(ABC, UserDict):
         """
         return self._config_file
 
-    def dereference(self, context: Optional[dict] = None) -> None:
+    def dereference(self, context: Optional[dict] = None) -> Config:
         """
         Render as much Jinja2 syntax as possible.
         """
@@ -235,6 +237,7 @@ class Config(ABC, UserDict):
                 break
             self.data = new
         logstate("final")
+        return self
 
     @abstractmethod
     def dump(self, path: Optional[Path]) -> None:

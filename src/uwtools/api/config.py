@@ -15,6 +15,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import YAMLKey
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
+from uwtools.config.validator import ConfigT
 from uwtools.config.validator import validate_external as _validate_external
 from uwtools.exceptions import UWConfigError
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
@@ -161,11 +162,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
     return realize(**{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml})
 
 
-def validate(
-    schema_file: Union[Path, str],
-    config: Optional[Union[dict, YAMLConfig, Path, str]] = None,
-    stdin_ok: bool = False,
-) -> bool:
+def validate(schema_file: Union[Path, str], config: ConfigT = None, stdin_ok: bool = False) -> bool:
     """
     Check whether the specified config conforms to the specified JSON Schema spec.
 
