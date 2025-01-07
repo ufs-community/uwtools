@@ -9,8 +9,7 @@ from textwrap import dedent
 from typing import Any
 from unittest.mock import Mock, patch
 
-import yaml
-from pytest import fixture, mark, raises
+from pytest import fixture, raises
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
@@ -197,7 +196,9 @@ def test_config_validator_validate_fail_top_level(caplog):
 def test_config_validator_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
-            validator.validate_internal(schema_name="a", desc="test", config={"color": "orange"})
+            validator.validate_internal(
+                schema_name="a", desc="test", config_data={"color": "orange"}
+            )
     assert logged(caplog, "Error at color:")
     assert logged(caplog, "  'orange' is not one of ['blue', 'red']")
     assert str(e.value) == "YAML validation errors"
@@ -205,40 +206,14 @@ def test_config_validator_validate_internal_no(caplog, schema_file):
 
 def test_config_validator_validate_internal_ok(schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
-        validator.validate_internal(schema_name="a", desc="test", config={"color": "blue"})
+        validator.validate_internal(schema_name="a", desc="test", config_data={"color": "blue"})
 
 
 def test_config_validator_validate_external(assets, config, schema):
     schema_file, _, cfgobj = assets
     with patch.object(validator, "validate") as validate:
-        validator.validate_external(schema_file=schema_file, desc="test", config=cfgobj)
+        validator.validate_external(schema_file=schema_file, desc="test", config_data=cfgobj)
     validate.assert_called_once_with(schema=schema, desc="test", config=config)
-
-
-def test_config_validator_prep_config_cfgobj(prep_config_dict):
-    cfgobj = validator._prep_config(config=YAMLConfig(config=prep_config_dict))
-    assert isinstance(cfgobj, dict)
-    assert cfgobj == {"roses": "red", "color": "red"}
-
-
-def test_config_validator__prep_config_dict(prep_config_dict):
-    cfgobj = validator._prep_config(config=prep_config_dict)
-    assert isinstance(cfgobj, dict)
-    assert cfgobj == {"roses": "red", "color": "red"}
-
-
-def test_config_validator__prep_config_file(prep_config_dict, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(prep_config_dict, f)
-    cfgobj = validator._prep_config(config=path)
-    assert isinstance(cfgobj, dict)
-    assert cfgobj == {"roses": "red", "color": "red"}
-
-
-@mark.parametrize("val", [True, 3.14, 42, [1, 2, 3], "foo", None])
-def test_config_validator__prep_config_other(val):
-    assert validator._prep_config(config=val) == val
 
 
 def test_config_validator__registry(tmp_path):

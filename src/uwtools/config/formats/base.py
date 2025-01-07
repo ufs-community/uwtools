@@ -26,7 +26,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config: Optional[Union[dict, str, Path]] = None) -> None:
+    def __init__(self, config: Optional[Union[dict, str, Config, Path]] = None) -> None:
         """
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
@@ -34,6 +34,9 @@ class Config(ABC, UserDict):
         if isinstance(config, dict):
             self._config_file = None
             self.update(config)
+        elif isinstance(config, Config):
+            self._config_file = None
+            self.update(config.data)
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)

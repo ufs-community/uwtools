@@ -15,7 +15,8 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import YAMLKey
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
-from uwtools.config.validator import ConfigT
+from uwtools.config.validator import ConfigDataT, ConfigPathT
+from uwtools.config.validator import validate_check_config as _validate_check_config
 from uwtools.config.validator import validate_external as _validate_external
 from uwtools.exceptions import UWConfigError
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
@@ -162,7 +163,12 @@ def realize_to_dict(  # pylint: disable=unused-argument
     return realize(**{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml})
 
 
-def validate(schema_file: Union[Path, str], config: ConfigT = None, stdin_ok: bool = False) -> bool:
+def validate(
+    schema_file: Union[Path, str],
+    config_data: Optional[ConfigDataT] = None,
+    config_path: Optional[ConfigPathT] = None,
+    stdin_ok: bool = False,
+) -> bool:
     """
     Check whether the specified config conforms to the specified JSON Schema spec.
 
@@ -170,15 +176,21 @@ def validate(schema_file: Union[Path, str], config: ConfigT = None, stdin_ok: bo
     ``dict`` or a YAMLConfig instance may also be provided for validation.
 
     :param schema_file: The JSON Schema file to use for validation.
-    :param config: The config to validate.
+    :param config_data: A config to validate.
+    :param config_path: A path to a file containing a config to validate.
     :param stdin_ok: OK to read from ``stdin``?
+    :raises: TypeError if config_* arguments are not set appropriately.
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise.
     """
+    _validate_check_config(config_data, config_path)
+    if config_data is None:
+        config_path = _ensure_data_source(_str2path(config_path), stdin_ok)
     try:
         _validate_external(
             schema_file=_str2path(schema_file),
             desc="config",
-            config=_ensure_data_source(_str2path(config), stdin_ok),
+            config_data=config_data,
+            config_path=config_path,
         )
     except UWConfigError:
         return False
