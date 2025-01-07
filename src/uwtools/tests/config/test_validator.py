@@ -4,12 +4,13 @@ Tests for uwtools.config.validator module.
 """
 import json
 import logging
+from functools import partial
 from pathlib import Path
 from textwrap import dedent
 from typing import Any
 from unittest.mock import Mock, patch
 
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
@@ -191,6 +192,19 @@ def test_config_validator_validate_fail_top_level(caplog):
       'n' is a required property
     """
     assert all(line in caplog.messages for line in dedent(expected).strip().split("\n"))
+
+
+@mark.parametrize(
+    "config_data,config_path", [(True, None), (None, True), (None, None), (True, True)]
+)
+def test_config_validator_validate_check_config(config_data, config_path):
+    f = partial(validator.validate_check_config, config_data, config_path)
+    if config_data is None or config_path is None:
+        assert f() is None
+    else:
+        with raises(TypeError) as e:
+            f()
+        assert str(e.value) == "Specify at most one of config_data, config_path"
 
 
 def test_config_validator_validate_internal_no(caplog, schema_file):
