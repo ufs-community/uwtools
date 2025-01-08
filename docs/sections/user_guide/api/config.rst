@@ -5,5 +5,5 @@
    :target: https://mybinder.org/v2/gh/ufs-community/uwtools/main?labpath=notebooks%2Fconfig.ipynb
 
 .. automodule:: uwtools.api.config
-   :inherited-members: UserDict
    :members:
+   :show-inheritance:

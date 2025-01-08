@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import difflib
 import os
 import re
@@ -23,7 +25,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config: Optional[Union[dict, str, Path]] = None) -> None:
+    def __init__(self, config: Optional[Union[dict, str, Config, Path]] = None) -> None:
         """
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
@@ -31,6 +33,9 @@ class Config(ABC, UserDict):
         if isinstance(config, dict):
             self._config_file = None
             self.update(config)
+        elif isinstance(config, Config):
+            self._config_file = config._config_file
+            self.update(config.data)
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
@@ -216,7 +221,7 @@ class Config(ABC, UserDict):
         """
         return self._config_file
 
-    def dereference(self, context: Optional[dict] = None) -> None:
+    def dereference(self, context: Optional[dict] = None) -> Config:
         """
         Render as much Jinja2 syntax as possible.
         """
@@ -234,6 +239,7 @@ class Config(ABC, UserDict):
                 break
             self.data = new
         logstate("final")
+        return self
 
     @abstractmethod
     def dump(self, path: Optional[Path]) -> None:
