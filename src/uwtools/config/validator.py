@@ -104,19 +104,22 @@ def validate_internal(
     """
     Validate a config against a uwtools-internal schema.
 
+    Specify at most one of config_data or config_path. If no config is specified, ``stdin`` is read
+    and will be parsed as YAML and then validated.
+
     :param schema_name: Name of uwtools schema to validate the config against.
     :param desc: A description of the config being validated, for logging.
     :param config_data: A config to validate.
     :param config_path: A path to a file containing a config to validate.
-    :raises: TypeError if config_* arguments are not set appropriately.
+    :raises: TypeError if both config_* arguments specified.
     """
     validate_check_config(config_data, config_path)
     log.info("Validating config against internal schema: %s", schema_name)
     validate_external(
-        config_data=config_data,
-        config_path=config_path,
         schema_file=internal_schema_file(schema_name),
         desc=desc,
+        config_data=config_data,
+        config_path=config_path,
     )
 
 
@@ -129,11 +132,14 @@ def validate_external(
     """
     Validate a YAML config against the JSON Schema in the given schema file.
 
+    Specify at most one of config_data or config_path. If no config is specified, ``stdin`` is read
+    and will be parsed as YAML and then validated.
+
     :param schema_file: The JSON Schema file to use for validation.
     :param desc: A description of the config being validated, for logging.
     :param config_data: A config to validate.
     :param config_path: A path to a file containing a config to validate.
-    :raises: TypeError if config_* arguments are not set appropriately.
+    :raises: TypeError if both config_* arguments specified.
     """
     validate_check_config(config_data, config_path)
     config: JSONValueT

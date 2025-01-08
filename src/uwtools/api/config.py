@@ -172,14 +172,14 @@ def validate(
     """
     Check whether the specified config conforms to the specified JSON Schema spec.
 
-    If no config is specified, ``stdin`` is read and will be parsed as YAML and then validated. A
-    ``dict`` or a ``YAMLConfig`` instance may also be provided for validation.
+    Specify at most one of config_data or config_path. If no config is specified, ``stdin`` is read
+    and will be parsed as YAML and then validated.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param config_data: A config to validate.
     :param config_path: A path to a file containing a config to validate.
     :param stdin_ok: OK to read from ``stdin``?
-    :raises: TypeError if config_* arguments are not set appropriately.
+    :raises: TypeError if both config_* arguments specified.
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise.
     """
     _validate_check_config(config_data, config_path)
