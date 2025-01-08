@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from typing import Optional, Union
 
-from uwtools.config.formats.base import Config as _Config
+from uwtools.config.formats.base import Config
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -113,9 +113,9 @@ def get_yaml_config(
 
 
 def realize(
-    input_config: Optional[Union[_Config, Path, dict, str]] = None,
+    input_config: Optional[Union[Config, Path, dict, str]] = None,
     input_format: Optional[str] = None,
-    update_config: Optional[Union[_Config, Path, dict, str]] = None,
+    update_config: Optional[Union[Config, Path, dict, str]] = None,
     update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
@@ -145,9 +145,9 @@ def realize(
 
 
 def realize_to_dict(  # pylint: disable=unused-argument
-    input_config: Optional[Union[dict, _Config, Path, str]] = None,
+    input_config: Optional[Union[dict, Config, Path, str]] = None,
     input_format: Optional[str] = None,
-    update_config: Optional[Union[dict, _Config, Path, str]] = None,
+    update_config: Optional[Union[dict, Config, Path, str]] = None,
     update_format: Optional[str] = None,
     key_path: Optional[list[YAMLKey]] = None,
     values_needed: bool = False,
@@ -173,7 +173,7 @@ def validate(
     Check whether the specified config conforms to the specified JSON Schema spec.
 
     If no config is specified, ``stdin`` is read and will be parsed as YAML and then validated. A
-    ``dict`` or a YAMLConfig instance may also be provided for validation.
+    ``dict`` or a ``YAMLConfig`` instance may also be provided for validation.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param config_data: A config to validate.
@@ -261,6 +261,7 @@ Recognized file extensions are: {extensions}
 ).strip()
 
 __all__ = [
+    "Config",
     "FieldTableConfig",
     "INIConfig",
     "NMLConfig",
