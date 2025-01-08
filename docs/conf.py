@@ -20,8 +20,8 @@ extlinks_detect_hardcoded_links = True
 html_logo = os.path.join("static", "ufs.png")
 html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 nitpick_ignore = [
-    ("py:class", "Path"),
     ("py:class", "f90nml.Namelist"),
 ]
 numfig = True
