@@ -46,7 +46,7 @@ class Assets(ABC):
         self,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
+        config: Optional[Union[dict, str, Path, YAMLConfig]] = None,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -231,7 +231,7 @@ class Assets(ABC):
         :raises: UWConfigError if config fails validation.
         """
         kwargs: dict = {
-            "config": self._config_intermediate,
+            "config_data": self._config_intermediate,
             "desc": "%s config" % self.driver_name(),
         }
         if self.schema_file:
@@ -526,7 +526,9 @@ class Driver(Assets):
         """
         Assets._validate(self)
         validate_internal(
-            schema_name=STR.platform, desc="platform config", config=self._config_intermediate
+            schema_name=STR.platform,
+            desc="platform config",
+            config_data=self._config_intermediate,
         )
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:

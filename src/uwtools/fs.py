@@ -113,7 +113,15 @@ class Stager(ABC):
 
         :raises: UWConfigError if config fails validation.
         """
-        validate_internal(schema_name=self._schema, desc="fs config", config=self._config)
+        config_data, config_path = (
+            (self._config, None) if isinstance(self._config, dict) else (None, self._config)
+        )
+        validate_internal(
+            schema_name=self._schema,
+            desc="fs config",
+            config_data=config_data,
+            config_path=config_path,
+        )
 
 
 class FileStager(Stager):

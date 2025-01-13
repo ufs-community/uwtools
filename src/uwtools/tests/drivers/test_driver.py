@@ -304,7 +304,7 @@ def test_Assets__validate_internal(assetsobj):
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
             "desc": "concrete config",
-            "config": assetsobj.config_full,
+            "config_data": assetsobj.config_full,
         }
 
 
@@ -316,7 +316,7 @@ def test_Assets__validate_external(config):
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
             "desc": "concrete config",
-            "config": assetsobj.config_full,
+            "config_data": assetsobj.config_full,
         }
 
 
@@ -599,7 +599,7 @@ def test_Driver__validate_external(config):
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
             "desc": "concrete config",
-            "config": assetsobj.config_full,
+            "config_data": assetsobj.config_full,
         }
 
 
@@ -610,12 +610,12 @@ def test_Driver__validate_internal(assetsobj):
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
             "desc": "concrete config",
-            "config": assetsobj.config_full,
+            "config_data": assetsobj.config_full,
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
             "desc": "platform config",
-            "config": assetsobj.config_full,
+            "config_data": assetsobj.config_full,
         }
 
 
