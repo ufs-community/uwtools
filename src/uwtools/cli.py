@@ -252,7 +252,7 @@ def _dispatch_config_validate(args: Args) -> bool:
     """
     return uwtools.api.config.validate(
         schema_file=args[STR.schemafile],
-        config=args[STR.infile],
+        config_path=args[STR.infile],
         stdin_ok=True,
     )
 
