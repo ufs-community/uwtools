@@ -48,7 +48,7 @@ def test_tasks():
         def provisioned_rundir(self):
             pass
 
-        def taskname(self, suffix):
+        def taskname(self, suffix=None):
             pass
 
         @external
