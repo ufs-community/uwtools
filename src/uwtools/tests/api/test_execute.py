@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
+from iotaa import refs
 from pytest import fixture, mark, raises
 
 from uwtools.api import execute
@@ -46,7 +47,7 @@ def kwargs(args):
 @mark.parametrize("key,val", [("batch", True), ("leadtime", 6)])
 def test_execute_fail_bad_args(caplog, key, kwargs, val):
     kwargs.update({"cycle": dt.datetime.now(), key: val})
-    assert execute.execute(**kwargs) is False
+    assert execute.execute(**kwargs) is None
     assert logged(caplog, f"TestDriver does not accept argument '{key}'")
 
 
@@ -69,7 +70,7 @@ def test_execute_pass(caplog, kwargs, remove, tmp_path):
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
     with patch.object(execute, "graph", return_value=graph_code):
-        assert execute.execute(**kwargs) is True
+        assert refs(execute.execute(**kwargs)) == 42
     assert regex_logged(caplog, "Instantiated %s with" % kwargs["classname"])
     with open(graph_file, "r", encoding="utf-8") as f:
         assert f.read().strip() == graph_code
@@ -77,7 +78,7 @@ def test_execute_pass(caplog, kwargs, remove, tmp_path):
 
 def test_execute_fail_cannot_load_driver_class(kwargs):
     kwargs["module"] = "bad_module_name"
-    assert execute.execute(**kwargs) is False
+    assert execute.execute(**kwargs) is None
 
 
 def test_tasks_fail(args, caplog, tmp_path):
@@ -91,7 +92,7 @@ def test_tasks_fail(args, caplog, tmp_path):
 
 def test_tasks_fail_no_cycle(args, caplog, kwargs):
     log.setLevel(logging.DEBUG)
-    assert execute.execute(**kwargs) is False
+    assert execute.execute(**kwargs) is None
     assert logged(caplog, "%s requires argument '%s'" % (args.classname, "cycle"))
 
 
