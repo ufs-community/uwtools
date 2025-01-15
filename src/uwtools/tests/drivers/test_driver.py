@@ -233,6 +233,11 @@ def test_Assets_leadtime(config):
     assert obj.leadtime == leadtime
 
 
+def test_Assets_taskname(assetsobj):
+    assert assetsobj.taskname() == "concrete"
+    assert assetsobj.taskname(suffix="test") == "concrete test"
+
+
 def test_Assets_validate(assetsobj, caplog):
     log.setLevel(logging.INFO)
     assetsobj.validate()
