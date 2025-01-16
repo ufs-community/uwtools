@@ -29,7 +29,7 @@ test:
     - isort 5.13.*
     - jq 1.7.*
     - make 4.4.*
-    - mypy 1.13.*
+    - mypy 1.14.*
     - pylint 3.3.*
     - pytest 8.3.*
     - pytest-cov 6.0.*
