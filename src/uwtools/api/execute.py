@@ -10,15 +10,13 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
-from iotaa import Asset, graph
+from iotaa import Node, graph
 
 from uwtools.config.support import YAMLKey
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source
-
-_AssetsT = Optional[Union[Asset, list[Asset], dict[str, Asset]]]
 
 
 def execute(
@@ -34,7 +32,7 @@ def execute(
     graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[YAMLKey]] = None,
     stdin_ok: Optional[bool] = False,
-) -> _AssetsT:
+) -> Optional[Node]:
     """
     Execute a driver task.
 
@@ -82,11 +80,11 @@ def execute(
             kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
-    node = getattr(driverobj, task)(dry_run=dry_run)
+    node: Node = getattr(driverobj, task)(dry_run=dry_run)
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
             print(graph(node), file=f)
-    return assets(node)
+    return node
 
 
 def tasks(module: Union[Path, str], classname: str) -> dict[str, str]:
