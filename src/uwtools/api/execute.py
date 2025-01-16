@@ -10,12 +10,16 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, Type, Union
 
+from iotaa import Asset
+
 from uwtools.config.support import YAMLKey
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source
+
+_AssetsT = Optional[Union[Asset, list[Asset], dict[str, Asset]]]
 
 
 def execute(
@@ -31,7 +35,7 @@ def execute(
     graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[YAMLKey]] = None,
     stdin_ok: Optional[bool] = False,
-) -> bool:
+) -> _AssetsT:
     """
     Execute a driver task.
 
@@ -51,11 +55,11 @@ def execute(
     :param graph_file: Write Graphviz DOT output here.
     :param key_path: Path of keys to config block to use.
     :param stdin_ok: OK to read from stdin?
-    :return: ``True`` if task completes without raising an exception.
+    :return: The assets yielded by the task, if it completes without raising an exception.
     """
     class_, module_path = _get_driver_class(module, classname)
     if not class_:
-        return False
+        return None
     assert module_path is not None
     args = dict(locals())
     accepted = set(getfullargspec(class_).args)
@@ -63,11 +67,11 @@ def execute(
     for arg in sorted([STR.batch, *non_optional]):
         if args.get(arg) and arg not in accepted:
             log.error("%s does not accept argument '%s'", classname, arg)
-            return False
+            return None
     for arg in sorted(non_optional):
         if arg in accepted and args[arg] is None:
             log.error("%s requires argument '%s'", classname, arg)
-            return False
+            return None
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
@@ -80,11 +84,11 @@ def execute(
             kwargs[arg] = args[arg]
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
-    getattr(driverobj, task)()
+    assets: _AssetsT = getattr(driverobj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
             print(graph(), file=f)
-    return True
+    return assets
 
 
 def tasks(module: Union[Path, str], classname: str) -> dict[str, str]:
