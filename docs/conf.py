@@ -24,6 +24,7 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 nitpick_ignore = [
     ("py:class", "Path"),
     ("py:class", "f90nml.Namelist"),
+    ("py:class", "iotaa.Asset"),
 ]
 numfig = True
 numfig_format = {"figure": "Figure %s"}

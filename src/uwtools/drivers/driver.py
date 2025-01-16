@@ -110,7 +110,7 @@ class Assets(ABC):
         with open(internal_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
             return bundle(json.load(f))
 
-    def taskname(self, suffix: str) -> str:
+    def taskname(self, suffix: Optional[str] = None) -> str:
         """
         Return a common tag for task-related log messages.
 
