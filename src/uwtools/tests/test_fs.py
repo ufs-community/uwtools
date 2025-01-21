@@ -3,6 +3,7 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
+from logging import getLogger
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -59,7 +60,9 @@ def test_fs_Copier_go(src_fn, dst_fn, td_fn):
     src, td, dst = src_fn("/src/file"), td_fn("/dst"), dst_fn("file")
     obj = Mock(_config={dst: src}, _simple=fs.Copier._simple, _target_dir=td)
     with patch.object(fs, "filecopy") as filecopy:
-        filecopy.return_value = iotaa.NodeExternal(taskname="test", dry_run=False, assets_=None)
+        filecopy.return_value = iotaa.NodeExternal(
+            taskname="test", threads=0, logger=getLogger(), assets_=None
+        )
         fs.Copier.go(obj)
     filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"))
 
