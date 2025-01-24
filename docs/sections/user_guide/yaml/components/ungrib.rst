@@ -20,7 +20,7 @@ execution:
 
 See :ref:`this page <execution_yaml>` for details.
 
-gfs_files:
+gribfiles:
 ^^^^^^^^^^
 
 Describes the GRIB-formatted files to be processed by ``ungrib``.
