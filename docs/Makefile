@@ -13,7 +13,7 @@ clean:
 
 docs:
 	$(MAKE) html
-	linkchecker --check-extern --no-warnings build/html/index.html
+	linkchecker --check-extern --no-warnings --user-agent Mozilla/5.0 build/html/index.html
 
 examples:
 	COLUMNS=80 $(MAKE) -C sections
