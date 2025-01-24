@@ -6,7 +6,7 @@
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
         },
-        "gfs_files": {
+        "gribfiles": {
           "additionalProperties": false,
           "properties": {
             "forecast_length": {
@@ -42,7 +42,7 @@
       },
       "required": [
         "execution",
-        "gfs_files",
+        "gribfiles",
         "rundir",
         "vtable"
       ],

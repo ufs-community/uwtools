@@ -4,7 +4,7 @@ ungrib:
       cores: 1
       walltime: "00:01:00"
     executable: /path/to/ungrib.exe
-  gfs_files:
+  gribfiles:
     forecast_length: 24
     interval_hours: 6
     offset: 0
