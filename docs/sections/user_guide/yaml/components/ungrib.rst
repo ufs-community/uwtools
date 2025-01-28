@@ -31,7 +31,7 @@ Describes the GRIB-formatted files to be processed by ``ungrib``.
 
   **max_leadtime:**
 
-  The length of the forecast in integer hours.
+  The maximum forecast leadtime to process. This may be the same as the forecast length, or a lower leadtime.
 
   **offset:**
 
