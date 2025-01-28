@@ -29,7 +29,7 @@ class Ungrib(DriverCycleBased):
         yield self.taskname("GRIB files")
         gribfiles = self.config["gribfiles"]
         offset = abs(gribfiles["offset"])
-        endhour = gribfiles["forecast_length"] + offset
+        endhour = gribfiles["max_leadtime"] + offset
         interval = gribfiles["interval_hours"]
         cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
         links = []
@@ -48,7 +48,7 @@ class Ungrib(DriverCycleBased):
         """
         # Do not use offset here. It's relative to the MPAS fcst to run.
         gribfiles = self.config["gribfiles"]
-        endhour = gribfiles["forecast_length"]
+        endhour = gribfiles["max_leadtime"]
         end_date = self._cycle + timedelta(hours=endhour)
         interval = int(gribfiles["interval_hours"]) * 3600  # hour to sec
         d = {

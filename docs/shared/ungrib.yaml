@@ -5,8 +5,8 @@ ungrib:
       walltime: "00:01:00"
     executable: /path/to/ungrib.exe
   gribfiles:
-    forecast_length: 24
     interval_hours: 6
+    max_leadtime: 24
     offset: 0
     path: /path/to/dir/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}
   rundir: /path/to/run/dir

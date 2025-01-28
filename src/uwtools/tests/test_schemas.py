@@ -1961,8 +1961,8 @@ def test_schema_ungrib():
     config = {
         "execution": {"executable": "/tmp/ungrib.exe"},
         "gribfiles": {
-            "forecast_length": 24,
             "interval_hours": 6,
+            "max_leadtime": 24,
             "offset": 0,
             "path": "/tmp/gfs.t12z.pgrb2.0p25.f000",
         },
