@@ -74,29 +74,26 @@ Build the ``uwtools`` Package Locally
 Install ``uwtools`` into a non-conda environment
 ------------------------------------------------
 
-If you are using an app that has its own environment requirements that do not work well with conda, you may need to use pip instead.
+If you are using an app that has its own environment requirements that do not work well with conda, you may need to install with ``pip`` instead.
 
-#. First, you will need to clone the git repo and check out the current release version. If you are using a tier 1 machine with a central installation, it is recommended to use that location.
-
-   .. code-block:: text
-
-      git checkout <version>
-
-#. To not pollute your base Python environment, it is recommended to create and activate your own environment. If you are installing into an existing spack or cmake build, skip to the last step.
+#. Clone the ``uwtools`` repo and check out the desired release tag.
 
    .. code-block:: text
 
-      python -m venv uwtools
+      git clone https://github.com/ufs-community/uwtools.git
+      cd uwtools
+      git checkout <tag>
 
-#. In the :uwtools:`uwtools repository<>`, activate your environment:
-
-   .. code-block:: text
-
-      . uwtools/bin/activate
-
-#. Then navigate to the ``src`` directory and install to the active environment using ``pip``. This will also install all dependencies.:
+#. Optional but recommended: Create and activate a Python virtual environment, to avoid installing into the base Python installation.
 
    .. code-block:: text
 
-      cd ~/git/uwtools/src
+      python -m venv uwtools-venv
+      . uwtools-venv/bin/activate
+
+#. Install ``uwtools`` and its required dependencies from the ``src/`` directory:
+
+   .. code-block:: text
+
+      cd src/
       pip install .
