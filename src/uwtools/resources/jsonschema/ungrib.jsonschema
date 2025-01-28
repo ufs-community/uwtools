@@ -6,14 +6,14 @@
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
         },
-        "gfs_files": {
+        "gribfiles": {
           "additionalProperties": false,
           "properties": {
-            "forecast_length": {
+            "interval_hours": {
               "minimum": 1,
               "type": "integer"
             },
-            "interval_hours": {
+            "max_leadtime": {
               "minimum": 1,
               "type": "integer"
             },
@@ -26,8 +26,8 @@
             }
           },
           "required": [
-            "forecast_length",
             "interval_hours",
+            "max_leadtime",
             "offset",
             "path"
           ],
@@ -42,7 +42,7 @@
       },
       "required": [
         "execution",
-        "gfs_files",
+        "gribfiles",
         "rundir",
         "vtable"
       ],

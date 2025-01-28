@@ -1960,9 +1960,9 @@ def test_schema_shave_rundir(shave_prop):
 def test_schema_ungrib():
     config = {
         "execution": {"executable": "/tmp/ungrib.exe"},
-        "gfs_files": {
-            "forecast_length": 24,
+        "gribfiles": {
             "interval_hours": 6,
+            "max_leadtime": 24,
             "offset": 0,
             "path": "/tmp/gfs.t12z.pgrb2.0p25.f000",
         },
@@ -1973,7 +1973,7 @@ def test_schema_ungrib():
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "gfs_files", "rundir", "vtable"):
+    for key in ("execution", "gribfiles", "rundir", "vtable"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
