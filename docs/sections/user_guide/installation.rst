@@ -69,3 +69,34 @@ Build the ``uwtools`` Package Locally
    .. code-block:: text
 
       conda create -y -n uwtools -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels uwtools[=<version>]
+
+
+Install ``uwtools`` into an existing environment
+------------------------------------------------
+
+If you are using an app that has its own environment requirements that do not work well with conda, you may need to use pip instead.
+
+#. First, you will need to clone the git repo and check out the current release version. If you are using a tier 1 machine with a central installation, it is recommended to use that location.
+
+   .. code-block:: text
+
+      git checkout [<version>]
+
+#. To not pollute your base Python environment, it is recommended to create and activate your own environment. If you are installing into an existing spack or cmake build, skip to the last step.
+
+   .. code-block:: text
+
+      python -m venv uwtools
+
+#. In the :uwtools:`uwtools repository<>`, activate your environment:
+
+   .. code-block:: text
+
+      . uwtools/bin/activate
+
+#. Then navigate to the ``src`` directory and install to the active environment using ``pip``. This will also install all dependencies.:
+
+   .. code-block:: text
+
+      cd ~/git/uwtools/src
+      pip install .
