@@ -5,11 +5,10 @@ chgres_cube driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import refs
+import iotaa
 from pytest import fixture, mark
 
 from uwtools.drivers.chgres_cube import ChgresCube
@@ -121,7 +120,7 @@ def test_ChgresCube_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -130,7 +129,7 @@ def test_ChgresCube_namelist_file(caplog, driverobj):
 def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  'string' is not of type 'boolean'")
@@ -140,11 +139,9 @@ def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(
-        caplog, "missing.nml (namelist.base_file): State: Not Ready (external asset)"
-    )
+    assert regex_logged(caplog, "missing.nml (namelist.base_file): Not ready [external asset]")
 
 
 def test_ChgresCube_output(driverobj):
@@ -153,8 +150,8 @@ def test_ChgresCube_output(driverobj):
     assert driverobj.output == expected
 
 
-def test_ChgresCube_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, namelist_file=D, runscript=D) as mocks:
+def test_ChgresCube_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(driverobj, namelist_file=ready_task, runscript=ready_task) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

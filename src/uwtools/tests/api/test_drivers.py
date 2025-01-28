@@ -3,7 +3,6 @@
 import datetime as dt
 from unittest.mock import patch
 
-import iotaa
 from pytest import mark
 
 from uwtools.api import (
@@ -28,7 +27,6 @@ from uwtools.api import (
     upp,
     ww3,
 )
-from uwtools.drivers import support
 from uwtools.utils import api
 
 modules = [
@@ -85,17 +83,12 @@ def test_api_execute(module):
 
 
 @mark.parametrize("module", modules)
-def test_api_graph(module):
-    assert module.graph is support.graph
-
-
-@mark.parametrize("module", modules)
 def test_api_schema(module):
     assert module.schema()
 
 
 @mark.parametrize("module", modules)
 def test_api_tasks(module):
-    with patch.object(iotaa, "tasknames") as tasknames:
+    with patch.object(module, "_tasks") as _tasks:
         module.tasks()
-        tasknames.assert_called_once_with(module._driver)
+        _tasks.assert_called_once_with(module._driver)

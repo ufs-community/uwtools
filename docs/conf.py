@@ -25,6 +25,7 @@ nitpick_ignore = [
     ("py:class", "Path"),
     ("py:class", "f90nml.Namelist"),
     ("py:class", "iotaa.Asset"),
+    ("py:class", "iotaa.Node"),
 ]
 numfig = True
 numfig_format = {"figure": "Figure %s"}

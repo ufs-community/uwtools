@@ -66,9 +66,9 @@ class SHConfig(Config):
             if m := re.match(r"^([a-zA-Z_]+[a-zA-Z0-9_]*)=(.*)$", s):
                 var, val = m[1], m[2]
                 d[var] = val
-                log.debug(f"Read variable '{var}' with value '{val}'")
+                log.debug("Read variable '%s' with value '%s'", var, val)
             else:
-                log.debug(f"Ignoring: {s}")
+                log.debug("Ignoring: %s", s)
         return d
 
     # Public methods

@@ -2,7 +2,6 @@
 API access to the ``uwtools`` ``ww3`` driver.
 """
 
-from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.drivers.ww3 import WaveWatchIII
 from uwtools.utils.api import make_execute as _make_execute
@@ -25,4 +24,4 @@ def tasks() -> dict[str, str]:
     return _tasks(_driver)
 
 
-__all__ = ["WaveWatchIII", "execute", "graph", "schema", "tasks"]
+__all__ = ["WaveWatchIII", "execute", "schema", "tasks"]

@@ -3,7 +3,6 @@
 SCHISM driver tests.
 """
 import datetime as dt
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
@@ -65,10 +64,10 @@ def test_SCHISM_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_SCHISM_provisioned_rundir(driverobj):
+def test_SCHISM_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        namelist_file=D,
+        namelist_file=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

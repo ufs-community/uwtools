@@ -3,7 +3,6 @@
 WaveWatchIII driver tests.
 """
 import datetime as dt
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
@@ -65,12 +64,8 @@ def test_WaveWatchIII_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_WaveWatchIII_provisioned_rundir(driverobj):
-    with patch.multiple(
-        driverobj,
-        namelist_file=D,
-        restart_directory=D,
-    ) as mocks:
+def test_WaveWatchIII_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(driverobj, namelist_file=ready_task, restart_directory=ready_task) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

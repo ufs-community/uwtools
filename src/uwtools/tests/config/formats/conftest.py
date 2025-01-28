@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring
 """
-Pytest fixtures for package uwtools.config.formats tests.
+Test fixtures for package uwtools.config.formats.
 """
 
 # NB: pytest implicitly imports files named conftest.py into test modules in the current directory

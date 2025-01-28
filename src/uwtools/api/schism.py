@@ -3,7 +3,6 @@ API access to the ``uwtools`` ``schism`` driver.
 """
 
 from uwtools.drivers.schism import SCHISM
-from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.utils.api import make_execute as _make_execute
 
@@ -25,4 +24,4 @@ def tasks() -> dict[str, str]:
     return _tasks(_driver)
 
 
-__all__ = ["SCHISM", "execute", "graph", "schema", "tasks"]
+__all__ = ["SCHISM", "execute", "schema", "tasks"]

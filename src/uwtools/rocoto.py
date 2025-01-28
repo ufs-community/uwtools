@@ -71,7 +71,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
         lines = xml.strip().split("\n")
         fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
         for n, line in enumerate(lines):
-            log.error(fmtstr % (n + 1, line))
+            log.error(fmtstr, n + 1, line)
     return valid
 
 

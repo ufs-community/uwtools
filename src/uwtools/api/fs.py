@@ -4,9 +4,9 @@ API access to ``uwtools`` file and directory management tools.
 
 import datetime as dt
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
-from iotaa import Asset
+import iotaa
 
 from uwtools.config.support import YAMLKey
 from uwtools.fs import Copier, Linker, MakeDirs
@@ -40,9 +40,8 @@ def copy(
         cycle=cycle,
         leadtime=leadtime,
         key_path=key_path,
-        dry_run=dry_run,
     )
-    assets: list[Asset] = stager.go()  # type: ignore
+    assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
     return all(asset.ready() for asset in assets)
 
 
@@ -73,9 +72,8 @@ def link(
         cycle=cycle,
         leadtime=leadtime,
         key_path=key_path,
-        dry_run=dry_run,
     )
-    assets: list[Asset] = stager.go()  # type: ignore
+    assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
     return all(asset.ready() for asset in assets)
 
 
@@ -106,10 +104,9 @@ def makedirs(
         cycle=cycle,
         leadtime=leadtime,
         key_path=key_path,
-        dry_run=dry_run,
     )
-    assets: list[Asset] = stager.go()  # type: ignore
-    return all(asset.ready() for asset in assets)
+    assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
+    return all(asset.ready for asset in assets)
 
 
 __all__ = ["Copier", "Linker", "MakeDirs", "copy", "link", "makedirs"]

@@ -5,9 +5,6 @@ Logging support.
 import logging
 import os
 import sys
-from typing import Any
-
-import iotaa
 
 # The logging prefix
 #
@@ -20,25 +17,7 @@ INDENT = "  "
 MSGWIDTH = 69
 
 
-class _Logger:
-    """
-    Support for swappable loggers.
-    """
-
-    def __init__(self) -> None:
-        self.logger = logging.getLogger()  # default to Python root logger.
-
-    def __getattr__(self, attr: str) -> Any:
-        """
-        Delegate attribute access to the currently-used logger.
-
-        :param attr: The attribute to access.
-        :returns: The requested attribute.
-        """
-        return getattr(self.logger, attr)
-
-
-log = _Logger()
+log = logging.getLogger()
 
 
 def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
@@ -61,13 +40,3 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
         **({"filename": os.devnull} if quiet else {}),
     }
     logging.basicConfig(**kwargs)
-
-
-def use_logger(logger: logging.Logger) -> None:
-    """
-    Log hereafter via the given logger.
-
-    :param logger: The logger to log to.
-    """
-    log.logger = logger
-    iotaa.logset(logger)

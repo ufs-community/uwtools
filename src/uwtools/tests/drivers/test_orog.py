@@ -4,7 +4,6 @@ Orog driver tests.
 """
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -104,10 +103,10 @@ def test_Orog_files_linked(driverobj):
 def test_Orog_grid_file_existence(caplog, driverobj, exist):
     log.setLevel(logging.DEBUG)
     grid_file = Path(driverobj.config["grid_file"])
-    status = f"Input grid file {str(grid_file)}: State: Not Ready (external asset)"
+    status = f"Input grid file {str(grid_file)}: Not ready [external asset]"
     if exist:
         grid_file.touch()
-        status = f"Input grid file {str(grid_file)}: State: Ready"
+        status = f"Input grid file {str(grid_file)}: Ready"
     driverobj.grid_file()
     assert regex_logged(caplog, status)
 
@@ -116,7 +115,7 @@ def test_Orog_grid_file_nonexistence(caplog, driverobj):
     log.setLevel(logging.INFO)
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
-    assert regex_logged(caplog, "Input grid file none: State: Ready")
+    assert regex_logged(caplog, "Input grid file none: Ready")
 
 
 def test_Orog_input_config_file_new(driverobj):
@@ -155,8 +154,10 @@ def test_Orog_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_Orog_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, files_linked=D, input_config_file=D, runscript=D) as mocks:
+def test_Orog_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(
+        driverobj, files_linked=ready_task, input_config_file=ready_task, runscript=ready_task
+    ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

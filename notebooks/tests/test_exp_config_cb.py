@@ -15,21 +15,22 @@ def test_exp_config():
         assert tb.cell_output_text(5) == fv3_rap_phys
         assert tb.cell_output_text(7) == user_cfg
         assert tb.cell_output_text(9) == str(YAMLConfig("fixtures/exp-config/base-file.yaml"))
-        updated_cfg = (
+        for line in [
             "cycle_day: !int '{{ cycle.strftime(''%d'') }}'",
             "varmap_file: '{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt'",
             "PARMdir: /path/to/ufs-srweather-app/parm",
-        )
-        assert all(x in tb.cell_output_text(11) for x in updated_cfg)
+        ]:
+            assert line in tb.cell_output_text(11)
         deref_cfg = (
             "data_dir_input_grid: /path/to/my/output/make_ics",
             "rundir: /path/to/my/output/make_ics",
         )
         assert all(x in tb.cell_output_text(13) for x in deref_cfg)
-        validate_out = (
-            "INFO Validating config against internal schema: chgres-cube",
-            "INFO 0 schema-validation errors found",
-            "INFO Validating config against internal schema: platform",
-            "chgres_cube valid schema: State: Ready",
-        )
-        assert all(x in tb.cell_output_text(15) for x in validate_out)
+        for line in [
+            "Validating config against internal schema: chgres-cube",
+            "0 schema-validation errors found in chgres_cube config",
+            "Validating config against internal schema: platform",
+            "0 schema-validation errors found in platform config",
+            "chgres_cube valid schema: Ready",
+        ]:
+            assert line in tb.cell_output_text(15)

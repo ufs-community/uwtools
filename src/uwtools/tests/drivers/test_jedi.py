@@ -5,11 +5,10 @@ JEDI driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
+import iotaa
 import yaml
-from iotaa import asset, external
 from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -120,7 +119,7 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
-    assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
+    assert regex_logged(caplog, f"{base_file}: Not ready [external asset]")
 
 
 def test_JEDI_driver_name(driverobj):
@@ -128,7 +127,7 @@ def test_JEDI_driver_name(driverobj):
 
 
 def test_JEDI_files_copied(driverobj):
-    with patch.object(jedi_base, "filecopy") as filecopy:
+    with patch.object(jedi_base, "filecopy", wraps=jedi_base.filecopy) as filecopy:
         driverobj._config["rundir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
@@ -142,7 +141,7 @@ def test_JEDI_files_copied(driverobj):
 
 
 def test_JEDI_files_linked(driverobj):
-    with patch.object(jedi_base, "symlink") as symlink:
+    with patch.object(jedi_base, "symlink", wraps=jedi_base.symlink) as symlink:
         driverobj._config["rundir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2
@@ -162,14 +161,14 @@ def test_JEDI_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_JEDI_provisioned_rundir(driverobj):
+def test_JEDI_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        configuration_file=D,
-        files_copied=D,
-        files_linked=D,
-        runscript=D,
-        validate_only=D,
+        configuration_file=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        runscript=ready_task,
+        validate_only=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
@@ -182,16 +181,15 @@ def test_JEDI_taskname(driverobj):
 
 def test_JEDI_validate_only(caplog, driverobj):
 
-    @external
+    @iotaa.external
     def file(path: Path):
         yield "Mocked file task for %s" % path
-        yield asset(path, lambda: True)
+        yield iotaa.asset(path, lambda: True)
 
     logging.getLogger().setLevel(logging.INFO)
     with patch.object(jedi, "file", file):
-        with patch.object(jedi, "run") as run:
-            result = Mock(output="", success=True)
-            run.return_value = result
+        with patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
+            run_shell_cmd.return_value = (True, None)
             driverobj.validate_only()
             cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
             cmds = [
@@ -200,7 +198,7 @@ def test_JEDI_validate_only(caplog, driverobj):
                 "time %s --validate-only %s 2>&1"
                 % (driverobj.config["execution"]["executable"], cfgfile),
             ]
-            run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
+            run_shell_cmd.assert_called_once_with(" && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
 
 

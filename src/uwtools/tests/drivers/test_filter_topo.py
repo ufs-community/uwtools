@@ -3,11 +3,10 @@
 filter_topo driver tests.
 """
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import refs
+import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.config.support import from_od
@@ -104,7 +103,7 @@ def test_FilterTopo_input_grid_file(driverobj):
 
 
 def test_FilterTopo_namelist_file(driverobj):
-    path = refs(driverobj.namelist_file())
+    path = iotaa.refs(driverobj.namelist_file())
     actual = from_od(f90nml.read(path).todict())
     expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected
@@ -116,9 +115,13 @@ def test_FilterTopo_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_FilterTopo_provisioned_rundir(driverobj):
+def test_FilterTopo_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
-        driverobj, input_grid_file=D, filtered_output_file=D, namelist_file=D, runscript=D
+        driverobj,
+        input_grid_file=ready_task,
+        filtered_output_file=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

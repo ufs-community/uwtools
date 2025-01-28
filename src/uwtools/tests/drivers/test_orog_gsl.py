@@ -3,7 +3,6 @@
 orog_gsl driver tests.
 """
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -101,14 +100,14 @@ def test_OrogGSL_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_OrogGSL_provisioned_rundir(driverobj):
+def test_OrogGSL_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_config_file=D,
-        input_grid_file=D,
-        runscript=D,
-        topo_data_2p5m=D,
-        topo_data_30s=D,
+        input_config_file=ready_task,
+        input_grid_file=ready_task,
+        runscript=ready_task,
+        topo_data_2p5m=ready_task,
+        topo_data_30s=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
