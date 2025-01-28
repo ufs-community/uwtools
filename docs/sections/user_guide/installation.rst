@@ -71,7 +71,7 @@ Build the ``uwtools`` Package Locally
       conda create -y -n uwtools -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels uwtools[=<version>]
 
 
-Install ``uwtools`` into an existing environment
+Install ``uwtools`` into a  non-conda environment
 ------------------------------------------------
 
 If you are using an app that has its own environment requirements that do not work well with conda, you may need to use pip instead.
