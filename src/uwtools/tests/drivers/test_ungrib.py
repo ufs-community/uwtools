@@ -27,9 +27,9 @@ def config(tmp_path):
                 },
                 "executable": str(tmp_path / "ungrib.exe"),
             },
-            "gfs_files": {
-                "forecast_length": 12,
+            "gribfiles": {
                 "interval_hours": 6,
+                "max_leadtime": 12,
                 "offset": 6,
                 "path": str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
             },

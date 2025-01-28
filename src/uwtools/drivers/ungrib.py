@@ -27,15 +27,15 @@ class Ungrib(DriverCycleBased):
         Symlinks to all the GRIB files.
         """
         yield self.taskname("GRIB files")
-        gfs_files = self.config["gfs_files"]
-        offset = abs(gfs_files["offset"])
-        endhour = gfs_files["forecast_length"] + offset
-        interval = gfs_files["interval_hours"]
+        gribfiles = self.config["gribfiles"]
+        offset = abs(gribfiles["offset"])
+        endhour = gribfiles["max_leadtime"] + offset
+        interval = gribfiles["interval_hours"]
         cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
         links = []
         for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
             infile = Path(
-                gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
+                gribfiles["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
             )
             link_name = self.rundir / f"GRIBFILE.{_ext(n)}"
             links.append((infile, link_name))
@@ -47,10 +47,10 @@ class Ungrib(DriverCycleBased):
         The namelist file.
         """
         # Do not use offset here. It's relative to the MPAS fcst to run.
-        gfs_files = self.config["gfs_files"]
-        endhour = gfs_files["forecast_length"]
+        gribfiles = self.config["gribfiles"]
+        endhour = gribfiles["max_leadtime"]
         end_date = self._cycle + timedelta(hours=endhour)
-        interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
+        interval = int(gribfiles["interval_hours"]) * 3600  # hour to sec
         d = {
             "update_values": {
                 "share": {
