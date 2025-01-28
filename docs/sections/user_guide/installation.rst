@@ -80,7 +80,7 @@ If you are using an app that has its own environment requirements that do not wo
 
    .. code-block:: text
 
-      git checkout [<version>]
+      git checkout <version>
 
 #. To not pollute your base Python environment, it is recommended to create and activate your own environment. If you are installing into an existing spack or cmake build, skip to the last step.
 
