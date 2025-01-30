@@ -1,0 +1,21 @@
+[2025-01-30T05:56:15]     INFO Validating config against internal schema: files-to-stage
+[2025-01-30T05:56:15]     INFO 0 schema-validation errors found in fs config
+[2025-01-30T05:56:16]     INFO File src/foo: Ready
+[2025-01-30T05:56:16]  WARNING File src/qux: Not ready [external asset]
+[2025-01-30T05:56:16]     INFO Copy src/foo -> copy-dst/foo: Executing
+[2025-01-30T05:56:16]     INFO Copy src/foo -> copy-dst/foo: Ready
+[2025-01-30T05:56:16]  WARNING Copy src/qux -> copy-dst/qux: Not ready
+[2025-01-30T05:56:16]  WARNING Copy src/qux -> copy-dst/qux: Requires:
+[2025-01-30T05:56:16]  WARNING Copy src/qux -> copy-dst/qux: ✖ File src/qux
+[2025-01-30T05:56:16]  WARNING File copies: Not ready
+[2025-01-30T05:56:16]  WARNING File copies: Requires:
+[2025-01-30T05:56:16]  WARNING File copies: ✔ Copy src/foo -> copy-dst/foo
+[2025-01-30T05:56:16]  WARNING File copies: ✖ Copy src/qux -> copy-dst/qux
+{
+  "not-ready": [
+    "copy-dst/qux"
+  ],
+  "ready": [
+    "copy-dst/foo"
+  ]
+}
