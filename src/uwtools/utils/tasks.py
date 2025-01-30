@@ -28,7 +28,10 @@ def directory(path: Path):
     yield "Directory %s" % path
     yield asset(path, path.is_dir)
     yield None
-    path.mkdir(parents=True, exist_ok=True)
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        pass
 
 
 @external

@@ -88,7 +88,7 @@ def makedirs(
     key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> bool:
+) -> dict[str, list[Path]]:
     """
     Make directories.
 
@@ -97,9 +97,9 @@ def makedirs(
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
-    :param dry_run: Do not link files.
+    :param dry_run: Do not create directories.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if all directories were made.
+    :return: A report on directories created / not created.
     """
     stager = MakeDirs(
         target_dir=Path(target_dir) if target_dir else None,
@@ -109,7 +109,8 @@ def makedirs(
         key_path=key_path,
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
-    return all(asset.ready for asset in assets)
+    ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
+    return {STR.ready: ready(True), STR.notready: ready(False)}
 
 
 __all__ = ["Copier", "Linker", "MakeDirs", "copy", "link", "makedirs"]

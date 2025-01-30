@@ -1,12 +1,15 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
 import datetime as dt
+import os
 from pathlib import Path
 
 from pytest import fixture
 
 from uwtools.api import fs
 from uwtools.strings import STR
+
+# Fixtures
 
 
 @fixture
@@ -27,7 +30,17 @@ def kwargs(tmp_path):
     }
 
 
-def test_copy_fail(kwargs):
+# Helpers
+
+
+def paths2strs(paths: list[Path]) -> set[str]:
+    return set(map(str, paths))
+
+
+# Tests
+
+
+def test_fs_copy_fail(kwargs):
     paths = kwargs["config"]["a"]["b"]
     for p in paths:
         assert not Path(p).exists()
@@ -35,49 +48,62 @@ def test_copy_fail(kwargs):
     report = fs.copy(**kwargs)
     ready = Path(list(paths.keys())[1])
     assert ready.is_file()
-    assert list(map(str, report[STR.ready])) == [str(ready)]
+    assert paths2strs(report[STR.ready]) == {str(ready)}
     not_ready = Path(list(paths.keys())[0])
     assert not not_ready.exists()
-    assert list(map(str, report[STR.notready])) == [str(not_ready)]
+    assert paths2strs(report[STR.notready]) == {str(not_ready)}
 
 
-def test_copy_pass(kwargs):
+def test_fs_copy_pass(kwargs):
     paths = kwargs["config"]["a"]["b"]
     for p in paths:
         assert not Path(p).exists()
     report = fs.copy(**kwargs)
     for p in paths:
         assert Path(p).is_file()
-    assert set(map(str, report[STR.ready])) == set(paths.keys())
-    assert set(map(str, report[STR.notready])) == set()
+    assert paths2strs(report[STR.ready]) == set(paths.keys())
+    assert paths2strs(report[STR.notready]) == set()
 
 
-def test_link_fail(kwargs):
+def test_fs_link_fail(kwargs):
     paths = kwargs["config"]["a"]["b"]
     assert not any(Path(p).exists() for p in paths)
     Path(list(paths.values())[0]).unlink()
     report = fs.link(**kwargs)
     ready = Path(list(paths.keys())[1])
     assert ready.is_symlink()
-    assert list(map(str, report[STR.ready])) == [str(ready)]
+    assert paths2strs(report[STR.ready]) == {str(ready)}
     not_ready = Path(list(paths.keys())[0])
     assert not not_ready.exists()
-    assert list(map(str, report[STR.notready])) == [str(not_ready)]
+    assert paths2strs(report[STR.notready]) == {str(not_ready)}
 
 
-def test_link_pass(kwargs):
+def test_fs_link_pass(kwargs):
     paths = kwargs["config"]["a"]["b"]
     for p in paths:
         assert not Path(p).exists()
     report = fs.link(**kwargs)
     for p in paths:
         assert Path(p).is_symlink()
-    assert set(map(str, report[STR.ready])) == set(paths.keys())
-    assert set(map(str, report[STR.notready])) == set()
+    assert paths2strs(report[STR.ready]) == set(paths.keys())
+    assert paths2strs(report[STR.notready]) == set()
 
 
-def test_makedirs(tmp_path):
+def test_fs_makedirs_pass(tmp_path):
     paths = [tmp_path / "foo" / x for x in ("bar", "baz")]
     assert not any(path.is_dir() for path in paths)
-    assert fs.makedirs(config={"makedirs": [str(path) for path in paths]}) is True
+    report = fs.makedirs(config={"makedirs": [str(path) for path in paths]})
     assert all(path.is_dir() for path in paths)
+    assert paths2strs(report[STR.ready]) == paths2strs(paths)
+    assert paths2strs(report[STR.notready]) == set()
+
+
+def test_fs_makedirs_fail(tmp_path):
+    paths = [tmp_path / "foo" / x for x in ("bar", "baz")]
+    assert not any(path.is_dir() for path in paths)
+    os.chmod(tmp_path, 0o555)  # make tmp_path read-only
+    report = fs.makedirs(config={"makedirs": [str(path) for path in paths]})
+    assert not any(path.is_dir() for path in paths)
+    assert paths2strs(report[STR.ready]) == set()
+    assert paths2strs(report[STR.notready]) == paths2strs(paths)
+    os.chmod(tmp_path, 0o755)  # make tmp_path writable

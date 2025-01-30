@@ -420,7 +420,7 @@ def _dispatch_fs_link(args: Args) -> dict[str, list[Path]]:
     )
 
 
-def _dispatch_fs_makedirs(args: Args) -> bool:
+def _dispatch_fs_makedirs(args: Args) -> dict[str, list[Path]]:
     """
     Define dispatch logic for fs makedirs action.
 
