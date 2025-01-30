@@ -401,7 +401,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
-    return _dispatch_fs_report(args=args, report=report)
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
 def _dispatch_fs_link(args: Args) -> bool:
@@ -419,7 +419,7 @@ def _dispatch_fs_link(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
-    return _dispatch_fs_report(args=args, report=report)
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
 def _dispatch_fs_makedirs(args: Args) -> bool:
@@ -437,11 +437,11 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
-    return _dispatch_fs_report(args=args, report=report)
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
-def _dispatch_fs_report(args: Args, report: dict[str, list[Path]]) -> bool:
-    if args[STR.report]:
+def _dispatch_fs_report(report: Optional[dict[str, list[Path]]]) -> bool:
+    if report:
         print(json.dumps(report, indent=2, sort_keys=True))
     return True
 

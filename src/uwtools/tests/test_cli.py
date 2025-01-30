@@ -396,7 +396,9 @@ def test__dispatch_fs(action, funcname):
 @mark.parametrize("action", ["copy", "link", "makedirs"])
 def test__dispatch_fs_action(action, args_dispatch_fs):
     args = args_dispatch_fs
-    with patch.object(cli.uwtools.api.fs, action) as a:
+    with patch.object(cli.uwtools.api.fs, action) as a, patch.object(
+        cli, "_dispatch_fs_report"
+    ) as _dispatch_fs_report:
         a.return_value = {STR.ready: ["/present"], STR.notready: ["/missing"]}
         getattr(cli, f"_dispatch_fs_{action}")(args)
     a.assert_called_once_with(
@@ -407,6 +409,9 @@ def test__dispatch_fs_action(action, args_dispatch_fs):
         key_path=args["key_path"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
+    )
+    _dispatch_fs_report.assert_called_once_with(
+        report={STR.ready: ["/present"], STR.notready: ["/missing"]}
     )
 
 
