@@ -403,7 +403,7 @@ def _dispatch_fs_copy(args: Args) -> dict[str, list[Path]]:
     )
 
 
-def _dispatch_fs_link(args: Args) -> bool:
+def _dispatch_fs_link(args: Args) -> dict[str, list[Path]]:
     """
     Define dispatch logic for fs link action.
 

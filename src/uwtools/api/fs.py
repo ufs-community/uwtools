@@ -10,6 +10,7 @@ import iotaa
 
 from uwtools.config.support import YAMLKey
 from uwtools.fs import Copier, Linker, MakeDirs
+from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
@@ -43,7 +44,7 @@ def copy(
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
     ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
-    return {"ready": ready(True), "not-ready": ready(False)}
+    return {STR.ready: ready(True), STR.notready: ready(False)}
 
 
 def link(
@@ -54,7 +55,7 @@ def link(
     key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> bool:
+) -> dict[str, list[Path]]:
     """
     Link files.
 
@@ -65,7 +66,7 @@ def link(
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if all links were created.
+    :return: A report on files linked / not linked.
     """
     stager = Linker(
         target_dir=Path(target_dir) if target_dir else None,
@@ -75,7 +76,8 @@ def link(
         key_path=key_path,
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
-    return all(asset.ready() for asset in assets)
+    ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
+    return {STR.ready: ready(True), STR.notready: ready(False)}
 
 
 def makedirs(

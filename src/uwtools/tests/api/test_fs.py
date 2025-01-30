@@ -6,6 +6,7 @@ from pathlib import Path
 from pytest import fixture
 
 from uwtools.api import fs
+from uwtools.strings import STR
 
 
 @fixture
@@ -34,10 +35,10 @@ def test_copy_fail(kwargs):
     report = fs.copy(**kwargs)
     ready = Path(list(paths.keys())[1])
     assert ready.is_file()
-    assert list(map(str, report["ready"])) == [str(ready)]
+    assert list(map(str, report[STR.ready])) == [str(ready)]
     not_ready = Path(list(paths.keys())[0])
     assert not not_ready.exists()
-    assert list(map(str, report["not-ready"])) == [str(not_ready)]
+    assert list(map(str, report[STR.notready])) == [str(not_ready)]
 
 
 def test_copy_pass(kwargs):
@@ -47,26 +48,32 @@ def test_copy_pass(kwargs):
     report = fs.copy(**kwargs)
     for p in paths:
         assert Path(p).is_file()
-    assert set(map(str, report["ready"])) == set(paths.keys())
-    assert set(map(str, report["not-ready"])) == set()
+    assert set(map(str, report[STR.ready])) == set(paths.keys())
+    assert set(map(str, report[STR.notready])) == set()
 
 
 def test_link_fail(kwargs):
     paths = kwargs["config"]["a"]["b"]
     assert not any(Path(p).exists() for p in paths)
     Path(list(paths.values())[0]).unlink()
-    assert fs.link(**kwargs) is False
-    assert not Path(list(paths.keys())[0]).exists()
-    assert Path(list(paths.keys())[1]).is_symlink()
+    report = fs.link(**kwargs)
+    ready = Path(list(paths.keys())[1])
+    assert ready.is_symlink()
+    assert list(map(str, report[STR.ready])) == [str(ready)]
+    not_ready = Path(list(paths.keys())[0])
+    assert not not_ready.exists()
+    assert list(map(str, report[STR.notready])) == [str(not_ready)]
 
 
 def test_link_pass(kwargs):
     paths = kwargs["config"]["a"]["b"]
     for p in paths:
         assert not Path(p).exists()
-    assert fs.link(**kwargs) is True
+    report = fs.link(**kwargs)
     for p in paths:
         assert Path(p).is_symlink()
+    assert set(map(str, report[STR.ready])) == set(paths.keys())
+    assert set(map(str, report[STR.notready])) == set()
 
 
 def test_makedirs(tmp_path):
