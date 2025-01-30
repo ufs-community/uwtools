@@ -337,6 +337,7 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
+    _add_arg_report(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -382,17 +383,16 @@ def _dispatch_fs(args: Args) -> bool:
         STR.link: _dispatch_fs_link,
         STR.makedirs: _dispatch_fs_makedirs,
     }
-    actions[args[STR.action]](args)
-    return True
+    return actions[args[STR.action]](args)
 
 
-def _dispatch_fs_copy(args: Args) -> dict[str, list[Path]]:
+def _dispatch_fs_copy(args: Args) -> bool:
     """
     Define dispatch logic for fs copy action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.copy(
+    report = uwtools.api.fs.copy(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -401,15 +401,16 @@ def _dispatch_fs_copy(args: Args) -> dict[str, list[Path]]:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(args=args, report=report)
 
 
-def _dispatch_fs_link(args: Args) -> dict[str, list[Path]]:
+def _dispatch_fs_link(args: Args) -> bool:
     """
     Define dispatch logic for fs link action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.link(
+    report = uwtools.api.fs.link(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -418,15 +419,16 @@ def _dispatch_fs_link(args: Args) -> dict[str, list[Path]]:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(args=args, report=report)
 
 
-def _dispatch_fs_makedirs(args: Args) -> dict[str, list[Path]]:
+def _dispatch_fs_makedirs(args: Args) -> bool:
     """
     Define dispatch logic for fs makedirs action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.makedirs(
+    report = uwtools.api.fs.makedirs(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -435,6 +437,13 @@ def _dispatch_fs_makedirs(args: Args) -> dict[str, list[Path]]:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(args=args, report=report)
+
+
+def _dispatch_fs_report(args: Args, report: dict[str, list[Path]]) -> bool:
+    if args[STR.report]:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    return True
 
 
 # Mode rocoto
@@ -799,6 +808,14 @@ def _add_arg_quiet(group: Group) -> None:
         "-q",
         action="store_true",
         help="Print no logging messages",
+    )
+
+
+def _add_arg_report(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.report),
+        action="store_true",
+        help="Show JSON report on [non]ready assets",
     )
 
 

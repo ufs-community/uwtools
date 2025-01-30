@@ -61,6 +61,7 @@ def args_dispatch_fs():
         "leadtime": dt.timedelta(hours=6),
         "key_path": ["a", "b"],
         "dry_run": False,
+        "report": True,
         "stdin_ok": True,
     }
 
@@ -396,6 +397,7 @@ def test__dispatch_fs(action, funcname):
 def test__dispatch_fs_action(action, args_dispatch_fs):
     args = args_dispatch_fs
     with patch.object(cli.uwtools.api.fs, action) as a:
+        a.return_value = {STR.ready: ["/present"], STR.notready: ["/missing"]}
         getattr(cli, f"_dispatch_fs_{action}")(args)
     a.assert_called_once_with(
         target_dir=args["target_dir"],

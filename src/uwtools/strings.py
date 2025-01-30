@@ -121,6 +121,7 @@ class STR:
     ready: str = "ready"
     realize: str = "realize"
     render: str = "render"
+    report: str = "report"
     rocoto: str = "rocoto"
     run: str = "run"
     rundir: str = "rundir"
