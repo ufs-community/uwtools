@@ -22,7 +22,7 @@ def copy(
     key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> dict[str, list[Path]]:
+) -> dict[str, list[str]]:
     """
     Copy files.
 
@@ -43,7 +43,7 @@ def copy(
         key_path=key_path,
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
-    ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
+    ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
 
@@ -55,7 +55,7 @@ def link(
     key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> dict[str, list[Path]]:
+) -> dict[str, list[str]]:
     """
     Link files.
 
@@ -76,7 +76,7 @@ def link(
         key_path=key_path,
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
-    ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
+    ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
 
@@ -88,7 +88,7 @@ def makedirs(
     key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> dict[str, list[Path]]:
+) -> dict[str, list[str]]:
     """
     Make directories.
 
@@ -109,7 +109,7 @@ def makedirs(
         key_path=key_path,
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
-    ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
+    ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
 

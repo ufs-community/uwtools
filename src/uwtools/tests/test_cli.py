@@ -415,6 +415,28 @@ def test__dispatch_fs_action(action, args_dispatch_fs):
     )
 
 
+def test__dispatch_fs_report_no(capsys):
+    report = None
+    cli._dispatch_fs_report(report=report)
+    assert capsys.readouterr().out.strip() == ""
+
+
+def test__dispatch_fs_report_yes(capsys):
+    report = {STR.ready: ["/present"], STR.notready: ["/missing"]}
+    cli._dispatch_fs_report(report=report)
+    expected = """
+    {
+      "not-ready": [
+        "/missing"
+      ],
+      "ready": [
+        "/present"
+      ]
+    }
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
 @mark.parametrize(
     "params",
     [

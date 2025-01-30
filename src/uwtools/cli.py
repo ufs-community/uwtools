@@ -440,7 +440,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
     return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
-def _dispatch_fs_report(report: Optional[dict[str, list[Path]]]) -> bool:
+def _dispatch_fs_report(report: Optional[dict[str, list[str]]]) -> bool:
     if report:
         print(json.dumps(report, indent=2, sort_keys=True))
     return True
