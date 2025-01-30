@@ -130,7 +130,6 @@ When the ``--report`` option is specified, a report of files not linked ("not-re
 .. literalinclude:: fs/link-exec-report.cmd
    :language: text
    :emphasize-lines: 2
-   :language: text
 .. literalinclude:: fs/link-exec-report.out
    :language: text
 
@@ -184,4 +183,22 @@ The ``--target-dir`` option need not be specified when all directory paths are a
    :language: text
    :emphasize-lines: 1
 .. literalinclude:: fs/makedirs-exec-no-target-dir-err.out
+   :language: text
+
+When the ``--report`` option is specified, a report of directories not created ("not-ready") and created ("ready") will be printed to ``stdout`` as machine-readable JSON. For example, using a config specifying both available and unavailable source files:
+
+.. literalinclude:: fs/makedirs-config-report.yaml
+   :language: yaml
+.. literalinclude:: fs/makedirs-exec-report.cmd
+   :language: text
+   :emphasize-lines: 5
+.. literalinclude:: fs/makedirs-exec-report.out
+   :language: text
+
+Since ``uwtools`` logs to ``stderr``, log and report output can be separated and the latter processed with a tool like ``jq``:
+
+.. literalinclude:: fs/makedirs-exec-report-jq.cmd
+   :language: text
+   :emphasize-lines: 5
+.. literalinclude:: fs/makedirs-exec-report-jq.out
    :language: text
