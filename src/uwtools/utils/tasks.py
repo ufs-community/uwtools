@@ -30,8 +30,8 @@ def directory(path: Path):
     yield None
     try:
         path.mkdir(parents=True, exist_ok=True)
-    except PermissionError:
-        pass
+    except PermissionError as e:
+        log.error(str(e))
 
 
 @external
