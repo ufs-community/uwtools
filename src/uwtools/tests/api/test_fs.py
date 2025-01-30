@@ -31,18 +31,24 @@ def test_copy_fail(kwargs):
     for p in paths:
         assert not Path(p).exists()
     Path(list(paths.values())[0]).unlink()
-    assert fs.copy(**kwargs) is False
-    assert not Path(list(paths.keys())[0]).exists()
-    assert Path(list(paths.keys())[1]).is_file()
+    report = fs.copy(**kwargs)
+    ready = Path(list(paths.keys())[1])
+    assert ready.is_file()
+    assert list(map(str, report["ready"])) == [str(ready)]
+    not_ready = Path(list(paths.keys())[0])
+    assert not not_ready.exists()
+    assert list(map(str, report["not-ready"])) == [str(not_ready)]
 
 
 def test_copy_pass(kwargs):
     paths = kwargs["config"]["a"]["b"]
     for p in paths:
         assert not Path(p).exists()
-    assert fs.copy(**kwargs) is True
+    report = fs.copy(**kwargs)
     for p in paths:
         assert Path(p).is_file()
+    assert set(map(str, report["ready"])) == set(paths.keys())
+    assert set(map(str, report["not-ready"])) == set()
 
 
 def test_link_fail(kwargs):

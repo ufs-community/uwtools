@@ -21,7 +21,7 @@ def copy(
     key_path: Optional[list[YAMLKey]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> bool:
+) -> dict[str, list[Path]]:
     """
     Copy files.
 
@@ -32,7 +32,7 @@ def copy(
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not copy files.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if all copies were created.
+    :return: A report on files copied / not copied.
     """
     stager = Copier(
         target_dir=Path(target_dir) if target_dir else None,
@@ -42,7 +42,8 @@ def copy(
         key_path=key_path,
     )
     assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
-    return all(asset.ready() for asset in assets)
+    ready = lambda state: [asset.ref for asset in assets if asset.ready() is state]
+    return {"ready": ready(True), "not-ready": ready(False)}
 
 
 def link(

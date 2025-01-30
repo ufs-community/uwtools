@@ -382,10 +382,11 @@ def _dispatch_fs(args: Args) -> bool:
         STR.link: _dispatch_fs_link,
         STR.makedirs: _dispatch_fs_makedirs,
     }
-    return actions[args[STR.action]](args)
+    actions[args[STR.action]](args)
+    return True
 
 
-def _dispatch_fs_copy(args: Args) -> bool:
+def _dispatch_fs_copy(args: Args) -> dict[str, list[Path]]:
     """
     Define dispatch logic for fs copy action.
 
