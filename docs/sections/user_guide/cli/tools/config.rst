@@ -90,6 +90,7 @@ The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` wi
 In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` action can build a complete config file from two or more separate files.
 
 .. literalinclude:: config/realize-help.cmd
+   :language: text
    :emphasize-lines: 1
 .. literalinclude:: config/realize-help.out
    :language: text

@@ -35,6 +35,15 @@ def test_tasks_directory(tmp_path):
     assert p.is_dir()
 
 
+def test_tasks_directory_fail(caplog, tmp_path):
+    os.chmod(tmp_path, 0o550)
+    p = tmp_path / "foo"
+    assert not iotaa.ready(tasks.directory(path=p))
+    assert not p.is_dir()
+    os.chmod(tmp_path, 0o750)
+    assert logged(caplog, "[Errno 13] Permission denied: '%s'" % p)
+
+
 def test_tasks_executable(tmp_path):
     p = tmp_path / "program"
     # Ensure that only our temp directory is on the path:

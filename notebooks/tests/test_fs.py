@@ -31,11 +31,24 @@ def test_copy():
             assert copy_keys_dst_txt == src_txt
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(5) == config_str
-        assert "True" in tb.cell_output_text(7)
-        assert "False" in tb.cell_output_text(11)
+        assert (
+            "{'ready': ['tmp/copy-target/file1-copy.nml',"
+            "\n  'tmp/copy-target/data/file2-copy.txt',"
+            "\n  'tmp/copy-target/data/file3-copy.csv'],"
+            "\n 'not-ready': []}" in tb.cell_output_text(7)
+        )
+        assert (
+            "{'ready': [], 'not-ready': ['tmp/copy-target/missing-copy.nml']}"
+            in tb.cell_output_text(11)
+        )
         assert tb.cell_output_text(13) == tb.cell_output_text(9)
         assert tb.cell_output_text(15) == config_keys_str
-        assert "True" in tb.cell_output_text(17)
+        assert (
+            "{'ready': ['tmp/copy-keys-target/file1-copy.nml',"
+            "\n  'tmp/copy-keys-target/data/file2-copy.txt',"
+            "\n  'tmp/copy-keys-target/data/file3-copy.csv'],"
+            "\n 'not-ready': []}" in tb.cell_output_text(17)
+        )
 
 
 def test_link():
@@ -71,11 +84,24 @@ def test_link():
             assert link_keys_dst_txt == src_txt
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(29) == config_str
-        assert "True" in tb.cell_output_text(31)
-        assert "False" in tb.cell_output_text(35)
+        assert (
+            "{'ready': ['tmp/link-target/file1-link.nml',"
+            "\n  'tmp/link-target/file2-link.txt',"
+            "\n  'tmp/link-target/data/file3-link.csv'],"
+            "\n 'not-ready': []}"
+        ) in tb.cell_output_text(31)
+        assert (
+            "{'ready': [], 'not-ready': ['tmp/link-target/missing-link.nml']}"
+            in tb.cell_output_text(35)
+        )
         assert tb.cell_output_text(37) == tb.cell_output_text(33)
         assert tb.cell_output_text(39) == config_keys_str
-        assert "True" in tb.cell_output_text(41)
+        assert (
+            "{'ready': ['tmp/link-keys-target/file1-link.nml',"
+            "\n  'tmp/link-keys-target/file2-link.txt',"
+            "\n  'tmp/link-keys-target/data/file3-link.csv'],"
+            "\n 'not-ready': []}"
+        ) in tb.cell_output_text(41)
 
 
 def test_makedirs():
@@ -95,6 +121,12 @@ def test_makedirs():
             assert os.path.exists("tmp/dir-keys-target/" + subdir)
         # Ensure that cell output text matches expectations.
         assert tb.cell_output_text(53) == config_str
-        assert "True" in tb.cell_output_text(55)
+        assert (
+            "{'ready': ['tmp/dir-target/foo', 'tmp/dir-target/bar/baz'], 'not-ready': []}"
+            in tb.cell_output_text(55)
+        )
         assert tb.cell_output_text(59) == config_keys_str
-        assert "True" in tb.cell_output_text(61)
+        assert (
+            "{'ready': ['tmp/dir-keys-target/foo/bar', 'tmp/dir-keys-target/baz'],"
+            "\n 'not-ready': []}"
+        ) in tb.cell_output_text(61)

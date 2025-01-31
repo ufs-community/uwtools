@@ -337,6 +337,7 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
+    _add_arg_report(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -391,7 +392,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.copy(
+    report = uwtools.api.fs.copy(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -400,6 +401,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
 def _dispatch_fs_link(args: Args) -> bool:
@@ -408,7 +410,7 @@ def _dispatch_fs_link(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.link(
+    report = uwtools.api.fs.link(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -417,6 +419,7 @@ def _dispatch_fs_link(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
 def _dispatch_fs_makedirs(args: Args) -> bool:
@@ -425,7 +428,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.makedirs(
+    report = uwtools.api.fs.makedirs(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -434,6 +437,13 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
+
+
+def _dispatch_fs_report(report: Optional[dict[str, list[str]]]) -> bool:
+    if report:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    return True
 
 
 # Mode rocoto
@@ -798,6 +808,14 @@ def _add_arg_quiet(group: Group) -> None:
         "-q",
         action="store_true",
         help="Print no logging messages",
+    )
+
+
+def _add_arg_report(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.report),
+        action="store_true",
+        help="Show JSON report on [non]ready assets",
     )
 
 
