@@ -1,7 +1,8 @@
 usage: uw fs makedirs [-h] [--version] [--config-file PATH]
                       [--target-dir PATH] [--cycle CYCLE]
                       [--leadtime LEADTIME] [--dry-run]
-                      [--key-path KEY[.KEY...]] [--quiet] [--verbose]
+                      [--key-path KEY[.KEY...]] [--report] [--quiet]
+                      [--verbose]
 
 Make directories
 
@@ -22,6 +23,8 @@ Optional arguments:
       Only log info, making no changes
   --key-path KEY[.KEY...]
       Dot-separated path of keys to config block to use
+  --report
+      Show JSON report on [non]ready assets
   --quiet, -q
       Print no logging messages
   --verbose, -v

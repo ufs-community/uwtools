@@ -8,9 +8,10 @@ from inspect import getfullargspec
 from pathlib import Path
 from typing import Callable, Optional, TypeVar, Union
 
+from iotaa import graph
+
 from uwtools.config.support import YAMLKey
 from uwtools.drivers.driver import DriverT
-from uwtools.drivers.support import graph
 from uwtools.exceptions import UWError
 from uwtools.utils.file import str2path
 
@@ -177,7 +178,6 @@ def _execute(
     """
     kwargs = dict(
         config=ensure_data_source(str2path(config), stdin_ok),
-        dry_run=dry_run,
         key_path=key_path,
         schema_file=schema_file,
     )
@@ -186,8 +186,8 @@ def _execute(
         if arg in accepted:
             kwargs[arg] = locals()[arg]
     obj = driver_class(**kwargs)
-    getattr(obj, task)()
+    node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
-            print(graph(), file=f)
+            print(graph(node), file=f)
     return True

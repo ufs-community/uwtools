@@ -28,6 +28,7 @@ warn_return_any = true
 [tool.pylint.main]
 extension-pkg-allow-list = ["lxml"]
 jobs = 4
+load-plugins = ["iotaa.pylint"]
 recursive = true
 
 [tool.pylint."messages control"]
@@ -42,6 +43,7 @@ disable = [
   "too-many-instance-attributes",
   "too-many-lines",
   "too-many-locals",
+  "too-many-positional-arguments",
   "too-many-public-methods",
   "unnecessary-lambda-assignment",
   "use-dict-literal",
@@ -49,5 +51,3 @@ disable = [
 enable = [
   "useless-suppression",
 ]
-
-[tool.pytest.ini_options]

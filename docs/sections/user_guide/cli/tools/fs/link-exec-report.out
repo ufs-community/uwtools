@@ -1,0 +1,21 @@
+[2025-01-30T06:36:37]     INFO Validating config against internal schema: files-to-stage
+[2025-01-30T06:36:38]     INFO 0 schema-validation errors found in fs config
+[2025-01-30T06:36:40]     INFO Filesystem item src/foo: Ready
+[2025-01-30T06:36:40]  WARNING Filesystem item src/qux: Not ready [external asset]
+[2025-01-30T06:36:40]     INFO Link link-dst-report/foo -> src/foo: Executing
+[2025-01-30T06:36:40]     INFO Link link-dst-report/foo -> src/foo: Ready
+[2025-01-30T06:36:41]  WARNING Link link-dst-report/qux -> src/qux: Not ready
+[2025-01-30T06:36:41]  WARNING Link link-dst-report/qux -> src/qux: Requires:
+[2025-01-30T06:36:41]  WARNING Link link-dst-report/qux -> src/qux: ✖ Filesystem item src/qux
+[2025-01-30T06:36:41]  WARNING File links: Not ready
+[2025-01-30T06:36:41]  WARNING File links: Requires:
+[2025-01-30T06:36:41]  WARNING File links: ✔ Link link-dst-report/foo -> src/foo
+[2025-01-30T06:36:41]  WARNING File links: ✖ Link link-dst-report/qux -> src/qux
+{
+  "not-ready": [
+    "link-dst-report/qux"
+  ],
+  "ready": [
+    "link-dst-report/foo"
+  ]
+}

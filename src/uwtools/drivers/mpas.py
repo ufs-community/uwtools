@@ -21,7 +21,7 @@ class MPAS(MPASBase):
 
     # Workflow tasks
 
-    @task
+    @tasks
     def boundary_files(self):
         """
         Boundary files.

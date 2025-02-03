@@ -21,7 +21,12 @@ html_logo = os.path.join("static", "ufs.png")
 html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
-nitpick_ignore_regex = [("py:class", r"^uwtools\..*"), ("py:class", "f90nml.Namelist")]
+nitpick_ignore = [
+    ("py:class", "Path"),
+    ("py:class", "f90nml.Namelist"),
+    ("py:class", "iotaa.Asset"),
+    ("py:class", "iotaa.Node"),
+]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow Tools"
@@ -59,7 +64,6 @@ extlinks = {
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
     "schism": ("https://schism-dev.github.io/schism/master/%s", "%s"),
     "sfc-climo-gen": ("https://ufs-community.github.io/UFS_UTILS/sfc_climo_gen/%s", "%s"),
-    "shell-redirection": ("https://www.gnu.org/software/bash/manual/html_node/Redirections.html%s", "%s"),
     "ufs": ("https://ufs.epic.noaa.gov/%s", "%s"),
     "ufs-utils": ("https://noaa-emcufs-utils.readthedocs.io/en/latest/ufs_utils.html#%s", "%s"),
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),

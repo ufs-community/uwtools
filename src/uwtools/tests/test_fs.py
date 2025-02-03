@@ -3,6 +3,7 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
+from logging import getLogger
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -59,6 +60,9 @@ def test_fs_Copier_go(src_fn, dst_fn, td_fn):
     src, td, dst = src_fn("/src/file"), td_fn("/dst"), dst_fn("file")
     obj = Mock(_config={dst: src}, _simple=fs.Copier._simple, _target_dir=td)
     with patch.object(fs, "filecopy") as filecopy:
+        filecopy.return_value = iotaa.NodeExternal(
+            taskname="test", threads=0, logger=getLogger(), assets_=None
+        )
         fs.Copier.go(obj)
     filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"))
 
@@ -78,18 +82,18 @@ def test_fs_Copier_go_live_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    fs.Copier(target_dir=dstdir, config=cfgdict, key_path=["a", "b"], dry_run=True).go()
+    copier = fs.Copier(target_dir=dstdir, config=cfgdict, key_path=["a", "b"])
+    copier.go(dry_run=True)
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    iotaa.dryrun(False)
 
 
 def test_fs_Copier_go_live_no_targetdir_abspath_pass(assets):
     dstdir, cfgdict, _ = assets
     old = cfgdict["a"]["b"]
     cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
-    assets = fs.Copier(config=cfgdict).go()
-    assert all(asset.ready() for asset in assets)  # type: ignore
+    fs.Copier(config=cfgdict).go()
+    assert all(path.is_file() for path in [dstdir / "foo", dstdir / "bar"])
 
 
 def test_Copier_no_targetdir_relpath_fail(assets):

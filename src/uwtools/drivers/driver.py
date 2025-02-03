@@ -14,7 +14,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Optional, Union
 
-from iotaa import asset, dryrun, external, task, tasks
+from iotaa import asset, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -46,8 +46,7 @@ class Assets(ABC):
         self,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
+        config: Optional[Union[dict, str, Path, YAMLConfig]] = None,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -69,7 +68,6 @@ class Assets(ABC):
         self._delegate(controller, STR.rundir)
         self.schema_file = schema_file
         self._validate()
-        dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
         cycle = self._cycle.strftime("%Y-%m-%dT%H:%M") if hasattr(self, "_cycle") else None
@@ -112,7 +110,7 @@ class Assets(ABC):
         with open(internal_schema_file(schema_name=cls._schema_name()), "r", encoding="utf-8") as f:
             return bundle(json.load(f))
 
-    def taskname(self, suffix: str) -> str:
+    def taskname(self, suffix: Optional[str] = None) -> str:
         """
         Return a common tag for task-related log messages.
 
@@ -163,9 +161,9 @@ class Assets(ABC):
             dump = partial(config_class.dump_dict, config, path)
         if validate(schema=schema or {"type": "object"}, desc="user-updated config", config=config):
             dump()
-            log.debug(f"Wrote config to {path}")
+            log.debug("Wrote config to %s", path)
         else:
-            log.debug(f"Failed to validate {path}")
+            log.debug("Failed to validate %s", path)
 
     def _delegate(self, controller: Optional[list[YAMLKey]], config_key: str) -> None:
         """
@@ -233,7 +231,7 @@ class Assets(ABC):
         :raises: UWConfigError if config fails validation.
         """
         kwargs: dict = {
-            "config": self._config_intermediate,
+            "config_data": self._config_intermediate,
             "desc": "%s config" % self.driver_name(),
         }
         if self.schema_file:
@@ -251,7 +249,6 @@ class AssetsCycleBased(Assets):
         self,
         cycle: datetime,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -259,7 +256,6 @@ class AssetsCycleBased(Assets):
         super().__init__(
             cycle=cycle,
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
             controller=controller,
@@ -284,7 +280,6 @@ class AssetsCycleLeadtimeBased(Assets):
         cycle: datetime,
         leadtime: timedelta,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
@@ -293,7 +288,6 @@ class AssetsCycleLeadtimeBased(Assets):
             cycle=cycle,
             leadtime=leadtime,
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
             controller=controller,
@@ -324,14 +318,12 @@ class AssetsTimeInvariant(Assets):
     def __init__(
         self,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         schema_file: Optional[Path] = None,
         controller: Optional[list[YAMLKey]] = None,
     ):
         super().__init__(
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
             controller=controller,
@@ -348,7 +340,6 @@ class Driver(Assets):
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -358,7 +349,6 @@ class Driver(Assets):
             cycle=cycle,
             leadtime=leadtime,
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             schema_file=schema_file,
             controller=controller,
@@ -536,7 +526,9 @@ class Driver(Assets):
         """
         Assets._validate(self)
         validate_internal(
-            schema_name=STR.platform, desc="platform config", config=self._config_intermediate
+            schema_name=STR.platform,
+            desc="platform config",
+            config_data=self._config_intermediate,
         )
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
@@ -570,7 +562,6 @@ class DriverCycleBased(Driver):
         self,
         cycle: datetime,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -579,7 +570,6 @@ class DriverCycleBased(Driver):
         super().__init__(
             cycle=cycle,
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
@@ -605,7 +595,6 @@ class DriverCycleLeadtimeBased(Driver):
         cycle: datetime,
         leadtime: timedelta,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -615,7 +604,6 @@ class DriverCycleLeadtimeBased(Driver):
             cycle=cycle,
             leadtime=leadtime,
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
@@ -647,7 +635,6 @@ class DriverTimeInvariant(Driver):
     def __init__(
         self,
         config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
-        dry_run: bool = False,
         key_path: Optional[list[YAMLKey]] = None,
         batch: bool = False,
         schema_file: Optional[Path] = None,
@@ -655,7 +642,6 @@ class DriverTimeInvariant(Driver):
     ):
         super().__init__(
             config=config,
-            dry_run=dry_run,
             key_path=key_path,
             batch=batch,
             schema_file=schema_file,
@@ -679,7 +665,6 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param cycle: The cycle.
     :param leadtime: The leadtime.
     :param config: Path to config file (read stdin if missing or None).
-    :param dry_run: Run in dry-run mode?
     :param key_path: Keys of keys to driver config block.
     :param batch: Run component via the batch system?
     :param schema_file: Path to schema file to use to validate an external driver.

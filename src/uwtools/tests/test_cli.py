@@ -61,6 +61,7 @@ def args_dispatch_fs():
         "leadtime": dt.timedelta(hours=6),
         "key_path": ["a", "b"],
         "dry_run": False,
+        "report": True,
         "stdin_ok": True,
     }
 
@@ -371,7 +372,8 @@ def test__dispatch_config_validate_config_obj():
         cli._dispatch_config_validate(_dispatch_config_validate_args)
     _validate_external_args = {
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
-        STR.config: _dispatch_config_validate_args[STR.infile],
+        "config_data": None,
+        "config_path": _dispatch_config_validate_args[STR.infile],
     }
     _validate_external.assert_called_once_with(**_validate_external_args, desc="config")
 
@@ -394,7 +396,10 @@ def test__dispatch_fs(action, funcname):
 @mark.parametrize("action", ["copy", "link", "makedirs"])
 def test__dispatch_fs_action(action, args_dispatch_fs):
     args = args_dispatch_fs
-    with patch.object(cli.uwtools.api.fs, action) as a:
+    with patch.object(cli.uwtools.api.fs, action) as a, patch.object(
+        cli, "_dispatch_fs_report"
+    ) as _dispatch_fs_report:
+        a.return_value = {STR.ready: ["/present"], STR.notready: ["/missing"]}
         getattr(cli, f"_dispatch_fs_{action}")(args)
     a.assert_called_once_with(
         target_dir=args["target_dir"],
@@ -405,6 +410,31 @@ def test__dispatch_fs_action(action, args_dispatch_fs):
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
     )
+    _dispatch_fs_report.assert_called_once_with(
+        report={STR.ready: ["/present"], STR.notready: ["/missing"]}
+    )
+
+
+def test__dispatch_fs_report_no(capsys):
+    report = None
+    cli._dispatch_fs_report(report=report)
+    assert capsys.readouterr().out.strip() == ""
+
+
+def test__dispatch_fs_report_yes(capsys):
+    report = {STR.ready: ["/present"], STR.notready: ["/missing"]}
+    cli._dispatch_fs_report(report=report)
+    expected = """
+    {
+      "not-ready": [
+        "/missing"
+      ],
+      "ready": [
+        "/present"
+      ]
+    }
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
 @mark.parametrize(

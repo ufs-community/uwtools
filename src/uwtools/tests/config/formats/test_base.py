@@ -194,7 +194,12 @@ def test_compare_config_ini(caplog, salad_base):
         assert not logged(caplog, line)
 
 
-def test_config_file(config):
+def test_config_from_config(config):
+    assert config.config_file.name == "config.yaml"
+    assert ConcreteConfig(config).data == config.data
+
+
+def test_config_from_file(config):
     assert config.config_file.name == "config.yaml"
     assert config.config_file.is_file()
 
@@ -240,8 +245,8 @@ l: "22"
         print(yaml, file=f)
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
-        config.dereference()
-    print(config["e"])
+        retval = config.dereference()
+    assert retval is config
     assert config == {
         "a": 44,
         "b": {"c": 33},

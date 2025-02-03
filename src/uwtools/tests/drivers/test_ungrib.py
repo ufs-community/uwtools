@@ -3,7 +3,6 @@
 Ungrib driver tests.
 """
 import datetime as dt
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
@@ -28,9 +27,9 @@ def config(tmp_path):
                 },
                 "executable": str(tmp_path / "ungrib.exe"),
             },
-            "gfs_files": {
-                "forecast_length": 12,
+            "gribfiles": {
                 "interval_hours": 6,
+                "max_leadtime": 12,
                 "offset": 6,
                 "path": str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
             },
@@ -114,13 +113,13 @@ def test_Ungrib_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_Ungrib_provisioned_rundir(driverobj):
+def test_Ungrib_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        gribfiles=D,
-        namelist_file=D,
-        runscript=D,
-        vtable=D,
+        gribfiles=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
+        vtable=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

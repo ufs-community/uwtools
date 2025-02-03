@@ -72,7 +72,7 @@ The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` wi
   .. literalinclude:: config/compare-verbose.out
      :language: text
 
-  Note that ``uw`` logs to ``stderr``. Use :shell-redirection:`shell redirection<>` as needed.
+  Note that ``uw`` logs to ``stderr``. Use shell redirection as needed.
 
 .. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
 
@@ -90,6 +90,7 @@ The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` wi
 In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` action can build a complete config file from two or more separate files.
 
 .. literalinclude:: config/realize-help.cmd
+   :language: text
    :emphasize-lines: 1
 .. literalinclude:: config/realize-help.out
    :language: text
@@ -123,7 +124,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-stdout.out
      :language: text
 
-  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
+  Shell redirection may also be used to stream output to a file, another process, etc.
 
 * Values in the input file can be updated via an optional update file:
 
@@ -264,7 +265,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-verbose.out
      :language: text
 
-  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately via :shell-redirection:`shell redirection<>`.
+  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately via shell redirection.
 
 .. _cli_config_validate_examples:
 
@@ -300,7 +301,7 @@ and the YAML file ``values.yaml`` with contents:
   .. literalinclude:: config/validate-pass.out
      :language: text
 
-  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
+  Shell redirection may also be used to stream output to a file, another process, etc.
 
 * To read the *config* from ``stdin`` and print validation results to ``stdout``:
 
@@ -328,4 +329,4 @@ and the YAML file ``values.yaml`` with contents:
   .. literalinclude:: config/validate-verbose.out
      :language: text
 
-  Note that ``uw`` logs to ``stderr``, so the stream can be :shell-redirection:`redirected<>`.
+  Note that ``uw`` logs to ``stderr``, so the stream can be redirected.

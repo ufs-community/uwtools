@@ -20,22 +20,22 @@ execution:
 
 See :ref:`this page <execution_yaml>` for details.
 
-gfs_files:
+gribfiles:
 ^^^^^^^^^^
 
 Describes the GRIB-formatted files to be processed by ``ungrib``.
 
-  **forecast_length:**
+  **interval_hours:**
 
-  The length of the forecast in integer hours.
+  Frequency interval of the given files, in integer hours.
+
+  **max_leadtime:**
+
+  The maximum forecast leadtime to process. This may be the same as the forecast length, or a lower leadtime.
 
   **offset:**
 
   How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
-
-  **interval_hours:**
-
-  Frequency interval of the given files, in integer hours.
 
   **path:**
 

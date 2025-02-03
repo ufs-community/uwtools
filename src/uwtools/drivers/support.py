@@ -5,16 +5,9 @@ Driver support.
 import re
 from typing import Type
 
-import iotaa as _iotaa
+from iotaa import tasknames as _tasknames
 
 from uwtools.drivers.driver import DriverT
-
-
-def graph() -> str:
-    """
-    Return Graphviz DOT code for the most recently executed task.
-    """
-    return _iotaa.graph()
 
 
 def set_driver_docstring(driver_class: Type) -> None:
@@ -42,5 +35,5 @@ def tasks(driver_class: DriverT) -> dict[str, str]:
     """
     return {
         task: (getattr(driver_class, task).__doc__ or "").strip().split("\n")[0]
-        for task in _iotaa.tasknames(driver_class)
+        for task in _tasknames(driver_class)
     }

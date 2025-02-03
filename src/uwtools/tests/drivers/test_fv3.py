@@ -5,11 +5,10 @@ FV3 driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
+import iotaa
 import yaml
-from iotaa import asset, external, refs
 from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
@@ -74,10 +73,10 @@ def driverobj(config, cycle):
 
 @fixture
 def truetask():
-    @external
+    @iotaa.external
     def true():
         yield "true"
-        yield asset(True, lambda: True)
+        yield iotaa.asset(True, lambda: True)
 
     return true
 
@@ -177,7 +176,7 @@ def test_FV3_model_configure(base_file_exists, caplog, driverobj):
         assert dst.is_file()
     else:
         assert not dst.is_file()
-        assert regex_logged(caplog, f"{src}: State: Not Ready (external asset)")
+        assert regex_logged(caplog, f"{src}: Not ready [external asset]")
 
 
 def test_FV3_namelist_file(caplog, driverobj):
@@ -188,7 +187,7 @@ def test_FV3_namelist_file(caplog, driverobj):
     dst = driverobj.rundir / "input.nml"
     assert not dst.is_file()
     driverobj._config["namelist_file"] = {"base_file": src}
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert logged(caplog, f"Wrote config to {path}")
     assert dst.is_file()
 
@@ -196,7 +195,7 @@ def test_FV3_namelist_file(caplog, driverobj):
 def test_FV3_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["namsfc"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -206,9 +205,9 @@ def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+    assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
 
 
 def test_FV3_output(driverobj):
@@ -218,19 +217,19 @@ def test_FV3_output(driverobj):
 
 
 @mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_rundir(domain, driverobj):
+def test_FV3_provisioned_rundir(domain, driverobj, ready_task):
     driverobj._config["domain"] = domain
     with patch.multiple(
         driverobj,
-        boundary_files=D,
-        diag_table=D,
-        field_table=D,
-        files_copied=D,
-        files_linked=D,
-        model_configure=D,
-        namelist_file=D,
-        restart_directory=D,
-        runscript=D,
+        boundary_files=ready_task,
+        diag_table=ready_task,
+        field_table=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        model_configure=ready_task,
+        namelist_file=ready_task,
+        restart_directory=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     excluded = ["boundary_files"] if domain == "global" else []

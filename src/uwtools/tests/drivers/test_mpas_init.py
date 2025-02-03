@@ -5,11 +5,10 @@ MPASInit driver tests.
 import datetime as dt
 import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import refs
+import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.drivers.mpas_base import MPASBase
@@ -178,7 +177,7 @@ def test_MPASInit_namelist_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -187,7 +186,7 @@ def test_MPASInit_namelist_file(caplog, driverobj):
 def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -197,9 +196,9 @@ def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+    assert regex_logged(caplog, "Not ready [external asset]")
 
 
 def test_MPASInit_output(driverobj):
@@ -208,15 +207,15 @@ def test_MPASInit_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_MPASInit_provisioned_rundir(driverobj):
+def test_MPASInit_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        boundary_files=D,
-        files_copied=D,
-        files_linked=D,
-        namelist_file=D,
-        runscript=D,
-        streams_file=D,
+        boundary_files=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
+        streams_file=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

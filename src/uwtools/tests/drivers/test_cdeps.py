@@ -11,7 +11,7 @@ from textwrap import dedent
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from iotaa import refs
+import iotaa
 from pytest import fixture, mark
 
 from uwtools.config.formats.nml import NMLConfig
@@ -33,6 +33,15 @@ def driverobj(tmp_path):
     )
 
 
+# Helpers
+
+
+@iotaa.external
+def ok():
+    yield "ok"
+    yield iotaa.asset(None, lambda: True)
+
+
 # Tests
 
 
@@ -45,8 +54,8 @@ def test_CDEPS(method):
 
 
 def test_CDEPS_atm(driverobj):
-    with patch.object(CDEPS, "atm_nml") as atm_nml:
-        with patch.object(CDEPS, "atm_stream") as atm_stream:
+    with patch.object(CDEPS, "atm_nml", wraps=ok()) as atm_nml:
+        with patch.object(CDEPS, "atm_stream", wraps=ok()) as atm_stream:
             driverobj.atm()
         atm_stream.assert_called_once_with()
     atm_nml.assert_called_once_with()
@@ -63,15 +72,15 @@ def test_CDEPS_nml(caplog, driverobj, group):
     assert not dst.is_file()
     del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
-    path = Path(refs(task()))
+    path = Path(iotaa.refs(task()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
 def test_CDEPS_ocn(driverobj):
-    with patch.object(CDEPS, "ocn_nml") as ocn_nml:
-        with patch.object(CDEPS, "ocn_stream") as ocn_stream:
+    with patch.object(CDEPS, "ocn_nml", wraps=ok()) as ocn_nml:
+        with patch.object(CDEPS, "ocn_stream", wraps=ok()) as ocn_stream:
             driverobj.ocn()
         ocn_stream.assert_called_once_with()
     ocn_nml.assert_called_once_with()
@@ -102,7 +111,7 @@ def test_CDEPS_streams(driverobj, group):
         print(dedent(template).strip(), file=f)
     driverobj._config[f"{group}_streams"]["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
-    path = Path(refs(task()))
+    path = Path(iotaa.refs(task()))
     assert dst.is_file()
     expected = """
     1.5

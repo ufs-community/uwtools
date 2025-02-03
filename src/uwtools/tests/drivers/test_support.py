@@ -5,20 +5,10 @@ Tests for uwtools.drivers.support module.
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, external, task, tasks
+import iotaa
 
 from uwtools.drivers import support
 from uwtools.drivers.driver import DriverTimeInvariant
-
-
-def test_graph():
-    @external
-    def ready():
-        yield "ready"
-        yield asset("ready", lambda: True)
-
-    ready()
-    assert support.graph().startswith("digraph")
 
 
 def test_set_driver_docstring():
@@ -48,18 +38,18 @@ def test_tasks():
         def provisioned_rundir(self):
             pass
 
-        def taskname(self, suffix):
+        def taskname(self, suffix=None):
             pass
 
-        @external
+        @iotaa.external
         def t1(self):
             "@external t1"
 
-        @task
+        @iotaa.task
         def t2(self):
             "@task t2"
 
-        @tasks
+        @iotaa.tasks
         def t3(self):
             "@tasks t3"
 

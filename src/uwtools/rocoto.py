@@ -71,7 +71,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
         lines = xml.strip().split("\n")
         fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
         for n, line in enumerate(lines):
-            log.error(fmtstr % (n + 1, line))
+            log.error(fmtstr, n + 1, line)
     return valid
 
 
@@ -350,15 +350,20 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config: Union[dict, YAMLConfig, Optional[Path]]) -> None:
+    def _config_validate(self, config: Optional[Union[dict, Path, YAMLConfig]] = None) -> None:
         """
         Validate the given YAML config.
 
         :param config: YAMLConfig object or path to YAML file (None => read stdin).
         :raises: UWConfigError if config fails validation.
         """
-        schema_file = resource_path("jsonschema/rocoto.jsonschema")
-        validate_yaml(schema_file=schema_file, desc="Rocoto config", config=config)
+        config_data, config_path = (None, config) if isinstance(config, Path) else (config, None)
+        validate_yaml(
+            schema_file=resource_path("jsonschema/rocoto.jsonschema"),
+            desc="Rocoto config",
+            config_data=config_data,
+            config_path=config_path,
+        )
 
     @property
     def _doctype(self) -> Optional[str]:
