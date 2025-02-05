@@ -42,7 +42,7 @@ class CDEPS(AssetsCycleBased):
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
-        self._model_namelist_file("atm_in", path)
+        self._model_namelist_file("datm", path)
 
     @task
     def atm_stream(self):
@@ -53,9 +53,9 @@ class CDEPS(AssetsCycleBased):
         yield self.taskname(f"stream file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
-        template_file = self.config["atm_streams"]["template_file"]
+        template_file = self.config["template_file"]
         yield file(path=Path(template_file))
-        self._model_stream_file("atm_streams", path, template_file)
+        self._model_stream_file("datm", path, template_file)
 
     @tasks
     def ocn(self):
@@ -78,7 +78,7 @@ class CDEPS(AssetsCycleBased):
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield None
-        self._model_namelist_file("ocn_in", path)
+        self._model_namelist_file("docn", path)
 
     @task
     def ocn_stream(self):
@@ -89,9 +89,9 @@ class CDEPS(AssetsCycleBased):
         yield self.taskname(f"stream file {fn}")
         path = self.rundir / fn
         yield asset(path, path.is_file)
-        template_file = self.config["ocn_streams"]["template_file"]
+        template_file = self.config["template_file"]
         yield file(path=Path(template_file))
-        self._model_stream_file("ocn_streams", path, template_file)
+        self._model_stream_file("docn", path, template_file)
 
     # Public helper methods
 
@@ -108,7 +108,7 @@ class CDEPS(AssetsCycleBased):
         """
         Create an atmosphere or ocean namelist file.
 
-        :param group: "atm_in" or "ocn_in".
+        :param group: "datm" or "docn".
         :param path: Path to write namelist to.
         """
         self._create_user_updated_config(
@@ -119,7 +119,7 @@ class CDEPS(AssetsCycleBased):
         """
         Create an atmosphere or ocean stream file, based on a template.
 
-        :param group: "atm_in" or "ocn_in".
+        :param group: "datm" or "docn".
         :param path: Path to write namelist to.
         :param template_file: Path to the template file to render.
         """
