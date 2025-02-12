@@ -90,7 +90,7 @@ CDEPS_CONFIG = {
             }
         },
     },
-    "template_file": "/path/to/atm.jinja2"
+    "template_file": "/path/to/atm.jinja2",
 }
 
 
