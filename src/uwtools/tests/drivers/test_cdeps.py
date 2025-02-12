@@ -61,7 +61,7 @@ def test_CDEPS_nml(caplog, driverobj, group):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / f"d{group}_in"
     assert not dst.is_file()
-    del driverobj._config[f"{group}_in"]["base_file"]
+    del driverobj._config[f"d{group}"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
     path = Path(refs(task()))
     assert dst.is_file()
@@ -100,7 +100,7 @@ def test_CDEPS_streams(driverobj, group):
     template_file = driverobj.rundir.parent / "template.jinja2"
     with open(template_file, "w", encoding="utf-8") as f:
         print(dedent(template).strip(), file=f)
-    driverobj._config[f"{group}_streams"]["template_file"] = template_file
+    driverobj._config["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
     path = Path(refs(task()))
     assert dst.is_file()
