@@ -125,7 +125,7 @@ def test_CDEPS_streams(driverobj, group):
 
 
 def test_CDEPS__model_namelist_file(driverobj):
-    group = "atm_in"
+    group = "datm"
     path = Path("/path/to/some.nml")
     with patch.object(driverobj, "_create_user_updated_config") as cuuc:
         driverobj._model_namelist_file(group=group, path=path)
@@ -135,7 +135,7 @@ def test_CDEPS__model_namelist_file(driverobj):
 
 
 def test_CDEPS__model_stream_file(driverobj):
-    group = "atm_streams"
+    group = "datm"
     path = Path("/path/to/some.streams")
     template_file = Path("/path/to/some.jinja2")
     with patch.object(cdeps, "_render") as render:

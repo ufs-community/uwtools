@@ -15,7 +15,8 @@
             },
             "readmode": {
               "enum": [
-                "single"
+                "single",
+                "full_file"
               ]
             },
             "stream_data_files": {
@@ -29,6 +30,48 @@
                 "type": "string"
               },
               "type": "array"
+            },
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "source": {
+                  "enum": [
+                    "hrrr",
+                    "gfs"
+                  ]
+                },
+                "length": {
+                  "type": "number"
+                },
+                "fxx": {
+                  "type": "number"
+                },
+                "subset": {
+                  "type": "boolean"
+                },
+                "overwrite": {
+                  "type": "boolean"
+                },
+                "target_directory": {
+                  "type": "string"
+                },
+                "protocol": {
+                  "enum": [
+                    "herbie",
+                    "wget",
+                    "s3"
+                  ]
+                },
+                "end_point": {
+                  "type": "string"
+                },
+                "files": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
             },
             "stream_lev_dimname": {
               "type": "string"
@@ -65,20 +108,9 @@
             }
           },
           "required": [
-            "dtlimit",
-            "mapalgo",
-            "readmode",
             "stream_data_files",
             "stream_data_variables",
-            "stream_lev_dimname",
-            "stream_mesh_file",
-            "stream_offset",
-            "stream_vectors",
-            "taxmode",
-            "tinterpalgo",
-            "yearAlign",
-            "yearFirst",
-            "yearLast"
+            "stream_mesh_file"
           ],
           "type": "object"
         }
@@ -90,7 +122,7 @@
     "cdeps": {
       "additionalProperties": false,
       "properties": {
-        "atm_in": {
+        "datm": {
           "additionalProperties": false,
           "anyOf": [
             {
@@ -195,27 +227,18 @@
                 "datm_nml"
               ],
               "type": "object"
-            }
-          },
-          "type": "object"
-        },
-        "atm_streams": {
-          "additionalProperties": false,
-          "properties": {
+            },
             "streams": {
               "$ref": "#/$defs/streams"
             },
-            "template_file": {
-              "type": "string"
-            }
+            "required": [
+              "streams"
+            ],
+            "type": "object"
           },
-          "required": [
-            "streams",
-            "template_file"
-          ],
           "type": "object"
         },
-        "ocn_in": {
+        "docn": {
           "additionalProperties": false,
           "anyOf": [
             {
@@ -280,32 +303,23 @@
                 "docn_nml"
               ],
               "type": "object"
-            }
-          },
-          "type": "object"
-        },
-        "ocn_streams": {
-          "additionalProperties": false,
-          "properties": {
+            },
             "streams": {
               "$ref": "#/$defs/streams"
             },
-            "template_file": {
-              "type": "string"
-            }
+            "required": [
+              "streams"
+            ],
+            "type": "object"
           },
-          "required": [
-            "streams",
-            "template_file"
-          ],
           "type": "object"
         },
-        "rundir": {
+        "template_file": {
           "type": "string"
-        }
+        },
       },
       "required": [
-        "rundir"
+        "template_file"
       ]
     }
   },
