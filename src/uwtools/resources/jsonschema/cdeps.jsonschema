@@ -317,6 +317,9 @@
         "template_file": {
           "type": "string"
         },
+        "rundir": {
+          "type": "string"
+        }
       },
       "required": [
         "template_file"
