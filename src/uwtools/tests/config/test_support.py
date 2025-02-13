@@ -198,3 +198,12 @@ class Test_UWYAMLRemove:
         node = support.UWYAMLRemove(loader, yaml.ScalarNode(tag="!remove", value=""))
         assert repr(node) == "!remove"
         assert str(node) == "!remove"
+
+    def test_UWYAMLRemove_dump(self, tmp_path):
+        expected = "ns: !remove [1, 2, 3]"
+        old = tmp_path / "old.yaml"
+        old.write_text(expected)
+        c = YAMLConfig(old)
+        new = tmp_path / "new.yaml"
+        c.dump(new)
+        assert new.read_text().strip() == expected
