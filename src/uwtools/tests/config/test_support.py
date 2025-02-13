@@ -170,12 +170,27 @@ class Test_UWYAMLConvert:
         assert str(ts) == "[1, 2, 3]"
 
 
+class Test_UWYAMLGlob:
+    """
+    Tests for class uwtools.config.support.UWYAMLGlob.
+    """
+
+    def test_UWYAMLGlob(self):
+        yaml.add_representer(support.UWYAMLGlob, support.UWYAMLTag.represent)
+        node = support.UWYAMLGlob(
+            yaml.SafeLoader(""), yaml.ScalarNode(tag="!glob", value="/path/to/*")
+        )
+        assert repr(node) == "!glob /path/to/*"
+        assert str(node) == "!glob /path/to/*"
+
+
 class Test_UWYAMLRemove:
     """
     Tests for class uwtools.config.support.UWYAMLRemove.
     """
 
-    def test_UWYAMLRemove___str__(self):
+    def test_UWYAMLRemove(self):
         yaml.add_representer(support.UWYAMLRemove, support.UWYAMLTag.represent)
         node = support.UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
+        assert repr(node) == "!remove"
         assert str(node) == "!remove"
