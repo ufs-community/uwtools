@@ -90,7 +90,7 @@ CDEPS_CONFIG = {
             }
         },
     },
-    "template_file": "/path/to/atm.jinja2"
+    "template_file": "/path/to/atm.jinja2",
 }
 
 
@@ -478,32 +478,26 @@ def test_schema_cdeps_streams(cdeps_config, section):
     # Values must be of the correct types:
     valerr = lambda k, v: errors(with_set(block, v, "streams", "stream01", k))
     # enum:
-    ks_enum = ["readmode"]
     assert "is not one of" in valerr("readmode", None)
     # integer:
-    ks_integer = ["stream_offset", "yearAlign", "yearFirst", "yearLast"]
-    for k in ks_integer:
+    for k in ["stream_offset", "yearAlign", "yearFirst", "yearLast"]:
         assert "is not of type 'integer'\n" in valerr(k, None)
     # number:
-    ks_number = ["dtlimit"]
-    for k in ks_number:
+    for k in ["dtlimit"]:
         assert "is not of type 'number'\n" in valerr(k, None)
     # string:
-    ks_string = ["mapalgo", "stream_lev_dimname", "stream_mesh_file", "taxmode", "tinterpalgo"]
-    for k in ks_string:
+    for k in ["mapalgo", "stream_lev_dimname", "stream_mesh_file", "taxmode", "tinterpalgo"]:
         assert "is not of type 'string'\n" in valerr(k, None)
     # string arrays:
-    ks_string_array = ["stream_data_files", "stream_data_variables"]
-    for k in ks_string_array:
+    for k in ["stream_data_files", "stream_data_variables"]:
         assert "is not of type 'array'\n" in valerr(k, None)
         assert "is not of type 'string'\n" in valerr(k, [1])
     # string or string array:
-    ks_string_or_string_array = ["stream_vectors"]
-    for k in ks_string_or_string_array:
+    for k in ["stream_vectors"]:
         assert "is not of type 'array', 'string'\n" in valerr(k, None)
         assert "is not of type 'string'\n" in valerr(k, [1])
-    # All keys are required:
-    for k in ks_enum + ks_integer + ks_number + ks_string + ks_string_array:
+    # Some keys are required:
+    for k in ["stream_data_files", "stream_data_variables", "stream_mesh_file"]:
         assert "is a required property" in errors(with_del(block, "streams", "stream01", k))
 
 

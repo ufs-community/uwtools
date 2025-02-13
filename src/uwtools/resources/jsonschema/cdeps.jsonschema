@@ -7,6 +7,48 @@
         "^stream0[1-9]$": {
           "additionalProperties": false,
           "properties": {
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "end_point": {
+                  "type": "string"
+                },
+                "files": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "fxx": {
+                  "type": "number"
+                },
+                "length": {
+                  "type": "number"
+                },
+                "overwrite": {
+                  "type": "boolean"
+                },
+                "protocol": {
+                  "enum": [
+                    "herbie",
+                    "wget",
+                    "s3"
+                  ]
+                },
+                "source": {
+                  "enum": [
+                    "hrrr",
+                    "gfs"
+                  ]
+                },
+                "subset": {
+                  "type": "boolean"
+                },
+                "target_directory": {
+                  "type": "string"
+                }
+              }
+            },
             "dtlimit": {
               "type": "number"
             },
@@ -30,48 +72,6 @@
                 "type": "string"
               },
               "type": "array"
-            },
-            "data": {
-              "additionalProperties": false,
-              "properties": {
-                "source": {
-                  "enum": [
-                    "hrrr",
-                    "gfs"
-                  ]
-                },
-                "length": {
-                  "type": "number"
-                },
-                "fxx": {
-                  "type": "number"
-                },
-                "subset": {
-                  "type": "boolean"
-                },
-                "overwrite": {
-                  "type": "boolean"
-                },
-                "target_directory": {
-                  "type": "string"
-                },
-                "protocol": {
-                  "enum": [
-                    "herbie",
-                    "wget",
-                    "s3"
-                  ]
-                },
-                "end_point": {
-                  "type": "string"
-                },
-                "files": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                }
-              }
             },
             "stream_lev_dimname": {
               "type": "string"
@@ -139,6 +139,9 @@
           "properties": {
             "base_file": {
               "type": "string"
+            },
+            "streams": {
+              "$ref": "#/$defs/streams"
             },
             "update_values": {
               "properties": {
@@ -227,15 +230,11 @@
                 "datm_nml"
               ],
               "type": "object"
-            },
-            "streams": {
-              "$ref": "#/$defs/streams"
-            },
-            "required": [
-              "streams"
-            ],
-            "type": "object"
+            }
           },
+          "required": [
+            "streams"
+          ],
           "type": "object"
         },
         "docn": {
@@ -255,6 +254,9 @@
           "properties": {
             "base_file": {
               "type": "string"
+            },
+            "streams": {
+              "$ref": "#/$defs/streams"
             },
             "update_values": {
               "properties": {
@@ -303,21 +305,17 @@
                 "docn_nml"
               ],
               "type": "object"
-            },
-            "streams": {
-              "$ref": "#/$defs/streams"
-            },
-            "required": [
-              "streams"
-            ],
-            "type": "object"
+            }
           },
+          "required": [
+            "streams"
+          ],
           "type": "object"
         },
-        "template_file": {
+        "rundir": {
           "type": "string"
         },
-        "rundir": {
+        "template_file": {
           "type": "string"
         }
       },
