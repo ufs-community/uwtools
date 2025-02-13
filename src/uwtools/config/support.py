@@ -95,7 +95,8 @@ class UWYAMLTag:
     A base class for custom UW YAML tags.
     """
 
-    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.Node) -> None:
+        self.node = node
         self.tag: str = node.tag
         self.value: str = node.value
 
@@ -103,14 +104,17 @@ class UWYAMLTag:
         return ("%s %s" % (self.tag, self.value)).strip()
 
     @staticmethod
-    def represent(dumper: yaml.Dumper, data: UWYAMLTag) -> yaml.nodes.ScalarNode:
+    def represent(
+        dumper: yaml.Dumper,  # pylint: disable=unused-argument
+        data: UWYAMLTag,
+    ) -> yaml.nodes.Node:
         """
-        Serialize a tagged scalar as "!type value".
+        Serialize a scalar value as "!type value".
 
         Implements the interface required by pyyaml's add_representer() function. See the pyyaml
         documentation for details.
         """
-        return dumper.represent_scalar(data.tag, data.value)
+        return data.node
 
 
 class UWYAMLTaggedStr(UWYAMLTag):
