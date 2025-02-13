@@ -44,6 +44,9 @@
                 "subset": {
                   "type": "boolean"
                 },
+                "combine": {
+                  "type": "boolean"
+                },
                 "target_directory": {
                   "type": "string"
                 }
