@@ -1,5 +1,8 @@
-UW YAML for Components
-======================
+Component Drivers
+=================
+
+Available Drivers
+-----------------
 
 .. toctree::
    :maxdepth: 1
@@ -24,3 +27,12 @@ UW YAML for Components
    ungrib
    upp
    ww3
+
+Common Driver Blocks
+--------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   execution
+   platform
