@@ -1,13 +1,14 @@
-[2025-01-30T06:32:58]     INFO Validating config against internal schema: makedirs
-[2025-01-30T06:32:58]     INFO 0 schema-validation errors found in fs config
-[2025-01-30T06:33:00]     INFO Directory makedirs-parent-report/foo: Executing
-[2025-01-30T06:33:00]     INFO Directory makedirs-parent-report/foo: Ready
-[2025-01-30T06:33:01]     INFO Directory makedirs-parent-report/subdir/bar: Executing
-[2025-01-30T06:33:01]  WARNING Directory makedirs-parent-report/subdir/bar: Not ready
-[2025-01-30T06:33:01]  WARNING Directories: Not ready
-[2025-01-30T06:33:01]  WARNING Directories: Requires:
-[2025-01-30T06:33:01]  WARNING Directories: ✔ Directory makedirs-parent-report/foo
-[2025-01-30T06:33:01]  WARNING Directories: ✖ Directory makedirs-parent-report/subdir/bar
+[2025-02-13T17:19:49]     INFO Validating config against internal schema: makedirs
+[2025-02-13T17:19:49]     INFO 0 schema-validation errors found in fs config
+[2025-02-13T17:19:50]     INFO Directory makedirs-parent-report/foo: Executing
+[2025-02-13T17:19:50]     INFO Directory makedirs-parent-report/foo: Ready
+[2025-02-13T17:19:50]     INFO Directory makedirs-parent-report/subdir/bar: Executing
+[2025-02-13T17:19:50]    ERROR [Errno 13] Permission denied: 'makedirs-parent-report/subdir/bar'
+[2025-02-13T17:19:50]  WARNING Directory makedirs-parent-report/subdir/bar: Not ready
+[2025-02-13T17:19:50]  WARNING Directories: Not ready
+[2025-02-13T17:19:50]  WARNING Directories: Requires:
+[2025-02-13T17:19:50]  WARNING Directories: ✔ Directory makedirs-parent-report/foo
+[2025-02-13T17:19:50]  WARNING Directories: ✖ Directory makedirs-parent-report/subdir/bar
 {
   "not-ready": [
     "makedirs-parent-report/subdir/bar"

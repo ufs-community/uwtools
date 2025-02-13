@@ -1,7 +1,7 @@
-.. _defining_a_workflow:
+.. _rocoto_workflows:
 
-Defining a Rocoto Workflow
-==========================
+Rocoto Workflows
+================
 
 :rocoto:`Rocoto<>` is a workflow manager widely used by :ufs:`UFS<>` users and developers. It uses a custom XML language to define a set of tasks, their computational resource needs on a batch system, and their dependencies.
 

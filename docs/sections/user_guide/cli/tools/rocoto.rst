@@ -16,7 +16,7 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 
 In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw rocoto``, that means transforming a structured UW YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto.
 
-More information about the structured UW YAML file for Rocoto can be found :any:`here<defining_a_workflow>`.
+See :ref:`rocoto_workflows` for more information about the structured UW YAML for Rocoto.
 
 .. literalinclude:: rocoto/realize-help.cmd
    :language: text
