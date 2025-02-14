@@ -10,7 +10,7 @@ import uwtools.logging
 
 # NB: Since pytest takes control of logging, these tests make assertions about the way logging
 # setup calls were made instead of obtaining the root logger object and making assertions about
-# it, since the roog logger will not be what one would expect.
+# it, since the root logger will not be what one would expect.
 
 
 def test_setup_logging():

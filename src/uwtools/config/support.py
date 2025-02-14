@@ -117,7 +117,7 @@ class UWYAMLConvert(UWYAMLTag):
     """
     A class supporting custom YAML tags specifying type conversions.
 
-    The constructor implements the interface required by a pyyaml Loader object's add_consructor()
+    The constructor implements the interface required by a pyyaml Loader object's add_constructor()
     method. See the pyyaml documentation for details.
     """
 
@@ -146,7 +146,7 @@ class UWYAMLConvert(UWYAMLTag):
     @property
     def converted(self) -> UWYAMLConvert.TaggedValT:
         """
-        Return the original YAML value converted to the type speficied by the tag.
+        Return the original YAML value converted to the type specified by the tag.
 
         :raises: Appropriate exception if the value cannot be represented as the required type.
         """
@@ -166,7 +166,7 @@ class UWYAMLRemove(UWYAMLTag):
     """
     A class supporting a custom YAML tag to remove a YAML key/value pair.
 
-    The constructor implements the interface required by a pyyaml Loader object's add_consructor()
+    The constructor implements the interface required by a pyyaml Loader object's add_constructor()
     method. See the pyyaml documentation for details.
     """
 
