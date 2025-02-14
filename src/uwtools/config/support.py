@@ -74,7 +74,7 @@ def uw_yaml_loader() -> type[yaml.SafeLoader]:
     A loader with basic UW constructors added.
     """
     loader = yaml.SafeLoader
-    for tag_class in (UWYAMLConvert, UWYAMLRemove):
+    for tag_class in (UWYAMLConvert, UWYAMLGlob, UWYAMLRemove):
         for tag in getattr(tag_class, "TAGS"):
             loader.add_constructor(tag, tag_class)
     return loader
@@ -95,7 +95,8 @@ class UWYAMLTag:
     A base class for custom UW YAML tags.
     """
 
-    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.Node) -> None:
+        self.node = node
         self.tag: str = node.tag
         self.value: str = node.value
 
@@ -103,26 +104,23 @@ class UWYAMLTag:
         return ("%s %s" % (self.tag, self.value)).strip()
 
     @staticmethod
-    def represent(dumper: yaml.Dumper, data: UWYAMLTag) -> yaml.nodes.ScalarNode:
+    def represent(
+        dumper: yaml.Dumper,  # pylint: disable=unused-argument
+        data: UWYAMLTag,
+    ) -> yaml.nodes.Node:
         """
-        Serialize a tagged scalar as "!type value".
+        Serialize a scalar value as "!type value".
 
         Implements the interface required by pyyaml's add_representer() function. See the pyyaml
         documentation for details.
         """
-        return dumper.represent_scalar(data.tag, data.value)
+        return data.node
 
 
-class UWYAMLConvert(UWYAMLTag):
+class UWYAMLTaggedStr(UWYAMLTag):
     """
-    A class supporting custom YAML tags specifying type conversions.
-
-    The constructor implements the interface required by a pyyaml Loader object's add_constructor()
-    method. See the pyyaml documentation for details.
+    Support for YAML tags that target str values.
     """
-
-    TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
-    TaggedValT = Union[bool, datetime, dict, float, int, list]
 
     def __init__(self, loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
         super().__init__(loader, node)
@@ -136,6 +134,15 @@ class UWYAMLConvert(UWYAMLTag):
                 "Value tagged %s must be type 'str' (not '%s') in: %s"
                 % (node.tag, node.value.__class__.__name__, hint)
             )
+
+
+class UWYAMLConvert(UWYAMLTaggedStr):
+    """
+    Support for YAML tags that specify type conversions.
+    """
+
+    TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
+    TaggedValT = Union[bool, datetime, dict, float, int, list]
 
     def __repr__(self) -> str:
         return "%s %s" % (self.tag, self.converted)
@@ -162,12 +169,17 @@ class UWYAMLConvert(UWYAMLTag):
         return dict(zip(UWYAMLConvert.TAGS, converters))[self.tag](self.value)
 
 
+class UWYAMLGlob(UWYAMLTaggedStr):
+    """
+    Support for a YAML tag that specifies a glob pattern.
+    """
+
+    TAGS = ("!glob",)
+
+
 class UWYAMLRemove(UWYAMLTag):
     """
-    A class supporting a custom YAML tag to remove a YAML key/value pair.
-
-    The constructor implements the interface required by a pyyaml Loader object's add_constructor()
-    method. See the pyyaml documentation for details.
+    Support for a YAML tag that removes a key/value pair.
     """
 
     TAGS = ("!remove",)

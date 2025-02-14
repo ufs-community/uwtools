@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.config.jinja2 module.
 """
@@ -20,6 +20,17 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
+
+# Fixtures
+
+
+@fixture
+def loader():
+    yaml.add_representer(support.UWYAMLConvert, support.UWYAMLTag.represent)
+    return yaml.SafeLoader("")
+
+
+# Tests
 
 
 @mark.parametrize("d,n", [({1: 42}, 1), ({1: {2: 42}}, 2), ({1: {2: {3: 42}}}, 3), ({1: {}}, 2)])
@@ -78,11 +89,6 @@ class Test_UWYAMLConvert:
 
     def comp(self, ts: support.UWYAMLConvert, s: str):
         assert yaml.dump(ts, default_flow_style=True).strip() == s
-
-    @fixture
-    def loader(self):
-        yaml.add_representer(support.UWYAMLConvert, support.UWYAMLTag.represent)
-        return yaml.SafeLoader("")
 
     @mark.parametrize(
         "tag,val,val_type",
@@ -170,12 +176,34 @@ class Test_UWYAMLConvert:
         assert str(ts) == "[1, 2, 3]"
 
 
+class Test_UWYAMLGlob:
+    """
+    Tests for class uwtools.config.support.UWYAMLGlob.
+    """
+
+    def test_UWYAMLGlob(self, loader):
+        yaml.add_representer(support.UWYAMLGlob, support.UWYAMLTag.represent)
+        node = support.UWYAMLGlob(loader, yaml.ScalarNode(tag="!glob", value="/path/to/*"))
+        assert repr(node) == "!glob /path/to/*"
+        assert str(node) == "!glob /path/to/*"
+
+
 class Test_UWYAMLRemove:
     """
     Tests for class uwtools.config.support.UWYAMLRemove.
     """
 
-    def test_UWYAMLRemove___str__(self):
+    def test_UWYAMLRemove(self, loader):
         yaml.add_representer(support.UWYAMLRemove, support.UWYAMLTag.represent)
-        node = support.UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
+        node = support.UWYAMLRemove(loader, yaml.ScalarNode(tag="!remove", value=""))
+        assert repr(node) == "!remove"
         assert str(node) == "!remove"
+
+    def test_UWYAMLRemove_dump(self, tmp_path):
+        expected = "ns: !remove [1, 2, 3]"
+        old = tmp_path / "old.yaml"
+        old.write_text(expected)
+        c = YAMLConfig(old)
+        new = tmp_path / "new.yaml"
+        c.dump(new)
+        assert new.read_text().strip() == expected

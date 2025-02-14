@@ -42,9 +42,14 @@ def dumpkit(tmp_path):
 def test_yaml__add_yaml_representers():
     YAMLConfig._add_yaml_representers()
     representers = yaml.Dumper.yaml_representers
-    assert support.UWYAMLConvert in representers
-    assert OrderedDict in representers
-    assert f90nml.Namelist in representers
+    for x in [
+        OrderedDict,
+        f90nml.Namelist,
+        support.UWYAMLConvert,
+        support.UWYAMLGlob,
+        support.UWYAMLRemove,
+    ]:
+        assert x in representers
 
 
 def test_yaml__get_depth_threshold():

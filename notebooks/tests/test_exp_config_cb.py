@@ -16,7 +16,7 @@ def test_exp_config():
         assert tb.cell_output_text(7) == user_cfg
         assert tb.cell_output_text(9) == str(YAMLConfig("fixtures/exp-config/base-file.yaml"))
         for line in [
-            "cycle_day: !int '{{ cycle.strftime(''%d'') }}'",
+            'cycle_day: !int "{{ cycle.strftime(\'%d\') }}"',
             "varmap_file: '{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt'",
             "PARMdir: /path/to/ufs-srweather-app/parm",
         ]:

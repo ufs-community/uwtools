@@ -10,6 +10,8 @@ from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
     UWYAMLConvert,
+    UWYAMLGlob,
+    UWYAMLRemove,
     dict_to_yaml_str,
     from_od,
     log_and_error,
@@ -58,9 +60,10 @@ class YAMLConfig(Config):
         """
         Add representers to the YAML dumper for custom types.
         """
-        yaml.add_representer(UWYAMLConvert, UWYAMLConvert.represent)
         yaml.add_representer(Namelist, cls._represent_namelist)
         yaml.add_representer(OrderedDict, cls._represent_ordereddict)
+        for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
+            yaml.add_representer(tag_class, getattr(tag_class, "represent"))
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
