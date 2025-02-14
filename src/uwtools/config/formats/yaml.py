@@ -62,8 +62,8 @@ class YAMLConfig(Config):
         """
         yaml.add_representer(Namelist, cls._represent_namelist)
         yaml.add_representer(OrderedDict, cls._represent_ordereddict)
-        for x in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
-            yaml.add_representer(x, getattr(x, "represent"))
+        for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
+            yaml.add_representer(tag_class, getattr(tag_class, "represent"))
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
