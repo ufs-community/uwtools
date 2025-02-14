@@ -155,7 +155,7 @@ def test_dereference_str_filter_rendered():
     assert jinja2.dereference(val=val, context={"recipient": "world"}) == "hello, world"
 
 
-def test_derefrence_str_variable_rendered_mixed():
+def test_dereference_str_variable_rendered_mixed():
     # A mixed result remains a str.
     val = "{{ n }} is an {{ t }}"
     assert jinja2.dereference(val=val, context={"n": 42, "t": "int"}) == "42 is an int"

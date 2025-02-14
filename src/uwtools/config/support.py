@@ -119,7 +119,7 @@ class UWYAMLTag:
 
 class UWYAMLTaggedStr(UWYAMLTag):
     """
-    Support for YAML tags targeting str values.
+    Support for YAML tags that target str values.
     """
 
     def __init__(self, loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
@@ -138,7 +138,7 @@ class UWYAMLTaggedStr(UWYAMLTag):
 
 class UWYAMLConvert(UWYAMLTaggedStr):
     """
-    Support for YAML tags specifying type conversions.
+    Support for YAML tags that specify type conversions.
     """
 
     TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
@@ -153,7 +153,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
     @property
     def converted(self) -> UWYAMLConvert.TaggedValT:
         """
-        Return the original YAML value converted to the type speficied by the tag.
+        Return the original YAML value converted to the type specified by the tag.
 
         :raises: Appropriate exception if the value cannot be represented as the required type.
         """
@@ -171,7 +171,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
 
 class UWYAMLGlob(UWYAMLTaggedStr):
     """
-    Support for a YAML tag specifying a glob pattern.
+    Support for a YAML tag that specifies a glob pattern.
     """
 
     TAGS = ("!glob",)
