@@ -3,7 +3,7 @@ set -ae
 ci_conda_activate
 set -ux
 f=recipe/meta.json
-glob="$(jq -r .name $f)-$(jq -r .version $f)-*_$(jq -r .buildnum $f).tar.bz2"
+glob="$(jq -r .name $f)-$(jq -r .version $f)-*_$(jq -r .buildnum $f).conda"
 for x in $(find $CI_CONDA_DIR/conda-bld -type f -name "$glob"); do
   anaconda -t $ANACONDA_TOKEN upload $x
 done
