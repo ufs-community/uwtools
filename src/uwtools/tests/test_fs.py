@@ -136,6 +136,16 @@ def test_fs_FileStager__expand_wildcards():
     glob.assert_called_once_with("/src/b*")
 
 
+def test_fs_FileStager__expand_wildcards_bad_scheme():
+    config = """
+    /dst/<a>: !glob https://foo.com/obj/*
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    with raises(UWConfigError) as e:
+        fs.FileStager._expand_wildcards(obj)
+    assert str(e.value) == "URL scheme 'https' incompatible with !glob tag"
+
+
 @mark.parametrize("source", ("dict", "file"))
 def test_fs_Linker(assets, source):
     dstdir, cfgdict, cfgfile = assets
