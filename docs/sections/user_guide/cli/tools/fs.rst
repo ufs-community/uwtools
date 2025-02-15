@@ -84,10 +84,16 @@ The ``link`` action stages files in a target directory by creating symbolic link
 
 * HTTP(S) sources are not supported.
 
+.. literalinclude:: fs/link-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: fs/link-help.out
+   :language: text
+
 ``makedirs``
 ------------
 
-The ``makedirs`` action creates directories. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`makedirs block <makedirs_yaml>`.
+The ``makedirs`` action creates directories. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`makedirs block <makedirs_yaml>`, which must nest under a ``makedirs:`` key.
 
 .. literalinclude:: fs/makedirs-help.cmd
    :language: text
@@ -128,20 +134,4 @@ The ``--target-dir`` option need not be specified when all directory paths are a
 .. literalinclude:: fs/makedirs-exec-no-target-dir-err.out
    :language: text
 
-When the ``--report`` option is specified, a report of directories not created ("not-ready") and created ("ready") will be printed to ``stdout`` as machine-readable JSON. For example, using a config specifying both available and unavailable source files:
-
-.. literalinclude:: fs/makedirs-config-report.yaml
-   :language: yaml
-.. literalinclude:: fs/makedirs-exec-report.cmd
-   :language: text
-   :emphasize-lines: 5
-.. literalinclude:: fs/makedirs-exec-report.out
-   :language: text
-
-Since ``uwtools`` logs to ``stderr``, log and report output can be separated and the latter processed with a tool like ``jq``:
-
-.. literalinclude:: fs/makedirs-exec-report-jq.cmd
-   :language: text
-   :emphasize-lines: 5
-.. literalinclude:: fs/makedirs-exec-report-jq.out
-   :language: text
+The ``--report`` option behaves the same as for ``link``, see above.

@@ -1,3 +1,0 @@
-makedirs:
-  - foo
-  - subdir/bar
