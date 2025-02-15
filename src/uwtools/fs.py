@@ -195,7 +195,7 @@ class Linker(FileStager):
         """
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
+        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_wildcards()]
 
 
 class MakeDirs(Stager):
