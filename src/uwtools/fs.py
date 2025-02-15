@@ -16,6 +16,7 @@ from uwtools.config.support import UWYAMLGlob, YAMLKey
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
@@ -144,8 +145,8 @@ class FileStager(Stager):
             if isinstance(src, UWYAMLGlob):
                 attrs = urlparse(src.value)
                 if attrs.scheme not in ["", "file"]:
-                    msg = "URL scheme '%s' incompatible with %s tag" % (attrs.scheme, src.tag)
-                    raise UWConfigError(msg)
+                    msg = "URL scheme '%s' incompatible with tag %s in: %s"
+                    log.error(msg, attrs.scheme, src.tag, src)
                 for path in map(Path, glob(src.value)):
                     items.append((str(Path(dst).parent / path.name), str(path)))
             else:

@@ -15,6 +15,7 @@ from pytest import fixture, mark, raises
 from uwtools import fs
 from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -136,14 +137,14 @@ def test_fs_FileStager__expand_wildcards():
     glob.assert_called_once_with("/src/b*")
 
 
-def test_fs_FileStager__expand_wildcards_bad_scheme():
+def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
     config = """
     /dst/<a>: !glob https://foo.com/obj/*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    with raises(UWConfigError) as e:
-        fs.FileStager._expand_wildcards(obj)
-    assert str(e.value) == "URL scheme 'https' incompatible with !glob tag"
+    assert not fs.FileStager._expand_wildcards(obj)
+    msg = "URL scheme 'https' incompatible with tag !glob in: !glob https://foo.com/obj/*"
+    assert logged(caplog, msg)
 
 
 @mark.parametrize("source", ("dict", "file"))
