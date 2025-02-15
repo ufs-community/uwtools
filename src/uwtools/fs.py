@@ -143,11 +143,14 @@ class FileStager(Stager):
         for dst, src in self._config.items():
             assert isinstance(src, (str, UWYAMLGlob))
             if isinstance(src, UWYAMLGlob):
-                attrs = urlparse(src.value)
+                pattern = src.value
+                attrs = urlparse(pattern)
                 if attrs.scheme not in ["", "file"]:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, attrs.scheme, src.tag, src)
-                for path in map(Path, glob(src.value)):
+                if attrs.scheme == "file":
+                    pattern = attrs.path
+                for path in map(Path, glob(pattern)):
                     items.append((str(Path(dst).parent / path.name), str(path)))
             else:
                 items.append((dst, src))

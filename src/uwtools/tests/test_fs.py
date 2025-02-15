@@ -124,17 +124,17 @@ def test_fs_FilerStager(assets, source):
 
 def test_fs_FileStager__expand_wildcards():
     config = """
-    /dst/a1: /src/a1
-    /dst/<b>: !glob /src/b*
+    /dst/<a>: !glob /src/a*
+    /dst/b1: /src/b1
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    with patch.object(fs, "glob", return_value=["/src/b1", "/src/b2"]) as glob:
+    with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
         assert fs.FileStager._expand_wildcards(obj) == [
             ("/dst/a1", "/src/a1"),
+            ("/dst/a2", "/src/a2"),
             ("/dst/b1", "/src/b1"),
-            ("/dst/b2", "/src/b2"),
         ]
-    glob.assert_called_once_with("/src/b*")
+    glob.assert_called_once_with("/src/a*")
 
 
 def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
@@ -145,6 +145,19 @@ def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
     assert not fs.FileStager._expand_wildcards(obj)
     msg = "URL scheme 'https' incompatible with tag !glob in: !glob https://foo.com/obj/*"
     assert logged(caplog, msg)
+
+
+def test_fs_FileStager__expand_wildcards_file_scheme():
+    config = """
+    /dst/<a>: !glob file:///src/a*
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
+        assert fs.FileStager._expand_wildcards(obj) == [
+            ("/dst/a1", "/src/a1"),
+            ("/dst/a2", "/src/a2"),
+        ]
+    glob.assert_called_once_with("/src/a*")
 
 
 @mark.parametrize("source", ("dict", "file"))
