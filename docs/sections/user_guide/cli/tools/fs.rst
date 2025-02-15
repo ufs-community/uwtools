@@ -80,66 +80,9 @@ Since ``uwtools`` logs to ``stderr``, log and report output can be separated and
 ``link``
 --------
 
-The ``link`` action stages files in a target directory by linking files, directories, or other symbolic links. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
+The ``link`` action stages files in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves identically to ``copy`` (see above) with the following caveats:
 
-.. literalinclude:: fs/link-help.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: fs/link-help.out
-   :language: text
-
-Examples
-^^^^^^^^
-
-Given ``link-config.yaml`` containing
-
-.. literalinclude:: fs/link-config.yaml
-   :language: yaml
-.. literalinclude:: fs/link-exec.cmd
-   :language: text
-   :emphasize-lines: 2
-.. literalinclude:: fs/link-exec.out
-   :language: text
-
-Here, ``foo`` and ``bar`` are symbolic links.
-
-The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
-
-.. literalinclude:: fs/link-config-timedep.yaml
-   :language: yaml
-.. literalinclude:: fs/link-exec-timedep.cmd
-   :language: text
-   :emphasize-lines: 2
-.. literalinclude:: fs/link-exec-timedep.out
-   :language: text
-
-The ``--target-dir`` option need not be specified when all linkname paths are absolute, and will never be applied to absolute linkname paths. If any linkname paths are relative, however, it is an error not to provide a target directory:
-
-.. literalinclude:: fs/link-config.yaml
-   :language: yaml
-.. literalinclude:: fs/link-exec-no-target-dir-err.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: fs/link-exec-no-target-dir-err.out
-   :language: text
-
-When the ``--report`` option is specified, a report of files not linked ("not-ready") and linked ("ready") will be printed to ``stdout`` as machine-readable JSON. For example, using a config specifying both available and unavailable source files:
-
-.. literalinclude:: fs/link-config-report.yaml
-   :language: yaml
-.. literalinclude:: fs/link-exec-report.cmd
-   :language: text
-   :emphasize-lines: 2
-.. literalinclude:: fs/link-exec-report.out
-   :language: text
-
-Since ``uwtools`` logs to ``stderr``, log and report output can be separated and the latter processed with a tool like ``jq``:
-
-.. literalinclude:: fs/link-exec-report-jq.cmd
-   :language: text
-   :emphasize-lines: 2
-.. literalinclude:: fs/link-exec-report-jq.out
-   :language: text
+* HTTP(S) sources are not supported.
 
 ``makedirs``
 ------------

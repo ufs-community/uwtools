@@ -1,1 +1,0 @@
-uw fs link --help
