@@ -53,12 +53,13 @@ class ConcreteStager(fs.Stager):
 # Tests
 
 
-@mark.parametrize("src_fn", [str, Path])
-@mark.parametrize("dst_fn", [str, Path])
-@mark.parametrize("td_fn", [str, Path])
-def test_fs_Copier_go(src_fn, dst_fn, td_fn):
-    src, td, dst = src_fn("/src/file"), td_fn("/dst"), dst_fn("file")
-    obj = Mock(_config={dst: src}, _simple=fs.Copier._simple, _target_dir=td)
+@mark.parametrize("src_func", [str, Path])
+@mark.parametrize("dst_func", [str, Path])
+@mark.parametrize("tgt_func", [str, Path])
+def test_fs_Copier_go(src_func, dst_func, tgt_func):
+    src, dst, tgt = src_func("/src/file"), dst_func("file"), tgt_func("/dst")
+    obj = Mock(_simple=fs.Copier._simple, _target_dir=tgt)
+    obj._expand_wildcards.return_value = [(dst, src)]
     with patch.object(fs, "filecopy") as filecopy:
         filecopy.return_value = iotaa.NodeExternal(
             taskname="test", threads=0, logger=getLogger(), assets_=None
