@@ -1,2 +1,2 @@
-rm -rf copy-dst-report-jq
-uw fs copy --report --target-dir copy-dst-report-jq --config-file copy-config-report.yaml
+rm -rf dst/copy-report-jq
+uw fs copy --report --target-dir dst/copy-report-jq --config-file copy-report-config.yaml

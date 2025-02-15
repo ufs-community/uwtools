@@ -1,17 +1,17 @@
-[2025-01-18T07:29:30]     INFO Validating config against internal schema: files-to-stage
-[2025-01-18T07:29:30]     INFO 0 schema-validation errors found in fs config
-[2025-01-18T07:29:32]     INFO File src/foo: Ready
-[2025-01-18T07:29:33]     INFO Remote object https://www.gnu.org/licenses/gpl-3.0.txt: Ready
-[2025-01-18T07:29:33]     INFO File src/bar: Ready
-[2025-01-18T07:29:33]     INFO Copy src/foo -> copy-dst/foo: Executing
-[2025-01-18T07:29:33]     INFO Copy src/foo -> copy-dst/foo: Ready
-[2025-01-18T07:29:33]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Executing
-[2025-01-18T07:29:33]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> copy-dst/licenses/gpl: Ready
-[2025-01-18T07:29:33]     INFO Copy src/bar -> copy-dst/subdir/bar: Executing
-[2025-01-18T07:29:33]     INFO Copy src/bar -> copy-dst/subdir/bar: Ready
-[2025-01-18T07:29:33]     INFO File copies: Ready
+[2025-02-15T17:50:51]     INFO Validating config against internal schema: files-to-stage
+[2025-02-15T17:50:51]     INFO 0 schema-validation errors found in fs config
+[2025-02-15T17:50:54]     INFO File src/foo: Ready
+[2025-02-15T17:50:55]     INFO Remote object https://www.gnu.org/licenses/gpl-3.0.txt: Ready
+[2025-02-15T17:50:55]     INFO File src/bar: Ready
+[2025-02-15T17:50:55]     INFO Copy src/foo -> dst/copy/foo: Executing
+[2025-02-15T17:50:55]     INFO Copy src/foo -> dst/copy/foo: Ready
+[2025-02-15T17:50:55]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Executing
+[2025-02-15T17:50:55]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Ready
+[2025-02-15T17:50:55]     INFO Copy src/bar -> dst/copy/subdir/bar: Executing
+[2025-02-15T17:50:55]     INFO Copy src/bar -> dst/copy/subdir/bar: Ready
+[2025-02-15T17:50:55]     INFO File copies: Ready
 
-copy-dst
+dst/copy
 ├── foo
 ├── licenses
 │   └── gpl

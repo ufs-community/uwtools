@@ -1,2 +1,2 @@
-rm -rf copy-dst
-uw fs copy --report --target-dir copy-dst --config-file copy-config-report.yaml 2>/dev/null | jq -r .ready[]
+rm -rf dst/copy
+uw fs copy --report --target-dir dst/copy --config-file copy-report-config.yaml 2>/dev/null | jq -r .ready[]

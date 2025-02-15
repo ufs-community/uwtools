@@ -1,11 +1,11 @@
-[2024-11-23T00:30:43]     INFO Validating config against internal schema: files-to-stage
-[2024-11-23T00:30:43]     INFO 0 schema-validation errors found in fs config
-[2024-11-23T00:30:44]     INFO File src/20240529/12/006/baz: Ready
-[2024-11-23T00:30:44]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Executing
-[2024-11-23T00:30:44]     INFO Copy src/20240529/12/006/baz -> copy-dst-timedep/baz-2024-05-29T18: Ready
-[2024-11-23T00:30:44]     INFO File copies: Ready
+[2025-02-15T17:50:54]     INFO Validating config against internal schema: files-to-stage
+[2025-02-15T17:50:54]     INFO 0 schema-validation errors found in fs config
+[2025-02-15T17:50:56]     INFO File src/20240529/12/006/baz: Ready
+[2025-02-15T17:50:56]     INFO Copy src/20240529/12/006/baz -> dst/copy-timedep/baz-2024-05-29T18: Executing
+[2025-02-15T17:50:56]     INFO Copy src/20240529/12/006/baz -> dst/copy-timedep/baz-2024-05-29T18: Ready
+[2025-02-15T17:50:56]     INFO File copies: Ready
 
-copy-dst-timedep
+dst/copy-timedep
 └── baz-2024-05-29T18
 
 1 directory, 1 file

@@ -1,4 +1,4 @@
-rm -rf copy-dst-timedep
-uw fs copy --target-dir copy-dst-timedep --config-file copy-config-timedep.yaml --cycle 2024-05-29T12 --leadtime 6 --key-path config.files
+rm -rf dst/copy-timedep
+uw fs copy --target-dir dst/copy-timedep --config-file copy-timedep-config.yaml --cycle 2024-05-29T12 --leadtime 6 --key-path config.files
 echo
-tree copy-dst-timedep
+tree dst/copy-timedep

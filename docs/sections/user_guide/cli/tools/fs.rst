@@ -77,16 +77,6 @@ Since ``uwtools`` logs to ``stderr``, log and report output can be separated and
 .. literalinclude:: fs/copy-report-jq-exec.out
    :language: text
 
-HTTP(S) URLs are supported in source values. For example:
-
-.. literalinclude:: fs/copy-url-config.yaml
-   :language: yaml
-.. literalinclude:: fs/copy-url-exec.cmd
-   :language: text
-   :emphasize-lines: 2
-.. literalinclude:: fs/copy-url-exec.out
-   :language: text
-
 ``link``
 --------
 
