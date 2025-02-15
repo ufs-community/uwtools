@@ -60,7 +60,7 @@ HTTP(S) sources are not supported when linking.
 Wildcard Support
 ----------------
 
-Glob-style wildcard patterns are supported when copying and linking.
+Glob-style wildcard patterns are supported when copying and linking and are recognized as such when tagged ``!glob``.
 
 Example block:
 
