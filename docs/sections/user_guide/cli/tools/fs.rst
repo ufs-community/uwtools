@@ -87,7 +87,9 @@ Use the ``!glob`` tag to specify that a source-path value should be treated as a
 .. literalinclude:: fs/copy-glob-exec.out
    :language: text
 
-See :ref:`files_yaml` for more information on the semantics of the `!glob` tag and wildcard copies. Note that directories are excluded, and recursion (deep copies) are not supported.
+See :ref:`files_yaml` for more information on the semantics of the `!glob` tag and wildcard copies.
+
+Note that directories are excluded, and recursion (deep copies) are not supported.
 
 ``link``
 --------
