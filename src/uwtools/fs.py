@@ -4,6 +4,7 @@ File and directory staging.
 
 import datetime as dt
 from abc import ABC, abstractmethod
+from glob import glob
 from pathlib import Path
 from typing import Optional, Union
 from urllib.parse import urlparse
@@ -11,7 +12,7 @@ from urllib.parse import urlparse
 from iotaa import tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import YAMLKey
+from uwtools.config.support import UWYAMLGlob, YAMLKey
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
@@ -136,6 +137,18 @@ class FileStager(Stager):
         """
         return list(self._config.keys())
 
+    def _expand_wildcards(self) -> list[tuple[str, str]]:
+        items = []
+        for dst, src in self._config.items():
+            assert isinstance(src, (str, UWYAMLGlob))
+            if isinstance(src, UWYAMLGlob):
+                d = Path(dst).parent
+                for path in map(Path, glob(src.value)):
+                    items.append((str(d / path.name), str(path)))
+            else:
+                items.append((dst, src))
+        return items
+
     @property
     def _schema(self) -> str:
         """
@@ -157,7 +170,7 @@ class Copier(FileStager):
         yield "File copies"
         yield [
             filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
-            for dst, src in self._config.items()
+            for dst, src in self._expand_wildcards()
         ]
 
     @staticmethod
