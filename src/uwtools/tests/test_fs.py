@@ -5,6 +5,7 @@
 
 from logging import getLogger
 from pathlib import Path
+from textwrap import dedent
 from unittest.mock import Mock, patch
 
 import iotaa
@@ -12,6 +13,7 @@ import yaml
 from pytest import fixture, mark, raises
 
 from uwtools import fs
+from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 
 # Fixtures
@@ -97,7 +99,7 @@ def test_fs_Copier_go_live_no_targetdir_abspath_pass(assets):
     assert all(path.is_file() for path in [dstdir / "foo", dstdir / "bar"])
 
 
-def test_Copier_no_targetdir_relpath_fail(assets):
+def test_Copier_go_no_targetdir_relpath_fail(assets):
     _, cfgdict, _ = assets
     with raises(UWConfigError) as e:
         fs.Copier(config=cfgdict, key_path=["a", "b"]).go()
@@ -117,6 +119,21 @@ def test_fs_FilerStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
+
+
+def test_fs_FileStager__expand_wildcards():
+    config = """
+    /dst/a1: /src/a1
+    /dst/<b>: !glob /src/b*
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    with patch.object(fs, "glob", return_value=["/src/b1", "/src/b2"]) as glob:
+        assert fs.FileStager._expand_wildcards(obj) == [
+            ("/dst/a1", "/src/a1"),
+            ("/dst/b1", "/src/b1"),
+            ("/dst/b2", "/src/b2"),
+        ]
+    glob.assert_called_once_with("/src/b*")
 
 
 @mark.parametrize("source", ("dict", "file"))
