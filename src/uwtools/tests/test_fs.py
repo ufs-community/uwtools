@@ -3,6 +3,7 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
+import logging
 from logging import getLogger
 from pathlib import Path
 from textwrap import dedent
@@ -15,6 +16,7 @@ from pytest import fixture, mark, raises
 from uwtools import fs
 from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.tests.support import logged
 
 # Fixtures
@@ -122,19 +124,23 @@ def test_fs_FilerStager(assets, source):
     assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
 
 
-def test_fs_FileStager__expand_wildcards():
-    config = """
-    /dst/<a>: !glob /src/a*
-    /dst/b1: /src/b1
+def test_fs_FileStager__expand_wildcards(caplog, tmp_path):
+    log.setLevel(logging.WARNING)
+    d = tmp_path
+    for fn in ["a1", "a2", "b1"]:
+        (d / fn).touch()
+    (d / "a3").mkdir()
+    config = f"""
+    /dst/<a>: !glob {d}/a*
+    /dst/b1: {d}/b1
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
-        assert fs.FileStager._expand_wildcards(obj) == [
-            ("/dst/a1", "/src/a1"),
-            ("/dst/a2", "/src/a2"),
-            ("/dst/b1", "/src/b1"),
-        ]
-    glob.assert_called_once_with("/src/a*")
+    assert sorted(fs.FileStager._expand_wildcards(obj)) == [
+        ("/dst/a1", str(d / "a1")),
+        ("/dst/a2", str(d / "a2")),
+        ("/dst/b1", str(d / "b1")),
+    ]
+    assert logged(caplog, f"Ignoring directory {d}/a3")
 
 
 def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
