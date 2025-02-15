@@ -29,12 +29,12 @@ Examples
 
 Given a config containing a mapping from local-filesystem destination paths to source paths
 
-.. literalinclude:: fs/copy-basic.yaml
+.. literalinclude:: fs/copy.yaml
    :language: yaml
-.. literalinclude:: fs/copy-basic.cmd
+.. literalinclude:: fs/copy.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-basic.out
+.. literalinclude:: fs/copy.out
    :language: text
 
 Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and ``gpl`` is a copy of the upstream network source.
@@ -51,7 +51,7 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 
 The ``--target-dir`` option need not be specified when all destination paths are absolute, and will never be applied to absolute destination paths. If any destination paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: fs/copy-basic.yaml
+.. literalinclude:: fs/copy.yaml
    :language: yaml
 .. literalinclude:: fs/copy-no-target-dir-err.cmd
    :language: text
@@ -124,12 +124,12 @@ Examples
 
 Given a config containing
 
-.. literalinclude:: fs/makedirs-basic.yaml
+.. literalinclude:: fs/makedirs.yaml
    :language: yaml
-.. literalinclude:: fs/makedirs-basic.cmd
+.. literalinclude:: fs/makedirs.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/makedirs-basic.out
+.. literalinclude:: fs/makedirs.out
    :language: text
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
@@ -144,7 +144,7 @@ The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime
 
 The ``--target-dir`` option need not be specified when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: fs/makedirs-basic.yaml
+.. literalinclude:: fs/makedirs.yaml
    :language: yaml
 .. literalinclude:: fs/makedirs-no-target-dir-err.cmd
    :language: text

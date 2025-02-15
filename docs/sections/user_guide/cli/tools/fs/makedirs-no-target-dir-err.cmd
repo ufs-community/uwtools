@@ -1,1 +1,1 @@
-uw fs makedirs --config-file makedirs-basic.yaml --key-path config
+uw fs makedirs --config-file makedirs.yaml --key-path config

@@ -1,1 +1,1 @@
-uw fs copy --config-file copy-basic.yaml --key-path config.files
+uw fs copy --config-file copy.yaml --key-path config.files
