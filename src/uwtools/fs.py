@@ -151,7 +151,10 @@ class FileStager(Stager):
                 if attrs.scheme == "file":
                     pattern = attrs.path
                 for path in map(Path, glob(pattern)):
-                    items.append((str(Path(dst).parent / path.name), str(path)))
+                    if not path.is_dir():
+                        items.append((str(Path(dst).parent / path.name), str(path)))
+                    else:
+                        log.debug("Skipping directory %s", path)
             else:
                 items.append((dst, src))
         return items

@@ -77,12 +77,26 @@ Since ``uwtools`` logs to ``stderr``, log and report output can be separated and
 .. literalinclude:: fs/copy-report-jq-exec.out
    :language: text
 
+Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
+
+.. literalinclude:: fs/copy-glob-config.yaml
+   :language: yaml
+.. literalinclude:: fs/copy-glob-exec.cmd
+   :language: text
+   :emphasize-lines: 2
+.. literalinclude:: fs/copy-glob-exec.out
+   :language: text
+
+See :ref:`files_yaml` for more information on the semantics of the `!glob` tag and wildcard copies. Note that directories are excluded, and recursion (deep copies) are not supported.
+
 ``link``
 --------
 
-The ``link`` action stages files in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves identically to ``copy`` (see above) with the following caveats:
+The ``link`` action stages items in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves similarly to ``copy`` (see above), but note the following:
 
+* In addition to file, directories and other symbolic links can be linked.
 * HTTP(S) sources are not supported.
+* Support for wildcard source values is the same as for ``link``.
 
 .. literalinclude:: fs/link-help.cmd
    :language: text
