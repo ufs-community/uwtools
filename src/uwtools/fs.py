@@ -154,7 +154,7 @@ class FileStager(Stager):
                     if not path.is_dir():
                         items.append((str(Path(dst).parent / path.name), str(path)))
                     else:
-                        log.debug("Skipping directory %s", path)
+                        log.warning("Ignoring directory %s", path)
             else:
                 items.append((dst, src))
         return items

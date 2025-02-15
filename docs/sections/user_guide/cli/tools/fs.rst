@@ -87,9 +87,11 @@ Use the ``!glob`` tag to specify that a source-path value should be treated as a
 .. literalinclude:: fs/copy-glob.out
    :language: text
 
-See :ref:`files_yaml` for more information on the semantics of the `!glob` tag and wildcard copies.
+The ``--report`` output can be especially useful in combination with wildcards to allow downstream logic to process a set of copied files whose identity is not known in advance.
 
-Note that directories are excluded, and recursion (deep copies) are not supported.
+Note that directories are excluded, and recursive copies are not supported. To recursively copy from a shell script, where you might otherwise use ``uw fs copy``, consider using ``cp -r``; and from Python code where you might otherwise call ``uwtools.api.fs.copy()``, consider using the standard-library `shutil.copytree()` <https://docs.python.org/3/library/shutil.html#shutil.copytree>`_. For more control, including file-grained include and exclude, consider the unrivaled `rsync` <https://rsync.samba.org/>`_, which can be installed from conda in case your system does not already provide it. It can be called from shell scripts, or via `subprocess` <https://docs.python.org/3/library/subprocess.html>`_ from Python.
+
+See :ref:`files_yaml` for more information on the semantics of the `!glob` tag and wildcard copies.
 
 ``link``
 --------
