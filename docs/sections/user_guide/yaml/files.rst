@@ -60,7 +60,7 @@ HTTP(S) sources are not supported when linking.
 Wildcard Support
 ----------------
 
-Glob-style wildcard patterns are supported when copying and linking and are recognized as such when tagged ``!glob``.
+Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
 
 Example block:
 
@@ -96,3 +96,12 @@ Given ``src/`` directory
 Behavior is similar when linking.
 
 Wildcards are not supported in combination with HTTP(S) sources.
+
+Note that the destination-path key is treated as a template, with the rightmost component (``<afile>`` and ``<bfile>`` above) discarded and replaced with actual filenames. Since YAML Mapping / Python ``dict`` keys must be unique, this supports the case where the same directory is the target of multiple copies, e.g.
+
+.. code-block:: yaml
+
+   /media/<images>: !glob /some/path/*.jpg
+   /media/<videos>: !glob /another/path/*.mp4
+
+A useful convention, adopted here, is to bracket the rightmost component between ``<`` and ``>`` characters as a visual reminder that the component is a placeholder, but this is arbitrary and the brackets have no special meaning.
