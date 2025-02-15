@@ -69,7 +69,7 @@ Example block:
    a/<afile>: !glob /src/a*
    b/<bfile>: !glob /src/b*
 
-Given ``src/`` directory
+Given ``/src/`` directory
 
 .. code-block:: text
 
