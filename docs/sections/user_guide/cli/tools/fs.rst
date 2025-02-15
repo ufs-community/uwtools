@@ -27,64 +27,64 @@ Source paths prefixed with ``http://`` or ``https://`` will be copied from their
 Examples
 ^^^^^^^^
 
-Given ``copy-config.yaml`` containing a mapping from local-filesystem destination paths to source paths
+Given a config containing a mapping from local-filesystem destination paths to source paths
 
-.. literalinclude:: fs/copy-basic-config.yaml
+.. literalinclude:: fs/copy-basic.yaml
    :language: yaml
-.. literalinclude:: fs/copy-basic-exec.cmd
+.. literalinclude:: fs/copy-basic.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-basic-exec.out
+.. literalinclude:: fs/copy-basic.out
    :language: text
 
 Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and ``gpl`` is a copy of the upstream network source.
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
-.. literalinclude:: fs/copy-timedep-config.yaml
+.. literalinclude:: fs/copy-timedep.yaml
    :language: yaml
-.. literalinclude:: fs/copy-timedep-exec.cmd
+.. literalinclude:: fs/copy-timedep.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-timedep-exec.out
+.. literalinclude:: fs/copy-timedep.out
    :language: text
 
 The ``--target-dir`` option need not be specified when all destination paths are absolute, and will never be applied to absolute destination paths. If any destination paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: fs/copy-basic-config.yaml
+.. literalinclude:: fs/copy-basic.yaml
    :language: yaml
-.. literalinclude:: fs/copy-no-target-dir-err-exec.cmd
+.. literalinclude:: fs/copy-no-target-dir-err.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: fs/copy-no-target-dir-err-exec.out
+.. literalinclude:: fs/copy-no-target-dir-err.out
    :language: text
 
 When the ``--report`` option is specified, a report of files not copied ("not-ready") and copied ("ready") will be printed to ``stdout`` as machine-readable JSON. For example, using a config specifying both available and unavailable source files:
 
-.. literalinclude:: fs/copy-report-config.yaml
+.. literalinclude:: fs/copy-report.yaml
    :language: yaml
-.. literalinclude:: fs/copy-report-exec.cmd
+.. literalinclude:: fs/copy-report.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-report-exec.out
+.. literalinclude:: fs/copy-report.out
    :language: text
 
 Since ``uwtools`` logs to ``stderr``, log and report output can be separated and the latter processed with a tool like ``jq``:
 
-.. literalinclude:: fs/copy-report-jq-exec.cmd
+.. literalinclude:: fs/copy-report-jq.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-report-jq-exec.out
+.. literalinclude:: fs/copy-report-jq.out
    :language: text
 
 Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
 
-.. literalinclude:: fs/copy-glob-config.yaml
+.. literalinclude:: fs/copy-glob.yaml
    :language: yaml
-.. literalinclude:: fs/copy-glob-exec.cmd
+.. literalinclude:: fs/copy-glob.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-glob-exec.out
+.. literalinclude:: fs/copy-glob.out
    :language: text
 
 See :ref:`files_yaml` for more information on the semantics of the `!glob` tag and wildcard copies.
@@ -120,34 +120,34 @@ The ``makedirs`` action creates directories. Any ``KEY`` positional arguments ar
 Examples
 ^^^^^^^^
 
-Given ``makedirs-config.yaml`` containing
+Given a config containing
 
-.. literalinclude:: fs/makedirs-basic-config.yaml
+.. literalinclude:: fs/makedirs-basic.yaml
    :language: yaml
-.. literalinclude:: fs/makedirs-basic-exec.cmd
+.. literalinclude:: fs/makedirs-basic.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/makedirs-basic-exec.out
+.. literalinclude:: fs/makedirs-basic.out
    :language: text
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
-.. literalinclude:: fs/makedirs-timedep-config.yaml
+.. literalinclude:: fs/makedirs-timedep.yaml
    :language: yaml
-.. literalinclude:: fs/makedirs-timedep-exec.cmd
+.. literalinclude:: fs/makedirs-timedep.cmd
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/makedirs-timedep-exec.out
+.. literalinclude:: fs/makedirs-timedep.out
    :language: text
 
 The ``--target-dir`` option need not be specified when all directory paths are absolute, and will never be applied to absolute paths. If any paths are relative, however, it is an error not to provide a target directory:
 
-.. literalinclude:: fs/makedirs-basic-config.yaml
+.. literalinclude:: fs/makedirs-basic.yaml
    :language: yaml
-.. literalinclude:: fs/makedirs-no-target-dir-err-exec.cmd
+.. literalinclude:: fs/makedirs-no-target-dir-err.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: fs/makedirs-no-target-dir-err-exec.out
+.. literalinclude:: fs/makedirs-no-target-dir-err.out
    :language: text
 
 The ``--report`` option behaves the same as for ``link`` (see above).
