@@ -1,6 +1,6 @@
 {
   "additionalProperties": {
-    "type": "string"
+    "type": "fs_src"
   },
   "minProperties": 1,
   "type": "object"
