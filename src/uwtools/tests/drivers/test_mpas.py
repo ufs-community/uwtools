@@ -215,7 +215,7 @@ def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     assert logged(caplog, f"Wrote config to {path}")
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
-    assert nml["nhyd_model"]["config_run_duration"] == "5_0:00:00"
+    assert nml["nhyd_model"]["config_run_duration"] == "005_00:00:00"
 
 
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
