@@ -204,6 +204,20 @@ def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
+def test_MPAS_namelist_file_short_duration(caplog, config, cycle):
+    log.setLevel(logging.DEBUG)
+    config["mpas"]["length"] = 0.25
+    driverobj = MPAS(config=config, cycle=cycle)
+    dst = driverobj.rundir / "namelist.atmosphere"
+    assert not dst.is_file()
+    path = Path(iotaa.refs(driverobj.namelist_file()))
+    assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
+    nml = f90nml.read(dst)
+    assert isinstance(nml, f90nml.Namelist)
+    assert nml["nhyd_model"]["config_run_duration"] == "00:15:00"
+
+
 def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = 120
