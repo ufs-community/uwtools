@@ -7,6 +7,7 @@ from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from inspect import getfullargspec
 from pathlib import Path
+from traceback import format_exc
 from types import ModuleType
 from typing import Optional, Type, Union
 
@@ -138,7 +139,8 @@ def _get_driver_module_explicit(module: Path) -> Optional[ModuleType]:
                 log.debug("Loaded module %s", module)
                 return m
             except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                for line in format_exc().strip().split("\n"):
+                    log.error(line)
     return None
 
 
