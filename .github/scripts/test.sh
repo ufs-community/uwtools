@@ -6,7 +6,7 @@ run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   env=python-$PYTHON_VERSION
   devpkgs=$(jq .packages.dev[] recipe/meta.json | tr -d ' "')
-  conda create --yes --name $env --quiet python=$PYTHON_VERSION $devpkgs
+  conda create --yes --name $env --quiet $devpkgs python=$PYTHON_VERSION
   conda activate $env
   . notebooks/install-deps
   set -x
