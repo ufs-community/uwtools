@@ -204,9 +204,10 @@ def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
-def test_MPAS_namelist_file_short_duration(caplog, config, cycle):
+@mark.parametrize(("hours", "expected"), [(0.25, "00:15:00"), (120, "005_00:00:00")])
+def test_MPAS_namelist_file_durations(caplog, config, cycle, hours, expected):
     log.setLevel(logging.DEBUG)
-    config["mpas"]["length"] = 0.25
+    config["mpas"]["length"] = hours
     driverobj = MPAS(config=config, cycle=cycle)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
@@ -215,21 +216,7 @@ def test_MPAS_namelist_file_short_duration(caplog, config, cycle):
     assert logged(caplog, f"Wrote config to {path}")
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
-    assert nml["nhyd_model"]["config_run_duration"] == "00:15:00"
-
-
-def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
-    log.setLevel(logging.DEBUG)
-    config["mpas"]["length"] = 120
-    driverobj = MPAS(config=config, cycle=cycle)
-    dst = driverobj.rundir / "namelist.atmosphere"
-    assert not dst.is_file()
-    path = Path(iotaa.refs(driverobj.namelist_file()))
-    assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
-    nml = f90nml.read(dst)
-    assert isinstance(nml, f90nml.Namelist)
-    assert nml["nhyd_model"]["config_run_duration"] == "005_00:00:00"
+    assert nml["nhyd_model"]["config_run_duration"] == expected
 
 
 def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
