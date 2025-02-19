@@ -49,7 +49,9 @@ class MPAS(MPASBase):
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         duration = timedelta(hours=self.config["length"])
-        hhmmss = ":".join(f"{x:02}" for x in str(timedelta(seconds=duration.seconds)).split(":"))
+        hhmmss = ":".join(
+            f"{int(x):02}" for x in str(timedelta(seconds=duration.seconds)).split(":")
+        )
         str_duration = "%s%s" % (f"{duration.days:03}_" if duration.days else "", hhmmss)
         namelist = self.config[STR.namelist]
         update_values = namelist.get(STR.updatevalues, {})
