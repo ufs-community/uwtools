@@ -58,7 +58,7 @@
           "type": "object"
         },
         "length": {
-          "minimum": 0.25,
+          "exclusiveMinimum": 0,
           "type": "number"
         },
         "namelist": {
