@@ -1307,11 +1307,11 @@ def test_schema_mpas_length(mpas_prop):
     # Positive int is ok:
     assert not errors(6)
     # Zero is not ok:
-    assert "0 is less than the minimum of 1" in errors(0)
+    assert "0 is less than or equal to the minimum of 0" in errors(0)
     # A negative number is not ok:
-    assert "-1 is less than the minimum of 1" in errors(-1)
+    assert "-1 is less than or equal to the minimum of 0" in errors(-1)
     # Something other than an int is not ok:
-    assert "'a string' is not of type 'integer'\n" in errors("a string")
+    assert "'a string' is not of type 'number'\n" in errors("a string")
 
 
 def test_schema_mpas_namelist(mpas_prop):
