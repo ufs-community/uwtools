@@ -155,7 +155,18 @@ def test__get_driver_class_implicit_pass(args):
     assert module_path == args.module
 
 
-def test__get_driver_module_explicit_absolute_fail(args):
+def test__get_driver_module_explicit_absolute_fail_syntax_error(args, caplog, tmp_path):
+    log.setLevel(logging.ERROR)
+    module = tmp_path / "module.py"
+    module.write_text("syntax error\n%s" % args.module.read_text())
+    assert module.is_absolute()
+    assert not execute._get_driver_module_explicit(module=module)
+    # If the module is found but fails to load, a traceback will be logged:
+    assert logged(caplog, "Traceback (most recent call last):")
+    assert logged(caplog, "SyntaxError: invalid syntax")
+
+
+def test__get_driver_module_explicit_absolute_fail_bad_path(args):
     assert args.module.is_absolute()
     module = args.module.with_suffix(".bad")
     assert not execute._get_driver_module_explicit(module=module)
@@ -166,7 +177,7 @@ def test__get_driver_module_explicit_absolute_pass(args):
     assert execute._get_driver_module_explicit(module=args.module)
 
 
-def test__get_driver_module_explicit_relative_fail(args):
+def test__get_driver_module_explicit_relative_fail_bad_path(args):
     args.module = Path(os.path.relpath(args.module)).with_suffix(".bad")
     assert not args.module.is_absolute()
     assert not execute._get_driver_module_explicit(module=args.module)
