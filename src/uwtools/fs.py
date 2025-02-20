@@ -141,20 +141,21 @@ class FileStager(Stager):
     def _expand_glob(self) -> list[tuple[str, str]]:
         items = []
         for dst, src in self._config.items():
-            if isinstance(src, UWYAMLGlob):
-                attrs = urlparse(src.value)
-                if attrs.scheme not in ["", "file"]:
-                    msg = "URL scheme '%s' incompatible with tag %s in: %s"
-                    log.error(msg, attrs.scheme, src.tag, src)
-                pattern = attrs.path if attrs.scheme == "file" else src.value
-                for p in iglob(pattern, recursive=True):
-                    path = Path(p)
-                    if not path.is_dir():
-                        items.append((str(Path(dst).parent / path.name), str(path)))
-                    else:
-                        log.warning("Ignoring directory %s", path)
-            else:
+            if not isinstance(src, UWYAMLGlob):
                 items.append((dst, src))
+                continue
+            attrs = urlparse(src.value)
+            if attrs.scheme not in ["", "file"]:
+                msg = "URL scheme '%s' incompatible with tag %s in: %s"
+                log.error(msg, attrs.scheme, src.tag, src)
+                continue
+            pattern = attrs.path if attrs.scheme == "file" else src.value
+            for p in iglob(pattern, recursive=True):
+                path = Path(p)
+                if not path.is_dir():
+                    items.append((str(Path(dst).parent / path.name), str(path)))
+                else:
+                    log.warning("Ignoring directory %s", path)
         return items
 
     @property
