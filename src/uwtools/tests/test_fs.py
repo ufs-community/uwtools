@@ -127,11 +127,19 @@ def test_fs_FilerStager(assets, source):
 def test_fs_FileStager__expand_glob(caplog, tmp_path):
     log.setLevel(logging.WARNING)
     d = tmp_path
-    for fn in ["a1", "a2", "b1"]:
-        (d / fn).touch()
+    # Files matching the pattern to include:
+    for x in ["a1", "a2", "b1"]:
+        (d / x).touch()
+    # A subdirectory matching the pattern to ignore:
     (d / "a3").mkdir()
+    # # Subdirectories, with both files to include and to ignore:
+    # for x in ["d1", "d2"]:
+    #     (d / x).mkdir()
+    #     (d / x / "a3").touch()
+    #     (d / x / "b1").touch()
+    # Proceed:
     config = f"""
-    /dst/<a>: !glob {d}/a*
+    /dst/<a>: !glob {d}/**/a*
     /dst/b1: {d}/b1
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
@@ -139,6 +147,8 @@ def test_fs_FileStager__expand_glob(caplog, tmp_path):
         ("/dst/a1", str(d / "a1")),
         ("/dst/a2", str(d / "a2")),
         ("/dst/b1", str(d / "b1")),
+        # ("/dst/d1/a3", str(d / "d1" / "a3")),
+        # ("/dst/d2/a3", str(d / "d2" / "a3")),
     ]
     assert logged(caplog, f"Ignoring directory {d}/a3")
 
@@ -158,12 +168,12 @@ def test_fs_FileStager__expand_glob_file_scheme():
     /dst/<a>: !glob file:///src/a*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
+    with patch.object(fs, "iglob", return_value=["/src/a1", "/src/a2"]) as iglob:
         assert fs.FileStager._expand_glob(obj) == [
             ("/dst/a1", "/src/a1"),
             ("/dst/a2", "/src/a2"),
         ]
-    glob.assert_called_once_with("/src/a*", recursive=True)
+    iglob.assert_called_once_with("/src/a*", recursive=True)
 
 
 @mark.parametrize("source", ("dict", "file"))
