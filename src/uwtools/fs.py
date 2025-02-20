@@ -141,16 +141,13 @@ class FileStager(Stager):
     def _expand_wildcards(self) -> list[tuple[str, str]]:
         items = []
         for dst, src in self._config.items():
-            assert isinstance(src, (str, UWYAMLGlob))
             if isinstance(src, UWYAMLGlob):
-                pattern = src.value
-                attrs = urlparse(pattern)
+                attrs = urlparse(src.value)
                 if attrs.scheme not in ["", "file"]:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, attrs.scheme, src.tag, src)
-                if attrs.scheme == "file":
-                    pattern = attrs.path
-                for path in map(Path, glob(pattern)):
+                pattern = attrs.path if attrs.scheme == "file" else src.value
+                for path in map(Path, glob(pattern, recursive=True)):
                     if not path.is_dir():
                         items.append((str(Path(dst).parent / path.name), str(path)))
                     else:

@@ -163,7 +163,7 @@ def test_fs_FileStager__expand_wildcards_file_scheme():
             ("/dst/a1", "/src/a1"),
             ("/dst/a2", "/src/a2"),
         ]
-    glob.assert_called_once_with("/src/a*")
+    glob.assert_called_once_with("/src/a*", recursive=True)
 
 
 @mark.parametrize("source", ("dict", "file"))
