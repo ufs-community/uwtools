@@ -5,6 +5,8 @@ File and directory staging.
 import datetime as dt
 from abc import ABC, abstractmethod
 from glob import iglob
+from itertools import dropwhile
+from operator import eq
 from pathlib import Path
 from typing import Optional, Union
 from urllib.parse import urlparse
@@ -149,11 +151,11 @@ class FileStager(Stager):
                 msg = "URL scheme '%s' incompatible with tag %s in: %s"
                 log.error(msg, attrs.scheme, src.tag, src)
                 continue
-            pattern = attrs.path if attrs.scheme == "file" else src.value
-            for p in iglob(pattern, recursive=True):
-                path = Path(p)
-                if not path.is_dir():
-                    items.append((str(Path(dst).parent / path.name), str(path)))
+            for path in iglob(attrs.path, recursive=True):
+                if not Path(path).is_dir():
+                    parts = zip(*[Path(x).parts for x in (path, attrs.path)])
+                    unique = Path(*[pair[0] for pair in dropwhile(lambda x: eq(*x), parts)])
+                    items.append((str(Path(dst).parent / unique), path))
                 else:
                     log.warning("Ignoring directory %s", path)
         return items

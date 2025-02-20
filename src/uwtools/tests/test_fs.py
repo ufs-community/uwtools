@@ -132,11 +132,11 @@ def test_fs_FileStager__expand_glob(caplog, tmp_path):
         (d / x).touch()
     # A subdirectory matching the pattern to ignore:
     (d / "a3").mkdir()
-    # # Subdirectories, with both files to include and to ignore:
-    # for x in ["d1", "d2"]:
-    #     (d / x).mkdir()
-    #     (d / x / "a3").touch()
-    #     (d / x / "b1").touch()
+    # Subdirectories, with both files to include and to ignore:
+    for x in ["d1", "d2"]:
+        (d / x).mkdir()
+        (d / x / "a3").touch()
+        (d / x / "b1").touch()
     # Proceed:
     config = f"""
     /dst/<a>: !glob {d}/**/a*
@@ -147,8 +147,8 @@ def test_fs_FileStager__expand_glob(caplog, tmp_path):
         ("/dst/a1", str(d / "a1")),
         ("/dst/a2", str(d / "a2")),
         ("/dst/b1", str(d / "b1")),
-        # ("/dst/d1/a3", str(d / "d1" / "a3")),
-        # ("/dst/d2/a3", str(d / "d2" / "a3")),
+        ("/dst/d1/a3", str(d / "d1" / "a3")),
+        ("/dst/d2/a3", str(d / "d2" / "a3")),
     ]
     assert logged(caplog, f"Ignoring directory {d}/a3")
 
