@@ -768,7 +768,7 @@ def test_schema_stage_files():
     # An empty dict is not allowed:
     assert non_empty_dict(errors({}))
     # Non-string values are not allowed:
-    assert "True is not of type 'string'\n" in errors({"file1": True})
+    assert "True is not of type 'fs_src'\n" in errors({"file1": True})
 
 
 # filter-topo

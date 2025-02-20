@@ -3,8 +3,10 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
+import logging
 from logging import getLogger
 from pathlib import Path
+from textwrap import dedent
 from unittest.mock import Mock, patch
 
 import iotaa
@@ -12,7 +14,10 @@ import yaml
 from pytest import fixture, mark, raises
 
 from uwtools import fs
+from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -53,12 +58,13 @@ class ConcreteStager(fs.Stager):
 # Tests
 
 
-@mark.parametrize("src_fn", [str, Path])
-@mark.parametrize("dst_fn", [str, Path])
-@mark.parametrize("td_fn", [str, Path])
-def test_fs_Copier_go(src_fn, dst_fn, td_fn):
-    src, td, dst = src_fn("/src/file"), td_fn("/dst"), dst_fn("file")
-    obj = Mock(_config={dst: src}, _simple=fs.Copier._simple, _target_dir=td)
+@mark.parametrize("src_func", [str, Path])
+@mark.parametrize("dst_func", [str, Path])
+@mark.parametrize("tgt_func", [str, Path])
+def test_fs_Copier_go(src_func, dst_func, tgt_func):
+    src, dst, tgt = src_func("/src/file"), dst_func("file"), tgt_func("/dst")
+    obj = Mock(_simple=fs.Copier._simple, _target_dir=tgt)
+    obj._expand_wildcards.return_value = [(dst, src)]
     with patch.object(fs, "filecopy") as filecopy:
         filecopy.return_value = iotaa.NodeExternal(
             taskname="test", threads=0, logger=getLogger(), assets_=None
@@ -96,7 +102,7 @@ def test_fs_Copier_go_live_no_targetdir_abspath_pass(assets):
     assert all(path.is_file() for path in [dstdir / "foo", dstdir / "bar"])
 
 
-def test_Copier_no_targetdir_relpath_fail(assets):
+def test_Copier_go_no_targetdir_relpath_fail(assets):
     _, cfgdict, _ = assets
     with raises(UWConfigError) as e:
         fs.Copier(config=cfgdict, key_path=["a", "b"]).go()
@@ -116,6 +122,48 @@ def test_fs_FilerStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
+
+
+def test_fs_FileStager__expand_wildcards(caplog, tmp_path):
+    log.setLevel(logging.WARNING)
+    d = tmp_path
+    for fn in ["a1", "a2", "b1"]:
+        (d / fn).touch()
+    (d / "a3").mkdir()
+    config = f"""
+    /dst/<a>: !glob {d}/a*
+    /dst/b1: {d}/b1
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    assert sorted(fs.FileStager._expand_wildcards(obj)) == [
+        ("/dst/a1", str(d / "a1")),
+        ("/dst/a2", str(d / "a2")),
+        ("/dst/b1", str(d / "b1")),
+    ]
+    assert logged(caplog, f"Ignoring directory {d}/a3")
+
+
+def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
+    config = """
+    /dst/<a>: !glob https://foo.com/obj/*
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    assert not fs.FileStager._expand_wildcards(obj)
+    msg = "URL scheme 'https' incompatible with tag !glob in: !glob https://foo.com/obj/*"
+    assert logged(caplog, msg)
+
+
+def test_fs_FileStager__expand_wildcards_file_scheme():
+    config = """
+    /dst/<a>: !glob file:///src/a*
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
+        assert fs.FileStager._expand_wildcards(obj) == [
+            ("/dst/a1", "/src/a1"),
+            ("/dst/a2", "/src/a2"),
+        ]
+    glob.assert_called_once_with("/src/a*")
 
 
 @mark.parametrize("source", ("dict", "file"))

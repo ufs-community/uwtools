@@ -4,6 +4,7 @@ File and directory staging.
 
 import datetime as dt
 from abc import ABC, abstractmethod
+from glob import glob
 from pathlib import Path
 from typing import Optional, Union
 from urllib.parse import urlparse
@@ -11,10 +12,11 @@ from urllib.parse import urlparse
 from iotaa import tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import YAMLKey
+from uwtools.config.support import UWYAMLGlob, YAMLKey
 from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.tasks import directory, filecopy, symlink
@@ -136,6 +138,27 @@ class FileStager(Stager):
         """
         return list(self._config.keys())
 
+    def _expand_wildcards(self) -> list[tuple[str, str]]:
+        items = []
+        for dst, src in self._config.items():
+            assert isinstance(src, (str, UWYAMLGlob))
+            if isinstance(src, UWYAMLGlob):
+                pattern = src.value
+                attrs = urlparse(pattern)
+                if attrs.scheme not in ["", "file"]:
+                    msg = "URL scheme '%s' incompatible with tag %s in: %s"
+                    log.error(msg, attrs.scheme, src.tag, src)
+                if attrs.scheme == "file":
+                    pattern = attrs.path
+                for path in map(Path, glob(pattern)):
+                    if not path.is_dir():
+                        items.append((str(Path(dst).parent / path.name), str(path)))
+                    else:
+                        log.warning("Ignoring directory %s", path)
+            else:
+                items.append((dst, src))
+        return items
+
     @property
     def _schema(self) -> str:
         """
@@ -157,7 +180,7 @@ class Copier(FileStager):
         yield "File copies"
         yield [
             filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
-            for dst, src in self._config.items()
+            for dst, src in self._expand_wildcards()
         ]
 
     @staticmethod
@@ -182,7 +205,7 @@ class Linker(FileStager):
         """
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
+        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_wildcards()]
 
 
 class MakeDirs(Stager):

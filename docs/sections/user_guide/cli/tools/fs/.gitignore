@@ -1,7 +1,1 @@
-copy-dst
-copy-dst-report-jq
-copy-dst-timedep
-link-dst
-link-dst-report
-link-dst-report-jq
-link-dst-timedep
+dst/

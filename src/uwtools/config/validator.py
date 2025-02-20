@@ -7,12 +7,13 @@ from functools import cache
 from pathlib import Path
 from typing import Optional, Union
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, validators
 from jsonschema.exceptions import ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import UWYAMLGlob
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
@@ -150,7 +151,7 @@ def validate_external(
     else:
         config = config_data
     if not str(schema_file).startswith(str(resource_path())):
-        log.debug("Using schema file: %s", schema_file)
+        log.debug("Validating config against external schema file: %s", schema_file)
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     if not validate(schema=schema, desc=desc, config=config):
@@ -184,5 +185,10 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     :param schema: JSON Schema to validate the config against.
     :return: Any validation errors.
     """
-    validator = Draft202012Validator(schema, registry=_registry())
+    base = Draft202012Validator
+    type_checker = base.TYPE_CHECKER.redefine(
+        "fs_src", lambda _, x: any(isinstance(x, t) for t in [str, UWYAMLGlob])
+    )
+    UWValidator = validators.extend(base, type_checker=type_checker)
+    validator = UWValidator(schema, registry=_registry())
     return list(validator.iter_errors(config))
