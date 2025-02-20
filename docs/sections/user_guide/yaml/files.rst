@@ -57,8 +57,8 @@ Example block:
 
 HTTP(S) sources are not supported when linking.
 
-Wildcard Support
-----------------
+Glob Support
+------------
 
 Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
 
@@ -95,7 +95,7 @@ Given ``/src/`` directory
 
 Behavior is similar when linking.
 
-Wildcards are not supported in combination with HTTP(S) sources.
+Glob patterns are not supported in combination with HTTP(S) sources.
 
 Note that the destination-path key is treated as a template, with the rightmost component (``<afile>`` and ``<bfile>`` above) discarded and replaced with actual filenames. Since YAML Mapping / Python ``dict`` keys must be unique, this supports the case where the same directory is the target of multiple copies, e.g.
 

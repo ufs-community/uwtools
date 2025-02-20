@@ -138,7 +138,7 @@ class FileStager(Stager):
         """
         return list(self._config.keys())
 
-    def _expand_wildcards(self) -> list[tuple[str, str]]:
+    def _expand_glob(self) -> list[tuple[str, str]]:
         items = []
         for dst, src in self._config.items():
             if isinstance(src, UWYAMLGlob):
@@ -177,7 +177,7 @@ class Copier(FileStager):
         yield "File copies"
         yield [
             filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
-            for dst, src in self._expand_wildcards()
+            for dst, src in self._expand_glob()
         ]
 
     @staticmethod
@@ -202,7 +202,7 @@ class Linker(FileStager):
         """
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_wildcards()]
+        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_glob()]
 
 
 class MakeDirs(Stager):

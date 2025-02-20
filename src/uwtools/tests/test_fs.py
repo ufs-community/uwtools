@@ -64,7 +64,7 @@ class ConcreteStager(fs.Stager):
 def test_fs_Copier_go(src_func, dst_func, tgt_func):
     src, dst, tgt = src_func("/src/file"), dst_func("file"), tgt_func("/dst")
     obj = Mock(_simple=fs.Copier._simple, _target_dir=tgt)
-    obj._expand_wildcards.return_value = [(dst, src)]
+    obj._expand_glob.return_value = [(dst, src)]
     with patch.object(fs, "filecopy") as filecopy:
         filecopy.return_value = iotaa.NodeExternal(
             taskname="test", threads=0, logger=getLogger(), assets_=None
@@ -124,7 +124,7 @@ def test_fs_FilerStager(assets, source):
     assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
 
 
-def test_fs_FileStager__expand_wildcards(caplog, tmp_path):
+def test_fs_FileStager__expand_glob(caplog, tmp_path):
     log.setLevel(logging.WARNING)
     d = tmp_path
     for fn in ["a1", "a2", "b1"]:
@@ -135,7 +135,7 @@ def test_fs_FileStager__expand_wildcards(caplog, tmp_path):
     /dst/b1: {d}/b1
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    assert sorted(fs.FileStager._expand_wildcards(obj)) == [
+    assert sorted(fs.FileStager._expand_glob(obj)) == [
         ("/dst/a1", str(d / "a1")),
         ("/dst/a2", str(d / "a2")),
         ("/dst/b1", str(d / "b1")),
@@ -143,23 +143,23 @@ def test_fs_FileStager__expand_wildcards(caplog, tmp_path):
     assert logged(caplog, f"Ignoring directory {d}/a3")
 
 
-def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
+def test_fs_FileStager__expand_glob_bad_scheme(caplog):
     config = """
     /dst/<a>: !glob https://foo.com/obj/*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    assert not fs.FileStager._expand_wildcards(obj)
+    assert not fs.FileStager._expand_glob(obj)
     msg = "URL scheme 'https' incompatible with tag !glob in: !glob https://foo.com/obj/*"
     assert logged(caplog, msg)
 
 
-def test_fs_FileStager__expand_wildcards_file_scheme():
+def test_fs_FileStager__expand_glob_file_scheme():
     config = """
     /dst/<a>: !glob file:///src/a*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
     with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
-        assert fs.FileStager._expand_wildcards(obj) == [
+        assert fs.FileStager._expand_glob(obj) == [
             ("/dst/a1", "/src/a1"),
             ("/dst/a2", "/src/a2"),
         ]
