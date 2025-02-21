@@ -39,6 +39,19 @@ def assets(tmp_path):
     return dstdir, cfgdict, cfgfile
 
 
+@fixture
+def _expand_glob_assets(tmp_path):
+    src, dst = [tmp_path / x for x in ("src", "dst")]
+    src.mkdir()
+    f, d = [src / x for x in ("file", "directory")]
+    f.touch()
+    d.mkdir()
+    config = f"""
+    {dst}/<f>: !glob {src}/*
+    """
+    return dst, f, d, config
+
+
 # Helpers
 
 
@@ -64,7 +77,7 @@ class ConcreteStager(fs.Stager):
 def test_fs_Copier_go(src_func, dst_func, tgt_func):
     src, dst, tgt = src_func("/src/file"), dst_func("file"), tgt_func("/dst")
     obj = Mock(_simple=fs.Copier._simple, _target_dir=tgt)
-    obj._expand_wildcards.return_value = [(dst, src)]
+    obj._expand_glob.return_value = [(dst, src)]
     with patch.object(fs, "filecopy") as filecopy:
         filecopy.return_value = iotaa.NodeExternal(
             taskname="test", threads=0, logger=getLogger(), assets_=None
@@ -110,6 +123,13 @@ def test_Copier_go_no_targetdir_relpath_fail(assets):
     assert errmsg % "foo" in str(e.value)
 
 
+def test_Copier__expand_glob(_expand_glob_assets):
+    dst, f, _, config = _expand_glob_assets
+    fs.Copier(config=yaml.load(dedent(config), Loader=uw_yaml_loader())).go()
+    # Only file is copied, not directory:
+    assert list(dst.glob("*")) == [dst / f.name]
+
+
 def test_fs_Copier__simple():
     assert fs.Copier._simple("relative/path") == Path("relative/path")
     assert fs.Copier._simple("/absolute/path") == Path("/absolute/path")
@@ -124,46 +144,56 @@ def test_fs_FilerStager(assets, source):
     assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
 
 
-def test_fs_FileStager__expand_wildcards(caplog, tmp_path):
+def test_fs_FileStager__expand_glob(caplog, tmp_path):
     log.setLevel(logging.WARNING)
     d = tmp_path
-    for fn in ["a1", "a2", "b1"]:
-        (d / fn).touch()
+    # Files matching the pattern to include:
+    for x in ["a1", "a2", "b1"]:
+        (d / x).touch()
+    # A subdirectory matching the pattern to ignore:
     (d / "a3").mkdir()
+    # Subdirectories, with both files to include and to ignore:
+    for x in ["d1", "d2"]:
+        (d / x).mkdir()
+        (d / x / "a3").touch()
+        (d / x / "b1").touch()
+    # Proceed:
     config = f"""
-    /dst/<a>: !glob {d}/a*
+    /dst/<a>: !glob {d}/**/a*
     /dst/b1: {d}/b1
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    assert sorted(fs.FileStager._expand_wildcards(obj)) == [
+    assert sorted(fs.FileStager._expand_glob(obj)) == [
         ("/dst/a1", str(d / "a1")),
         ("/dst/a2", str(d / "a2")),
         ("/dst/b1", str(d / "b1")),
+        ("/dst/d1/a3", str(d / "d1" / "a3")),
+        ("/dst/d2/a3", str(d / "d2" / "a3")),
     ]
     assert logged(caplog, f"Ignoring directory {d}/a3")
 
 
-def test_fs_FileStager__expand_wildcards_bad_scheme(caplog):
+def test_fs_FileStager__expand_glob_bad_scheme(caplog):
     config = """
     /dst/<a>: !glob https://foo.com/obj/*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    assert not fs.FileStager._expand_wildcards(obj)
+    assert not fs.FileStager._expand_glob(obj)
     msg = "URL scheme 'https' incompatible with tag !glob in: !glob https://foo.com/obj/*"
     assert logged(caplog, msg)
 
 
-def test_fs_FileStager__expand_wildcards_file_scheme():
+def test_fs_FileStager__expand_glob_file_scheme():
     config = """
     /dst/<a>: !glob file:///src/a*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    with patch.object(fs, "glob", return_value=["/src/a1", "/src/a2"]) as glob:
-        assert fs.FileStager._expand_wildcards(obj) == [
+    with patch.object(fs, "iglob", return_value=["/src/a1", "/src/a2"]) as iglob:
+        assert fs.FileStager._expand_glob(obj) == [
             ("/dst/a1", "/src/a1"),
             ("/dst/a2", "/src/a2"),
         ]
-    glob.assert_called_once_with("/src/a*")
+    iglob.assert_called_once_with("/src/a*", recursive=True)
 
 
 @mark.parametrize("source", ("dict", "file"))
@@ -175,6 +205,13 @@ def test_fs_Linker(assets, source):
     fs.Linker(target_dir=dstdir, config=config, key_path=["a", "b"]).go()
     assert (dstdir / "foo").is_symlink()
     assert (dstdir / "subdir" / "bar").is_symlink()
+
+
+def test_Linker__expand_glob(_expand_glob_assets):
+    dst, f, d, config = _expand_glob_assets
+    fs.Linker(config=yaml.load(dedent(config), Loader=uw_yaml_loader())).go()
+    # Both file and directory are linked:
+    assert set(dst.glob("*")) == set([dst / f.name, dst / d.name])
 
 
 @mark.parametrize(

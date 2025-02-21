@@ -87,11 +87,9 @@ Use the ``!glob`` tag to specify that a source-path value should be treated as a
 .. literalinclude:: fs/copy-glob.out
    :language: text
 
-The ``--report`` output can be especially useful in combination with wildcards to allow downstream logic to process a set of copied files whose identity is not known in advance.
+The ``--report`` output can be especially useful in combination with glob patterns to allow downstream logic to process a set of copied files whose identity is not known in advance.
 
-Note that directories are excluded, and recursive copies are not supported. To recursively copy from a shell script, where you might otherwise use ``uw fs copy``, consider using ``cp -r``; and from Python code where you might otherwise call ``uwtools.api.fs.copy()``, consider using the standard-library :python:`shutil.copytree <shutil.html#shutil.copytree>`. For more control, including file-grained include and exclude, consider the unrivaled `rsync <https://rsync.samba.org/>`_, which can be installed from conda in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
-
-See :ref:`files_yaml` for more information on the semantics of the ``!glob`` tag and wildcard copies.
+See :ref:`files_yaml` for more examples and information on the semantics of the ``!glob`` tag.
 
 ``link``
 --------
@@ -99,8 +97,9 @@ See :ref:`files_yaml` for more information on the semantics of the ``!glob`` tag
 The ``link`` action stages items in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves similarly to ``copy`` (see above), but note the following:
 
 * In addition to file, directories and other symbolic links can be linked.
+* The ``link`` action links directories indentified by glob patterns, whereas the ``copy`` action ignores directories.
 * HTTP(S) sources are not supported.
-* Support for wildcard source values is the same as for ``link``.
+* Support for glob-pattern source values is the same as for ``link``.
 
 .. literalinclude:: fs/link-help.cmd
    :language: text

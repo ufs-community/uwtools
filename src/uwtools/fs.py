@@ -4,7 +4,9 @@ File and directory staging.
 
 import datetime as dt
 from abc import ABC, abstractmethod
-from glob import glob
+from glob import iglob
+from itertools import dropwhile, zip_longest
+from operator import eq
 from pathlib import Path
 from typing import Optional, Union
 from urllib.parse import urlparse
@@ -138,25 +140,26 @@ class FileStager(Stager):
         """
         return list(self._config.keys())
 
-    def _expand_wildcards(self) -> list[tuple[str, str]]:
+    def _expand_glob(self) -> list[tuple[str, str]]:
         items = []
         for dst, src in self._config.items():
-            assert isinstance(src, (str, UWYAMLGlob))
-            if isinstance(src, UWYAMLGlob):
-                pattern = src.value
-                attrs = urlparse(pattern)
-                if attrs.scheme not in ["", "file"]:
+            if isinstance(src, str):
+                items.append((dst, src))
+            else:
+                assert isinstance(src, UWYAMLGlob)
+                attrs = urlparse(src.value)
+                if attrs.scheme in ["", "file"]:
+                    for path in iglob(attrs.path, recursive=True):
+                        if Path(path).is_dir() and not isinstance(self, Linker):
+                            log.warning("Ignoring directory %s", path)
+                        else:
+                            parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])
+                            pairs = dropwhile(lambda x: eq(*x), parts)
+                            unique = Path(*[pair[0] for pair in pairs if pair[0]])
+                            items.append((str(Path(dst).parent / unique), path))
+                else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, attrs.scheme, src.tag, src)
-                if attrs.scheme == "file":
-                    pattern = attrs.path
-                for path in map(Path, glob(pattern)):
-                    if not path.is_dir():
-                        items.append((str(Path(dst).parent / path.name), str(path)))
-                    else:
-                        log.warning("Ignoring directory %s", path)
-            else:
-                items.append((dst, src))
         return items
 
     @property
@@ -180,7 +183,7 @@ class Copier(FileStager):
         yield "File copies"
         yield [
             filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
-            for dst, src in self._expand_wildcards()
+            for dst, src in self._expand_glob()
         ]
 
     @staticmethod
@@ -205,7 +208,7 @@ class Linker(FileStager):
         """
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_wildcards()]
+        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_glob()]
 
 
 class MakeDirs(Stager):

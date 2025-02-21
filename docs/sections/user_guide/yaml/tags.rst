@@ -96,6 +96,11 @@ Converts the tagged node to a Python ``float`` value. For example, given ``input
    $ uw config realize --input-file input.yaml --output-format yaml
    f2: 5.859
 
+``!glob``
+^^^^^^^^^
+
+Only for use in :ref:`File Blocks<files_yaml>`. See :ref:`Glob Support<files_yaml_glob_support>` for more information.
+
 ``!include``
 ^^^^^^^^^^^^
 

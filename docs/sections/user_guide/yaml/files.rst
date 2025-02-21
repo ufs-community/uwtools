@@ -57,12 +57,14 @@ Example block:
 
 HTTP(S) sources are not supported when linking.
 
-Wildcard Support
-----------------
+.. _files_yaml_glob_support:
 
-Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
+Glob Support
+------------
 
-Example block:
+Use the ``!glob`` tag to specify that a source-path value should be treated as a :python:`glob <glob.html>` pattern:
+
+Example config:
 
 .. code-block:: yaml
 
@@ -95,8 +97,6 @@ Given ``/src/`` directory
 
 Behavior is similar when linking.
 
-Wildcards are not supported in combination with HTTP(S) sources.
-
 Note that the destination-path key is treated as a template, with the rightmost component (``<afile>`` and ``<bfile>`` above) discarded and replaced with actual filenames. Since YAML Mapping / Python ``dict`` keys must be unique, this supports the case where the same directory is the target of multiple copies, e.g.
 
 .. code-block:: yaml
@@ -105,3 +105,49 @@ Note that the destination-path key is treated as a template, with the rightmost 
    /media/<videos>: !glob /another/path/*.mp4
 
 A useful convention, adopted here, is to bracket the rightmost component between ``<`` and ``>`` characters as a visual reminder that the component is a placeholder, but this is arbitrary and the brackets have no special meaning.
+
+Since ``uwtools`` passes argument ``recursive=True`` when calling Python's :python:`iglob() <glob.html#glob.iglob>`, the following behavior is also supported:
+
+Example config:
+
+.. code-block:: yaml
+
+   <f>: !glob /src/**/a*
+
+Given ``/src/`` directory
+
+.. code-block:: text
+
+   src
+   ├── a1
+   ├── b1
+   ├── bar
+   │   ├── a2
+   │   ├── b2
+   │   └── baz
+   │       ├── a3
+   │       └── b3
+   └── foo
+       ├── a4
+       └── b4
+
+* Result when copying to target directory ``target/``:
+
+.. code-block:: text
+
+   target
+   ├── a1
+   ├── bar
+   │   ├── a2
+   │   └── baz
+   │       └── a3
+   └── foo
+       └── a4
+
+Caveats
+-------
+
+* Glob patterns are not supported in combination with HTTP(S) sources.
+* In copy mode, directories identified by a glob pattern are ignored and not copied.
+* In link mode, directories identified by a glob pattern are linked.
+* Many interesting use cases for copying/linking are beyond the scope of this tool. For more control, including file-grained include and exclude, consider using the unrivaled `rsync <https://rsync.samba.org/>`_, which can be installed from conda in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
