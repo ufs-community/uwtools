@@ -148,3 +148,6 @@ Caveats
 -------
 
 * Glob patterns are not supported in combination with HTTP(S) sources.
+* In copy mode, directories identified by a glob pattern are ignored and not copied.
+* In link mode, directories identified by a glob pattern are linked.
+
