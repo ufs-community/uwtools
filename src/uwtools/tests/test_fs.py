@@ -125,8 +125,7 @@ def test_Copier_go_no_targetdir_relpath_fail(assets):
 
 def test_Copier__expand_glob(_expand_glob_assets):
     dst, f, _, config = _expand_glob_assets
-    copier = fs.Copier(config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    copier.go()
+    fs.Copier(config=yaml.load(dedent(config), Loader=uw_yaml_loader())).go()
     # Only file is copied, not directory:
     assert list(dst.glob("*")) == [dst / f.name]
 
@@ -210,8 +209,7 @@ def test_fs_Linker(assets, source):
 
 def test_Linker__expand_glob(_expand_glob_assets):
     dst, f, d, config = _expand_glob_assets
-    copier = fs.Linker(config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    copier.go()
+    fs.Linker(config=yaml.load(dedent(config), Loader=uw_yaml_loader())).go()
     # Both file and directory are linked:
     assert set(dst.glob("*")) == set([dst / f.name, dst / d.name])
 
