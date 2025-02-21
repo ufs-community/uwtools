@@ -57,6 +57,8 @@ Example block:
 
 HTTP(S) sources are not supported when linking.
 
+.. _files_yaml_glob_support:
+
 Glob Support
 ------------
 
