@@ -12,7 +12,7 @@
 dst/copy
 ├── foo
 ├── licenses
-│   └── gpl
+│   └── gpl
 └── subdir
     └── bar
 
