@@ -62,7 +62,7 @@ HTTP(S) sources are not supported when linking.
 Glob Support
 ------------
 
-Use the ``!glob`` tag to specify that a source-path value should be treated as a `glob <https://docs.python.org/3/library/glob.html>`_ pattern:
+Use the ``!glob`` tag to specify that a source-path value should be treated as a :python:`glob <glob.html>` pattern:
 
 Example config:
 
@@ -106,7 +106,7 @@ Note that the destination-path key is treated as a template, with the rightmost 
 
 A useful convention, adopted here, is to bracket the rightmost component between ``<`` and ``>`` characters as a visual reminder that the component is a placeholder, but this is arbitrary and the brackets have no special meaning.
 
-Since ``uwtools`` passes argument ``recursive=True`` when calling Python's `iglob() <https://docs.python.org/3/library/glob.html#glob.iglob>`_, so the following behavior is also supported:
+Since ``uwtools`` passes argument ``recursive=True`` when calling Python's :python:`iglob() <glob.html#glob.iglob>`, so the following behavior is also supported:
 
 Example config:
 
@@ -118,31 +118,31 @@ Given ``/src/`` directory
 
 .. code-block:: text
 
-src
-├── a1
-├── b1
-├── bar
-│   ├── a2
-│   ├── b2
-│   └── baz
-│       ├── a3
-│       └── b3
-└── foo
-    ├── a4
-    └── b4
+   src
+   ├── a1
+   ├── b1
+   ├── bar
+   │   ├── a2
+   │   ├── b2
+   │   └── baz
+   │       ├── a3
+   │       └── b3
+   └── foo
+       ├── a4
+       └── b4
 
 * Result when copying to target directory ``target/``:
 
 .. code-block:: text
 
-target
-├── a1
-├── bar
-│   ├── a2
-│   └── baz
-│       └── a3
-└── foo
-    └── a4
+   target
+   ├── a1
+   ├── bar
+   │   ├── a2
+   │   └── baz
+   │       └── a3
+   └── foo
+       └── a4
 
 Caveats
 -------
