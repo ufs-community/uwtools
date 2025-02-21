@@ -160,7 +160,6 @@ class FileStager(Stager):
                 else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, attrs.scheme, src.tag, src)
-                    continue
         return items
 
     @property
