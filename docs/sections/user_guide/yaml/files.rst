@@ -106,7 +106,7 @@ Note that the destination-path key is treated as a template, with the rightmost 
 
 A useful convention, adopted here, is to bracket the rightmost component between ``<`` and ``>`` characters as a visual reminder that the component is a placeholder, but this is arbitrary and the brackets have no special meaning.
 
-Since ``uwtools`` passes argument ``recursive=True`` when calling Python's :python:`iglob() <glob.html#glob.iglob>`, so the following behavior is also supported:
+Since ``uwtools`` passes argument ``recursive=True`` when calling Python's :python:`iglob() <glob.html#glob.iglob>`, the following behavior is also supported:
 
 Example config:
 
