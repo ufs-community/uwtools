@@ -143,23 +143,24 @@ class FileStager(Stager):
     def _expand_glob(self) -> list[tuple[str, str]]:
         items = []
         for dst, src in self._config.items():
-            assert isinstance(src, (str, UWYAMLGlob))
             if isinstance(src, str):
                 items.append((dst, src))
-                continue
-            attrs = urlparse(src.value)
-            if attrs.scheme not in ["", "file"]:
-                msg = "URL scheme '%s' incompatible with tag %s in: %s"
-                log.error(msg, attrs.scheme, src.tag, src)
-                continue
-            for path in iglob(attrs.path, recursive=True):
-                if Path(path).is_dir():
-                    log.warning("Ignoring directory %s", path)
+            else:
+                assert isinstance(src, UWYAMLGlob)
+                attrs = urlparse(src.value)
+                if attrs.scheme in ["", "file"]:
+                    for path in iglob(attrs.path, recursive=True):
+                        if Path(path).is_dir():
+                            log.warning("Ignoring directory %s", path)
+                        else:
+                            parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])
+                            pairs = dropwhile(lambda x: eq(*x), parts)
+                            unique = Path(*[pair[0] for pair in pairs if pair[0]])
+                            items.append((str(Path(dst).parent / unique), path))
                 else:
-                    parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])
-                    pairs = dropwhile(lambda x: eq(*x), parts)
-                    unique = Path(*[pair[0] for pair in pairs if pair[0]])
-                    items.append((str(Path(dst).parent / unique), path))
+                    msg = "URL scheme '%s' incompatible with tag %s in: %s"
+                    log.error(msg, attrs.scheme, src.tag, src)
+                    continue
         return items
 
     @property
