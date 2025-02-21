@@ -99,6 +99,7 @@ See :ref:`files_yaml` for more information on the semantics of the ``!glob`` tag
 The ``link`` action stages items in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves similarly to ``copy`` (see above), but note the following:
 
 * In addition to file, directories and other symbolic links can be linked.
+* The ``link`` action links directories indentified by glob patterns, whereas the ``copy`` action ignores directories.
 * HTTP(S) sources are not supported.
 * Support for glob-pattern source values is the same as for ``link``.
 
