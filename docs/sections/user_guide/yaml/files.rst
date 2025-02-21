@@ -62,9 +62,9 @@ HTTP(S) sources are not supported when linking.
 Glob Support
 ------------
 
-Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
+Use the ``!glob`` tag to specify that a source-path value should be treated as a `glob <https://docs.python.org/3/library/glob.html>`_ pattern:
 
-Example block:
+Example config:
 
 .. code-block:: yaml
 
@@ -97,8 +97,6 @@ Given ``/src/`` directory
 
 Behavior is similar when linking.
 
-Glob patterns are not supported in combination with HTTP(S) sources.
-
 Note that the destination-path key is treated as a template, with the rightmost component (``<afile>`` and ``<bfile>`` above) discarded and replaced with actual filenames. Since YAML Mapping / Python ``dict`` keys must be unique, this supports the case where the same directory is the target of multiple copies, e.g.
 
 .. code-block:: yaml
@@ -107,3 +105,46 @@ Note that the destination-path key is treated as a template, with the rightmost 
    /media/<videos>: !glob /another/path/*.mp4
 
 A useful convention, adopted here, is to bracket the rightmost component between ``<`` and ``>`` characters as a visual reminder that the component is a placeholder, but this is arbitrary and the brackets have no special meaning.
+
+Since ``uwtools`` passes argument ``recursive=True`` when calling Python's `iglob() <https://docs.python.org/3/library/glob.html#glob.iglob>`_, so the following behavior is also supported:
+
+Example config:
+
+.. code-block:: yaml
+
+   <f>: !glob /src/**/a*
+
+Given ``/src/`` directory
+
+.. code-block:: text
+
+src
+├── a1
+├── b1
+├── bar
+│   ├── a2
+│   ├── b2
+│   └── baz
+│       ├── a3
+│       └── b3
+└── foo
+    ├── a4
+    └── b4
+
+* Result when copying to target directory ``target/``:
+
+.. code-block:: text
+
+target
+├── a1
+├── bar
+│   ├── a2
+│   └── baz
+│       └── a3
+└── foo
+    └── a4
+
+Caveats
+-------
+
+* Glob patterns are not supported in combination with HTTP(S) sources.

@@ -5,7 +5,7 @@ File and directory staging.
 import datetime as dt
 from abc import ABC, abstractmethod
 from glob import iglob
-from itertools import dropwhile
+from itertools import dropwhile, zip_longest
 from operator import eq
 from pathlib import Path
 from typing import Optional, Union
@@ -143,7 +143,8 @@ class FileStager(Stager):
     def _expand_glob(self) -> list[tuple[str, str]]:
         items = []
         for dst, src in self._config.items():
-            if not isinstance(src, UWYAMLGlob):
+            assert isinstance(src, (str, UWYAMLGlob))
+            if isinstance(src, str):
                 items.append((dst, src))
                 continue
             attrs = urlparse(src.value)
@@ -152,12 +153,13 @@ class FileStager(Stager):
                 log.error(msg, attrs.scheme, src.tag, src)
                 continue
             for path in iglob(attrs.path, recursive=True):
-                if not Path(path).is_dir():
-                    parts = zip(*[Path(x).parts for x in (path, attrs.path)])
-                    unique = Path(*[pair[0] for pair in dropwhile(lambda x: eq(*x), parts)])
-                    items.append((str(Path(dst).parent / unique), path))
-                else:
+                if Path(path).is_dir():
                     log.warning("Ignoring directory %s", path)
+                else:
+                    parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])
+                    pairs = dropwhile(lambda x: eq(*x), parts)
+                    unique = Path(*[pair[0] for pair in pairs if pair[0]])
+                    items.append((str(Path(dst).parent / unique), path))
         return items
 
     @property
