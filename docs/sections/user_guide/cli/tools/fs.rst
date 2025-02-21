@@ -89,9 +89,7 @@ Use the ``!glob`` tag to specify that a source-path value should be treated as a
 
 The ``--report`` output can be especially useful in combination with glob patterns to allow downstream logic to process a set of copied files whose identity is not known in advance.
 
-For more control, including file-grained include and exclude, consider using the unrivaled `rsync <https://rsync.samba.org/>`_, which can be installed from conda in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
-
-See :ref:`files_yaml` for more information on the semantics of the ``!glob`` tag.
+See :ref:`files_yaml` for more examples and information on the semantics of the ``!glob`` tag.
 
 ``link``
 --------

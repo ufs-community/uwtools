@@ -150,4 +150,4 @@ Caveats
 * Glob patterns are not supported in combination with HTTP(S) sources.
 * In copy mode, directories identified by a glob pattern are ignored and not copied.
 * In link mode, directories identified by a glob pattern are linked.
-
+* Many interesting use cases for copying/linking are beyond the scope of this tool. For more control, including file-grained include and exclude, consider using the unrivaled `rsync <https://rsync.samba.org/>`_, which can be installed from conda in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
