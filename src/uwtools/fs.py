@@ -150,7 +150,7 @@ class FileStager(Stager):
                 attrs = urlparse(src.value)
                 if attrs.scheme in ["", "file"]:
                     for path in iglob(attrs.path, recursive=True):
-                        if Path(path).is_dir():
+                        if Path(path).is_dir() and not isinstance(self, Linker):
                             log.warning("Ignoring directory %s", path)
                         else:
                             parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])

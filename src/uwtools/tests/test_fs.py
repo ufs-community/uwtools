@@ -39,6 +39,19 @@ def assets(tmp_path):
     return dstdir, cfgdict, cfgfile
 
 
+@fixture
+def _expand_glob_assets(tmp_path):
+    src, dst = [tmp_path / x for x in ("src", "dst")]
+    src.mkdir()
+    f, d = [src / x for x in ("file", "directory")]
+    f.touch()
+    d.mkdir()
+    config = f"""
+    {dst}/<f>: !glob {src}/*
+    """
+    return dst, f, d, config
+
+
 # Helpers
 
 
@@ -108,6 +121,14 @@ def test_Copier_go_no_targetdir_relpath_fail(assets):
         fs.Copier(config=cfgdict, key_path=["a", "b"]).go()
     errmsg = "Relative path '%s' requires target directory to be specified"
     assert errmsg % "foo" in str(e.value)
+
+
+def test_Copier__expand_glob(_expand_glob_assets):
+    dst, f, _, config = _expand_glob_assets
+    copier = fs.Copier(config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    copier.go()
+    # Only file is copied, not directory:
+    assert list(dst.glob("*")) == [dst / f.name]
 
 
 def test_fs_Copier__simple():
@@ -185,6 +206,14 @@ def test_fs_Linker(assets, source):
     fs.Linker(target_dir=dstdir, config=config, key_path=["a", "b"]).go()
     assert (dstdir / "foo").is_symlink()
     assert (dstdir / "subdir" / "bar").is_symlink()
+
+
+def test_Linker__expand_glob(_expand_glob_assets):
+    dst, f, d, config = _expand_glob_assets
+    copier = fs.Linker(config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    copier.go()
+    # Both file and directory are linked:
+    assert set(dst.glob("*")) == set([dst / f.name, dst / d.name])
 
 
 @mark.parametrize(
