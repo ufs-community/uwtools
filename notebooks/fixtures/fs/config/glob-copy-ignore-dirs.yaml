@@ -1,0 +1,1 @@
+glob-copy-ignore-dirs/<f>: !glob fixtures/fs/data/subdir*
