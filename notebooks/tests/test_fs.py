@@ -1,11 +1,13 @@
 # pylint: disable=redefined-outer-name
 
 import os
+from pathlib import Path
 
 import yaml
-from pathlib import Path
 from pytest import fixture
 from testbook import testbook
+
+base = Path("fixtures/fs")
 
 
 @fixture(scope="module")
@@ -14,23 +16,18 @@ def tb():
         yield tb
 
 
-def test_fs_copy(tb):
+def test_fs_copy(load, tb):
     # Get the config files as text and dictionaries.
-    config_str = Path("fixtures/fs/config/copy.yaml").read_text().rstrip()
-    config_dict = yaml.safe_load(config_str)
-    config_keys_str = Path("fixtures/fs/config/copy-keys.yaml").read_text().strip()
-    config_keys_dict = yaml.safe_load(config_keys_str)
+    config_str = load(base / "config/copy.yaml")
+    config_keys_str = load(base / "config/copy-keys.yaml")
     # Each key in each config should have created a copy of the file given by each value.
-    for item in config_dict.items():
-        copy_dst_txt = Path(f"tmp/copy-target/{item[0]}").read_text().rstrip()
-        copier_dst_txt = Path(f"tmp/copier-target/{item[0]}").read_text().rstrip()
-        src_txt = Path(item[1]).read_text().rstrip()
-        assert copy_dst_txt == src_txt
-        assert copier_dst_txt == src_txt
-    for item in config_keys_dict["files"]["to"]["copy"].items():
-        copy_keys_dst_txt = Path(f"tmp/copy-keys-target/{item[0]}").read_text().strip()
-        src_txt = Path(item[1]).read_text().strip()
-        assert copy_keys_dst_txt == src_txt
+    for item in yaml.safe_load(config_str).items():
+        src_txt = load(item[1])
+        assert load(f"tmp/copy-target/{item[0]}") == src_txt
+        assert load(f"tmp/copier-target/{item[0]}") == src_txt
+    for item in yaml.safe_load(config_keys_str)["files"]["to"]["copy"].items():
+        src_txt = load(item[1])
+        assert load(f"tmp/copy-keys-target/{item[0]}") == src_txt
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(5) == config_str
     assert (
@@ -53,29 +50,24 @@ def test_fs_copy(tb):
     )
 
 
-def test_fs_link(tb):
+def test_fs_link(load, tb):
     # Get the config files as text and dictionaries.
-    config_str = Path("fixtures/fs/config/link.yaml").read_text().rstrip()
-    config_dict = yaml.safe_load(config_str)
-    config_keys_str = Path("fixtures/fs/config/link-keys.yaml").read_text().rstrip()
-    config_keys_dict = yaml.safe_load(config_keys_str)
+    config_str = load(base / "config/link.yaml")
+    config_keys_str = load(base / "config/link-keys.yaml")
     # Each key in each config should have created a symlink of the file given by each value.
-    for item in config_dict.items():
+    for item in yaml.safe_load(config_str).items():
         link_path = "tmp/link-target/" + item[0]
         linker_path = "tmp/linker-target/" + item[0]
-        link_dst_txt = Path(link_path).read_text().rstrip()
-        linker_dst_txt = Path(linker_path).read_text().rstrip()
-        src_txt = Path(item[1]).read_text().rstrip()
+        src_txt = load(item[1])
         assert os.path.islink(link_path)
-        assert link_dst_txt == src_txt
+        assert load(link_path) == src_txt
         assert os.path.islink(linker_path)
-        assert linker_dst_txt == src_txt
-    for item in config_keys_dict["files"]["to"]["link"].items():
+        assert load(linker_path) == src_txt
+    for item in yaml.safe_load(config_keys_str)["files"]["to"]["link"].items():
         link_keys_path = "tmp/link-keys-target/" + item[0]
-        link_keys_dst_txt = Path(link_keys_path).read_text().rstrip()
-        src_txt = Path(item[1]).read_text().rstrip()
+        src_txt = load(item[1])
         assert os.path.islink(link_keys_path)
-        assert link_keys_dst_txt == src_txt
+        assert load(link_keys_path) == src_txt
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(29) == config_str
     assert (
@@ -98,11 +90,11 @@ def test_fs_link(tb):
     ) in tb.cell_output_text(41)
 
 
-def test_fs_makedirs(tb):
+def test_fs_makedirs(load, tb):
     # Get the config files as text and dictionaries.
-    config_str = Path("fixtures/fs/config/dir.yaml").read_text().rstrip()
+    config_str = load(base / "config/dir.yaml")
     config_dict = yaml.safe_load(config_str)
-    config_keys_str = Path("fixtures/fs/config/dir-keys.yaml").read_text().rstrip()
+    config_keys_str = load(base / "config/dir-keys.yaml")
     config_keys_dict = yaml.safe_load(config_keys_str)
     # Each value in each config should have been created as one or more subdirectories.
     for subdir in config_dict["makedirs"]:

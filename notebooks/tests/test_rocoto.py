@@ -1,7 +1,11 @@
 # pylint: disable=redefined-outer-name
 
+from pathlib import Path
+
 from pytest import fixture
 from testbook import testbook
+
+base = Path("fixtures/rocoto")
 
 
 @fixture(scope="module")
@@ -10,22 +14,16 @@ def tb():
         yield tb
 
 
-def test_rocoto_building_simple_workflow(tb):
-    with open("fixtures/rocoto/simple-workflow.yaml", "r", encoding="utf-8") as f:
-        simple_yaml = f.read().rstrip()
-    with open("fixtures/rocoto/err-workflow.yaml", "r", encoding="utf-8") as f:
-        err_yaml = f.read().rstrip()
-    with open("tmp/simple-workflow.xml", "r", encoding="utf-8") as f:
-        simple_xml = f.read().rstrip()
-    assert tb.cell_output_text(5) == simple_yaml
+def test_rocoto_building_simple_workflow(load, tb):
+    assert tb.cell_output_text(5) == load(base / "simple-workflow.yaml")
     valid_out = (
         "INFO 0 schema-validation errors found",
         "INFO 0 Rocoto XML validation errors found",
         "True",
     )
     assert all(x in tb.cell_output_text(7) for x in valid_out)
-    assert tb.cell_output_text(9) == simple_xml
-    assert tb.cell_output_text(11) == err_yaml
+    assert tb.cell_output_text(9) == load("tmp/simple-workflow.xml")
+    assert tb.cell_output_text(11) == load(base / "err-workflow.yaml")
     err_out = (
         "ERROR 3 schema-validation errors found",
         "ERROR Error at workflow.attrs:",
@@ -39,48 +37,30 @@ def test_rocoto_building_simple_workflow(tb):
     assert all(x in tb.cell_output_text(13) for x in err_out)
 
 
-def test_rocoto_building_workflows(tb):
-    with open("fixtures/rocoto/ent-workflow.yaml", "r", encoding="utf-8") as f:
-        ent_yaml = f.read().rstrip()
-    with open("fixtures/rocoto/ent-cs-workflow.yaml", "r", encoding="utf-8") as f:
-        ent_cs_yaml = f.read().rstrip()
-    with open("fixtures/rocoto/tasks-workflow.yaml", "r", encoding="utf-8") as f:
-        tasks_yaml = f.read().rstrip()
-    with open("fixtures/rocoto/tasks-deps-workflow.yaml", "r", encoding="utf-8") as f:
-        tasks_deps_yaml = f.read().rstrip()
-    with open("fixtures/rocoto/meta-workflow.yaml", "r", encoding="utf-8") as f:
-        meta_yaml = f.read().rstrip()
-    with open("fixtures/rocoto/meta-nested-workflow.yaml", "r", encoding="utf-8") as f:
-        meta_nested_yaml = f.read().rstrip()
-    with open("tmp/ent-cs-workflow.xml", "r", encoding="utf-8") as f:
-        ent_cs_xml = f.read().rstrip()
-    with open("tmp/tasks-deps-workflow.xml", "r", encoding="utf-8") as f:
-        tasks_deps_xml = f.read().rstrip()
-    with open("tmp/meta-workflow.xml", "r", encoding="utf-8") as f:
-        meta_xml = f.read().rstrip()
-    assert tb.cell_output_text(15) == ent_yaml
-    assert tb.cell_output_text(17) == ent_cs_yaml
+def test_rocoto_building_workflows(load, tb):
+    assert tb.cell_output_text(15) == load(base / "ent-workflow.yaml")
+    assert tb.cell_output_text(17) == load(base / "ent-cs-workflow.yaml")
     valid_out = (
         "INFO 0 schema-validation errors found",
         "INFO 0 Rocoto XML validation errors found",
         "True",
     )
     assert all(x in tb.cell_output_text(19) for x in valid_out)
-    assert tb.cell_output_text(21) == ent_cs_xml
-    assert tb.cell_output_text(23) == tasks_yaml
-    assert tb.cell_output_text(25) == tasks_deps_yaml
+    assert tb.cell_output_text(21) == load("tmp/ent-cs-workflow.xml")
+    assert tb.cell_output_text(23) == load(base / "tasks-workflow.yaml")
+    assert tb.cell_output_text(25) == load(base / "tasks-deps-workflow.yaml")
     assert all(x in tb.cell_output_text(27) for x in valid_out)
-    assert tb.cell_output_text(29) == tasks_deps_xml
-    assert tb.cell_output_text(31) == meta_yaml
+    assert tb.cell_output_text(29) == load("tmp/tasks-deps-workflow.xml")
+    assert tb.cell_output_text(31) == load(base / "meta-workflow.yaml")
     assert all(x in tb.cell_output_text(33) for x in valid_out)
-    assert tb.cell_output_text(35) == meta_xml
-    assert tb.cell_output_text(37) == meta_nested_yaml
+    assert tb.cell_output_text(35) == load("tmp/meta-workflow.xml")
+    assert tb.cell_output_text(37) == load(base / "meta-nested-workflow.yaml")
 
 
 def test_rocoto_validate(tb):
-    with open("fixtures/rocoto/simple-workflow.xml", "r", encoding="utf-8") as f:
+    with open(base / "simple-workflow.xml", "r", encoding="utf-8") as f:
         simple_xml = f.read().rstrip()
-    with open("fixtures/rocoto/err-workflow.xml", "r", encoding="utf-8") as f:
+    with open(base / "err-workflow.xml", "r", encoding="utf-8") as f:
         err_xml = f.read().rstrip()
     assert tb.cell_output_text(41) == simple_xml
     valid_out = ("INFO 0 Rocoto XML validation errors found", "True")
