@@ -3,6 +3,7 @@
 import os
 
 import yaml
+from pathlib import Path
 from pytest import fixture
 from testbook import testbook
 
@@ -15,27 +16,20 @@ def tb():
 
 def test_fs_copy(tb):
     # Get the config files as text and dictionaries.
-    with open("fixtures/fs/config/copy.yaml", "r", encoding="utf-8") as f:
-        config_str = f.read().rstrip()
-        config_dict = yaml.safe_load(config_str)
-    with open("fixtures/fs/config/copy-keys.yaml", "r", encoding="utf-8") as f:
-        config_keys_str = f.read().rstrip()
-        config_keys_dict = yaml.safe_load(config_keys_str)
+    config_str = Path("fixtures/fs/config/copy.yaml").read_text().rstrip()
+    config_dict = yaml.safe_load(config_str)
+    config_keys_str = Path("fixtures/fs/config/copy-keys.yaml").read_text().strip()
+    config_keys_dict = yaml.safe_load(config_keys_str)
     # Each key in each config should have created a copy of the file given by each value.
     for item in config_dict.items():
-        with open("tmp/copy-target/" + item[0], "r", encoding="utf-8") as f:
-            copy_dst_txt = f.read().rstrip()
-        with open("tmp/copier-target/" + item[0], "r", encoding="utf-8") as f:
-            copier_dst_txt = f.read().rstrip()
-        with open(item[1], "r", encoding="utf-8") as f:
-            src_txt = f.read().rstrip()
+        copy_dst_txt = Path(f"tmp/copy-target/{item[0]}").read_text().rstrip()
+        copier_dst_txt = Path(f"tmp/copier-target/{item[0]}").read_text().rstrip()
+        src_txt = Path(item[1]).read_text().rstrip()
         assert copy_dst_txt == src_txt
         assert copier_dst_txt == src_txt
     for item in config_keys_dict["files"]["to"]["copy"].items():
-        with open("tmp/copy-keys-target/" + item[0], "r", encoding="utf-8") as f:
-            copy_keys_dst_txt = f.read().rstrip()
-        with open(item[1], "r", encoding="utf-8") as f:
-            src_txt = f.read().rstrip()
+        copy_keys_dst_txt = Path(f"tmp/copy-keys-target/{item[0]}").read_text().strip()
+        src_txt = Path(item[1]).read_text().strip()
         assert copy_keys_dst_txt == src_txt
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(5) == config_str
@@ -61,32 +55,25 @@ def test_fs_copy(tb):
 
 def test_fs_link(tb):
     # Get the config files as text and dictionaries.
-    with open("fixtures/fs/config/link.yaml", "r", encoding="utf-8") as f:
-        config_str = f.read().rstrip()
-        config_dict = yaml.safe_load(config_str)
-    with open("fixtures/fs/config/link-keys.yaml", "r", encoding="utf-8") as f:
-        config_keys_str = f.read().rstrip()
-        config_keys_dict = yaml.safe_load(config_keys_str)
+    config_str = Path("fixtures/fs/config/link.yaml").read_text().rstrip()
+    config_dict = yaml.safe_load(config_str)
+    config_keys_str = Path("fixtures/fs/config/link-keys.yaml").read_text().rstrip()
+    config_keys_dict = yaml.safe_load(config_keys_str)
     # Each key in each config should have created a symlink of the file given by each value.
     for item in config_dict.items():
         link_path = "tmp/link-target/" + item[0]
         linker_path = "tmp/linker-target/" + item[0]
-        with open(link_path, "r", encoding="utf-8") as f:
-            link_dst_txt = f.read().rstrip()
-        with open(linker_path, "r", encoding="utf-8") as f:
-            linker_dst_txt = f.read().rstrip()
-        with open(item[1], "r", encoding="utf-8") as f:
-            src_txt = f.read().rstrip()
+        link_dst_txt = Path(link_path).read_text().rstrip()
+        linker_dst_txt = Path(linker_path).read_text().rstrip()
+        src_txt = Path(item[1]).read_text().rstrip()
         assert os.path.islink(link_path)
         assert link_dst_txt == src_txt
         assert os.path.islink(linker_path)
         assert linker_dst_txt == src_txt
     for item in config_keys_dict["files"]["to"]["link"].items():
         link_keys_path = "tmp/link-keys-target/" + item[0]
-        with open(link_keys_path, "r", encoding="utf-8") as f:
-            link_keys_dst_txt = f.read().rstrip()
-        with open(item[1], "r", encoding="utf-8") as f:
-            src_txt = f.read().rstrip()
+        link_keys_dst_txt = Path(link_keys_path).read_text().rstrip()
+        src_txt = Path(item[1]).read_text().rstrip()
         assert os.path.islink(link_keys_path)
         assert link_keys_dst_txt == src_txt
     # Ensure that cell output text matches expectations.
@@ -113,12 +100,10 @@ def test_fs_link(tb):
 
 def test_fs_makedirs(tb):
     # Get the config files as text and dictionaries.
-    with open("fixtures/fs/config/dir.yaml", "r", encoding="utf-8") as f:
-        config_str = f.read().rstrip()
-        config_dict = yaml.safe_load(config_str)
-    with open("fixtures/fs/config/dir-keys.yaml", "r", encoding="utf-8") as f:
-        config_keys_str = f.read().rstrip()
-        config_keys_dict = yaml.safe_load(config_keys_str)
+    config_str = Path("fixtures/fs/config/dir.yaml").read_text().rstrip()
+    config_dict = yaml.safe_load(config_str)
+    config_keys_str = Path("fixtures/fs/config/dir-keys.yaml").read_text().rstrip()
+    config_keys_dict = yaml.safe_load(config_keys_str)
     # Each value in each config should have been created as one or more subdirectories.
     for subdir in config_dict["makedirs"]:
         assert os.path.exists("tmp/dir-target/" + subdir)
