@@ -1,13 +1,14 @@
 # pylint: disable=redefined-outer-name
 
 import os
+from glob import glob
 from pathlib import Path
 
 import yaml
 from pytest import fixture
 from testbook import testbook
 
-base = Path("fixtures/fs")
+base = Path("fixtures/fs/config")
 
 
 @fixture(scope="module")
@@ -18,8 +19,8 @@ def tb():
 
 def test_fs_copy(load, tb):
     # Get the config files as text and dictionaries.
-    config_str = load(base / "config/copy.yaml")
-    config_keys_str = load(base / "config/copy-keys.yaml")
+    config_str = load(base / "copy.yaml")
+    config_keys_str = load(base / "copy-keys.yaml")
     # Each key in each config should have created a copy of the file given by each value.
     for item in yaml.safe_load(config_str).items():
         src_txt = load(item[1])
@@ -52,8 +53,8 @@ def test_fs_copy(load, tb):
 
 def test_fs_link(load, tb):
     # Get the config files as text and dictionaries.
-    config_str = load(base / "config/link.yaml")
-    config_keys_str = load(base / "config/link-keys.yaml")
+    config_str = load(base / "link.yaml")
+    config_keys_str = load(base / "link-keys.yaml")
     # Each key in each config should have created a symlink of the file given by each value.
     for item in yaml.safe_load(config_str).items():
         link_path = "tmp/link-target/" + item[0]
@@ -92,8 +93,8 @@ def test_fs_link(load, tb):
 
 def test_fs_makedirs(load, tb):
     # Get the config files as text and dictionaries.
-    config_str = load(base / "config/dir.yaml")
-    config_keys_str = load(base / "config/dir-keys.yaml")
+    config_str = load(base / "dir.yaml")
+    config_keys_str = load(base / "dir-keys.yaml")
     # Each value in each config should have been created as one or more subdirectories.
     for subdir in yaml.safe_load(config_str)["makedirs"]:
         assert os.path.exists("tmp/dir-target/" + subdir)
@@ -111,3 +112,39 @@ def test_fs_makedirs(load, tb):
         "{'ready': ['tmp/dir-keys-target/foo/bar', 'tmp/dir-keys-target/baz'],"
         "\n 'not-ready': []}"
     ) in tb.cell_output_text(61)
+
+
+def test_fs_glob_copy_basic(load, tb):
+    d = Path("tmp/glob-copy")
+    expected = {"file1.nml", "file2.txt", "file3.csv"}
+    assert set(glob(f"{d}/*")) == {str(d / x) for x in expected}
+    assert tb.cell_output_text(73) == load(base / "glob-copy.yaml")
+
+
+def test_fs_glob_copy_recursive():
+    d = Path("tmp/glob-copy-recursive")
+    expected = {str(d / x) for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
+    for p in expected:
+        assert Path(p).is_file()
+    assert set(x for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
+
+
+def test_fs_glob_copy_ignore_dirs():
+    d = Path("tmp/glob-copy-ignore-dirs")
+    assert not d.is_dir()
+
+
+def test_fs_glob_link_recursive():
+    d = Path("tmp/glob-link-recursive")
+    expected = {str(d / x) for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
+    for p in expected:
+        assert Path(p).is_symlink()
+    assert set(x for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
+
+
+def test_fs_glob_link_link_dirs():
+    d = Path("tmp/glob-link-dirs")
+    expected = {str(d / x) for x in ("subdir1", "subdir2")}
+    for p in expected:
+        assert Path(p).is_symlink()
+    assert set(glob(f"{d}/*")) == expected
