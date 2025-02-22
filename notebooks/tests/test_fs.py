@@ -131,10 +131,10 @@ def test_fs_glob_copy_basic(load, tb):
 
 def test_fs_glob_copy_recursive(load, tb):
     d = Path("tmp/glob-copy-recursive")
-    expected = {str(d / x) for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
+    expected = {d / x for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
     for p in expected:
-        assert Path(p).is_file()
-    assert set(x for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
+        assert p.is_file()
+    assert set(Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
     assert tb.cell_output_text(78) == load(base / "glob-copy-recursive.yaml")
     stdout = """
     {'ready': ['tmp/glob-copy-recursive/file1.nml',
@@ -157,10 +157,10 @@ def test_fs_glob_copy_ignore_dirs(load, tb):
 
 def test_fs_glob_link_recursive(load, tb):
     d = Path("tmp/glob-link-recursive")
-    expected = {str(d / x) for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
+    expected = {d / x for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
     for p in expected:
-        assert Path(p).is_symlink()
-    assert set(x for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
+        assert p.is_symlink()
+    assert set(Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
     assert tb.cell_output_text(86) == load(base / "glob-link-recursive.yaml")
     stdout = """
     {'ready': ['tmp/glob-link-recursive/file1.nml',
@@ -173,10 +173,10 @@ def test_fs_glob_link_recursive(load, tb):
 
 def test_fs_glob_link_link_dirs(load, tb):
     d = Path("tmp/glob-link-dirs")
-    expected = {str(d / x) for x in ("subdir1", "subdir2")}
+    expected = {d / x for x in ("subdir1", "subdir2")}
     for p in expected:
-        assert Path(p).is_symlink()
-    assert set(glob(f"{d}/*")) == expected
+        assert p.is_symlink()
+    assert set(Path(x) for x in glob(f"{d}/*")) == expected
     assert tb.cell_output_text(90) == load(base / "glob-link-dirs.yaml")
     stdout = """
     {'ready': ['tmp/glob-link-dirs/subdir1', 'tmp/glob-link-dirs/subdir2'],
