@@ -183,3 +183,15 @@ def test_fs_glob_link_link_dirs(load, tb):
      'not-ready': []}
     """
     assert dedent(stdout).strip() in tb.cell_output_text(91)
+
+
+def test_fs_copy_http(load, tb):
+    d = Path("tmp/licenses")
+    expected = d / "gpl"
+    assert expected.is_file()
+    assert set(glob(f"{d}/*")) == {str(expected)}
+    assert tb.cell_output_text(94) == load(base / "copy-http.yaml")
+    stdout = """
+    {'ready': ['tmp/licenses/gpl'], 'not-ready': []}
+    """
+    assert dedent(stdout).strip() in tb.cell_output_text(95)
