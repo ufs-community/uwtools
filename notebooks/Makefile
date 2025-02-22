@@ -12,6 +12,8 @@ format:
 lint:
 	pylint tests
 
+test: test-nb
+
 test-nb: lint unittest
 
 unittest:
