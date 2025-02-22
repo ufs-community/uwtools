@@ -3,6 +3,7 @@
 import os
 from glob import glob
 from pathlib import Path
+from textwrap import dedent
 
 import yaml
 from pytest import fixture
@@ -119,32 +120,66 @@ def test_fs_glob_copy_basic(load, tb):
     expected = {"file1.nml", "file2.txt", "file3.csv"}
     assert set(glob(f"{d}/*")) == {str(d / x) for x in expected}
     assert tb.cell_output_text(73) == load(base / "glob-copy.yaml")
+    stdout = """
+    {'ready': ['tmp/glob-copy/file3.csv',
+      'tmp/glob-copy/file1.nml',
+      'tmp/glob-copy/file2.txt'],
+     'not-ready': []}
+    """
+    assert dedent(stdout).strip() in tb.cell_output_text(74)
 
 
-def test_fs_glob_copy_recursive():
+def test_fs_glob_copy_recursive(load, tb):
     d = Path("tmp/glob-copy-recursive")
     expected = {str(d / x) for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
     for p in expected:
         assert Path(p).is_file()
     assert set(x for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
+    assert tb.cell_output_text(78) == load(base / "glob-copy-recursive.yaml")
+    stdout = """
+    {'ready': ['tmp/glob-copy-recursive/file1.nml',
+      'tmp/glob-copy-recursive/subdir1/file4.nml',
+      'tmp/glob-copy-recursive/subdir2/file5.nml'],
+     'not-ready': []}
+    """
+    assert dedent(stdout).strip() in tb.cell_output_text(79)
 
 
-def test_fs_glob_copy_ignore_dirs():
+def test_fs_glob_copy_ignore_dirs(load, tb):
     d = Path("tmp/glob-copy-ignore-dirs")
     assert not d.is_dir()
+    assert tb.cell_output_text(83) == load(base / "glob-copy-ignore-dirs.yaml")
+    stdout = """
+    {'ready': [], 'not-ready': []}
+    """
+    assert dedent(stdout).strip() in tb.cell_output_text(84)
 
 
-def test_fs_glob_link_recursive():
+def test_fs_glob_link_recursive(load, tb):
     d = Path("tmp/glob-link-recursive")
     expected = {str(d / x) for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
     for p in expected:
         assert Path(p).is_symlink()
     assert set(x for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
+    assert tb.cell_output_text(86) == load(base / "glob-link-recursive.yaml")
+    stdout = """
+    {'ready': ['tmp/glob-link-recursive/file1.nml',
+      'tmp/glob-link-recursive/subdir1/file4.nml',
+      'tmp/glob-link-recursive/subdir2/file5.nml'],
+     'not-ready': []}
+    """
+    assert dedent(stdout).strip() in tb.cell_output_text(87)
 
 
-def test_fs_glob_link_link_dirs():
+def test_fs_glob_link_link_dirs(load, tb):
     d = Path("tmp/glob-link-dirs")
     expected = {str(d / x) for x in ("subdir1", "subdir2")}
     for p in expected:
         assert Path(p).is_symlink()
     assert set(glob(f"{d}/*")) == expected
+    assert tb.cell_output_text(90) == load(base / "glob-link-dirs.yaml")
+    stdout = """
+    {'ready': ['tmp/glob-link-dirs/subdir1', 'tmp/glob-link-dirs/subdir2'],
+     'not-ready': []}
+    """
+    assert dedent(stdout).strip() in tb.cell_output_text(91)
