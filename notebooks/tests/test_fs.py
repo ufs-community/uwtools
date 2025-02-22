@@ -93,14 +93,12 @@ def test_fs_link(load, tb):
 def test_fs_makedirs(load, tb):
     # Get the config files as text and dictionaries.
     config_str = load(base / "config/dir.yaml")
-    config_dict = yaml.safe_load(config_str)
     config_keys_str = load(base / "config/dir-keys.yaml")
-    config_keys_dict = yaml.safe_load(config_keys_str)
     # Each value in each config should have been created as one or more subdirectories.
-    for subdir in config_dict["makedirs"]:
+    for subdir in yaml.safe_load(config_str)["makedirs"]:
         assert os.path.exists("tmp/dir-target/" + subdir)
         assert os.path.exists("tmp/makedirs-target/" + subdir)
-    for subdir in config_keys_dict["path"]["to"]["dirs"]["makedirs"]:
+    for subdir in yaml.safe_load(config_keys_str)["path"]["to"]["dirs"]["makedirs"]:
         assert os.path.exists("tmp/dir-keys-target/" + subdir)
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(53) == config_str
