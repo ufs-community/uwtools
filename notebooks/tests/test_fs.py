@@ -6,10 +6,10 @@ from testbook import testbook
 
 def test_copy():
     # Get the config files as text and dictionaries.
-    with open("fixtures/fs/copy-config.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/fs/config/copy.yaml", "r", encoding="utf-8") as f:
         config_str = f.read().rstrip()
         config_dict = yaml.safe_load(config_str)
-    with open("fixtures/fs/copy-keys-config.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/fs/config/copy-keys.yaml", "r", encoding="utf-8") as f:
         config_keys_str = f.read().rstrip()
         config_keys_dict = yaml.safe_load(config_keys_str)
     with testbook("fs.ipynb", execute=True) as tb:
@@ -53,10 +53,10 @@ def test_copy():
 
 def test_link():
     # Get the config files as text and dictionaries.
-    with open("fixtures/fs/link-config.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/fs/config/link.yaml", "r", encoding="utf-8") as f:
         config_str = f.read().rstrip()
         config_dict = yaml.safe_load(config_str)
-    with open("fixtures/fs/link-keys-config.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/fs/config/link-keys.yaml", "r", encoding="utf-8") as f:
         config_keys_str = f.read().rstrip()
         config_keys_dict = yaml.safe_load(config_keys_str)
     with testbook("fs.ipynb", execute=True) as tb:
@@ -106,10 +106,10 @@ def test_link():
 
 def test_makedirs():
     # Get the config files as text and dictionaries.
-    with open("fixtures/fs/dir-config.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/fs/config/dir.yaml", "r", encoding="utf-8") as f:
         config_str = f.read().rstrip()
         config_dict = yaml.safe_load(config_str)
-    with open("fixtures/fs/dir-keys-config.yaml", "r", encoding="utf-8") as f:
+    with open("fixtures/fs/config/dir-keys.yaml", "r", encoding="utf-8") as f:
         config_keys_str = f.read().rstrip()
         config_keys_dict = yaml.safe_load(config_keys_str)
     with testbook("fs.ipynb", execute=True) as tb:
