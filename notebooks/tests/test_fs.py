@@ -3,7 +3,6 @@
 import os
 from glob import glob
 from pathlib import Path
-from textwrap import dedent
 
 import yaml
 from pytest import fixture
@@ -115,83 +114,82 @@ def test_fs_makedirs(load, tb):
     ) in tb.cell_output_text(61)
 
 
-def test_fs_glob_copy_basic(load, tb):
+def test_fs_glob_copy_basic(load, report, tb):
     d = Path("tmp/glob-copy")
-    expected = {"file1.nml", "file2.txt", "file3.csv"}
-    assert set(glob(f"{d}/*")) == {str(d / x) for x in expected}
+    expected = {d / x for x in ("file1.nml", "file2.txt", "file3.csv")}
+    for p in expected:
+        assert p.is_file()
+    assert set(Path(x) for x in glob(f"{d}/*")) == expected
     assert tb.cell_output_text(73) == load(base / "glob-copy.yaml")
-    stdout = """
-    {'ready': ['tmp/glob-copy/file3.csv',
-      'tmp/glob-copy/file1.nml',
-      'tmp/glob-copy/file2.txt'],
-     'not-ready': []}
-    """
-    assert dedent(stdout).strip() in tb.cell_output_text(74)
+    r = report(74)
+    assert set(r["ready"]) == set(map(str, expected))
+    assert not r["not-ready"]
 
 
-def test_fs_glob_copy_recursive(load, tb):
+def test_fs_glob_copy_recursive(load, report, tb):
     d = Path("tmp/glob-copy-recursive")
     expected = {d / x for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
     for p in expected:
         assert p.is_file()
     assert set(Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
     assert tb.cell_output_text(78) == load(base / "glob-copy-recursive.yaml")
-    stdout = """
-    {'ready': ['tmp/glob-copy-recursive/file1.nml',
-      'tmp/glob-copy-recursive/subdir1/file4.nml',
-      'tmp/glob-copy-recursive/subdir2/file5.nml'],
-     'not-ready': []}
-    """
-    assert dedent(stdout).strip() in tb.cell_output_text(79)
+    r = report(79)
+    assert set(r["ready"]) == set(map(str, expected))
+    assert not r["not-ready"]
 
 
-def test_fs_glob_copy_ignore_dirs(load, tb):
+def test_fs_glob_copy_ignore_dirs(load, report, tb):
     d = Path("tmp/glob-copy-ignore-dirs")
     assert not d.is_dir()
     assert tb.cell_output_text(83) == load(base / "glob-copy-ignore-dirs.yaml")
-    stdout = """
-    {'ready': [], 'not-ready': []}
-    """
-    assert dedent(stdout).strip() in tb.cell_output_text(84)
+    r = report(84)
+    assert not r["ready"]
+    assert not r["not-ready"]
 
 
-def test_fs_glob_link_recursive(load, tb):
+def test_fs_glob_link_recursive(load, report, tb):
     d = Path("tmp/glob-link-recursive")
     expected = {d / x for x in ("file1.nml", "subdir1/file4.nml", "subdir2/file5.nml")}
     for p in expected:
         assert p.is_symlink()
     assert set(Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()) == expected
     assert tb.cell_output_text(86) == load(base / "glob-link-recursive.yaml")
-    stdout = """
-    {'ready': ['tmp/glob-link-recursive/file1.nml',
-      'tmp/glob-link-recursive/subdir1/file4.nml',
-      'tmp/glob-link-recursive/subdir2/file5.nml'],
-     'not-ready': []}
-    """
-    assert dedent(stdout).strip() in tb.cell_output_text(87)
+    r = report(87)
+    assert set(r["ready"]) == set(map(str, expected))
+    assert not r["not-ready"]
 
 
-def test_fs_glob_link_link_dirs(load, tb):
+def test_fs_glob_link_link_dirs(load, report, tb):
     d = Path("tmp/glob-link-dirs")
     expected = {d / x for x in ("subdir1", "subdir2")}
     for p in expected:
         assert p.is_symlink()
     assert set(Path(x) for x in glob(f"{d}/*")) == expected
     assert tb.cell_output_text(90) == load(base / "glob-link-dirs.yaml")
-    stdout = """
-    {'ready': ['tmp/glob-link-dirs/subdir1', 'tmp/glob-link-dirs/subdir2'],
-     'not-ready': []}
-    """
-    assert dedent(stdout).strip() in tb.cell_output_text(91)
+    r = report(91)
+    assert set(r["ready"]) == set(map(str, expected))
+    assert not r["not-ready"]
 
 
-def test_fs_copy_http(load, tb):
+def test_fs_copy_http(load, report, tb):
     d = Path("tmp/licenses")
     expected = d / "gpl"
     assert expected.is_file()
     assert set(glob(f"{d}/*")) == {str(expected)}
     assert tb.cell_output_text(94) == load(base / "copy-http.yaml")
-    stdout = """
-    {'ready': ['tmp/licenses/gpl'], 'not-ready': []}
-    """
-    assert dedent(stdout).strip() in tb.cell_output_text(95)
+    r = report(95)
+    assert r["ready"] == [str(expected)]
+    assert not r["not-ready"]
+
+
+# Helpers
+
+
+@fixture
+def report(tb):
+    def report(cell: int) -> dict:
+        lines = tb.cell_output_text(cell).split("\n")
+        stdout = "\n".join([line for line in lines if not line.startswith("[")])
+        return yaml.safe_load(stdout)
+
+    return report
