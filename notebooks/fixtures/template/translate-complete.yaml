@@ -1,3 +1,0 @@
-flowers:
-  roses: {{ color1 }}
-  violets: {{ color2 }}
