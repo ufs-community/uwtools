@@ -16,7 +16,7 @@ Optional arguments:
   --target-dir PATH
       Root directory for relative destination paths
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2025-03-17T18)
+      The cycle in ISO8601 format (e.g. 2024-08-12T00)
   --leadtime LEADTIME
       The leadtime as hours[:minutes[:seconds]]
   --dry-run
