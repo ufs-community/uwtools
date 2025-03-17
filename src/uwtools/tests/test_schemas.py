@@ -1789,6 +1789,41 @@ def test_schema_rocoto_workflow_cycledef():
     assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
 
 
+@mark.parametrize("spec", ["*", "0", "59", "*/2", "1-10", "0,15,30,45", "15-45/5", "0-29,30-59/2"])
+def test_schema_rocoto_workflow_cycledef_crontab_like_ok_minutes(spec):
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    assert not errors([{"spec": f"{spec} * * * * *"}])
+
+
+@mark.parametrize("spec", ["*", "0", "23", "*/6", "1-12", "0,6,12,18", "6-18/3", "0-12,13-23/3"])
+def test_schema_rocoto_workflow_cycledef_crontab_like_ok_hours(spec):
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    assert not errors([{"spec": f"* {spec} * * * *"}])
+
+
+@mark.parametrize("spec", ["*", "1", "31", "*/2", "1-15", "10,20,30", "5-30/5", "1-15,16-30/2"])
+def test_schema_rocoto_workflow_cycledef_crontab_like_ok_days(spec):
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    assert not errors([{"spec": f"* * {spec} * * *"}])
+
+
+@mark.parametrize("spec", ["*", "1", "12", "*/2", "6-9", "3,6,9,12", "1-6/2", "1-6,8-12/2"])
+def test_schema_rocoto_workflow_cycledef_crontab_like_ok_months(spec):
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    assert not errors([{"spec": f"* * * {spec} * *"}])
+
+
+# @mark.parametrize("spec", ["*", "1900", "2025", "9999", "*/2", "1990-1999",
+# "2000,2011,2017", "2000-2100/2", "2000-2010/2,2011-2019"])
+@mark.parametrize("spec", ["*", "1900", "2025", "9999", "1990-1999", "2000,2011,2017"])
+def test_schema_rocoto_workflow_cycledef_crontab_like_ok_years(spec):
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    assert not errors([{"spec": f"* * * * {spec} *"}])
+
+
+# @mark.parametrize("weekdays", ["*"])
+
+
 def test_schema_rocoto_task_resources():
     errors = schema_validator("rocoto", "$defs", "task", "properties")
     # Basic resource options
