@@ -1903,9 +1903,6 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_from_rocoto_docs(spec):
     assert not errors([{"spec": spec}])
 
 
-# @mark.parametrize("weekdays", ["*"])
-
-
 def test_schema_rocoto_task_resources():
     errors = schema_validator("rocoto", "$defs", "task", "properties")
     # Basic resource options
