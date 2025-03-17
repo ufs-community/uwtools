@@ -1813,9 +1813,20 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_months(spec):
     assert not errors([{"spec": f"* * * {spec} * *"}])
 
 
-# @mark.parametrize("spec", ["*", "1900", "2025", "9999", "*/2", "1990-1999",
-# "2000,2011,2017", "2000-2100/2", "2000-2010/2,2011-2019"])
-@mark.parametrize("spec", ["*", "1900", "2025", "9999", "1990-1999", "2000,2011,2017"])
+@mark.parametrize(
+    "spec",
+    [
+        "*",
+        "1900",
+        "2025",
+        "9999",
+        "*/2",
+        "1990-1999",
+        "2000,2011,2017",
+        "2000-2100/2",
+        "2000-2010/2,2011-2019",
+    ],
+)
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_years(spec):
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
     assert not errors([{"spec": f"* * * * {spec} *"}])
