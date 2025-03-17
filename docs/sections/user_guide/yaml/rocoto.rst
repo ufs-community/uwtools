@@ -58,7 +58,7 @@ UW YAML ``cycledef:`` specs using the "crontab-like" syntax, following examples 
    cycledef:
      - attrs:
          group: 15min
-       spec: */15 * * * 2006-2010 *
+       spec: "*/15 * * * 2006-2010 *"
      - attrs:
          group: hourly
        spec: 0 * * * 2006-2010 *
