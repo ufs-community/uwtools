@@ -1,3 +1,3 @@
-[2024-12-07T01:01:51]     INFO Validating config against internal schema: files-to-stage
-[2024-12-07T01:01:53]     INFO 0 schema-validation errors found in fs config
-[2024-12-07T01:01:53]    ERROR Relative path 'foo' requires target directory to be specified
+[2025-03-17T22:06:36]     INFO Validating config against internal schema: files-to-stage
+[2025-03-17T22:06:36]     INFO 0 schema-validation errors found in fs config
+[2025-03-17T22:06:36]    ERROR Relative path 'foo' requires target directory to be specified

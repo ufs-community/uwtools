@@ -1,10 +1,10 @@
-[2024-11-23T00:30:43]     INFO Validating config against internal schema: makedirs
-[2024-11-23T00:30:43]     INFO 0 schema-validation errors found in fs config
-[2024-11-23T00:30:44]     INFO Directory makedirs-parent-timedep/foo/20240529/12/006/bar: Executing
-[2024-11-23T00:30:44]     INFO Directory makedirs-parent-timedep/foo/20240529/12/006/bar: Ready
-[2024-11-23T00:30:44]     INFO Directory makedirs-parent-timedep/baz/20240529/12/006/qux: Executing
-[2024-11-23T00:30:44]     INFO Directory makedirs-parent-timedep/baz/20240529/12/006/qux: Ready
-[2024-11-23T00:30:44]     INFO Directories: Ready
+[2025-03-17T22:06:38]     INFO Validating config against internal schema: makedirs
+[2025-03-17T22:06:38]     INFO 0 schema-validation errors found in fs config
+[2025-03-17T22:06:39]     INFO Directory makedirs-parent-timedep/foo/20240529/12/006/bar: Executing
+[2025-03-17T22:06:39]     INFO Directory makedirs-parent-timedep/foo/20240529/12/006/bar: Ready
+[2025-03-17T22:06:39]     INFO Directory makedirs-parent-timedep/baz/20240529/12/006/qux: Executing
+[2025-03-17T22:06:39]     INFO Directory makedirs-parent-timedep/baz/20240529/12/006/qux: Ready
+[2025-03-17T22:06:39]     INFO Directories: Ready
 
 makedirs-parent-timedep/
 ├── baz/

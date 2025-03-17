@@ -1,21 +1,21 @@
-[2025-01-05T21:15:07]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
-[2025-01-05T21:15:07]    DEBUG [dereference] Dereferencing, current value:
-[2025-01-05T21:15:07]    DEBUG [dereference]   workflow:
-[2025-01-05T21:15:07]    DEBUG [dereference]     attrs:
-[2025-01-05T21:15:07]    DEBUG [dereference]       realtime: false
-[2025-01-05T21:15:07]    DEBUG [dereference]       scheduler: slurm
-[2025-01-05T21:15:07]    DEBUG [dereference]     cycledef:
-[2025-01-05T21:15:07]    DEBUG [dereference]     - attrs:
-[2025-01-05T21:15:07]    DEBUG [dereference]         group: howdy
-[2025-01-05T21:15:07]    DEBUG [dereference]       spec: 202209290000 202209300000 06:00:00
+[2025-03-17T22:06:35]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
+[2025-03-17T22:06:35]    DEBUG [dereference] Dereferencing, current value:
+[2025-03-17T22:06:35]    DEBUG [dereference]   workflow:
+[2025-03-17T22:06:35]    DEBUG [dereference]     attrs:
+[2025-03-17T22:06:35]    DEBUG [dereference]       realtime: false
+[2025-03-17T22:06:35]    DEBUG [dereference]       scheduler: slurm
+[2025-03-17T22:06:35]    DEBUG [dereference]     cycledef:
+[2025-03-17T22:06:35]    DEBUG [dereference]     - attrs:
+[2025-03-17T22:06:35]    DEBUG [dereference]         group: howdy
+[2025-03-17T22:06:35]    DEBUG [dereference]       spec: 202209290000 202209300000 06:00:00
 ...
-[2025-01-05T21:15:07]    DEBUG [dereference]     cycledefs: howdy
-[2025-01-05T21:15:07]    DEBUG [dereference]   account: '&ACCOUNT;'
-[2025-01-05T21:15:07]    DEBUG [dereference]   command: echo hello $person
-[2025-01-05T21:15:07]    DEBUG [dereference]   jobname: hello
-[2025-01-05T21:15:07]    DEBUG [dereference]   native: --reservation my_reservation
-[2025-01-05T21:15:07]    DEBUG [dereference]   nodes: 1:ppn=1
-[2025-01-05T21:15:07]    DEBUG [dereference]   walltime: 00:01:00
-[2025-01-05T21:15:07]    DEBUG [dereference]   envars:
-[2025-01-05T21:15:07]    DEBUG [dereference]     person: siri
-[2025-01-05T21:15:07]     INFO 0 Rocoto XML validation errors found
+[2025-03-17T22:06:37]    DEBUG [dereference]     cycledefs: howdy
+[2025-03-17T22:06:37]    DEBUG [dereference]   account: '&ACCOUNT;'
+[2025-03-17T22:06:37]    DEBUG [dereference]   command: echo hello $person
+[2025-03-17T22:06:37]    DEBUG [dereference]   jobname: hello
+[2025-03-17T22:06:37]    DEBUG [dereference]   native: --reservation my_reservation
+[2025-03-17T22:06:37]    DEBUG [dereference]   nodes: 1:ppn=1
+[2025-03-17T22:06:37]    DEBUG [dereference]   walltime: 00:01:00
+[2025-03-17T22:06:37]    DEBUG [dereference]   envars:
+[2025-03-17T22:06:37]    DEBUG [dereference]     person: siri
+[2025-03-17T22:06:37]     INFO 0 Rocoto XML validation errors found
