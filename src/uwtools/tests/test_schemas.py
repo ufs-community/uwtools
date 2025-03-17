@@ -1834,7 +1834,10 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_minutes(spec):
     assert not errors([{"spec": f"{spec} * * * * *"}])
 
 
-@mark.parametrize("spec", ["*", "0", "23", "*/6", "1-12", "0,6,12,18", "6-18/3", "0-12,13-23/3"])
+@mark.parametrize(
+    "spec",
+    ["*", "0", "23", "*/6", "*/999", "1-12", "0,6,12,18", "6-18/3", "6-18/999", "0-12,13-23/3"],
+)
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_hours(spec):
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
     assert not errors([{"spec": f"* {spec} * * * *"}])
