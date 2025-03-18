@@ -1892,13 +1892,16 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_weekdays(spec):
 @mark.parametrize(
     "spec",
     [
+        # From Rocoto docs:
         "*/15 * * * 2006-2010 *",
         "0 * * * 2006-2010 *",
         "0 */3 * * 2006-2010 *",
         "0 */6 * 1,2 2006-2010 *",
+        # From Issue 709:
+        "0 0 1 1 1960-1962 *",
     ],
 )
-def test_schema_rocoto_workflow_cycledef_crontab_like_ok_from_rocoto_docs(spec):
+def test_schema_rocoto_workflow_cycledef_crontab_like_ok_examples(spec):
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
     assert not errors([{"spec": spec}])
 
