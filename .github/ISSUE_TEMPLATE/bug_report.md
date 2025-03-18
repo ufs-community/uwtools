@@ -1,53 +1,36 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Bug Report
+about: Report a failure of documented behavior.
 title:
-labels: bug
+labels: Bug
 assignees:
 
 ---
 
 <!--
-- - -  I N S T R U C T I O N S  --  P L E A S E  R E A D  - - -
-Please remove boiler plate instructions when filling out this template.
-Please remove unwanted/unrelated/irrelevant information such as comments provided as a reference in this template.
-Use proper formatting to separate code snippets from text description e.g. use ```code block``` or `in-line code`.
-Please copy any output files into a Github gist (for e.g.) and link to the gist, rather than relying on paths on platforms that might change or disappear.
+  Please:
+  * Use the Feature Request template if you are suggesting a feature.
+  * Review the project's Issues to see if this bug has already been reported. Feel free to comment on an existing Issue.
+  * Format code snippets with backticks, either as ```code block``` or `inline code`.
+  * Attach small support files, if needed, via Issue comments; link to large files in GitHub Gists, Google Drive, etc.
 -->
 
-If this is a new feature request, please consider using the [Feature Request](./feature_request.md) template.
-Your desired feature may already have an issue created!
-If so, please consider using that Issue to expand on the feature capabilities or requirements.
+**Current Behavior**
 
-Your bug may have already been reported!
-Please look through the existing issues on the [Issue tracker](https://github.com/ufs-community/uwtools/issues) to see if this issue has been created.
-If so, please consider using that Issue to add any additional information.
+<!-- Please describe the erroneous behavior. -->
 
-**Expected behavior**
-<!-- Tell us what should happen. -->
+**Expected Behavior**
 
-**Current behavior**
-<!-- Tell us what happens instead of the expected behavior. -->
-
-**Machines affected**
-<!-- Tell us which environments (e.g. OS's, HPC's, CSP's, etc.) have this bug been detected. -->
+<!-- What should happen instead? -->
 
 **To Reproduce**
-<!--- Provide a link to a live example, and/or an unambiguous set of steps to -->
-<!--- reproduce this bug. Include code to reproduce, if relevant -->
-<!--1. -->
-<!--2. -->
-<!--3. -->
 
-**Context**
-<!--- Providing context helps us come up with a solution that is most useful in the real world. -->
+<!--- Provide an unambiguous set of steps to reproduce the bug. Include code and/or data if needed. -->
 
-**Detailed Description**
-<!--- Provide a detailed description of the change or addition you are proposing. -->
+**Additional Context**
 
-**Additional Information**
-<!-- Any other relevant information that we should know to correctly understand and reproduce the issue. Please describe in as much detail as possible. -->
+<!-- Other helpful info, screenshots, etc. -->
 
-**Possible Implementation**
-<!--- Not obligatory, but suggest an idea for implementing addition or change. -->
+**Current Version**
 
+<!-- Which uwtools version are you using, from 'uw --version', 'conda list | grep uwtools', etc. -->

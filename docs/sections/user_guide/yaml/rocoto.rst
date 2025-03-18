@@ -45,11 +45,29 @@ UW YAML Keys
    ...
    </workflow>
 
-``cycledef:`` -- This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
+``cycledef:`` -- This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto (search :rocoto:`this page<>` for those terms). The example above uses the "start, stop, step" syntax and translates to a single ``<cycledef>`` tag:
 
 .. code-block:: xml
 
    <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+
+UW YAML ``cycledef:`` specs using the "crontab-like" syntax, following examples in the Rocoto documentation, might look like:
+
+.. code-block:: yaml
+
+   cycledef:
+     - attrs:
+         group: 15min
+       spec: "*/15 * * * 2006-2010 *"
+     - attrs:
+         group: hourly
+       spec: 0 * * * 2006-2010 *
+     - attrs:
+         group: 3hourly
+       spec: 0 */3 * * 2006-2010 *
+     - attrs:
+         group: 6hrlyJanFeb
+       spec: 0 */6 * 1,2 2006-2010 *
 
 ``entities:`` -- This section defines key/value pairs --- each rendered as ``<!ENTITY key "value">`` --- to translate to named entities (variables) in XML. The example above would yield:
 
