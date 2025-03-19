@@ -49,7 +49,7 @@ and a YAML file called ``values.yaml`` with contents:
   .. literalinclude:: template/render-exec-stdout.out
      :language: text
 
-  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
+  Shell redirection may also be used to stream output to a file, another process, etc.
 
 * To render the template to a file via command-line argument:
 
@@ -99,7 +99,7 @@ and a YAML file called ``values.yaml`` with contents:
   .. literalinclude:: template/render-exec-verbose.out
      :language: text
 
-  Note that ``uw`` logs to ``stderr``. Use :shell-redirection:`shell redirection<>` as needed.
+  Note that ``uw`` logs to ``stderr``. Use shell redirection as needed.
 
 * The following examples use the YAML file ``greeting.yaml`` with contents:
 
@@ -213,7 +213,7 @@ The examples in this section use atparse-formatted template file ``atparse.txt``
   .. literalinclude:: template/translate-exec-stdout.out
      :language: text
 
-  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
+  Shell redirection may also be used to stream output to a file, another process, etc.
 
 * To convert the template to a file via command-line argument:
 
