@@ -100,15 +100,15 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     yield asset(Path(dst), Path(dst).is_file)
     dst = _local_path(dst)  # currently no support for remote destinations
     src_scheme = urlparse(str(src)).scheme
-    if src_scheme in SCHEMES.local:
-        yield file(src)
-        _filecopy_local(_local_path(src), dst)
-    elif src_scheme in SCHEMES.hsi:
+    if src_scheme in SCHEMES.hsi:
         yield None  # PM fix this
         _filecopy_hsi(str(src), dst)
     elif src_scheme in SCHEMES.http:
         yield existing(src)
         _filecopy_http(str(src), dst)
+    elif src_scheme in SCHEMES.local:
+        yield file(src)
+        _filecopy_local(_local_path(src), dst)
     else:
         _bad_scheme(src, src_scheme)
 
@@ -148,7 +148,10 @@ def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
 
 def _filecopy_hsi(src: str, dst: Path) -> None:
     """
-    PM WRITE DOCSTRING PM WRITE TESTS.
+    Copy an HPSS mass-store file to the local filesystem via HSI.
+
+    :param src: HPSS path of the source file.
+    :param dst: Path to the destination file to create.
     """
     assert src
     assert dst
@@ -156,7 +159,10 @@ def _filecopy_hsi(src: str, dst: Path) -> None:
 
 def _filecopy_http(src: str, dst: Path) -> None:
     """
-    PM WRITE DOCSTRING PM WRITE TESTS.
+    Copy a remote file to the local filesystem via HTTP.
+
+    :param src: URL of the source file.
+    :param dst: Path to the destination file to create.
     """
     dst.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(src, allow_redirects=True, timeout=3)
@@ -169,7 +175,10 @@ def _filecopy_http(src: str, dst: Path) -> None:
 
 def _filecopy_local(src: Path, dst: Path) -> None:
     """
-    PM WRITE DOCSTRING PM WRITE TESTS.
+    Copy a file in the local filesystem.
+
+    :param src: Path to the source file.
+    :param dst: Path to the destination file to create.
     """
     dst.parent.mkdir(parents=True, exist_ok=True)
     copy(src, dst)

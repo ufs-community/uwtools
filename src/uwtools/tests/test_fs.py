@@ -18,6 +18,7 @@ from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
+from uwtools.utils import tasks
 
 # Fixtures
 
@@ -66,6 +67,12 @@ class ConcreteStager(fs.Stager):
     @property
     def _schema(self):
         return "some-schema"
+
+
+@iotaa.external
+def exists(*_args, **_kwargs):
+    yield "exists"
+    yield iotaa.asset(None, lambda: True)
 
 
 # Tests
@@ -281,3 +288,46 @@ def test_fs_Stager__config_block_fails_bad_type(assets, val):
     with raises(UWConfigError) as e:
         ConcreteStager(target_dir=dstdir, config=cfgdict, key_path=["a", "b"])
     assert str(e.value) == "Value at a.b must be a dictionary"
+
+
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_fs_filecopy_hsi(dst_in, dst_out):
+    src = "hsi://path/to/file"
+    with patch.object(tasks, "_filecopy_hsi") as _filecopy_hsi, patch.object(
+        tasks, "existing", exists
+    ):
+        fs.filecopy(src=src, dst=dst_in)
+    _filecopy_hsi.assert_called_once_with(src, Path(dst_out))
+
+
+@mark.parametrize("scheme", ["http", "https"])
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_fs_filecopy_http(scheme, dst_in, dst_out):
+    src = f"{scheme}://a.com/file"
+    with patch.object(tasks, "_filecopy_http") as _filecopy_http, patch.object(
+        tasks, "existing", exists
+    ):
+        fs.filecopy(src=src, dst=dst_in)
+    _filecopy_http.assert_called_once_with(src, Path(dst_out))
+
+
+@mark.parametrize(
+    ["src_in", "src_out"],
+    [("/path/to/src", "/path/to/src"), ("file:///path/to/src", "/path/to/src")],
+)
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_fs_filecopy_local(src_in, src_out, dst_in, dst_out):
+    with patch.object(tasks, "_filecopy_local") as _filecopy_local, patch.object(
+        tasks, "file", exists
+    ):
+        fs.filecopy(src=src_in, dst=dst_in)
+    _filecopy_local.assert_called_once_with(Path(src_out), Path(dst_out))
