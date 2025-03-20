@@ -13,6 +13,7 @@ from pytest import mark, raises
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.strings import STR
 from uwtools.tests.support import logged
 from uwtools.utils import tasks
 
@@ -135,18 +136,31 @@ def test_tasks_existing_bad_scheme():
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_file_missing(prefix, tmp_path):
+def test_tasks_file__missing(prefix, tmp_path):
     path = tmp_path / "file"
     path = "%s%s" % (prefix, path) if prefix else path
     assert not iotaa.ready(tasks.file(path=path))
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_file_present(prefix, tmp_path):
+def test_tasks_file__present(prefix, tmp_path):
     path = tmp_path / "file"
     path.touch()
     path = "%s%s" % (prefix, path) if prefix else path
     assert iotaa.ready(tasks.file(path=path))
+
+
+@mark.parametrize("available", [True, False])
+@mark.parametrize("wrapper", [Path, str])
+def test_tasks_file_hpss(available, wrapper):
+    path = wrapper("/path/to/file")
+    with (
+        patch.object(tasks, "executable", exists),
+        patch.object(tasks, "run_shell_cmd", return_value=(available, None)) as run_shell_cmd,
+    ):
+        val = tasks.file_hpss(path=path)
+    assert iotaa.refs(val) == path
+    run_shell_cmd.assert_called_once_with(f"{STR.hsi} ls {path}")
 
 
 def test_tasks_filecopy_simple(tmp_path):
