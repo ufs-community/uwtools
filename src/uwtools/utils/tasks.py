@@ -15,6 +15,7 @@ from iotaa import asset, external, task
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
+from uwtools.utils.processing import run_shell_cmd
 
 SCHEMES = ns(
     hsi=(STR.url_scheme_hsi,),
@@ -46,7 +47,7 @@ def executable(program: Union[Path, str]):
 
     :param program: Name of or path to the program.
     """
-    yield "Executable program %s" % program
+    yield "Executable program '%s' on PATH" % program
     yield asset(program, lambda: bool(which(program)))
 
 
@@ -85,6 +86,20 @@ def file(path: Union[Path, str], context: str = ""):
     suffix = f" ({context})" if context else ""
     yield "File %s%s" % (path, suffix)
     yield asset(path, path.is_file)
+
+
+@task
+def file_hpss(path: Union[Path, str]):
+    """
+    An existing file in HPSS.
+
+    :param path: HPSS path to the file.
+    """
+    yield "HPSS file %s" % path
+    available = [False]
+    yield asset(path, lambda: available[0])
+    yield executable(STR.hsi)
+    available[0], _ = run_shell_cmd(f"{STR.hsi} ls {str(path)}")
 
 
 @task

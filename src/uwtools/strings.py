@@ -91,6 +91,7 @@ class STR:
     globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"
     help: str = "help"
+    hsi: str = "hsi"
     infile: str = "input_file"
     infmt: str = "input_format"
     ioda: str = "ioda"
