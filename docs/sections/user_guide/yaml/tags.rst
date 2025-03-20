@@ -3,7 +3,9 @@
 Custom Tags
 ===========
 
-Tags are used to denote the type of a YAML node when converting to a Python object. Standard YAML tags are defined `here <http://yaml.org/type/index.html>`_.
+Tags are used to denote the type of a YAML node when converting to a Python object.
+
+UW supports the use of standard YAML tags, denoted by `!!` as defined `here <http://yaml.org/type/index.html>`_. Additionally, UW defines the following tags to support use cases not covered by standard tags, denoted by `!` and described in detail below. Where standard YAML tags are applied to their values immediately, application of UW YAML tags is delayed until after Jinja2 expressions in tagged values are dereferenced.
 
 Tags may be implicit:
 
@@ -20,8 +22,6 @@ Or explicit:
    boolean: !!bool "true"
    integer: !!int "3"
    float: !!float "3.14"
-
-Additionally, UW defines the following tags to support use cases not covered by standard tags. Where standard YAML tags are applied to their values immediately, application of UW YAML tags is delayed until after Jinja2 expressions in tagged values are dereferenced.
 
 **NB** Values tagged with UW YAML tags must be strings. Use quotes as necessary to ensure that they are.
 
