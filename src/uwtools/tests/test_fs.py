@@ -309,7 +309,7 @@ def test_fs_filecopy_hsi(dst_in, dst_out):
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_fs_filecopy_http(scheme, dst_in, dst_out):
-    src = f"{scheme}://a.com/file"
+    src = f"{scheme}://foo.com/obj"
     with patch.object(tasks, "_filecopy_http") as _filecopy_http, patch.object(
         tasks, "existing", exists
     ):

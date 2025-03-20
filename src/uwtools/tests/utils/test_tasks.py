@@ -231,6 +231,30 @@ def test__bad_scheme():
     assert str(e.value) == f"Scheme 'foo' in '{path}' not supported"
 
 
+@mark.skip()
+def test__filecopy_hsi():
+    pass
+
+
+def test__filecopy_http(tmp_path):
+    dst = tmp_path / "dst"
+    assert not dst.exists()
+    with patch.object(tasks.requests, "get") as get:
+        response = Mock(status_code=200, content=b"data")
+        get.return_value = response
+        tasks._filecopy_http(src="http://foo.com/obj", dst=dst)
+    assert dst.exists()
+
+
+def test__filecopy_local(tmp_path):
+    src = tmp_path / "src"
+    src.touch()
+    dst = tmp_path / "subdir" / "dst"
+    assert not dst.exists()
+    tasks._filecopy_local(src=src, dst=dst)
+    assert dst.exists()
+
+
 def test__local_path_fail():
     path = "foo://bucket/a/b"
     with patch.object(tasks, "_bad_scheme") as _bad_scheme:
