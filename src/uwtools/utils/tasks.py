@@ -169,8 +169,9 @@ def _filecopy_hsi(src: str, dst: Path) -> None:
     :param src: HPSS path of the source file.
     :param dst: Path to the destination file to create.
     """
-    assert src
-    assert dst
+    _, output = run_shell_cmd(f"{STR.hsi} -q get {dst} : {src}")
+    breakpoint()
+    return
 
 
 def _filecopy_http(src: str, dst: Path) -> None:
