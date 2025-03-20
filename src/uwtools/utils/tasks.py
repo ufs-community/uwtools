@@ -14,8 +14,13 @@ from iotaa import asset, external, task
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.strings import STR
 
-SCHEMES = ns(http=("http", "https"), local=("", "file"))
+SCHEMES = ns(
+    hsi=(STR.url_scheme_hsi,),
+    http=(STR.url_scheme_http, STR.url_scheme_https),
+    local=("", STR.url_scheme_file),
+)
 
 
 @task
@@ -96,20 +101,14 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     dst = _local_path(dst)  # currently no support for remote destinations
     src_scheme = urlparse(str(src)).scheme
     if src_scheme in SCHEMES.local:
-        src = _local_path(src)
         yield file(src)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        copy(src, dst)
+        _filecopy_local(_local_path(src), dst)
+    elif src_scheme in SCHEMES.hsi:
+        yield None  # PM fix this
+        _filecopy_hsi(str(src), dst)
     elif src_scheme in SCHEMES.http:
-        src = str(src)
         yield existing(src)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        response = requests.get(src, allow_redirects=True, timeout=3)
-        if (code := response.status_code) == 200:
-            with open(dst, "wb") as f:
-                f.write(response.content)
-        else:
-            log.error("Could not get '%s', HTTP status was: %s", src, code)
+        _filecopy_http(str(src), dst)
     else:
         _bad_scheme(src, src_scheme)
 
@@ -145,6 +144,35 @@ def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
     :raises: UWConfigError.
     """
     raise UWConfigError(f"Scheme '{scheme}' in '{path}' not supported")
+
+
+def _filecopy_hsi(src: str, dst: Path) -> None:
+    """
+    PM WRITE DOCSTRING PM WRITE TESTS.
+    """
+    assert src
+    assert dst
+
+
+def _filecopy_http(src: str, dst: Path) -> None:
+    """
+    PM WRITE DOCSTRING PM WRITE TESTS.
+    """
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    response = requests.get(src, allow_redirects=True, timeout=3)
+    if (code := response.status_code) == 200:
+        with open(dst, "wb") as f:
+            f.write(response.content)
+    else:
+        log.error("Could not get '%s', HTTP status was: %s", src, code)
+
+
+def _filecopy_local(src: Path, dst: Path) -> None:
+    """
+    PM WRITE DOCSTRING PM WRITE TESTS.
+    """
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    copy(src, dst)
 
 
 def _local_path(path: Union[Path, str]) -> Path:
