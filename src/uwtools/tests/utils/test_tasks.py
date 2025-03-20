@@ -285,9 +285,15 @@ def test_utils_tasks_symlink__directory_hierarchy(prefix, tmp_path):
     assert link.is_symlink()
 
 
-@mark.skip()
-def test_utils_tasks__filecopy_hsi():
-    pass
+def test_utils_tasks__filecopy_hsi(caplog):
+    src = "/path/to/src"
+    dst = "/path/to/dst"
+    with patch.object(tasks, "run_shell_cmd") as run_shell_cmd:
+        run_shell_cmd.return_value = (True, "foo\nbar\n")
+        tasks._filecopy_hsi(src=src, dst=Path(dst))
+    run_shell_cmd.assert_called_once_with(f"hsi -q get {dst} : {src}")
+    assert logged(caplog, "=> foo")
+    assert logged(caplog, "=> bar")
 
 
 def test_utils_tasks__filecopy_http(tmp_path):
