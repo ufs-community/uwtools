@@ -117,7 +117,7 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     dst = _local_path(dst)  # currently no support for remote destinations
     src_scheme = urlparse(str(src)).scheme
     if src_scheme in SCHEMES.hsi:
-        yield file_hpss(src)
+        yield [executable(STR.hsi), file_hpss(src)]
         _filecopy_hsi(str(src), dst)
     elif src_scheme in SCHEMES.http:
         yield existing(src)

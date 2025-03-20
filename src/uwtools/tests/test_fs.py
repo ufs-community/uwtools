@@ -298,6 +298,7 @@ def test_fs_filecopy_hsi(dst_in, dst_out):
     src = "hsi://path/to/file"
     with (
         patch.object(tasks, "_filecopy_hsi") as _filecopy_hsi,
+        patch.object(tasks, "executable", exists),
         patch.object(tasks, "existing", exists),
         patch.object(tasks, "file_hpss", exists),
     ):
