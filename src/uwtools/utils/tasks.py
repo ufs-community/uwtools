@@ -99,8 +99,8 @@ def file_hpss(path: Union[Path, str]):
     available: list[Union[bool, Path, str]] = [False]
     yield asset(path, lambda: bool(available[0]))
     yield executable(STR.hsi)
-    status, _ = run_shell_cmd(f"{STR.hsi} ls {str(path)}")
-    available[0] = path if status == 0 else False
+    success, _ = run_shell_cmd(f"{STR.hsi} ls {str(path)}")
+    available[0] = path if success else False
 
 
 @task
@@ -115,10 +115,11 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     yield "Copy %s -> %s" % (src, dst)
     yield asset(Path(dst), Path(dst).is_file)
     dst = _local_path(dst)  # currently no support for remote destinations
-    src_scheme = urlparse(str(src)).scheme
+    parts = urlparse(str(src))
+    src_scheme = parts.scheme
     if src_scheme in SCHEMES.hsi:
-        yield [executable(STR.hsi), file_hpss(src)]
-        _filecopy_hsi(str(src), dst)
+        yield [executable(STR.hsi), file_hpss(parts.path)]
+        _filecopy_hsi(parts.path, dst)
     elif src_scheme in SCHEMES.http:
         yield existing(src)
         _filecopy_http(str(src), dst)
@@ -170,8 +171,8 @@ def _filecopy_hsi(src: str, dst: Path) -> None:
     :param dst: Path to the destination file to create.
     """
     _, output = run_shell_cmd(f"{STR.hsi} -q get {dst} : {src}")
-    breakpoint()
-    return
+    for line in output.strip().split("\n"):
+        log.info("=> %s", line)
 
 
 def _filecopy_http(src: str, dst: Path) -> None:

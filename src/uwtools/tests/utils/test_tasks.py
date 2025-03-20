@@ -29,14 +29,14 @@ def exists(x):
 # Tests
 
 
-def test_tasks_directory(tmp_path):
+def test_utils_tasks_directory(tmp_path):
     p = tmp_path / "foo" / "bar"
     assert not p.is_dir()
     assert iotaa.ready(tasks.directory(path=p))
     assert p.is_dir()
 
 
-def test_tasks_directory_fail(caplog, tmp_path):
+def test_utils_tasks_directory__fail(caplog, tmp_path):
     os.chmod(tmp_path, 0o550)
     p = tmp_path / "foo"
     assert not iotaa.ready(tasks.directory(path=p))
@@ -45,7 +45,7 @@ def test_tasks_directory_fail(caplog, tmp_path):
     assert logged(caplog, "[Errno 13] Permission denied: '%s'" % p)
 
 
-def test_tasks_executable(tmp_path):
+def test_utils_tasks_executable(tmp_path):
     p = tmp_path / "program"
     # Ensure that only our temp directory is on the path:
     with patch.dict(os.environ, {"PATH": str(tmp_path)}, clear=True):
@@ -59,8 +59,15 @@ def test_tasks_executable(tmp_path):
         assert iotaa.ready(tasks.executable(program=p))
 
 
+def test_utils_tasks_existing__bad_scheme():
+    path = "foo://bucket/a/b"
+    with raises(UWConfigError) as e:
+        tasks.existing(path=path)
+    assert str(e.value) == f"Scheme 'foo' in '{path}' not supported"
+
+
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_existing_local_missing(caplog, prefix, tmp_path):
+def test_utils_tasks_existing__local_missing(caplog, prefix, tmp_path):
     log.setLevel(logging.INFO)
     base = tmp_path / "x"
     path = prefix + str(base) if prefix else base
@@ -68,7 +75,7 @@ def test_tasks_existing_local_missing(caplog, prefix, tmp_path):
     assert logged(caplog, "Filesystem item %s: Not ready [external asset]" % base)
 
 
-def test_tasks_existing_local_present_directory(caplog, tmp_path):
+def test_utils_tasks_existing__local_present_directory(caplog, tmp_path):
     log.setLevel(logging.INFO)
     path = tmp_path / "directory"
     path.mkdir()
@@ -76,18 +83,18 @@ def test_tasks_existing_local_present_directory(caplog, tmp_path):
     assert logged(caplog, "Filesystem item %s: Ready" % path)
 
 
-def test_tasks_existing_missing(tmp_path):
+def test_utils_tasks_existing__missing(tmp_path):
     path = tmp_path / "x"
     assert not iotaa.ready(tasks.existing(path=path))
 
 
-def test_tasks_existing_present_file(tmp_path):
+def test_utils_tasks_existing__present_file(tmp_path):
     path = tmp_path / "file"
     path.touch()
     assert iotaa.ready(tasks.existing(path=path))
 
 
-def test_tasks_existing_present_symlink(caplog, tmp_path):
+def test_utils_tasks_existing__present_symlink(caplog, tmp_path):
     log.setLevel(logging.INFO)
     path = tmp_path / "symlink"
     path.symlink_to(os.devnull)
@@ -96,7 +103,7 @@ def test_tasks_existing_present_symlink(caplog, tmp_path):
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_existing_local_present_file(caplog, prefix, tmp_path):
+def test_utils_tasks_existing__local_present_file(caplog, prefix, tmp_path):
     log.setLevel(logging.INFO)
     base = tmp_path / "file"
     base.touch()
@@ -106,7 +113,7 @@ def test_tasks_existing_local_present_file(caplog, prefix, tmp_path):
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_existing_local_present_symlink(caplog, prefix, tmp_path):
+def test_utils_tasks_existing__local_present_symlink(caplog, prefix, tmp_path):
     log.setLevel(logging.INFO)
     base = tmp_path / "symlink"
     base.symlink_to(os.devnull)
@@ -117,7 +124,7 @@ def test_tasks_existing_local_present_symlink(caplog, prefix, tmp_path):
 
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize("code,expected", [(200, True), (404, False)])
-def test_tasks_existing_remote(caplog, code, expected, scheme):
+def test_utils_tasks_existing__remote(caplog, code, expected, scheme):
     log.setLevel(logging.INFO)
     path = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
@@ -128,22 +135,15 @@ def test_tasks_existing_remote(caplog, code, expected, scheme):
     assert logged(caplog, msg)
 
 
-def test_tasks_existing_bad_scheme():
-    path = "foo://bucket/a/b"
-    with raises(UWConfigError) as e:
-        tasks.existing(path=path)
-    assert str(e.value) == f"Scheme 'foo' in '{path}' not supported"
-
-
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_file__missing(prefix, tmp_path):
+def test_utils_tasks_file__missing(prefix, tmp_path):
     path = tmp_path / "file"
     path = "%s%s" % (prefix, path) if prefix else path
     assert not iotaa.ready(tasks.file(path=path))
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_file__present(prefix, tmp_path):
+def test_utils_tasks_file__present(prefix, tmp_path):
     path = tmp_path / "file"
     path.touch()
     path = "%s%s" % (prefix, path) if prefix else path
@@ -152,7 +152,7 @@ def test_tasks_file__present(prefix, tmp_path):
 
 @mark.parametrize("available", [True, False])
 @mark.parametrize("wrapper", [Path, str])
-def test_tasks_file_hpss(available, wrapper):
+def test_utils_tasks_file_hpss(available, wrapper):
     path = wrapper("/path/to/file")
     with (
         patch.object(tasks, "executable", exists),
@@ -163,16 +163,7 @@ def test_tasks_file_hpss(available, wrapper):
     run_shell_cmd.assert_called_once_with(f"{STR.hsi} ls {path}")
 
 
-def test_tasks_filecopy_simple(tmp_path):
-    src = tmp_path / "src"
-    dst = tmp_path / "dst"
-    src.touch()
-    assert not dst.is_file()
-    tasks.filecopy(src=src, dst=dst)
-    assert dst.is_file()
-
-
-def test_tasks_filecopy_directory_hierarchy(tmp_path):
+def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
     src = tmp_path / "src"
     dst = tmp_path / "foo" / "bar" / "dst"
     src.touch()
@@ -183,7 +174,7 @@ def test_tasks_filecopy_directory_hierarchy(tmp_path):
 
 @mark.parametrize("code,expected", [(200, True), (404, False)])
 @mark.parametrize("src", ["http://foo.com/obj", "https://foo.com/obj"])
-def test_tasks_filecopy_source_http(code, expected, src, tmp_path):
+def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
     log.setLevel(logging.INFO)
     dst = tmp_path / "a-file"
     assert not dst.is_file()
@@ -201,7 +192,7 @@ def test_tasks_filecopy_source_http(code, expected, src, tmp_path):
     "src,ok",
     [("/src/file", True), ("file:///src/file", True), ("foo://bucket/a/b", False)],
 )
-def test_tasks_filecopy_source_local(src, ok):
+def test_utils_tasks_filecopy__source_local(src, ok):
     dst = "/dst/file"
     with patch.object(tasks.Path, "mkdir") as mkdir:
         if ok:
@@ -216,8 +207,64 @@ def test_tasks_filecopy_source_local(src, ok):
             assert str(e.value) == f"Scheme 'foo' in '{src}' not supported"
 
 
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
+    src = "hsi:///path/to/file"
+    with (
+        patch.object(tasks, "_filecopy_hsi") as _filecopy_hsi,
+        patch.object(tasks, "executable", exists),
+        patch.object(tasks, "file_hpss", exists),
+    ):
+        tasks.filecopy(src=src, dst=dst_in)
+    _filecopy_hsi.assert_called_once_with("/path/to/file", Path(dst_out))
+
+
+@mark.parametrize("scheme", ["http", "https"])
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_utils_tasks_filecopy__mocked_http(scheme, dst_in, dst_out):
+    src = f"{scheme}://foo.com/obj"
+    with (
+        patch.object(tasks, "_filecopy_http") as _filecopy_http,
+        patch.object(tasks, "existing", exists),
+    ):
+        tasks.filecopy(src=src, dst=dst_in)
+    _filecopy_http.assert_called_once_with(src, Path(dst_out))
+
+
+@mark.parametrize(
+    ["src_in", "src_out"],
+    [("/path/to/src", "/path/to/src"), ("file:///path/to/src", "/path/to/src")],
+)
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_utils_tasks_filecopy__mocked_local(src_in, src_out, dst_in, dst_out):
+    with (
+        patch.object(tasks, "_filecopy_local") as _filecopy_local,
+        patch.object(tasks, "file", exists),
+    ):
+        tasks.filecopy(src=src_in, dst=dst_in)
+    _filecopy_local.assert_called_once_with(Path(src_out), Path(dst_out))
+
+
+def test_utils_tasks_filecopy__simple(tmp_path):
+    src = tmp_path / "src"
+    dst = tmp_path / "dst"
+    src.touch()
+    assert not dst.is_file()
+    tasks.filecopy(src=src, dst=dst)
+    assert dst.is_file()
+
+
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_symlink_simple(prefix, tmp_path):
+def test_utils_tasks_symlink__simple(prefix, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
     target.touch()
@@ -228,7 +275,7 @@ def test_tasks_symlink_simple(prefix, tmp_path):
 
 
 @mark.parametrize("prefix", ["", "file://"])
-def test_tasks_symlink_directory_hierarchy(prefix, tmp_path):
+def test_utils_tasks_symlink__directory_hierarchy(prefix, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "foo" / "bar" / "link"
     target.touch()
@@ -238,19 +285,12 @@ def test_tasks_symlink_directory_hierarchy(prefix, tmp_path):
     assert link.is_symlink()
 
 
-def test__bad_scheme():
-    path = "foo://bucket/a/b"
-    with raises(UWConfigError) as e:
-        tasks.existing(path=path)
-    assert str(e.value) == f"Scheme 'foo' in '{path}' not supported"
-
-
 @mark.skip()
-def test__filecopy_hsi():
+def test_utils_tasks__filecopy_hsi():
     pass
 
 
-def test__filecopy_http(tmp_path):
+def test_utils_tasks__filecopy_http(tmp_path):
     dst = tmp_path / "dst"
     assert not dst.exists()
     with patch.object(tasks.requests, "get") as get:
@@ -260,7 +300,7 @@ def test__filecopy_http(tmp_path):
     assert dst.exists()
 
 
-def test__filecopy_local(tmp_path):
+def test_utils_tasks__filecopy_local(tmp_path):
     src = tmp_path / "src"
     src.touch()
     dst = tmp_path / "subdir" / "dst"
@@ -269,7 +309,7 @@ def test__filecopy_local(tmp_path):
     assert dst.exists()
 
 
-def test__local_path_fail():
+def test_utils_tasks__local__path_fail():
     path = "foo://bucket/a/b"
     with patch.object(tasks, "_bad_scheme") as _bad_scheme:
         tasks._local_path(path)
@@ -278,7 +318,7 @@ def test__local_path_fail():
 
 @mark.parametrize("prefix", ["", "file://"])
 @mark.parametrize("wrapper", [str, Path])
-def test__local_path_pass(prefix, wrapper):
+def test_utils_tasks__local__path_pass(prefix, wrapper):
     path = "/some/file"
     p2: Union[str, Path] = str(f"{prefix}{path}") if wrapper == str else Path(path)
     assert tasks._local_path(p2) == Path(path)
