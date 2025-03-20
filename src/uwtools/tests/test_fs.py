@@ -296,8 +296,10 @@ def test_fs_Stager__config_block_fails_bad_type(assets, val):
 )
 def test_fs_filecopy_hsi(dst_in, dst_out):
     src = "hsi://path/to/file"
-    with patch.object(tasks, "_filecopy_hsi") as _filecopy_hsi, patch.object(
-        tasks, "existing", exists
+    with (
+        patch.object(tasks, "_filecopy_hsi") as _filecopy_hsi,
+        patch.object(tasks, "existing", exists),
+        patch.object(tasks, "file_hpss", exists),
     ):
         fs.filecopy(src=src, dst=dst_in)
     _filecopy_hsi.assert_called_once_with(src, Path(dst_out))
@@ -310,8 +312,9 @@ def test_fs_filecopy_hsi(dst_in, dst_out):
 )
 def test_fs_filecopy_http(scheme, dst_in, dst_out):
     src = f"{scheme}://foo.com/obj"
-    with patch.object(tasks, "_filecopy_http") as _filecopy_http, patch.object(
-        tasks, "existing", exists
+    with (
+        patch.object(tasks, "_filecopy_http") as _filecopy_http,
+        patch.object(tasks, "existing", exists),
     ):
         fs.filecopy(src=src, dst=dst_in)
     _filecopy_http.assert_called_once_with(src, Path(dst_out))
@@ -326,8 +329,9 @@ def test_fs_filecopy_http(scheme, dst_in, dst_out):
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_fs_filecopy_local(src_in, src_out, dst_in, dst_out):
-    with patch.object(tasks, "_filecopy_local") as _filecopy_local, patch.object(
-        tasks, "file", exists
+    with (
+        patch.object(tasks, "_filecopy_local") as _filecopy_local,
+        patch.object(tasks, "file", exists),
     ):
         fs.filecopy(src=src_in, dst=dst_in)
     _filecopy_local.assert_called_once_with(Path(src_out), Path(dst_out))
