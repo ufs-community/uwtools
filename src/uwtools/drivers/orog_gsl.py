@@ -69,7 +69,7 @@ class OrogGSL(DriverTimeInvariant):
         fn = "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
         src = Path(self.config["config"]["topo_data_2p5m"])
         dst = self.rundir / fn
-        yield self.taskname("Input grid")
+        yield self.taskname("Topo data 2.5-min")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -81,7 +81,7 @@ class OrogGSL(DriverTimeInvariant):
         fn = "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
         src = Path(self.config["config"]["topo_data_30s"])
         dst = self.rundir / fn
-        yield self.taskname("Input grid")
+        yield self.taskname("Topo data 30-sec")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
