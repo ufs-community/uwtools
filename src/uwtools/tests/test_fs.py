@@ -68,6 +68,12 @@ class ConcreteStager(fs.Stager):
         return "some-schema"
 
 
+@iotaa.external
+def exists(*_args, **_kwargs):
+    yield "exists"
+    yield iotaa.asset(None, lambda: True)
+
+
 # Tests
 
 

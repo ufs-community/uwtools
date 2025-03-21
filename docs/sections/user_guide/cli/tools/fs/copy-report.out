@@ -1,16 +1,15 @@
-[2025-02-15T17:50:50]     INFO Validating config against internal schema: files-to-stage
-[2025-02-15T17:50:51]     INFO 0 schema-validation errors found in fs config
-[2025-02-15T17:50:53]     INFO File src/foo: Ready
-[2025-02-15T17:50:53]  WARNING File src/qux: Not ready [external asset]
-[2025-02-15T17:50:53]     INFO Copy src/foo -> dst/copy-report-jq/foo: Executing
-[2025-02-15T17:50:53]     INFO Copy src/foo -> dst/copy-report-jq/foo: Ready
-[2025-02-15T17:50:53]  WARNING Copy src/qux -> dst/copy-report-jq/qux: Not ready
-[2025-02-15T17:50:53]  WARNING Copy src/qux -> dst/copy-report-jq/qux: Requires:
-[2025-02-15T17:50:53]  WARNING Copy src/qux -> dst/copy-report-jq/qux: ✖ File src/qux
-[2025-02-15T17:50:53]  WARNING File copies: Not ready
-[2025-02-15T17:50:53]  WARNING File copies: Requires:
-[2025-02-15T17:50:53]  WARNING File copies: ✔ Copy src/foo -> dst/copy-report-jq/foo
-[2025-02-15T17:50:53]  WARNING File copies: ✖ Copy src/qux -> dst/copy-report-jq/qux
+[2025-03-21T02:57:07]     INFO Validating config against internal schema: files-to-stage
+[2025-03-21T02:57:07]     INFO 0 schema-validation errors found in fs config
+[2025-03-21T02:57:08]     INFO Copy src/foo -> dst/copy-report-jq/foo: Executing
+[2025-03-21T02:57:08]     INFO Copy src/foo -> dst/copy-report-jq/foo: Ready
+[2025-03-21T02:57:08]  WARNING File src/qux: Not ready [external asset]
+[2025-03-21T02:57:08]  WARNING Copy src/qux -> dst/copy-report-jq/qux: Not ready
+[2025-03-21T02:57:08]  WARNING Copy src/qux -> dst/copy-report-jq/qux: Requires:
+[2025-03-21T02:57:08]  WARNING Copy src/qux -> dst/copy-report-jq/qux: ✖ File src/qux
+[2025-03-21T02:57:08]  WARNING File copies: Not ready
+[2025-03-21T02:57:08]  WARNING File copies: Requires:
+[2025-03-21T02:57:08]  WARNING File copies: ✔ Copy src/foo -> dst/copy-report-jq/foo
+[2025-03-21T02:57:08]  WARNING File copies: ✖ Copy src/qux -> dst/copy-report-jq/qux
 {
   "not-ready": [
     "dst/copy-report-jq/qux"
