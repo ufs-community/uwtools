@@ -285,9 +285,9 @@ def test_utils_tasks_symlink__directory_hierarchy(prefix, tmp_path):
     assert link.is_symlink()
 
 
-def test_utils_tasks__filecopy_hsi(caplog):
-    src = "/path/to/src"
-    dst = "/path/to/dst"
+def test_utils_tasks__filecopy_hsi(caplog, tmp_path):
+    src = tmp_path / "src" / "foo"
+    dst = tmp_path / "dst" / "foo"
     with patch.object(tasks, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (True, "foo\nbar\n")
         tasks._filecopy_hsi(src=src, dst=Path(dst))
