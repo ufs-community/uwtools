@@ -98,7 +98,9 @@ See :ref:`files_yaml` for more examples and information on the semantics of the 
 An HPSS ``hsi://`` URL can be used as a source path when copying to the local filesysem:
 
 ..
-   NB: The .txt below is not a .cmd and will not be executed to update the static .out file.
+   NB: The .txt below is not a .cmd and so will not be automatically executed to update the static
+   .out file. On a system with HPSS access, run 'make copy-hpss-single.out' in the 'fs' directory
+   to update after editing (or touch'ing) either the corresponding .yaml or .txt file.
 
 .. literalinclude:: fs/copy-hpss-single.yaml
    :language: yaml

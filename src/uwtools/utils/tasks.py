@@ -170,6 +170,7 @@ def _filecopy_hsi(src: str, dst: Path) -> None:
     :param src: HPSS path of the source file.
     :param dst: Path to the destination file to create.
     """
+    dst.parent.mkdir(parents=True, exist_ok=True)
     _, output = run_shell_cmd(f"{STR.hsi} -q get {dst} : {src}")
     for line in output.strip().split("\n"):
         log.info("=> %s", line)
