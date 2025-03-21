@@ -88,7 +88,7 @@ def file(path: Union[Path, str], context: str = ""):
     yield asset(path, path.is_file)
 
 
-@task
+@external
 def file_hpss(path: Union[Path, str]):
     """
     An existing file in HPSS.
@@ -96,11 +96,8 @@ def file_hpss(path: Union[Path, str]):
     :param path: HPSS path to the file.
     """
     yield "HPSS file %s" % path
-    available: list[Union[bool, Path, str]] = [False]
-    yield asset(path, lambda: bool(available[0]))
-    yield executable(STR.hsi)
-    success, _ = run_shell_cmd(f"{STR.hsi} ls {str(path)}")
-    available[0] = path if success else False
+    available, _ = run_shell_cmd(f"{STR.hsi} ls {str(path)}")
+    yield asset(path, lambda: available)
 
 
 @task
