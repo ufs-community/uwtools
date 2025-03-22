@@ -16,7 +16,7 @@ The ``uw`` mode for handling filesystem items (files and directories).
 
 The ``copy`` action stages files in a target directory by copying files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
-Source paths prefixed with ``http://`` or ``https://`` will be copied from their upstream network locations to the local filesystem.
+Source paths prefixed with ``http://``, ``https://``, or ``hsi://`` will be copied from their upstream network locations to the local filesystem.
 
 .. literalinclude:: fs/copy-help.cmd
    :language: text
@@ -27,7 +27,9 @@ Source paths prefixed with ``http://`` or ``https://`` will be copied from their
 Examples
 ^^^^^^^^
 
-Given a config containing a mapping from local-filesystem destination paths to source paths
+**Local-filesystem and HTTP Sources**
+
+Given a config containing a mapping from local-filesystem destination paths to source paths:
 
 .. literalinclude:: fs/copy.yaml
    :language: yaml
@@ -77,7 +79,7 @@ Since ``uwtools`` logs to ``stderr``, log and report output can be separated and
 .. literalinclude:: fs/copy-report-jq.out
    :language: text
 
-Use the ``!glob`` tag to specify that a source-path value should be treated as a glob pattern:
+Use the ``!glob`` tag to specify that a local-filesystem source-path value should be treated as a glob pattern:
 
 .. literalinclude:: fs/copy-glob.yaml
    :language: yaml
@@ -91,14 +93,31 @@ The ``--report`` output can be especially useful in combination with glob patter
 
 See :ref:`files_yaml` for more examples and information on the semantics of the ``!glob`` tag.
 
+**HPSS Mass Store Sources**
+
+An HPSS ``hsi://`` URL can be used as a source path when copying to the local filesystem:
+
+..
+   NB: The .txt below is not a .cmd and so will not be automatically executed to update the static
+   .out file. On a system with HPSS access, run 'make copy-hpss-single.out' in the 'fs' directory
+   to update after editing (or touch'ing) either the corresponding .yaml or .txt file.
+
+.. literalinclude:: fs/copy-hpss-single.yaml
+   :language: yaml
+.. literalinclude:: fs/copy-hpss-single.txt
+   :language: text
+   :emphasize-lines: 2
+.. literalinclude:: fs/copy-hpss-single.out
+   :language: text
+
 ``link``
 --------
 
 The ``link`` action stages items in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves similarly to ``copy`` (see above), but note the following:
 
+* HTTP(S) and HPSS sources are not supported.
 * In addition to file, directories and other symbolic links can be linked.
 * The ``link`` action links directories indentified by glob patterns, whereas the ``copy`` action ignores directories.
-* HTTP(S) sources are not supported.
 * Support for glob-pattern source values is the same as for ``link``.
 
 .. literalinclude:: fs/link-help.cmd

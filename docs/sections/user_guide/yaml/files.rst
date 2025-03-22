@@ -57,6 +57,29 @@ Example block:
 
 HTTP(S) sources are not supported when linking.
 
+HPSS Support
+------------
+
+Full-file copies with ``hsi``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Source values may be ``hsi://`` URLs when copying. Note that the ``hsi`` executable must be available on the ``PATH`` of the shell from which ``uw`` (or the application making ``uwtools.api`` calls) is invoked.
+
+Example block:
+
+.. code-block:: yaml
+
+   archive.tgz: hsi:///hpss/path/to/archive.tgz
+
+* Result when copying to target directory ``target/``:
+
+.. code-block:: text
+
+   target
+   └── archive.tgz
+
+HPSS sources are not supported when linking.
+
 .. _files_yaml_glob_support:
 
 Glob Support
