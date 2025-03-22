@@ -95,7 +95,7 @@ See :ref:`files_yaml` for more examples and information on the semantics of the 
 
 **HPSS Mass Store Sources**
 
-An HPSS ``hsi://`` URL can be used as a source path when copying to the local filesysem:
+An HPSS ``hsi://`` URL can be used as a source path when copying to the local filesystem:
 
 ..
    NB: The .txt below is not a .cmd and so will not be automatically executed to update the static
