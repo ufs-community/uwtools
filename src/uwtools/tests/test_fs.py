@@ -93,7 +93,7 @@ def test_fs_Copier_go(src_func, dst_func, tgt_func):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_fs_Copier_go_live(assets, source):
+def test_fs_Copier_go__live(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -103,7 +103,7 @@ def test_fs_Copier_go_live(assets, source):
     assert (dstdir / "subdir" / "bar").is_file()
 
 
-def test_fs_Copier_go_live_config_file_dry_run(assets):
+def test_fs_Copier_go__live_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
@@ -113,7 +113,7 @@ def test_fs_Copier_go_live_config_file_dry_run(assets):
     assert not (dstdir / "subdir" / "bar").exists()
 
 
-def test_fs_Copier_go_live_no_targetdir_abspath_pass(assets):
+def test_fs_Copier_go__live_no_targetdir_abspath_pass(assets):
     dstdir, cfgdict, _ = assets
     old = cfgdict["a"]["b"]
     cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
@@ -121,7 +121,7 @@ def test_fs_Copier_go_live_no_targetdir_abspath_pass(assets):
     assert all(path.is_file() for path in [dstdir / "foo", dstdir / "bar"])
 
 
-def test_Copier_go_no_targetdir_relpath_fail(assets):
+def test_Copier_go__no_targetdir_relpath_fail(assets):
     _, cfgdict, _ = assets
     with raises(UWConfigError) as e:
         fs.Copier(config=cfgdict, key_path=["a", "b"]).go()
@@ -150,7 +150,7 @@ def test_fs_FilerStager(assets, source):
     assert fs.FileStager(target_dir=dstdir, config=config, key_path=["a", "b"])
 
 
-def test_fs_FileStager__expand_glob(caplog, tmp_path):
+def test_fs_FileStager__expand_glob(tmp_path):
     log.setLevel(logging.WARNING)
     d = tmp_path
     # Files matching the pattern to include:
@@ -169,17 +169,17 @@ def test_fs_FileStager__expand_glob(caplog, tmp_path):
     /dst/b1: {d}/b1
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
-    assert sorted(fs.FileStager._expand_glob(obj)) == [
+    a_files = [
         ("/dst/a1", str(d / "a1")),
         ("/dst/a2", str(d / "a2")),
-        ("/dst/b1", str(d / "b1")),
         ("/dst/d1/a3", str(d / "d1" / "a3")),
         ("/dst/d2/a3", str(d / "d2" / "a3")),
     ]
-    assert logged(caplog, f"Ignoring directory {d}/a3")
+    obj._expand_glob_local.return_value = a_files
+    assert set(fs.FileStager._expand_glob(obj)) == {*a_files, ("/dst/b1", str(d / "b1"))}
 
 
-def test_fs_FileStager__expand_glob_bad_scheme(caplog):
+def test_fs_FileStager__expand_glob__bad_scheme(caplog):
     config = """
     /dst/<a>: !glob https://foo.com/obj/*
     """
@@ -189,13 +189,20 @@ def test_fs_FileStager__expand_glob_bad_scheme(caplog):
     assert logged(caplog, msg)
 
 
-def test_fs_FileStager__expand_glob_file_scheme():
+def test_fs_FileStager__expand_glob__file_scheme():
     config = """
     /dst/<a>: !glob file:///src/a*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    obj._expand_glob_local.return_value = []
+    fs.FileStager._expand_glob(obj)
+    obj._expand_glob_local.assert_called_once_with("/src/a*", "/dst/<a>")
+
+
+def test_fs_FileStager__expand_glob_local():
+    obj = Mock(wraps=fs.FileStager)
     with patch.object(fs, "iglob", return_value=["/src/a1", "/src/a2"]) as iglob:
-        assert fs.FileStager._expand_glob(obj) == [
+        assert fs.FileStager._expand_glob_local(obj, "/src/a*", "/dst/<a>") == [
             ("/dst/a1", "/src/a1"),
             ("/dst/a2", "/src/a2"),
         ]
@@ -251,7 +258,7 @@ def test_Linker__expand_glob(_expand_glob_assets):
         ("other/path", "file:///some/path", None, False),
     ],
 )
-def test_fs_Stager__check_destination_paths_fail(path, target_dir, msg, fail_expected):
+def test_fs_Stager__check_destination_paths__fail(path, target_dir, msg, fail_expected):
     obj = Mock(_dst_paths=[path], _target_dir=target_dir)
     if fail_expected:
         with raises(UWConfigError) as e:
@@ -263,7 +270,7 @@ def test_fs_Stager__check_destination_paths_fail(path, target_dir, msg, fail_exp
     "path,fail_expected",
     [("foo://bucket/a/b", True), ("/some/path", False), ("file:///some/path", False)],
 )
-def test_fs_Stager__check_target_dir_fail_bad_scheme(path, fail_expected):
+def test_fs_Stager__check_target_dir__fail_bad_scheme(path, fail_expected):
     obj = Mock(_target_dir="foo://bucket/a/b")
     if fail_expected:
         with raises(UWConfigError) as e:
@@ -272,7 +279,7 @@ def test_fs_Stager__check_target_dir_fail_bad_scheme(path, fail_expected):
 
 
 @mark.parametrize("source", ("dict", "file"))
-def test_fs_Stager__config_block_fail_bad_key_path(assets, source):
+def test_fs_Stager__config_block__fail_bad_key_path(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
@@ -281,7 +288,7 @@ def test_fs_Stager__config_block_fail_bad_key_path(assets, source):
 
 
 @mark.parametrize("val", [None, True, False, "str", 42, 3.14, [], tuple()])
-def test_fs_Stager__config_block_fails_bad_type(assets, val):
+def test_fs_Stager__config_block__fail_bad_type(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:

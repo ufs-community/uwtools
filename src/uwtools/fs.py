@@ -21,6 +21,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
+from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import directory, filecopy, symlink
 
 
@@ -141,25 +142,40 @@ class FileStager(Stager):
         return list(self._config.keys())
 
     def _expand_glob(self) -> list[tuple[str, str]]:
-        items = []
+        items: list[tuple] = []
         for dst, src in self._config.items():
             if isinstance(src, str):
                 items.append((dst, src))
             else:
                 assert isinstance(src, UWYAMLGlob)
                 attrs = urlparse(src.value)
-                if attrs.scheme in ["", "file"]:
-                    for path in iglob(attrs.path, recursive=True):
-                        if Path(path).is_dir() and not isinstance(self, Linker):
-                            log.warning("Ignoring directory %s", path)
-                        else:
-                            parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])
-                            pairs = dropwhile(lambda x: eq(*x), parts)
-                            unique = Path(*[pair[0] for pair in pairs if pair[0]])
-                            items.append((str(Path(dst).parent / unique), path))
+                if attrs.scheme == "hsi":
+                    items.extend(self._expand_glob_hsi(attrs.path, dst))
+                elif attrs.scheme in ["", "file"]:
+                    items.extend(self._expand_glob_local(attrs.path, dst))
                 else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, attrs.scheme, src.tag, src)
+        return items
+
+    # pylint: disable-next=W0613
+    def _expand_glob_hsi(self, path: str, dst: str) -> list[tuple]:
+        items: list[tuple] = []
+        success, _output = run_shell_cmd(f"{STR.hsi} -q ls -1 {str(path)}")
+        if success:
+            raise NotImplementedError
+        return items
+
+    def _expand_glob_local(self, path: str, dst: str) -> list[tuple]:
+        items: list[tuple] = []
+        for p in iglob(path, recursive=True):
+            if Path(p).is_dir() and not isinstance(self, Linker):
+                log.warning("Ignoring directory %s", p)
+            else:
+                parts = zip_longest(*[Path(x).parts for x in (p, path)])
+                pairs = dropwhile(lambda x: eq(*x), parts)
+                unique = Path(*[pair[0] for pair in pairs if pair[0]])
+                items.append((str(Path(dst).parent / unique), p))
         return items
 
     @property

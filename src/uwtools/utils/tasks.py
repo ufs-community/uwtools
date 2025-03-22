@@ -96,7 +96,7 @@ def file_hpss(path: Union[Path, str]):
     :param path: HPSS path to the file.
     """
     yield "HPSS file %s" % path
-    available, _ = run_shell_cmd(f"{STR.hsi} ls {str(path)}")
+    available, _ = run_shell_cmd(f"{STR.hsi} -q ls {str(path)}")
     yield asset(path, lambda: available)
 
 

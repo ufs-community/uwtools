@@ -160,7 +160,7 @@ def test_utils_tasks_file_hpss(available, wrapper):
     ):
         val = tasks.file_hpss(path=path)
     assert iotaa.refs(val) == path
-    run_shell_cmd.assert_called_once_with(f"{STR.hsi} ls {path}")
+    run_shell_cmd.assert_called_once_with(f"{STR.hsi} -q ls {path}")
 
 
 def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
