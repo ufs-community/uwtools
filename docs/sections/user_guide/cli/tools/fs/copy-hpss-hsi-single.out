@@ -1,0 +1,14 @@
+[2025-03-24T23:16:23]     INFO Validating config against internal schema: files-to-stage
+[2025-03-24T23:16:23]     INFO 0 schema-validation errors found in fs config
+[2025-03-24T23:16:23]     INFO Running: hsi -q ls -1 '/BMC/fim/madden/prepsourceschem.tar.gz'
+[2025-03-24T23:16:28]     INFO Copy hsi:///BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Executing
+[2025-03-24T23:16:28]     INFO Running: hsi -q get dst/copy-hpss-hsi-single/psc.tgz : /BMC/fim/madden/prepsourceschem.tar.gz
+[2025-03-24T23:16:33]     INFO => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-24T23:16:33]     INFO => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-single/psc.tgz' : '/BMC/fim/madden/prepsourceschem.tar.gz' (2011/07/22 16:55:04 2209010 bytes, 489810.7 KBS )
+[2025-03-24T23:16:33]     INFO Copy hsi:///BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Ready
+[2025-03-24T23:16:33]     INFO File copies: Ready
+
+dst/copy-hpss-hsi-single
+└── psc.tgz
+
+1 directory, 1 file

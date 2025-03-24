@@ -37,49 +37,6 @@ where ``foo`` and ``bar`` are copies of their respective source files.
 
 where ``foo`` and ``bar`` are symbolic links.
 
-HTTP(S) Support
----------------
-
-Sources values may be ``http://`` or ``https://`` URLs when copying.
-
-Example block:
-
-.. code-block:: yaml
-
-   index: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20241001/conus/hrrr.t01z.wrfprsf00.grib2.idx
-
-* Result when copying to target directory ``target/``:
-
-.. code-block:: text
-
-   target
-   └── index
-
-HTTP(S) sources are not supported when linking.
-
-HPSS Support
-------------
-
-Full-file copies with ``hsi``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Source values may be ``hsi://`` URLs when copying. Note that the ``hsi`` executable must be available on the ``PATH`` of the shell from which ``uw`` (or the application making ``uwtools.api`` calls) is invoked.
-
-Example block:
-
-.. code-block:: yaml
-
-   archive.tgz: hsi:///hpss/path/to/archive.tgz
-
-* Result when copying to target directory ``target/``:
-
-.. code-block:: text
-
-   target
-   └── archive.tgz
-
-HPSS sources are not supported when linking.
-
 .. _files_yaml_glob_support:
 
 Glob Support
@@ -168,9 +125,76 @@ Given ``/src/`` directory
        └── a4
 
 Caveats
--------
+^^^^^^^
 
 * Glob patterns are not supported in combination with HTTP(S) sources.
 * In copy mode, directories identified by a glob pattern are ignored and not copied.
 * In link mode, directories identified by a glob pattern are linked.
 * Many interesting use cases for copying/linking are beyond the scope of this tool. For more control, including file-grained include and exclude, consider using the unrivaled `rsync <https://rsync.samba.org/>`_, which can be installed from conda in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
+
+HTTP(S) Support
+---------------
+
+Sources values may be ``http://`` or ``https://`` URLs when copying.
+
+Example block:
+
+.. code-block:: yaml
+
+   index: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20241001/conus/hrrr.t01z.wrfprsf00.grib2.idx
+
+* Result when copying to target directory ``target/``:
+
+.. code-block:: text
+
+   target
+   └── index
+
+HTTP(S) sources are not supported when linking.
+
+HPSS Support
+------------
+
+Full-file copies with ``hsi``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Source values may be ``hsi://`` URLs when copying. Note that the ``hsi`` executable must be available on the ``PATH`` of the shell from which ``uw`` (or the application making ``uwtools.api`` calls) is invoked.
+
+Example block:
+
+.. code-block:: yaml
+
+   archive.tgz: hsi:///hpss/path/to/archive.tgz
+
+* Result when copying to target directory ``target/``:
+
+.. code-block:: text
+
+   target
+   └── archive.tgz
+
+HPSS sources are not supported when linking.
+
+.. _files_yaml_hsi_glob_support:
+
+The ``!glob`` tag (see :ref:`here<files_yaml_glob_support>`) can be used with full-file ``hsi`` copies. For example:
+
+.. code-block:: yaml
+
+   <file>: !glob hsi:///hpss/path/to/archive*.tgz
+
+* Result when copying to target directory ``target/``, given HPSS files ``archive1.tgz`` and ``archive2.tgz`` under ``/hpss/path/to/``:
+
+.. code-block:: text
+
+   target
+   ├── archive1.tgz
+   └── archive2.tgz
+
+Use the following command to preview the files to be copied when using an ``hsi`` glob:
+
+.. code-block:: text
+
+   hsi -q ls -1 '<your-glob-pattern>`
+
+Here, ``<your-glob-pattern>`` is a plain path, including wildcard characters, without the ``hsi://`` prefix.

@@ -95,20 +95,33 @@ See :ref:`files_yaml` for more examples and information on the semantics of the 
 
 **HPSS Mass Store Sources**
 
-An HPSS ``hsi://`` URL can be used as a source path when copying to the local filesystem:
-
 ..
-   NB: The .txt below is not a .cmd and so will not be automatically executed to update the static
-   .out file. On a system with HPSS access, run 'make copy-hpss-single.out' in the 'fs' directory
-   to update after editing (or touch'ing) either the corresponding .yaml or .txt file.
+   NB: The .txt files below are not .cmd files and so will not be automatically executed to update
+   their corresponding  static .out files. On a system with HPSS access, run 'make <outfile>' (using
+   the name of an actual .out file) in the 'fs' directory to update after editing (or touch'ing) a
+   .yaml or .txt file.
 
-.. literalinclude:: fs/copy-hpss-single.yaml
+An HPSS ``hsi://`` URL can be used as a source path when copying full files from HPSS to the local filesystem:
+
+.. literalinclude:: fs/copy-hpss-hsi-single.yaml
    :language: yaml
-.. literalinclude:: fs/copy-hpss-single.txt
+.. literalinclude:: fs/copy-hpss-hsi-single.txt
    :language: text
    :emphasize-lines: 2
-.. literalinclude:: fs/copy-hpss-single.out
+.. literalinclude:: fs/copy-hpss-hsi-single.out
    :language: text
+
+Use the ``!glob`` tag to copy multiple full HPSS files:
+
+.. literalinclude:: fs/copy-hpss-hsi-glob.yaml
+   :language: yaml
+.. literalinclude:: fs/copy-hpss-gsi-glob.txt
+   :language: text
+   :emphasize-lines: 2
+.. literalinclude:: fs/copy-hpss-hsi-glob.out
+   :language: text
+
+See :ref:`here<files_yaml_glob_support>` for more information on use of the ``!glob`` tag in combination with ``hsi://`` sources.
 
 ``link``
 --------
