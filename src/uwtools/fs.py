@@ -162,11 +162,13 @@ class FileStager(Stager):
         items: list[tuple] = []
         success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(glob_pattern)}'")
         if success:
-            matches = output.strip().split("\n")[2:]
-            if not matches:
-                log.warning(output[1])
-            for path in matches:
-                items.append(self._expand_glob_resolve(glob_pattern, path, dst))
+            lines = output.strip().split("\n")
+            if matches := [line for line in lines if not line.startswith("***")][1:]:
+                for path in matches:
+                    d, s = self._expand_glob_resolve(glob_pattern, path, dst)
+                    items.append((d, f"{STR.hsi}://{s}"))
+            else:
+                log.warning(lines[1])
         return items
 
     def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple]:
