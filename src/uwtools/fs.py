@@ -166,7 +166,7 @@ class FileStager(Stager):
             if not matches:
                 log.warning(output[1])
             for path in matches:
-                items.append(self._expand_glob_unique(glob_pattern, dst, path))
+                items.append(self._expand_glob_resolve(glob_pattern, path, dst))
         return items
 
     def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple]:
@@ -175,15 +175,19 @@ class FileStager(Stager):
             if Path(path).is_dir() and not isinstance(self, Linker):
                 log.warning("Ignoring directory %s", path)
             else:
-                items.append(self._expand_glob_unique(glob_pattern, dst, path))
+                items.append(self._expand_glob_resolve(glob_pattern, path, dst))
         return items
 
     @staticmethod
-    def _expand_glob_unique(glob_pattern: str, dst: str, path: str) -> tuple[str, str]:
-        parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
-        pairs = dropwhile(lambda x: eq(*x), parts)
-        unique = Path(*[pair[0] for pair in pairs if pair[0]])
-        return (str(Path(dst).parent / unique), path)
+    def _expand_glob_resolve(glob_pattern: str, path: str, dst: str) -> tuple[str, str]:
+        suffix: Union[Path, str]
+        if path == glob_pattern:  # degenerate case
+            suffix = Path(path).parts[-1]
+        else:
+            parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
+            pairs = dropwhile(lambda x: eq(*x), parts)
+            suffix = Path(*[pair[0] for pair in pairs if pair[0]])
+        return (str(Path(dst).parent / suffix), path)
 
     @property
     def _schema(self) -> str:

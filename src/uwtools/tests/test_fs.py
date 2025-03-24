@@ -209,6 +209,26 @@ def test_fs_FileStager__expand_glob_local():
     iglob.assert_called_once_with("/src/a*", recursive=True)
 
 
+@mark.parametrize(
+    "args",
+    [
+        ("/a/b/c", "/a/b/c", "/foo/c"),
+        ("/a/b/*", "/a/b/c", "/foo/c"),
+        ("/a/b/*/c", "/a/b/x/c", "/foo/x/c"),
+        ("/a/*/*", "/a/b/c", "/foo/b/c"),
+        ("/a/**/c", "/a/b/x/c", "/foo/b/x/c"),
+        ("/a/*/x/*/c", "/a/b/x/y/c", "/foo/b/x/y/c"),
+        # ("/a/b/*", "", ""),
+    ],
+)
+def test_fs_FileStager__expand_glob_resolve(args):
+    glob_pattern, path, dst = args
+    actual = fs.FileStager._expand_glob_resolve(
+        glob_pattern=glob_pattern, path=path, dst="/foo/<f>"
+    )
+    assert actual == (dst, path)
+
+
 @mark.parametrize("source", ("dict", "file"))
 def test_fs_Linker(assets, source):
     dstdir, cfgdict, cfgfile = assets
