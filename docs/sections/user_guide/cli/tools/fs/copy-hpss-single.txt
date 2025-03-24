@@ -1,0 +1,4 @@
+rm -rf dst/copy-hpss-single
+uw fs copy --target-dir dst/copy-hpss-single --config-file copy-hpss-single.yaml
+echo
+tree dst/copy-hpss-single
