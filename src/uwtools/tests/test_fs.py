@@ -218,7 +218,6 @@ def test_fs_FileStager__expand_glob_local():
         ("/a/*/*", "/a/b/c", "/foo/b/c"),
         ("/a/**/c", "/a/b/x/c", "/foo/b/x/c"),
         ("/a/*/x/*/c", "/a/b/x/y/c", "/foo/b/x/y/c"),
-        # ("/a/b/*", "", ""),
     ],
 )
 def test_fs_FileStager__expand_glob_resolve(args):

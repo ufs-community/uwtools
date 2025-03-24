@@ -186,7 +186,7 @@ class FileStager(Stager):
         else:
             parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
             pairs = dropwhile(lambda x: eq(*x), parts)
-            suffix = Path(*[pair[0] for pair in pairs if pair[0]])
+            suffix = Path(*[pair[0] for pair in pairs])
         return (str(Path(dst).parent / suffix), path)
 
     @property
