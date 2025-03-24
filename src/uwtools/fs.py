@@ -158,25 +158,32 @@ class FileStager(Stager):
                     log.error(msg, attrs.scheme, src.tag, src)
         return items
 
-    # pylint: disable-next=W0613
-    def _expand_glob_hsi(self, path: str, dst: str) -> list[tuple]:
+    def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple]:
         items: list[tuple] = []
-        success, _output = run_shell_cmd(f"{STR.hsi} -q ls -1 {str(path)}")
+        success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(glob_pattern)}'")
         if success:
-            raise NotImplementedError
+            matches = output.strip().split("\n")[2:]
+            if not matches:
+                log.warning(output[1])
+            for path in matches:
+                items.append(self._expand_glob_unique(glob_pattern, dst, path))
         return items
 
-    def _expand_glob_local(self, path: str, dst: str) -> list[tuple]:
+    def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple]:
         items: list[tuple] = []
-        for p in iglob(path, recursive=True):
-            if Path(p).is_dir() and not isinstance(self, Linker):
-                log.warning("Ignoring directory %s", p)
+        for path in iglob(glob_pattern, recursive=True):
+            if Path(path).is_dir() and not isinstance(self, Linker):
+                log.warning("Ignoring directory %s", path)
             else:
-                parts = zip_longest(*[Path(x).parts for x in (p, path)])
-                pairs = dropwhile(lambda x: eq(*x), parts)
-                unique = Path(*[pair[0] for pair in pairs if pair[0]])
-                items.append((str(Path(dst).parent / unique), p))
+                items.append(self._expand_glob_unique(glob_pattern, dst, path))
         return items
+
+    @staticmethod
+    def _expand_glob_unique(glob_pattern: str, dst: str, path: str) -> tuple[str, str]:
+        parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
+        pairs = dropwhile(lambda x: eq(*x), parts)
+        unique = Path(*[pair[0] for pair in pairs if pair[0]])
+        return (str(Path(dst).parent / unique), path)
 
     @property
     def _schema(self) -> str:
