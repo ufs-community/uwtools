@@ -189,9 +189,10 @@ def test_fs_FileStager__expand_glob__bad_scheme(caplog):
     assert logged(caplog, msg)
 
 
-def test_fs_FileStager__expand_glob__file_scheme():
-    config = """
-    /dst/<a>: !glob file:///src/a*
+@mark.parametrize("prefix", ["", "file://"])
+def test_fs_FileStager__expand_glob__file_scheme(prefix):
+    config = f"""
+    /dst/<a>: !glob {prefix}/src/a*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
     obj._expand_glob_local.return_value = []
