@@ -210,16 +210,20 @@ def test_fs_FileStager__expand_glob__hsi_scheme():
     obj._expand_glob_hsi.assert_called_once_with("/src/a*", "/dst/<a>")
 
 
-@mark.parametrize("success", [True, False])
-def test_fs_FileStager__expand_glob_hsi(success):
+@mark.parametrize(["matches", "success"], [(True, True), (False, True), (False, False)])
+def test_fs_FileStager__expand_glob_hsi(caplog, matches, success):
     obj = Mock(wraps=fs.FileStager)
     glob_pattern = "/src/a*"
-    output = "header\n/src/a1\n/src/a2\n" if success else "*** ERROR"
+    output = "header\n/src/a1\n/src/a2\n" if matches else "header\n*** ERROR\n"
     with patch.object(fs, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (success, dedent(output).lstrip())
         result = fs.FileStager._expand_glob_hsi(obj, glob_pattern, "/dst/<a>")
         if success:
-            assert result == [("/dst/a1", "hsi:///src/a1"), ("/dst/a2", "hsi:///src/a2")]
+            if matches:
+                assert result == [("/dst/a1", "hsi:///src/a1"), ("/dst/a2", "hsi:///src/a2")]
+            else:
+                assert not result
+                assert logged(caplog, "*** ERROR")
         else:
             assert not result
     run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")
