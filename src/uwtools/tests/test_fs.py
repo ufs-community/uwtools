@@ -211,7 +211,7 @@ def test_fs_FileStager__expand_glob__hsi_scheme():
 
 
 @mark.parametrize("success", [True, False])
-def test_fs_FileStager__expand_glob_hsi(caplog, success):
+def test_fs_FileStager__expand_glob_hsi(success):
     obj = Mock(wraps=fs.FileStager)
     glob_pattern = "/src/a*"
     output = "header\n/src/a1\n/src/a2\n" if success else "*** ERROR"
@@ -221,7 +221,7 @@ def test_fs_FileStager__expand_glob_hsi(caplog, success):
         if success:
             assert result == [("/dst/a1", "hsi:///src/a1"), ("/dst/a2", "hsi:///src/a2")]
         else:
-            assert result == []
+            assert not result
     run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")
 
 
