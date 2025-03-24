@@ -210,6 +210,21 @@ def test_fs_FileStager__expand_glob__hsi_scheme():
     obj._expand_glob_hsi.assert_called_once_with("/src/a*", "/dst/<a>")
 
 
+@mark.parametrize("success", [True, False])
+def test_fs_FileStager__expand_glob_hsi(caplog, success):
+    obj = Mock(wraps=fs.FileStager)
+    glob_pattern = "/src/a*"
+    output = "header\n/src/a1\n/src/a2\n" if success else "*** ERROR"
+    with patch.object(fs, "run_shell_cmd") as run_shell_cmd:
+        run_shell_cmd.return_value = (success, dedent(output).lstrip())
+        result = fs.FileStager._expand_glob_hsi(obj, glob_pattern, "/dst/<a>")
+        if success:
+            assert result == [("/dst/a1", "hsi:///src/a1"), ("/dst/a2", "hsi:///src/a2")]
+        else:
+            assert result == []
+    run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")
+
+
 def test_fs_FileStager__expand_glob_local():
     obj = Mock(wraps=fs.FileStager)
     with patch.object(fs, "iglob", return_value=["/src/a1", "/src/a2"]) as iglob:
