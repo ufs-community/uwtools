@@ -115,7 +115,7 @@ Use the ``!glob`` tag to copy multiple full HPSS files:
 
 .. literalinclude:: fs/copy-hpss-hsi-glob.yaml
    :language: yaml
-.. literalinclude:: fs/copy-hpss-gsi-glob.txt
+.. literalinclude:: fs/copy-hpss-hsi-glob.txt
    :language: text
    :emphasize-lines: 2
 .. literalinclude:: fs/copy-hpss-hsi-glob.out
