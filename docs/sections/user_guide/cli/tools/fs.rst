@@ -91,9 +91,9 @@ Use the ``!glob`` tag to specify that a local-filesystem source-path value shoul
 
 The ``--report`` output can be especially useful in combination with glob patterns to allow downstream logic to process a set of copied files whose identity is not known in advance.
 
-See :ref:`files_yaml` for more examples and information on the semantics of the ``!glob`` tag.
+See :ref:`files_yaml_glob_support` for more examples and information on the semantics of the ``!glob`` tag.
 
-**HPSS Mass Store Sources**
+**HPSS Sources**
 
 ..
    NB: The .txt files below are not .cmd files and so will not be automatically executed to update
@@ -111,6 +111,8 @@ An HPSS ``hsi://`` URL can be used as a source path when copying full files from
 .. literalinclude:: fs/copy-hpss-hsi-single.out
    :language: text
 
+See :ref:`files_yaml_hsi_support` for more information on UW YAML support for ``hsi://`` sources.
+
 Use the ``!glob`` tag to copy multiple full HPSS files:
 
 .. literalinclude:: fs/copy-hpss-hsi-glob.yaml
@@ -121,14 +123,14 @@ Use the ``!glob`` tag to copy multiple full HPSS files:
 .. literalinclude:: fs/copy-hpss-hsi-glob.out
    :language: text
 
-See :ref:`here<files_yaml_glob_support>` for more information on use of the ``!glob`` tag in combination with ``hsi://`` sources.
+See :ref:`files_yaml_hsi_glob_support` for more information on the use of the ``!glob`` tag in combination with ``hsi://`` sources.
 
 ``link``
 --------
 
 The ``link`` action stages items in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves similarly to ``copy`` (see above), but note the following:
 
-* HTTP(S) and HPSS sources are not supported.
+* HTTP and HPSS sources are not supported.
 * In addition to file, directories and other symbolic links can be linked.
 * The ``link`` action links directories indentified by glob patterns, whereas the ``copy`` action ignores directories.
 * Support for glob-pattern source values is the same as for ``link``.
