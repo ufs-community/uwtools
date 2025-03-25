@@ -291,7 +291,7 @@ def test_utils_tasks__filecopy_hsi(caplog, tmp_path):
     with patch.object(tasks, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (True, "foo\nbar\n")
         tasks._filecopy_hsi(src=src, dst=Path(dst))
-    run_shell_cmd.assert_called_once_with(f"hsi -q get {dst} : {src}")
+    run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'")
     assert logged(caplog, "=> foo")
     assert logged(caplog, "=> bar")
 
