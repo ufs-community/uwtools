@@ -159,11 +159,12 @@ class FileStager(Stager):
         return items
 
     def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple]:
+        hsi_errmsg_prefix = "***"
         items: list[tuple] = []
         success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(glob_pattern)}'")
         if success:
             lines = output.strip().split("\n")
-            if matches := [line for line in lines if not line.startswith("***")][1:]:
+            if matches := [line for line in lines if not line.startswith(hsi_errmsg_prefix)][1:]:
                 for path in matches:
                     d, s = self._expand_glob_resolve(glob_pattern, path, dst)
                     items.append((d, f"{STR.hsi}://{s}"))
@@ -188,7 +189,7 @@ class FileStager(Stager):
         else:
             parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
             pairs = dropwhile(lambda x: eq(*x), parts)
-            suffix = Path(*[pair[0] for pair in pairs])
+            suffix = Path(*[pair[0] for pair in pairs if pair[0]])
         return (str(Path(dst).parent / suffix), path)
 
     @property

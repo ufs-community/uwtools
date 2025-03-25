@@ -242,12 +242,13 @@ def test_fs_FileStager__expand_glob_local():
 @mark.parametrize(
     "args",
     [
-        ("/a/b/c", "/a/b/c", "/foo/c"),
-        ("/a/b/*", "/a/b/c", "/foo/c"),
-        ("/a/b/*/c", "/a/b/x/c", "/foo/x/c"),
-        ("/a/*/*", "/a/b/c", "/foo/b/c"),
         ("/a/**/c", "/a/b/x/c", "/foo/b/x/c"),
+        ("/a/*/*", "/a/b/c", "/foo/b/c"),
         ("/a/*/x/*/c", "/a/b/x/y/c", "/foo/b/x/y/c"),
+        ("/a/b/*", "/a/b/c", "/foo/c"),
+        ("/a/b/**/c", "/a/b/c", "/foo/c"),
+        ("/a/b/*/c", "/a/b/x/c", "/foo/x/c"),
+        ("/a/b/c", "/a/b/c", "/foo/c"),
     ],
 )
 def test_fs_FileStager__expand_glob_resolve(args):
