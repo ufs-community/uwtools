@@ -160,7 +160,7 @@ def test_utils_tasks_file_hpss(available, wrapper):
     ):
         val = tasks.file_hpss(path=path)
     assert iotaa.refs(val) == path
-    run_shell_cmd.assert_called_once_with(f"{STR.hsi} ls {path}")
+    run_shell_cmd.assert_called_once_with(f"{STR.hsi} -q ls -1 '{path}'")
 
 
 def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
@@ -291,7 +291,7 @@ def test_utils_tasks__filecopy_hsi(caplog, tmp_path):
     with patch.object(tasks, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (True, "foo\nbar\n")
         tasks._filecopy_hsi(src=src, dst=Path(dst))
-    run_shell_cmd.assert_called_once_with(f"hsi -q get {dst} : {src}")
+    run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'")
     assert logged(caplog, "=> foo")
     assert logged(caplog, "=> bar")
 

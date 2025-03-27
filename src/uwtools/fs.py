@@ -21,6 +21,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
+from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import directory, filecopy, symlink
 
 
@@ -141,26 +142,55 @@ class FileStager(Stager):
         return list(self._config.keys())
 
     def _expand_glob(self) -> list[tuple[str, str]]:
-        items = []
+        items: list[tuple] = []
         for dst, src in self._config.items():
             if isinstance(src, str):
                 items.append((dst, src))
             else:
                 assert isinstance(src, UWYAMLGlob)
                 attrs = urlparse(src.value)
-                if attrs.scheme in ["", "file"]:
-                    for path in iglob(attrs.path, recursive=True):
-                        if Path(path).is_dir() and not isinstance(self, Linker):
-                            log.warning("Ignoring directory %s", path)
-                        else:
-                            parts = zip_longest(*[Path(x).parts for x in (path, attrs.path)])
-                            pairs = dropwhile(lambda x: eq(*x), parts)
-                            unique = Path(*[pair[0] for pair in pairs if pair[0]])
-                            items.append((str(Path(dst).parent / unique), path))
+                if attrs.scheme == "hsi":
+                    items.extend(self._expand_glob_hsi(attrs.path, dst))
+                elif attrs.scheme in ["", "file"]:
+                    items.extend(self._expand_glob_local(attrs.path, dst))
                 else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, attrs.scheme, src.tag, src)
         return items
+
+    def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple]:
+        hsi_errmsg_prefix = "***"
+        items: list[tuple] = []
+        success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(glob_pattern)}'")
+        if success:
+            lines = output.strip().split("\n")
+            if matches := [line for line in lines if not line.startswith(hsi_errmsg_prefix)][1:]:
+                for path in matches:
+                    d, s = self._expand_glob_resolve(glob_pattern, path, dst)
+                    items.append((d, f"{STR.hsi}://{s}"))
+            else:
+                log.warning(lines[1])
+        return items
+
+    def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple]:
+        items: list[tuple] = []
+        for path in iglob(glob_pattern, recursive=True):
+            if Path(path).is_dir() and not isinstance(self, Linker):
+                log.warning("Ignoring directory %s", path)
+            else:
+                items.append(self._expand_glob_resolve(glob_pattern, path, dst))
+        return items
+
+    @staticmethod
+    def _expand_glob_resolve(glob_pattern: str, path: str, dst: str) -> tuple[str, str]:
+        suffix: Union[Path, str]
+        if path == glob_pattern:  # degenerate case
+            suffix = Path(path).parts[-1]
+        else:
+            parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
+            pairs = dropwhile(lambda x: eq(*x), parts)
+            suffix = Path(*[pair[0] for pair in pairs if pair[0]])
+        return (str(Path(dst).parent / suffix), path)
 
     @property
     def _schema(self) -> str:

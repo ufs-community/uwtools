@@ -1,0 +1,4 @@
+rm -rf dst/copy-hpss-hsi-glob
+uw fs copy --target-dir dst/copy-hpss-hsi-glob --config-file copy-hpss-hsi-glob.yaml
+echo
+tree dst/copy-hpss-hsi-glob
