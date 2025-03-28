@@ -19,6 +19,7 @@ from uwtools.utils.processing import run_shell_cmd
 
 SCHEMES = ns(
     hsi=(STR.url_scheme_hsi,),
+    htar=(STR.url_scheme_htar,),
     http=(STR.url_scheme_http, STR.url_scheme_https),
     local=("", STR.url_scheme_file),
 )
@@ -117,6 +118,9 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     if src_scheme in SCHEMES.hsi:
         yield [executable(STR.hsi), file_hpss(parts.path)]
         _filecopy_hsi(parts.path, dst)
+    if src_scheme in SCHEMES.htar:
+        yield [executable(STR.hsi), executable(STR.htar), file_hpss(parts.path)]
+        _filecopy_htar(parts.path, parts.query, dst)
     elif src_scheme in SCHEMES.http:
         yield existing(src)
         _filecopy_http(str(src), dst)
@@ -162,15 +166,31 @@ def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
 
 def _filecopy_hsi(src: str, dst: Path) -> None:
     """
-    Copy an HPSS mass-store file to the local filesystem via HSI.
+    Copy an HPSS file to the local filesystem via hsi.
 
-    :param src: HPSS path of the source file.
+    :param src: HPSS path to the source file.
     :param dst: Path to the destination file to create.
     """
     dst.parent.mkdir(parents=True, exist_ok=True)
     _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
     for line in output.strip().split("\n"):
         log.info("=> %s", line)
+
+
+def _filecopy_htar(src_archive: str, src_file: str, dst: Path) -> None:
+    """
+    Copy a file from an HPSS-based archive to the local filesystem via htar.
+
+    :param src_archive: HPSS path to the source archive.
+    :param src_file: Path within the archive to the file.
+    :param dst: Path to the destination file to create.
+    """
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    assert src_archive
+    assert src_file
+    # _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
+    # for line in output.strip().split("\n"):
+    #     log.info("=> %s", line)
 
 
 def _filecopy_http(src: str, dst: Path) -> None:
