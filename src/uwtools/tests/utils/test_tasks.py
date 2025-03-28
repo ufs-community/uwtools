@@ -263,6 +263,17 @@ def test_utils_tasks_symlink__directory_hierarchy(prefix, tmp_path):
     assert link.is_symlink()
 
 
+@mark.parametrize("wrapper", [Path, str])
+def test_utils_tasks_symlink_target(tmp_path, wrapper):
+    d, f, s = (tmp_path / x for x in ("d", "f", "s"))
+    d.mkdir()
+    f.touch()
+    s.symlink_to(f)
+    for x in [d, f, s]:
+        assert iotaa.ready(tasks.symlink_target(path=wrapper(x)))
+    assert not iotaa.ready(tasks.symlink_target(path=tmp_path / "foo"))
+
+
 def test_utils_tasks__local__path_fail():
     path = "foo://bucket/a/b"
     with patch.object(tasks, "_bad_scheme") as _bad_scheme:
