@@ -10,7 +10,7 @@ from typing import NoReturn, Union
 from urllib.parse import urlparse
 
 import requests
-from iotaa import asset, external, task
+from iotaa import asset, external, task, tasks
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -52,33 +52,36 @@ def executable(program: Union[Path, str]):
     yield asset(program, lambda: bool(which(program)))
 
 
-@external
-def existing(path: Union[Path, str]):
+@task
+def existing_hpss(path: Union[Path, str]):
     """
-    An existing file, directory, symlink, or remote object.
+    An existing file in HPSS.
 
-    :param path: Path to the item.
-    :raises: UWConfigError for unsupported URL schemes.
+    :param path: HPSS path to the file.
     """
-    info = urlparse(str(path))
-    scheme = info.scheme
-    if scheme in SCHEMES.local:
-        path = _local_path(path)
-        yield "Filesystem item %s" % path
-        yield asset(path, path.exists)
-    elif scheme in SCHEMES.http:
-        path = str(path)
-        ready = lambda: requests.head(path, allow_redirects=True, timeout=3).status_code == 200
-        yield "Remote object %s" % path
-        yield asset(path, ready)
-    else:
-        _bad_scheme(path, scheme)
+    yield "HPSS file %s" % path
+    val = [False]
+    yield asset(path, lambda: val[0])
+    yield executable(STR.hsi)
+    available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(path)}'")
+    val[0] = available
+
+
+@external
+def existing_http(url: str):
+    """
+    An existing remote HTTP object.
+
+    :param url: URL of the HTTP object.
+    """
+    yield "Remote HTTP object %s" % url
+    yield asset(url, lambda: requests.head(url, allow_redirects=True, timeout=3).status_code == 200)
 
 
 @external
 def file(path: Union[Path, str], context: str = ""):
     """
-    An existing file or symlink to an existing file.
+    An existing file.
 
     :param path: Path to the file.
     :param context: Optional additional context for the file.
@@ -89,19 +92,7 @@ def file(path: Union[Path, str], context: str = ""):
     yield asset(path, path.is_file)
 
 
-@external
-def file_hpss(path: Union[Path, str]):
-    """
-    An existing file in HPSS.
-
-    :param path: HPSS path to the file.
-    """
-    yield "HPSS file %s" % path
-    available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(path)}'")
-    yield asset(path, lambda: available)
-
-
-@task
+@tasks
 def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     """
     A copy of an existing file.
@@ -111,24 +102,91 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     :raises: UWConfigError for unsupported URL schemes.
     """
     yield "Copy %s -> %s" % (src, dst)
-    yield asset(Path(dst), Path(dst).is_file)
     dst = _local_path(dst)  # currently no support for remote destinations
     parts = urlparse(str(src))
     src_scheme = parts.scheme
     if src_scheme in SCHEMES.hsi:
-        yield [executable(STR.hsi), file_hpss(parts.path)]
-        _filecopy_hsi(parts.path, dst)
+        yield filecopy_hsi(parts.path, dst)
     if src_scheme in SCHEMES.htar:
-        yield [executable(STR.hsi), executable(STR.htar), file_hpss(parts.path)]
-        _filecopy_htar(parts.path, parts.query, dst)
+        yield filecopy_htar(parts.path, parts.query, dst)
     elif src_scheme in SCHEMES.http:
-        yield existing(src)
-        _filecopy_http(str(src), dst)
+        yield filecopy_http(str(src), dst)
     elif src_scheme in SCHEMES.local:
-        yield file(src)
-        _filecopy_local(_local_path(src), dst)
+        yield filecopy_local(_local_path(src), dst)
     else:
         _bad_scheme(src, src_scheme)
+
+
+@task
+def filecopy_hsi(src: str, dst: Path):
+    """
+    Copy an HPSS file to the local filesystem via hsi.
+
+    :param src: HPSS path to the source file.
+    :param dst: Path to the destination file to create.
+    """
+    yield "HSI %s -> %s" % (src, dst)
+    yield asset(Path(dst), Path(dst).is_file)
+    yield existing_hpss(src)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
+    for line in output.strip().split("\n"):
+        log.info("=> %s", line)
+
+
+@task
+def filecopy_htar(src_archive: str, src_file: str, dst: Path):
+    """
+    Copy a file from an HPSS-based archive to the local filesystem via htar.
+
+    :param src_archive: HPSS path to the source archive.
+    :param src_file: Path within the archive to the file.
+    :param dst: Path to the destination file to create.
+    """
+    yield "HTAR %s:%s -> %s" % (src_archive, src_file, dst)
+    yield asset(Path(dst), Path(dst).is_file)
+    yield existing_hpss(src_archive)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    assert src_archive
+    assert src_file
+    # _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
+    # for line in output.strip().split("\n"):
+    #     log.info("=> %s", line)
+
+
+@task
+def filecopy_http(url: str, dst: Path):
+    """
+    Copy a remote file to the local filesystem via HTTP.
+
+    :param url: URL of the source file.
+    :param dst: Path to the destination file to create.
+    """
+    yield "HTTP %s -> %s" % (url, dst)
+    yield asset(Path(dst), Path(dst).is_file)
+    yield existing_http(url)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    response = requests.get(url, allow_redirects=True, timeout=3)
+    if (code := response.status_code) == 200:
+        with open(dst, "wb") as f:
+            f.write(response.content)
+    else:
+        log.error("Could not get '%s', HTTP status was: %s", url, code)
+
+
+@task
+def filecopy_local(src: Path, dst: Path):
+    """
+    Copy a file in the local filesystem.
+
+    :param src: Path to the source file.
+    :param dst: Path to the destination file to create.
+    """
+    yield "Local %s -> %s" % (src, dst)
+    yield asset(Path(dst), Path(dst).is_file)
+    yield file(src)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    copy(src, dst)
 
 
 @task
@@ -142,12 +200,25 @@ def symlink(target: Union[Path, str], linkname: Union[Path, str]):
     target, linkname = map(_local_path, [target, linkname])
     yield "Link %s -> %s" % (linkname, target)
     yield asset(linkname, linkname.exists)
-    yield existing(target)
+    yield symlink_target(target)
     linkname.parent.mkdir(parents=True, exist_ok=True)
     os.symlink(
         src=target if target.is_absolute() else os.path.relpath(target, linkname.parent),
         dst=linkname,
     )
+
+
+@external
+def symlink_target(path: Union[Path, str]):
+    """
+    An existing file, symlink, or directory.
+
+    :param path: Path to the file, symlink, or directory.
+    :param context: Optional additional context for the file.
+    """
+    path = _local_path(path)
+    yield "Target %s" % path
+    yield asset(path, path.exists)
 
 
 # Private helpers
@@ -162,62 +233,6 @@ def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
     :raises: UWConfigError.
     """
     raise UWConfigError(f"Scheme '{scheme}' in '{path}' not supported")
-
-
-def _filecopy_hsi(src: str, dst: Path) -> None:
-    """
-    Copy an HPSS file to the local filesystem via hsi.
-
-    :param src: HPSS path to the source file.
-    :param dst: Path to the destination file to create.
-    """
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
-    for line in output.strip().split("\n"):
-        log.info("=> %s", line)
-
-
-def _filecopy_htar(src_archive: str, src_file: str, dst: Path) -> None:
-    """
-    Copy a file from an HPSS-based archive to the local filesystem via htar.
-
-    :param src_archive: HPSS path to the source archive.
-    :param src_file: Path within the archive to the file.
-    :param dst: Path to the destination file to create.
-    """
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    assert src_archive
-    assert src_file
-    # _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
-    # for line in output.strip().split("\n"):
-    #     log.info("=> %s", line)
-
-
-def _filecopy_http(src: str, dst: Path) -> None:
-    """
-    Copy a remote file to the local filesystem via HTTP.
-
-    :param src: URL of the source file.
-    :param dst: Path to the destination file to create.
-    """
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    response = requests.get(src, allow_redirects=True, timeout=3)
-    if (code := response.status_code) == 200:
-        with open(dst, "wb") as f:
-            f.write(response.content)
-    else:
-        log.error("Could not get '%s', HTTP status was: %s", src, code)
-
-
-def _filecopy_local(src: Path, dst: Path) -> None:
-    """
-    Copy a file in the local filesystem.
-
-    :param src: Path to the source file.
-    :param dst: Path to the destination file to create.
-    """
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    copy(src, dst)
 
 
 def _local_path(path: Union[Path, str]) -> Path:
