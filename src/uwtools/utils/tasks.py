@@ -8,10 +8,10 @@ from shutil import copy, move, which
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace as ns
 from typing import NoReturn, Union
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 import requests
-from iotaa import asset, external, task, tasks
+from iotaa import Node, asset, external, task
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -94,29 +94,27 @@ def file(path: Union[Path, str], context: str = ""):
     yield asset(path, path.is_file)
 
 
-@tasks
-def filecopy(src: Union[Path, str], dst: Union[Path, str]):
+def filecopy(src: Union[Path, str], dst: Union[Path, str]) -> Node:
     """
     A copy of an existing file.
 
     :param src: Path to the source file.
     :param dst: Path to the destination file to create.
+    :return: An iotaa task-graph node.
     :raises: UWConfigError for unsupported URL schemes.
     """
-    yield "Copy %s -> %s" % (src, dst)
     dst = _local_path(dst)  # currently no support for remote destinations
     parts = urlparse(str(src))
     src_scheme = parts.scheme
     if src_scheme in SCHEMES.hsi:
-        yield filecopy_hsi(parts.path, dst)
+        return filecopy_hsi(parts.path, dst)
     if src_scheme in SCHEMES.htar:
-        yield filecopy_htar(parts.path, unquote(parts.query), dst)
-    elif src_scheme in SCHEMES.http:
-        yield filecopy_http(str(src), dst)
-    elif src_scheme in SCHEMES.local:
-        yield filecopy_local(_local_path(src), dst)
-    else:
-        _bad_scheme(src, src_scheme)
+        return filecopy_htar(parts.path, unquote(parts.query), dst)
+    if src_scheme in SCHEMES.http:
+        return filecopy_http(str(src), dst)
+    if src_scheme in SCHEMES.local:
+        return filecopy_local(_local_path(src), dst)
+    _bad_scheme(src, src_scheme)
 
 
 @task
