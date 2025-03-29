@@ -219,14 +219,15 @@ Example block:
 
 .. code-block:: yaml
 
-   b: htar:///hpss/path/to/archive.tar?/internal/path/to/a
+   foo/b: htar:///hpss/path/to/archive.tar?/internal/path/to/a
 
 * Result when copying to target directory ``target/``:
 
 .. code-block:: text
 
    target
-   └── b
+   └── foo
+       └── b
 
 Caveats
 ^^^^^^^
