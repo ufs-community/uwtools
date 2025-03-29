@@ -16,9 +16,9 @@ def test_run_failure(caplog):
     assert "division by zero" in output
     assert success is False
     assert logged(caplog, "Running: %s" % cmd)
-    assert logged(caplog, "  Failed with status: 2")
-    assert logged(caplog, "  Output:")
-    assert logged(caplog, "    expr: division by zero")
+    assert logged(caplog, "Failed with status: 2")
+    assert logged(caplog, "Output:")
+    assert logged(caplog, "  expr: division by zero")
 
 
 def test_run_success(caplog, tmp_path):
@@ -29,5 +29,5 @@ def test_run_success(caplog, tmp_path):
     )
     assert success
     assert logged(caplog, f"Running: {cmd} in {tmp_path} with environment variables FOO=bar")
-    assert logged(caplog, "  Output:")
-    assert logged(caplog, "    hello bar")
+    assert logged(caplog, "Output:")
+    assert logged(caplog, "  hello bar")
