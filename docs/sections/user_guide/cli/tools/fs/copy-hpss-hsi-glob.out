@@ -1,32 +1,20 @@
-[2025-03-29T16:42:52]     INFO Validating config against internal schema: files-to-stage
-[2025-03-29T16:42:52]     INFO 0 schema-validation errors found in fs config
-[2025-03-29T16:42:52]     INFO Running: hsi -q ls -1 '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_*.gfs_pgrb2b.tar.idx'
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx: Executing
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx'
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx' (2025/01/03 05:06:11 482080 bytes, 364125.7 KBS )
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx: Ready
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx: Executing
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx'
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx' (2025/01/03 04:35:46 482080 bytes, 560573.9 KBS )
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx: Ready
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx: Executing
-[2025-03-29T16:42:52]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx'
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx' (2025/01/03 05:14:37 482080 bytes, 496925.6 KBS )
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx: Ready
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx: Executing
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx'
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx' : '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx' (2025/01/03 04:34:16 482080 bytes, 568453.8 KBS )
-[2025-03-29T16:42:58]     INFO HSI /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx -> dst/copy-hpss-hsi-glob/com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx: Ready
-[2025-03-29T16:42:58]     INFO File copies: Ready
+[2025-03-29T17:19:29]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T17:19:29]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T17:19:29]     INFO Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.*'
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Executing
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Running: hsi -q get 'dst/copy-hpss-hsi-glob/data.tar' : '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/data.tar' : '/BMC/rtrr/5year/uwtools/data.tar' (2025/03/29 17:12:40 5632 bytes, 4505.5 KBS )
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Ready
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Executing
+[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/data.tar.idx' : '/BMC/rtrr/5year/uwtools/data.tar.idx'
+[2025-03-29T17:19:30]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-29T17:19:30]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/data.tar.idx' : '/BMC/rtrr/5year/uwtools/data.tar.idx' (2025/03/29 17:12:40 2848 bytes, 2776.1 KBS )
+[2025-03-29T17:19:30]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Ready
+[2025-03-29T17:19:30]     INFO File copies: Ready
 
 dst/copy-hpss-hsi-glob
-├── com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar.idx
-├── com_gfs_v16.3_gfs.20250101_06.gfs_pgrb2b.tar.idx
-├── com_gfs_v16.3_gfs.20250101_12.gfs_pgrb2b.tar.idx
-└── com_gfs_v16.3_gfs.20250101_18.gfs_pgrb2b.tar.idx
+├── data.tar
+└── data.tar.idx
 
-1 directory, 4 files
+1 directory, 2 files

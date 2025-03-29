@@ -1,17 +1,17 @@
-[2025-03-29T16:44:40]     INFO Validating config against internal schema: files-to-stage
-[2025-03-29T16:44:40]     INFO 0 schema-validation errors found in fs config
-[2025-03-29T16:44:40]     INFO HPSS file /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar: Executing
-[2025-03-29T16:44:40]     INFO HPSS file /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar: Running: hsi -q ls -1 '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar'
-[2025-03-29T16:44:40]     INFO HPSS file /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar: Ready
-[2025-03-29T16:44:40]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Executing
-[2025-03-29T16:44:40]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Running: htar -qxf '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar' './gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx' in dst/copy-hpss-htar-single/.tmpdirq4l0bh14
-[2025-03-29T16:44:46]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T16:44:46]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: => HTAR: HTAR SUCCESSFUL
-[2025-03-29T16:44:46]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Moving dst/copy-hpss-htar-single/.tmpdirq4l0bh14/gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile
-[2025-03-29T16:44:46]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Ready
-[2025-03-29T16:44:46]     INFO File copies: Ready
+[2025-03-29T17:19:38]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T17:19:38]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T17:19:38]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Executing
+[2025-03-29T17:19:38]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-03-29T17:19:38]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Ready
+[2025-03-29T17:19:38]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Executing
+[2025-03-29T17:19:38]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Running: htar -qxf '/BMC/rtrr/5year/uwtools/data.tar' 'a1.txt' in dst/copy-hpss-htar-single/.tmpdir5rse8ihf
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: => HTAR: HTAR SUCCESSFUL
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Moving dst/copy-hpss-htar-single/.tmpdir5rse8ihf/a1.txt -> dst/copy-hpss-htar-single/afile
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Ready
+[2025-03-29T17:19:43]     INFO File copies: Ready
 
 dst/copy-hpss-htar-single
-└── idxfile
+└── afile
 
 1 directory, 1 file

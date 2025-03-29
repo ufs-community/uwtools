@@ -213,13 +213,13 @@ Archive-Member ``htar`` Copies
 
 Source values may be ``htar://`` URLs when copying. Note that the ``htar``  executable must be available on the ``PATH`` of the shell from which ``uw`` (or the application making ``uwtools.api`` calls) is invoked. HPSS sources are not supported when linking.
 
-The name of the archive member to extract and copy to the destination path on the local filesystem should be provided as the `query string <https://en.wikipedia.org/wiki/Query_string>`_ in the URL (i.e. following ``htar://``, the path to the archive file, and a ``?`` character) and should be prefixed with ``./``. If ``?`` or ``&`` characters appear in either the archive-file path or the archive-member path, they should be encoded as ``%3F`` and ``%26``, respectively, per `URL encoding rules <https://developer.mozilla.org/en-US/docs/Glossary/Percent-encoding>`_.
+The name of the archive member to extract and copy to the destination path on the local filesystem should be provided as the `query string <https://en.wikipedia.org/wiki/Query_string>`_ in the URL, i.e. following ``htar://``, the path to the archive file, and a ``?`` character. If ``?`` or ``&`` characters appear in either the archive-file path or the archive-member path, they should be encoded as ``%3F`` and ``%26``, respectively, per `URL encoding rules <https://developer.mozilla.org/en-US/docs/Glossary/Percent-encoding>`_.
 
 Example block:
 
 .. code-block:: yaml
 
-   b: htar:///hpss/path/to/archive.tar?./a
+   b: htar:///hpss/path/to/archive.tar?a
 
 * Result when copying to target directory ``target/``:
 
