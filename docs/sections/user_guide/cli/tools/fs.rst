@@ -125,7 +125,7 @@ Use the ``!glob`` tag to copy multiple full HPSS files:
 
 See :ref:`files_yaml_hsi_glob_support` for more information on the use of the ``!glob`` tag in combination with ``hsi://`` sources.
 
-An ``htar://`` URL can be used as a cource path to extract a member from an HPSS ``tar`` archive file and copy it to the local filesystem. The URL should include the path to the archive file and, as the URL `query string <https://en.wikipedia.org/wiki/Query_string>`_, the path to archive member to extract, to copy:
+An ``htar://`` URL can be used as a source path to extract a member from an HPSS ``tar`` archive file and copy it to the local filesystem. The URL should include the path to the archive file and, as the URL `query string <https://en.wikipedia.org/wiki/Query_string>`_, the path to archive member to extract:
 
 .. literalinclude:: fs/copy-hpss-htar-single.yaml
    :language: yaml
