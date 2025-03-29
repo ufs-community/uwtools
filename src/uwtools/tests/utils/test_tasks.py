@@ -5,7 +5,7 @@ import os
 import stat
 from pathlib import Path
 from typing import Union
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 
 import iotaa
 from iotaa import asset, external
@@ -155,6 +155,7 @@ def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
         tasks.filecopy(src=src, dst=dst_in)
     filecopy_hsi.assert_called_once_with("/path/to/file", Path(dst_out), True)
 
+
 @mark.parametrize(
     ["dst_in", "dst_out"],
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
@@ -164,7 +165,8 @@ def test_utils_tasks_filecopy__mocked_htar(dst_in, dst_out):
     with patch.object(tasks, "filecopy_htar") as filecopy_htar:
         tasks.filecopy(src=src, dst=dst_in)
     filecopy_htar.assert_called_once_with("/path/to/archive.tar", "foo?&bar", Path(dst_out), True)
-    
+
+
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize(
     ["dst_in", "dst_out"],
@@ -202,19 +204,41 @@ def test_utils_tasks_filecopy__simple(tmp_path):
 
 def test_utils_tasks_filecopy_hsi(caplog, ready_task, tmp_path):
     log.setLevel(logging.INFO)
-    src = tmp_path / "src" / "foo"
-    dst = tmp_path / "dst" / "foo"
+    src = "/path/to/src"
+    dst = tmp_path / "dst"
     with (
         patch.object(tasks, "run_shell_cmd") as run_shell_cmd,
         patch.object(tasks, "existing_hpss", wraps=ready_task) as existing_hpss,
     ):
-        run_shell_cmd.return_value = (True, "foo\nbar\n")
+        run_shell_cmd.side_effect = lambda *_a, **_kw: (dst.touch(), (True, "msg1\nmsg2\n"))[1]
         tasks.filecopy_hsi(src=src, dst=Path(dst))
-    taskname = f"HSI {src} -> {dst}"
     existing_hpss.assert_called_once_with(src)
+    taskname = f"HSI {src} -> {dst}"
     run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'", taskname=taskname)
-    assert logged(caplog, f"{taskname}: => foo")
-    assert logged(caplog, f"{taskname}: => bar")
+    assert logged(caplog, f"{taskname}: => msg1")
+    assert logged(caplog, f"{taskname}: => msg2")
+    assert dst.exists()
+
+
+def test_utils_tasks_filecopy_htar(caplog, ready_task, tmp_path):
+    log.setLevel(logging.INFO)
+    src_archive = "/path/to/archive.tar"
+    src_file = "afile"
+    dst = tmp_path / "dst"
+    with (
+        patch.object(tasks, "existing_hpss", wraps=ready_task) as existing_hpss,
+        patch.object(tasks, "move", side_effect=lambda *_a, **_kw: dst.touch()) as move,
+        patch.object(tasks, "run_shell_cmd", return_value=(True, "msg1\nmsg2\n")) as run_shell_cmd,
+    ):
+        tasks.filecopy_htar(src_archive=src_archive, src_file=src_file, dst=Path(dst))
+    existing_hpss.assert_called_once_with(src_archive)
+    cmd = f"htar -qxf '{src_archive}' '{src_file}'"
+    taskname = f"HTAR {src_archive}:{src_file} -> {dst}"
+    run_shell_cmd.assert_called_once_with(cmd, cwd=ANY, taskname=taskname)
+    move.assert_called_once_with(ANY, dst)
+    assert logged(caplog, f"{taskname}: => msg1")
+    assert logged(caplog, f"{taskname}: => msg2")
+    assert dst.exists()
 
 
 def test_utils_tasks_filecopy_http(ready_task, tmp_path):
