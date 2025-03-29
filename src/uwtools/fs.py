@@ -249,8 +249,8 @@ class Linker(FileStager):
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
         yield [
-            symlink(target=Path(v), linkname=linkname(k), check=check)
-            for k, v, check in self._expand_glob()
+            symlink(target=Path(v), linkname=linkname(k), check=nonglob)
+            for k, v, nonglob in self._expand_glob()
         ]
 
 
