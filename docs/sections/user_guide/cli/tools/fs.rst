@@ -101,7 +101,7 @@ See :ref:`files_yaml_glob_support` for more examples and information on the sema
    the name of an actual .out file) in the 'fs' directory to update after editing (or touch'ing) a
    .yaml or .txt file.
 
-An HPSS ``hsi://`` URL can be used as a source path when copying full files from HPSS to the local filesystem:
+An ``hsi://`` URL can be used as a source path to copy full files from HPSS to the local filesystem:
 
 .. literalinclude:: fs/copy-hpss-hsi-single.yaml
    :language: yaml
@@ -124,6 +124,18 @@ Use the ``!glob`` tag to copy multiple full HPSS files:
    :language: text
 
 See :ref:`files_yaml_hsi_glob_support` for more information on the use of the ``!glob`` tag in combination with ``hsi://`` sources.
+
+An ``htar://`` URL can be used as a cource path to extract a member from an HPSS ``tar`` archive file and copy it to the local filesystem. The URL should include the path to the archive file and, as the URL `query string <https://en.wikipedia.org/wiki/Query_string>`_, the path to archive member to extract, to copy:
+
+.. literalinclude:: fs/copy-hpss-htar-single.yaml
+   :language: yaml
+.. literalinclude:: fs/copy-hpss-htar-single.txt
+   :language: text
+   :emphasize-lines: 2
+.. literalinclude:: fs/copy-hpss-htar-single.out
+   :language: text
+
+See :ref:`files_yaml_htar_support` for more information on UW YAML support for ``htar://`` sources.
 
 ``link``
 --------

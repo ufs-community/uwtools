@@ -1,0 +1,18 @@
+[2025-03-29T04:27:09]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T04:27:09]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T04:27:09]     INFO HPSS file /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar: Executing
+[2025-03-29T04:27:09]     INFO HPSS file /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar: Running: hsi -q ls -1 '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar'
+[2025-03-29T04:27:09]     INFO HPSS file /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar: Ready
+[2025-03-29T04:27:09]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Executing
+[2025-03-29T04:27:09]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Running: htar -qxf '/NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar' './gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx' in dst/copy-hpss-htar-single/.tmpdir1j7xyh8x
+[2025-03-29T04:27:09]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Moving dst/copy-hpss-htar-single/.tmpdir1j7xyh8x/gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile
+[2025-03-29T04:27:09]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-29T04:27:09]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: => HTAR: HTAR SUCCESSFUL
+[2025-03-29T04:27:09]     INFO HTAR /NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar:./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Ready
+[2025-03-29T04:27:09]     INFO Copy htar:///NCEPPROD/hpssprod/runhistory/rh2025/202501/20250101/com_gfs_v16.3_gfs.20250101_00.gfs_pgrb2b.tar?./gfs.20250101/00/atmos/gfs.t00z.pgrb2b.0p25.anl.idx -> dst/copy-hpss-htar-single/idxfile: Ready
+[2025-03-29T04:27:09]     INFO File copies: Ready
+
+dst/copy-hpss-htar-single
+└── idxfile
+
+1 directory, 1 file

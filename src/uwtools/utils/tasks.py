@@ -8,7 +8,7 @@ from shutil import copy, move, which
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace as ns
 from typing import NoReturn, Union
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 import requests
 from iotaa import asset, external, task, tasks
@@ -110,7 +110,7 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]):
     if src_scheme in SCHEMES.hsi:
         yield filecopy_hsi(parts.path, dst)
     if src_scheme in SCHEMES.htar:
-        yield filecopy_htar(parts.path, parts.query, dst)
+        yield filecopy_htar(parts.path, unquote(parts.query), dst)
     elif src_scheme in SCHEMES.http:
         yield filecopy_http(str(src), dst)
     elif src_scheme in SCHEMES.local:
