@@ -9,7 +9,7 @@ from uwtools.tests.support import logged
 from uwtools.utils import processing
 
 
-def test_run_failure(caplog):
+def test_utils_processing_run_shell_cmd__failure(caplog):
     processing.log.setLevel(logging.INFO)
     cmd = "expr 1 / 0"
     success, output = processing.run_shell_cmd(cmd=cmd)
@@ -21,7 +21,7 @@ def test_run_failure(caplog):
     assert logged(caplog, "  expr: division by zero")
 
 
-def test_run_success(caplog, tmp_path):
+def test_utils_processing_run_shell_cmd__success(caplog, tmp_path):
     processing.log.setLevel(logging.INFO)
     cmd = "echo hello $FOO"
     success, _ = processing.run_shell_cmd(
