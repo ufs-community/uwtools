@@ -24,14 +24,13 @@ def run_shell_cmd(
     :param log_output: Log output from successful cmd? (Error output is always logged.)
     :return: A result object providing combined stder/stdout output and success values.
     """
-
-    log.info("Running: %s", cmd)
+    msg = f"Running: {cmd}"
     if cwd:
-        log.info("%sin %s", INDENT, cwd)
+        msg += f" in {cwd}"
     if env:
-        log.info("%swith environment variables:", INDENT)
-        for key, val in env.items():
-            log.info("%s%s=%s", INDENT * 2, key, val)
+        kvpairs = " ".join(f"{k}={v}" for k, v in env.items())
+        msg += f" with environment variables {kvpairs}"
+    log.info(msg)
     try:
         output = check_output(
             cmd, cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True

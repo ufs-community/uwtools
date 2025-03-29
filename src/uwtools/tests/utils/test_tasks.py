@@ -81,7 +81,7 @@ def test_utils_tasks_existing_http(caplog, code, expected, scheme):
         state = iotaa.ready(tasks.existing_http(url=url))
         assert state is expected
     head.assert_called_with(url, allow_redirects=True, timeout=3)
-    msg = "Remote HTTP object %s: %s" % (url, "Ready" if state else "Not ready [external asset]")
+    msg = "Remote HTTP resource %s: %s" % (url, "Ready" if state else "Not ready [external asset]")
     assert logged(caplog, msg)
 
 
@@ -212,8 +212,8 @@ def test_utils_tasks_filecopy_hsi(caplog, ready_task, tmp_path):
         tasks.filecopy_hsi(src=src, dst=Path(dst))
     existing_hpss.assert_called_once_with(src)
     run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'")
-    assert logged(caplog, "=> foo")
-    assert logged(caplog, "=> bar")
+    assert logged(caplog, f"HSI {src} -> {dst}: => foo")
+    assert logged(caplog, f"HSI {src} -> {dst}: => bar")
 
 
 def test_utils_tasks_filecopy_http(ready_task, tmp_path):

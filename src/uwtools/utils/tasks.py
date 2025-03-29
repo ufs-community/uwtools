@@ -4,7 +4,8 @@ Common iotaa tasks.
 
 import os
 from pathlib import Path
-from shutil import copy, which
+from shutil import copy, move, which
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace as ns
 from typing import NoReturn, Union
 from urllib.parse import urlparse
@@ -70,11 +71,11 @@ def existing_hpss(path: Union[Path, str]):
 @external
 def existing_http(url: str):
     """
-    An existing remote HTTP object.
+    An existing remote HTTP resource.
 
-    :param url: URL of the HTTP object.
+    :param url: URL of the HTTP resource.
     """
-    yield "Remote HTTP object %s" % url
+    yield "Remote HTTP resource %s" % url
     yield asset(url, lambda: requests.head(url, allow_redirects=True, timeout=3).status_code == 200)
 
 
@@ -125,13 +126,14 @@ def filecopy_hsi(src: str, dst: Path):
     :param src: HPSS path to the source file.
     :param dst: Path to the destination file to create.
     """
-    yield "HSI %s -> %s" % (src, dst)
+    taskname = "HSI %s -> %s" % (src, dst)
+    yield taskname
     yield asset(Path(dst), Path(dst).is_file)
     yield existing_hpss(src)
     dst.parent.mkdir(parents=True, exist_ok=True)
     _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
     for line in output.strip().split("\n"):
-        log.info("=> %s", line)
+        log.info("%s: => %s", taskname, line)
 
 
 @task
@@ -143,15 +145,17 @@ def filecopy_htar(src_archive: str, src_file: str, dst: Path):
     :param src_file: Path within the archive to the file.
     :param dst: Path to the destination file to create.
     """
-    yield "HTAR %s:%s -> %s" % (src_archive, src_file, dst)
+    taskname = "HTAR %s:%s -> %s" % (src_archive, src_file, dst)
+    yield taskname
     yield asset(Path(dst), Path(dst).is_file)
     yield existing_hpss(src_archive)
     dst.parent.mkdir(parents=True, exist_ok=True)
-    assert src_archive
-    assert src_file
-    # _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
-    # for line in output.strip().split("\n"):
-    #     log.info("=> %s", line)
+    cmd = f"{STR.htar} -qxf '{src_archive}' '{src_file}'"
+    with TemporaryDirectory(prefix=".tmpdir", dir=dst.parent) as tmpdir:
+        _, output = run_shell_cmd(cmd, cwd=tmpdir)
+        move(Path(tmpdir, src_file), dst)
+    for line in output.strip().split("\n"):
+        log.info("%s: => %s", taskname, line)
 
 
 @task

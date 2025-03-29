@@ -28,9 +28,6 @@ def test_run_success(caplog, tmp_path):
         cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True
     )
     assert success
-    assert logged(caplog, "Running: %s" % cmd)
-    assert logged(caplog, "  in %s" % tmp_path)
-    assert logged(caplog, "  with environment variables:")
-    assert logged(caplog, "    FOO=bar")
+    assert logged(caplog, f"Running: {cmd} in {tmp_path} with environment variables FOO=bar")
     assert logged(caplog, "  Output:")
     assert logged(caplog, "    hello bar")
