@@ -1,14 +1,14 @@
-[2025-03-29T15:16:16]     INFO Validating config against internal schema: files-to-stage
-[2025-03-29T15:16:16]     INFO 0 schema-validation errors found in fs config
-[2025-03-29T15:16:17]     INFO HPSS file /BMC/fim/madden/prepsourceschem.tar.gz: Executing
-[2025-03-29T15:16:17]     INFO HPSS file /BMC/fim/madden/prepsourceschem.tar.gz: Running: hsi -q ls -1 '/BMC/fim/madden/prepsourceschem.tar.gz'
-[2025-03-29T15:16:22]     INFO HPSS file /BMC/fim/madden/prepsourceschem.tar.gz: Ready
-[2025-03-29T15:16:22]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Executing
-[2025-03-29T15:16:22]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Running: hsi -q get 'dst/copy-hpss-hsi-single/psc.tgz' : '/BMC/fim/madden/prepsourceschem.tar.gz'
-[2025-03-29T15:16:27]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T15:16:27]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-single/psc.tgz' : '/BMC/fim/madden/prepsourceschem.tar.gz' (2011/07/22 16:55:04 2209010 bytes, 96817.7 KBS )
-[2025-03-29T15:16:27]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Ready
-[2025-03-29T15:16:27]     INFO File copies: Ready
+[2025-03-29T16:44:31]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T16:44:31]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T16:44:31]     INFO HPSS file /BMC/fim/madden/prepsourceschem.tar.gz: Executing
+[2025-03-29T16:44:31]     INFO HPSS file /BMC/fim/madden/prepsourceschem.tar.gz: Running: hsi -q ls -1 '/BMC/fim/madden/prepsourceschem.tar.gz'
+[2025-03-29T16:44:31]     INFO HPSS file /BMC/fim/madden/prepsourceschem.tar.gz: Ready
+[2025-03-29T16:44:31]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Executing
+[2025-03-29T16:44:31]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Running: hsi -q get 'dst/copy-hpss-hsi-single/psc.tgz' : '/BMC/fim/madden/prepsourceschem.tar.gz'
+[2025-03-29T16:44:32]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-29T16:44:32]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-single/psc.tgz' : '/BMC/fim/madden/prepsourceschem.tar.gz' (2011/07/22 16:55:04 2209010 bytes, 92636.8 KBS )
+[2025-03-29T16:44:32]     INFO HSI /BMC/fim/madden/prepsourceschem.tar.gz -> dst/copy-hpss-hsi-single/psc.tgz: Ready
+[2025-03-29T16:44:32]     INFO File copies: Ready
 
 dst/copy-hpss-hsi-single
 └── psc.tgz
