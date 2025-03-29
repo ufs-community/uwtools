@@ -205,3 +205,31 @@ Use the following command to preview the files to be copied when using an ``hsi`
    hsi -q ls -1 '<your-glob-pattern>`
 
 Here, ``<your-glob-pattern>`` is a path that includes wildcard characters, without the ``hsi://`` prefix. See the `HSI Reference Manual <https://hpss-collaboration.org/wp-content/uploads/2023/09/hpss_hsi_10.2_reference_manual.pdf>`_ for more information on ``hsi`` and the wildcard characters it supports in glob patterns.
+
+.. _files_yaml_htar_support:
+
+Archive-Member ``htar`` Copies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Source values may be ``htar://`` URLs when copying. Note that the ``htar``  executable must be available on the ``PATH`` of the shell from which ``uw`` (or the application making ``uwtools.api`` calls) is invoked. HPSS sources are not supported when linking.
+
+The name of the archive member to extract and copy to the destination path on the local filesystem should be provided as the `query string <https://en.wikipedia.org/wiki/Query_string>`_ in the URL, i.e. following ``htar://``, the path to the archive file, and a ``?`` character. If ``?`` or ``&`` characters appear in either the archive-file path or the archive-member path, they should be encoded as ``%3F`` and ``%26``, respectively, per `URL encoding rules <https://developer.mozilla.org/en-US/docs/Glossary/Percent-encoding>`_.
+
+Example block:
+
+.. code-block:: yaml
+
+   foo/b: htar:///hpss/path/to/archive.tar?/internal/path/to/a
+
+* Result when copying to target directory ``target/``:
+
+.. code-block:: text
+
+   target
+   └── foo
+       └── b
+
+Caveats
+^^^^^^^
+
+* Only a small subset of the functionality available through the ``hsi`` and ``htar`` utilities is exposed via UW YAML. Users with advanced requirements may prefer to use those tools directly, outside ``uwtools``.
