@@ -227,3 +227,8 @@ Example block:
 
    target
    └── b
+
+Caveats
+^^^^^^^
+
+* Only a small subset of the functionality available through the ``hsi`` and ``htar`` utilities is exposed via UW YAML. Users with advanced requirements may prefer to use those tools directly, outside ``uwtools``.
