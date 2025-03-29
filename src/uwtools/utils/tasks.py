@@ -155,11 +155,11 @@ def filecopy_htar(src_archive: str, src_file: str, dst: Path):
     cmd = f"{STR.htar} -qxf '{src_archive}' '{src_file}'"
     with TemporaryDirectory(prefix=".tmpdir", dir=dst.parent) as tmpdir:
         _, output = run_shell_cmd(cmd, cwd=tmpdir, taskname=taskname)
+        for line in output.strip().split("\n"):
+            log.info("%s: => %s", taskname, line)
         tmp = Path(tmpdir, src_file)
         log.info("%s: Moving %s -> %s", taskname, tmp, dst)
         move(tmp, dst)
-    for line in output.strip().split("\n"):
-        log.info("%s: => %s", taskname, line)
 
 
 @task
