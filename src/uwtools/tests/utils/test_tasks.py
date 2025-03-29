@@ -210,10 +210,11 @@ def test_utils_tasks_filecopy_hsi(caplog, ready_task, tmp_path):
     ):
         run_shell_cmd.return_value = (True, "foo\nbar\n")
         tasks.filecopy_hsi(src=src, dst=Path(dst))
+    taskname = f"HSI {src} -> {dst}"
     existing_hpss.assert_called_once_with(src)
-    run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'")
-    assert logged(caplog, f"HSI {src} -> {dst}: => foo")
-    assert logged(caplog, f"HSI {src} -> {dst}: => bar")
+    run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'", taskname=taskname)
+    assert logged(caplog, f"{taskname}: => foo")
+    assert logged(caplog, f"{taskname}: => bar")
 
 
 def test_utils_tasks_filecopy_http(ready_task, tmp_path):

@@ -131,7 +131,8 @@ def filecopy_hsi(src: str, dst: Path):
     yield asset(Path(dst), Path(dst).is_file)
     yield existing_hpss(src)
     dst.parent.mkdir(parents=True, exist_ok=True)
-    _, output = run_shell_cmd(f"{STR.hsi} -q get '{dst}' : '{src}'")
+    cmd = f"{STR.hsi} -q get '{dst}' : '{src}'"
+    _, output = run_shell_cmd(cmd, taskname=taskname)
     for line in output.strip().split("\n"):
         log.info("%s: => %s", taskname, line)
 
@@ -152,7 +153,7 @@ def filecopy_htar(src_archive: str, src_file: str, dst: Path):
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = f"{STR.htar} -qxf '{src_archive}' '{src_file}'"
     with TemporaryDirectory(prefix=".tmpdir", dir=dst.parent) as tmpdir:
-        _, output = run_shell_cmd(cmd, cwd=tmpdir)
+        _, output = run_shell_cmd(cmd, cwd=tmpdir, taskname=taskname)
         move(Path(tmpdir, src_file), dst)
     for line in output.strip().split("\n"):
         log.info("%s: => %s", taskname, line)
