@@ -3,8 +3,8 @@ File and directory staging.
 """
 
 import datetime as dt
+import glob
 from abc import ABC, abstractmethod
-from glob import iglob
 from itertools import dropwhile, zip_longest
 from operator import eq
 from pathlib import Path
@@ -141,48 +141,48 @@ class FileStager(Stager):
         """
         return list(self._config.keys())
 
-    def _expand_glob(self) -> list[tuple[str, str]]:
-        items: list[tuple] = []
+    def _expand_glob(self) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
         for dst, src in self._config.items():
             if isinstance(src, str):
-                items.append((dst, src))
+                srcs.append((dst, src, True))
             else:
                 assert isinstance(src, UWYAMLGlob)
-                attrs = urlparse(src.value)
-                if attrs.scheme == "hsi":
-                    items.extend(self._expand_glob_hsi(attrs.path, dst))
-                elif attrs.scheme in ["", "file"]:
-                    items.extend(self._expand_glob_local(attrs.path, dst))
+                parts = urlparse(src.value)
+                if parts.scheme == "hsi":
+                    srcs.extend(self._expand_glob_hsi(parts.path, dst))
+                elif parts.scheme in ["", "file"]:
+                    srcs.extend(self._expand_glob_local(parts.path, dst))
                 else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
-                    log.error(msg, attrs.scheme, src.tag, src)
-        return items
+                    log.error(msg, parts.scheme, src.tag, src)
+        return srcs
 
-    def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple]:
+    def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
         hsi_errmsg_prefix = "***"
-        items: list[tuple] = []
+        srcs: list[tuple[str, str, bool]] = []
         success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(glob_pattern)}'")
         if success:
             lines = output.strip().split("\n")
             if matches := [line for line in lines if not line.startswith(hsi_errmsg_prefix)][1:]:
                 for path in matches:
-                    d, s = self._expand_glob_resolve(glob_pattern, path, dst)
-                    items.append((d, f"{STR.hsi}://{s}"))
+                    d, s, nonglob = self._expand_glob_resolve(glob_pattern, path, dst)
+                    srcs.append((d, f"{STR.hsi}://{s}", nonglob))
             else:
                 log.warning(lines[1])
-        return items
+        return srcs
 
-    def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple]:
-        items: list[tuple] = []
-        for path in iglob(glob_pattern, recursive=True):
+    def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
+        for path in glob.iglob(glob_pattern, recursive=True):
             if Path(path).is_dir() and not isinstance(self, Linker):
                 log.warning("Ignoring directory %s", path)
             else:
-                items.append(self._expand_glob_resolve(glob_pattern, path, dst))
-        return items
+                srcs.append(self._expand_glob_resolve(glob_pattern, path, dst))
+        return srcs
 
     @staticmethod
-    def _expand_glob_resolve(glob_pattern: str, path: str, dst: str) -> tuple[str, str]:
+    def _expand_glob_resolve(glob_pattern: str, path: str, dst: str) -> tuple[str, str, bool]:
         suffix: Union[Path, str]
         if path == glob_pattern:  # degenerate case
             suffix = Path(path).parts[-1]
@@ -190,7 +190,8 @@ class FileStager(Stager):
             parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
             pairs = dropwhile(lambda x: eq(*x), parts)
             suffix = Path(*[pair[0] for pair in pairs if pair[0]])
-        return (str(Path(dst).parent / suffix), path)
+        nonglob = glob_pattern == glob.escape(glob_pattern)  # pattern has no glob characters
+        return (str(Path(dst).parent / suffix), path, nonglob)
 
     @property
     def _schema(self) -> str:
@@ -210,10 +211,16 @@ class Copier(FileStager):
         """
         Copy files.
         """
+
+        # If a source path is a glob pattern, the existence of the file(s) found via glob expansion
+        # is already assured and it is unnecessary to check again for their existence. If, however,
+        # a source path is a full explicit path, its existence should be checked before and attempt
+        # is made to copy it.
+
         yield "File copies"
         yield [
-            filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst))
-            for dst, src in self._expand_glob()
+            filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst), check=nonglob)
+            for dst, src, nonglob in self._expand_glob()
         ]
 
     @staticmethod
@@ -236,9 +243,15 @@ class Linker(FileStager):
         """
         Link files.
         """
+
+        # See comment in Copier.go() in re: "check" argument.
+
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._expand_glob()]
+        yield [
+            symlink(target=Path(v), linkname=linkname(k), check=check)
+            for k, v, check in self._expand_glob()
+        ]
 
 
 class MakeDirs(Stager):

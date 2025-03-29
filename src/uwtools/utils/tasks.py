@@ -94,12 +94,13 @@ def file(path: Union[Path, str], context: str = ""):
     yield asset(path, path.is_file)
 
 
-def filecopy(src: Union[Path, str], dst: Union[Path, str]) -> Node:
+def filecopy(src: Union[Path, str], dst: Union[Path, str], check: bool = True) -> Node:
     """
     A copy of an existing file.
 
     :param src: Path to the source file.
     :param dst: Path to the destination file to create.
+    :param check: Check existence of source before trying to copy.
     :return: An iotaa task-graph node.
     :raises: UWConfigError for unsupported URL schemes.
     """
@@ -107,28 +108,29 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str]) -> Node:
     parts = urlparse(str(src))
     src_scheme = parts.scheme
     if src_scheme in SCHEMES.hsi:
-        return filecopy_hsi(parts.path, dst)
+        return filecopy_hsi(parts.path, dst, check)
     if src_scheme in SCHEMES.htar:
-        return filecopy_htar(parts.path, unquote(parts.query), dst)
+        return filecopy_htar(parts.path, unquote(parts.query), dst, check)
     if src_scheme in SCHEMES.http:
-        return filecopy_http(str(src), dst)
+        return filecopy_http(str(src), dst, check)
     if src_scheme in SCHEMES.local:
-        return filecopy_local(_local_path(src), dst)
+        return filecopy_local(_local_path(src), dst, check)
     _bad_scheme(src, src_scheme)
 
 
 @task
-def filecopy_hsi(src: str, dst: Path):
+def filecopy_hsi(src: str, dst: Path, check: bool = True):
     """
     Copy an HPSS file to the local filesystem via hsi.
 
     :param src: HPSS path to the source file.
     :param dst: Path to the destination file to create.
+    :param check: Check existence of source before trying to copy.
     """
     taskname = "HSI %s -> %s" % (src, dst)
     yield taskname
     yield asset(Path(dst), Path(dst).is_file)
-    yield existing_hpss(src)
+    yield existing_hpss(src) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = f"{STR.hsi} -q get '{dst}' : '{src}'"
     _, output = run_shell_cmd(cmd, taskname=taskname)
@@ -137,18 +139,19 @@ def filecopy_hsi(src: str, dst: Path):
 
 
 @task
-def filecopy_htar(src_archive: str, src_file: str, dst: Path):
+def filecopy_htar(src_archive: str, src_file: str, dst: Path, check: bool = True):
     """
     Copy a file from an HPSS-based archive to the local filesystem via htar.
 
     :param src_archive: HPSS path to the source archive.
     :param src_file: Path within the archive to the file.
     :param dst: Path to the destination file to create.
+    :param check: Check existence of source before trying to copy.
     """
     taskname = "HTAR %s:%s -> %s" % (src_archive, src_file, dst)
     yield taskname
     yield asset(Path(dst), Path(dst).is_file)
-    yield existing_hpss(src_archive)
+    yield existing_hpss(src_archive) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = f"{STR.htar} -qxf '{src_archive}' '{src_file}'"
     with TemporaryDirectory(prefix=".tmpdir", dir=dst.parent) as tmpdir:
@@ -161,16 +164,17 @@ def filecopy_htar(src_archive: str, src_file: str, dst: Path):
 
 
 @task
-def filecopy_http(url: str, dst: Path):
+def filecopy_http(url: str, dst: Path, check: bool = True):
     """
     Copy a remote file to the local filesystem via HTTP.
 
     :param url: URL of the source file.
     :param dst: Path to the destination file to create.
+    :param check: Check existence of source before trying to copy.
     """
     yield "HTTP %s -> %s" % (url, dst)
     yield asset(Path(dst), Path(dst).is_file)
-    yield existing_http(url)
+    yield existing_http(url) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(url, allow_redirects=True, timeout=3)
     if (code := response.status_code) == 200:
@@ -181,32 +185,34 @@ def filecopy_http(url: str, dst: Path):
 
 
 @task
-def filecopy_local(src: Path, dst: Path):
+def filecopy_local(src: Path, dst: Path, check: bool = True):
     """
     Copy a file in the local filesystem.
 
     :param src: Path to the source file.
     :param dst: Path to the destination file to create.
+    :param check: Check existence of source before trying to copy.
     """
     yield "Local %s -> %s" % (src, dst)
     yield asset(Path(dst), Path(dst).is_file)
-    yield file(src)
+    yield file(src) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     copy(src, dst)
 
 
 @task
-def symlink(target: Union[Path, str], linkname: Union[Path, str]):
+def symlink(target: Union[Path, str], linkname: Union[Path, str], check: bool = True):
     """
     A symbolic link.
 
     :param target: The existing file or directory.
     :param linkname: The symlink to create.
+    :param check: Check existence of source before trying to copy.
     """
     target, linkname = map(_local_path, [target, linkname])
     yield "Link %s -> %s" % (linkname, target)
     yield asset(linkname, linkname.exists)
-    yield symlink_target(target)
+    yield symlink_target(target) if check else None
     linkname.parent.mkdir(parents=True, exist_ok=True)
     os.symlink(
         src=target if target.is_absolute() else os.path.relpath(target, linkname.parent),

@@ -157,7 +157,7 @@ def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
         patch.object(tasks, "filecopy_hsi") as filecopy_hsi,
     ):
         tasks.filecopy(src=src, dst=dst_in)
-    filecopy_hsi.assert_called_once_with("/path/to/file", Path(dst_out))
+    filecopy_hsi.assert_called_once_with("/path/to/file", Path(dst_out), True)
 
 
 @mark.parametrize("scheme", ["http", "https"])
@@ -172,7 +172,7 @@ def test_utils_tasks_filecopy__mocked_http(scheme, dst_in, dst_out):
         patch.object(tasks, "filecopy_http") as filecopy_http,
     ):
         tasks.filecopy(src=src, dst=dst_in)
-    filecopy_http.assert_called_once_with(src, Path(dst_out))
+    filecopy_http.assert_called_once_with(src, Path(dst_out), True)
 
 
 @mark.parametrize(
@@ -189,7 +189,7 @@ def test_utils_tasks_filecopy__mocked_local(src_in, src_out, dst_in, dst_out):
         patch.object(tasks, "filecopy_local") as filecopy_local,
     ):
         tasks.filecopy(src=src_in, dst=dst_in)
-    filecopy_local.assert_called_once_with(Path(src_out), Path(dst_out))
+    filecopy_local.assert_called_once_with(Path(src_out), Path(dst_out), True)
 
 
 def test_utils_tasks_filecopy__simple(tmp_path):
