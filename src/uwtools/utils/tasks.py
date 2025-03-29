@@ -60,11 +60,12 @@ def existing_hpss(path: Union[Path, str]):
 
     :param path: HPSS path to the file.
     """
-    yield "HPSS file %s" % path
+    taskname = "HPSS file %s" % path
+    yield taskname
     val = [False]
     yield asset(path, lambda: val[0])
     yield executable(STR.hsi)
-    available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(path)}'")
+    available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(path)}'", taskname=taskname)
     val[0] = available
 
 
