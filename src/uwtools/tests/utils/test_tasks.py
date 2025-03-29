@@ -151,15 +151,20 @@ def test_utils_tasks_filecopy__source_local(src, ok):
 )
 def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
     src = "hsi:///path/to/file"
-    with (
-        patch.object(tasks, "executable", exists),
-        patch.object(tasks, "existing_hpss", exists),
-        patch.object(tasks, "filecopy_hsi") as filecopy_hsi,
-    ):
+    with patch.object(tasks, "filecopy_hsi") as filecopy_hsi:
         tasks.filecopy(src=src, dst=dst_in)
     filecopy_hsi.assert_called_once_with("/path/to/file", Path(dst_out), True)
 
-
+@mark.parametrize(
+    ["dst_in", "dst_out"],
+    [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
+)
+def test_utils_tasks_filecopy__mocked_htar(dst_in, dst_out):
+    src = "htar:///path/to/archive.tar?foo%3F%26bar"
+    with patch.object(tasks, "filecopy_htar") as filecopy_htar:
+        tasks.filecopy(src=src, dst=dst_in)
+    filecopy_htar.assert_called_once_with("/path/to/archive.tar", "foo?&bar", Path(dst_out), True)
+    
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize(
     ["dst_in", "dst_out"],
@@ -167,10 +172,7 @@ def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
 )
 def test_utils_tasks_filecopy__mocked_http(scheme, dst_in, dst_out):
     src = f"{scheme}://foo.com/obj"
-    with (
-        patch.object(tasks, "existing_http", exists),
-        patch.object(tasks, "filecopy_http") as filecopy_http,
-    ):
+    with patch.object(tasks, "filecopy_http") as filecopy_http:
         tasks.filecopy(src=src, dst=dst_in)
     filecopy_http.assert_called_once_with(src, Path(dst_out), True)
 
@@ -184,10 +186,7 @@ def test_utils_tasks_filecopy__mocked_http(scheme, dst_in, dst_out):
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_utils_tasks_filecopy__mocked_local(src_in, src_out, dst_in, dst_out):
-    with (
-        patch.object(tasks, "file", exists),
-        patch.object(tasks, "filecopy_local") as filecopy_local,
-    ):
+    with patch.object(tasks, "filecopy_local") as filecopy_local:
         tasks.filecopy(src=src_in, dst=dst_in)
     filecopy_local.assert_called_once_with(Path(src_out), Path(dst_out), True)
 
