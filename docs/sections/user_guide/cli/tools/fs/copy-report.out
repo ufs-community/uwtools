@@ -1,19 +1,15 @@
-[2025-03-28T21:56:59]     INFO Validating config against internal schema: files-to-stage
-[2025-03-28T21:56:59]     INFO 0 schema-validation errors found in fs config
-[2025-03-28T21:57:00]     INFO Local src/foo -> dst/copy-report-jq/foo: Executing
-[2025-03-28T21:57:00]     INFO Local src/foo -> dst/copy-report-jq/foo: Ready
-[2025-03-28T21:57:00]  WARNING File src/qux: Not ready [external asset]
-[2025-03-28T21:57:00]     INFO Copy src/foo -> dst/copy-report-jq/foo: Ready
-[2025-03-28T21:57:00]  WARNING Local src/qux -> dst/copy-report-jq/qux: Not ready
-[2025-03-28T21:57:00]  WARNING Local src/qux -> dst/copy-report-jq/qux: Requires:
-[2025-03-28T21:57:00]  WARNING Local src/qux -> dst/copy-report-jq/qux: ✖ File src/qux
-[2025-03-28T21:57:00]  WARNING Copy src/qux -> dst/copy-report-jq/qux: Not ready
-[2025-03-28T21:57:00]  WARNING Copy src/qux -> dst/copy-report-jq/qux: Requires:
-[2025-03-28T21:57:00]  WARNING Copy src/qux -> dst/copy-report-jq/qux: ✖ Local src/qux -> dst/copy-report-jq/qux
-[2025-03-28T21:57:00]  WARNING File copies: Not ready
-[2025-03-28T21:57:00]  WARNING File copies: Requires:
-[2025-03-28T21:57:00]  WARNING File copies: ✔ Copy src/foo -> dst/copy-report-jq/foo
-[2025-03-28T21:57:00]  WARNING File copies: ✖ Copy src/qux -> dst/copy-report-jq/qux
+[2025-03-29T15:18:17]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T15:18:17]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T15:18:17]     INFO Local src/foo -> dst/copy-report-jq/foo: Executing
+[2025-03-29T15:18:17]     INFO Local src/foo -> dst/copy-report-jq/foo: Ready
+[2025-03-29T15:18:17]  WARNING File src/qux: Not ready [external asset]
+[2025-03-29T15:18:17]  WARNING Local src/qux -> dst/copy-report-jq/qux: Not ready
+[2025-03-29T15:18:17]  WARNING Local src/qux -> dst/copy-report-jq/qux: Requires:
+[2025-03-29T15:18:17]  WARNING Local src/qux -> dst/copy-report-jq/qux: ✖ File src/qux
+[2025-03-29T15:18:17]  WARNING File copies: Not ready
+[2025-03-29T15:18:17]  WARNING File copies: Requires:
+[2025-03-29T15:18:17]  WARNING File copies: ✔ Local src/foo -> dst/copy-report-jq/foo
+[2025-03-29T15:18:17]  WARNING File copies: ✖ Local src/qux -> dst/copy-report-jq/qux
 {
   "not-ready": [
     "dst/copy-report-jq/qux"

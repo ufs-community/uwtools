@@ -1,15 +1,12 @@
-[2025-03-28T21:56:59]     INFO Validating config against internal schema: files-to-stage
-[2025-03-28T21:56:59]     INFO 0 schema-validation errors found in fs config
-[2025-03-28T21:57:00]     INFO Local src/foo -> dst/copy/foo: Executing
-[2025-03-28T21:57:00]     INFO Local src/foo -> dst/copy/foo: Ready
-[2025-03-28T21:57:00]     INFO HTTP https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Executing
-[2025-03-28T21:57:01]     INFO HTTP https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Ready
-[2025-03-28T21:57:01]     INFO Local src/bar -> dst/copy/subdir/bar: Executing
-[2025-03-28T21:57:01]     INFO Local src/bar -> dst/copy/subdir/bar: Ready
-[2025-03-28T21:57:01]     INFO Copy src/foo -> dst/copy/foo: Ready
-[2025-03-28T21:57:01]     INFO Copy https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Ready
-[2025-03-28T21:57:01]     INFO Copy src/bar -> dst/copy/subdir/bar: Ready
-[2025-03-28T21:57:01]     INFO File copies: Ready
+[2025-03-29T15:18:17]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T15:18:17]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T15:18:18]     INFO Local src/foo -> dst/copy/foo: Executing
+[2025-03-29T15:18:18]     INFO Local src/foo -> dst/copy/foo: Ready
+[2025-03-29T15:18:18]     INFO HTTP https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Executing
+[2025-03-29T15:18:18]     INFO HTTP https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Ready
+[2025-03-29T15:18:18]     INFO Local src/bar -> dst/copy/subdir/bar: Executing
+[2025-03-29T15:18:18]     INFO Local src/bar -> dst/copy/subdir/bar: Ready
+[2025-03-29T15:18:18]     INFO File copies: Ready
 
 dst/copy
 ├── foo
