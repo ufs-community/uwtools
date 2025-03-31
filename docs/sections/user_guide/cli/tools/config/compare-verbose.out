@@ -1,9 +1,9 @@
-[2024-11-14T23:27:45]    DEBUG Command: uw config compare --file-1-path a.nml --file-2-path c.nml --verbose
-[2024-11-14T23:27:45]     INFO - a.nml
-[2024-11-14T23:27:45]     INFO + c.nml
-[2024-11-14T23:27:45]     INFO ---------------------------------------------------------------------
-[2024-11-14T23:27:45]     INFO ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
-[2024-11-14T23:27:45]     INFO ---------------------------------------------------------------------
-[2024-11-14T23:27:45]     INFO   values:
-[2024-11-14T23:27:45]     INFO     greeting: Hello
-[2024-11-14T23:27:45]     INFO -   recipient: World
+[2025-01-02T03:04:05]    DEBUG Command: uw config compare --file-1-path a.nml --file-2-path c.nml --verbose
+[2025-01-02T03:04:05]     INFO - a.nml
+[2025-01-02T03:04:05]     INFO + c.nml
+[2025-01-02T03:04:05]     INFO ---------------------------------------------------------------------
+[2025-01-02T03:04:05]     INFO ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
+[2025-01-02T03:04:05]     INFO ---------------------------------------------------------------------
+[2025-01-02T03:04:05]     INFO   values:
+[2025-01-02T03:04:05]     INFO     greeting: Hello
+[2025-01-02T03:04:05]     INFO -   recipient: World

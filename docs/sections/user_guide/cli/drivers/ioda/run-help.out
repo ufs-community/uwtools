@@ -7,7 +7,7 @@ A run
 
 Required arguments:
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-06-17T18)
+      The cycle in ISO8601 format (e.g. 2025-03-31T12)
 
 Optional arguments:
   -h, --help

@@ -1,11 +1,11 @@
-[2025-03-21T02:57:06]     INFO Validating config against internal schema: files-to-stage
-[2025-03-21T02:57:06]     INFO 0 schema-validation errors found in fs config
-[2025-03-21T02:57:08]  WARNING Ignoring directory src/20240529
-[2025-03-21T02:57:08]     INFO Copy src/foo -> dst/copy-glob/dst/foo: Executing
-[2025-03-21T02:57:08]     INFO Copy src/foo -> dst/copy-glob/dst/foo: Ready
-[2025-03-21T02:57:08]     INFO Copy src/bar -> dst/copy-glob/dst/bar: Executing
-[2025-03-21T02:57:08]     INFO Copy src/bar -> dst/copy-glob/dst/bar: Ready
-[2025-03-21T02:57:08]     INFO File copies: Ready
+[2025-01-02T03:04:05]     INFO Validating config against internal schema: files-to-stage
+[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in fs config
+[2025-01-02T03:04:05]  WARNING Ignoring directory src/20240529
+[2025-01-02T03:04:05]     INFO Copy src/foo -> dst/copy-glob/dst/foo: Executing
+[2025-01-02T03:04:05]     INFO Copy src/foo -> dst/copy-glob/dst/foo: Ready
+[2025-01-02T03:04:05]     INFO Copy src/bar -> dst/copy-glob/dst/bar: Executing
+[2025-01-02T03:04:05]     INFO Copy src/bar -> dst/copy-glob/dst/bar: Ready
+[2025-01-02T03:04:05]     INFO File copies: Ready
 {
   "not-ready": [],
   "ready": [

@@ -24,7 +24,7 @@ Optional arguments:
   --schema-file PATH
       Path to schema file to use for validation
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-08-08T18)
+      The cycle in ISO8601 format (e.g. 2025-03-31T12)
   --leadtime LEADTIME
       The leadtime as hours[:minutes[:seconds]]
   --batch
