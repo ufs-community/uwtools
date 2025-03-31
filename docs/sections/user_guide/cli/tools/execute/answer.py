@@ -13,7 +13,7 @@ class Answer(AssetsTimeInvariant):
         """
         A file containing the answer.
         """
-        path = self.rundir / "answer"
+        path = self.rundir / "answer.txt"
         yield self.taskname("Answer file")
         yield asset(path, path.is_file)
         yield None

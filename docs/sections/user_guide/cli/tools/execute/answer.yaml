@@ -1,3 +1,3 @@
 answer:
   n: 42
-  rundir: /tmp/rand
+  rundir: tmp/answer
