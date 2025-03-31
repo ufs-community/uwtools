@@ -17,7 +17,6 @@ from uwtools.drivers.jedi import JEDI
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
-from uwtools.tests.support import regex_logged
 
 # Fixtures
 
@@ -111,7 +110,7 @@ def test_JEDI_configuration_file(driverobj):
     assert newcfg == {**basecfg, "baz": "qux"}
 
 
-def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
+def test_JEDI_configuration_file_missing_base_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     base_file = Path(driverobj.config["rundir"], "missing")
     driverobj._config["configuration_file"]["base_file"] = base_file
@@ -119,7 +118,7 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
-    assert regex_logged(caplog, f"{base_file}: Not ready [external asset]")
+    assert logged(f"{base_file}: Not ready [external asset]", escape=True)
 
 
 def test_JEDI_driver_name(driverobj):
@@ -179,7 +178,7 @@ def test_JEDI_taskname(driverobj):
     assert driverobj.taskname("foo") == "20240201 18Z jedi foo"
 
 
-def test_JEDI_validate_only(caplog, driverobj):
+def test_JEDI_validate_only(driverobj, logged):
 
     @iotaa.external
     def file(path: Path):
@@ -199,7 +198,7 @@ def test_JEDI_validate_only(caplog, driverobj):
                 % (driverobj.config["execution"]["executable"], cfgfile),
             ]
             run_shell_cmd.assert_called_once_with(" && ".join(cmds))
-    assert regex_logged(caplog, "Config is valid")
+    assert logged("Config is valid")
 
 
 def test_JEDI__config_fn(driverobj):

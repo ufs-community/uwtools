@@ -15,7 +15,6 @@ from uwtools.drivers.driver import Driver
 from uwtools.drivers.upp import UPP
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
@@ -122,7 +121,7 @@ def test_UPP_files_linked(driverobj):
         assert (driverobj.rundir / dst).is_symlink()
 
 
-def test_UPP_namelist_file(caplog, driverobj):
+def test_UPP_namelist_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
     with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
@@ -131,7 +130,7 @@ def test_UPP_namelist_file(caplog, driverobj):
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
     assert nml["model_inputs"]["datestr"] == datestr
@@ -140,23 +139,23 @@ def test_UPP_namelist_file(caplog, driverobj):
     assert nml["nampgb"]["kpv"] == 42
 
 
-def test_UPP_namelist_file_fails_validation(caplog, driverobj):
+def test_UPP_namelist_file_fails_validation(driverobj, logged):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
     del driverobj._config["namelist"]["base_file"]
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  'string' is not of type 'integer'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  'string' is not of type 'integer'")
 
 
-def test_UPP_namelist_file_missing_base_file(caplog, driverobj):
+def test_UPP_namelist_file_missing_base_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
+    assert logged("missing.nml: Not ready [external asset]", escape=True)
 
 
 def test_UPP_output(driverobj, tmp_path):

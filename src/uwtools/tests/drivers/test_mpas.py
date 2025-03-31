@@ -17,7 +17,7 @@ from uwtools.drivers.mpas import MPAS
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged, regex_logged
+from uwtools.tests.support import fixture_path
 
 # Helpers
 
@@ -184,28 +184,28 @@ def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-def test_MPAS_namelist_file(caplog, driverobj):
+def test_MPAS_namelist_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
 
 
-def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
+def test_MPAS_namelist_file_fails_validation(driverobj, logged):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 @mark.parametrize(("hours", "expected"), [(0.25, "00:15:00"), (120, "005_00:00:00")])
-def test_MPAS_namelist_file_durations(caplog, config, cycle, hours, expected):
+def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
     log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = hours
     driverobj = MPAS(config=config, cycle=cycle)
@@ -213,19 +213,19 @@ def test_MPAS_namelist_file_durations(caplog, config, cycle, hours, expected):
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
     assert nml["nhyd_model"]["config_run_duration"] == expected
 
 
-def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
+def test_MPAS_namelist_file_missing_base_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
+    assert logged("missing.nml: Not ready [external asset]", escape=True)
 
 
 def test_MPAS_output(driverobj):

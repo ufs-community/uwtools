@@ -15,7 +15,6 @@ from uwtools.drivers.driver import Driver
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen
 from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
-from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -102,25 +101,25 @@ def test_SfcClimoGen_driver_name(driverobj):
     assert driverobj.driver_name() == SfcClimoGen.driver_name() == "sfc_climo_gen"
 
 
-def test_SfcClimoGen_namelist_file(caplog, driverobj, ready_task):
+def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready_task):
         path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj, ready_task):
+def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_task):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready_task):
         path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  'string' is not of type 'integer'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  'string' is not of type 'integer'")
 
 
 def test_SfcClimoGen_output(driverobj):

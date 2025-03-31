@@ -16,7 +16,7 @@ from uwtools.drivers.mpas_init import MPASInit
 from uwtools.exceptions import UWNotImplementedError
 from uwtools.logging import log
 from uwtools.tests.drivers.test_mpas import streams_file
-from uwtools.tests.support import fixture_path, logged, regex_logged
+from uwtools.tests.support import fixture_path
 
 # Fixtures
 
@@ -173,32 +173,32 @@ def test_MPASInit_namelist_contents(cycle, driverobj):
     assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
 
 
-def test_MPASInit_namelist_file(caplog, driverobj):
+def test_MPASInit_namelist_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
+def test_MPASInit_namelist_file_fails_validation(driverobj, logged):
     log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
-def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
+def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
     log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "Not ready [external asset]")
+    assert logged("Not ready [external asset]", escape=True)
 
 
 def test_MPASInit_output(driverobj):
