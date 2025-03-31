@@ -7,7 +7,6 @@ Tests for uwtools.drivers.driver module.
 """
 import datetime as dt
 import json
-import logging
 from pathlib import Path
 from textwrap import dedent
 from typing import Optional
@@ -20,7 +19,6 @@ from pytest import fixture, mark, raises
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
 from uwtools.exceptions import UWConfigError, UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
 
 # Helpers
@@ -230,7 +228,6 @@ def test_Assets_taskname(assetsobj):
 
 
 def test_Assets_validate(assetsobj, logged):
-    log.setLevel(logging.INFO)
     assetsobj.validate()
     assert logged("Ready")
 

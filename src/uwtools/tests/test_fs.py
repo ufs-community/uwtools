@@ -3,7 +3,6 @@
 # pylint: disable=protected-access
 # pylint: disable=redefined-outer-name
 
-import logging
 from logging import getLogger
 from pathlib import Path
 from textwrap import dedent
@@ -16,7 +15,6 @@ from pytest import fixture, mark, raises
 from uwtools import fs
 from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 
 # Fixtures
 
@@ -150,7 +148,6 @@ def test_fs_FilerStager(assets, source):
 
 
 def test_fs_FileStager__expand_glob(tmp_path):
-    log.setLevel(logging.WARNING)
     d = tmp_path
     # Files matching the pattern to include:
     for x in ["a1", "a2", "b1"]:

@@ -2,13 +2,13 @@
 A driver for the jedi component.
 """
 
-import logging
 from pathlib import Path
 
 from iotaa import asset, refs, task, tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
@@ -52,7 +52,7 @@ class JEDI(JEDIBase):
             cmd = " && ".join([*envcmds, cmd])
         success, _ = run_shell_cmd(cmd)
         if success:
-            logging.info("%s: Config is valid", taskname)
+            log.info("%s: Config is valid", taskname)
             a.ready = lambda: True
 
     # Public helper methods

@@ -3,7 +3,6 @@
 FV3 driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,7 +13,6 @@ from pytest import fixture, mark, raises
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
 
 # Fixtures
@@ -162,7 +160,6 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 
 @mark.parametrize("base_file_exists", [True, False])
 def test_FV3_model_configure(base_file_exists, driverobj, logged):
-    log.setLevel(logging.DEBUG)
     src = driverobj.rundir / "model_configure.in"
     if base_file_exists:
         with open(src, "w", encoding="utf-8") as f:
@@ -179,7 +176,6 @@ def test_FV3_model_configure(base_file_exists, driverobj, logged):
 
 
 def test_FV3_namelist_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     src = driverobj.rundir / "input.nml.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
@@ -192,7 +188,6 @@ def test_FV3_namelist_file(driverobj, logged):
 
 
 def test_FV3_namelist_file_fails_validation(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["namsfc"]["foo"] = None
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
@@ -201,7 +196,6 @@ def test_FV3_namelist_file_fails_validation(driverobj, logged):
 
 
 def test_FV3_namelist_file_missing_base_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))

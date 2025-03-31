@@ -23,7 +23,7 @@ def logged(caplog):
         if full:
             return "\n".join(caplog.messages).strip() == s.strip()
         if multiline:
-            return s in "\n".join(caplog.messages)
+            return s.strip() in "\n".join(caplog.messages).strip()
         s = s if regex else re.escape(s)
         return any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
 

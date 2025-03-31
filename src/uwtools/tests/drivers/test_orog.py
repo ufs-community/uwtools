@@ -2,7 +2,6 @@
 """
 Orog driver tests.
 """
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,7 +10,6 @@ from pytest import fixture, mark, raises
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
 
 # Fixtures
@@ -100,7 +98,6 @@ def test_Orog_files_linked(driverobj):
 
 @mark.parametrize("exist", [True, False])
 def test_Orog_grid_file_existence(driverobj, logged, exist):
-    log.setLevel(logging.DEBUG)
     grid_file = Path(driverobj.config["grid_file"])
     status = f"Input grid file {str(grid_file)}: Not ready [external asset]"
     if exist:
@@ -111,7 +108,6 @@ def test_Orog_grid_file_existence(driverobj, logged, exist):
 
 
 def test_Orog_grid_file_nonexistence(driverobj, logged):
-    log.setLevel(logging.INFO)
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
     assert logged("Input grid file none: Ready")

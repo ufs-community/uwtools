@@ -3,7 +3,6 @@
 JEDI driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -16,7 +15,6 @@ from uwtools.drivers import jedi, jedi_base
 from uwtools.drivers.jedi import JEDI
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 
 # Fixtures
 
@@ -111,7 +109,6 @@ def test_JEDI_configuration_file(driverobj):
 
 
 def test_JEDI_configuration_file_missing_base_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     base_file = Path(driverobj.config["rundir"], "missing")
     driverobj._config["configuration_file"]["base_file"] = base_file
     cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
@@ -185,7 +182,6 @@ def test_JEDI_validate_only(driverobj, logged):
         yield "Mocked file task for %s" % path
         yield iotaa.asset(path, lambda: True)
 
-    logging.getLogger().setLevel(logging.INFO)
     with patch.object(jedi, "file", file):
         with patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
             run_shell_cmd.return_value = (True, None)

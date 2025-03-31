@@ -1,7 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
-import logging
 import re
 import sys
 from argparse import ArgumentParser as Parser
@@ -19,7 +18,6 @@ import uwtools.api.template
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
-from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
 # Helpers
@@ -291,7 +289,6 @@ def test__check_update(fmt, fn, ok):
 
 
 def test__check_verbosity_fail(capsys):
-    log.setLevel(logging.INFO)
     args = {STR.quiet: True, STR.verbose: True}
     with raises(SystemExit):
         cli._check_verbosity(args)
@@ -356,7 +353,6 @@ def test__dispatch_config_realize(args_config_realize):
 
 
 def test__dispatch_config_realize_fail(args_config_realize, logged):
-    log.setLevel(logging.ERROR)
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
     assert logged("Config could not be realized")

@@ -3,7 +3,6 @@
 MPAS driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,7 +15,6 @@ from pytest import fixture, mark, raises
 from uwtools.drivers.mpas import MPAS
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.tests.support import fixture_path
 
 # Helpers
@@ -185,7 +183,6 @@ def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 
 
 def test_MPAS_namelist_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
@@ -196,7 +193,6 @@ def test_MPAS_namelist_file(driverobj, logged):
 
 
 def test_MPAS_namelist_file_fails_validation(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
@@ -206,7 +202,6 @@ def test_MPAS_namelist_file_fails_validation(driverobj, logged):
 
 @mark.parametrize(("hours", "expected"), [(0.25, "00:15:00"), (120, "005_00:00:00")])
 def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
-    log.setLevel(logging.DEBUG)
     config["mpas"]["length"] = hours
     driverobj = MPAS(config=config, cycle=cycle)
     dst = driverobj.rundir / "namelist.atmosphere"
@@ -220,7 +215,6 @@ def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
 
 
 def test_MPAS_namelist_file_missing_base_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))

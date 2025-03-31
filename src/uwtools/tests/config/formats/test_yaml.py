@@ -5,7 +5,6 @@ Tests for uwtools.config.formats.yaml module.
 
 import datetime
 import filecmp
-import logging
 import sys
 from collections import OrderedDict
 from io import StringIO
@@ -20,7 +19,6 @@ from uwtools import exceptions
 from uwtools.config import support
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, _stdinproxy
 
@@ -203,7 +201,6 @@ def test_yaml_stdin_plus_relpath_failure(logged):
     # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
-    log.setLevel(logging.INFO)
     _stdinproxy.cache_clear()
     relpath = "../bar/baz.yaml"
     with StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]") as sio:

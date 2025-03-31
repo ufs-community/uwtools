@@ -1,6 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access
 
-import logging
 import os
 import stat
 from pathlib import Path
@@ -12,7 +11,6 @@ from iotaa import asset, external
 from pytest import mark, raises
 
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils import tasks
 
@@ -75,7 +73,6 @@ def test_utils_tasks_existing_hpss(available, wrapper):
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize("code,expected", [(200, True), (404, False)])
 def test_utils_tasks_existing_http(code, expected, logged, scheme):
-    log.setLevel(logging.INFO)
     url = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
         state = iotaa.ready(tasks.existing_http(url=url))
@@ -112,7 +109,6 @@ def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
 @mark.parametrize("code,expected", [(200, True), (404, False)])
 @mark.parametrize("src", ["http://foo.com/obj", "https://foo.com/obj"])
 def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
-    log.setLevel(logging.INFO)
     dst = tmp_path / "a-file"
     assert not dst.is_file()
     with patch.object(tasks, "existing_http", exists):
@@ -202,7 +198,6 @@ def test_utils_tasks_filecopy__simple(tmp_path):
 
 
 def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
-    log.setLevel(logging.INFO)
     src = "/path/to/src"
     dst = tmp_path / "dst"
     with (
@@ -220,7 +215,6 @@ def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
 
 
 def test_utils_tasks_filecopy_htar(logged, ready_task, tmp_path):
-    log.setLevel(logging.INFO)
     src_archive = "/path/to/archive.tar"
     src_file = "afile"
     dst = tmp_path / "dst"

@@ -3,7 +3,6 @@
 chgres_cube driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,7 +12,6 @@ from pytest import fixture, mark
 
 from uwtools.drivers.chgres_cube import ChgresCube
 from uwtools.drivers.driver import Driver
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
 
 # Fixtures
@@ -116,7 +114,6 @@ def test_ChgresCube_driver_name(driverobj):
 
 
 def test_ChgresCube_namelist_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
@@ -126,7 +123,6 @@ def test_ChgresCube_namelist_file(driverobj, logged):
 
 
 def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
@@ -135,7 +131,6 @@ def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
 
 
 def test_ChgresCube_namelist_file_missing_base_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))

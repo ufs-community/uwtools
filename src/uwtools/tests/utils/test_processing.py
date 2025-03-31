@@ -3,13 +3,11 @@
 Tests for uwtools.utils.processing module.
 """
 
-import logging
 
 from uwtools.utils import processing
 
 
 def test_utils_processing_run_shell_cmd__failure(logged):
-    processing.log.setLevel(logging.INFO)
     cmd = "expr 1 / 0"
     success, output = processing.run_shell_cmd(cmd=cmd)
     assert "division by zero" in output
@@ -21,7 +19,6 @@ def test_utils_processing_run_shell_cmd__failure(logged):
 
 
 def test_utils_processing_run_shell_cmd__success(logged, tmp_path):
-    processing.log.setLevel(logging.INFO)
     cmd = "echo hello $FOO"
     success, _ = processing.run_shell_cmd(
         cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True

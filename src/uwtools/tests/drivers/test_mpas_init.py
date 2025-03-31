@@ -3,7 +3,6 @@
 MPASInit driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,7 +13,6 @@ from pytest import fixture, mark, raises
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path
 
@@ -174,7 +172,6 @@ def test_MPASInit_namelist_contents(cycle, driverobj):
 
 
 def test_MPASInit_namelist_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
     path = Path(iotaa.refs(driverobj.namelist_file()))
@@ -184,7 +181,6 @@ def test_MPASInit_namelist_file(driverobj, logged):
 
 
 def test_MPASInit_namelist_file_fails_validation(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
@@ -193,7 +189,6 @@ def test_MPASInit_namelist_file_fails_validation(driverobj, logged):
 
 
 def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))

@@ -2,7 +2,6 @@
 """
 sfc_climo_gen driver tests.
 """
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,7 +13,6 @@ from uwtools.drivers import sfc_climo_gen
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 
 # Fixtures
 
@@ -102,7 +100,6 @@ def test_SfcClimoGen_driver_name(driverobj):
 
 
 def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
-    log.setLevel(logging.DEBUG)
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready_task):
@@ -113,7 +110,6 @@ def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
 
 
 def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_task):
-    log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready_task):
         path = Path(iotaa.refs(driverobj.namelist_file()))

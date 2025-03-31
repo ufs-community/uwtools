@@ -3,7 +3,6 @@
 UPP driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,7 +13,6 @@ from pytest import fixture, mark, raises
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.upp import UPP
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 
 # Fixtures
 
@@ -122,7 +120,6 @@ def test_UPP_files_linked(driverobj):
 
 
 def test_UPP_namelist_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
     with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
         print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
@@ -140,7 +137,6 @@ def test_UPP_namelist_file(driverobj, logged):
 
 
 def test_UPP_namelist_file_fails_validation(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     driverobj._config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
     del driverobj._config["namelist"]["base_file"]
     path = Path(iotaa.refs(driverobj.namelist_file()))
@@ -150,7 +146,6 @@ def test_UPP_namelist_file_fails_validation(driverobj, logged):
 
 
 def test_UPP_namelist_file_missing_base_file(driverobj, logged):
-    log.setLevel(logging.DEBUG)
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))

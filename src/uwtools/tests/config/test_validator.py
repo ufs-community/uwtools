@@ -3,7 +3,6 @@
 Tests for uwtools.config.validator module.
 """
 import json
-import logging
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -15,7 +14,6 @@ from pytest import fixture, mark, raises
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.utils.file import resource_path
 
 # Fixtures
@@ -125,7 +123,6 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 
 
 def test_config_validator_bundle(logged):
-    log.setLevel(logging.DEBUG)
     schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
     with patch.object(validator, "_registry") as _registry:
         outer, inner = Mock(), Mock()
@@ -173,7 +170,6 @@ def test_config_validator_validate_dict(config, schema):
 
 
 def test_config_validator_validate_fail_bad_enum_val(config, logged, schema):
-    log.setLevel(logging.INFO)
     config["color"] = "yellow"  # invalid enum value
     assert not validator.validate(schema=schema, desc="test", config=config)
     assert logged("1 schema-validation error found")
@@ -181,7 +177,6 @@ def test_config_validator_validate_fail_bad_enum_val(config, logged, schema):
 
 
 def test_config_validator_validate_fail_bad_number_val(config, logged, schema):
-    log.setLevel(logging.INFO)
     config["number"] = "string"  # invalid number value
     assert not validator.validate(schema=schema, desc="test", config=config)
     assert logged("1 schema-validation error found")

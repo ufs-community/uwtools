@@ -1,7 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
-import logging
 import os
 import sys
 from pathlib import Path
@@ -13,7 +12,6 @@ from pytest import fixture, mark, raises
 
 from uwtools.api import execute
 from uwtools.exceptions import UWError
-from uwtools.logging import log
 from uwtools.tests.support import fixture_path
 
 # Fixtures
@@ -65,7 +63,6 @@ def test_execute_pass(kwargs, logged, remove, tmp_path):
     for kwarg in remove:
         del kwargs[kwarg]
     kwargs["cycle"] = dt.datetime.now()
-    log.setLevel(logging.DEBUG)
     graph_file = tmp_path / "g.dot"
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
@@ -89,7 +86,6 @@ def test_tasks_fail(args, logged, tmp_path):
 
 
 def test_tasks_fail_no_cycle(args, kwargs, logged):
-    log.setLevel(logging.DEBUG)
     assert execute.execute(**kwargs) is None
     assert logged("%s requires argument '%s'" % (args.classname, "cycle"))
 
@@ -101,7 +97,6 @@ def test_tasks_pass(args, f):
 
 
 def test__get_driver_class_explicit_fail_bad_class(args, logged):
-    log.setLevel(logging.DEBUG)
     bad_class = "BadClass"
     c, module_path = execute._get_driver_class(classname=bad_class, module=args.module)
     assert c is None
@@ -110,7 +105,6 @@ def test__get_driver_class_explicit_fail_bad_class(args, logged):
 
 
 def test__get_driver_class_explicit_fail_bad_name(args, logged):
-    log.setLevel(logging.DEBUG)
     bad_name = Path("bad_name")
     c, module_path = execute._get_driver_class(classname=args.classname, module=bad_name)
     assert c is None
@@ -119,7 +113,6 @@ def test__get_driver_class_explicit_fail_bad_name(args, logged):
 
 
 def test__get_driver_class_explicit_fail_bad_path(args, logged, tmp_path):
-    log.setLevel(logging.DEBUG)
     module = tmp_path / "not.py"
     c, module_path = execute._get_driver_class(classname=args.classname, module=module)
     assert c is None
@@ -128,7 +121,6 @@ def test__get_driver_class_explicit_fail_bad_path(args, logged, tmp_path):
 
 
 def test__get_driver_class_explicit_fail_bad_spec(args, logged):
-    log.setLevel(logging.DEBUG)
     with patch.object(execute, "spec_from_file_location", return_value=None):
         c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c is None
@@ -137,7 +129,6 @@ def test__get_driver_class_explicit_fail_bad_spec(args, logged):
 
 
 def test__get_driver_class_explicit_pass(args):
-    log.setLevel(logging.DEBUG)
     c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c
     assert c.__name__ == "TestDriver"
@@ -145,7 +136,6 @@ def test__get_driver_class_explicit_pass(args):
 
 
 def test__get_driver_class_implicit_pass(args):
-    log.setLevel(logging.DEBUG)
     with patch.object(Path, "cwd", return_value=fixture_path()):
         c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c
@@ -154,7 +144,6 @@ def test__get_driver_class_implicit_pass(args):
 
 
 def test__get_driver_module_explicit_absolute_fail_syntax_error(args, logged, tmp_path):
-    log.setLevel(logging.ERROR)
     module = tmp_path / "module.py"
     module.write_text("syntax error\n%s" % args.module.read_text())
     assert module.is_absolute()

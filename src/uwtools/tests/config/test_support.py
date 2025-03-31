@@ -3,7 +3,6 @@
 Tests for uwtools.config.jinja2 module.
 """
 
-import logging
 from collections import OrderedDict
 from datetime import datetime
 
@@ -17,7 +16,6 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
 # Fixtures
@@ -73,7 +71,6 @@ def test_config_support_from_od():
 
 
 def test_config_support_log_and_error(logged):
-    log.setLevel(logging.ERROR)
     msg = "Something bad happened"
     with raises(UWConfigError) as e:
         raise support.log_and_error(msg)

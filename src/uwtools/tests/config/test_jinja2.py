@@ -3,7 +3,6 @@
 Tests for uwtools.config.jinja2 module.
 """
 
-import logging
 import os
 from datetime import datetime
 from io import StringIO
@@ -18,14 +17,12 @@ from pytest import fixture, mark, raises
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
 from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, uw_yaml_loader
-from uwtools.logging import log
 
 # Fixtures
 
 
 @fixture
 def deref_render_assets():
-    log.setLevel(logging.DEBUG)
     return "{{ greeting + ' ' + recipient }}", {"greeting": "hello"}, {"recipient": "world"}
 
 
@@ -130,13 +127,11 @@ def test_dereference_no_op_due_to_error(logged, logmsg, val):
     #   - An undefined error in a loop expression.
     #   - A division-by-zero error.
     # The unrenderable expression is returned unmodified.
-    log.setLevel(logging.DEBUG)
     assert jinja2.dereference(val=val, context={}) == val
     assert logged(logmsg)
 
 
 def test_dereference_remove(logged):
-    log.setLevel(logging.DEBUG)
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
     assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
@@ -167,7 +162,6 @@ def test_dereference_str_variable_rendered_str():
 
 
 def test_deref_debug(logged):
-    log.setLevel(logging.DEBUG)
     jinja2.deref_debug(action="Frobnicated", val="foo")
     assert logged("[dereference] Frobnicated: foo")
 
@@ -242,7 +236,6 @@ def test_render_calls__write(template_file, tmp_path, values_file):
 
 
 def test_render_dry_run(logged, template_file, values_file):
-    log.setLevel(logging.INFO)
     expected = "roses are red, violets are blue"
     result = render_helper(input_file=template_file, values_file=values_file, dry_run=True)
     assert result == expected
@@ -250,7 +243,6 @@ def test_render_dry_run(logged, template_file, values_file):
 
 
 def test_render_fails(logged, tmp_path):
-    log.setLevel(logging.INFO)
     input_file = tmp_path / "template.yaml"
     with open(input_file, "w", encoding="utf-8") as f:
         print("{{ constants.pi }} {{ constants.e }}", file=f)
@@ -262,7 +254,6 @@ def test_render_fails(logged, tmp_path):
 
 
 def test_render_values_missing(logged, template_file, values_file):
-    log.setLevel(logging.INFO)
     # Read in the config, remove the "roses" key, then re-write it.
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
@@ -275,7 +266,6 @@ def test_render_values_missing(logged, template_file, values_file):
 
 
 def test_render_values_needed(logged, template_file, values_file):
-    log.setLevel(logging.INFO)
     render_helper(input_file=template_file, values_file=values_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
         assert logged(f"  {var}")
@@ -297,7 +287,6 @@ def test_unrendered(s, status):
     ],
 )
 def test__deref_convert_no(logged, tag, value):
-    log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
     val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == val
@@ -321,7 +310,6 @@ def test__deref_convert_no(logged, tag, value):
     ],
 )
 def test__deref_convert_ok(converted, logged, tag, value):
-    log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
     val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == converted
@@ -330,7 +318,6 @@ def test__deref_convert_ok(converted, logged, tag, value):
 
 
 def test__deref_render_held(logged):
-    log.setLevel(logging.DEBUG)
     val, context = "!int '{{ a }}'", yaml.load("a: !int '42'", Loader=uw_yaml_loader())
     assert jinja2._deref_render(val=val, context=context) == val
     assert logged("Rendered")
@@ -338,7 +325,6 @@ def test__deref_render_held(logged):
 
 
 def test__deref_render_no(deref_render_assets, logged):
-    log.setLevel(logging.DEBUG)
     val, context, _ = deref_render_assets
     assert jinja2._deref_render(val=val, context=context) == val
     assert not logged("Rendered")
@@ -346,7 +332,6 @@ def test__deref_render_no(deref_render_assets, logged):
 
 
 def test__deref_render_ok(deref_render_assets, logged):
-    log.setLevel(logging.DEBUG)
     val, context, local = deref_render_assets
     assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
     assert logged("Rendered")
@@ -354,7 +339,6 @@ def test__deref_render_ok(deref_render_assets, logged):
 
 
 def test__deref_render_unloadable_val(logged):
-    log.setLevel(logging.DEBUG)
     val = "&XMLENTITY;"
     assert jinja2._deref_render(val='{{ "%s" if True }}' % val, context={}) == val
     assert logged("Rendered")
@@ -362,14 +346,12 @@ def test__deref_render_unloadable_val(logged):
 
 
 def test__dry_run_template(logged):
-    log.setLevel(logging.DEBUG)
     jinja2._dry_run_template("roses are red\nviolets are blue")
     assert logged("roses are red")
     assert logged("violets are blue")
 
 
 def test__log_missing_values(logged):
-    log.setLevel(logging.DEBUG)
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
     assert logged("Value(s) required to render template not provided:")
@@ -378,7 +360,6 @@ def test__log_missing_values(logged):
 
 
 def test__report(logged):
-    log.setLevel(logging.DEBUG)
     expected = """
 Internal arguments when rendering template:
 ---------------------------------------------------------------------
@@ -475,7 +456,6 @@ def test__supplement_values_priority(supplemental_values):
 
 
 def test__values_needed(logged):
-    log.setLevel(logging.DEBUG)
     undeclared_variables = {"roses_color", "lavender_smell"}
     jinja2._values_needed(undeclared_variables)
     assert logged("Value(s) needed to render this template are:")

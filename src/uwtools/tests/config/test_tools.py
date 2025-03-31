@@ -3,7 +3,6 @@
 Tests for uwtools.config.tools module.
 """
 
-import logging
 import sys
 from io import StringIO
 from pathlib import Path
@@ -21,7 +20,6 @@ from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
-from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.tests.support import compare_files, fixture_path
 from uwtools.utils.file import _stdinproxy as stdinproxy
@@ -110,7 +108,6 @@ def help_realize_config_simple(infn, infmt, tmpdir):
 
 
 def test_compare_configs_good(compare_configs_assets, logged):
-    log.setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert tools.compare_configs(
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
@@ -119,7 +116,6 @@ def test_compare_configs_good(compare_configs_assets, logged):
 
 
 def test_compare_configs_changed_value(compare_configs_assets, logged):
-    log.setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
@@ -149,7 +145,6 @@ def test_compare_configs_changed_value(compare_configs_assets, logged):
 
 
 def test_compare_configs_missing_key(compare_configs_assets, logged):
-    log.setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     del d["baz"]
     with writable(b) as f:
@@ -177,7 +172,6 @@ def test_compare_configs_missing_key(compare_configs_assets, logged):
 
 
 def test_compare_configs_bad_format(logged):
-    log.setLevel(logging.INFO)
     assert not tools.compare_configs(
         config_1_path=Path("/not/used"),
         config_1_format="jpg",
@@ -301,7 +295,6 @@ def test_realize_config_dry_run(logged):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
     """
-    log.setLevel(logging.INFO)
     infile = fixture_path("fruit_config.yaml")
     yaml_config = YAMLConfig(infile)
     yaml_config.dereference()
@@ -311,7 +304,7 @@ def test_realize_config_dry_run(logged):
         output_format=FORMAT.yaml,
         dry_run=True,
     )
-    assert logged(str(yaml_config), full=True)
+    assert logged(str(yaml_config), multiline=True)
 
 
 def test_realize_config_field_table(tmp_path):
@@ -551,7 +544,6 @@ def test_realize_config_values_needed_ini(logged):
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
     """
-    log.setLevel(logging.INFO)
     tools.realize_config(
         input_config=fixture_path("simple3.ini"),
         input_format=FORMAT.ini,
@@ -576,7 +568,7 @@ def test_realize_config_values_needed_ini(logged):
       salad.how_many: {{ amount }}
       dessert.flavor: {{ flavor }}
     """
-    assert logged(dedent(expected), full=True)
+    assert logged(dedent(expected), multiline=True)
 
 
 def test_realize_config_values_needed_yaml(logged):
@@ -584,7 +576,6 @@ def test_realize_config_values_needed_yaml(logged):
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
     """
-    log.setLevel(logging.INFO)
     tools.realize_config(
         input_config=fixture_path("srw_example.yaml"),
         input_format=FORMAT.yaml,
@@ -608,7 +599,7 @@ def test_realize_config_values_needed_yaml(logged):
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
     """
-    assert logged(dedent(expected), full=True)
+    assert logged(dedent(expected), multiline=True)
 
 
 def test_walk_key_path_fail_bad_key_path():
@@ -688,7 +679,6 @@ def test__realize_config_input_setup_ini_stdin(logged):
     baz = 42
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
@@ -725,7 +715,6 @@ def test__realize_config_input_setup_nml_stdin(logged):
     /
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
@@ -758,7 +747,6 @@ def test__realize_config_input_setup_sh_stdin(logged):
     foo=bar
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
@@ -791,7 +779,6 @@ def test__realize_config_input_setup_yaml_stdin(logged):
     foo: bar
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
@@ -802,7 +789,6 @@ def test__realize_config_input_setup_yaml_stdin(logged):
 
 
 def test__realize_config_output_setup(logged, tmp_path):
-    log.setLevel(logging.DEBUG)
     input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
     output_file = tmp_path / "output.yaml"
     assert tools._realize_config_output_setup(
@@ -820,7 +806,6 @@ def test__realize_config_update_cfgobj(realize_config_testobj):
 
 def test__realize_config_update_stdin(logged, realize_config_testobj):
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     assert realize_config_testobj[1][2][3] == 42
     with StringIO() as sio:
         print("{1: {2: {3: 43}}}", file=sio)
@@ -848,7 +833,6 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
 
 
 def test__realize_config_values_needed(logged, tmp_path):
-    log.setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
@@ -859,7 +843,6 @@ def test__realize_config_values_needed(logged, tmp_path):
 
 
 def test__realize_config_values_needed_negative_results(logged, tmp_path):
-    log.setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({}, f)
