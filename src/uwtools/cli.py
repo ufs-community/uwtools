@@ -670,7 +670,7 @@ def _add_arg_cycle(group: Group, required: bool = False) -> None:
     cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
-        help="The cycle in ISO8601 format (e.g. %s)" % cycle.strftime("%Y-%m-%dT%H"),
+        help="The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)",
         required=required,
         type=dt.datetime.fromisoformat,
     )
