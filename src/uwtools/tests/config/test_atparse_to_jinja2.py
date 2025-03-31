@@ -54,12 +54,12 @@ def test_convert_input_file_to_output_file(atparsefile, capsys, txt_jinja2, tmp_
     assert not streams.out
 
 
-def test_convert_input_file_to_logging(atparsefile, caplog, capsys, txt_jinja2, tmp_path):
+def test_convert_input_file_to_logging(atparsefile, capsys, logged, txt_jinja2, tmp_path):
     log.setLevel(logging.DEBUG)
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, dry_run=True)
     streams = capsys.readouterr()
-    assert "\n".join(record.message for record in caplog.records).strip() == txt_jinja2
+    assert logged(txt_jinja2, full=True)
     assert not streams.out
     assert not outfile.is_file()
 
@@ -113,13 +113,13 @@ def test_convert_stdin_to_file(txt_atparse, capsys, txt_jinja2, tmp_path):
     assert not streams.out
 
 
-def test_convert_stdin_to_logging(txt_atparse, caplog, txt_jinja2, tmp_path):
+def test_convert_stdin_to_logging(txt_atparse, logged, txt_jinja2, tmp_path):
     log.setLevel(logging.INFO)
     outfile = tmp_path / "outfile"
     _stdinproxy.cache_clear()
     with StringIO(txt_atparse) as sio, patch.object(sys, "stdin", new=sio):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
-    assert "\n".join(record.message for record in caplog.records) == txt_jinja2
+    assert logged(txt_jinja2, full=True)
     assert not outfile.is_file()
 
 

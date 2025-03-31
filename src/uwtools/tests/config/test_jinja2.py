@@ -377,7 +377,7 @@ def test__log_missing_values(logged):
     assert logged("  violets_color")
 
 
-def test__report(caplog):
+def test__report(logged):
     log.setLevel(logging.DEBUG)
     expected = """
 Internal arguments when rendering template:
@@ -387,7 +387,7 @@ longish_variable: 42
 ---------------------------------------------------------------------
 """.strip()
     jinja2._report(dict(foo="bar", longish_variable=42))
-    assert "\n".join(record.message for record in caplog.records) == expected
+    assert logged(expected, full=True)
 
 
 def test__supplement_values():

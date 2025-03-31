@@ -172,23 +172,23 @@ def test_config_validator_validate_dict(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
-def test_config_validator_validate_fail_bad_enum_val(caplog, config, schema):
+def test_config_validator_validate_fail_bad_enum_val(config, logged, schema):
     log.setLevel(logging.INFO)
     config["color"] = "yellow"  # invalid enum value
     assert not validator.validate(schema=schema, desc="test", config=config)
-    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
-    assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
+    assert logged("1 schema-validation error found")
+    assert logged("'yellow' is not one of")
 
 
-def test_config_validator_validate_fail_bad_number_val(caplog, config, schema):
+def test_config_validator_validate_fail_bad_number_val(config, logged, schema):
     log.setLevel(logging.INFO)
     config["number"] = "string"  # invalid number value
     assert not validator.validate(schema=schema, desc="test", config=config)
-    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
-    assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+    assert logged("1 schema-validation error found")
+    assert logged("'string' is not of type 'number'")
 
 
-def test_config_validator_validate_fail_top_level(caplog):
+def test_config_validator_validate_fail_top_level(logged):
     schema = {
         "additionalProperties": False,
         "properties": {"n": {"type": "integer"}},
@@ -204,7 +204,7 @@ def test_config_validator_validate_fail_top_level(caplog):
     Error at top level:
       'n' is a required property
     """
-    assert all(line in caplog.messages for line in dedent(expected).strip().split("\n"))
+    assert logged(dedent(expected), full=True)
 
 
 @mark.parametrize(
