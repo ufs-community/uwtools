@@ -39,10 +39,10 @@ Config ``answer.yaml``
 
 * Execute the external driver:
 
-  .. literalinclude:: execute/execute.cmd
+  .. literalinclude:: execute/answer.cmd
      :language: text
      :emphasize-lines: 2
-  .. literalinclude:: execute/execute.out
+  .. literalinclude:: execute/answer.out
      :language: text
   
 * If the external driver does not accept an argument that was provided on the command line, it will exit with error. In this case, ``Answer`` inherits from parent class ``AssetsTimeInvariant``, which does not accept a ``cycle`` argument:
