@@ -23,7 +23,7 @@ from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
-from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.tests.support import compare_files, fixture_path
 from uwtools.utils.file import _stdinproxy as stdinproxy
 from uwtools.utils.file import writable
 
@@ -109,16 +109,16 @@ def help_realize_config_simple(infn, infmt, tmpdir):
 # Tests
 
 
-def test_compare_configs_good(compare_configs_assets, caplog):
+def test_compare_configs_good(compare_configs_assets, logged):
     log.setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert tools.compare_configs(
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
-    assert caplog.records
+    assert logged(".*")
 
 
-def test_compare_configs_changed_value(compare_configs_assets, caplog):
+def test_compare_configs_changed_value(compare_configs_assets, logged):
     log.setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
@@ -145,10 +145,10 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
         str(b),
     )
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(caplog, line)
+        assert logged(line, escape=True)
 
 
-def test_compare_configs_missing_key(compare_configs_assets, caplog):
+def test_compare_configs_missing_key(compare_configs_assets, logged):
     log.setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     del d["baz"]
@@ -173,10 +173,10 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
         str(a),
     )
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(caplog, line)
+        assert logged(line, escape=True)
 
 
-def test_compare_configs_bad_format(caplog):
+def test_compare_configs_bad_format(logged):
     log.setLevel(logging.INFO)
     assert not tools.compare_configs(
         config_1_path=Path("/not/used"),
@@ -185,7 +185,7 @@ def test_compare_configs_bad_format(caplog):
         config_2_format=FORMAT.yaml,
     )
     msg = "Formats do not match: jpg vs yaml"
-    assert logged(caplog, msg)
+    assert logged(msg)
 
 
 def test_config_check_depths_realize_fail(realize_config_testobj):
@@ -685,7 +685,7 @@ def test__realize_config_input_setup_ini_file(tmp_path):
     assert input_obj.data == {"section": {"foo": "bar"}}
 
 
-def test__realize_config_input_setup_ini_stdin(caplog):
+def test__realize_config_input_setup_ini_stdin(logged):
     data = """
     [section]
     foo = bar
@@ -699,7 +699,7 @@ def test__realize_config_input_setup_ini_stdin(caplog):
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.ini)
     assert input_obj.data == {"section": {"foo": "bar", "baz": "42"}}  # note: 42 is str, not int
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin", escape=True)
 
 
 def test__realize_config_input_setup_nml_cfgobj():
@@ -722,7 +722,7 @@ def test__realize_config_input_setup_nml_file(tmp_path):
     assert input_obj["nl"]["pi"] == 3.14
 
 
-def test__realize_config_input_setup_nml_stdin(caplog):
+def test__realize_config_input_setup_nml_stdin(logged):
     data = """
     &nl
       pi = 3.14
@@ -736,7 +736,7 @@ def test__realize_config_input_setup_nml_stdin(caplog):
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.nml)
     assert input_obj["nl"]["pi"] == 3.14
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
 def test__realize_config_input_setup_sh_cfgobj():
@@ -757,7 +757,7 @@ def test__realize_config_input_setup_sh_file(tmp_path):
     assert input_obj.data == {"foo": "bar"}
 
 
-def test__realize_config_input_setup_sh_stdin(caplog):
+def test__realize_config_input_setup_sh_stdin(logged):
     data = """
     foo=bar
     """
@@ -769,7 +769,7 @@ def test__realize_config_input_setup_sh_stdin(caplog):
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.sh)
     assert input_obj.data == {"foo": "bar"}
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
 def test__realize_config_input_setup_yaml_cfgobj():
@@ -790,7 +790,7 @@ def test__realize_config_input_setup_yaml_file(tmp_path):
     assert input_obj.data == {"foo": "bar"}
 
 
-def test__realize_config_input_setup_yaml_stdin(caplog):
+def test__realize_config_input_setup_yaml_stdin(logged):
     data = """
     foo: bar
     """
@@ -802,17 +802,17 @@ def test__realize_config_input_setup_yaml_stdin(caplog):
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.yaml)
     assert input_obj.data == {"foo": "bar"}
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
-def test__realize_config_output_setup(caplog, tmp_path):
+def test__realize_config_output_setup(logged, tmp_path):
     log.setLevel(logging.DEBUG)
     input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
     output_file = tmp_path / "output.yaml"
     assert tools._realize_config_output_setup(
         input_obj=input_obj, output_file=output_file, key_path=["a", "b"]
     ) == ({"foo": "bar"}, FORMAT.yaml)
-    assert logged(caplog, f"Writing output to {output_file}")
+    assert logged(f"Writing output to {output_file}")
 
 
 def test__realize_config_update_cfgobj(realize_config_testobj):
@@ -822,7 +822,7 @@ def test__realize_config_update_cfgobj(realize_config_testobj):
     assert o[1][2][3] == 43
 
 
-def test__realize_config_update_stdin(caplog, realize_config_testobj):
+def test__realize_config_update_stdin(logged, realize_config_testobj):
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
     assert realize_config_testobj[1][2][3] == 42
@@ -834,7 +834,7 @@ def test__realize_config_update_stdin(caplog, realize_config_testobj):
                 input_obj=realize_config_testobj, update_format=FORMAT.yaml
             )
     assert o[1][2][3] == 43
-    assert logged(caplog, "Reading update from stdin")
+    assert logged("Reading update from stdin")
 
 
 def test__realize_config_update_noop(realize_config_testobj):
