@@ -83,13 +83,13 @@ def exists(*_args, **_kwargs):
 def test_fs_Copier_go(src_func, dst_func, tgt_func):
     src, dst, tgt = src_func("/src/file"), dst_func("file"), tgt_func("/dst")
     obj = Mock(_simple=fs.Copier._simple, _target_dir=tgt)
-    obj._expand_glob.return_value = [(dst, src)]
+    obj._expand_glob.return_value = [(dst, src, False)]
     with patch.object(fs, "filecopy") as filecopy:
         filecopy.return_value = iotaa.NodeExternal(
             taskname="test", threads=0, logger=getLogger(), assets_=None
         )
         fs.Copier.go(obj)
-    filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"))
+    filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"), check=False)
 
 
 @mark.parametrize("source", ("dict", "file"))
@@ -170,13 +170,13 @@ def test_fs_FileStager__expand_glob(tmp_path):
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
     a_files = [
-        ("/dst/a1", str(d / "a1")),
-        ("/dst/a2", str(d / "a2")),
-        ("/dst/d1/a3", str(d / "d1" / "a3")),
-        ("/dst/d2/a3", str(d / "d2" / "a3")),
+        ("/dst/a1", str(d / "a1"), False),
+        ("/dst/a2", str(d / "a2"), False),
+        ("/dst/d1/a3", str(d / "d1" / "a3"), False),
+        ("/dst/d2/a3", str(d / "d2" / "a3"), False),
     ]
     obj._expand_glob_local.return_value = a_files
-    assert set(fs.FileStager._expand_glob(obj)) == {*a_files, ("/dst/b1", str(d / "b1"))}
+    assert set(fs.FileStager._expand_glob(obj)) == {*a_files, ("/dst/b1", str(d / "b1"), True)}
 
 
 def test_fs_FileStager__expand_glob__bad_scheme(caplog):
@@ -220,7 +220,10 @@ def test_fs_FileStager__expand_glob_hsi(caplog, matches, success):
         result = fs.FileStager._expand_glob_hsi(obj, glob_pattern, "/dst/<a>")
         if success:
             if matches:
-                assert result == [("/dst/a1", "hsi:///src/a1"), ("/dst/a2", "hsi:///src/a2")]
+                assert result == [
+                    ("/dst/a1", "hsi:///src/a1", False),
+                    ("/dst/a2", "hsi:///src/a2", False),
+                ]
             else:
                 assert not result
                 assert logged(caplog, "*** ERROR")
@@ -231,10 +234,10 @@ def test_fs_FileStager__expand_glob_hsi(caplog, matches, success):
 
 def test_fs_FileStager__expand_glob_local():
     obj = Mock(wraps=fs.FileStager)
-    with patch.object(fs, "iglob", return_value=["/src/a1", "/src/a2"]) as iglob:
+    with patch.object(fs.glob, "iglob", return_value=["/src/a1", "/src/a2"]) as iglob:
         assert fs.FileStager._expand_glob_local(obj, "/src/a*", "/dst/<a>") == [
-            ("/dst/a1", "/src/a1"),
-            ("/dst/a2", "/src/a2"),
+            ("/dst/a1", "/src/a1", False),
+            ("/dst/a2", "/src/a2", False),
         ]
     iglob.assert_called_once_with("/src/a*", recursive=True)
 
@@ -242,21 +245,21 @@ def test_fs_FileStager__expand_glob_local():
 @mark.parametrize(
     "args",
     [
-        ("/a/**/c", "/a/b/x/c", "/foo/b/x/c"),
-        ("/a/*/*", "/a/b/c", "/foo/b/c"),
-        ("/a/*/x/*/c", "/a/b/x/y/c", "/foo/b/x/y/c"),
-        ("/a/b/*", "/a/b/c", "/foo/c"),
-        ("/a/b/**/c", "/a/b/c", "/foo/c"),
-        ("/a/b/*/c", "/a/b/x/c", "/foo/x/c"),
-        ("/a/b/c", "/a/b/c", "/foo/c"),
+        ("/a/**/c", "/a/b/x/c", "/foo/b/x/c", False),
+        ("/a/*/*", "/a/b/c", "/foo/b/c", False),
+        ("/a/*/x/*/c", "/a/b/x/y/c", "/foo/b/x/y/c", False),
+        ("/a/b/*", "/a/b/c", "/foo/c", False),
+        ("/a/b/**/c", "/a/b/c", "/foo/c", False),
+        ("/a/b/*/c", "/a/b/x/c", "/foo/x/c", False),
+        ("/a/b/c", "/a/b/c", "/foo/c", True),
     ],
 )
 def test_fs_FileStager__expand_glob_resolve(args):
-    glob_pattern, path, dst = args
+    glob_pattern, path, dst, nonglob = args
     actual = fs.FileStager._expand_glob_resolve(
         glob_pattern=glob_pattern, path=path, dst="/foo/<f>"
     )
-    assert actual == (dst, path)
+    assert actual == (dst, path, nonglob)
 
 
 @mark.parametrize("source", ("dict", "file"))
