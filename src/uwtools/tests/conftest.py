@@ -1,13 +1,18 @@
 # pylint: disable=missing-function-docstring
 
+import logging
 import re
 
 from iotaa import asset, external
 from pytest import fixture
 
+from uwtools.logging import log
+
 
 @fixture
 def logged(caplog):
+    log.setLevel(logging.DEBUG)
+
     def logged_(s: str, clear: bool = False, escape: bool = False):
         s = re.escape(s) if escape else s
         found = any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
