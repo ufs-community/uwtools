@@ -8,9 +8,11 @@ from pytest import fixture
 
 @fixture
 def logged(caplog):
-    def logged_(s: str):
+    def logged_(s: str, clear: bool = False, escape: bool = False):
+        s = re.escape(s) if escape else s
         found = any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
-        caplog.clear()
+        if clear:
+            caplog.clear()
         return found
 
     return logged_

@@ -17,7 +17,6 @@ from uwtools import fs
 from uwtools.config.support import uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -179,14 +178,14 @@ def test_fs_FileStager__expand_glob(tmp_path):
     assert set(fs.FileStager._expand_glob(obj)) == {*a_files, ("/dst/b1", str(d / "b1"), True)}
 
 
-def test_fs_FileStager__expand_glob__bad_scheme(caplog):
+def test_fs_FileStager__expand_glob__bad_scheme(logged):
     config = """
     /dst/<a>: !glob https://foo.com/obj/*
     """
     obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
     assert not fs.FileStager._expand_glob(obj)
     msg = "URL scheme 'https' incompatible with tag !glob in: !glob https://foo.com/obj/*"
-    assert logged(caplog, msg)
+    assert logged(msg)
 
 
 @mark.parametrize("prefix", ["", "file://"])
@@ -211,7 +210,7 @@ def test_fs_FileStager__expand_glob__hsi_scheme():
 
 
 @mark.parametrize(["matches", "success"], [(True, True), (False, True), (False, False)])
-def test_fs_FileStager__expand_glob_hsi(caplog, matches, success):
+def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
     obj = Mock(wraps=fs.FileStager)
     glob_pattern = "/src/a*"
     output = "header\n/src/a1\n/src/a2\n" if matches else "header\n*** ERROR\n"
@@ -226,7 +225,7 @@ def test_fs_FileStager__expand_glob_hsi(caplog, matches, success):
                 ]
             else:
                 assert not result
-                assert logged(caplog, "*** ERROR")
+                assert logged("*** ERROR", escape=True)
         else:
             assert not result
     run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")
