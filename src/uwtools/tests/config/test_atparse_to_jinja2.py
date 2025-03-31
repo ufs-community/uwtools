@@ -55,7 +55,7 @@ def test_convert_input_file_to_output_file(atparsefile, capsys, txt_jinja2, tmp_
 
 
 def test_convert_input_file_to_logging(atparsefile, caplog, capsys, txt_jinja2, tmp_path):
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, dry_run=True)
     streams = capsys.readouterr()

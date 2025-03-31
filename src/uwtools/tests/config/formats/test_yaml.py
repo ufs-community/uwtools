@@ -21,7 +21,7 @@ from uwtools.config import support
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged
+from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, _stdinproxy
 
 # Fixtures
@@ -198,7 +198,7 @@ def test_yaml_repr_str(func):
             assert actual.strip() == expected.strip()
 
 
-def test_yaml_stdin_plus_relpath_failure(caplog):
+def test_yaml_stdin_plus_relpath_failure(logged):
     # Instantiate a YAMLConfig with no input file, triggering a read from stdin. Patch stdin to
     # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
@@ -212,7 +212,7 @@ def test_yaml_stdin_plus_relpath_failure(caplog):
                 YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"
     assert msg in str(e.value)
-    assert logged(caplog, msg)
+    assert logged(msg)
 
 
 def test_yaml_unexpected_error(tmp_path):
