@@ -47,18 +47,18 @@ Config ``answer.yaml``
   
 * If the external driver does not accept an argument that was provided on the command line, it will exit with error. In this case, ``Answer`` inherits from parent class ``AssetsTimeInvariant``, which does not accept a ``cycle`` argument:
 
-  .. literalinclude:: execute/bad-arg.cmd
+  .. literalinclude:: execute/answer-bad-arg.cmd
      :language: text
      :emphasize-lines: 1
-  .. literalinclude:: execute/bad-arg.out
+  .. literalinclude:: execute/answer-bad-arg.out
      :language: text
   
 * If the schema file for a driver resides in the same directory as its Python module and has the same filename prefix, as well as a ``.jsonschema`` suffix (e.g. ``answer.jsonschema`` alongside ``answer.py``) then the ``--schema-file`` argument is not required. However, ``--schema-file`` can be used to point to an alternate schema:
 
-  .. literalinclude:: execute/answer-alt.cmd
+  .. literalinclude:: execute/answer-alt-schema.cmd
      :language: text
      :emphasize-lines: 2
-  .. literalinclude:: execute/answer-alt.out
+  .. literalinclude:: execute/answer-alt-schema.out
      :language: text
 
 * Other arguments behave identically to the same-named arguments to internal ``uwtools`` drivers (see :ref:`drivers`).

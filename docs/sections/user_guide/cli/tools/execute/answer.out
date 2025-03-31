@@ -1,4 +1,4 @@
 [2025-01-02T03:04:05]     INFO 0 schema-validation errors found in answer config
 [2025-01-02T03:04:05]     INFO answer Answer file: Executing
-[2025-01-02T03:04:05]    ERROR answer Answer file: Task failed: [Errno 17] File exists: '/home/maddenp/git/uwtools/docs/sections/user_guide/cli/tools/execute/tmp/answer'
+[2025-01-02T03:04:05]     INFO answer Answer file: Ready
 The answer is: 42
