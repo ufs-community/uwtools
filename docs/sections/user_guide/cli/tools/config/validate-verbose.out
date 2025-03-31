@@ -1,21 +1,21 @@
-[2025-02-15T07:02:49]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-[2025-02-15T07:02:49]    DEBUG [dereference] Dereferencing, current value:
-[2025-02-15T07:02:49]    DEBUG [dereference]   values:
-[2025-02-15T07:02:49]    DEBUG [dereference]     greeting: Hello
-[2025-02-15T07:02:49]    DEBUG [dereference]     recipient: World
-[2025-02-15T07:02:49]    DEBUG [dereference] Rendering: values
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendered: values
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendering: greeting
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendered: greeting
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendering: Hello
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendered: Hello
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendering: recipient
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendered: recipient
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendering: World
-[2025-02-15T07:02:50]    DEBUG [dereference] Rendered: World
-[2025-02-15T07:02:50]    DEBUG [dereference] Dereferencing, final value:
-[2025-02-15T07:02:50]    DEBUG [dereference]   values:
-[2025-02-15T07:02:50]    DEBUG [dereference]     greeting: Hello
-[2025-02-15T07:02:50]    DEBUG [dereference]     recipient: World
-[2025-02-15T07:02:50]    DEBUG Validating config against external schema file: schema.jsonschema
-[2025-02-15T07:02:50]     INFO 0 schema-validation errors found in config
+[2025-01-02T03:04:05]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
+[2025-01-02T03:04:05]    DEBUG [dereference] Dereferencing, current value:
+[2025-01-02T03:04:05]    DEBUG [dereference]   values:
+[2025-01-02T03:04:05]    DEBUG [dereference]     greeting: Hello
+[2025-01-02T03:04:05]    DEBUG [dereference]     recipient: World
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: values
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: values
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: greeting
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: greeting
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: Hello
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: Hello
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: recipient
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: recipient
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: World
+[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: World
+[2025-01-02T03:04:05]    DEBUG [dereference] Dereferencing, final value:
+[2025-01-02T03:04:05]    DEBUG [dereference]   values:
+[2025-01-02T03:04:05]    DEBUG [dereference]     greeting: Hello
+[2025-01-02T03:04:05]    DEBUG [dereference]     recipient: World
+[2025-01-02T03:04:05]    DEBUG Validating config against external schema file: schema.jsonschema
+[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in config

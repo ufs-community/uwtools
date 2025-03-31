@@ -666,11 +666,9 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
 
 
 def _add_arg_cycle(group: Group, required: bool = False) -> None:
-    offset = dt.timedelta(hours=(dt.datetime.now(dt.timezone.utc).hour // 6) * 6)
-    cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
-        help="The cycle in ISO8601 format (e.g. %s)" % cycle.strftime("%Y-%m-%dT%H"),
+        help="The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)",
         required=required,
         type=dt.datetime.fromisoformat,
     )
