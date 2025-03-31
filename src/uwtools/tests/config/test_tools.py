@@ -297,7 +297,7 @@ def test_realize_config_double_tag_nest_forward_reference(tmp_path):
     help_realize_config_double_tag(config, expected, tmp_path)
 
 
-def test_realize_config_dry_run(caplog):
+def test_realize_config_dry_run(logged):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
     """
@@ -311,9 +311,7 @@ def test_realize_config_dry_run(caplog):
         output_format=FORMAT.yaml,
         dry_run=True,
     )
-    actual = "\n".join(record.message for record in caplog.records)
-    expected = str(yaml_config).strip()
-    assert actual == expected
+    assert logged(str(yaml_config), full=True)
 
 
 def test_realize_config_field_table(tmp_path):
@@ -548,7 +546,7 @@ def test_realize_config_total_fail():
     assert str(e.value) == "Config could not be totally realized"
 
 
-def test_realize_config_values_needed_ini(caplog):
+def test_realize_config_values_needed_ini(logged):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
@@ -560,7 +558,6 @@ def test_realize_config_values_needed_ini(caplog):
         output_format=FORMAT.ini,
         values_needed=True,
     )
-    actual = "\n".join(record.message for record in caplog.records)
     expected = """
     Keys that are complete:
       salad
@@ -579,10 +576,10 @@ def test_realize_config_values_needed_ini(caplog):
       salad.how_many: {{ amount }}
       dessert.flavor: {{ flavor }}
     """
-    assert actual.strip() == dedent(expected).strip()
+    assert logged(dedent(expected), full=True)
 
 
-def test_realize_config_values_needed_yaml(caplog):
+def test_realize_config_values_needed_yaml(logged):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
@@ -594,7 +591,6 @@ def test_realize_config_values_needed_yaml(caplog):
         output_format=FORMAT.yaml,
         values_needed=True,
     )
-    actual = "\n".join(record.message for record in caplog.records)
     expected = """
     Keys that are complete:
       FV3GFS
@@ -612,7 +608,7 @@ def test_realize_config_values_needed_yaml(caplog):
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
     """
-    assert actual.strip() == dedent(expected).strip()
+    assert logged(dedent(expected), full=True)
 
 
 def test_walk_key_path_fail_bad_key_path():
@@ -851,28 +847,26 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     assert o[1][2][3] == 43
 
 
-def test__realize_config_values_needed(caplog, tmp_path):
+def test__realize_config_values_needed(logged, tmp_path):
     log.setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
     c = YAMLConfig(config=path)
     tools._realize_config_values_needed(input_obj=c)
-    msgs = "\n".join(record.message for record in caplog.records)
-    assert "Keys that are complete:\n  1" in msgs
-    assert "Keys with unrendered Jinja2 variables/expressions:\n  2" in msgs
+    assert logged("Keys that are complete:\n  1", multiline=True)
+    assert logged("Keys with unrendered Jinja2 variables/expressions:\n  2", multiline=True)
 
 
-def test__realize_config_values_needed_negative_results(caplog, tmp_path):
+def test__realize_config_values_needed_negative_results(logged, tmp_path):
     log.setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({}, f)
     c = YAMLConfig(config=path)
     tools._realize_config_values_needed(input_obj=c)
-    msgs = "\n".join(record.message for record in caplog.records)
-    assert "No keys are complete." in msgs
-    assert "No keys have unrendered Jinja2 variables/expressions." in msgs
+    assert logged("No keys are complete.")
+    assert logged("No keys have unrendered Jinja2 variables/expressions.")
 
 
 @mark.parametrize("input_fmt", FORMAT.extensions())
