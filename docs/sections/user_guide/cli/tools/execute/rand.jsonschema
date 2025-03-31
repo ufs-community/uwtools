@@ -1,12 +1,9 @@
 {
   "properties": {
-    "rand": {
+    "answer": {
       "additionalProperties": false,
       "properties": {
-        "hi": {
-          "type": "integer"
-        },
-        "lo": {
+        "n": {
           "type": "integer"
         },
         "rundir": {
@@ -14,14 +11,13 @@
         }
       },
       "required": [
-        "lo",
-        "hi",
+        "n",
         "rundir"
       ],
       "type": "object"
     },
     "required": [
-      "rand"
+      "answer"
     ],
     "type": "object"
   }

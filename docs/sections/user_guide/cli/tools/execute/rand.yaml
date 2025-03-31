@@ -1,4 +1,3 @@
-rand:
-  hi: 100
-  lo: 1
+answer:
+  n: 42
   rundir: /tmp/rand
