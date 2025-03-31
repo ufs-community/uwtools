@@ -15,22 +15,17 @@ def logged(caplog):
 
     def logged_(
         s: str,
-        clear: bool = False,
         full: bool = False,
         multiline: bool = False,
         regex: bool = False,
     ):
-        assert not (full and multiline)
+        assert len([x for x in (full, multiline, regex) if x]) < 2
         if full:
-            found = "\n".join(caplog.messages).strip() == s.strip()
-        elif multiline:
-            found = s in "\n".join(caplog.messages)
-        else:
-            s = s if regex else re.escape(s)
-            found = any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
-        if clear:
-            caplog.clear()
-        return found
+            return "\n".join(caplog.messages).strip() == s.strip()
+        if multiline:
+            return s in "\n".join(caplog.messages)
+        s = s if regex else re.escape(s)
+        return any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
 
     return logged_
 
