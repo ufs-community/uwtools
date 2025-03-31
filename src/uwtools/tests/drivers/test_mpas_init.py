@@ -198,7 +198,7 @@ def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged("Not ready [external asset]", escape=True)
+    assert logged("Not ready [external asset]")
 
 
 def test_MPASInit_output(driverobj):

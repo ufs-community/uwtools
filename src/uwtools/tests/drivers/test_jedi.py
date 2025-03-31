@@ -118,7 +118,7 @@ def test_JEDI_configuration_file_missing_base_file(driverobj, logged):
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
-    assert logged(f"{base_file}: Not ready [external asset]", escape=True)
+    assert logged(f"{base_file}: Not ready [external asset]")
 
 
 def test_JEDI_driver_name(driverobj):

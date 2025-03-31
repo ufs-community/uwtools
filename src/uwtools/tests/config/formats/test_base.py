@@ -147,7 +147,7 @@ def test_compare_config(fmt, logged, salad_base):
         vegetable: tomato
     """
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(line, escape=True)
+        assert logged(line)
 
 
 def test_compare_config_ini(logged, salad_base):
@@ -178,7 +178,7 @@ def test_compare_config_ini(logged, salad_base):
         vegetable: tomato
     """
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(line, escape=True)
+        assert logged(line)
     anomalous = """
     ---------------------------------------------------------------------
     ↓ ? = info | -/+ = line unique to - or + file | blank = matching line

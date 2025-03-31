@@ -227,7 +227,7 @@ def test_config_validator_validate_internal_no(logged, schema_file):
                 schema_name="a", desc="test", config_data={"color": "orange"}
             )
     assert logged("Error at color:")
-    assert logged("  'orange' is not one of ['blue', 'red']", escape=True)
+    assert logged("  'orange' is not one of ['blue', 'red']")
     assert str(e.value) == "YAML validation errors"
 
 

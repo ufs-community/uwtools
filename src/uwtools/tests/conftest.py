@@ -13,8 +13,8 @@ from uwtools.logging import log
 def logged(caplog):
     log.setLevel(logging.DEBUG)
 
-    def logged_(s: str, clear: bool = False, escape: bool = False):
-        s = re.escape(s) if escape else s
+    def logged_(s: str, clear: bool = False, regex: bool = False):
+        s = s if regex else re.escape(s)
         found = any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
         if clear:
             caplog.clear()

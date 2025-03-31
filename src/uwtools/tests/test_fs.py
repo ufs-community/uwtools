@@ -225,7 +225,7 @@ def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
                 ]
             else:
                 assert not result
-                assert logged("*** ERROR", escape=True)
+                assert logged("*** ERROR")
         else:
             assert not result
     run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")

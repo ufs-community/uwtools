@@ -160,7 +160,7 @@ def test__get_driver_module_explicit_absolute_fail_syntax_error(args, logged, tm
     assert module.is_absolute()
     assert not execute._get_driver_module_explicit(module=module)
     # If the module is found but fails to load, a traceback will be logged:
-    assert logged("Traceback (most recent call last):", escape=True)
+    assert logged("Traceback (most recent call last):")
     assert logged("SyntaxError: invalid syntax")
 
 

@@ -169,7 +169,7 @@ def test_dereference_str_variable_rendered_str():
 def test_deref_debug(logged):
     log.setLevel(logging.DEBUG)
     jinja2.deref_debug(action="Frobnicated", val="foo")
-    assert logged("[dereference] Frobnicated: foo", escape=True)
+    assert logged("[dereference] Frobnicated: foo")
 
 
 def test_register_filters_env():
@@ -270,7 +270,7 @@ def test_render_values_missing(logged, template_file, values_file):
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template_file, values_file=values_file)
-    assert logged("Value(s) required to render template not provided:", escape=True)
+    assert logged("Value(s) required to render template not provided:")
     assert logged("  roses_color")
 
 
@@ -372,7 +372,7 @@ def test__log_missing_values(logged):
     log.setLevel(logging.DEBUG)
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
-    assert logged("Value(s) required to render template not provided:", escape=True)
+    assert logged("Value(s) required to render template not provided:")
     assert logged("  roses_color")
     assert logged("  violets_color")
 
@@ -478,7 +478,7 @@ def test__values_needed(logged):
     log.setLevel(logging.DEBUG)
     undeclared_variables = {"roses_color", "lavender_smell"}
     jinja2._values_needed(undeclared_variables)
-    assert logged("Value(s) needed to render this template are:", escape=True)
+    assert logged("Value(s) needed to render this template are:")
     assert logged("  roses_color")
     assert logged("  lavender_smell")
 

@@ -175,7 +175,7 @@ def test_FV3_model_configure(base_file_exists, driverobj, logged):
         assert dst.is_file()
     else:
         assert not dst.is_file()
-        assert logged(f"{src}: Not ready [external asset]", escape=True)
+        assert logged(f"{src}: Not ready [external asset]")
 
 
 def test_FV3_namelist_file(driverobj, logged):
@@ -206,7 +206,7 @@ def test_FV3_namelist_file_missing_base_file(driverobj, logged):
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged("missing.nml: Not ready [external asset]", escape=True)
+    assert logged("missing.nml: Not ready [external asset]")
 
 
 def test_FV3_output(driverobj):

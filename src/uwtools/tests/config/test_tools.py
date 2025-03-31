@@ -115,7 +115,7 @@ def test_compare_configs_good(compare_configs_assets, logged):
     assert tools.compare_configs(
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
-    assert logged(".*")
+    assert logged(".*", regex=True)
 
 
 def test_compare_configs_changed_value(compare_configs_assets, logged):
@@ -145,7 +145,7 @@ def test_compare_configs_changed_value(compare_configs_assets, logged):
         str(b),
     )
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(line, escape=True)
+        assert logged(line)
 
 
 def test_compare_configs_missing_key(compare_configs_assets, logged):
@@ -173,7 +173,7 @@ def test_compare_configs_missing_key(compare_configs_assets, logged):
         str(a),
     )
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(line, escape=True)
+        assert logged(line)
 
 
 def test_compare_configs_bad_format(logged):
@@ -699,7 +699,7 @@ def test__realize_config_input_setup_ini_stdin(logged):
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.ini)
     assert input_obj.data == {"section": {"foo": "bar", "baz": "42"}}  # note: 42 is str, not int
-    assert logged("Reading input from stdin", escape=True)
+    assert logged("Reading input from stdin")
 
 
 def test__realize_config_input_setup_nml_cfgobj():

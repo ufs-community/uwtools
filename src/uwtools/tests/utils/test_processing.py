@@ -27,6 +27,6 @@ def test_utils_processing_run_shell_cmd__success(logged, tmp_path):
         cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True
     )
     assert success
-    assert logged(f"Running: {cmd} in {tmp_path} with environment variables FOO=bar", escape=True)
+    assert logged(f"Running: {cmd} in {tmp_path} with environment variables FOO=bar")
     assert logged("Output:")
     assert logged("  hello bar")

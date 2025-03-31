@@ -107,7 +107,7 @@ def test_Orog_grid_file_existence(driverobj, logged, exist):
         grid_file.touch()
         status = f"Input grid file {str(grid_file)}: Ready"
     driverobj.grid_file()
-    assert logged(status, escape=True)
+    assert logged(status)
 
 
 def test_Orog_grid_file_nonexistence(driverobj, logged):

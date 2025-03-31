@@ -41,7 +41,7 @@ def test_utils_tasks_directory__fail(logged, tmp_path):
     assert not iotaa.ready(tasks.directory(path=p))
     assert not p.is_dir()
     os.chmod(tmp_path, 0o750)
-    assert logged("[Errno 13] Permission denied: '%s'" % p, escape=True)
+    assert logged("[Errno 13] Permission denied: '%s'" % p)
 
 
 def test_utils_tasks_executable(tmp_path):
@@ -82,7 +82,7 @@ def test_utils_tasks_existing_http(code, expected, logged, scheme):
         assert state is expected
     head.assert_called_with(url, allow_redirects=True, timeout=3)
     msg = "Remote HTTP resource %s: %s" % (url, "Ready" if state else "Not ready [external asset]")
-    assert logged(msg, escape=True)
+    assert logged(msg)
 
 
 @mark.parametrize("prefix", ["", "file://"])
