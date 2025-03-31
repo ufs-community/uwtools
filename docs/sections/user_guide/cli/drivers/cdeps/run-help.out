@@ -6,7 +6,7 @@ The data atmosphere configuration with all required content
 
 Required arguments:
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2025-03-31T12)
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
 
 Optional arguments:
   -h, --help
