@@ -1,14 +1,14 @@
-[2025-03-29T17:19:31]     INFO Validating config against internal schema: files-to-stage
-[2025-03-29T17:19:31]     INFO 0 schema-validation errors found in fs config
-[2025-03-29T17:19:31]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Executing
-[2025-03-29T17:19:31]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.tar'
-[2025-03-29T17:19:31]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Ready
-[2025-03-29T17:19:31]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: Executing
-[2025-03-29T17:19:31]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: Running: hsi -q get 'dst/copy-hpss-hsi-single/a.tar' : '/BMC/rtrr/5year/uwtools/data.tar'
-[2025-03-29T17:19:36]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T17:19:36]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-single/a.tar' : '/BMC/rtrr/5year/uwtools/data.tar' (2025/03/29 17:12:40 5632 bytes, 7832.3 KBS )
-[2025-03-29T17:19:36]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: Ready
-[2025-03-29T17:19:36]     INFO File copies: Ready
+[2025-01-02T03:04:05]     INFO Validating config against internal schema: files-to-stage
+[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in fs config
+[2025-01-02T03:04:05]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Executing
+[2025-01-02T03:04:05]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-01-02T03:04:05]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Ready
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: Executing
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: Running: hsi -q get 'dst/copy-hpss-hsi-single/a.tar' : '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-single/a.tar' : '/BMC/rtrr/5year/uwtools/data.tar' (2025/03/29 17:12:40 5632 bytes, 3982.9 KBS )
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-single/a.tar: Ready
+[2025-01-02T03:04:05]     INFO File copies: Ready
 
 dst/copy-hpss-hsi-single
 └── a.tar

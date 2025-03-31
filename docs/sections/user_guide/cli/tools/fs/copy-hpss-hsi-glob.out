@@ -1,17 +1,17 @@
-[2025-03-29T17:19:29]     INFO Validating config against internal schema: files-to-stage
-[2025-03-29T17:19:29]     INFO 0 schema-validation errors found in fs config
-[2025-03-29T17:19:29]     INFO Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.*'
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Executing
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Running: hsi -q get 'dst/copy-hpss-hsi-glob/data.tar' : '/BMC/rtrr/5year/uwtools/data.tar'
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/data.tar' : '/BMC/rtrr/5year/uwtools/data.tar' (2025/03/29 17:12:40 5632 bytes, 4505.5 KBS )
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Ready
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Executing
-[2025-03-29T17:19:29]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/data.tar.idx' : '/BMC/rtrr/5year/uwtools/data.tar.idx'
-[2025-03-29T17:19:30]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
-[2025-03-29T17:19:30]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/data.tar.idx' : '/BMC/rtrr/5year/uwtools/data.tar.idx' (2025/03/29 17:12:40 2848 bytes, 2776.1 KBS )
-[2025-03-29T17:19:30]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Ready
-[2025-03-29T17:19:30]     INFO File copies: Ready
+[2025-01-02T03:04:05]     INFO Validating config against internal schema: files-to-stage
+[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in fs config
+[2025-01-02T03:04:05]     INFO Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.*'
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Executing
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Running: hsi -q get 'dst/copy-hpss-hsi-glob/data.tar' : '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/data.tar' : '/BMC/rtrr/5year/uwtools/data.tar' (2025/03/29 17:12:40 5632 bytes, 3305.2 KBS )
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar -> dst/copy-hpss-hsi-glob/data.tar: Ready
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Executing
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Running: hsi -q get 'dst/copy-hpss-hsi-glob/data.tar.idx' : '/BMC/rtrr/5year/uwtools/data.tar.idx'
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: => get  '/home/Paul.Madden/git/uwtools/docs/sections/user_guide/cli/tools/fs/dst/copy-hpss-hsi-glob/data.tar.idx' : '/BMC/rtrr/5year/uwtools/data.tar.idx' (2025/03/29 17:12:40 2848 bytes, 1950.6 KBS )
+[2025-01-02T03:04:05]     INFO HSI /BMC/rtrr/5year/uwtools/data.tar.idx -> dst/copy-hpss-hsi-glob/data.tar.idx: Ready
+[2025-01-02T03:04:05]     INFO File copies: Ready
 
 dst/copy-hpss-hsi-glob
 ├── data.tar

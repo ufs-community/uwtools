@@ -34,7 +34,7 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
         print("--quiet may not be used with --debug or --verbose", file=sys.stderr)
         sys.exit(1)
     kwargs: dict = {
-        "datefmt": "%Y-%m-%dT%H:%M:%S",
+        "datefmt": os.environ.get("UWTOOLS_TIMESTAMP") or "%Y-%m-%dT%H:%M:%S",
         "format": "[%(asctime)s] %(levelname)8s %(message)s",
         "level": logging.DEBUG if verbose else logging.INFO,
         **({"filename": os.devnull} if quiet else {}),
