@@ -9,7 +9,7 @@ use_uwtools_logger()
 class Answer(AssetsTimeInvariant):
 
     @task
-    def answer(self):
+    def answerfile(self):
         """
         A file containing the answer.
         """

@@ -1,10 +1,4 @@
-[2025-01-02T03:04:05]    ERROR Traceback (most recent call last):
-[2025-01-02T03:04:05]    ERROR   File "/home/maddenp/git/uwtools/src/uwtools/api/execute.py", line 138, in _get_driver_module_explicit
-[2025-01-02T03:04:05]    ERROR     loader.exec_module(m)
-[2025-01-02T03:04:05]    ERROR   File "<frozen importlib._bootstrap_external>", line 846, in exec_module
-[2025-01-02T03:04:05]    ERROR   File "<frozen importlib._bootstrap_external>", line 982, in get_code
-[2025-01-02T03:04:05]    ERROR   File "<frozen importlib._bootstrap_external>", line 1039, in get_data
-[2025-01-02T03:04:05]    ERROR FileNotFoundError: [Errno 2] No such file or directory: 'rand.py'
-[2025-01-02T03:04:05]    ERROR Could not load module rand.py
-cat: /tmp/rand/randint: No such file or directory
-Random integer is
+[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in answer config
+[2025-01-02T03:04:05]     INFO answer Answer file: Executing
+[2025-01-02T03:04:05]    ERROR answer Answer file: Task failed: [Errno 17] File exists: '/home/maddenp/git/uwtools/docs/sections/user_guide/cli/tools/execute/tmp/answer'
+The answer is: 42

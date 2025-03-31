@@ -1,3 +1,3 @@
-rm -rf /tmp/rand
-uw execute --module rand.py --classname Rand --task randfile --config-file rand.yaml
-echo Random integer is $(cat /tmp/rand/randint)
+rm -rf tmp/answer
+uw execute --module answer.py --classname Answer --task answerfile --config-file answer.yaml
+echo The answer is: $(cat tmp/answer/answer.txt)
