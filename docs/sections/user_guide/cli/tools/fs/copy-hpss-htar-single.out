@@ -1,0 +1,17 @@
+[2025-03-29T17:19:38]     INFO Validating config against internal schema: files-to-stage
+[2025-03-29T17:19:38]     INFO 0 schema-validation errors found in fs config
+[2025-03-29T17:19:38]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Executing
+[2025-03-29T17:19:38]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-03-29T17:19:38]     INFO HPSS file /BMC/rtrr/5year/uwtools/data.tar: Ready
+[2025-03-29T17:19:38]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Executing
+[2025-03-29T17:19:38]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Running: htar -qxf '/BMC/rtrr/5year/uwtools/data.tar' 'a1.txt' in dst/copy-hpss-htar-single/.tmpdir5rse8ihf
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: => HTAR: HTAR SUCCESSFUL
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Moving dst/copy-hpss-htar-single/.tmpdir5rse8ihf/a1.txt -> dst/copy-hpss-htar-single/afile
+[2025-03-29T17:19:43]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-single/afile: Ready
+[2025-03-29T17:19:43]     INFO File copies: Ready
+
+dst/copy-hpss-htar-single
+└── afile
+
+1 directory, 1 file
