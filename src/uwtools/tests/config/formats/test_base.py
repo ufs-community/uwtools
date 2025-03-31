@@ -158,7 +158,7 @@ def test_compare_config_ini(logged, salad_base):
     salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
-    assert not logged(".*")
+    assert not logged(".*", regex=True)
     # Create differences in base dict:
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
