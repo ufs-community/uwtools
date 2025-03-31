@@ -13,12 +13,7 @@ from uwtools.logging import log
 def logged(caplog):
     log.setLevel(logging.DEBUG)
 
-    def logged_(
-        s: str,
-        full: bool = False,
-        multiline: bool = False,
-        regex: bool = False,
-    ):
+    def logged_(s: str, full: bool = False, multiline: bool = False, regex: bool = False):
         assert len([x for x in (full, multiline, regex) if x]) < 2
         if full:
             return "\n".join(caplog.messages).strip() == s.strip()
