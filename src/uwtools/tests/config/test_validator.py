@@ -16,7 +16,6 @@ from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.tests.support import logged
 from uwtools.utils.file import resource_path
 
 # Fixtures
@@ -125,7 +124,7 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_config_validator_bundle(caplog):
+def test_config_validator_bundle(logged):
     log.setLevel(logging.DEBUG)
     schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
     with patch.object(validator, "_registry") as _registry:
@@ -147,7 +146,7 @@ def test_config_validator_bundle(caplog):
         "Bundling str value at key path: fruit.b.name",
         "Bundling NoneType value at key path: flowers",
     ]:
-        assert logged(caplog, msg)
+        assert logged(msg)
 
 
 def test_config_validator_internal_schema_file():
@@ -221,14 +220,14 @@ def test_config_validator_validate_check_config(config_data, config_path):
         assert str(e.value) == "Specify at most one of config_data, config_path"
 
 
-def test_config_validator_validate_internal_no(caplog, schema_file):
+def test_config_validator_validate_internal_no(logged, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
             validator.validate_internal(
                 schema_name="a", desc="test", config_data={"color": "orange"}
             )
-    assert logged(caplog, "Error at color:")
-    assert logged(caplog, "  'orange' is not one of ['blue', 'red']")
+    assert logged("Error at color:")
+    assert logged("  'orange' is not one of ['blue', 'red']", escape=True)
     assert str(e.value) == "YAML validation errors"
 
 
