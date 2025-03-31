@@ -4,7 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "n": {
-          "type": "integer"
+          "type": "number"
         },
         "rundir": {
           "type": "string"
