@@ -3,7 +3,6 @@
 Tests for uwtools.config.validator module.
 """
 import json
-import logging
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -15,8 +14,6 @@ from pytest import fixture, mark, raises
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
-from uwtools.tests.support import logged
 from uwtools.utils.file import resource_path
 
 # Fixtures
@@ -125,8 +122,7 @@ def write_as_json(data: dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_config_validator_bundle(caplog):
-    log.setLevel(logging.DEBUG)
+def test_config_validator_bundle(logged):
     schema = {"fruit": {"$ref": "urn:uwtools:a"}, "flowers": None}
     with patch.object(validator, "_registry") as _registry:
         outer, inner = Mock(), Mock()
@@ -147,7 +143,7 @@ def test_config_validator_bundle(caplog):
         "Bundling str value at key path: fruit.b.name",
         "Bundling NoneType value at key path: flowers",
     ]:
-        assert logged(caplog, msg)
+        assert logged(msg)
 
 
 def test_config_validator_internal_schema_file():
@@ -173,23 +169,21 @@ def test_config_validator_validate_dict(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
-def test_config_validator_validate_fail_bad_enum_val(caplog, config, schema):
-    log.setLevel(logging.INFO)
+def test_config_validator_validate_fail_bad_enum_val(config, logged, schema):
     config["color"] = "yellow"  # invalid enum value
     assert not validator.validate(schema=schema, desc="test", config=config)
-    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
-    assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
+    assert logged("1 schema-validation error found")
+    assert logged("'yellow' is not one of")
 
 
-def test_config_validator_validate_fail_bad_number_val(caplog, config, schema):
-    log.setLevel(logging.INFO)
+def test_config_validator_validate_fail_bad_number_val(config, logged, schema):
     config["number"] = "string"  # invalid number value
     assert not validator.validate(schema=schema, desc="test", config=config)
-    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
-    assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+    assert logged("1 schema-validation error found")
+    assert logged("'string' is not of type 'number'")
 
 
-def test_config_validator_validate_fail_top_level(caplog):
+def test_config_validator_validate_fail_top_level(logged):
     schema = {
         "additionalProperties": False,
         "properties": {"n": {"type": "integer"}},
@@ -205,7 +199,7 @@ def test_config_validator_validate_fail_top_level(caplog):
     Error at top level:
       'n' is a required property
     """
-    assert all(line in caplog.messages for line in dedent(expected).strip().split("\n"))
+    assert logged(dedent(expected), full=True)
 
 
 @mark.parametrize(
@@ -221,14 +215,14 @@ def test_config_validator_validate_check_config(config_data, config_path):
         assert str(e.value) == "Specify at most one of config_data, config_path"
 
 
-def test_config_validator_validate_internal_no(caplog, schema_file):
+def test_config_validator_validate_internal_no(logged, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
             validator.validate_internal(
                 schema_name="a", desc="test", config_data={"color": "orange"}
             )
-    assert logged(caplog, "Error at color:")
-    assert logged(caplog, "  'orange' is not one of ['blue', 'red']")
+    assert logged("Error at color:")
+    assert logged("  'orange' is not one of ['blue', 'red']")
     assert str(e.value) == "YAML validation errors"
 
 

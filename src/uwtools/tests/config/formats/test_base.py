@@ -3,7 +3,6 @@
 Tests for the uwtools.config.base module.
 """
 import datetime as dt
-import logging
 import os
 from datetime import datetime
 from textwrap import dedent
@@ -17,8 +16,7 @@ from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged
+from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, readable
 
 # Fixtures
@@ -117,18 +115,16 @@ def test__parse_include(config):
 
 
 @mark.parametrize("fmt", [FORMAT.nml, FORMAT.yaml])
-def test_compare_config(caplog, fmt, salad_base):
+def test_compare_config(fmt, logged, salad_base):
     """
     Compare two config objects.
     """
-    log.setLevel(logging.INFO)
     cfgobj = tools.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
     if fmt == FORMAT.ini:
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
-    assert not caplog.records
-    caplog.clear()
+    assert not logged(".*")
     # Create differences in base dict:
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
@@ -151,20 +147,18 @@ def test_compare_config(caplog, fmt, salad_base):
         vegetable: tomato
     """
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(caplog, line)
+        assert logged(line)
 
 
-def test_compare_config_ini(caplog, salad_base):
+def test_compare_config_ini(logged, salad_base):
     """
     Compare two config objects.
     """
-    log.setLevel(logging.INFO)
     cfgobj = tools.format_to_config("ini")(fixture_path("simple.ini"))
     salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
-    assert not caplog.records
-    caplog.clear()
+    assert not logged(".*", regex=True)
     # Create differences in base dict:
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
@@ -184,14 +178,14 @@ def test_compare_config_ini(caplog, salad_base):
         vegetable: tomato
     """
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(caplog, line)
+        assert logged(line)
     anomalous = """
     ---------------------------------------------------------------------
     ↓ ? = info | -/+ = line unique to - or + file | blank = matching line
     ---------------------------------------------------------------------
     """
     for line in dedent(anomalous).strip("\n").split("\n"):
-        assert not logged(caplog, line)
+        assert not logged(line)
 
 
 def test_config_from_config(config):
@@ -211,7 +205,6 @@ def test_dereference(tmp_path):
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
     #   - Tagged scalars in collections are handled correctly.
-    log.setLevel(logging.DEBUG)
     yaml = """
 a: !int '{{ b.c + 11 }}'
 b:
@@ -278,7 +271,6 @@ l: "22"
 
 
 def test_dereference_context_override(tmp_path):
-    log.setLevel(logging.DEBUG)
     yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:

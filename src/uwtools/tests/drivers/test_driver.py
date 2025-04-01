@@ -7,7 +7,6 @@ Tests for uwtools.drivers.driver module.
 """
 import datetime as dt
 import json
-import logging
 from pathlib import Path
 from textwrap import dedent
 from typing import Optional
@@ -20,9 +19,7 @@ from pytest import fixture, mark, raises
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
 from uwtools.exceptions import UWConfigError, UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import regex_logged
 
 # Helpers
 
@@ -230,10 +227,9 @@ def test_Assets_taskname(assetsobj):
     assert assetsobj.taskname(suffix="test") == "concrete test"
 
 
-def test_Assets_validate(assetsobj, caplog):
-    log.setLevel(logging.INFO)
+def test_Assets_validate(assetsobj, logged):
     assetsobj.validate()
-    assert regex_logged(caplog, "Ready")
+    assert logged("Ready")
 
 
 def test_Assets_validate_key_path(config, controller_schema):
@@ -245,7 +241,7 @@ def test_Assets_validate_key_path(config, controller_schema):
 
 
 @mark.parametrize("should_pass,t", [(True, "integer"), (False, "string")])
-def test_Assets_validate_schema_file(caplog, should_pass, t, tmp_path):
+def test_Assets_validate_schema_file(logged, should_pass, t, tmp_path):
     path = tmp_path / "test.jsonschema"
     schema = {"properties": {"concrete": {"properties": {"n": {"type": t}}}}}
     with open(path, "w", encoding="utf-8") as f:
@@ -257,7 +253,7 @@ def test_Assets_validate_schema_file(caplog, should_pass, t, tmp_path):
         else:
             with raises(UWConfigError):
                 test()
-            assert regex_logged(caplog, "1 is not of type 'string'")
+            assert logged("1 is not of type 'string'")
 
 
 @mark.parametrize(
@@ -454,11 +450,11 @@ def test_driver_show_output(capsys, config):
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
-def test_driver_show_output_fail(caplog, config):
+def test_driver_show_output_fail(config, logged):
     with patch.object(ConcreteDriverTimeInvariant, "output", new_callable=PropertyMock) as output:
         output.side_effect = UWConfigError("FAIL")
         ConcreteDriverTimeInvariant(config).show_output()
-    assert "FAIL" in caplog.messages
+    assert logged("FAIL")
 
 
 @mark.parametrize(

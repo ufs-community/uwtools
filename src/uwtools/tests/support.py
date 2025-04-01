@@ -1,11 +1,9 @@
-import re
 from copy import deepcopy
 from importlib import resources
 from pathlib import Path
 from typing import Any, Callable, Union
 
 import yaml
-from _pytest.logging import LogCaptureFixture
 
 from uwtools.config.validator import _validation_errors
 from uwtools.utils.file import resource_path
@@ -56,29 +54,6 @@ def fixture_path(suffix: str = "") -> Path:
         location.
     """
     return fixture_pathobj(suffix)
-
-
-def logged(caplog: LogCaptureFixture, msg: str) -> bool:
-    """
-    Does the given message occur in the log capture?
-
-    :param caplog: The pytest log capture.
-    :param msg: The message sought.
-    :return: Does it?
-    """
-    return msg in [record.message for record in caplog.records]
-
-
-def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
-    """
-    Does the given regex match a line in the log capture?
-
-    :param caplog: The pytest log capture.
-    :param msg: The regex sought.
-    :return: Does it?
-    """
-    pattern = re.compile(re.escape(msg))
-    return any(pattern.search(record.message) for record in caplog.records)
 
 
 def schema_validator(schema_name: str, *args: Any) -> Callable:

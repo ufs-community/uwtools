@@ -3,7 +3,6 @@
 Tests for uwtools.config.tools module.
 """
 
-import logging
 import sys
 from io import StringIO
 from pathlib import Path
@@ -21,9 +20,8 @@ from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
-from uwtools.logging import log
 from uwtools.strings import FORMAT
-from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.tests.support import compare_files, fixture_path
 from uwtools.utils.file import _stdinproxy as stdinproxy
 from uwtools.utils.file import writable
 
@@ -109,17 +107,15 @@ def help_realize_config_simple(infn, infmt, tmpdir):
 # Tests
 
 
-def test_compare_configs_good(compare_configs_assets, caplog):
-    log.setLevel(logging.INFO)
+def test_compare_configs_good(compare_configs_assets, logged):
     _, a, b = compare_configs_assets
     assert tools.compare_configs(
         config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
-    assert caplog.records
+    assert logged(".*", regex=True)
 
 
-def test_compare_configs_changed_value(compare_configs_assets, caplog):
-    log.setLevel(logging.INFO)
+def test_compare_configs_changed_value(compare_configs_assets, logged):
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
@@ -145,11 +141,10 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
         str(b),
     )
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(caplog, line)
+        assert logged(line)
 
 
-def test_compare_configs_missing_key(compare_configs_assets, caplog):
-    log.setLevel(logging.INFO)
+def test_compare_configs_missing_key(compare_configs_assets, logged):
     d, a, b = compare_configs_assets
     del d["baz"]
     with writable(b) as f:
@@ -173,11 +168,10 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
         str(a),
     )
     for line in dedent(expected).strip("\n").split("\n"):
-        assert logged(caplog, line)
+        assert logged(line)
 
 
-def test_compare_configs_bad_format(caplog):
-    log.setLevel(logging.INFO)
+def test_compare_configs_bad_format(logged):
     assert not tools.compare_configs(
         config_1_path=Path("/not/used"),
         config_1_format="jpg",
@@ -185,7 +179,7 @@ def test_compare_configs_bad_format(caplog):
         config_2_format=FORMAT.yaml,
     )
     msg = "Formats do not match: jpg vs yaml"
-    assert logged(caplog, msg)
+    assert logged(msg)
 
 
 def test_config_check_depths_realize_fail(realize_config_testobj):
@@ -297,11 +291,10 @@ def test_realize_config_double_tag_nest_forward_reference(tmp_path):
     help_realize_config_double_tag(config, expected, tmp_path)
 
 
-def test_realize_config_dry_run(caplog):
+def test_realize_config_dry_run(logged):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
     """
-    log.setLevel(logging.INFO)
     infile = fixture_path("fruit_config.yaml")
     yaml_config = YAMLConfig(infile)
     yaml_config.dereference()
@@ -311,9 +304,7 @@ def test_realize_config_dry_run(caplog):
         output_format=FORMAT.yaml,
         dry_run=True,
     )
-    actual = "\n".join(record.message for record in caplog.records)
-    expected = str(yaml_config).strip()
-    assert actual == expected
+    assert logged(str(yaml_config), multiline=True)
 
 
 def test_realize_config_field_table(tmp_path):
@@ -548,19 +539,17 @@ def test_realize_config_total_fail():
     assert str(e.value) == "Config could not be totally realized"
 
 
-def test_realize_config_values_needed_ini(caplog):
+def test_realize_config_values_needed_ini(logged):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
     """
-    log.setLevel(logging.INFO)
     tools.realize_config(
         input_config=fixture_path("simple3.ini"),
         input_format=FORMAT.ini,
         output_format=FORMAT.ini,
         values_needed=True,
     )
-    actual = "\n".join(record.message for record in caplog.records)
     expected = """
     Keys that are complete:
       salad
@@ -579,22 +568,20 @@ def test_realize_config_values_needed_ini(caplog):
       salad.how_many: {{ amount }}
       dessert.flavor: {{ flavor }}
     """
-    assert actual.strip() == dedent(expected).strip()
+    assert logged(dedent(expected), multiline=True)
 
 
-def test_realize_config_values_needed_yaml(caplog):
+def test_realize_config_values_needed_yaml(logged):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
     """
-    log.setLevel(logging.INFO)
     tools.realize_config(
         input_config=fixture_path("srw_example.yaml"),
         input_format=FORMAT.yaml,
         output_format=FORMAT.yaml,
         values_needed=True,
     )
-    actual = "\n".join(record.message for record in caplog.records)
     expected = """
     Keys that are complete:
       FV3GFS
@@ -612,7 +599,7 @@ def test_realize_config_values_needed_yaml(caplog):
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
     """
-    assert actual.strip() == dedent(expected).strip()
+    assert logged(dedent(expected), multiline=True)
 
 
 def test_walk_key_path_fail_bad_key_path():
@@ -685,21 +672,20 @@ def test__realize_config_input_setup_ini_file(tmp_path):
     assert input_obj.data == {"section": {"foo": "bar"}}
 
 
-def test__realize_config_input_setup_ini_stdin(caplog):
+def test__realize_config_input_setup_ini_stdin(logged):
     data = """
     [section]
     foo = bar
     baz = 42
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.ini)
     assert input_obj.data == {"section": {"foo": "bar", "baz": "42"}}  # note: 42 is str, not int
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
 def test__realize_config_input_setup_nml_cfgobj():
@@ -722,21 +708,20 @@ def test__realize_config_input_setup_nml_file(tmp_path):
     assert input_obj["nl"]["pi"] == 3.14
 
 
-def test__realize_config_input_setup_nml_stdin(caplog):
+def test__realize_config_input_setup_nml_stdin(logged):
     data = """
     &nl
       pi = 3.14
     /
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.nml)
     assert input_obj["nl"]["pi"] == 3.14
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
 def test__realize_config_input_setup_sh_cfgobj():
@@ -757,19 +742,18 @@ def test__realize_config_input_setup_sh_file(tmp_path):
     assert input_obj.data == {"foo": "bar"}
 
 
-def test__realize_config_input_setup_sh_stdin(caplog):
+def test__realize_config_input_setup_sh_stdin(logged):
     data = """
     foo=bar
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.sh)
     assert input_obj.data == {"foo": "bar"}
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
 def test__realize_config_input_setup_yaml_cfgobj():
@@ -790,29 +774,27 @@ def test__realize_config_input_setup_yaml_file(tmp_path):
     assert input_obj.data == {"foo": "bar"}
 
 
-def test__realize_config_input_setup_yaml_stdin(caplog):
+def test__realize_config_input_setup_yaml_stdin(logged):
     data = """
     foo: bar
     """
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     with StringIO() as sio:
         print(dedent(data).strip(), file=sio)
         sio.seek(0)
         with patch.object(sys, "stdin", new=sio):
             input_obj = tools._realize_config_input_setup(input_format=FORMAT.yaml)
     assert input_obj.data == {"foo": "bar"}
-    assert logged(caplog, "Reading input from stdin")
+    assert logged("Reading input from stdin")
 
 
-def test__realize_config_output_setup(caplog, tmp_path):
-    log.setLevel(logging.DEBUG)
+def test__realize_config_output_setup(logged, tmp_path):
     input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
     output_file = tmp_path / "output.yaml"
     assert tools._realize_config_output_setup(
         input_obj=input_obj, output_file=output_file, key_path=["a", "b"]
     ) == ({"foo": "bar"}, FORMAT.yaml)
-    assert logged(caplog, f"Writing output to {output_file}")
+    assert logged(f"Writing output to {output_file}")
 
 
 def test__realize_config_update_cfgobj(realize_config_testobj):
@@ -822,9 +804,8 @@ def test__realize_config_update_cfgobj(realize_config_testobj):
     assert o[1][2][3] == 43
 
 
-def test__realize_config_update_stdin(caplog, realize_config_testobj):
+def test__realize_config_update_stdin(logged, realize_config_testobj):
     stdinproxy.cache_clear()
-    log.setLevel(logging.DEBUG)
     assert realize_config_testobj[1][2][3] == 42
     with StringIO() as sio:
         print("{1: {2: {3: 43}}}", file=sio)
@@ -834,7 +815,7 @@ def test__realize_config_update_stdin(caplog, realize_config_testobj):
                 input_obj=realize_config_testobj, update_format=FORMAT.yaml
             )
     assert o[1][2][3] == 43
-    assert logged(caplog, "Reading update from stdin")
+    assert logged("Reading update from stdin")
 
 
 def test__realize_config_update_noop(realize_config_testobj):
@@ -851,28 +832,24 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     assert o[1][2][3] == 43
 
 
-def test__realize_config_values_needed(caplog, tmp_path):
-    log.setLevel(logging.INFO)
+def test__realize_config_values_needed(logged, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
     c = YAMLConfig(config=path)
     tools._realize_config_values_needed(input_obj=c)
-    msgs = "\n".join(record.message for record in caplog.records)
-    assert "Keys that are complete:\n  1" in msgs
-    assert "Keys with unrendered Jinja2 variables/expressions:\n  2" in msgs
+    assert logged("Keys that are complete:\n  1", multiline=True)
+    assert logged("Keys with unrendered Jinja2 variables/expressions:\n  2", multiline=True)
 
 
-def test__realize_config_values_needed_negative_results(caplog, tmp_path):
-    log.setLevel(logging.INFO)
+def test__realize_config_values_needed_negative_results(logged, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({}, f)
     c = YAMLConfig(config=path)
     tools._realize_config_values_needed(input_obj=c)
-    msgs = "\n".join(record.message for record in caplog.records)
-    assert "No keys are complete." in msgs
-    assert "No keys have unrendered Jinja2 variables/expressions." in msgs
+    assert logged("No keys are complete.")
+    assert logged("No keys have unrendered Jinja2 variables/expressions.")
 
 
 @mark.parametrize("input_fmt", FORMAT.extensions())

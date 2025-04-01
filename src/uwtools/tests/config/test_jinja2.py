@@ -3,7 +3,6 @@
 Tests for uwtools.config.jinja2 module.
 """
 
-import logging
 import os
 from datetime import datetime
 from io import StringIO
@@ -18,15 +17,12 @@ from pytest import fixture, mark, raises
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
 from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, uw_yaml_loader
-from uwtools.logging import log
-from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
 
 @fixture
 def deref_render_assets():
-    log.setLevel(logging.DEBUG)
     return "{{ greeting + ' ' + recipient }}", {"greeting": "hello"}, {"recipient": "world"}
 
 
@@ -124,24 +120,22 @@ def test_dereference_no_op(val):
         ("division by zero", "{{ 1 / 0 }}"),
     ],
 )
-def test_dereference_no_op_due_to_error(caplog, logmsg, val):
+def test_dereference_no_op_due_to_error(logged, logmsg, val):
     # Erroneous inputs cause:
     #   - A type error due to + operating on a str and an int.
     #   - An undefined error due to reference to a non-existent value.
     #   - An undefined error in a loop expression.
     #   - A division-by-zero error.
     # The unrenderable expression is returned unmodified.
-    log.setLevel(logging.DEBUG)
     assert jinja2.dereference(val=val, context={}) == val
-    assert regex_logged(caplog, logmsg)
+    assert logged(logmsg)
 
 
-def test_dereference_remove(caplog):
-    log.setLevel(logging.DEBUG)
+def test_dereference_remove(logged):
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
     assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
-    assert regex_logged(caplog, "Removing value at: a.b.d")
+    assert logged("Removing value at: a.b.d")
 
 
 def test_dereference_str_expression_rendered():
@@ -167,10 +161,9 @@ def test_dereference_str_variable_rendered_str():
     assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
 
 
-def test_deref_debug(caplog):
-    log.setLevel(logging.DEBUG)
+def test_deref_debug(logged):
     jinja2.deref_debug(action="Frobnicated", val="foo")
-    assert logged(caplog, "[dereference] Frobnicated: foo")
+    assert logged("[dereference] Frobnicated: foo")
 
 
 def test_register_filters_env():
@@ -242,16 +235,14 @@ def test_render_calls__write(template_file, tmp_path, values_file):
         write.assert_called_once_with(outfile, "roses are red, violets are blue")
 
 
-def test_render_dry_run(caplog, template_file, values_file):
-    log.setLevel(logging.INFO)
+def test_render_dry_run(logged, template_file, values_file):
     expected = "roses are red, violets are blue"
     result = render_helper(input_file=template_file, values_file=values_file, dry_run=True)
     assert result == expected
-    assert logged(caplog, expected)
+    assert logged(expected)
 
 
-def test_render_fails(caplog, tmp_path):
-    log.setLevel(logging.INFO)
+def test_render_fails(logged, tmp_path):
     input_file = tmp_path / "template.yaml"
     with open(input_file, "w", encoding="utf-8") as f:
         print("{{ constants.pi }} {{ constants.e }}", file=f)
@@ -259,11 +250,10 @@ def test_render_fails(caplog, tmp_path):
     with open(values_file, "w", encoding="utf-8") as f:
         print("constants: {pi: 3.14}", file=f)
     assert render_helper(input_file=input_file, values_file=values_file) is None
-    assert logged(caplog, "Template render failed with error: 'dict object' has no attribute 'e'")
+    assert logged("Template render failed with error: 'dict object' has no attribute 'e'")
 
 
-def test_render_values_missing(caplog, template_file, values_file):
-    log.setLevel(logging.INFO)
+def test_render_values_missing(logged, template_file, values_file):
     # Read in the config, remove the "roses" key, then re-write it.
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
@@ -271,15 +261,14 @@ def test_render_values_missing(caplog, template_file, values_file):
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template_file, values_file=values_file)
-    assert logged(caplog, "Value(s) required to render template not provided:")
-    assert logged(caplog, "  roses_color")
+    assert logged("Value(s) required to render template not provided:")
+    assert logged("  roses_color")
 
 
-def test_render_values_needed(caplog, template_file, values_file):
-    log.setLevel(logging.INFO)
+def test_render_values_needed(logged, template_file, values_file):
     render_helper(input_file=template_file, values_file=values_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
-        assert logged(caplog, f"  {var}")
+        assert logged(f"  {var}")
 
 
 @mark.parametrize("s,status", [("foo: bar", False), ("foo: '{{ bar }} {{ baz }}'", True)])
@@ -297,13 +286,12 @@ def test_unrendered(s, status):
         ("!list", "null"),
     ],
 )
-def test__deref_convert_no(caplog, tag, value):
-    log.setLevel(logging.DEBUG)
+def test__deref_convert_no(logged, tag, value):
     loader = yaml.SafeLoader(os.devnull)
     val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == val
-    assert not regex_logged(caplog, "Converted")
-    assert regex_logged(caplog, "Conversion failed")
+    assert not logged("Converted")
+    assert logged("Conversion failed")
 
 
 @mark.parametrize(
@@ -321,65 +309,57 @@ def test__deref_convert_no(caplog, tag, value):
         ([0, 1, 2], "!list", "{0: a, 1: b, 2: c}"),
     ],
 )
-def test__deref_convert_ok(caplog, converted, tag, value):
-    log.setLevel(logging.DEBUG)
+def test__deref_convert_ok(converted, logged, tag, value):
     loader = yaml.SafeLoader(os.devnull)
     val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == converted
-    assert regex_logged(caplog, "Converted")
-    assert not regex_logged(caplog, "Conversion failed")
+    assert logged("Converted")
+    assert not logged("Conversion failed")
 
 
-def test__deref_render_held(caplog):
-    log.setLevel(logging.DEBUG)
+def test__deref_render_held(logged):
     val, context = "!int '{{ a }}'", yaml.load("a: !int '42'", Loader=uw_yaml_loader())
     assert jinja2._deref_render(val=val, context=context) == val
-    assert regex_logged(caplog, "Rendered")
-    assert regex_logged(caplog, "Held")
+    assert logged("Rendered")
+    assert logged("Held")
 
 
-def test__deref_render_no(caplog, deref_render_assets):
-    log.setLevel(logging.DEBUG)
+def test__deref_render_no(deref_render_assets, logged):
     val, context, _ = deref_render_assets
     assert jinja2._deref_render(val=val, context=context) == val
-    assert not regex_logged(caplog, "Rendered")
-    assert regex_logged(caplog, "Rendering failed")
+    assert not logged("Rendered")
+    assert logged("Rendering failed")
 
 
-def test__deref_render_ok(caplog, deref_render_assets):
-    log.setLevel(logging.DEBUG)
+def test__deref_render_ok(deref_render_assets, logged):
     val, context, local = deref_render_assets
     assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
-    assert regex_logged(caplog, "Rendered")
-    assert not regex_logged(caplog, "Rendering failed")
+    assert logged("Rendered")
+    assert not logged("Rendering failed")
 
 
-def test__deref_render_unloadable_val(caplog):
-    log.setLevel(logging.DEBUG)
+def test__deref_render_unloadable_val(logged):
     val = "&XMLENTITY;"
     assert jinja2._deref_render(val='{{ "%s" if True }}' % val, context={}) == val
-    assert regex_logged(caplog, "Rendered")
-    assert not regex_logged(caplog, "Rendering failed")
+    assert logged("Rendered")
+    assert not logged("Rendering failed")
 
 
-def test__dry_run_template(caplog):
-    log.setLevel(logging.DEBUG)
+def test__dry_run_template(logged):
     jinja2._dry_run_template("roses are red\nviolets are blue")
-    assert logged(caplog, "roses are red")
-    assert logged(caplog, "violets are blue")
+    assert logged("roses are red")
+    assert logged("violets are blue")
 
 
-def test__log_missing_values(caplog):
-    log.setLevel(logging.DEBUG)
+def test__log_missing_values(logged):
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
-    assert logged(caplog, "Value(s) required to render template not provided:")
-    assert logged(caplog, "  roses_color")
-    assert logged(caplog, "  violets_color")
+    assert logged("Value(s) required to render template not provided:")
+    assert logged("  roses_color")
+    assert logged("  violets_color")
 
 
-def test__report(caplog):
-    log.setLevel(logging.DEBUG)
+def test__report(logged):
     expected = """
 Internal arguments when rendering template:
 ---------------------------------------------------------------------
@@ -388,7 +368,7 @@ longish_variable: 42
 ---------------------------------------------------------------------
 """.strip()
     jinja2._report(dict(foo="bar", longish_variable=42))
-    assert "\n".join(record.message for record in caplog.records) == expected
+    assert logged(expected, full=True)
 
 
 def test__supplement_values():
@@ -475,13 +455,12 @@ def test__supplement_values_priority(supplemental_values):
         assert jinja2._supplement_values(values_src=sv.f, env=True, overrides=o)["foo"] == e["foo"]
 
 
-def test__values_needed(caplog):
-    log.setLevel(logging.DEBUG)
+def test__values_needed(logged):
     undeclared_variables = {"roses_color", "lavender_smell"}
     jinja2._values_needed(undeclared_variables)
-    assert logged(caplog, "Value(s) needed to render this template are:")
-    assert logged(caplog, "  roses_color")
-    assert logged(caplog, "  lavender_smell")
+    assert logged("Value(s) needed to render this template are:")
+    assert logged("  roses_color")
+    assert logged("  lavender_smell")
 
 
 def test__write_template_to_file(tmp_path):

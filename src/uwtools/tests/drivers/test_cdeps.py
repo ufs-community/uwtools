@@ -4,7 +4,6 @@ CDEPS driver tests.
 """
 
 import datetime as dt
-import logging
 from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
@@ -18,8 +17,6 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers import cdeps
 from uwtools.drivers.cdeps import CDEPS
 from uwtools.drivers.driver import AssetsCycleBased
-from uwtools.logging import log
-from uwtools.tests.support import logged
 from uwtools.tests.test_schemas import CDEPS_CONFIG
 
 # Fixtures
@@ -66,15 +63,14 @@ def test_CDEPS_driver_name(driverobj):
 
 
 @mark.parametrize("group", ["atm", "ocn"])
-def test_CDEPS_nml(caplog, driverobj, group):
-    log.setLevel(logging.DEBUG)
+def test_CDEPS_nml(driverobj, group, logged):
     dst = driverobj.rundir / f"d{group}_in"
     assert not dst.is_file()
     del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
     path = Path(iotaa.refs(task()))
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 

@@ -3,7 +3,6 @@
 FV3 driver tests.
 """
 import datetime as dt
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,9 +13,7 @@ from pytest import fixture, mark, raises
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
@@ -162,8 +159,7 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 
 
 @mark.parametrize("base_file_exists", [True, False])
-def test_FV3_model_configure(base_file_exists, caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_model_configure(base_file_exists, driverobj, logged):
     src = driverobj.rundir / "model_configure.in"
     if base_file_exists:
         with open(src, "w", encoding="utf-8") as f:
@@ -176,11 +172,10 @@ def test_FV3_model_configure(base_file_exists, caplog, driverobj):
         assert dst.is_file()
     else:
         assert not dst.is_file()
-        assert regex_logged(caplog, f"{src}: Not ready [external asset]")
+        assert logged(f"{src}: Not ready [external asset]")
 
 
-def test_FV3_namelist_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_namelist_file(driverobj, logged):
     src = driverobj.rundir / "input.nml.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
@@ -188,26 +183,24 @@ def test_FV3_namelist_file(caplog, driverobj):
     assert not dst.is_file()
     driverobj._config["namelist_file"] = {"base_file": src}
     path = Path(iotaa.refs(driverobj.namelist_file()))
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert dst.is_file()
 
 
-def test_FV3_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["namsfc"]["foo"] = None
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
-def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(iotaa.refs(driverobj.namelist_file()))
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: Not ready [external asset]")
+    assert logged("missing.nml: Not ready [external asset]")
 
 
 def test_FV3_output(driverobj):

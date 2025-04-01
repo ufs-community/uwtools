@@ -1,6 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access
 
-import logging
 import os
 import stat
 from pathlib import Path
@@ -12,9 +11,7 @@ from iotaa import asset, external
 from pytest import mark, raises
 
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.strings import STR
-from uwtools.tests.support import logged
 from uwtools.utils import tasks
 
 # Helpers
@@ -36,13 +33,13 @@ def test_utils_tasks_directory(tmp_path):
     assert p.is_dir()
 
 
-def test_utils_tasks_directory__fail(caplog, tmp_path):
+def test_utils_tasks_directory__fail(logged, tmp_path):
     os.chmod(tmp_path, 0o550)
     p = tmp_path / "foo"
     assert not iotaa.ready(tasks.directory(path=p))
     assert not p.is_dir()
     os.chmod(tmp_path, 0o750)
-    assert logged(caplog, "[Errno 13] Permission denied: '%s'" % p)
+    assert logged("[Errno 13] Permission denied: '%s'" % p)
 
 
 def test_utils_tasks_executable(tmp_path):
@@ -75,15 +72,14 @@ def test_utils_tasks_existing_hpss(available, wrapper):
 
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize("code,expected", [(200, True), (404, False)])
-def test_utils_tasks_existing_http(caplog, code, expected, scheme):
-    log.setLevel(logging.INFO)
+def test_utils_tasks_existing_http(code, expected, logged, scheme):
     url = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
         state = iotaa.ready(tasks.existing_http(url=url))
         assert state is expected
     head.assert_called_with(url, allow_redirects=True, timeout=3)
     msg = "Remote HTTP resource %s: %s" % (url, "Ready" if state else "Not ready [external asset]")
-    assert logged(caplog, msg)
+    assert logged(msg)
 
 
 @mark.parametrize("prefix", ["", "file://"])
@@ -113,7 +109,6 @@ def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
 @mark.parametrize("code,expected", [(200, True), (404, False)])
 @mark.parametrize("src", ["http://foo.com/obj", "https://foo.com/obj"])
 def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
-    log.setLevel(logging.INFO)
     dst = tmp_path / "a-file"
     assert not dst.is_file()
     with patch.object(tasks, "existing_http", exists):
@@ -202,8 +197,7 @@ def test_utils_tasks_filecopy__simple(tmp_path):
     assert dst.is_file()
 
 
-def test_utils_tasks_filecopy_hsi(caplog, ready_task, tmp_path):
-    log.setLevel(logging.INFO)
+def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
     src = "/path/to/src"
     dst = tmp_path / "dst"
     with (
@@ -215,13 +209,12 @@ def test_utils_tasks_filecopy_hsi(caplog, ready_task, tmp_path):
     existing_hpss.assert_called_once_with(src)
     taskname = f"HSI {src} -> {dst}"
     run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'", taskname=taskname)
-    assert logged(caplog, f"{taskname}: => msg1")
-    assert logged(caplog, f"{taskname}: => msg2")
+    assert logged(f"{taskname}: => msg1")
+    assert logged(f"{taskname}: => msg2")
     assert dst.exists()
 
 
-def test_utils_tasks_filecopy_htar(caplog, ready_task, tmp_path):
-    log.setLevel(logging.INFO)
+def test_utils_tasks_filecopy_htar(logged, ready_task, tmp_path):
     src_archive = "/path/to/archive.tar"
     src_file = "afile"
     dst = tmp_path / "dst"
@@ -236,8 +229,8 @@ def test_utils_tasks_filecopy_htar(caplog, ready_task, tmp_path):
     taskname = f"HTAR {src_archive}:{src_file} -> {dst}"
     run_shell_cmd.assert_called_once_with(cmd, cwd=ANY, taskname=taskname)
     move.assert_called_once_with(ANY, dst)
-    assert logged(caplog, f"{taskname}: => msg1")
-    assert logged(caplog, f"{taskname}: => msg2")
+    assert logged(f"{taskname}: => msg1")
+    assert logged(f"{taskname}: => msg2")
     assert dst.exists()
 
 

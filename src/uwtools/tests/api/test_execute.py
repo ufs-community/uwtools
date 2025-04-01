@@ -1,7 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
-import logging
 import os
 import sys
 from pathlib import Path
@@ -13,8 +12,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.api import execute
 from uwtools.exceptions import UWError
-from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged, regex_logged
+from uwtools.tests.support import fixture_path
 
 # Fixtures
 
@@ -45,10 +43,10 @@ def kwargs(args):
 
 
 @mark.parametrize("key,val", [("batch", True), ("leadtime", 6)])
-def test_execute_fail_bad_args(caplog, key, kwargs, val):
+def test_execute_fail_bad_args(key, kwargs, logged, val):
     kwargs.update({"cycle": dt.datetime.now(), key: val})
     assert execute.execute(**kwargs) is None
-    assert logged(caplog, f"TestDriver does not accept argument '{key}'")
+    assert logged(f"TestDriver does not accept argument '{key}'")
 
 
 def test_execute_fail_stdin_not_ok(kwargs):
@@ -61,17 +59,16 @@ def test_execute_fail_stdin_not_ok(kwargs):
 
 
 @mark.parametrize("remove", ([], ["schema_file"]))
-def test_execute_pass(caplog, kwargs, remove, tmp_path):
+def test_execute_pass(kwargs, logged, remove, tmp_path):
     for kwarg in remove:
         del kwargs[kwarg]
     kwargs["cycle"] = dt.datetime.now()
-    log.setLevel(logging.DEBUG)
     graph_file = tmp_path / "g.dot"
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
     with patch.object(execute, "graph", return_value=graph_code):
         assert refs(execute.execute(**kwargs)) == 42
-    assert regex_logged(caplog, "Instantiated %s with" % kwargs["classname"])
+    assert logged("Instantiated %s with" % kwargs["classname"])
     with open(graph_file, "r", encoding="utf-8") as f:
         assert f.read().strip() == graph_code
 
@@ -81,19 +78,16 @@ def test_execute_fail_cannot_load_driver_class(kwargs):
     assert execute.execute(**kwargs) is None
 
 
-def test_tasks_fail(args, caplog, tmp_path):
+def test_tasks_fail(args, logged, tmp_path):
     module = tmp_path / "not.py"
     tasks = execute.tasks(classname=args.classname, module=module)
     assert tasks == {}
-    assert logged(
-        caplog, "Could not get tasks from class %s in module %s" % (args.classname, module)
-    )
+    assert logged("Could not get tasks from class %s in module %s" % (args.classname, module))
 
 
-def test_tasks_fail_no_cycle(args, caplog, kwargs):
-    log.setLevel(logging.DEBUG)
+def test_tasks_fail_no_cycle(args, kwargs, logged):
     assert execute.execute(**kwargs) is None
-    assert logged(caplog, "%s requires argument '%s'" % (args.classname, "cycle"))
+    assert logged("%s requires argument '%s'" % (args.classname, "cycle"))
 
 
 @mark.parametrize("f", [Path, str])
@@ -102,44 +96,39 @@ def test_tasks_pass(args, f):
     assert tasks["forty_two"] == "42"
 
 
-def test__get_driver_class_explicit_fail_bad_class(caplog, args):
-    log.setLevel(logging.DEBUG)
+def test__get_driver_class_explicit_fail_bad_class(args, logged):
     bad_class = "BadClass"
     c, module_path = execute._get_driver_class(classname=bad_class, module=args.module)
     assert c is None
     assert module_path == args.module
-    assert logged(caplog, "Module %s has no class %s" % (args.module, bad_class))
+    assert logged("Module %s has no class %s" % (args.module, bad_class))
 
 
-def test__get_driver_class_explicit_fail_bad_name(caplog, args):
-    log.setLevel(logging.DEBUG)
+def test__get_driver_class_explicit_fail_bad_name(args, logged):
     bad_name = Path("bad_name")
     c, module_path = execute._get_driver_class(classname=args.classname, module=bad_name)
     assert c is None
     assert module_path is None
-    assert logged(caplog, "Could not load module %s" % bad_name)
+    assert logged("Could not load module %s" % bad_name)
 
 
-def test__get_driver_class_explicit_fail_bad_path(caplog, args, tmp_path):
-    log.setLevel(logging.DEBUG)
+def test__get_driver_class_explicit_fail_bad_path(args, logged, tmp_path):
     module = tmp_path / "not.py"
     c, module_path = execute._get_driver_class(classname=args.classname, module=module)
     assert c is None
     assert module_path is None
-    assert logged(caplog, "Could not load module %s" % module)
+    assert logged("Could not load module %s" % module)
 
 
-def test__get_driver_class_explicit_fail_bad_spec(caplog, args):
-    log.setLevel(logging.DEBUG)
+def test__get_driver_class_explicit_fail_bad_spec(args, logged):
     with patch.object(execute, "spec_from_file_location", return_value=None):
         c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c is None
     assert module_path is None
-    assert logged(caplog, "Could not load module %s" % args.module)
+    assert logged("Could not load module %s" % args.module)
 
 
 def test__get_driver_class_explicit_pass(args):
-    log.setLevel(logging.DEBUG)
     c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c
     assert c.__name__ == "TestDriver"
@@ -147,7 +136,6 @@ def test__get_driver_class_explicit_pass(args):
 
 
 def test__get_driver_class_implicit_pass(args):
-    log.setLevel(logging.DEBUG)
     with patch.object(Path, "cwd", return_value=fixture_path()):
         c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c
@@ -155,15 +143,14 @@ def test__get_driver_class_implicit_pass(args):
     assert module_path == args.module
 
 
-def test__get_driver_module_explicit_absolute_fail_syntax_error(args, caplog, tmp_path):
-    log.setLevel(logging.ERROR)
+def test__get_driver_module_explicit_absolute_fail_syntax_error(args, logged, tmp_path):
     module = tmp_path / "module.py"
     module.write_text("syntax error\n%s" % args.module.read_text())
     assert module.is_absolute()
     assert not execute._get_driver_module_explicit(module=module)
     # If the module is found but fails to load, a traceback will be logged:
-    assert logged(caplog, "Traceback (most recent call last):")
-    assert logged(caplog, "SyntaxError: invalid syntax")
+    assert logged("Traceback (most recent call last):")
+    assert logged("SyntaxError: invalid syntax")
 
 
 def test__get_driver_module_explicit_absolute_fail_bad_path(args):
