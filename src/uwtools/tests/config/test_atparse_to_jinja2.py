@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.utils.atparse_to_jinja2 module.
 """
@@ -34,7 +33,7 @@ def txt_jinja2():
 @fixture
 def atparsefile(txt_atparse, tmp_path):
     path = tmp_path / "atparse.txt"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         print(txt_atparse, file=f)
     return path
 
@@ -45,7 +44,7 @@ def atparsefile(txt_atparse, tmp_path):
 def test_convert_input_file_to_output_file(atparsefile, capsys, txt_jinja2, tmp_path):
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, output_file=outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
+    with outfile.open() as f:
         assert f.read().strip() == txt_jinja2
     streams = capsys.readouterr()
     assert not streams.err
@@ -80,7 +79,7 @@ def test_convert_preserve_whitespace(tmp_path):
 
 """
     infile = tmp_path / "atparse"
-    with open(infile, "w", encoding="utf-8") as f:
+    with infile.open("w") as f:
         f.write(atparse)
     outfile = tmp_path / "jinja2"
     atparse_to_jinja2.convert(input_file=infile, output_file=outfile)
@@ -94,7 +93,7 @@ def test_convert_preserve_whitespace(tmp_path):
         {{ fifth_entry }} {{ sixth_entry }}
 
 """
-    with open(outfile, "r", encoding="utf-8") as f:
+    with outfile.open() as f:
         assert f.read() == expected
 
 
@@ -103,7 +102,7 @@ def test_convert_stdin_to_file(txt_atparse, capsys, txt_jinja2, tmp_path):
     _stdinproxy.cache_clear()
     with StringIO(txt_atparse) as sio, patch.object(sys, "stdin", new=sio):
         atparse_to_jinja2.convert(output_file=outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
+    with outfile.open() as f:
         assert f.read().strip() == txt_jinja2
     streams = capsys.readouterr()
     assert not streams.err

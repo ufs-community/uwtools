@@ -1,12 +1,12 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 UPP driver tests.
 """
+
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import iotaa
 from pytest import fixture, mark, raises
 
@@ -58,8 +58,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 5, 6, 12)
+def cycle(utc):
+    return utc(2024, 5, 6, 12)
 
 
 @fixture
@@ -100,28 +100,28 @@ def test_UPP_driver_name(driverobj):
 
 
 def test_UPP_files_copied(driverobj):
-    for _, src in driverobj.config["files_to_copy"].items():
+    for src in driverobj.config["files_to_copy"].values():
         Path(src).touch()
-    for dst, _ in driverobj.config["files_to_copy"].items():
+    for dst in driverobj.config["files_to_copy"]:
         assert not (driverobj.rundir / dst).is_file()
     driverobj.files_copied()
-    for dst, _ in driverobj.config["files_to_copy"].items():
+    for dst in driverobj.config["files_to_copy"]:
         assert (driverobj.rundir / dst).is_file()
 
 
 def test_UPP_files_linked(driverobj):
-    for _, src in driverobj.config["files_to_link"].items():
+    for src in driverobj.config["files_to_link"].values():
         Path(src).touch()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert not (driverobj.rundir / dst).is_file()
     driverobj.files_linked()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert (driverobj.rundir / dst).is_symlink()
 
 
 def test_UPP_namelist_file(driverobj, logged):
     datestr = "2024-05-05_12:00:00"
-    with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
+    with Path(driverobj.config["namelist"]["base_file"]).open("w") as f:
         print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
     dst = driverobj.rundir / "itag"
     assert not dst.is_file()
@@ -170,7 +170,7 @@ def test_UPP_output(driverobj, tmp_path):
     ]
     # fmt: on
     control_file = tmp_path / "postxconfig-NT.txt"
-    with open(control_file, "w", encoding="utf-8") as f:
+    with control_file.open("w") as f:
         print("\n".join(control_data), file=f)
     driverobj._config["control_file"] = str(control_file)
     expected = {"gribfiles": [str(driverobj.rundir / ("%s.GrbF24" % x)) for x in ("FOO", "BAR")]}

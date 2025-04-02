@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring
-
 from unittest.mock import patch
 
 from uwtools.api import logging as uw_logging

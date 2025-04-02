@@ -1,5 +1,3 @@
-# pylint: disable=redefined-outer-name
-
 from glob import glob
 from pathlib import Path
 

@@ -1,8 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 JEDI driver tests.
 """
-import datetime as dt
+
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -62,8 +61,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -98,7 +97,7 @@ def test_JEDI(method):
 def test_JEDI_configuration_file(driverobj):
     basecfg = {"foo": "bar"}
     base_file = Path(driverobj.config["configuration_file"]["base_file"])
-    with open(base_file, "w", encoding="utf-8") as f:
+    with base_file.open("w") as f:
         yaml.dump(basecfg, f)
     cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
@@ -176,24 +175,22 @@ def test_JEDI_taskname(driverobj):
 
 
 def test_JEDI_validate_only(driverobj, logged):
-
     @iotaa.external
     def file(path: Path):
         yield "Mocked file task for %s" % path
         yield iotaa.asset(path, lambda: True)
 
-    with patch.object(jedi, "file", file):
-        with patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
-            run_shell_cmd.return_value = (True, None)
-            driverobj.validate_only()
-            cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
-            cmds = [
-                "module load some-module",
-                "module load jedi-module",
-                "time %s --validate-only %s 2>&1"
-                % (driverobj.config["execution"]["executable"], cfgfile),
-            ]
-            run_shell_cmd.assert_called_once_with(" && ".join(cmds))
+    with patch.object(jedi, "file", file), patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
+        run_shell_cmd.return_value = (True, None)
+        driverobj.validate_only()
+        cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
+        cmds = [
+            "module load some-module",
+            "module load jedi-module",
+            "time %s --validate-only %s 2>&1"
+            % (driverobj.config["execution"]["executable"], cfgfile),
+        ]
+        run_shell_cmd.assert_called_once_with(" && ".join(cmds))
     assert logged("Config is valid")
 
 

@@ -23,7 +23,7 @@ lint() {
   msg Running linter
   (
     set -eux
-    pylint .
+    ruff check .
   )
   msg OK
 }
@@ -50,8 +50,7 @@ unittest() {
   msg OK
 }
 
-test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(dirname $0)/../src
-python --version
+test "${CONDEV_SHELL:-}" = 1 && cd $(dirname $0)/../src || cd ../test_files
 if [[ -n "${1:-}" ]]; then
   # Run single specified code-quality tool.
   $1

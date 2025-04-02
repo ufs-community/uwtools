@@ -2,6 +2,8 @@
 Encapsulates string based memory conversions.
 """
 
+from __future__ import annotations
+
 MAP = {"KB": 1000, "MB": 1000 * 1000, "GB": 1000 * 1000 * 1000}
 
 
@@ -12,10 +14,10 @@ class Memory:
     100MB -> 100(quatity)MB(measurement)
     """
 
-    def __init__(self, value):
+    def __init__(self, value: str):
         self._value = value
-        self._measurement = None
-        self._quantity = None
+        self._measurement: str | None = None
+        self._quantity: float | None = None
 
     def __str__(self):
         if float.is_integer(self.quantity):
@@ -25,7 +27,7 @@ class Memory:
     @property
     def measurement(self):
         """
-        The measurement (MB, KB, etc.)
+        The measurement (MB, KB, etc.).
         """
         if self._measurement is None:
             self._measurement = self._value[-2:]

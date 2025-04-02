@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Granular tests of JSON Schema schemas.
 """
@@ -161,7 +160,7 @@ def chgres_cube_config():
             },
             "validate": True,
         },
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
 
 
@@ -311,13 +310,7 @@ def non_empty_dict(errors: list[str]) -> bool:
 
 
 def non_empty_list(errors: list[str]) -> bool:
-    for msg in [
-        "[] is too short",  # jsonschema [4.18.0,4.20.*]
-        "[] should be non-empty",  # jsonschema [4.21.0,?]
-    ]:
-        if msg in errors:
-            return True
-    return False
+    return any(msg in errors for msg in ["[] is too short", "[] should be non-empty"])
 
 
 # batchargs
@@ -619,7 +612,7 @@ def test_schema_esg_grid():
     config = {
         "execution": {"executable": "esg_grid"},
         "namelist": {"base_file": "/path", "validate": True},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("esg-grid", "properties", "esg_grid")
     # Basic correctness:
@@ -866,10 +859,10 @@ def test_schema_fv3():
         "domain": "regional",
         "execution": {"executable": "fv3"},
         "field_table": {"base_file": "/path"},
-        "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
+        "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/some/file"},
         "length": 3,
         "namelist": {"base_file": "/path", "validate": True},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("fv3", "properties", "fv3")
     # Basic correctness:
@@ -1019,9 +1012,9 @@ def test_schema_fv3_rundir(fv3_prop):
 
 def test_schema_global_equiv_resol():
     config = {
-        "execution": {"executable": "/tmp/global_equiv_resol.exe"},
-        "input_grid_file": "/tmp/input_grid_file",
-        "rundir": "/tmp",
+        "execution": {"executable": "/some/global_equiv_resol.exe"},
+        "input_grid_file": "/some/input_grid_file",
+        "rundir": "/run",
     }
     errors = schema_validator("global-equiv-resol", "properties", "global_equiv_resol")
     # Basic correctness:
@@ -1050,10 +1043,10 @@ def test_schema_ioda():
             "base_file": "/path/to/ioda.yaml",
             "update_values": {"foo": "bar", "baz": "qux"},
         },
-        "execution": {"executable": "/tmp/ioda.exe"},
+        "execution": {"executable": "/some/ioda.exe"},
         "files_to_copy": {"file1": "src1", "file2": "src2"},
         "files_to_link": {"link1": "src3", "link2": "src4"},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("ioda", "properties", "ioda")
     # Basic correctness:
@@ -1094,10 +1087,10 @@ def test_schema_jedi():
             "base_file": "/path/to/jedi.yaml",
             "update_values": {"foo": "bar", "baz": "qux"},
         },
-        "execution": {"executable": "/tmp/jedi.exe"},
+        "execution": {"executable": "/some/jedi.exe"},
         "files_to_copy": {"file1": "src1", "file2": "src2"},
         "files_to_link": {"link1": "src3", "link2": "src4"},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("jedi", "properties", "jedi")
     # Basic correctness:
@@ -1136,7 +1129,7 @@ def test_schema_make_hgrid():
     config = {
         "config": {"grid_type": "from_file", "my_grid_file": "/path/to/my_grid_file"},
         "execution": {"executable": "make_hgrid"},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("make-hgrid", "properties", "make_hgrid")
     # Basic correctness:
@@ -1198,7 +1191,7 @@ def test_schema_make_solo_mosaic():
     config = {
         "config": {"dir": "path/to/dir", "num_tiles": 1},
         "execution": {"executable": "make_solo_mosaic"},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("make-solo-mosaic", "properties", "make_solo_mosaic")
     # Basic correctness:
@@ -1638,7 +1631,7 @@ def test_schema_orog():
     assert "is not of type 'boolean'\n" in errors({"mask": None})
     # Top-level keys require a string value:
     for key in ["grid_file", "rundir", "merge", "orog_file"]:
-        assert "is not of type 'string'\n" in errors(with_set(config, None, "rundir"))
+        assert "is not of type 'string'\n" in errors(with_set(config, None, key))
 
 
 # orog-gsl
@@ -1924,12 +1917,12 @@ def test_schema_rocoto_task_resources():
 def test_schema_schism():
     config = {
         "namelist": {
-            "template_file": "/tmp/param.nml",
+            "template_file": "/some/param.nml",
             "template_values": {
                 "dt": 100,
             },
         },
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("schism", "properties", "schism")
     # Basic correctness:
@@ -1970,7 +1963,7 @@ def test_schema_sfc_climo_gen():
     config = {
         "execution": {"executable": "sfc_climo_gen"},
         "namelist": {"base_file": "/path", "validate": True},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
     # Basic correctness:
@@ -2030,7 +2023,7 @@ def test_schema_shave():
             "nhalo": 1,
         },
         "execution": {"executable": "shave"},
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("shave", "properties", "shave")
     # Basic correctness:
@@ -2076,15 +2069,15 @@ def test_schema_shave_rundir(shave_prop):
 
 def test_schema_ungrib():
     config = {
-        "execution": {"executable": "/tmp/ungrib.exe"},
+        "execution": {"executable": "/some/ungrib.exe"},
         "gribfiles": {
             "interval_hours": 6,
             "max_leadtime": 24,
             "offset": 0,
-            "path": "/tmp/gfs.t12z.pgrb2.0p25.f000",
+            "path": "/some/gfs.t12z.pgrb2.0p25.f000",
         },
-        "rundir": "/tmp",
-        "vtable": "/tmp/Vtable.GFS",
+        "rundir": "/run",
+        "vtable": "/some/Vtable.GFS",
     }
     errors = schema_validator("ungrib", "properties", "ungrib")
     # Basic correctness:
@@ -2252,12 +2245,12 @@ def test_schema_upp_rundir(upp_prop):
 def test_schema_ww3():
     config = {
         "namelist": {
-            "template_file": "/tmp/ww3_shel.nml",
+            "template_file": "/some/ww3_shel.nml",
             "template_values": {
                 "input_forcing_winds": "C",
             },
         },
-        "rundir": "/tmp",
+        "rundir": "/run",
     }
     errors = schema_validator("ww3", "properties", "ww3")
     # Basic correctness:

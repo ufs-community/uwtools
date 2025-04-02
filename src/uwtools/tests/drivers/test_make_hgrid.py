@@ -1,7 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 make_hgrid driver tests.
 """
+
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises

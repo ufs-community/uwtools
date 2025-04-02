@@ -14,14 +14,15 @@ the local package along with its dependencies from PyPI.
 import json
 import os
 import re
+from pathlib import Path
 
-from setuptools import find_packages, setup  # type: ignore
+from setuptools import find_packages, setup
 
 # Collect package metadata.
 
-recipe = os.environ.get("RECIPE_DIR", "../recipe")
-metasrc = os.path.join(recipe, "meta.json")
-with open(metasrc, "r", encoding="utf-8") as f:
+recipe = Path(os.environ.get("RECIPE_DIR", "../recipe"))
+metasrc = recipe / "meta.json"
+with metasrc.open() as f:
     meta = json.load(f)
 name_conda = meta["name"]
 name_py = name_conda.replace("-", "_")

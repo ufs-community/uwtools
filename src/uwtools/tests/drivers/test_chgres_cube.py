@@ -1,12 +1,12 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 chgres_cube driver tests.
 """
+
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import iotaa
 from pytest import fixture, mark
 
@@ -18,8 +18,8 @@ from uwtools.scheduler import Slurm
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture

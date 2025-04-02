@@ -1,7 +1,6 @@
-# pylint: disable=missing-function-docstring
-
 import logging
 import re
+from datetime import datetime, timezone
 
 from iotaa import asset, external
 from pytest import fixture
@@ -28,8 +27,19 @@ def logged(caplog):
 @fixture
 def ready_task():
     @external
-    def ready(*args, **kwargs):  # pylint: disable=unused-argument
+    def ready(*_args, **_kwargs):
         yield "ready"
         yield asset(None, lambda: True)
 
     return ready
+
+
+@fixture
+def utc():
+    def datetime_utc(*args, **kwargs) -> datetime:
+        # See https://github.com/python/mypy/issues/6799
+        tz = timezone.utc
+        dt = datetime(*args, **kwargs, tzinfo=tz) if args or kwargs else datetime.now(tz=tz)  # type: ignore[misc]
+        return dt.replace(tzinfo=None)
+
+    return datetime_utc

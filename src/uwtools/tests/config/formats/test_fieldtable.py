@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.fieldtable module.
 """
@@ -39,7 +38,7 @@ def dumpkit(tmp_path):
 
 @fixture(scope="module")
 def ref():
-    with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f:
+    with fixture_path("field_table.FV3_GFS_v16").open() as f:
         return f.read().strip()
 
 
@@ -67,7 +66,7 @@ def test_fieldtable_repr_str(config, func, ref):
 def test_fieldtable_simple(config, ref, tmp_path):
     outfile = tmp_path / "field_table_from_yaml.FV3_GFS"
     FieldTableConfig(config=config).dump(outfile)
-    with open(outfile, "r", encoding="utf-8") as out:
+    with outfile.open() as out:
         assert out.read().strip() == ref
 
 
@@ -82,12 +81,12 @@ def test_fieldtable_as_dict():
 def test_fieldtable_dump(dumpkit):
     d, expected, path = dumpkit
     FieldTableConfig(d).dump(path)
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open() as f:
         assert f.read().strip() == expected
 
 
 def test_fieldtable_dump_dict(dumpkit):
     d, expected, path = dumpkit
     FieldTableConfig.dump_dict(d, path=path)
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open() as f:
         assert f.read().strip() == expected

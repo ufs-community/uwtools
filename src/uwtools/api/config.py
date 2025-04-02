@@ -2,9 +2,11 @@
 API access to ``uwtools`` configuration management tools.
 """
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.fieldtable import FieldTableConfig
@@ -12,7 +14,6 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import YAMLKey
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import ConfigDataT, ConfigPathT
@@ -23,14 +24,17 @@ from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import FORMAT as _FORMAT
 from uwtools.utils.file import str2path as _str2path
 
+if TYPE_CHECKING:
+    from uwtools.config.support import YAMLKey
+
 # Public
 
 
 def compare(
-    config_1_path: Union[Path, str],
-    config_2_path: Union[Path, str],
-    config_1_format: Optional[str] = None,
-    config_2_format: Optional[str] = None,
+    config_1_path: Path | str,
+    config_2_path: Path | str,
+    config_1_format: str | None = None,
+    config_2_format: str | None = None,
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
@@ -44,7 +48,7 @@ def compare(
 
 
 def get_fieldtable_config(
-    config: Union[dict, Optional[Union[Path, str]]] = None, stdin_ok=False
+    config: dict | Path | str | None = None, stdin_ok: bool = False
 ) -> FieldTableConfig:
     """
     Get a ``FieldTableConfig`` object.
@@ -57,7 +61,7 @@ def get_fieldtable_config(
 
 
 def get_ini_config(
-    config: Union[dict, Optional[Union[Path, str]]] = None,
+    config: dict | Path | str | None = None,
     stdin_ok: bool = False,
 ) -> INIConfig:
     """
@@ -71,7 +75,7 @@ def get_ini_config(
 
 
 def get_nml_config(
-    config: Union[dict, Optional[Union[Path, str]]] = None,
+    config: dict | Path | str | None = None,
     stdin_ok: bool = False,
 ) -> NMLConfig:
     """
@@ -85,7 +89,7 @@ def get_nml_config(
 
 
 def get_sh_config(
-    config: Union[dict, Optional[Union[Path, str]]] = None,
+    config: dict | Path | str | None = None,
     stdin_ok: bool = False,
 ) -> SHConfig:
     """
@@ -99,7 +103,7 @@ def get_sh_config(
 
 
 def get_yaml_config(
-    config: Union[dict, Optional[Union[Path, str]]] = None,
+    config: dict | Path | str | None = None,
     stdin_ok: bool = False,
 ) -> YAMLConfig:
     """
@@ -113,13 +117,13 @@ def get_yaml_config(
 
 
 def realize(
-    input_config: Optional[Union[Config, Path, dict, str]] = None,
-    input_format: Optional[str] = None,
-    update_config: Optional[Union[Config, Path, dict, str]] = None,
-    update_format: Optional[str] = None,
-    output_file: Optional[Union[Path, str]] = None,
-    output_format: Optional[str] = None,
-    key_path: Optional[list[YAMLKey]] = None,
+    input_config: Config | Path | dict | str | None = None,
+    input_format: str | None = None,
+    update_config: Config | Path | dict | str | None = None,
+    update_format: str | None = None,
+    output_file: Path | str | None = None,
+    output_format: str | None = None,
+    key_path: list[YAMLKey] | None = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -144,12 +148,12 @@ def realize(
     )
 
 
-def realize_to_dict(  # pylint: disable=unused-argument
-    input_config: Optional[Union[dict, Config, Path, str]] = None,
-    input_format: Optional[str] = None,
-    update_config: Optional[Union[dict, Config, Path, str]] = None,
-    update_format: Optional[str] = None,
-    key_path: Optional[list[YAMLKey]] = None,
+def realize_to_dict(
+    input_config: Config | dict | Path | str | None = None,
+    input_format: str | None = None,
+    update_config: Config | dict | Path | str | None = None,
+    update_format: str | None = None,
+    key_path: list[YAMLKey] | None = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -164,9 +168,9 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
 
 def validate(
-    schema_file: Union[Path, str],
-    config_data: Optional[ConfigDataT] = None,
-    config_path: Optional[ConfigPathT] = None,
+    schema_file: Path | str,
+    config_data: ConfigDataT | None = None,
+    config_path: ConfigPathT | None = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -213,9 +217,7 @@ Recognized file extensions are: {extensions}
 :param config_1_format: Format of 1st config file (optional if file's extension is recognized).
 :param config_2_format: Format of 2nd config file (optional if file's extension is recognized).
 :return: ``False`` if config files had differences, otherwise ``True``.
-""".format(
-    extensions=", ".join(_FORMAT.extensions())
-).strip()
+""".format(extensions=", ".join(_FORMAT.extensions())).strip()
 
 
 realize.__doc__ = """
@@ -256,9 +258,7 @@ Recognized file extensions are: {extensions}
 :param stdin_ok: OK to read from ``stdin``?
 :return: The ``dict`` representation of the realized config.
 :raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered.
-""".format(
-    extensions=", ".join(_FORMAT.extensions())
-).strip()
+""".format(extensions=", ".join(_FORMAT.extensions())).strip()  # noqa: E501
 
 __all__ = [
     "Config",

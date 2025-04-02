@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from copy import deepcopy
 from importlib import resources
 from pathlib import Path
-from typing import Any, Callable, Union
+from typing import Any, Callable
 
 import yaml
 
@@ -9,7 +11,7 @@ from uwtools.config.validator import _validation_errors
 from uwtools.utils.file import resource_path
 
 
-def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
+def compare_files(path1: Path | str, path2: Path | str) -> bool:
     """
     Determine whether the two given files are identical up to any number of trailing newlines, which
     are ignored. Print the contents of both files when they do not match.
@@ -18,9 +20,10 @@ def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
     :param path2: Path to second file.
     :return: Do the files match?
     """
-    with open(path1, "r", encoding="utf-8") as f:
+    path1, path2 = map(Path, (path1, path2))
+    with path1.open() as f:
         content1 = f.read().rstrip("\n")
-    with open(path2, "r", encoding="utf-8") as f:
+    with path2.open() as f:
         content2 = f.read().rstrip("\n")
     if content1 != content2:
         print("1st file looks like:")
@@ -41,8 +44,7 @@ def fixture_pathobj(suffix: str = "") -> Path:
         location.
     """
     with resources.as_file(resources.files("uwtools.tests.fixtures")) as prefix:
-        path = prefix / suffix
-    return path
+        return prefix / suffix
 
 
 def fixture_path(suffix: str = "") -> Path:
@@ -65,9 +67,7 @@ def schema_validator(schema_name: str, *args: Any) -> Callable:
     :returns: A lambda that, when called with an input to test, returns a string (possibly empty)
         containing the validation errors.
     """
-    with open(
-        resource_path("jsonschema") / f"{schema_name}.jsonschema", "r", encoding="utf-8"
-    ) as f:
+    with (resource_path("jsonschema") / f"{schema_name}.jsonschema").open() as f:
         schema = yaml.safe_load(f)
     defs = schema.get("$defs", {})
     for arg in args:

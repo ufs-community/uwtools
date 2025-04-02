@@ -1,6 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-
-import datetime as dt
 import os
 import sys
 from pathlib import Path
@@ -42,34 +39,34 @@ def kwargs(args):
 # Tests
 
 
-@mark.parametrize("key,val", [("batch", True), ("leadtime", 6)])
-def test_execute_fail_bad_args(key, kwargs, logged, val):
-    kwargs.update({"cycle": dt.datetime.now(), key: val})
+@mark.parametrize(("key", "val"), [("batch", True), ("leadtime", 6)])
+def test_execute_fail_bad_args(key, kwargs, logged, utc, val):
+    kwargs.update({"cycle": utc(), key: val})
     assert execute.execute(**kwargs) is None
     assert logged(f"TestDriver does not accept argument '{key}'")
 
 
-def test_execute_fail_stdin_not_ok(kwargs):
+def test_execute_fail_stdin_not_ok(kwargs, utc):
     kwargs["config"] = None
-    kwargs["cycle"] = dt.datetime.now()
+    kwargs["cycle"] = utc()
     kwargs["stdin_ok"] = False
     with raises(UWError) as e:
         execute.execute(**kwargs)
     assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
 
 
-@mark.parametrize("remove", ([], ["schema_file"]))
-def test_execute_pass(kwargs, logged, remove, tmp_path):
+@mark.parametrize("remove", [[], ["schema_file"]])
+def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
     for kwarg in remove:
         del kwargs[kwarg]
-    kwargs["cycle"] = dt.datetime.now()
+    kwargs["cycle"] = utc()
     graph_file = tmp_path / "g.dot"
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
     with patch.object(execute, "graph", return_value=graph_code):
         assert refs(execute.execute(**kwargs)) == 42
     assert logged("Instantiated %s with" % kwargs["classname"])
-    with open(graph_file, "r", encoding="utf-8") as f:
+    with graph_file.open() as f:
         assert f.read().strip() == graph_code
 
 
@@ -93,7 +90,7 @@ def test_tasks_fail_no_cycle(args, kwargs, logged):
 @mark.parametrize("f", [Path, str])
 def test_tasks_pass(args, f):
     tasks = execute.tasks(classname=args.classname, module=f(args.module))
-    assert tasks["forty_two"] == "42"
+    assert tasks["forty_two"] == "Forty Two."
 
 
 def test__get_driver_class_explicit_fail_bad_class(args, logged):

@@ -128,7 +128,7 @@ class Ungrib(DriverCycleBased):
         link.symlink_to(infile)
 
 
-def _ext(n):
+def _ext(n: int) -> str:
     """
     Return a 3-letter representation of the given integer.
 

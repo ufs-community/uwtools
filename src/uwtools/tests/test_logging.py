@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring
-
 import logging
 import os
 from unittest.mock import ANY, patch
@@ -14,9 +12,9 @@ import uwtools.logging
 
 
 def test_setup_logging():
-    with patch.object(logging, "basicConfig") as basicConfig:
+    with patch.object(logging, "basicConfig") as bc:
         uwtools.logging.setup_logging()
-        basicConfig.assert_called_once_with(
+        bc.assert_called_once_with(
             datefmt=ANY,
             format=ANY,
             level=logging.INFO,
@@ -24,9 +22,9 @@ def test_setup_logging():
 
 
 def test_setup_logging_quiet():
-    with patch.object(logging, "basicConfig") as basicConfig:
+    with patch.object(logging, "basicConfig") as bc:
         uwtools.logging.setup_logging(quiet=True)
-        basicConfig.assert_called_once_with(
+        bc.assert_called_once_with(
             datefmt=ANY,
             filename=os.devnull,
             format=ANY,
@@ -40,9 +38,9 @@ def test_setup_logging_quiet_and_verbose():
 
 
 def test_setup_logging_verbose():
-    with patch.object(logging, "basicConfig") as basicConfig:
+    with patch.object(logging, "basicConfig") as bc:
         uwtools.logging.setup_logging(verbose=True)
-        basicConfig.assert_called_once_with(
+        bc.assert_called_once_with(
             datefmt=ANY,
             format=ANY,
             level=logging.DEBUG,

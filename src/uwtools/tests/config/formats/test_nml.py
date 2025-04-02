@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.nml module.
 """
@@ -6,7 +5,7 @@ Tests for uwtools.config.formats.nml module.
 import filecmp
 from textwrap import dedent
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark
 
 from uwtools.config.formats.nml import NMLConfig
@@ -80,7 +79,7 @@ def test_nml_derived_type_file(tmp_path):
     /
     """
     path = tmp_path / "a.nml"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         print(dedent(s).strip(), file=f)
     nml = NMLConfig(config=path)
     assert nml["nl"]["o"] == {"i": 41, "j": 42}
@@ -103,7 +102,7 @@ def test_nml_dump_dict_Namelist(data, tmp_path):
 @mark.parametrize("func", [repr, str])
 def test_ini_repr_str(func):
     config = fixture_path("simple.nml")
-    with open(config, "r", encoding="utf-8") as f:
+    with config.open() as f:
         assert func(NMLConfig(config)) == f.read().strip()
 
 
@@ -135,12 +134,12 @@ def test_nml_as_dict():
 def test_nml_dump(dumpkit):
     d, expected, path = dumpkit
     NMLConfig(d).dump(path)
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open() as f:
         assert f.read().strip() == expected
 
 
 def test_nml_dump_dict(dumpkit):
     d, expected, path = dumpkit
     NMLConfig.dump_dict(d, path=path)
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open() as f:
         assert f.read().strip() == expected

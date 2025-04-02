@@ -1,7 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 global_equiv_resol driver tests.
 """
+
 from pathlib import Path
 from unittest.mock import patch
 

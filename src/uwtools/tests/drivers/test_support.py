@@ -1,14 +1,18 @@
-# pylint: disable=missing-class-docstring,missing-function-docstring
 """
 Tests for uwtools.drivers.support module.
 """
-from pathlib import Path
-from typing import Optional
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import iotaa
 
 from uwtools.drivers import support
 from uwtools.drivers.driver import DriverTimeInvariant
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_set_driver_docstring():
@@ -29,7 +33,6 @@ def test_set_driver_docstring():
 
 
 def test_tasks():
-
     class SomeDriver(DriverTimeInvariant):
         @classmethod
         def driver_name(cls):
@@ -43,29 +46,29 @@ def test_tasks():
 
         @iotaa.external
         def t1(self):
-            "@external t1"
+            """@external t1."""
 
         @iotaa.task
         def t2(self):
-            "@task t2"
+            """@task t2."""
 
         @iotaa.tasks
         def t3(self):
-            "@tasks t3"
+            """@tasks t3."""
 
         @property
         def _resources(self):
             pass
 
-        def _validate(self, schema_file: Optional[Path] = None):
+        def _validate(self, schema_file: Path | None = None):
             pass
 
     assert support.tasks(SomeDriver) == {
         "run": "A run.",
         "runscript": "The runscript.",
         "show_output": "Show the output to be created by this component.",
-        "t1": "@external t1",
-        "t2": "@task t2",
-        "t3": "@tasks t3",
+        "t1": "@external t1.",
+        "t2": "@task t2.",
+        "t3": "@tasks t3.",
         "validate": "Validate the UW driver config.",
     }

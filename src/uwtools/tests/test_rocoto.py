@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.rocoto module.
 """
@@ -25,11 +24,11 @@ def assets(tmp_path):
 @fixture
 def validation_assets(tmp_path):
     xml_file_good = fixture_path("hello_workflow.xml")
-    with open(xml_file_good, "r", encoding="utf-8") as f:
+    with xml_file_good.open() as f:
         xml_string_good = f.read()
     xml_string_bad = "<bad/>"
     xml_file_bad = tmp_path / "bad.xml"
-    with open(xml_file_bad, "w", encoding="utf-8") as f:
+    with xml_file_bad.open("w") as f:
         print(xml_string_bad, file=f)
     return xml_file_bad, xml_file_good, xml_string_bad, xml_string_good
 
@@ -60,7 +59,7 @@ def test_realize_rocoto_xml_file_to_file(assets):
 def test_realize_rocoto_xml_cfg_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile))
-    with open(outfile, "w", encoding="utf-8") as f:
+    with outfile.open("w") as f:
         f.write(capsys.readouterr().out)
     assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
@@ -68,7 +67,7 @@ def test_realize_rocoto_xml_cfg_to_stdout(capsys, assets):
 def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize_rocoto_xml(config=cfgfile)
-    with open(outfile, "w", encoding="utf-8") as f:
+    with outfile.open("w") as f:
         f.write(capsys.readouterr().out)
     assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
@@ -93,7 +92,7 @@ def test_validate_rocoto_xml_string_pass(validation_assets):
     assert rocoto.validate_rocoto_xml_string(xml=xml_string_good) is True
 
 
-class Test__RocotoXML:
+class TestRocotoXML:
     """
     Tests for class uwtools.rocoto._RocotoXML.
     """
@@ -276,7 +275,7 @@ class Test__RocotoXML:
         errors = schema_validator("rocoto", "$defs", "dependency")
         assert not errors(config)
         instance._add_task_dependency_child(e=root, config=config, tag=tag)
-        for tag, _ in config.items():
+        for tag in config:
             assert tag == next(iter(config))
 
     def test__add_task_dependency_operator_datadep_operand(self, instance, root):
@@ -406,14 +405,14 @@ class Test__RocotoXML:
 
     def test__config_validate_config_fail(self, instance, tmp_path):
         cfgfile = tmp_path / "bad.yaml"
-        with open(cfgfile, "w", encoding="utf-8") as f:
+        with cfgfile.open("w") as f:
             print("not: ok", file=f)
         with raises(UWConfigError):
             instance._config_validate(config=YAMLConfig(cfgfile))
 
     def test__config_validate_file_fail(self, instance, tmp_path):
         cfgfile = tmp_path / "bad.yaml"
-        with open(cfgfile, "w", encoding="utf-8") as f:
+        with cfgfile.open("w") as f:
             print("not: ok", file=f)
         with raises(UWConfigError):
             instance._config_validate(config=cfgfile)

@@ -3,14 +3,13 @@ Driver support.
 """
 
 import re
-from typing import Type
 
 from iotaa import tasknames as _tasknames
 
 from uwtools.drivers.driver import DriverT
 
 
-def set_driver_docstring(driver_class: Type) -> None:
+def set_driver_docstring(driver_class: type) -> None:
     """
     Append inherited parameter descriptions to the driver's own docstring.
 
@@ -24,7 +23,7 @@ def set_driver_docstring(driver_class: Type) -> None:
     assert body_old is not None
     body = re.sub(r"\n\n+", "\n", body_old.strip()).split("\n")[1:]
     new = "\n".join([f"{head}\n", *body])
-    setattr(driver_class, "__doc__", new)
+    driver_class.__doc__ = new
 
 
 def tasks(driver_class: DriverT) -> dict[str, str]:

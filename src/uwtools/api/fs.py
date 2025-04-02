@@ -2,24 +2,29 @@
 API access to ``uwtools`` file and directory management tools.
 """
 
-import datetime as dt
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Optional, Union, cast
+from typing import TYPE_CHECKING, cast
 
 import iotaa
 
-from uwtools.config.support import YAMLKey
 from uwtools.fs import Copier, Linker, MakeDirs
 from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
+if TYPE_CHECKING:
+    import datetime as dt
+
+    from uwtools.config.support import YAMLKey
+
 
 def copy(
-    config: Optional[Union[Path, dict, str]] = None,
-    target_dir: Optional[Union[Path, str]] = None,
-    cycle: Optional[dt.datetime] = None,
-    leadtime: Optional[dt.timedelta] = None,
-    key_path: Optional[list[YAMLKey]] = None,
+    config: Path | dict | str | None = None,
+    target_dir: Path | str | None = None,
+    cycle: dt.datetime | None = None,
+    leadtime: dt.timedelta | None = None,
+    key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> dict[str, list[str]]:
@@ -48,11 +53,11 @@ def copy(
 
 
 def link(
-    config: Optional[Union[Path, dict, str]] = None,
-    target_dir: Optional[Union[Path, str]] = None,
-    cycle: Optional[dt.datetime] = None,
-    leadtime: Optional[dt.timedelta] = None,
-    key_path: Optional[list[YAMLKey]] = None,
+    config: Path | dict | str | None = None,
+    target_dir: Path | str | None = None,
+    cycle: dt.datetime | None = None,
+    leadtime: dt.timedelta | None = None,
+    key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> dict[str, list[str]]:
@@ -81,11 +86,11 @@ def link(
 
 
 def makedirs(
-    config: Optional[Union[Path, dict, str]] = None,
-    target_dir: Optional[Union[Path, str]] = None,
-    cycle: Optional[dt.datetime] = None,
-    leadtime: Optional[dt.timedelta] = None,
-    key_path: Optional[list[YAMLKey]] = None,
+    config: Path | dict | str | None = None,
+    target_dir: Path | str | None = None,
+    cycle: dt.datetime | None = None,
+    leadtime: dt.timedelta | None = None,
+    key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> dict[str, list[str]]:

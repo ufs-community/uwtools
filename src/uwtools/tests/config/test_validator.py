@@ -1,7 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.validator module.
 """
+
 import json
 from functools import partial
 from pathlib import Path
@@ -105,7 +105,7 @@ def schema() -> dict[str, Any]:
 @fixture
 def schema_file(schema, tmp_path) -> Path:
     path: Path = tmp_path / "a.jsonschema"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         json.dump(schema, f)
     return path
 
@@ -114,7 +114,7 @@ def schema_file(schema, tmp_path) -> Path:
 
 
 def write_as_json(data: dict[str, Any], path: Path) -> Path:
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return path
 
@@ -152,7 +152,7 @@ def test_config_validator_internal_schema_file():
 
 
 @mark.parametrize(
-    "schema,config",
+    ("schema", "config"),
     [
         ({"type": "boolean"}, True),  # bool
         ({"type": "number"}, 3.14),  # float
@@ -203,7 +203,7 @@ def test_config_validator_validate_fail_top_level(logged):
 
 
 @mark.parametrize(
-    "config_data,config_path", [(True, None), (None, True), (None, None), (True, True)]
+    ("config_data", "config_path"), [(True, None), (None, True), (None, None), (True, True)]
 )
 def test_config_validator_validate_check_config(config_data, config_path):
     f = partial(validator.validate_check_config, config_data, config_path)
@@ -216,11 +216,11 @@ def test_config_validator_validate_check_config(config_data, config_path):
 
 
 def test_config_validator_validate_internal_no(logged, schema_file):
-    with patch.object(validator, "resource_path", return_value=schema_file.parent):
-        with raises(UWConfigError) as e:
-            validator.validate_internal(
-                schema_name="a", desc="test", config_data={"color": "orange"}
-            )
+    with (
+        patch.object(validator, "resource_path", return_value=schema_file.parent),
+        raises(UWConfigError) as e,
+    ):
+        validator.validate_internal(schema_name="a", desc="test", config_data={"color": "orange"})
     assert logged("Error at color:")
     assert logged("  'orange' is not one of ['blue', 'red']")
     assert str(e.value) == "YAML validation errors"
@@ -242,7 +242,7 @@ def test_config_validator__registry(tmp_path):
     validator._registry.cache_clear()
     d = {"foo": "bar"}
     path = tmp_path / "foo-bar.jsonschema"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         json.dump(d, f)
     with patch.object(validator, "resource_path", return_value=path) as resource_path:
         r = validator._registry()

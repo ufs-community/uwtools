@@ -5,16 +5,18 @@ Support for HPC schedulers.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass, fields
-from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.processing import run_shell_cmd
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from pathlib import Path
 
 
 class JobScheduler(ABC):
@@ -63,13 +65,13 @@ class JobScheduler(ABC):
         if name := props.get(STR.scheduler):
             log.debug("Getting '%s' scheduler", name)
             if scheduler_class := schedulers.get(name):
-                return scheduler_class(props)  # type: ignore
-            raise UWConfigError(
-                "Scheduler '%s' should be one of: %s" % (name, ", ".join(schedulers.keys()))
-            )
-        raise UWConfigError(f"No 'scheduler' defined in {props}")
+                return scheduler_class(props)  # type: ignore[abstract,arg-type]
+            msg = "Scheduler '%s' should be one of: %s" % (name, ", ".join(schedulers.keys()))
+            raise UWConfigError(msg)
+        msg = f"No 'scheduler' defined in {props}"
+        raise UWConfigError(msg)
 
-    def submit_job(self, runscript: Path, submit_file: Optional[Path] = None) -> bool:
+    def submit_job(self, runscript: Path, submit_file: Path | None = None) -> bool:
         """
         Submit a job to the scheduler.
 
@@ -138,7 +140,8 @@ class JobScheduler(ABC):
             for x in fields(_DirectivesRequired)
             if getattr(_DirectivesRequired, x.name) not in self._props
         ]:
-            raise UWConfigError("Missing required directives: %s" % ", ".join(missing))
+            msg = "Missing required directives: %s" % ", ".join(missing)
+            raise UWConfigError(msg)
 
 
 class LSF(JobScheduler):

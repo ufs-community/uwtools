@@ -2,19 +2,23 @@
 Utilities for interacting with external processes.
 """
 
-from pathlib import Path
+from __future__ import annotations
+
 from subprocess import STDOUT, CalledProcessError, check_output
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 from uwtools.logging import INDENT, log
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def run_shell_cmd(
     cmd: str,
-    cwd: Optional[Union[Path, str]] = None,
-    env: Optional[dict[str, str]] = None,
-    log_output: Optional[bool] = False,
-    taskname: Optional[str] = None,
+    cwd: Path | str | None = None,
+    env: dict[str, str] | None = None,
+    log_output: bool | None = False,
+    taskname: str | None = None,
 ) -> tuple[bool, str]:
     """
     Run a command in a shell.

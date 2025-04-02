@@ -1,12 +1,12 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 MPASInit driver tests.
 """
+
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import iotaa
 from pytest import fixture, mark, raises
 
@@ -85,8 +85,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -124,14 +124,14 @@ def test_MPASInit(method):
 def test_MPASInit_boundary_files(cycle, driverobj):
     ns = (0, 1)
     links = [
-        driverobj.rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
+        driverobj.rundir / f"FILE:{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
     input_path = Path(driverobj.config["boundary_conditions"]["path"])
     input_path.mkdir()
     for n in ns:
-        (input_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
+        (input_path / f"FILE:{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
@@ -141,7 +141,7 @@ def test_MPASInit_driver_name(driverobj):
 
 
 @mark.parametrize(
-    "key,task,test",
+    ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
 def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_path):

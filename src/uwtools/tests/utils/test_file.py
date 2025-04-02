@@ -1,10 +1,8 @@
-# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.utils.file module.
 """
 
 import sys
-from datetime import datetime as dt
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
@@ -16,11 +14,11 @@ from uwtools.utils import file
 
 
 @fixture
-def assets(tmp_path):
+def assets(tmp_path, utc):
     rundir = tmp_path / "rundir"
     rundir.mkdir()
     assert rundir.is_dir()
-    now = dt(2023, 6, 29, 23, 48, 11)
+    now = utc(2023, 6, 29, 23, 48, 11)
     renamed = rundir.parent / ("rundir_%s" % now.strftime("%Y%m%d_%H%M%S"))
     assert not renamed.is_dir()
     return now, renamed, rundir
@@ -59,7 +57,7 @@ def test__stdinproxy():
 
 
 @mark.parametrize(
-    "ext,file_type",
+    ("ext", "file_type"),
     {
         "atparse": "atparse",
         "bash": "sh",
@@ -96,7 +94,7 @@ def test_path_if_it_exists(tmp_path):
 
 def test_readable_file(tmp_path):
     apath = tmp_path / "afile"
-    with open(apath, "w", encoding="utf-8") as f:
+    with apath.open("w") as f:
         f.write("hello")
     with file.readable(filepath=apath) as f:
         assert f.read() == "hello"
@@ -128,7 +126,7 @@ def test_writable_file(tmp_path):
     apath = tmp_path / "afile"
     with file.writable(filepath=apath) as f:
         assert f.write("hello")
-    with open(apath, "r", encoding="utf-8") as f:
+    with apath.open() as f:
         assert f.read() == "hello"
 
 

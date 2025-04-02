@@ -1,9 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access
+from __future__ import annotations
 
 import os
-import stat
 from pathlib import Path
-from typing import Union
 from unittest.mock import ANY, Mock, patch
 
 import iotaa
@@ -34,11 +32,11 @@ def test_utils_tasks_directory(tmp_path):
 
 
 def test_utils_tasks_directory__fail(logged, tmp_path):
-    os.chmod(tmp_path, 0o550)
+    tmp_path.chmod(0o550)
     p = tmp_path / "foo"
     assert not iotaa.ready(tasks.directory(path=p))
     assert not p.is_dir()
-    os.chmod(tmp_path, 0o750)
+    tmp_path.chmod(0o750)
     assert logged("[Errno 13] Permission denied: '%s'" % p)
 
 
@@ -52,7 +50,7 @@ def test_utils_tasks_executable(tmp_path):
         p.touch()
         assert not iotaa.ready(tasks.executable(program=p))
         # Program exists and is executable:
-        os.chmod(p, os.stat(p).st_mode | stat.S_IEXEC)  # set executable bits
+        p.chmod(0o750)
         assert iotaa.ready(tasks.executable(program=p))
 
 
@@ -71,7 +69,7 @@ def test_utils_tasks_existing_hpss(available, wrapper):
 
 
 @mark.parametrize("scheme", ["http", "https"])
-@mark.parametrize("code,expected", [(200, True), (404, False)])
+@mark.parametrize(("code", "expected"), [(200, True), (404, False)])
 def test_utils_tasks_existing_http(code, expected, logged, scheme):
     url = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
@@ -106,7 +104,7 @@ def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
     assert dst.is_file()
 
 
-@mark.parametrize("code,expected", [(200, True), (404, False)])
+@mark.parametrize(("code", "expected"), [(200, True), (404, False)])
 @mark.parametrize("src", ["http://foo.com/obj", "https://foo.com/obj"])
 def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
     dst = tmp_path / "a-file"
@@ -115,23 +113,22 @@ def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
         with patch.object(tasks, "requests") as requests:
             response = requests.get()
             response.status_code = code
-            response.content = "data".encode("utf-8")
+            response.content = b"data"
             tasks.filecopy(src=src, dst=dst)
         requests.get.assert_called_with(src, allow_redirects=True, timeout=3)
     assert dst.is_file() is expected
 
 
 @mark.parametrize(
-    "src,ok",
+    ("src", "ok"),
     [("/src/file", True), ("file:///src/file", True), ("foo://bucket/a/b", False)],
 )
 def test_utils_tasks_filecopy__source_local(src, ok):
     dst = "/dst/file"
     with patch.object(tasks.Path, "mkdir") as mkdir:
         if ok:
-            with patch.object(tasks, "file", exists):
-                with patch.object(tasks, "copy") as copy:
-                    tasks.filecopy(src=src, dst=dst)
+            with patch.object(tasks, "file", exists), patch.object(tasks, "copy") as copy:
+                tasks.filecopy(src=src, dst=dst)
             mkdir.assert_called_once_with(parents=True, exist_ok=True)
             copy.assert_called_once_with(Path("/src/file"), Path(dst))
         else:
@@ -141,7 +138,7 @@ def test_utils_tasks_filecopy__source_local(src, ok):
 
 
 @mark.parametrize(
-    ["dst_in", "dst_out"],
+    ("dst_in", "dst_out"),
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
@@ -152,7 +149,7 @@ def test_utils_tasks_filecopy__mocked_hsi(dst_in, dst_out):
 
 
 @mark.parametrize(
-    ["dst_in", "dst_out"],
+    ("dst_in", "dst_out"),
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_utils_tasks_filecopy__mocked_htar(dst_in, dst_out):
@@ -164,7 +161,7 @@ def test_utils_tasks_filecopy__mocked_htar(dst_in, dst_out):
 
 @mark.parametrize("scheme", ["http", "https"])
 @mark.parametrize(
-    ["dst_in", "dst_out"],
+    ("dst_in", "dst_out"),
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_utils_tasks_filecopy__mocked_http(scheme, dst_in, dst_out):
@@ -175,11 +172,11 @@ def test_utils_tasks_filecopy__mocked_http(scheme, dst_in, dst_out):
 
 
 @mark.parametrize(
-    ["src_in", "src_out"],
+    ("src_in", "src_out"),
     [("/path/to/src", "/path/to/src"), ("file:///path/to/src", "/path/to/src")],
 )
 @mark.parametrize(
-    ["dst_in", "dst_out"],
+    ("dst_in", "dst_out"),
     [("/path/to/dst", "/path/to/dst"), ("file:///path/to/dst", "/path/to/dst")],
 )
 def test_utils_tasks_filecopy__mocked_local(src_in, src_out, dst_in, dst_out):
@@ -303,5 +300,6 @@ def test_utils_tasks__local__path_fail():
 @mark.parametrize("wrapper", [str, Path])
 def test_utils_tasks__local__path_pass(prefix, wrapper):
     path = "/some/file"
-    p2: Union[str, Path] = str(f"{prefix}{path}") if wrapper == str else Path(path)
+    p2: Path | str
+    p2 = str(f"{prefix}{path}") if wrapper is str else Path(path)
     assert tasks._local_path(p2) == Path(path)

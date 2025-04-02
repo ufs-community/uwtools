@@ -1,9 +1,13 @@
-from pathlib import Path
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.strings import FORMAT
 from uwtools.utils.file import writable
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class FieldTableConfig(YAMLConfig):
@@ -37,7 +41,7 @@ class FieldTableConfig(YAMLConfig):
         return "\n".join(lines)
 
     @staticmethod
-    def _get_depth_threshold() -> Optional[int]:
+    def _get_depth_threshold() -> int | None:
         """
         Return the config's depth threshold.
         """
@@ -58,7 +62,7 @@ class FieldTableConfig(YAMLConfig):
         """
         return self.data
 
-    def dump(self, path: Optional[Path] = None) -> None:
+    def dump(self, path: Path | None = None) -> None:
         """
         Dump the config in Field Table format.
 
@@ -67,7 +71,7 @@ class FieldTableConfig(YAMLConfig):
         self.dump_dict(self.data, path)
 
     @classmethod
-    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
+    def dump_dict(cls, cfg: dict, path: Path | None = None) -> None:
         """
         Dump a provided config dictionary in Field Table format.
 

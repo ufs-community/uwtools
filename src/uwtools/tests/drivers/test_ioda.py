@@ -1,8 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 IODA driver tests.
 """
-import datetime as dt
+
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -55,8 +54,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 5, 1, 6)
+def cycle(utc):
+    return utc(2024, 5, 1, 6)
 
 
 @fixture

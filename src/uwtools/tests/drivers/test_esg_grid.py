@@ -1,11 +1,11 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 ESGGrid driver tests.
 """
+
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import iotaa
 from pytest import fixture, mark, raises
 

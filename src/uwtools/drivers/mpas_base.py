@@ -97,7 +97,7 @@ class MPASBase(DriverCycleBased):
                         SubElement(stream, elem, name=item)
         path.parent.mkdir(parents=True, exist_ok=True)
         xml = etree.tostring(streams, pretty_print=True, encoding="utf-8").decode()
-        with open(path, "w", encoding="utf-8") as f:
+        with path.open("w") as f:
             f.write(xml)
 
     # Private helper methods

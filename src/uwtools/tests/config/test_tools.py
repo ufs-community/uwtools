@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.tools module.
 """
@@ -9,11 +8,12 @@ from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import yaml
 from pytest import fixture, mark, raises
 
 from uwtools.config import tools
+from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
@@ -60,10 +60,10 @@ def realize_config_yaml_input(tmp_path):
 def help_realize_config_double_tag(config, expected, tmp_path):
     path_in = tmp_path / "in.yaml"
     path_out = tmp_path / "out.yaml"
-    with open(path_in, "w", encoding="utf-8") as f:
+    with path_in.open("w") as f:
         print(dedent(config).strip(), file=f)
     tools.realize_config(input_config=path_in, output_file=path_out)
-    with open(path_out, "r", encoding="utf-8") as f:
+    with path_out.open() as f:
         assert f.read().strip() == dedent(expected).strip()
 
 
@@ -200,6 +200,25 @@ def test_config_check_depths_update_fail(realize_config_testobj):
     assert f"Cannot update depth-{depthin} config to type-'ini' config" in str(e.value)
 
 
+@mark.parametrize(
+    ("cfgtype", "fmt"),
+    [
+        (FieldTableConfig, FORMAT.fieldtable),
+        (INIConfig, FORMAT.ini),
+        (NMLConfig, FORMAT.nml),
+        (SHConfig, FORMAT.sh),
+        (YAMLConfig, FORMAT.yaml),
+    ],
+)
+def test_config_tools_format_to_config(cfgtype, fmt):
+    assert tools.format_to_config(fmt) is cfgtype
+
+
+def test_config_tools_format_to_config_fail():
+    with raises(UWConfigError):
+        tools.format_to_config("no-such-config-type")
+
+
 def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     """
     Test that a .cfg file can be used to create a YAML object.
@@ -217,7 +236,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     expected_file = tmp_path / "test.yaml"
     expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
+    with outfile.open() as f:
         assert f.read()[-1] == "\n"
 
 
@@ -319,13 +338,12 @@ def test_realize_config_field_table(tmp_path):
         output_file=outfile,
         output_format=FORMAT.fieldtable,
     )
-    with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f1:
-        with open(outfile, "r", encoding="utf-8") as f2:
-            reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
-            outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-            lines = zip(outlist, reflist)
-            for line1, line2 in lines:
-                assert line1 in line2
+    with fixture_path("field_table.FV3_GFS_v16").open() as f1, outfile.open() as f2:
+        reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+        outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
+        lines = zip(outlist, reflist)
+        for line1, line2 in lines:
+            assert line1 in line2
 
 
 def test_realize_config_fmt2fmt_nml2nml(tmp_path):
@@ -387,7 +405,7 @@ def test_realize_config_remove_nml_to_nml(tmp_path):
       e: !remove
     """
     update_config = tmp_path / "update.yaml"
-    with open(update_config, "w", encoding="utf-8") as f:
+    with update_config.open("w") as f:
         print(dedent(s).strip(), file=f)
     output_file = tmp_path / "config.nml"
     assert not output_file.is_file()
@@ -407,13 +425,13 @@ def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
         d: !remove
     """
     update_config = tmp_path / "update.yaml"
-    with open(update_config, "w", encoding="utf-8") as f:
+    with update_config.open("w") as f:
         print(dedent(s).strip(), file=f)
-    assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
+    assert tools.realize_config(
         input_config=input_config,
         update_config=update_config,
         output_format=FORMAT.yaml,
-    )
+    ) == {"a": {"b": {"c": 11, "e": 33}}}
 
 
 def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
@@ -423,13 +441,13 @@ def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
       b: !remove
     """
     update_config = tmp_path / "update.yaml"
-    with open(update_config, "w", encoding="utf-8") as f:
+    with update_config.open("w") as f:
         print(dedent(s).strip(), file=f)
-    assert {"a": {}} == tools.realize_config(
+    assert tools.realize_config(
         input_config=input_config,
         update_config=update_config,
         output_format=FORMAT.yaml,
-    )
+    ) == {"a": {}}
 
 
 def test_realize_config_scalar_value(capsys):
@@ -446,7 +464,6 @@ def test_realize_config_simple_ini(tmp_path):
     """
     Test that providing an INI file with necessary settings will create an INI config file.
     """
-
     help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
 
 
@@ -598,7 +615,7 @@ def test_realize_config_values_needed_yaml(logged):
       FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
-    """
+    """  # noqa: E501
     assert logged(dedent(expected), multiline=True)
 
 
@@ -639,7 +656,7 @@ def test__ensure_format_dict_implicit():
 
 
 def test__ensure_format_deduced():
-    assert tools._ensure_format(desc="foo", config=Path("/tmp/config.nml")) == FORMAT.nml
+    assert tools._ensure_format(desc="foo", config=Path("/some/config.nml")) == FORMAT.nml
 
 
 def test__ensure_format_explicitly_specified_no_path():
@@ -648,7 +665,7 @@ def test__ensure_format_explicitly_specified_no_path():
 
 def test__ensure_format_explicitly_specified_with_path():
     assert (
-        tools._ensure_format(desc="foo", fmt=FORMAT.ini, config=Path("/tmp/config.yaml"))
+        tools._ensure_format(desc="foo", fmt=FORMAT.ini, config=Path("/some/config.yaml"))
         == FORMAT.ini
     )
 
@@ -666,7 +683,7 @@ def test__realize_config_input_setup_ini_file(tmp_path):
     foo = bar
     """
     path = tmp_path / "config.ini"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         print(dedent(data).strip(), file=f)
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"section": {"foo": "bar"}}
@@ -702,7 +719,7 @@ def test__realize_config_input_setup_nml_file(tmp_path):
     /
     """
     path = tmp_path / "config.nml"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         print(dedent(data).strip(), file=f)
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj["nl"]["pi"] == 3.14
@@ -736,7 +753,7 @@ def test__realize_config_input_setup_sh_file(tmp_path):
     foo=bar
     """
     path = tmp_path / "config.sh"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         print(dedent(data).strip(), file=f)
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"foo": "bar"}
@@ -768,7 +785,7 @@ def test__realize_config_input_setup_yaml_file(tmp_path):
     foo: bar
     """
     path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w") as f:
         print(dedent(data).strip(), file=f)
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"foo": "bar"}
@@ -826,7 +843,7 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     assert realize_config_testobj[1][2][3] == 42
     values = {1: {2: {3: 43}}}
     update_config = tmp_path / "config.yaml"
-    with open(update_config, "w", encoding="utf-8") as f:
+    with update_config.open("w") as f:
         yaml.dump(values, f)
     o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
     assert o[1][2][3] == 43

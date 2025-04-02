@@ -3,6 +3,7 @@ A driver for chgres_cube.
 """
 
 from pathlib import Path
+from typing import Any
 
 from iotaa import asset, task, tasks
 
@@ -26,7 +27,9 @@ class ChgresCube(DriverCycleLeadtimeBased):
         The namelist file.
         """
 
-        def update_input_files(k, config_files, input_files):
+        def update_input_files(
+            k: str, config_files: dict[str, str], input_files: list[tuple[Any, str]]
+        ) -> None:
             v = config_files[k]
             context = ".".join(["config", k])
             if isinstance(v, str):

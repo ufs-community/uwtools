@@ -1,8 +1,6 @@
-# pylint: disable=missing-function-docstring
 """
 Tests for uwtools.utils.processing module.
 """
-
 
 from uwtools.utils import processing
 

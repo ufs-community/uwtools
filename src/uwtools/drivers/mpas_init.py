@@ -38,7 +38,7 @@ class MPASInit(MPASBase):
             target = Path(boundary_filepath, fn)
             linkname = self.rundir / fn
             symlinks[target] = linkname
-        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
+        yield [symlink(target=tgt, linkname=lnk) for tgt, lnk in symlinks.items()]
 
     @task
     def namelist_file(self):

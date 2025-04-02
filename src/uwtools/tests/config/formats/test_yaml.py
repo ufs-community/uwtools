@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.yaml module.
 """
@@ -11,7 +10,7 @@ from io import StringIO
 from textwrap import dedent
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import yaml
 from pytest import fixture, mark, raises
 
@@ -170,9 +169,12 @@ def test_yaml_constructor_error_not_dict_from_file(tmp_path):
 
 def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
-    with StringIO("42") as sio, patch.object(sys, "stdin", new=sio):
-        with raises(exceptions.UWConfigError) as e:
-            YAMLConfig()
+    with (
+        StringIO("42") as sio,
+        patch.object(sys, "stdin", new=sio),
+        raises(exceptions.UWConfigError) as e,
+    ):
+        YAMLConfig()
     assert "Parsed an int value from stdin, expected a dict" in str(e.value)
 
 
@@ -191,7 +193,7 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
 @mark.parametrize("func", [repr, str])
 def test_yaml_repr_str(func):
     config = fixture_path("simple.yaml")
-    with open(config, "r", encoding="utf-8") as f:
+    with config.open() as f:
         for actual, expected in zip(func(YAMLConfig(config)).split("\n"), f.readlines()):
             assert actual.strip() == expected.strip()
 
@@ -203,10 +205,12 @@ def test_yaml_stdin_plus_relpath_failure(logged):
     # raised.
     _stdinproxy.cache_clear()
     relpath = "../bar/baz.yaml"
-    with StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]") as sio:
-        with patch.object(sys, "stdin", new=sio):
-            with raises(UWConfigError) as e:
-                YAMLConfig()
+    with (
+        StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]") as sio,
+        patch.object(sys, "stdin", new=sio),
+        raises(UWConfigError) as e,
+    ):
+        YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"
     assert msg in str(e.value)
     assert logged(msg)
@@ -214,7 +218,7 @@ def test_yaml_stdin_plus_relpath_failure(logged):
 
 def test_yaml_unexpected_error(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
-    with open(cfgfile, "w", encoding="utf-8") as f:
+    with cfgfile.open("w") as f:
         print("{n: 42}", file=f)
     with patch.object(yaml, "load") as load:
         msg = "Unexpected error"
@@ -235,12 +239,12 @@ def test_yaml_as_dict():
 def test_yaml_dump(dumpkit):
     d, expected, path = dumpkit
     YAMLConfig(d).dump(path)
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open() as f:
         assert f.read().strip() == expected
 
 
 def test_yaml_dump_dict(dumpkit):
     d, expected, path = dumpkit
     YAMLConfig.dump_dict(d, path=path)
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open() as f:
         assert f.read().strip() == expected
