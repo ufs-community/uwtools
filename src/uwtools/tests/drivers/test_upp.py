@@ -7,7 +7,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
@@ -125,7 +124,7 @@ def test_UPP_namelist_file(driverobj, logged):
         print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
     dst = driverobj.rundir / "itag"
     assert not dst.is_file()
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -139,7 +138,7 @@ def test_UPP_namelist_file(driverobj, logged):
 def test_UPP_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
     del driverobj._config["namelist"]["base_file"]
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'integer'")
@@ -148,7 +147,7 @@ def test_UPP_namelist_file_fails_validation(driverobj, logged):
 def test_UPP_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged("missing.nml: Not ready [external asset]")
 

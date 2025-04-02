@@ -7,7 +7,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-import iotaa
 import yaml
 from lxml import etree
 from pytest import fixture, mark, raises
@@ -187,7 +186,7 @@ def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 def test_MPAS_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -196,7 +195,7 @@ def test_MPAS_namelist_file(driverobj, logged):
 
 def test_MPAS_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -208,7 +207,7 @@ def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
     driverobj = MPAS(config=config, cycle=cycle)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -219,7 +218,7 @@ def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
 def test_MPAS_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged("missing.nml: Not ready [external asset]")
 
