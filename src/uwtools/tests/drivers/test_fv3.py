@@ -181,14 +181,14 @@ def test_FV3_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "input.nml"
     assert not dst.is_file()
     driverobj._config["namelist_file"] = {"base_file": src}
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert logged(f"Wrote config to {path}")
     assert dst.is_file()
 
 
 def test_FV3_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["namsfc"]["foo"] = None
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -197,7 +197,7 @@ def test_FV3_namelist_file_fails_validation(driverobj, logged):
 def test_FV3_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged("missing.nml: Not ready [external asset]")
 

@@ -65,7 +65,7 @@ def test_CDEPS_nml(driverobj, group, logged):
     assert not dst.is_file()
     del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
-    path = Path(iotaa.refs(task()))
+    path = Path(task().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -104,7 +104,7 @@ def test_CDEPS_streams(driverobj, group):
         print(dedent(template).strip(), file=f)
     driverobj._config[f"{group}_streams"]["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
-    path = Path(iotaa.refs(task()))
+    path = Path(task().refs)
     assert dst.is_file()
     expected = """
     1.5
