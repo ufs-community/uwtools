@@ -184,8 +184,7 @@ def filecopy_http(url: str, dst: Path, check: bool = True):
     dst.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(url, allow_redirects=True, timeout=3)
     if (code := response.status_code) == HTTPStatus.OK:
-        with dst.open("wb") as f:
-            f.write(response.content)
+        dst.write_bytes(response.content)
     else:
         log.error("Could not get '%s', HTTP status was: %s", url, code)
 

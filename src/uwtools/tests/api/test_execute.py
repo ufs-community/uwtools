@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace as ns
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
 
@@ -62,10 +62,19 @@ def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
     graph_file = tmp_path / "g.dot"
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
-    with patch.object(execute, "graph", return_value=graph_code):
-        node = execute.execute(**kwargs)
-        assert node
-        assert node.refs == 42
+    with (
+        patch.object(execute, "_get_driver_class") as gdc,
+        patch.object(execute, "getfullargspec") as gfa,
+    ):
+        node = Mock(graph=graph_code)
+        node.refs = 42
+        driverobj = Mock()
+        driverobj.forty_two.return_value = node
+        gdc.return_value = (Mock(return_value=driverobj), kwargs["module"])
+        gfa().args = {"batch", "cycle"}
+        val = execute.execute(**kwargs)
+        assert val
+        assert val.refs == 42
     assert logged("Instantiated %s with" % kwargs["classname"])
     with graph_file.open() as f:
         assert f.read().strip() == graph_code

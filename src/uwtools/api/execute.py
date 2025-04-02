@@ -11,8 +11,6 @@ from pathlib import Path
 from traceback import format_exc
 from typing import TYPE_CHECKING
 
-from iotaa import Node, graph
-
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
 from uwtools.strings import STR
@@ -21,6 +19,8 @@ from uwtools.utils.api import ensure_data_source
 if TYPE_CHECKING:
     from datetime import datetime, timedelta
     from types import ModuleType
+
+    from iotaa import Node
 
     from uwtools.config.support import YAMLKey
 
@@ -88,8 +88,7 @@ def execute(
     log.debug("Instantiated %s with: %s", classname, kwargs)
     node: Node = getattr(driverobj, task)(dry_run=dry_run)
     if graph_file:
-        with Path(graph_file).open("w") as f:
-            print(graph(node), file=f)
+        Path(graph_file).write_text(f"{node.graph}\n")
     return node
 
 

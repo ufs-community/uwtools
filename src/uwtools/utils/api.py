@@ -9,8 +9,6 @@ from inspect import getfullargspec
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, TypeVar
 
-from iotaa import graph
-
 from uwtools.exceptions import UWError
 from uwtools.utils.file import str2path
 
@@ -195,6 +193,5 @@ def _execute(
     obj = driver_class(**kwargs)
     node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
-        with Path(graph_file).open("w") as f:
-            print(graph(node), file=f)
+        Path(graph_file).write_text(f"{node.graph}\n")
     return True
