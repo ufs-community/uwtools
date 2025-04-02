@@ -107,7 +107,7 @@ class UWYAMLTag:
 
     @staticmethod
     def represent(
-        dumper: yaml.Dumper,  # noqa: ARG004
+        _dumper: yaml.Dumper,
         data: UWYAMLTag,
     ) -> yaml.nodes.Node:
         """
