@@ -4,7 +4,6 @@ from pathlib import Path
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
-from iotaa import refs
 from pytest import fixture, mark, raises
 
 from uwtools.api import execute
@@ -64,7 +63,9 @@ def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
     with patch.object(execute, "graph", return_value=graph_code):
-        assert refs(execute.execute(**kwargs)) == 42
+        node = execute.execute(**kwargs)
+        assert node
+        assert node.refs == 42
     assert logged("Instantiated %s with" % kwargs["classname"])
     with graph_file.open() as f:
         assert f.read().strip() == graph_code

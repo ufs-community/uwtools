@@ -7,8 +7,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-import iotaa
-
 from uwtools.fs import Copier, Linker, MakeDirs
 from uwtools.strings import STR
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
@@ -47,7 +45,7 @@ def copy(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
+    assets = cast(list, stager.go(dry_run=dry_run).assets)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
@@ -80,7 +78,7 @@ def link(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
+    assets = cast(list, stager.go(dry_run=dry_run).assets)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
@@ -113,7 +111,7 @@ def makedirs(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, iotaa.assets(stager.go(dry_run=dry_run)))
+    assets = cast(list, stager.go(dry_run=dry_run).assets)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 

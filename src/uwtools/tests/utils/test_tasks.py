@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 from unittest.mock import ANY, Mock, patch
 
-import iotaa
 from iotaa import asset, external
 from pytest import mark, raises
 
@@ -27,14 +26,14 @@ def exists(x):
 def test_utils_tasks_directory(tmp_path):
     p = tmp_path / "foo" / "bar"
     assert not p.is_dir()
-    assert iotaa.ready(tasks.directory(path=p))
+    assert tasks.directory(path=p).ready
     assert p.is_dir()
 
 
 def test_utils_tasks_directory__fail(logged, tmp_path):
     tmp_path.chmod(0o550)
     p = tmp_path / "foo"
-    assert not iotaa.ready(tasks.directory(path=p))
+    assert not tasks.directory(path=p).ready
     assert not p.is_dir()
     tmp_path.chmod(0o750)
     assert logged("[Errno 13] Permission denied: '%s'" % p)
@@ -45,13 +44,13 @@ def test_utils_tasks_executable(tmp_path):
     # Ensure that only our temp directory is on the path:
     with patch.dict(os.environ, {"PATH": str(tmp_path)}, clear=True):
         # Program does not exist:
-        assert not iotaa.ready(tasks.executable(program=p))
+        assert not tasks.executable(program=p).ready
         # Program exists but is not executable:
         p.touch()
-        assert not iotaa.ready(tasks.executable(program=p))
+        assert not tasks.executable(program=p).ready
         # Program exists and is executable:
         p.chmod(0o750)
-        assert iotaa.ready(tasks.executable(program=p))
+        assert tasks.executable(program=p).ready
 
 
 @mark.parametrize("available", [True, False])
@@ -63,7 +62,7 @@ def test_utils_tasks_existing_hpss(available, wrapper):
         patch.object(tasks, "run_shell_cmd", return_value=(available, None)) as run_shell_cmd,
     ):
         val = tasks.existing_hpss(path=path)
-    assert iotaa.refs(val) == path
+    assert val.refs == path
     taskname = f"HPSS file {path}"
     run_shell_cmd.assert_called_once_with(f"{STR.hsi} -q ls -1 '{path}'", taskname=taskname)
 
@@ -73,7 +72,7 @@ def test_utils_tasks_existing_hpss(available, wrapper):
 def test_utils_tasks_existing_http(code, expected, logged, scheme):
     url = f"{scheme}://foo.com/obj"
     with patch.object(tasks.requests, "head", return_value=Mock(status_code=code)) as head:
-        state = iotaa.ready(tasks.existing_http(url=url))
+        state = tasks.existing_http(url=url).ready
         assert state is expected
     head.assert_called_with(url, allow_redirects=True, timeout=3)
     msg = "Remote HTTP resource %s: %s" % (url, "Ready" if state else "Not ready [external asset]")
@@ -84,7 +83,7 @@ def test_utils_tasks_existing_http(code, expected, logged, scheme):
 def test_utils_tasks_file__missing(prefix, tmp_path):
     path = tmp_path / "file"
     path = "%s%s" % (prefix, path) if prefix else path
-    assert not iotaa.ready(tasks.file(path=path))
+    assert not tasks.file(path=path).ready
 
 
 @mark.parametrize("prefix", ["", "file://"])
@@ -92,7 +91,7 @@ def test_utils_tasks_file__present(prefix, tmp_path):
     path = tmp_path / "file"
     path.touch()
     path = "%s%s" % (prefix, path) if prefix else path
-    assert iotaa.ready(tasks.file(path=path))
+    assert tasks.file(path=path).ready
 
 
 def test_utils_tasks_filecopy__directory_hierarchy(tmp_path):
@@ -285,8 +284,8 @@ def test_utils_tasks_symlink_target(tmp_path, wrapper):
     f.touch()
     s.symlink_to(f)
     for x in [d, f, s]:
-        assert iotaa.ready(tasks.symlink_target(path=wrapper(x)))
-    assert not iotaa.ready(tasks.symlink_target(path=tmp_path / "foo"))
+        assert tasks.symlink_target(path=wrapper(x)).ready
+    assert not tasks.symlink_target(path=tmp_path / "foo").ready
 
 
 def test_utils_tasks__local__path_fail():
