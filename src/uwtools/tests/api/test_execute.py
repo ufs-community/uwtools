@@ -76,8 +76,7 @@ def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
         assert val
         assert val.refs == 42
     assert logged("Instantiated %s with" % kwargs["classname"])
-    with graph_file.open() as f:
-        assert f.read().strip() == graph_code
+    assert graph_file.read_text().strip() == graph_code
 
 
 def test_execute_fail_cannot_load_driver_class(kwargs):

@@ -91,12 +91,10 @@ def test_sh_as_dict():
 def test_sh_dump(dumpkit):
     d, expected, path = dumpkit
     SHConfig(d).dump(path)
-    with path.open() as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected
 
 
 def test_sh_dump_dict(dumpkit):
     d, expected, path = dumpkit
     SHConfig.dump_dict(d, path=path)
-    with path.open() as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected

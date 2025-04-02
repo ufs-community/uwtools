@@ -94,8 +94,7 @@ def test_path_if_it_exists(tmp_path):
 
 def test_readable_file(tmp_path):
     apath = tmp_path / "afile"
-    with apath.open("w") as f:
-        f.write("hello")
+    apath.write_text("hello")
     with file.readable(filepath=apath) as f:
         assert f.read() == "hello"
 
@@ -126,8 +125,7 @@ def test_writable_file(tmp_path):
     apath = tmp_path / "afile"
     with file.writable(filepath=apath) as f:
         assert f.write("hello")
-    with apath.open() as f:
-        assert f.read() == "hello"
+    assert apath.read_text() == "hello"
 
 
 def test_writable_nofile():

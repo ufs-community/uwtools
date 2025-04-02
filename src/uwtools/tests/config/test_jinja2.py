@@ -29,16 +29,14 @@ def deref_render_assets():
 def supplemental_values(tmp_path):
     d = {"foo": "bar", "another": "value"}
     valsfile = tmp_path / "values.yaml"
-    with valsfile.open("w") as f:
-        yaml.dump(d, f)
+    valsfile.write_text(yaml.dump(d))
     return ns(d=d, e={"CYCLE": "2024030112"}, f=valsfile, o={"baz": "qux"})
 
 
 @fixture
 def template_file(tmp_path):
     path = tmp_path / "template.jinja2"
-    with path.open("w") as f:
-        f.write("roses are {{roses_color}}, violets are {{violets_color}}")
+    path.write_text("roses are {{roses_color}}, violets are {{violets_color}}")
     return path
 
 
@@ -51,8 +49,7 @@ violets_color: blue
 cannot:
     override: this
 """.strip()
-    with path.open("w") as f:
-        f.write(yaml)
+    path.write_text(yaml)
     return path
 
 
@@ -189,8 +186,7 @@ def test_render(values_file, template_file, tmp_path):
     expected = "roses are red, violets are blue"
     result = render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
     assert result == expected
-    with outfile.open() as f:
-        assert f.read().strip() == expected
+    assert outfile.read_text().strip() == expected
 
 
 def test_render_calls__dry_run(template_file, tmp_path, values_file):
@@ -204,12 +200,9 @@ def test_render_calls__dry_run(template_file, tmp_path, values_file):
 
 def test_render_calls__log_missing(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
-    with values_file.open() as f:
-        cfgobj = yaml.safe_load(f.read())
+    cfgobj = yaml.safe_load(values_file.read_text())
     del cfgobj["roses_color"]
-    with values_file.open("w") as f:
-        f.write(yaml.dump(cfgobj))
-
+    values_file.write_text(yaml.dump(cfgobj))
     with patch.object(jinja2, "_log_missing_values") as lmv:
         render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
         lmv.assert_called_once_with(["roses_color"])
@@ -243,22 +236,18 @@ def test_render_dry_run(logged, template_file, values_file):
 
 def test_render_fails(logged, tmp_path):
     input_file = tmp_path / "template.yaml"
-    with input_file.open("w") as f:
-        print("{{ constants.pi }} {{ constants.e }}", file=f)
+    input_file.write_text("{{ constants.pi }} {{ constants.e }}")
     values_file = tmp_path / "values.yaml"
-    with values_file.open("w") as f:
-        print("constants: {pi: 3.14}", file=f)
+    values_file.write_text("constants: {pi: 3.14}")
     assert render_helper(input_file=input_file, values_file=values_file) is None
     assert logged("Template render failed with error: 'dict object' has no attribute 'e'")
 
 
 def test_render_values_missing(logged, template_file, values_file):
     # Read in the config, remove the "roses" key, then re-write it.
-    with values_file.open() as f:
-        cfgobj = yaml.safe_load(f.read())
+    cfgobj = yaml.safe_load(values_file.read_text())
     del cfgobj["roses_color"]
-    with values_file.open("w") as f:
-        f.write(yaml.dump(cfgobj))
+    values_file.write_text(yaml.dump(cfgobj))
     render_helper(input_file=template_file, values_file=values_file)
     assert logged("Value(s) required to render template not provided:")
     assert logged("  roses_color")
@@ -469,8 +458,7 @@ def test__values_needed(logged):
 def test__write_template_to_file(tmp_path):
     outfile = tmp_path / "out.txt"
     jinja2._write_template(outfile, "roses are red, violets are blue")
-    with outfile.open() as f:
-        assert f.read().strip() == "roses are red, violets are blue"
+    assert outfile.read_text().strip() == "roses are red, violets are blue"
 
 
 def test__write_template_stdout(capsys):
@@ -490,8 +478,7 @@ class TestJ2Template:
         def write(s, *args):
             path = tmp_path.joinpath(*list(args))
             path.parent.mkdir(exist_ok=True)
-            with path.open("w") as f:
-                print(s, file=f)
+            path.write_text(s)
             return path
 
         write("{% macro double(x) %}{{ x }}{{ x }}{% endmacro %}", "m1.jinja")
@@ -523,13 +510,11 @@ class TestJ2Template:
         path = tmp_path / "rendered.txt"
         obj = J2Template(values=testdata.config, template_source=testdata.template)
         obj.dump(output_path=path)
-        with path.open() as f:
-            assert f.read().strip() == "Hello to the world"
+        assert path.read_text().strip() == "Hello to the world"
 
     def test_render_file(self, testdata, tmp_path):
         path = tmp_path / "template.jinja2"
-        with path.open("w", encoding="utf-8") as f:
-            print(testdata.template, file=f)
+        path.write_text(testdata.template)
         validate(J2Template(values=testdata.config, template_source=path))
 
     def test_render_string(self, testdata):

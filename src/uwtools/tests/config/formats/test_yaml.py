@@ -146,12 +146,11 @@ def test_yaml_simple(tmp_path):
 def test_yaml_constructor_error_no_quotes(tmp_path):
     # Test that Jinja2 template without quotes raises UWConfigError.
     tmpfile = tmp_path / "test.yaml"
-    with tmpfile.open("w", encoding="utf-8") as f:
-        s = """
-        foo: {{ bar }}
-        bar: 2
-        """
-        f.write(dedent(s).strip())
+    s = """
+    foo: {{ bar }}
+    bar: 2
+    """
+    tmpfile.write_text(dedent(s).strip())
     with raises(exceptions.UWConfigError) as e:
         YAMLConfig(tmpfile)
     assert "value is enclosed in quotes" in str(e.value)
@@ -160,8 +159,7 @@ def test_yaml_constructor_error_no_quotes(tmp_path):
 def test_yaml_constructor_error_not_dict_from_file(tmp_path):
     # Test that a useful exception is raised if the YAML file input is a non-dict value.
     tmpfile = tmp_path / "test.yaml"
-    with tmpfile.open("w", encoding="utf-8") as f:
-        f.write("hello")
+    tmpfile.write_text("hello")
     with raises(exceptions.UWConfigError) as e:
         YAMLConfig(tmpfile)
     assert f"Parsed a str value from {tmpfile}, expected a dict" in str(e.value)
@@ -182,8 +180,7 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
     # Test that unregistered constructor raises UWConfigError.
 
     tmpfile = tmp_path / "test.yaml"
-    with tmpfile.open("w", encoding="utf-8") as f:
-        f.write("foo: !not_a_constructor bar")
+    tmpfile.write_text("foo: !not_a_constructor bar")
     with raises(exceptions.UWConfigError) as e:
         YAMLConfig(tmpfile)
     assert "constructor: '!not_a_constructor'" in str(e.value)
@@ -193,9 +190,10 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
 @mark.parametrize("func", [repr, str])
 def test_yaml_repr_str(func):
     config = fixture_path("simple.yaml")
-    with config.open() as f:
-        for actual, expected in zip(func(YAMLConfig(config)).split("\n"), f.readlines()):
-            assert actual.strip() == expected.strip()
+    for actual, expected in zip(
+        func(YAMLConfig(config)).split("\n"), config.read_text().split("\n")
+    ):
+        assert actual.strip() == expected.strip()
 
 
 def test_yaml_stdin_plus_relpath_failure(logged):
@@ -218,8 +216,7 @@ def test_yaml_stdin_plus_relpath_failure(logged):
 
 def test_yaml_unexpected_error(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
-    with cfgfile.open("w") as f:
-        print("{n: 42}", file=f)
+    cfgfile.write_text("{n: 42}")
     with patch.object(yaml, "load") as load:
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)
@@ -239,12 +236,10 @@ def test_yaml_as_dict():
 def test_yaml_dump(dumpkit):
     d, expected, path = dumpkit
     YAMLConfig(d).dump(path)
-    with path.open() as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected
 
 
 def test_yaml_dump_dict(dumpkit):
     d, expected, path = dumpkit
     YAMLConfig.dump_dict(d, path=path)
-    with path.open() as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected

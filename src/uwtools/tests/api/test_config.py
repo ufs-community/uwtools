@@ -133,8 +133,7 @@ def test_validate_config_data(cfg):
 @mark.parametrize("cast", [str, Path])
 def test_validate_config_path(cast, tmp_path):
     cfg = tmp_path / "config.yaml"
-    with cfg.open("w") as f:
-        yaml.dump({}, f)
+    cfg.write_text(yaml.dump({}))
     kwargs: dict = {"schema_file": "schema-file", "config_path": cast(cfg)}
     with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)

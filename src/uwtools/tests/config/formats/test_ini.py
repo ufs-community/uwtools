@@ -55,8 +55,7 @@ def test_ini_instantiation_depth():
 @mark.parametrize("func", [repr, str])
 def test_ini_repr_str(func):
     config = fixture_path("simple.ini")
-    with config.open() as f:
-        assert func(INIConfig(config)) == f.read().strip()
+    assert func(INIConfig(config)) == config.read_text().strip()
 
 
 def test_ini_simple(salad_base, tmp_path):
@@ -89,12 +88,10 @@ def test_ini_as_dict():
 def test_ini_dump(dumpkit):
     d, expected, path = dumpkit
     INIConfig(d).dump(path)
-    with path.open() as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected
 
 
 def test_ini_dump_dict(dumpkit):
     d, expected, path = dumpkit
     INIConfig.dump_dict(d, path=path)
-    with path.open() as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected

@@ -26,8 +26,7 @@ def kwargs():
 @fixture
 def template_file(tmp_path):
     path = tmp_path / "template.jinja2"
-    with path.open("w") as f:
-        f.write("roses are {{roses_color}}, violets are {{violets_color}}")
+    path.write_text("roses are {{roses_color}}, violets are {{violets_color}}")
     return path
 
 

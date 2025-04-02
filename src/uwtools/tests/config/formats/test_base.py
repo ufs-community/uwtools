@@ -26,8 +26,7 @@ from uwtools.utils.file import FORMAT, readable
 def config(tmp_path):
     path = tmp_path / "config.yaml"
     data = {"foo": 42}
-    with path.open("w") as f:
-        yaml.dump(data, f)
+    path.write_text(yaml.dump(data))
     return ConcreteConfig(config=path)
 
 
@@ -83,8 +82,7 @@ def test__depth(config):
 def test__load_paths(config, tmp_path):
     paths = (tmp_path / fn for fn in ("f1", "f2"))
     for path in paths:
-        with path.open("w") as f:
-            yaml.dump({path.name: "defined"}, f)
+        path.write_text(yaml.dump({path.name: "defined"}))
     cfg = config._load_paths(config_files=paths)
     for path in paths:
         assert cfg[path.name] == "present"
@@ -233,8 +231,7 @@ l: "22"
 
 """.strip()
     path = tmp_path / "config.yaml"
-    with path.open("w") as f:
-        print(yaml, file=f)
+    path.write_text(yaml)
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
         retval = config.dereference()
@@ -272,8 +269,7 @@ l: "22"
 def test_dereference_context_override(tmp_path, utc):
     yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
     path = tmp_path / "config.yaml"
-    with path.open("w") as f:
-        print(yaml, file=f)
+    path.write_text(yaml)
     config = YAMLConfig(path)
     config.dereference(context={"cycle": utc(2024, 2, 12, 6)})
     assert config["file"] == "gfs.t06z.atmanl.nc"
