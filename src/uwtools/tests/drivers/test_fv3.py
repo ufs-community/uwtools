@@ -145,8 +145,7 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["fv3"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
     path = tmp_path / "config.yaml"
-    with path.open("w") as f:
-        yaml.dump(config, f)
+    path.write_text(yaml.dump(config))
     driverobj = FV3(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
@@ -161,8 +160,7 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 def test_FV3_model_configure(base_file_exists, driverobj, logged):
     src = driverobj.rundir / "model_configure.in"
     if base_file_exists:
-        with src.open("w") as f:
-            yaml.dump({}, f)
+        src.write_text(yaml.dump({}))
     dst = driverobj.rundir / "model_configure"
     assert not dst.is_file()
     driverobj._config["model_configure"] = {"base_file": src}
@@ -176,8 +174,7 @@ def test_FV3_model_configure(base_file_exists, driverobj, logged):
 
 def test_FV3_namelist_file(driverobj, logged):
     src = driverobj.rundir / "input.nml.in"
-    with src.open("w") as f:
-        yaml.dump({}, f)
+    src.write_text(yaml.dump({}))
     dst = driverobj.rundir / "input.nml"
     assert not dst.is_file()
     driverobj._config["namelist_file"] = {"base_file": src}

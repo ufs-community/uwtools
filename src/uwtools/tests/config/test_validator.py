@@ -105,8 +105,7 @@ def schema() -> dict[str, Any]:
 @fixture
 def schema_file(schema, tmp_path) -> Path:
     path: Path = tmp_path / "a.jsonschema"
-    with path.open("w") as f:
-        json.dump(schema, f)
+    path.write_text(json.dumps(schema))
     return path
 
 
@@ -114,8 +113,7 @@ def schema_file(schema, tmp_path) -> Path:
 
 
 def write_as_json(data: dict[str, Any], path: Path) -> Path:
-    with path.open("w") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     return path
 
 
@@ -242,8 +240,7 @@ def test_config_validator__registry(tmp_path):
     validator._registry.cache_clear()
     d = {"foo": "bar"}
     path = tmp_path / "foo-bar.jsonschema"
-    with path.open("w") as f:
-        json.dump(d, f)
+    path.write_text(json.dumps(d))
     with patch.object(validator, "resource_path", return_value=path) as resource_path:
         r = validator._registry()
         assert r.get_or_retrieve("urn:uwtools:foo-bar").value.contents == d

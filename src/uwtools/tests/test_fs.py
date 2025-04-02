@@ -25,8 +25,7 @@ def assets(tmp_path):
     fn2.touch()
     cfgdict = {"a": {"b": {"foo": str(fn1), "subdir/bar": str(fn2)}}}
     cfgfile = tmp_path / "config.yaml"
-    with cfgfile.open("w") as f:
-        yaml.dump(cfgdict, f)
+    cfgfile.write_text(yaml.dump(cfgdict))
     dstdir = tmp_path / "dst"
     return dstdir, cfgdict, cfgfile
 

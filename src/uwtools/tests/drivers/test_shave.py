@@ -85,9 +85,7 @@ def test_Shave_input_config_file(driverobj):
     Path(input_file_path).touch()
     output_file_path = driverobj._config["config"]["output_grid_file"]
     driverobj.input_config_file()
-    with Path(driverobj._input_config_path).open() as cfg_file:
-        content = cfg_file.readlines()
-    content = [line.strip("\n") for line in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 1
     assert content[0] == f"{nx} {ny} {nhalo} '{input_file_path}' '{output_file_path}'"
 

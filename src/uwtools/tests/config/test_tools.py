@@ -60,11 +60,9 @@ def realize_config_yaml_input(tmp_path):
 def help_realize_config_double_tag(config, expected, tmp_path):
     path_in = tmp_path / "in.yaml"
     path_out = tmp_path / "out.yaml"
-    with path_in.open("w") as f:
-        print(dedent(config).strip(), file=f)
+    path_in.write_text(dedent(config).strip())
     tools.realize_config(input_config=path_in, output_file=path_out)
-    with path_out.open() as f:
-        assert f.read().strip() == dedent(expected).strip()
+    assert path_out.read_text().strip() == dedent(expected).strip()
 
 
 def help_realize_config_fmt2fmt(input_file, input_format, update_file, update_format, tmpdir):
@@ -236,8 +234,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     expected_file = tmp_path / "test.yaml"
     expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
-    with outfile.open() as f:
-        assert f.read()[-1] == "\n"
+    assert outfile.read_text()[-1] == "\n"
 
 
 def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
@@ -338,12 +335,13 @@ def test_realize_config_field_table(tmp_path):
         output_file=outfile,
         output_format=FORMAT.fieldtable,
     )
-    with fixture_path("field_table.FV3_GFS_v16").open() as f1, outfile.open() as f2:
-        reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
-        outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-        lines = zip(outlist, reflist)
-        for line1, line2 in lines:
-            assert line1 in line2
+    f1_lines = fixture_path("field_table.FV3_GFS_v16").read_text().split("\n")
+    f2_lines = outfile.read_text().split("\n")
+    reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1_lines]
+    outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2_lines]
+    lines = zip(outlist, reflist)
+    for line1, line2 in lines:
+        assert line1 in line2
 
 
 def test_realize_config_fmt2fmt_nml2nml(tmp_path):
@@ -405,8 +403,7 @@ def test_realize_config_remove_nml_to_nml(tmp_path):
       e: !remove
     """
     update_config = tmp_path / "update.yaml"
-    with update_config.open("w") as f:
-        print(dedent(s).strip(), file=f)
+    update_config.write_text(dedent(s).strip())
     output_file = tmp_path / "config.nml"
     assert not output_file.is_file()
     tools.realize_config(
@@ -425,8 +422,7 @@ def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
         d: !remove
     """
     update_config = tmp_path / "update.yaml"
-    with update_config.open("w") as f:
-        print(dedent(s).strip(), file=f)
+    update_config.write_text(dedent(s).strip())
     assert tools.realize_config(
         input_config=input_config,
         update_config=update_config,
@@ -441,8 +437,7 @@ def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
       b: !remove
     """
     update_config = tmp_path / "update.yaml"
-    with update_config.open("w") as f:
-        print(dedent(s).strip(), file=f)
+    update_config.write_text(dedent(s).strip())
     assert tools.realize_config(
         input_config=input_config,
         update_config=update_config,
@@ -683,8 +678,7 @@ def test__realize_config_input_setup_ini_file(tmp_path):
     foo = bar
     """
     path = tmp_path / "config.ini"
-    with path.open("w") as f:
-        print(dedent(data).strip(), file=f)
+    path.write_text(dedent(data).strip())
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"section": {"foo": "bar"}}
 
@@ -719,8 +713,7 @@ def test__realize_config_input_setup_nml_file(tmp_path):
     /
     """
     path = tmp_path / "config.nml"
-    with path.open("w") as f:
-        print(dedent(data).strip(), file=f)
+    path.write_text(dedent(data).strip())
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj["nl"]["pi"] == 3.14
 
@@ -753,8 +746,7 @@ def test__realize_config_input_setup_sh_file(tmp_path):
     foo=bar
     """
     path = tmp_path / "config.sh"
-    with path.open("w") as f:
-        print(dedent(data).strip(), file=f)
+    path.write_text(dedent(data).strip())
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"foo": "bar"}
 
@@ -785,8 +777,7 @@ def test__realize_config_input_setup_yaml_file(tmp_path):
     foo: bar
     """
     path = tmp_path / "config.yaml"
-    with path.open("w") as f:
-        print(dedent(data).strip(), file=f)
+    path.write_text(dedent(data).strip())
     input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"foo": "bar"}
 
@@ -843,8 +834,7 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     assert realize_config_testobj[1][2][3] == 42
     values = {1: {2: {3: 43}}}
     update_config = tmp_path / "config.yaml"
-    with update_config.open("w") as f:
-        yaml.dump(values, f)
+    update_config.write_text(yaml.dump(values))
     o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
     assert o[1][2][3] == 43
 

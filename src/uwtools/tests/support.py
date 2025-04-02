@@ -21,10 +21,8 @@ def compare_files(path1: Path | str, path2: Path | str) -> bool:
     :return: Do the files match?
     """
     path1, path2 = map(Path, (path1, path2))
-    with path1.open() as f:
-        content1 = f.read().rstrip("\n")
-    with path2.open() as f:
-        content2 = f.read().rstrip("\n")
+    content1 = path1.read_text().rstrip("\n")
+    content2 = path2.read_text().rstrip("\n")
     if content1 != content2:
         print("1st file looks like:")
         print(content1)
@@ -67,8 +65,7 @@ def schema_validator(schema_name: str, *args: Any) -> Callable:
     :returns: A lambda that, when called with an input to test, returns a string (possibly empty)
         containing the validation errors.
     """
-    with (resource_path("jsonschema") / f"{schema_name}.jsonschema").open() as f:
-        schema = yaml.safe_load(f)
+    schema = yaml.safe_load((resource_path("jsonschema") / f"{schema_name}.jsonschema").read_text())
     defs = schema.get("$defs", {})
     for arg in args:
         schema = schema[arg]
