@@ -107,8 +107,7 @@ def test_fs_makedirs(load, tb):
     )
     assert tb.cell_output_text(59) == config_keys_str
     assert (
-        "{'ready': ['tmp/dir-keys-target/foo/bar', 'tmp/dir-keys-target/baz'],"
-        "\n 'not-ready': []}"
+        "{'ready': ['tmp/dir-keys-target/foo/bar', 'tmp/dir-keys-target/baz'],\n 'not-ready': []}"
     ) in tb.cell_output_text(61)
 
 

@@ -6,7 +6,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["ALL"]
-#ignore = [
+ignore = [
 #  "ANN002",  # missing-type-args
 #  "ANN003",  # missing-type-kwargs
 #  "ANN201",  # missing-return-type-class-method
@@ -17,7 +17,7 @@ select = ["ALL"]
 #  "ANN401",  # any-type
 #  "B010",    # set-attr-with-constant
 #  "C408",    # unnecessary-collection-call
-#  "COM812",  # missing-trailing-comma
+  "COM812",  # missing-trailing-comma
 #  "D100",    # undocumented-public-module
 #  "D101",    # undocumented-public-class
 #  "D102",    # undocumented-public-method
@@ -27,9 +27,9 @@ select = ["ALL"]
 #  "D107",    # undocumented-public-init
 #  "D200",    # unnecessary-multiline-docstring
 #  "D202",    # blank-line-after-function
-#  "D203",    # incorrect-blank-line-before-class
+  "D203",    # incorrect-blank-line-before-class
 #  "D205",    # missing-blank-line-after-summary
-#  "D212",    # multi-line-summary-first-line
+  "D212",    # multi-line-summary-first-line
 #  "D400",    # missing-trailing-period
 #  "D401",    # non-imperative-mood
 #  "D404",    # docstring-starts-with-this
@@ -52,4 +52,4 @@ select = ["ALL"]
 #  "TC006",   # runtime-cast-value
 #  "UP031",   # printf-string-formatting
 #  "UP032",   # f-string
-#]
+]
