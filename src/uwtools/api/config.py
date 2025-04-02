@@ -231,8 +231,8 @@ values. It may be specified as a filesystem path, a ``dict``, or a ``Config`` ob
 not, it will be read from ``stdin``.
 
 At most one of the input config or the update config may be left unspecified, in which case the
-other will be read from ``stdin``. If neither filename or format is specified for the update config, no
-update will be performed.
+other will be read from ``stdin``. If neither filename or format is specified for the update config,
+no update will be performed.
 
 The output destination may be specified as a filesystem path. When it is not, it will be written to
 ``stdout``.
@@ -257,8 +257,8 @@ Recognized file extensions are: {extensions}
 :param dry_run: Log output instead of writing to output.
 :param stdin_ok: OK to read from ``stdin``?
 :return: The ``dict`` representation of the realized config.
-:raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered.
-""".format(extensions=", ".join(_FORMAT.extensions())).strip()  # noqa: E501
+:raises: ``UWConfigRealizeError`` if ``total`` is ``True`` and any Jinja2 syntax was not rendered.
+""".format(extensions=", ".join(_FORMAT.extensions())).strip()
 
 __all__ = [
     "Config",
