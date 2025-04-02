@@ -24,12 +24,10 @@ def assets(tmp_path):
 @fixture
 def validation_assets(tmp_path):
     xml_file_good = fixture_path("hello_workflow.xml")
-    with xml_file_good.open() as f:
-        xml_string_good = f.read()
+    xml_string_good = xml_file_good.read_text()
     xml_string_bad = "<bad/>"
     xml_file_bad = tmp_path / "bad.xml"
-    with xml_file_bad.open("w") as f:
-        print(xml_string_bad, file=f)
+    xml_file_bad.write_text(xml_string_bad)
     return xml_file_bad, xml_file_good, xml_string_bad, xml_string_good
 
 
@@ -59,16 +57,14 @@ def test_realize_rocoto_xml_file_to_file(assets):
 def test_realize_rocoto_xml_cfg_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile))
-    with outfile.open("w") as f:
-        f.write(capsys.readouterr().out)
+    outfile.write_text(capsys.readouterr().out)
     assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
 
 def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize_rocoto_xml(config=cfgfile)
-    with outfile.open("w") as f:
-        f.write(capsys.readouterr().out)
+    outfile.write_text(capsys.readouterr().out)
     assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
 
@@ -405,15 +401,13 @@ class TestRocotoXML:
 
     def test__config_validate_config_fail(self, instance, tmp_path):
         cfgfile = tmp_path / "bad.yaml"
-        with cfgfile.open("w") as f:
-            print("not: ok", file=f)
+        cfgfile.write_text("not: ok")
         with raises(UWConfigError):
             instance._config_validate(config=YAMLConfig(cfgfile))
 
     def test__config_validate_file_fail(self, instance, tmp_path):
         cfgfile = tmp_path / "bad.yaml"
-        with cfgfile.open("w") as f:
-            print("not: ok", file=f)
+        cfgfile.write_text("not: ok")
         with raises(UWConfigError):
             instance._config_validate(config=cfgfile)
 

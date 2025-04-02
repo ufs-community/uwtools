@@ -119,9 +119,7 @@ def test_Orog_input_config_file_new(driverobj):
     grid_file = Path(driverobj.config["grid_file"])
     grid_file.touch()
     driverobj.input_config_file()
-    with Path(driverobj._input_config_path).open() as inps:
-        content = inps.readlines()
-    content = [line.strip("\n") for line in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 3
     assert content[0] == "'{}'".format(driverobj.config["grid_file"])
     assert content[1] == ".false."
@@ -132,9 +130,7 @@ def test_Orog_input_config_file_old(driverobj):
     grid_file = Path(driverobj.config["grid_file"])
     grid_file.touch()
     driverobj.input_config_file()
-    with Path(driverobj._input_config_path).open() as inps:
-        content = inps.readlines()
-    content = [line.strip("\n") for line in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 5
     assert len(content[0].split()) == 9
     assert content[1] == "'{}'".format(driverobj.config["grid_file"])

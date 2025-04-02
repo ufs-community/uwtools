@@ -70,9 +70,8 @@ class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
 
 
 def write(path: Path, x):
-    with path.open("w") as f:
-        json.dump(x, f)
-        return path
+    path.write_text(json.dumps(x))
+    return path
 
 
 # Fixtures
@@ -240,8 +239,7 @@ def test_Assets_validate_key_path(config, controller_schema):
 def test_Assets_validate_schema_file(logged, should_pass, t, tmp_path):
     path = tmp_path / "test.jsonschema"
     schema = {"properties": {"concrete": {"properties": {"n": {"type": t}}}}}
-    with path.open("w") as f:
-        json.dump(schema, f)
+    path.write_text(json.dumps(schema))
     test = lambda: ConcreteAssetsTimeInvariant(config={"concrete": {"n": 1}}, schema_file=path)
     with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
         if should_pass:
@@ -273,9 +271,7 @@ def test_Assets__create_user_updated_config_base_file(
     ConcreteAssetsTimeInvariant._create_user_updated_config(
         config_class=YAMLConfig, config_values=dc, path=path
     )
-    with path.open() as f:
-        updated = yaml.safe_load(f)
-    assert updated == expected
+    assert yaml.safe_load(path.read_text()) == expected
 
 
 def test_Assets__delegate(driverobj):
@@ -362,8 +358,7 @@ def test_Driver_namelist_schema_default(driverobj, tmp_path):
         }
     }
     schema_path = tmp_path / "test.jsonschema"
-    with schema_path.open("w") as f:
-        json.dump(schema, f)
+    schema_path.write_text(json.dumps(schema))
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"namelist": {"validate": True}}
         with patch.object(driver, "internal_schema_file", return_value=schema_path):
@@ -374,8 +369,7 @@ def test_Driver_namelist_schema_external(driverobj, tmp_path):
     nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
     schema = {"foo": {"bar": nmlschema}}
     schema_path = tmp_path / "test.jsonschema"
-    with schema_path.open("w") as f:
-        json.dump(schema, f)
+    schema_path.write_text(json.dumps(schema))
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"baz": {"qux": {"validate": True}}}
         driverobj.schema_file = schema_path
@@ -474,9 +468,7 @@ def test_Driver__create_user_updated_config_base_file(
     ConcreteDriverTimeInvariant._create_user_updated_config(
         config_class=YAMLConfig, config_values=driverobj.config, path=path
     )
-    with path.open() as f:
-        updated = yaml.safe_load(f)
-    assert updated == expected
+    assert yaml.safe_load(path.read_text()) == expected
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -638,9 +630,7 @@ def test_Driver__write_runscript(driverobj):
     time foo bar baz {executable}
     test $? -eq 0 && touch runscript.concrete.done
     """
-    with path.open() as f:
-        actual = f.read()
-    assert actual.strip() == dedent(expected).strip()
+    assert path.read_text().strip() == dedent(expected).strip()
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):

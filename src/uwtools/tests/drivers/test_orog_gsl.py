@@ -80,9 +80,7 @@ def test_OrogGSL_driver_name(driverobj):
 def test_OrogGSL_input_config_file(driverobj):
     driverobj.input_config_file()
     inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
-    with Path(driverobj._input_config_path).open() as cfg_file:
-        content = cfg_file.readlines()
-    content = [line.strip("\n") for line in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 3
     assert content == inputs
 

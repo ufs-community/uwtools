@@ -97,8 +97,7 @@ def test_JEDI(method):
 def test_JEDI_configuration_file(driverobj):
     basecfg = {"foo": "bar"}
     base_file = Path(driverobj.config["configuration_file"]["base_file"])
-    with base_file.open("w") as f:
-        yaml.dump(basecfg, f)
+    base_file.write_text(yaml.dump(basecfg))
     cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
     driverobj.configuration_file()

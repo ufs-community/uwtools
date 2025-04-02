@@ -120,8 +120,8 @@ def test_UPP_files_linked(driverobj):
 
 def test_UPP_namelist_file(driverobj, logged):
     datestr = "2024-05-05_12:00:00"
-    with Path(driverobj.config["namelist"]["base_file"]).open("w") as f:
-        print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
+    base_file = Path(driverobj.config["namelist"]["base_file"])
+    base_file.write_text("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr)
     dst = driverobj.rundir / "itag"
     assert not dst.is_file()
     path = Path(driverobj.namelist_file().refs)
@@ -169,8 +169,7 @@ def test_UPP_output(driverobj, tmp_path):
     ]
     # fmt: on
     control_file = tmp_path / "postxconfig-NT.txt"
-    with control_file.open("w") as f:
-        print("\n".join(control_data), file=f)
+    control_file.write_text("\n".join(control_data))
     driverobj._config["control_file"] = str(control_file)
     expected = {"gribfiles": [str(driverobj.rundir / ("%s.GrbF24" % x)) for x in ("FOO", "BAR")]}
     assert driverobj.output == expected

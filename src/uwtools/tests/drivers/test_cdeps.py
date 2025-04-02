@@ -100,8 +100,7 @@ def test_CDEPS_streams(driverobj, group):
     {{ streams.stream01.yearLast }}
     """
     template_file = driverobj.rundir.parent / "template.jinja2"
-    with template_file.open("w") as f:
-        print(dedent(template).strip(), file=f)
+    template_file.write_text(dedent(template).strip())
     driverobj._config[f"{group}_streams"]["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
     path = Path(task().refs)
@@ -122,8 +121,7 @@ def test_CDEPS_streams(driverobj, group):
     1
     1
     """
-    with path.open() as f:
-        assert f.read().strip() == dedent(expected).strip()
+    assert path.read_text().strip() == dedent(expected).strip()
 
 
 def test_CDEPS__model_namelist_file(driverobj):

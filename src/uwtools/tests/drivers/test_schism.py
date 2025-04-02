@@ -56,8 +56,7 @@ def test_SCHISM_driver_name(driverobj):
 
 def test_SCHISM_namelist_file(driverobj):
     src = driverobj.config["namelist"]["template_file"]
-    with Path(src).open("w") as f:
-        yaml.dump({}, f)
+    Path(src).write_text(yaml.dump({}))
     dst = driverobj.rundir / "param.nml"
     assert not dst.is_file()
     driverobj.namelist_file()

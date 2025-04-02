@@ -24,10 +24,9 @@ def streams_file(config, driverobj, drivername):
     array_elements_tested = set()
     driverobj.streams_file()
     path = Path(driverobj.config["rundir"], driverobj._streams_fn)
-    with path.open() as f:
-        xml = etree.parse(f).getroot()
+    xml = etree.fromstring(path.read_text())
     assert xml.tag == "streams"
-    for child in xml.getchildren():  # type: ignore[union-attr]
+    for child in xml.getchildren():  # type: ignore[attr-defined]
         block = config[drivername]["streams"][child.get("name")]
         for k, v in block.items():
             if k not in [*[f"{e}s" for e in array_elements], "mutable"]:
@@ -171,8 +170,7 @@ def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["mpas"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
     path = tmp_path / "config.yaml"
-    with path.open("w") as f:
-        yaml.dump(config, f)
+    path.write_text(yaml.dump(config))
     driverobj = MPAS(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
