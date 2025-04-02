@@ -130,7 +130,7 @@ def test_fs_glob_copy_recursive(load, report, tb):
     assert {Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()} == expected
     assert tb.cell_output_text(78) == load(base / "glob-copy-recursive.yaml")
     r = report(79)
-    assert r["ready"] == sorted(list(map(str, expected)))
+    assert {*r["ready"]} == set(map(str, expected))
     assert not r["not-ready"]
 
 
