@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import re
+import stat
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from functools import partial
@@ -558,7 +559,7 @@ class Driver(Assets):
         )
         with writable(path) as f:
             print(rs, file=f)
-        path.chmod(0o750)
+        path.chmod(path.stat().st_mode | stat.S_IEXEC)
 
 
 class DriverCycleBased(Driver):
