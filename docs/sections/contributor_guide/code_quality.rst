@@ -10,7 +10,7 @@ In an active development shell, the following ``make`` targets are available and
    * - Command
      - Description
    * - ``make format``
-     - Formats code and imports with :ruff:`ruff<>`, docstrings with :docformatter:`docformatter<>`, and ``.json*`` documents with :jq:`jq<>`
+     - Formats code and imports with :ruff:`ruff<>`, docstrings with :docformatter:`docformatter<>`, and JSON documents with :jq:`jq<>`
    * - ``make lint``
      - Lints code with :ruff:`ruff<>`
    * - ``make typecheck``
