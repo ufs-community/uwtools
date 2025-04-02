@@ -109,8 +109,7 @@ class UPP(DriverCycleLeadtimeBased):
         # from the block's identifier and the suffix defined above.
         cf = self.config["control_file"]
         try:
-            with Path(cf).open() as f:
-                lines = f.read().split("\n")
+            lines = Path(cf).read_text().split("\n")
         except (FileNotFoundError, PermissionError) as e:
             msg = f"Could not open UPP control file {cf}"
             raise UWConfigError(msg) from e

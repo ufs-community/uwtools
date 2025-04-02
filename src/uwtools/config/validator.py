@@ -157,8 +157,7 @@ def validate_external(
         config = config_data
     if not str(schema_file).startswith(str(resource_path())):
         log.debug("Validating config against external schema file: %s", schema_file)
-    with schema_file.open() as f:
-        schema = json.load(f)
+    schema = json.loads(schema_file.read_text())
     if not validate(schema=schema, desc=desc, config=config):
         msg = "YAML validation errors"
         raise UWConfigError(msg)
@@ -177,8 +176,10 @@ def _registry() -> Registry:
 
     def retrieve(uri: str) -> Resource:
         name = uri.split(":")[-1]
-        with resource_path(f"jsonschema/{name}.jsonschema").open() as f:
-            return Resource(contents=json.load(f), specification=DRAFT202012)  # type: ignore[call-arg]
+        return Resource(
+            contents=json.loads(resource_path(f"jsonschema/{name}.jsonschema").read_text()),
+            specification=DRAFT202012,
+        )  # type: ignore[call-arg]
 
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 

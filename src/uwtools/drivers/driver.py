@@ -111,8 +111,8 @@ class Assets(ABC):
         """
         Return the driver's internal schema.
         """
-        with internal_schema_file(schema_name=cls._schema_name()).open() as f:
-            return bundle(json.load(f))
+        path = internal_schema_file(schema_name=cls._schema_name())
+        return bundle(json.loads(path.read_text()))
 
     def taskname(self, suffix: str | None = None) -> str:
         """
@@ -208,8 +208,7 @@ class Assets(ABC):
             nmlcfg = nmlcfg[config_key]
         if nmlcfg.get(STR.validate, True):
             schema_file = self.schema_file or internal_schema_file(schema_name=self._schema_name())
-            with schema_file.open() as f:
-                schema = json.load(f)
+            schema = json.loads(schema_file.read_text())
             for schema_key in schema_keys or [
                 STR.properties,
                 self.driver_name(),

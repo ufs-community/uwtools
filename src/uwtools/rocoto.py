@@ -59,8 +59,8 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     :return: Did the XML conform to the schema?
     """
     tree = etree.fromstring(xml.encode("utf-8"))
-    with resource_path("rocoto/schema_with_metatasks.rng").open() as f:
-        schema = etree.RelaxNG(etree.parse(f))
+    path = resource_path("rocoto/schema_with_metatasks.rng")
+    schema = etree.RelaxNG(etree.fromstring(path.read_text()))
     valid: bool = schema.validate(tree)
     nerr = len(schema.error_log)
     log_method = log.info if valid else log.error
