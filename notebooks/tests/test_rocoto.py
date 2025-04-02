@@ -56,9 +56,9 @@ def test_rocoto_building_workflows(load, tb):
 
 
 def test_rocoto_validate(tb):
-    with open(base / "simple-workflow.xml", "r", encoding="utf-8") as f:
+    with (base / "simple-workflow.xml").open() as f:
         simple_xml = f.read().rstrip()
-    with open(base / "err-workflow.xml", "r", encoding="utf-8") as f:
+    with (base / "err-workflow.xml").open() as f:
         err_xml = f.read().rstrip()
     assert tb.cell_output_text(41) == simple_xml
     valid_out = ("INFO 0 Rocoto XML validation errors found", "True")

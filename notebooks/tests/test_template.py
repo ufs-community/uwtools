@@ -24,15 +24,14 @@ def test_template_render(load, tb):
     temp_yaml2 = yaml.safe_load(rend_temp_str2)
     assert temp_yaml2["user"] == {"name": "Jane Doe", "favorite_food": "tamales"}
     assert tb.cell_output_text(5) == load(base / "render-template.yaml")
-    assert (
-        "INFO   first" in tb.cell_output_text(7)
-        and "INFO   food" in tb.cell_output_text(7)
-        and "INFO   last" in tb.cell_output_text(7)
-    )
+    assert "INFO   first" in tb.cell_output_text(7)
+    assert "INFO   food" in tb.cell_output_text(7)
+    assert "INFO   last" in tb.cell_output_text(7)
     assert tb.cell_output_text(9) == load(base / "render-values.yaml")
     assert tb.cell_output_text(11) == rend_temp_str1
     assert tb.cell_output_text(13) == rend_temp_str2
-    assert rend_temp_str1 in tb.cell_output_text(15) and rend_temp_str2 in tb.cell_output_text(15)
+    assert rend_temp_str1 in tb.cell_output_text(15)
+    assert rend_temp_str2 in tb.cell_output_text(15)
 
 
 def test_template_render_to_str(tb):

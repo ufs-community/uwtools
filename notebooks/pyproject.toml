@@ -7,49 +7,15 @@ line-length = 100
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-#  "ANN002",  # missing-type-args
-#  "ANN003",  # missing-type-kwargs
-#  "ANN201",  # missing-return-type-class-method
-#  "ANN202",  # missing-return-type-private-function
-#  "ANN204",  # missing-return-type-special-method
-#  "ANN205",  # missing-return-type-static-method
-#  "ANN206",  # missing-return-type-class-method
-#  "ANN401",  # any-type
-#  "B010",    # set-attr-with-constant
-#  "C408",    # unnecessary-collection-call
+  "ANN001",  # missing-type-function-argument
+  "ANN201",  # missing-return-type-class-method
   "COM812",  # missing-trailing-comma
-#  "D100",    # undocumented-public-module
-#  "D101",    # undocumented-public-class
-#  "D102",    # undocumented-public-method
-#  "D103",    # undocumented-public-function
-#  "D104",    # undocumented-public-package
-#  "D105",    # undocumented-magic-method
-#  "D107",    # undocumented-public-init
-#  "D200",    # unnecessary-multiline-docstring
-#  "D202",    # blank-line-after-function
+  "D100",    # undocumented-public-module
+  "D103",    # undocumented-public-function
+  "D104",    # undocumented-public-package
   "D203",    # incorrect-blank-line-before-class
-#  "D205",    # missing-blank-line-after-summary
   "D212",    # multi-line-summary-first-line
-#  "D400",    # missing-trailing-period
-#  "D401",    # non-imperative-mood
-#  "D404",    # docstring-starts-with-this
-#  "E731",    # lambda-assignment
-#  "FBT001",  # boolean-type-hint-positional-argument
-#  "FBT002",  # boolean-default-value-positional-argument
-#  "FBT003",  # boolean-positional-value-in-call
-#  "FLY002",  # static-join-to-f-string
-#  "N813",    # camelcase-imported-as-lowercase
-#  "PLR0913", # too-many-arguments
-#  "PT019",   # pytest-fixture-param-without-value
-#  "PTH207",  # glob
-#  "RUF015",  # unnecessary-iterable-allocation-for-first-element
-#  "S101",    # assert
-#  "S103",    # bad-file-permissions
-#  "S506",    # unsafe-yaml-load
-#  "S602",    # subprocess-popen-with-shell-equals-true
-#  "S701",    # jinja2-autoescape-false
-#  "T201",    # print
-#  "TC006",   # runtime-cast-value
-#  "UP031",   # printf-string-formatting
-#  "UP032",   # f-string
+  "PT013",   # pytest-incorrect-pytest-import
+  "PTH207",  # glob
+  "S101",    # assert
 ]
