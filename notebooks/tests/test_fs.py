@@ -118,7 +118,7 @@ def test_fs_glob_copy_basic(load, report, tb):
     assert {Path(x) for x in glob(f"{d}/*")} == expected
     assert tb.cell_output_text(73) == load(base / "glob-copy.yaml")
     r = report(74)
-    assert {r["ready"]} == set(map(str, expected))
+    assert {*r["ready"]} == set(map(str, expected))
     assert not r["not-ready"]
 
 
@@ -130,7 +130,7 @@ def test_fs_glob_copy_recursive(load, report, tb):
     assert {Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()} == expected
     assert tb.cell_output_text(78) == load(base / "glob-copy-recursive.yaml")
     r = report(79)
-    assert {r["ready"]} == set(map(str, expected))
+    assert r["ready"] == sorted(list(map(str, expected)))
     assert not r["not-ready"]
 
 
@@ -151,7 +151,7 @@ def test_fs_glob_link_recursive(load, report, tb):
     assert {Path(x) for x in glob(f"{d}/**/*", recursive=True) if Path(x).is_file()} == expected
     assert tb.cell_output_text(86) == load(base / "glob-link-recursive.yaml")
     r = report(87)
-    assert {r["ready"]} == set(map(str, expected))
+    assert {*r["ready"]} == set(map(str, expected))
     assert not r["not-ready"]
 
 
@@ -163,7 +163,7 @@ def test_fs_glob_link_link_dirs(load, report, tb):
     assert {Path(x) for x in glob(f"{d}/*")} == expected
     assert tb.cell_output_text(90) == load(base / "glob-link-dirs.yaml")
     r = report(91)
-    assert {r["ready"]} == set(map(str, expected))
+    assert {*r["ready"]} == set(map(str, expected))
     assert not r["not-ready"]
 
 
@@ -171,7 +171,7 @@ def test_fs_copy_http(load, report, tb):
     d = Path("tmp/licenses")
     expected = d / "gpl"
     assert expected.is_file()
-    assert {glob(f"{d}/*")} == {str(expected)}
+    assert glob(f"{d}/*") == [str(expected)]
     assert tb.cell_output_text(94) == load(base / "copy-http.yaml")
     r = report(95)
     assert r["ready"] == [str(expected)]
