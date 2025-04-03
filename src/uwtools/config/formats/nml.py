@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from collections import OrderedDict
 from io import StringIO
-from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
@@ -12,13 +13,16 @@ from uwtools.config.tools import config_check_depths_dump
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 class NMLConfig(Config):
     """
     Work with Fortran namelist configs.
     """
 
-    def __init__(self, config: Union[dict, Optional[Path]] = None) -> None:
+    def __init__(self, config: dict | Path | None = None) -> None:
         """
         Construct an NMLConfig object.
 
@@ -37,7 +41,7 @@ class NMLConfig(Config):
         :param cfg: A dict object.
         """
 
-        def to_od(d):
+        def to_od(d: dict):
             return OrderedDict(
                 {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
             )
@@ -49,7 +53,7 @@ class NMLConfig(Config):
             return sio.getvalue().strip()
 
     @staticmethod
-    def _get_depth_threshold() -> Optional[int]:
+    def _get_depth_threshold() -> int | None:
         """
         Return the config's depth threshold.
         """
@@ -62,7 +66,7 @@ class NMLConfig(Config):
         """
         return FORMAT.nml
 
-    def _load(self, config_file: Optional[Path]) -> dict:
+    def _load(self, config_file: Path | None) -> dict:
         """
         Read and parse a Fortran namelist file.
 
@@ -84,7 +88,7 @@ class NMLConfig(Config):
         d = self.data
         return from_od(d.todict()) if isinstance(d, Namelist) else d
 
-    def dump(self, path: Optional[Path]) -> None:
+    def dump(self, path: Path | None) -> None:
         """
         Dump the config in Fortran namelist format.
 
@@ -93,7 +97,7 @@ class NMLConfig(Config):
         self.dump_dict(cfg=self.data, path=path)
 
     @classmethod
-    def dump_dict(cls, cfg: Union[dict, Namelist], path: Optional[Path] = None) -> None:
+    def dump_dict(cls, cfg: dict | Namelist, path: Path | None = None) -> None:
         """
         Dump a provided config dictionary in Fortran namelist format.
 

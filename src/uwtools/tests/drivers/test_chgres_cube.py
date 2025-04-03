@@ -1,13 +1,12 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 chgres_cube driver tests.
 """
+
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-import iotaa
+import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark
 
 from uwtools.drivers.chgres_cube import ChgresCube
@@ -18,8 +17,8 @@ from uwtools.scheduler import Slurm
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -116,7 +115,7 @@ def test_ChgresCube_driver_name(driverobj):
 def test_ChgresCube_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -124,7 +123,7 @@ def test_ChgresCube_namelist_file(driverobj, logged):
 
 def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'boolean'")
@@ -133,7 +132,7 @@ def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
 def test_ChgresCube_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged("missing.nml (namelist.base_file): Not ready [external asset]")
 

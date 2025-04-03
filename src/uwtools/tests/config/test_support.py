@@ -1,22 +1,15 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.config.jinja2 module.
 """
 
 from collections import OrderedDict
-from datetime import datetime
 
 import yaml
 from pytest import fixture, mark, raises
 
 from uwtools.config import support
-from uwtools.config.formats.fieldtable import FieldTableConfig
-from uwtools.config.formats.ini import INIConfig
-from uwtools.config.formats.nml import NMLConfig
-from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
-from uwtools.utils.file import FORMAT
 
 # Fixtures
 
@@ -30,7 +23,9 @@ def loader():
 # Tests
 
 
-@mark.parametrize("d,n", [({1: 42}, 1), ({1: {2: 42}}, 2), ({1: {2: {3: 42}}}, 3), ({1: {}}, 2)])
+@mark.parametrize(
+    ("d", "n"), [({1: 42}, 1), ({1: {2: 42}}, 2), ({1: {2: {3: 42}}}, 3), ({1: {}}, 2)]
+)
 def test_config_support_depth(d, n):
     assert support.depth(d) == n
 
@@ -43,25 +38,6 @@ def test_config_support_dict_to_yaml_str(capsys):
     assert str(cfgobj) == expected
     cfgobj.dump()
     assert capsys.readouterr().out.strip() == expected
-
-
-@mark.parametrize(
-    "cfgtype,fmt",
-    [
-        (FieldTableConfig, FORMAT.fieldtable),
-        (INIConfig, FORMAT.ini),
-        (NMLConfig, FORMAT.nml),
-        (SHConfig, FORMAT.sh),
-        (YAMLConfig, FORMAT.yaml),
-    ],
-)
-def test_config_support_format_to_config(cfgtype, fmt):
-    assert support.format_to_config(fmt) is cfgtype
-
-
-def test_config_support_format_to_config_fail():
-    with raises(UWConfigError):
-        support.format_to_config("no-such-config-type")
 
 
 def test_config_support_from_od():
@@ -78,7 +54,7 @@ def test_config_support_log_and_error(logged):
     assert logged(msg)
 
 
-class Test_UWYAMLConvert:
+class TestUWYAMLConvert:
     """
     Tests for class uwtools.config.support.UWYAMLConvert.
     """
@@ -87,7 +63,7 @@ class Test_UWYAMLConvert:
         assert yaml.dump(ts, default_flow_style=True).strip() == s
 
     @mark.parametrize(
-        "tag,val,val_type",
+        ("tag", "val", "val_type"),
         [
             ("!bool", True, "bool"),
             ("!dict", {1: 2}, "dict"),
@@ -106,21 +82,21 @@ class Test_UWYAMLConvert:
     # demonstrate that those nodes' convert() methods return representations in the type specified
     # by the tag.
 
-    @mark.parametrize("value, expected", [("False", False), ("True", True)])
+    @mark.parametrize(("value", "expected"), [("False", False), ("True", True)])
     def test_UWYAMLConvert_bool_values(self, expected, loader, value):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!bool", value=value))
         assert ts.converted == expected
 
     def test_UWYAMLConvert_datetime_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!datetime", value="foo"))
-        with raises(ValueError):
+        with raises(ValueError, match="Invalid isoformat string"):
             assert ts.converted
 
-    def test_UWYAMLConvert_datetime_ok(self, loader):
+    def test_UWYAMLConvert_datetime_ok(self, loader, utc):
         ts = support.UWYAMLConvert(
             loader, yaml.ScalarNode(tag="!datetime", value="2024-08-09 12:22:42")
         )
-        assert ts.converted == datetime(2024, 8, 9, 12, 22, 42)
+        assert ts.converted == utc(2024, 8, 9, 12, 22, 42)
         self.comp(ts, "!datetime '2024-08-09 12:22:42'")
 
     def test_UWYAMLConvert_dict_no(self, loader):
@@ -135,7 +111,7 @@ class Test_UWYAMLConvert:
 
     def test_UWYAMLConvert_float_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!float", value="foo"))
-        with raises(ValueError):
+        with raises(ValueError, match="could not convert string to float"):
             assert ts.converted
 
     def test_UWYAMLConvert_float_ok(self, loader):
@@ -145,7 +121,7 @@ class Test_UWYAMLConvert:
 
     def test_UWYAMLConvert_int_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="foo"))
-        with raises(ValueError):
+        with raises(ValueError, match="invalid literal"):
             assert ts.converted
 
     def test_UWYAMLConvert_int_ok(self, loader):
@@ -172,7 +148,7 @@ class Test_UWYAMLConvert:
         assert str(ts) == "[1, 2, 3]"
 
 
-class Test_UWYAMLGlob:
+class TestUWYAMLGlob:
     """
     Tests for class uwtools.config.support.UWYAMLGlob.
     """
@@ -184,7 +160,7 @@ class Test_UWYAMLGlob:
         assert str(node) == "!glob /path/to/*"
 
 
-class Test_UWYAMLRemove:
+class TestUWYAMLRemove:
     """
     Tests for class uwtools.config.support.UWYAMLRemove.
     """

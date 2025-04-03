@@ -1,5 +1,3 @@
-# pylint: disable=redefined-outer-name
-
 from pathlib import Path
 
 from pytest import fixture
@@ -58,10 +56,8 @@ def test_rocoto_building_workflows(load, tb):
 
 
 def test_rocoto_validate(tb):
-    with open(base / "simple-workflow.xml", "r", encoding="utf-8") as f:
-        simple_xml = f.read().rstrip()
-    with open(base / "err-workflow.xml", "r", encoding="utf-8") as f:
-        err_xml = f.read().rstrip()
+    simple_xml = (base / "simple-workflow.xml").read_text().rstrip()
+    err_xml = (base / "err-workflow.xml").read_text().rstrip()
     assert tb.cell_output_text(41) == simple_xml
     valid_out = ("INFO 0 Rocoto XML validation errors found", "True")
     assert all(x in tb.cell_output_text(43) for x in valid_out)

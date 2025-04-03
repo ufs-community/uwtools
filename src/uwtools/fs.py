@@ -2,13 +2,14 @@
 File and directory staging.
 """
 
-import datetime as dt
+from __future__ import annotations
+
 import glob
 from abc import ABC, abstractmethod
 from itertools import dropwhile, zip_longest
 from operator import eq
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 from iotaa import tasks
@@ -24,6 +25,9 @@ from uwtools.utils.api import str2path
 from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import directory, filecopy, symlink
 
+if TYPE_CHECKING:
+    import datetime as dt
+
 
 class Stager(ABC):
     """
@@ -32,11 +36,11 @@ class Stager(ABC):
 
     def __init__(
         self,
-        config: Optional[Union[dict, str, Path]] = None,
-        target_dir: Optional[Union[str, Path]] = None,
-        cycle: Optional[dt.datetime] = None,
-        leadtime: Optional[dt.timedelta] = None,
-        key_path: Optional[list[YAMLKey]] = None,
+        config: dict | str | Path | None = None,
+        target_dir: str | Path | None = None,
+        cycle: dt.datetime | None = None,
+        leadtime: dt.timedelta | None = None,
+        key_path: list[YAMLKey] | None = None,
     ) -> None:
         """
         Stage files and directories.
@@ -161,7 +165,7 @@ class FileStager(Stager):
     def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
         hsi_errmsg_prefix = "***"
         srcs: list[tuple[str, str, bool]] = []
-        success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(glob_pattern)}'")
+        success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{glob_pattern!s}'")
         if success:
             lines = output.strip().split("\n")
             if matches := [line for line in lines if not line.startswith(hsi_errmsg_prefix)][1:]:
@@ -183,7 +187,7 @@ class FileStager(Stager):
 
     @staticmethod
     def _expand_glob_resolve(glob_pattern: str, path: str, dst: str) -> tuple[str, str, bool]:
-        suffix: Union[Path, str]
+        suffix: Path | str
         if path == glob_pattern:  # degenerate case
             suffix = Path(path).parts[-1]
         else:
@@ -224,7 +228,7 @@ class Copier(FileStager):
         ]
 
     @staticmethod
-    def _simple(path: Union[Path, str]) -> Path:
+    def _simple(path: Path | str) -> Path:
         """
         Convert a path, potentially prefixed with scheme file://, into a simple filesystem path.
 

@@ -2,12 +2,15 @@
 Common iotaa tasks.
 """
 
+from __future__ import annotations
+
 import os
+from http import HTTPStatus
 from pathlib import Path
 from shutil import copy, move, which
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace as ns
-from typing import NoReturn, Union
+from typing import NoReturn
 from urllib.parse import unquote, urlparse
 
 import requests
@@ -43,7 +46,7 @@ def directory(path: Path):
 
 
 @external
-def executable(program: Union[Path, str]):
+def executable(program: Path | str):
     """
     An executable program located on the current path.
 
@@ -54,7 +57,7 @@ def executable(program: Union[Path, str]):
 
 
 @task
-def existing_hpss(path: Union[Path, str]):
+def existing_hpss(path: Path | str):
     """
     An existing file in HPSS.
 
@@ -65,7 +68,7 @@ def existing_hpss(path: Union[Path, str]):
     val = [False]
     yield asset(path, lambda: val[0])
     yield executable(STR.hsi)
-    available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{str(path)}'", taskname=taskname)
+    available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{path!s}'", taskname=taskname)
     val[0] = available
 
 
@@ -77,11 +80,14 @@ def existing_http(url: str):
     :param url: URL of the HTTP resource.
     """
     yield "Remote HTTP resource %s" % url
-    yield asset(url, lambda: requests.head(url, allow_redirects=True, timeout=3).status_code == 200)
+    yield asset(
+        url,
+        lambda: requests.head(url, allow_redirects=True, timeout=3).status_code == HTTPStatus.OK,
+    )
 
 
 @external
-def file(path: Union[Path, str], context: str = ""):
+def file(path: Path | str, context: str = ""):
     """
     An existing file.
 
@@ -94,7 +100,7 @@ def file(path: Union[Path, str], context: str = ""):
     yield asset(path, path.is_file)
 
 
-def filecopy(src: Union[Path, str], dst: Union[Path, str], check: bool = True) -> Node:
+def filecopy(src: Path | str, dst: Path | str, check: bool = True) -> Node:
     """
     A copy of an existing file.
 
@@ -115,7 +121,7 @@ def filecopy(src: Union[Path, str], dst: Union[Path, str], check: bool = True) -
         return filecopy_http(str(src), dst, check)
     if src_scheme in SCHEMES.local:
         return filecopy_local(_local_path(src), dst, check)
-    _bad_scheme(src, src_scheme)
+    _bad_scheme(src, src_scheme)  # noqa: RET503
 
 
 @task
@@ -173,13 +179,12 @@ def filecopy_http(url: str, dst: Path, check: bool = True):
     :param check: Check existence of source before trying to copy.
     """
     yield "HTTP %s -> %s" % (url, dst)
-    yield asset(Path(dst), Path(dst).is_file)
+    yield asset(dst, dst.is_file)
     yield existing_http(url) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(url, allow_redirects=True, timeout=3)
-    if (code := response.status_code) == 200:
-        with open(dst, "wb") as f:
-            f.write(response.content)
+    if (code := response.status_code) == HTTPStatus.OK:
+        dst.write_bytes(response.content)
     else:
         log.error("Could not get '%s', HTTP status was: %s", url, code)
 
@@ -201,7 +206,7 @@ def filecopy_local(src: Path, dst: Path, check: bool = True):
 
 
 @task
-def symlink(target: Union[Path, str], linkname: Union[Path, str], check: bool = True):
+def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     """
     A symbolic link.
 
@@ -221,7 +226,7 @@ def symlink(target: Union[Path, str], linkname: Union[Path, str], check: bool = 
 
 
 @external
-def symlink_target(path: Union[Path, str]):
+def symlink_target(path: Path | str):
     """
     An existing file, symlink, or directory.
 
@@ -236,7 +241,7 @@ def symlink_target(path: Union[Path, str]):
 # Private helpers
 
 
-def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
+def _bad_scheme(path: Path | str, scheme: str) -> NoReturn:
     """
     Fail on an unsupported URL scheme.
 
@@ -244,10 +249,11 @@ def _bad_scheme(path: Union[Path, str], scheme: str) -> NoReturn:
     :param scheme: The scheme.
     :raises: UWConfigError.
     """
-    raise UWConfigError(f"Scheme '{scheme}' in '{path}' not supported")
+    msg = f"Scheme '{scheme}' in '{path}' not supported"
+    raise UWConfigError(msg)
 
 
-def _local_path(path: Union[Path, str]) -> Path:
+def _local_path(path: Path | str) -> Path:
     """
     Ensure path is local and return simple version.
 

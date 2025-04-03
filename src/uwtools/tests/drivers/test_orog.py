@@ -1,7 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Orog driver tests.
 """
+
 from pathlib import Path
 from unittest.mock import patch
 
@@ -87,22 +87,22 @@ def test_Orog_driver_name(driverobj):
 
 
 def test_Orog_files_linked(driverobj):
-    for _, src in driverobj.config["files_to_link"].items():
+    for src in driverobj.config["files_to_link"].values():
         Path(src).touch()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert not (driverobj.rundir / dst).is_file()
     driverobj.files_linked()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert (driverobj.rundir / dst).is_symlink()
 
 
 @mark.parametrize("exist", [True, False])
 def test_Orog_grid_file_existence(driverobj, logged, exist):
     grid_file = Path(driverobj.config["grid_file"])
-    status = f"Input grid file {str(grid_file)}: Not ready [external asset]"
+    status = f"Input grid file {grid_file!s}: Not ready [external asset]"
     if exist:
         grid_file.touch()
-        status = f"Input grid file {str(grid_file)}: Ready"
+        status = f"Input grid file {grid_file!s}: Ready"
     driverobj.grid_file()
     assert logged(status)
 
@@ -119,9 +119,7 @@ def test_Orog_input_config_file_new(driverobj):
     grid_file = Path(driverobj.config["grid_file"])
     grid_file.touch()
     driverobj.input_config_file()
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as inps:
-        content = inps.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 3
     assert content[0] == "'{}'".format(driverobj.config["grid_file"])
     assert content[1] == ".false."
@@ -132,9 +130,7 @@ def test_Orog_input_config_file_old(driverobj):
     grid_file = Path(driverobj.config["grid_file"])
     grid_file.touch()
     driverobj.input_config_file()
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as inps:
-        content = inps.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 5
     assert len(content[0].split()) == 9
     assert content[1] == "'{}'".format(driverobj.config["grid_file"])

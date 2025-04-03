@@ -1,21 +1,21 @@
-[tool.black]
-line-length = 100
-
-[tool.isort]
-line_length = 100
-profile = "black"
-
-[tool.pylint.main]
-recursive = true
-
-[tool.pylint."messages control"]
-disable = [
-  "missing-function-docstring",
-  "missing-module-docstring",
-]
-enable = [
-  "useless-suppression",
-]
-
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "ANN001",  # missing-type-function-argument
+  "ANN201",  # missing-return-type-class-method
+  "COM812",  # missing-trailing-comma
+  "D100",    # undocumented-public-module
+  "D103",    # undocumented-public-function
+  "D104",    # undocumented-public-package
+  "D203",    # incorrect-blank-line-before-class
+  "D212",    # multi-line-summary-first-line
+  "PT013",   # pytest-incorrect-pytest-import
+  "PTH207",  # glob
+  "S101",    # assert
+]

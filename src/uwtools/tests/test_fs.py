@@ -1,8 +1,3 @@
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=protected-access
-# pylint: disable=redefined-outer-name
-
 from logging import getLogger
 from pathlib import Path
 from textwrap import dedent
@@ -30,8 +25,7 @@ def assets(tmp_path):
     fn2.touch()
     cfgdict = {"a": {"b": {"foo": str(fn1), "subdir/bar": str(fn2)}}}
     cfgfile = tmp_path / "config.yaml"
-    with open(cfgfile, "w", encoding="utf-8") as f:
-        yaml.dump(cfgdict, f)
+    cfgfile.write_text(yaml.dump(cfgdict))
     dstdir = tmp_path / "dst"
     return dstdir, cfgdict, cfgfile
 
@@ -89,7 +83,7 @@ def test_fs_Copier_go(src_func, dst_func, tgt_func):
     filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"), check=False)
 
 
-@mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ["dict", "file"])
 def test_fs_Copier_go__live(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -137,10 +131,10 @@ def test_fs_Copier__simple():
     assert fs.Copier._simple("relative/path") == Path("relative/path")
     assert fs.Copier._simple("/absolute/path") == Path("/absolute/path")
     assert fs.Copier._simple("file:///absolute/path") == Path("/absolute/path")
-    assert fs.Copier._simple("") == Path("")
+    assert fs.Copier._simple("") == Path("")  # noqa: PTH201
 
 
-@mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ["dict", "file"])
 def test_fs_FilerStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -206,7 +200,7 @@ def test_fs_FileStager__expand_glob__hsi_scheme():
     obj._expand_glob_hsi.assert_called_once_with("/src/a*", "/dst/<a>")
 
 
-@mark.parametrize(["matches", "success"], [(True, True), (False, True), (False, False)])
+@mark.parametrize(("matches", "success"), [(True, True), (False, True), (False, False)])
 def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
     obj = Mock(wraps=fs.FileStager)
     glob_pattern = "/src/a*"
@@ -258,7 +252,7 @@ def test_fs_FileStager__expand_glob_resolve(args):
     assert actual == (dst, path, nonglob)
 
 
-@mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ["dict", "file"])
 def test_fs_Linker(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -273,11 +267,11 @@ def test_Linker__expand_glob(_expand_glob_assets):
     dst, f, d, config = _expand_glob_assets
     fs.Linker(config=yaml.load(dedent(config), Loader=uw_yaml_loader())).go()
     # Both file and directory are linked:
-    assert set(dst.glob("*")) == set([dst / f.name, dst / d.name])
+    assert set(dst.glob("*")) == {dst / f.name, dst / d.name}
 
 
 @mark.parametrize(
-    "path,target_dir,msg,fail_expected",
+    ("path", "target_dir", "msg", "fail_expected"),
     [
         (
             "/other/path",
@@ -316,7 +310,7 @@ def test_fs_Stager__check_destination_paths__fail(path, target_dir, msg, fail_ex
 
 
 @mark.parametrize(
-    "path,fail_expected",
+    ("path", "fail_expected"),
     [("foo://bucket/a/b", True), ("/some/path", False), ("file:///some/path", False)],
 )
 def test_fs_Stager__check_target_dir__fail_bad_scheme(path, fail_expected):
@@ -327,7 +321,7 @@ def test_fs_Stager__check_target_dir__fail_bad_scheme(path, fail_expected):
         assert str(e.value) == "Non-filesystem path '%s' invalid as target directory" % path
 
 
-@mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ["dict", "file"])
 def test_fs_Stager__config_block__fail_bad_key_path(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile

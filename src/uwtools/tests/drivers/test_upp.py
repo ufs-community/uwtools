@@ -1,13 +1,12 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 UPP driver tests.
 """
+
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-import iotaa
+import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
@@ -58,8 +57,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 5, 6, 12)
+def cycle(utc):
+    return utc(2024, 5, 6, 12)
 
 
 @fixture
@@ -100,32 +99,32 @@ def test_UPP_driver_name(driverobj):
 
 
 def test_UPP_files_copied(driverobj):
-    for _, src in driverobj.config["files_to_copy"].items():
+    for src in driverobj.config["files_to_copy"].values():
         Path(src).touch()
-    for dst, _ in driverobj.config["files_to_copy"].items():
+    for dst in driverobj.config["files_to_copy"]:
         assert not (driverobj.rundir / dst).is_file()
     driverobj.files_copied()
-    for dst, _ in driverobj.config["files_to_copy"].items():
+    for dst in driverobj.config["files_to_copy"]:
         assert (driverobj.rundir / dst).is_file()
 
 
 def test_UPP_files_linked(driverobj):
-    for _, src in driverobj.config["files_to_link"].items():
+    for src in driverobj.config["files_to_link"].values():
         Path(src).touch()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert not (driverobj.rundir / dst).is_file()
     driverobj.files_linked()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert (driverobj.rundir / dst).is_symlink()
 
 
 def test_UPP_namelist_file(driverobj, logged):
     datestr = "2024-05-05_12:00:00"
-    with open(driverobj.config["namelist"]["base_file"], "w", encoding="utf-8") as f:
-        print("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr, file=f)
+    base_file = Path(driverobj.config["namelist"]["base_file"])
+    base_file.write_text("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr)
     dst = driverobj.rundir / "itag"
     assert not dst.is_file()
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -139,7 +138,7 @@ def test_UPP_namelist_file(driverobj, logged):
 def test_UPP_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
     del driverobj._config["namelist"]["base_file"]
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'integer'")
@@ -148,7 +147,7 @@ def test_UPP_namelist_file_fails_validation(driverobj, logged):
 def test_UPP_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(iotaa.refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged("missing.nml: Not ready [external asset]")
 
@@ -170,8 +169,7 @@ def test_UPP_output(driverobj, tmp_path):
     ]
     # fmt: on
     control_file = tmp_path / "postxconfig-NT.txt"
-    with open(control_file, "w", encoding="utf-8") as f:
-        print("\n".join(control_data), file=f)
+    control_file.write_text("\n".join(control_data))
     driverobj._config["control_file"] = str(control_file)
     expected = {"gribfiles": [str(driverobj.rundir / ("%s.GrbF24" % x)) for x in ("FOO", "BAR")]}
     assert driverobj.output == expected

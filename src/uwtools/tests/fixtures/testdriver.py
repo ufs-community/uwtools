@@ -11,7 +11,7 @@ class TestDriver(AssetsCycleBased):
     @iotaa.task
     def forty_two(self):
         """
-        42
+        Forty Two.
         """
         yield "42"
         yield iotaa.asset(42, lambda: True)

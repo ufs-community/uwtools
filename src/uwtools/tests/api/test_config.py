@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring
-
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -32,7 +30,7 @@ def test_compare():
 
 
 @mark.parametrize(
-    "classname,f",
+    ("classname", "f"),
     [
         ("FieldTableConfig", config.get_fieldtable_config),
         ("INIConfig", config.get_ini_config),
@@ -88,7 +86,7 @@ def test_realize_to_dict():
     with patch.object(config, "realize") as realize:
         config.realize_to_dict(**kwargs)
     realize.assert_called_once_with(
-        **dict({**kwargs, **{"output_file": Path(os.devnull), "output_format": FORMAT.yaml}})
+        **{**kwargs, "output_file": Path(os.devnull), "output_format": FORMAT.yaml}
     )
 
 
@@ -132,11 +130,10 @@ def test_validate_config_data(cfg):
     )
 
 
-@mark.parametrize("cast", (str, Path))
+@mark.parametrize("cast", [str, Path])
 def test_validate_config_path(cast, tmp_path):
     cfg = tmp_path / "config.yaml"
-    with open(cfg, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
+    cfg.write_text(yaml.dump({}))
     kwargs: dict = {"schema_file": "schema-file", "config_path": cast(cfg)}
     with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)

@@ -1,7 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
-
 import datetime as dt
-import os
 from pathlib import Path
 
 from pytest import fixture
@@ -13,7 +10,7 @@ from uwtools.strings import STR
 
 
 @fixture
-def kwargs(tmp_path):
+def kwargs(tmp_path, utc):
     dstdir, srcdir = tmp_path / "dst", tmp_path / "src"
     srcfile1, srcfile2 = srcdir / "f1", srcdir / "f2"
     srcdir.mkdir()
@@ -23,7 +20,7 @@ def kwargs(tmp_path):
     return {
         "target_dir": None,
         "config": config,
-        "cycle": dt.datetime.now(),
+        "cycle": utc(),
         "leadtime": dt.timedelta(hours=6),
         "key_path": ["a", "b"],
         "dry_run": False,
@@ -94,9 +91,9 @@ def test_fs_makedirs_pass(tmp_path):
 def test_fs_makedirs_fail(tmp_path):
     paths = [tmp_path / "foo" / x for x in ("bar", "baz")]
     assert not any(path.is_dir() for path in paths)
-    os.chmod(tmp_path, 0o555)  # make tmp_path read-only
+    tmp_path.chmod(0o555)  # make tmp_path read-only
     report = fs.makedirs(config={"makedirs": [str(path) for path in paths]})
     assert not any(path.is_dir() for path in paths)
     assert set(report[STR.ready]) == set()
     assert set(report[STR.notready]) == set(map(str, paths))
-    os.chmod(tmp_path, 0o755)  # make tmp_path writable
+    tmp_path.chmod(0o755)  # make tmp_path writable

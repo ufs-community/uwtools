@@ -6,11 +6,11 @@ all:
 	$(error Valid targets are: $(TARGETS))
 
 format:
-	black tests
-	isort tests
+	ruff format tests
+	ruff check --select I --fix tests
 
 lint:
-	pylint tests
+	ruff check tests
 
 test: test-nb
 

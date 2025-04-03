@@ -1,12 +1,11 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 sfc_climo_gen driver tests.
 """
+
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-import iotaa
+import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
 from uwtools.drivers import sfc_climo_gen
@@ -103,7 +102,7 @@ def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready_task):
-        path = Path(iotaa.refs(driverobj.namelist_file()))
+        path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -112,7 +111,7 @@ def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
 def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_task):
     driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready_task):
-        path = Path(iotaa.refs(driverobj.namelist_file()))
+        path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'integer'")

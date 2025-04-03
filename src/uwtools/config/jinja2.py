@@ -2,11 +2,13 @@
 Support for rendering Jinja2 templates.
 """
 
+from __future__ import annotations
+
 import os
 from datetime import datetime
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
@@ -35,8 +37,8 @@ class J2Template:
     def __init__(
         self,
         values: dict,
-        template_source: Optional[Union[str, Path]] = None,
-        searchpath: Optional[list[str]] = None,
+        template_source: str | Path | None = None,
+        searchpath: list[str] | None = None,
     ) -> None:
         """
         :param values: Values needed to render the provided template.
@@ -78,7 +80,7 @@ class J2Template:
 
     # Public methods
 
-    def dump(self, output_path: Optional[Path]) -> None:
+    def dump(self, output_path: Path | None) -> None:
         """
         Write rendered template to the path provided.
 
@@ -110,7 +112,7 @@ class J2Template:
 
 
 def dereference(
-    val: _ConfigVal, context: dict, local: Optional[dict] = None, keys: Optional[list[str]] = None
+    val: _ConfigVal, context: dict, local: dict | None = None, keys: list[str] | None = None
 ) -> _ConfigVal:
     """
     Render Jinja2 syntax, wherever possible.
@@ -156,7 +158,7 @@ def dereference(
     return rendered
 
 
-def deref_debug(action: str, val: Optional[_ConfigVal] = None) -> None:
+def deref_debug(action: str, val: _ConfigVal | None = None) -> None:
     """
     Log a debug-level message related to dereferencing.
 
@@ -169,16 +171,16 @@ def deref_debug(action: str, val: Optional[_ConfigVal] = None) -> None:
 
 
 def render(
-    values_src: Optional[Union[dict, Path]] = None,
-    values_format: Optional[str] = None,
-    input_file: Optional[Path] = None,
-    output_file: Optional[Path] = None,
-    overrides: Optional[dict[str, str]] = None,
+    values_src: dict | Path | None = None,
+    values_format: str | None = None,
+    input_file: Path | None = None,
+    output_file: Path | None = None,
+    overrides: dict[str, str] | None = None,
     env: bool = False,
-    searchpath: Optional[list[str]] = None,
+    searchpath: list[str] | None = None,
     values_needed: bool = False,
     dry_run: bool = False,
-) -> Optional[str]:
+) -> str | None:
     """
     Check and render a Jinja2 template.
 
@@ -210,7 +212,7 @@ def render(
     # Render the template. If there are missing values, report them and return an error to the
     # caller.
 
-    missing = [var for var in undeclared_variables if var not in values.keys()]
+    missing = [var for var in undeclared_variables if var not in values]
     if missing:
         _log_missing_values(missing)
         return None
@@ -256,14 +258,14 @@ def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     deref_debug("Converting", val.value)
     try:
         converted = val.converted
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:  # noqa: BLE001
         deref_debug("Conversion failed", str(e))
     else:
         deref_debug("Converted", converted)
     return converted
 
 
-def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
+def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     """
     Render a Jinja2 variable/expression as part of dereferencing.
 
@@ -280,7 +282,7 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     context = {**(local or {}), **context}
     try:
         rendered = template.render(context)
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:  # noqa: BLE001
         rendered = val
         deref_debug("Rendering failed", val)
         for line in str(e).split("\n"):
@@ -289,7 +291,7 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
         deref_debug("Rendered", rendered)
     try:
         loaded = yaml.load(rendered, Loader=uw_yaml_loader())
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:  # noqa: BLE001
         loaded = None
         deref_debug("Loading rendered value as YAML", rendered)
         for line in str(e).split("\n"):
@@ -333,8 +335,8 @@ def _register_filters(env: Environment) -> Environment:
 
     def path_join(path_components: list[str]) -> str:
         if any(isinstance(x, Undefined) for x in path_components):
-            raise UndefinedError()
-        return os.path.join(*path_components)
+            raise UndefinedError
+        return str(Path().joinpath(*path_components))
 
     filters = dict(env=lambda var: os.environ[var], path_join=path_join)
     env.filters.update(filters)
@@ -356,9 +358,9 @@ def _report(args: dict) -> None:
 
 
 def _supplement_values(
-    values_src: Optional[Union[dict, Path]] = None,
-    values_format: Optional[str] = None,
-    overrides: Optional[dict[str, str]] = None,
+    values_src: dict | Path | None = None,
+    values_format: str | None = None,
+    overrides: dict[str, str] | None = None,
     env: bool = False,
 ) -> dict:
     """
@@ -398,7 +400,7 @@ def _values_needed(undeclared_variables: set[str]) -> None:
         log.info("%s%s", INDENT, var)
 
 
-def _write_template(output_file: Optional[Path], rendered_template: str) -> str:
+def _write_template(output_file: Path | None, rendered_template: str) -> str:
     """
     Write the rendered template.
 

@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import math
-from collections import OrderedDict
 from datetime import datetime
 from functools import partial
 from importlib import import_module
-from typing import Callable, Type, Union
+from typing import TYPE_CHECKING, Callable, Union
 
 import yaml
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
+
+if TYPE_CHECKING:
+    from collections import OrderedDict
 
 INCLUDE_TAG = "!include"
 YAMLKey = Union[bool, float, int, str]
@@ -29,7 +31,7 @@ def depth(d: dict) -> int:
     return (max(map(depth, d.values()), default=0) + 1) if isinstance(d, dict) else 0
 
 
-def format_to_config(fmt: str) -> Type:
+def format_to_config(fmt: str) -> type:
     """
     Maps a CLI format name to its corresponding Config class.
 
@@ -43,13 +45,13 @@ def format_to_config(fmt: str) -> Type:
         FORMAT.sh: "SHConfig",
         FORMAT.yaml: "YAMLConfig",
     }
-    if not fmt in lookup:
+    if fmt not in lookup:
         raise log_and_error("Format '%s' should be one of: %s" % (fmt, ", ".join(lookup)))
-    cfgclass: Type = getattr(import_module(f"uwtools.config.formats.{fmt}"), lookup[fmt])
+    cfgclass: type = getattr(import_module(f"uwtools.config.formats.{fmt}"), lookup[fmt])
     return cfgclass
 
 
-def from_od(d: Union[OrderedDict, dict]) -> dict:
+def from_od(d: OrderedDict | dict) -> dict:
     """
     Return a (nested) dict with content equivalent to the given (nested) OrderedDict.
 
@@ -75,7 +77,7 @@ def uw_yaml_loader() -> type[yaml.SafeLoader]:
     """
     loader = yaml.SafeLoader
     for tag_class in (UWYAMLConvert, UWYAMLGlob, UWYAMLRemove):
-        for tag in getattr(tag_class, "TAGS"):
+        for tag in tag_class.TAGS:
             loader.add_constructor(tag, tag_class)
     return loader
 
@@ -105,7 +107,7 @@ class UWYAMLTag:
 
     @staticmethod
     def represent(
-        dumper: yaml.Dumper,  # pylint: disable=unused-argument
+        _dumper: yaml.Dumper,
         data: UWYAMLTag,
     ) -> yaml.nodes.Node:
         """
@@ -130,10 +132,12 @@ class UWYAMLTaggedStr(UWYAMLTag):
                 if node.start_mark is None
                 else node.start_mark.buffer.replace("\n\x00", "")
             )
-            raise UWConfigError(
-                "Value tagged %s must be type 'str' (not '%s') in: %s"
-                % (node.tag, node.value.__class__.__name__, hint)
+            msg = "Value tagged %s must be type 'str' (not '%s') in: %s" % (
+                node.tag,
+                node.value.__class__.__name__,
+                hint,
             )
+            raise UWConfigError(msg)
 
 
 class UWYAMLConvert(UWYAMLTaggedStr):

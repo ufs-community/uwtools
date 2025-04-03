@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring
 """
 Tests for uwtools.utils.file_helpers module.
 """

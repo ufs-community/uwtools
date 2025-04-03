@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
@@ -54,8 +52,8 @@ def test_make_execute(execute_kwargs):
         )
 
 
-def test_make_execute_cycle(execute_kwargs):
-    execute_kwargs["cycle"] = dt.datetime.now()
+def test_make_execute_cycle(execute_kwargs, utc):
+    execute_kwargs["cycle"] = utc()
     func = api.make_execute(driver_class=TestDriver, with_cycle=True)
     assert func.__name__ == "execute"
     assert func.__doc__ is not None
@@ -69,8 +67,8 @@ def test_make_execute_cycle(execute_kwargs):
         )
 
 
-def test_make_execute_cycle_leadtime(execute_kwargs):
-    execute_kwargs["cycle"] = dt.datetime.now()
+def test_make_execute_cycle_leadtime(execute_kwargs, utc):
+    execute_kwargs["cycle"] = utc()
     execute_kwargs["leadtime"] = dt.timedelta(hours=24)
     func = api.make_execute(driver_class=TestDriver, with_cycle=True, with_leadtime=True)
     assert func.__name__ == "execute"
@@ -92,13 +90,13 @@ def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
 
 
 @mark.parametrize("hours", [0, 24, 168])
-def test__execute(execute_kwargs, hours, tmp_path):
+def test__execute(execute_kwargs, hours, tmp_path, utc):
     graph_file = tmp_path / "g.dot"
     kwargs = {
         **execute_kwargs,
         "driver_class": TestDriverCL,
         "config": {"concrete": {"some": "config"}},
-        "cycle": dt.datetime.now(),
+        "cycle": utc(),
         "leadtime": dt.timedelta(hours=hours),
         "graph_file": graph_file,
     }

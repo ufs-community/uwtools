@@ -2,13 +2,14 @@
 Support for validating a config using JSON Schema.
 """
 
+from __future__ import annotations
+
 import json
 from functools import cache
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Union
 
 from jsonschema import Draft202012Validator, validators
-from jsonschema.exceptions import ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -18,6 +19,9 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
+if TYPE_CHECKING:
+    from jsonschema.exceptions import ValidationError
+
 # Public functions
 
 JSONValueT = Union[bool, dict, float, int, list, str]
@@ -25,7 +29,7 @@ ConfigDataT = Union[JSONValueT, YAMLConfig]
 ConfigPathT = Union[str, Path]
 
 
-def bundle(schema: dict, keys: Optional[list] = None) -> dict:
+def bundle(schema: dict, keys: list | None = None) -> dict:
     """
     Bundle a schema by dereferencing links to other schemas.
 
@@ -83,7 +87,7 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
 
 
 def validate_check_config(
-    config_data: Optional[ConfigDataT] = None, config_path: Optional[ConfigPathT] = None
+    config_data: ConfigDataT | None = None, config_path: ConfigPathT | None = None
 ) -> None:
     """
     Enforce mutual exclusivity of config_* arguments.
@@ -93,14 +97,15 @@ def validate_check_config(
     :raises: TypeError if both config_* arguments specified.
     """
     if config_data is not None and config_path is not None:
-        raise TypeError("Specify at most one of config_data, config_path")
+        msg = "Specify at most one of config_data, config_path"
+        raise TypeError(msg)
 
 
 def validate_internal(
     schema_name: str,
     desc: str,
-    config_data: Optional[ConfigDataT] = None,
-    config_path: Optional[ConfigPathT] = None,
+    config_data: ConfigDataT | None = None,
+    config_path: ConfigPathT | None = None,
 ) -> None:
     """
     Validate a config against a uwtools-internal schema.
@@ -127,8 +132,8 @@ def validate_internal(
 def validate_external(
     schema_file: Path,
     desc: str,
-    config_data: Optional[ConfigDataT] = None,
-    config_path: Optional[ConfigPathT] = None,
+    config_data: ConfigDataT | None = None,
+    config_path: ConfigPathT | None = None,
 ) -> None:
     """
     Validate a YAML config against the JSON Schema in the given schema file.
@@ -152,10 +157,10 @@ def validate_external(
         config = config_data
     if not str(schema_file).startswith(str(resource_path())):
         log.debug("Validating config against external schema file: %s", schema_file)
-    with open(schema_file, "r", encoding="utf-8") as f:
-        schema = json.load(f)
+    schema = json.loads(schema_file.read_text())
     if not validate(schema=schema, desc=desc, config=config):
-        raise UWConfigError("YAML validation errors")
+        msg = "YAML validation errors"
+        raise UWConfigError(msg)
 
 
 # Private functions
@@ -171,10 +176,12 @@ def _registry() -> Registry:
 
     def retrieve(uri: str) -> Resource:
         name = uri.split(":")[-1]
-        with open(resource_path(f"jsonschema/{name}.jsonschema"), "r", encoding="utf-8") as f:
-            return Resource(contents=json.load(f), specification=DRAFT202012)  # type: ignore
+        return Resource(
+            contents=json.loads(resource_path(f"jsonschema/{name}.jsonschema").read_text()),
+            specification=DRAFT202012,
+        )  # type: ignore[call-arg]
 
-    return Registry(retrieve=retrieve)  # type: ignore
+    return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
@@ -189,6 +196,6 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     type_checker = base.TYPE_CHECKER.redefine(
         "fs_src", lambda _, x: any(isinstance(x, t) for t in [str, UWYAMLGlob])
     )
-    UWValidator = validators.extend(base, type_checker=type_checker)
-    validator = UWValidator(schema, registry=_registry())
+    uwvalidator = validators.extend(base, type_checker=type_checker)
+    validator = uwvalidator(schema, registry=_registry())
     return list(validator.iter_errors(config))

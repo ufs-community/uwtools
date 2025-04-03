@@ -1,7 +1,7 @@
-[tool.black]
-line-length = 100
-
 [tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:"
+]
 fail_under = 100
 omit = ["*/tests/*"]
 show_missing = true
@@ -16,38 +16,69 @@ recursive = true
 wrap-descriptions = 100
 wrap-summaries = 100
 
-[tool.isort]
-line_length = 100
-profile = "black"
-
 [tool.mypy]
 check_untyped_defs = true
 pretty = true
 warn_return_any = true
 
-[tool.pylint.main]
-extension-pkg-allow-list = ["lxml"]
-jobs = 4
-load-plugins = ["iotaa.pylint"]
-recursive = true
+[tool.ruff]
+line-length = 100
 
-[tool.pylint."messages control"]
-disable = [
-  "consider-using-f-string",
-  "duplicate-code",
-  "invalid-name",
-  "missing-module-docstring",
-  "too-few-public-methods",
-  "too-many-arguments",
-  "too-many-branches",
-  "too-many-instance-attributes",
-  "too-many-lines",
-  "too-many-locals",
-  "too-many-positional-arguments",
-  "too-many-public-methods",
-  "unnecessary-lambda-assignment",
-  "use-dict-literal",
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "ANN002",  # missing-type-args
+  "ANN003",  # missing-type-kwargs
+  "ANN201",  # missing-return-type-class-method
+  "ANN202",  # missing-return-type-private-function
+  "ANN204",  # missing-return-type-special-method
+  "ANN205",  # missing-return-type-static-method
+  "ANN206",  # missing-return-type-class-method
+  "ANN401",  # any-type
+  "B010",    # set-attr-with-constant
+  "C408",    # unnecessary-collection-call
+  "COM812",  # missing-trailing-comma
+  "D100",    # undocumented-public-module
+  "D101",    # undocumented-public-class
+  "D102",    # undocumented-public-method
+  "D103",    # undocumented-public-function
+  "D104",    # undocumented-public-package
+  "D105",    # undocumented-magic-method
+  "D107",    # undocumented-public-init
+  "D200",    # unnecessary-multiline-docstring
+  "D202",    # blank-line-after-function
+  "D203",    # incorrect-blank-line-before-class
+  "D205",    # missing-blank-line-after-summary
+  "D212",    # multi-line-summary-first-line
+  "D400",    # missing-trailing-period
+  "D401",    # non-imperative-mood
+  "D404",    # docstring-starts-with-this
+  "E731",    # lambda-assignment
+  "FBT001",  # boolean-type-hint-positional-argument
+  "FBT002",  # boolean-default-value-positional-argument
+  "FBT003",  # boolean-positional-value-in-call
+  "FLY002",  # static-join-to-f-string
+  "N813",    # camelcase-imported-as-lowercase
+  "PLR0913", # too-many-arguments
+  "PT019",   # pytest-fixture-param-without-value
+  "PTH207",  # glob
+  "RUF015",  # unnecessary-iterable-allocation-for-first-element
+  "S101",    # assert
+  "S103",    # bad-file-permissions
+  "S506",    # unsafe-yaml-load
+  "S602",    # subprocess-popen-with-shell-equals-true
+  "S701",    # jinja2-autoescape-false
+  "T201",    # print
+  "TC006",   # runtime-cast-value
+  "UP031",   # printf-string-formatting
+  "UP032",   # f-string
 ]
-enable = [
-  "useless-suppression",
+
+[tool.ruff.lint.per-file-ignores]
+"uwtools/tests/*" = [
+  "ANN001",  # missing-type-function-argument
+  "N802",    # invalid-function-name
+  "PLR2004", # magic-value-comparison
+  "PT013",   # pytest-incorrect-pytest-import
+  "SLF001",  # private-member-access
 ]

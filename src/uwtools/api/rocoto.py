@@ -2,19 +2,24 @@
 API access to ``uwtools`` Rocoto support.
 """
 
-from pathlib import Path
-from typing import Optional, Union
+from __future__ import annotations
 
-from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
+from typing import TYPE_CHECKING
+
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
+
 
 def realize(
-    config: Optional[Union[_YAMLConfig, Path, str]],
-    output_file: Optional[Union[Path, str]] = None,
+    config: _YAMLConfig | Path | str | None,
+    output_file: Path | str | None = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -36,7 +41,7 @@ def realize(
 
 
 def validate(
-    xml_file: Optional[Union[Path, str]] = None,
+    xml_file: Path | str | None = None,
     stdin_ok: bool = False,
 ) -> bool:
     """

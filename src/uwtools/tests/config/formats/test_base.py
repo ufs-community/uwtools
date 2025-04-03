@@ -1,11 +1,11 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for the uwtools.config.base module.
 """
-import datetime as dt
+
 import os
 from datetime import datetime
 from textwrap import dedent
+from typing import cast
 from unittest.mock import patch
 
 import yaml
@@ -26,8 +26,7 @@ from uwtools.utils.file import FORMAT, readable
 def config(tmp_path):
     path = tmp_path / "config.yaml"
     data = {"foo": 42}
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(data, f)
+    path.write_text(yaml.dump(data))
     return ConcreteConfig(config=path)
 
 
@@ -83,8 +82,7 @@ def test__depth(config):
 def test__load_paths(config, tmp_path):
     paths = (tmp_path / fn for fn in ("f1", "f2"))
     for path in paths:
-        with open(path, "w", encoding="utf-8") as f:
-            yaml.dump({path.name: "defined"}, f)
+        path.write_text(yaml.dump({path.name: "defined"}))
     cfg = config._load_paths(config_files=paths)
     for path in paths:
         assert cfg[path.name] == "present"
@@ -107,7 +105,6 @@ def test__parse_include(config):
         }
     )
     config._parse_include()
-
     assert config["fruit"] == "papaya"
     assert config["how_many"] == 17
     assert config["config"]["meat"] == "beef"
@@ -234,8 +231,7 @@ l: "22"
 
 """.strip()
     path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        print(yaml, file=f)
+    path.write_text(yaml)
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
         retval = config.dereference()
@@ -270,13 +266,12 @@ l: "22"
     }
 
 
-def test_dereference_context_override(tmp_path):
+def test_dereference_context_override(tmp_path, utc):
     yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
     path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        print(yaml, file=f)
+    path.write_text(yaml)
     config = YAMLConfig(path)
-    config.dereference(context={"cycle": dt.datetime(2024, 2, 12, 6)})
+    config.dereference(context={"cycle": utc(2024, 2, 12, 6)})
     assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
@@ -290,7 +285,7 @@ def test_invalid_config(fmt2, tmp_path):
     cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
     depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
-        tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
+        cast(Config, tools.format_to_config(fmt2)).dump_dict(cfg=cfgin.data, path=outfile)
     assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
 
 

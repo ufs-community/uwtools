@@ -2,7 +2,7 @@
 A driver for make_solo_mosaic.
 """
 
-from typing import Optional
+from __future__ import annotations
 
 from iotaa import tasks
 
@@ -28,7 +28,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
 
     # Public helper methods
 
-    def taskname(self, suffix: Optional[str] = None) -> str:
+    def taskname(self, suffix: str | None = None) -> str:
         """
         Return a common tag for graph-task log messages.
 

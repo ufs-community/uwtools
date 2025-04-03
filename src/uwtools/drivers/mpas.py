@@ -34,9 +34,10 @@ class MPAS(MPASBase):
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"lbc.{file_date.strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+            target = Path(lbcs["path"], fn)
             linkname = self.rundir / fn
-            symlinks[linkname] = Path(lbcs["path"], fn)
-        yield [symlink(target=t, linkname=l) for l, t in symlinks.items()]
+            symlinks[target] = linkname
+        yield [symlink(target=tgt, linkname=lnk) for tgt, lnk in symlinks.items()]
 
     @task
     def namelist_file(self):

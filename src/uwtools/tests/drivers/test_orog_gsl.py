@@ -1,7 +1,7 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 orog_gsl driver tests.
 """
+
 from pathlib import Path
 from unittest.mock import patch
 
@@ -80,9 +80,7 @@ def test_OrogGSL_driver_name(driverobj):
 def test_OrogGSL_input_config_file(driverobj):
     driverobj.input_config_file()
     inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as cfg_file:
-        content = cfg_file.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 3
     assert content == inputs
 

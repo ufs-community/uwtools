@@ -1,15 +1,13 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 CDEPS driver tests.
 """
 
-import datetime as dt
 from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 import iotaa
 from pytest import fixture, mark
 
@@ -23,10 +21,9 @@ from uwtools.tests.test_schemas import CDEPS_CONFIG
 
 
 @fixture
-def driverobj(tmp_path):
+def driverobj(tmp_path, utc):
     return CDEPS(
-        config={"cdeps": {**deepcopy(CDEPS_CONFIG), "rundir": str(tmp_path / "run")}},
-        cycle=dt.datetime.now(),
+        config={"cdeps": {**deepcopy(CDEPS_CONFIG), "rundir": str(tmp_path / "run")}}, cycle=utc()
     )
 
 
@@ -68,7 +65,7 @@ def test_CDEPS_nml(driverobj, group, logged):
     assert not dst.is_file()
     del driverobj._config[f"{group}_in"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
-    path = Path(iotaa.refs(task()))
+    path = Path(task().refs)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -103,11 +100,10 @@ def test_CDEPS_streams(driverobj, group):
     {{ streams.stream01.yearLast }}
     """
     template_file = driverobj.rundir.parent / "template.jinja2"
-    with open(template_file, "w", encoding="utf-8") as f:
-        print(dedent(template).strip(), file=f)
+    template_file.write_text(dedent(template).strip())
     driverobj._config[f"{group}_streams"]["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
-    path = Path(iotaa.refs(task()))
+    path = Path(task().refs)
     assert dst.is_file()
     expected = """
     1.5
@@ -125,8 +121,7 @@ def test_CDEPS_streams(driverobj, group):
     1
     1
     """
-    with open(path, "r", encoding="utf-8") as f:
-        assert f.read().strip() == dedent(expected).strip()
+    assert path.read_text().strip() == dedent(expected).strip()
 
 
 def test_CDEPS__model_namelist_file(driverobj):

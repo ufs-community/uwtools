@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring
 """
 Tests for uwtools.config_validator module.
 """

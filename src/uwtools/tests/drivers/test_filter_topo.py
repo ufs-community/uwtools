@@ -1,12 +1,11 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 filter_topo driver tests.
 """
+
 from pathlib import Path
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-import iotaa
+import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
 from uwtools.config.support import from_od
@@ -103,7 +102,7 @@ def test_FilterTopo_input_grid_file(driverobj):
 
 
 def test_FilterTopo_namelist_file(driverobj):
-    path = iotaa.refs(driverobj.namelist_file())
+    path = driverobj.namelist_file().refs
     actual = from_od(f90nml.read(path).todict())
     expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected

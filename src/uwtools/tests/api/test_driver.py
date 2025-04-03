@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring
-
 from pytest import mark
 
 from uwtools.api import driver as driver_api

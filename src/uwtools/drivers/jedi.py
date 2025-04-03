@@ -4,7 +4,7 @@ A driver for the jedi component.
 
 from pathlib import Path
 
-from iotaa import asset, refs, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.drivers.support import set_driver_docstring
@@ -47,7 +47,7 @@ class JEDI(JEDIBase):
         executable = file(Path(self.config[STR.execution][STR.executable]))
         config = self.configuration_file()
         yield [executable, config]
-        cmd = "time %s --validate-only %s 2>&1" % (refs(executable), refs(config))
+        cmd = "time %s --validate-only %s 2>&1" % (executable.refs, config.refs)
         if envcmds := self.config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
         success, _ = run_shell_cmd(cmd)

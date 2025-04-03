@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import difflib
-import os
 import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import Optional, Union
 
 import yaml
 
@@ -25,7 +23,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config: Optional[Union[dict, str, Config, Path]] = None) -> None:
+    def __init__(self, config: dict | str | Config | Path | None = None) -> None:
         """
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
@@ -34,16 +32,18 @@ class Config(ABC, UserDict):
             self._config_file = None
             self.update(config)
         elif isinstance(config, Config):
-            self._config_file = config._config_file
+            self._config_file = config._config_file  # noqa: SLF001
             self.update(config.data)
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
         if self._get_depth_threshold() and self._depth != self._get_depth_threshold():
-            raise UWConfigError(
-                "Cannot instantiate depth-%s %s with depth-%s config"
-                % (self._get_depth_threshold(), type(self).__name__, self._depth)
+            msg = "Cannot instantiate depth-%s %s with depth-%s config" % (
+                self._get_depth_threshold(),
+                type(self).__name__,
+                self._depth,
             )
+            raise UWConfigError(msg)
 
     def __repr__(self) -> str:
         """
@@ -121,7 +121,7 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def _get_depth_threshold() -> Optional[int]:
+    def _get_depth_threshold() -> int | None:
         """
         Return the config's depth threshold.
         """
@@ -134,7 +134,7 @@ class Config(ABC, UserDict):
         """
 
     @abstractmethod
-    def _load(self, config_file: Optional[Path]) -> dict:
+    def _load(self, config_file: Path | None) -> dict:
         """
         Read and parse a config file.
 
@@ -152,17 +152,18 @@ class Config(ABC, UserDict):
         """
         cfg = {}
         for config_file in config_files:
-            if not os.path.isabs(config_file):
+            cf = config_file
+            if not Path(cf).is_absolute():
                 if self._config_file:
-                    config_file = self._config_file.parent / config_file
+                    cf = self._config_file.parent / config_file
                 else:
                     raise log_and_error(
-                        "Reading from stdin, a relative path was encountered: %s" % config_file
+                        "Reading from stdin, a relative path was encountered: %s" % cf
                     )
-            cfg.update(self._load(config_file=config_file))
+            cfg.update(self._load(config_file=cf))
         return cfg
 
-    def _parse_include(self, ref_dict: Optional[dict] = None) -> None:
+    def _parse_include(self, ref_dict: dict | None = None) -> None:
         """
         Recursively process include directives in a config object.
 
@@ -177,11 +178,10 @@ class Config(ABC, UserDict):
         for key, value in deepcopy(ref_dict).items():
             if isinstance(value, dict):
                 self._parse_include(ref_dict[key])
-            elif isinstance(value, str):
-                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
-                    filepaths = yaml.safe_load(m[1])
-                    self.update_from(self._load_paths(filepaths))
-                    del ref_dict[key]
+            elif isinstance(value, str) and (m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value)):
+                filepaths = yaml.safe_load(m[1])
+                self.update_from(self._load_paths(filepaths))
+                del ref_dict[key]
 
     # Public methods
 
@@ -192,7 +192,7 @@ class Config(ABC, UserDict):
         """
 
     def compare_config(
-        self, dict1: dict, dict2: Optional[dict] = None, header: Optional[bool] = True
+        self, dict1: dict, dict2: dict | None = None, header: bool | None = True
     ) -> bool:
         """
         Compare two config dictionaries.
@@ -215,13 +215,13 @@ class Config(ABC, UserDict):
         return False
 
     @property
-    def config_file(self) -> Optional[Path]:
+    def config_file(self) -> Path | None:
         """
         Return the path to the config file from which this object was instantiated, if applicable.
         """
         return self._config_file
 
-    def dereference(self, context: Optional[dict] = None) -> Config:
+    def dereference(self, context: dict | None = None) -> Config:
         """
         Render as much Jinja2 syntax as possible.
         """
@@ -242,7 +242,7 @@ class Config(ABC, UserDict):
         return self
 
     @abstractmethod
-    def dump(self, path: Optional[Path]) -> None:
+    def dump(self, path: Path | None) -> None:
         """
         Dump the config to stdout or a file.
 
@@ -251,7 +251,7 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
+    def dump_dict(cfg: dict, path: Path | None = None) -> None:
         """
         Dump a provided config dictionary to stdout or a file.
 
@@ -259,7 +259,7 @@ class Config(ABC, UserDict):
         :param path: Path to dump config to (default: stdout).
         """
 
-    def update_from(self, src: Union[dict, UserDict]) -> None:
+    def update_from(self, src: dict | UserDict) -> None:
         """
         Update a config.
 

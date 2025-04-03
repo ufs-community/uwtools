@@ -1,11 +1,10 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Ungrib driver tests.
 """
-import datetime as dt
+
 from unittest.mock import patch
 
-import f90nml  # type: ignore
+import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
 from uwtools.drivers import ungrib
@@ -44,8 +43,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -87,9 +86,7 @@ def test_Ungrib_gribfiles(driverobj, tmp_path):
     cycle_hr = 12
     for n, forecast_hour in enumerate((6, 12, 18)):
         links = [driverobj.rundir / f"GRIBFILE.{ungrib._ext(n)}"]
-        infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(
-            cycle_hr=cycle_hr, forecast_hour=forecast_hour
-        )
+        infile = tmp_path / f"gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}"
         infile.touch()
     assert not any(link.is_file() for link in links)
     driverobj.gribfiles()

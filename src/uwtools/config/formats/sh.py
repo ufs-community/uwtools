@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import re
 import shlex
-from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
@@ -9,13 +10,16 @@ from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 class SHConfig(Config):
     """
     Work with key=value shell configs.
     """
 
-    def __init__(self, config: Union[dict, Optional[Path]] = None):
+    def __init__(self, config: dict | Path | None = None):
         """
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
@@ -38,7 +42,7 @@ class SHConfig(Config):
         return "\n".join(lines)
 
     @staticmethod
-    def _get_depth_threshold() -> Optional[int]:
+    def _get_depth_threshold() -> int | None:
         """
         Return the config's depth threshold.
         """
@@ -51,7 +55,7 @@ class SHConfig(Config):
         """
         return FORMAT.sh
 
-    def _load(self, config_file: Optional[Path]) -> dict:
+    def _load(self, config_file: Path | None) -> dict:
         """
         Read and parse key=value lines from shell code.
 
@@ -79,7 +83,7 @@ class SHConfig(Config):
         """
         return self.data
 
-    def dump(self, path: Optional[Path]) -> None:
+    def dump(self, path: Path | None) -> None:
         """
         Dump the config as key=value lines.
 
@@ -89,7 +93,7 @@ class SHConfig(Config):
         self.dump_dict(self.data, path)
 
     @classmethod
-    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
+    def dump_dict(cls, cfg: dict, path: Path | None = None) -> None:
         """
         Dump a provided config dictionary in bash format.
 

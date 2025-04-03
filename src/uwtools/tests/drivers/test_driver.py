@@ -1,15 +1,13 @@
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=protected-access
-# pylint: disable=redefined-outer-name
 """
 Tests for uwtools.drivers.driver module.
 """
+
+from __future__ import annotations
+
 import datetime as dt
 import json
 from pathlib import Path
 from textwrap import dedent
-from typing import Optional
 from unittest.mock import Mock, PropertyMock, patch
 
 import iotaa
@@ -25,7 +23,6 @@ from uwtools.scheduler import Slurm
 
 
 class Common:
-
     __test__ = False
 
     @iotaa.task
@@ -41,7 +38,7 @@ class Common:
     def provisioned_rundir(self):
         pass
 
-    def _validate(self, schema_file: Optional[Path] = None) -> None:
+    def _validate(self, schema_file: Path | None = None) -> None:
         pass
 
 
@@ -66,17 +63,15 @@ class ConcreteDriverCycleLeadtimeBased(Common, driver.DriverCycleLeadtimeBased):
 
 
 class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
-
     @property
     def output(self):
         # The dict keys are intentionally out-of-alphabetical-order to test JSON sorting.
         return {"bar": ["/path/to/bar1", "/path/to/bar2"], "foo": "/path/to/foo"}
 
 
-def write(path, x):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(x, f)
-        return path
+def write(path: Path, x):
+    path.write_text(json.dumps(x))
+    return path
 
 
 # Fixtures
@@ -152,15 +147,15 @@ def test_Assets_fail_bad_config(config):
     assert str(e.value) == "Required 'concrete' block missing in config"
 
 
-def test_Assets___repr___cycle_based(config):
-    obj = ConcreteAssetsCycleBased(config=config, cycle=dt.datetime(2024, 7, 2, 12))
+def test_Assets___repr___cycle_based(config, utc):
+    obj = ConcreteAssetsCycleBased(config=config, cycle=utc(2024, 7, 2, 12))
     expected = "concrete 2024-07-02T12:00 in %s" % obj.config["rundir"]
     assert repr(obj) == expected
 
 
-def test_Assets___repr___cycle_and_leadtime_based(config):
+def test_Assets___repr___cycle_and_leadtime_based(config, utc):
     obj = ConcreteAssetsCycleLeadtimeBased(
-        config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
+        config=config, cycle=utc(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
     expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj.config["rundir"]
     assert repr(obj) == expected
@@ -180,14 +175,14 @@ def test_Assets_config(assetsobj):
     # The user-accessible object is equivalent to the internal driver config:
     assert assetsobj.config == assetsobj._config
     # But they are separate objects:
-    assert not assetsobj.config is assetsobj._config
+    assert assetsobj.config is not assetsobj._config
 
 
 def test_Assets_config_full(assetsobj):
     # The user-accessible object is equivalent to the internal driver config:
     assert assetsobj.config_full == assetsobj._config_full
     # But they are separate objects:
-    assert not assetsobj.config_full is assetsobj._config_full
+    assert assetsobj.config_full is not assetsobj._config_full
 
 
 def test_Assets_controller(config, controller_schema):
@@ -201,8 +196,8 @@ def test_Assets_controller(config, controller_schema):
         )
 
 
-def test_Assets_cycle(config):
-    cycle = dt.datetime(2024, 7, 2, 12)
+def test_Assets_cycle(config, utc):
+    cycle = utc(2024, 7, 2, 12)
     obj = ConcreteAssetsCycleBased(config=config, cycle=cycle)
     assert obj.cycle == cycle
 
@@ -214,8 +209,8 @@ def test_Assets_key_path(config, tmp_path):
     assert assetsobj.config == config[assetsobj.driver_name()]
 
 
-def test_Assets_leadtime(config):
-    cycle = dt.datetime(2024, 7, 2, 12)
+def test_Assets_leadtime(config, utc):
+    cycle = utc(2024, 7, 2, 12)
     leadtime = dt.timedelta(hours=6)
     obj = ConcreteAssetsCycleLeadtimeBased(config=config, cycle=cycle, leadtime=leadtime)
     assert obj.cycle == cycle
@@ -240,12 +235,11 @@ def test_Assets_validate_key_path(config, controller_schema):
         )
 
 
-@mark.parametrize("should_pass,t", [(True, "integer"), (False, "string")])
+@mark.parametrize(("should_pass", "t"), [(True, "integer"), (False, "string")])
 def test_Assets_validate_schema_file(logged, should_pass, t, tmp_path):
     path = tmp_path / "test.jsonschema"
     schema = {"properties": {"concrete": {"properties": {"n": {"type": t}}}}}
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(schema, f)
+    path.write_text(json.dumps(schema))
     test = lambda: ConcreteAssetsTimeInvariant(config={"concrete": {"n": 1}}, schema_file=path)
     with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
         if should_pass:
@@ -257,7 +251,7 @@ def test_Assets_validate_schema_file(logged, should_pass, t, tmp_path):
 
 
 @mark.parametrize(
-    "base_file,update_values,expected",
+    ("base_file", "update_values", "expected"),
     [
         (False, False, {}),
         (False, True, {"a": 33}),
@@ -277,9 +271,7 @@ def test_Assets__create_user_updated_config_base_file(
     ConcreteAssetsTimeInvariant._create_user_updated_config(
         config_class=YAMLConfig, config_values=dc, path=path
     )
-    with open(path, "r", encoding="utf-8") as f:
-        updated = yaml.safe_load(f)
-    assert updated == expected
+    assert yaml.safe_load(path.read_text()) == expected
 
 
 def test_Assets__delegate(driverobj):
@@ -329,8 +321,8 @@ def test_Driver(driverobj):
     assert driverobj._batch is True
 
 
-def test_Driver_cycle(config):
-    cycle = dt.datetime(2024, 7, 2, 12)
+def test_Driver_cycle(config, utc):
+    cycle = utc(2024, 7, 2, 12)
     obj = ConcreteDriverCycleBased(config=config, cycle=cycle)
     assert obj.cycle == cycle
 
@@ -350,8 +342,8 @@ def test_Driver_controller(config, controller_schema):
         )
 
 
-def test_Driver_leadtime(config):
-    cycle = dt.datetime(2024, 7, 2, 12)
+def test_Driver_leadtime(config, utc):
+    cycle = utc(2024, 7, 2, 12)
     leadtime = dt.timedelta(hours=6)
     obj = ConcreteDriverCycleLeadtimeBased(config=config, cycle=cycle, leadtime=leadtime)
     assert obj.cycle == cycle
@@ -366,8 +358,7 @@ def test_Driver_namelist_schema_default(driverobj, tmp_path):
         }
     }
     schema_path = tmp_path / "test.jsonschema"
-    with open(schema_path, "w", encoding="utf-8") as f:
-        json.dump(schema, f)
+    schema_path.write_text(json.dumps(schema))
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"namelist": {"validate": True}}
         with patch.object(driver, "internal_schema_file", return_value=schema_path):
@@ -378,8 +369,7 @@ def test_Driver_namelist_schema_external(driverobj, tmp_path):
     nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
     schema = {"foo": {"bar": nmlschema}}
     schema_path = tmp_path / "test.jsonschema"
-    with open(schema_path, "w", encoding="utf-8") as f:
-        json.dump(schema, f)
+    schema_path.write_text(json.dumps(schema))
     with patch.object(ConcreteDriverTimeInvariant, "config", new_callable=PropertyMock) as dc:
         dc.return_value = {"baz": {"qux": {"validate": True}}}
         driverobj.schema_file = schema_path
@@ -400,8 +390,8 @@ def test_Driver_output(config):
 
 
 @mark.parametrize("cls", [ConcreteDriverCycleBased, ConcreteDriverCycleLeadtimeBased])
-def test_Driver_output_not_implemented(cls, config):
-    kwargs = {"config": config, "cycle": dt.datetime(2024, 10, 22, 12)}
+def test_Driver_output_not_implemented(cls, config, utc):
+    kwargs = {"config": config, "cycle": utc(2024, 10, 22, 12)}
     if cls == ConcreteDriverCycleLeadtimeBased:
         kwargs["leadtime"] = 6
     driverobj = cls(**kwargs)
@@ -427,7 +417,8 @@ def test_Driver_run(batch, driverobj):
 
 
 @mark.parametrize(
-    "arg,type_", [("envcmds", list), ("envvars", dict), ("execution", list), ("scheduler", Slurm)]
+    ("arg", "type_"),
+    [("envcmds", list), ("envvars", dict), ("execution", list), ("scheduler", Slurm)],
 )
 def test_Driver_runscript(arg, driverobj, type_):
     with patch.object(driverobj, "_runscript") as runscript:
@@ -458,7 +449,7 @@ def test_driver_show_output_fail(config, logged):
 
 
 @mark.parametrize(
-    "base_file,update_values,expected",
+    ("base_file", "update_values", "expected"),
     [
         (False, False, {}),
         (False, True, {"a": 33}),
@@ -477,9 +468,7 @@ def test_Driver__create_user_updated_config_base_file(
     ConcreteDriverTimeInvariant._create_user_updated_config(
         config_class=YAMLConfig, config_values=driverobj.config, path=path
     )
-    with open(path, "r", encoding="utf-8") as f:
-        updated = yaml.safe_load(f)
-    assert updated == expected
+    assert yaml.safe_load(path.read_text()) == expected
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -586,10 +575,10 @@ def test_Driver__runscript_path(driverobj):
 
 
 def test_Driver__scheduler(driverobj):
-    with patch.object(driver, "JobScheduler") as JobScheduler:
-        scheduler = JobScheduler.get_scheduler()
+    with patch.object(driver, "JobScheduler") as js:
+        scheduler = js.get_scheduler()
         assert driverobj._scheduler == scheduler
-        JobScheduler.get_scheduler.assert_called_with(driverobj._run_resources)
+        js.get_scheduler.assert_called_with(driverobj._run_resources)
 
 
 def test_Driver__validate_external(config):
@@ -641,9 +630,7 @@ def test_Driver__write_runscript(driverobj):
     time foo bar baz {executable}
     test $? -eq 0 && touch runscript.concrete.done
     """
-    with open(path, "r", encoding="utf-8") as f:
-        actual = f.read()
-    assert actual.strip() == dedent(expected).strip()
+    assert path.read_text().strip() == dedent(expected).strip()
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):
@@ -658,9 +645,8 @@ def test__add_docstring():
     class C:
         pass
 
-    assert getattr(C, "__doc__") is None
+    assert C.__doc__ is None
     with patch.object(driver, "C", C, create=True):
-        class_ = driver.C  # type: ignore # pylint: disable=no-member
         omit = [
             "batch",
             "config",
@@ -670,5 +656,6 @@ def test__add_docstring():
             "leadtime",
             "schema_file",
         ]
-        driver._add_docstring(class_=class_, omit=omit)
-    assert getattr(C, "__doc__").strip() == "A driver."
+        driver._add_docstring(class_=C, omit=omit)
+    assert (docstring := C.__doc__) is not None
+    assert docstring.strip() == "A driver."

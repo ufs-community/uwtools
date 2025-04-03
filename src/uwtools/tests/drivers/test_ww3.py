@@ -1,8 +1,8 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 WaveWatchIII driver tests.
 """
-import datetime as dt
+
+from pathlib import Path
 from unittest.mock import patch
 
 import yaml
@@ -30,8 +30,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -56,8 +56,7 @@ def test_WaveWatchIII_driver_name(driverobj):
 
 def test_WaveWatchIII_namelist_file(driverobj):
     src = driverobj.config["namelist"]["template_file"]
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
+    Path(src).write_text(yaml.dump({}))
     dst = driverobj.rundir / "ww3_shel.nml"
     assert not dst.is_file()
     driverobj.namelist_file()

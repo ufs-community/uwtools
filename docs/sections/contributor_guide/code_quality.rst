@@ -10,9 +10,9 @@ In an active development shell, the following ``make`` targets are available and
    * - Command
      - Description
    * - ``make format``
-     - Formats code with :black:`black<>`, imports with :isort:`isort<>`, docstrings with :docformatter:`docformatter<>`, and ``.jsonschema`` documents with :jq:`jq<>`
+     - Formats code and imports with :ruff:`ruff<>`, docstrings with :docformatter:`docformatter<>`, and JSON documents with :jq:`jq<>`
    * - ``make lint``
-     - Lints code with :pylint:`pylint<>`
+     - Lints code with :ruff:`ruff<>`
    * - ``make typecheck``
      - Typechecks code with :mypy:`mypy<>`
    * - ``make unittest``
