@@ -1,0 +1,1 @@
+hsi -q ls -1 /BMC/rtrr/5year/uwtools/*.tar

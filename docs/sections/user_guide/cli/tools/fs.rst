@@ -24,10 +24,8 @@ Source paths prefixed with ``http://``, ``https://``, or ``hsi://`` will be copi
 .. literalinclude:: fs/copy-help.out
    :language: text
 
-Examples
-^^^^^^^^
-
-**Local-filesystem and HTTP Sources**
+Local-filesystem and HTTP Sources
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Given a config containing a mapping from local-filesystem destination paths to source paths:
 
@@ -93,13 +91,28 @@ The ``--report`` output can be especially useful in combination with glob patter
 
 See :ref:`files_yaml_glob_support` for more examples and information on the semantics of the ``!glob`` tag.
 
-**HPSS Sources**
+HPSS Sources
+^^^^^^^^^^^^
 
 ..
    NB: The .txt files below are not .cmd files and so will not be automatically executed to update
    their corresponding  static .out files. On a system with HPSS access, run 'make <outfile>' (using
    the name of an actual .out file) in the 'fs' directory to update after editing (or touch'ing) a
    .yaml or .txt file.
+
+The examples in this section use the following files
+
+.. literalinclude:: fs/copy-hpss-show-files.txt
+   :language: text
+.. literalinclude:: fs/copy-hpss-show-files.out
+   :language: text
+
+with this content:
+
+.. literalinclude:: fs/copy-hpss-show-content.txt
+   :language: text
+.. literalinclude:: fs/copy-hpss-show-content.out
+   :language: text
 
 An ``hsi://`` URL can be used as a source path to copy full files from HPSS to the local filesystem:
 
