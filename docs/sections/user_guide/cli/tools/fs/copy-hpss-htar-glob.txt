@@ -1,0 +1,4 @@
+rm -rf dst/copy-hpss-htar-glob
+uw fs copy --target-dir dst/copy-hpss-htar-glob --config-file copy-hpss-htar-glob.yaml
+echo
+tree dst/copy-hpss-htar-glob
