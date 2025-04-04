@@ -155,6 +155,8 @@ class FileStager(Stager):
                 parts = urlparse(src.value)
                 if parts.scheme == "hsi":
                     srcs.extend(self._expand_glob_hsi(parts.path, dst))
+                if parts.schema == "htar":
+                    srcs.extend(self._expand_glob_htar(parts.path, parts.query, dst))
                 elif parts.scheme in ["", "file"]:
                     srcs.extend(self._expand_glob_local(parts.path, dst))
                 else:
@@ -175,6 +177,11 @@ class FileStager(Stager):
             else:
                 log.warning(lines[1])
         return srcs
+
+    def _expand_glob_htar(self, path: str, query: str, dst: str) -> list[tuple[str, str, bool]]:
+        breakpoint()
+        archives = [archive for _, archive in self._expand_glob_hsi(path, "<unused>")]
+        pass
 
     def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
         srcs: list[tuple[str, str, bool]] = []
