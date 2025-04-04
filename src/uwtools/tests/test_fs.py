@@ -214,19 +214,39 @@ def test_fs_FileStager__expand_glob__htar_scheme():
 def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
     obj = Mock(wraps=fs.FileStager)
     glob_pattern = "/src/a*"
-    output = "header\n/src/a1\n/src/a2\n" if matches else "header\n*** ERROR\n"
+    output = {
+        True: """
+        [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+        /BMC/rtrr/5year/uwtools/code.tar
+        /BMC/rtrr/5year/uwtools/data.tar
+        """,
+        False: """
+        [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+        *** Warning: No matching names located for '/BMC/rtrr/5year/uwtools/*.foo'
+        """,
+    }[matches]
     with patch.object(fs, "run_shell_cmd") as run_shell_cmd:
-        run_shell_cmd.return_value = (success, output)
+        run_shell_cmd.return_value = (success, dedent(output).strip())
         result = fs.FileStager._expand_glob_hsi(obj, glob_pattern, "/dst/<a>")
         if success:
             if matches:
                 assert result == [
-                    ("/dst/a1", "hsi:///src/a1", False),
-                    ("/dst/a2", "hsi:///src/a2", False),
+                    (
+                        "/dst/BMC/rtrr/5year/uwtools/code.tar",
+                        "hsi:///BMC/rtrr/5year/uwtools/code.tar",
+                        False,
+                    ),
+                    (
+                        "/dst/BMC/rtrr/5year/uwtools/data.tar",
+                        "hsi:///BMC/rtrr/5year/uwtools/data.tar",
+                        False,
+                    ),
                 ]
             else:
                 assert not result
-                assert logged("*** ERROR")
+                assert logged(
+                    "*** Warning: No matching names located for '/BMC/rtrr/5year/uwtools/*.foo'"
+                )
         else:
             assert not result
     run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")
