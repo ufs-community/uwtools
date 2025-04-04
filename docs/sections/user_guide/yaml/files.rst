@@ -229,6 +229,27 @@ Example block:
    └── foo
        └── b
 
+.. _files_yaml_htar_glob_support:
+
+Glob Support for Archive-Member ``htar`` Copies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``!glob`` tag can be used with archive-member ``htar`` copies.
+
+Example block:
+
+.. code-block:: yaml
+
+   <file>: !glob htar:///hpss/path/to/pysrc*.tar?*.py
+
+* Result when copying to target directory ``target/``, given HPSS files ``pysrc1.tar`` and ``pysrc2.tar`` under ``/hpss/path/to/``, where ``pysrc1.tar`` contains member file ``a1.py`` and ``pysrc2.tar`` contains member file ``a2.py``:
+
+.. code-block:: text
+
+   target
+   ├── a1.py
+   └── a2.py
+
 Caveats
 ^^^^^^^
 

@@ -5,7 +5,9 @@ File and directory staging.
 from __future__ import annotations
 
 import glob
+import re
 from abc import ABC, abstractmethod
+from fnmatch import fnmatch
 from itertools import dropwhile, zip_longest
 from operator import eq
 from pathlib import Path
@@ -155,6 +157,8 @@ class FileStager(Stager):
                 parts = urlparse(src.value)
                 if parts.scheme == "hsi":
                     srcs.extend(self._expand_glob_hsi(parts.path, dst))
+                if parts.scheme == "htar":
+                    srcs.extend(self._expand_glob_htar(parts.path, parts.query, dst))
                 elif parts.scheme in ["", "file"]:
                     srcs.extend(self._expand_glob_local(parts.path, dst))
                 else:
@@ -163,8 +167,8 @@ class FileStager(Stager):
         return srcs
 
     def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
-        hsi_errmsg_prefix = "***"
         srcs: list[tuple[str, str, bool]] = []
+        hsi_errmsg_prefix = "***"
         success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{glob_pattern!s}'")
         if success:
             lines = output.strip().split("\n")
@@ -174,6 +178,23 @@ class FileStager(Stager):
                     srcs.append((d, f"{STR.hsi}://{s}", nonglob))
             else:
                 log.warning(lines[1])
+        return srcs
+
+    def _expand_glob_htar(self, path: str, query: str, dst: str) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
+        archive_files = self._expand_glob_hsi(path, "<unused>")
+        for archive_file in [url.removeprefix(f"{STR.hsi}://") for _, url, _ in archive_files]:
+            success, output = run_shell_cmd(f"{STR.htar} -qtf '{archive_file}'")
+            if not success:
+                return []  # any failure => no results
+            for line in output.strip().split("\n"):
+                regex = r"^HTAR:\s+[^ ]{10}\s+[^ ]+\s+\d+\s+[^ ]{10}\s+[^ ]{5}\s+(.*)$"
+                # e.g.: HTAR: -rw-r--r--  Paul.Madden/rtruc         64 2025-04-04 04:37  a1.c
+                if m := re.match(regex, line):
+                    archive_member = m[1]
+                    if fnmatch(archive_member, query):
+                        d, s, nonglob = self._expand_glob_resolve(query, m[1], dst)
+                        srcs.append((d, f"{STR.htar}://{archive_file}?{s}", nonglob))
         return srcs
 
     def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
