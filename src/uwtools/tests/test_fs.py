@@ -234,8 +234,6 @@ def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
 
 @mark.parametrize("success", [True, False])
 def test_fs_FileStager__expand_glob_htar(success):
-    path = "/src/a*"
-    query = "a1*"
     outputs = [
         """
         [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
@@ -255,25 +253,24 @@ def test_fs_FileStager__expand_glob_htar(success):
         """,  # noqa: E501
     ]
     obj = Mock(wraps=fs.FileStager)
-    with patch.object(obj, "_expand_glob_hsi") as _expand_glob_hsi:
-        _expand_glob_hsi.return_value = [
-            (None, "hsi:///a1.tar", None),
-            (None, "hsi:///a2.tar", None),
-        ]
-        with patch.object(fs, "run_shell_cmd") as run_shell_cmd:
-            run_shell_cmd.side_effect = [(success, dedent(output).strip()) for output in outputs]
-            result = fs.FileStager._expand_glob_htar(obj, path, query, "/dst/<a>")
-            if success:
-                assert result == [
-                    ("/dst/a1.c", "htar:///a1.tar?a1.c", False),
-                    ("/dst/a1.py", "htar:///a1.tar?a1.py", False),
-                    ("/dst/a1.txt", "htar:///a2.tar?a1.txt", False),
-                ]
-                assert [x[0][0] for x in run_shell_cmd.call_args_list] == [
-                    f"htar -qtf '/a{n}.tar'" for n in (1, 2)
-                ]
-            else:
-                assert not result
+    _expand_glob_hsi = Mock(return_value=[(None, f"hsi:///a{n}.tar", None) for n in (1, 2)])
+    with (
+        patch.object(obj, "_expand_glob_hsi", _expand_glob_hsi),
+        patch.object(fs, "run_shell_cmd") as run_shell_cmd,
+    ):
+        run_shell_cmd.side_effect = [(success, dedent(output).strip()) for output in outputs]
+        result = fs.FileStager._expand_glob_htar(obj, "/src/a*", "a1.*", "/dst/<a>")
+        if success:
+            assert result == [
+                ("/dst/a1.c", "htar:///a1.tar?a1.c", False),
+                ("/dst/a1.py", "htar:///a1.tar?a1.py", False),
+                ("/dst/a1.txt", "htar:///a2.tar?a1.txt", False),
+            ]
+            actual = [x[0][0] for x in run_shell_cmd.call_args_list]
+            expected = [f"htar -qtf '/a{n}.tar'" for n in (1, 2)]
+            assert actual == expected
+        else:
+            assert not result
 
 
 def test_fs_FileStager__expand_glob_local():
