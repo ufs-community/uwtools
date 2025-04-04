@@ -200,6 +200,16 @@ def test_fs_FileStager__expand_glob__hsi_scheme():
     obj._expand_glob_hsi.assert_called_once_with("/src/a*", "/dst/<a>")
 
 
+def test_fs_FileStager__expand_glob__htar_scheme():
+    config = """
+    /dst/<a>: !glob htar:///src/a*?f*
+    """
+    obj = Mock(_config=yaml.load(dedent(config), Loader=uw_yaml_loader()))
+    obj._expand_glob_htar.return_value = []
+    fs.FileStager._expand_glob(obj)
+    obj._expand_glob_htar.assert_called_once_with("/src/a*", "f*", "/dst/<a>")
+
+
 @mark.parametrize(("matches", "success"), [(True, True), (False, True), (False, False)])
 def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
     obj = Mock(wraps=fs.FileStager)
