@@ -167,8 +167,8 @@ class FileStager(Stager):
         return srcs
 
     def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
-        hsi_errmsg_prefix = "***"
         srcs: list[tuple[str, str, bool]] = []
+        hsi_errmsg_prefix = "***"
         success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{glob_pattern!s}'")
         if success:
             lines = output.strip().split("\n")
@@ -195,8 +195,7 @@ class FileStager(Stager):
                     if fnmatch(archive_member, query):
                         d, s, nonglob = self._expand_glob_resolve(query, m[1], dst)
                         srcs.append((d, f"{STR.htar}://{archive_file}?{s}", nonglob))
-        print(srcs)
-        import sys ; sys.exit(0)
+        return srcs
 
     def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
         srcs: list[tuple[str, str, bool]] = []
