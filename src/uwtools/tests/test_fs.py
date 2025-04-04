@@ -216,7 +216,7 @@ def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
     glob_pattern = "/src/a*"
     output = "header\n/src/a1\n/src/a2\n" if matches else "header\n*** ERROR\n"
     with patch.object(fs, "run_shell_cmd") as run_shell_cmd:
-        run_shell_cmd.return_value = (success, dedent(output).lstrip())
+        run_shell_cmd.return_value = (success, output)
         result = fs.FileStager._expand_glob_hsi(obj, glob_pattern, "/dst/<a>")
         if success:
             if matches:
@@ -230,6 +230,50 @@ def test_fs_FileStager__expand_glob_hsi(logged, matches, success):
         else:
             assert not result
     run_shell_cmd.assert_called_once_with(f"hsi -q ls -1 '{glob_pattern}'")
+
+
+@mark.parametrize("success", [True, False])
+def test_fs_FileStager__expand_glob_htar(success):
+    path = "/src/a*"
+    query = "a1*"
+    outputs = [
+        """
+        [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+        HTAR: -rw-r--r--  Paul.Madden/rtruc         64 2025-04-04 04:37  a1.c
+        HTAR: -rw-r--r--  Paul.Madden/rtruc         22 2025-04-04 04:38  a1.py
+        HTAR: -rw-------  Paul.Madden/rtruc        256 2025-04-04 12:58  /tmp/HTAR_CF_CHK_2834605_1743771535
+        HTAR: HTAR SUCCESSFUL
+        """,  # noqa: E501
+        """
+        [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+        HTAR: -rw-r--r--  Paul.Madden/rtruc          3 2025-03-29 16:47  a1.txt
+        HTAR: -rw-r--r--  Paul.Madden/rtruc          3 2025-03-29 16:48  a2.dat
+        HTAR: -rw-r--r--  Paul.Madden/rtruc          3 2025-03-29 16:48  b1.txt
+        HTAR: -rw-r--r--  Paul.Madden/rtruc          3 2025-03-29 16:48  b2.dat
+        HTAR: -rw-------  Paul.Madden/rtruc        256 2025-03-29 17:14  /tmp/HTAR_CF_CHK_4120691_1743268474
+        HTAR: HTAR SUCCESSFUL
+        """,  # noqa: E501
+    ]
+    obj = Mock(wraps=fs.FileStager)
+    with patch.object(obj, "_expand_glob_hsi") as _expand_glob_hsi:
+        _expand_glob_hsi.return_value = [
+            (None, "hsi:///a1.tar", None),
+            (None, "hsi:///a2.tar", None),
+        ]
+        with patch.object(fs, "run_shell_cmd") as run_shell_cmd:
+            run_shell_cmd.side_effect = [(success, dedent(output).strip()) for output in outputs]
+            result = fs.FileStager._expand_glob_htar(obj, path, query, "/dst/<a>")
+            if success:
+                assert result == [
+                    ("/dst/a1.c", "htar:///a1.tar?a1.c", False),
+                    ("/dst/a1.py", "htar:///a1.tar?a1.py", False),
+                    ("/dst/a1.txt", "htar:///a2.tar?a1.txt", False),
+                ]
+                assert [x[0][0] for x in run_shell_cmd.call_args_list] == [
+                    f"htar -qtf '/a{n}.tar'" for n in (1, 2)
+                ]
+            else:
+                assert not result
 
 
 def test_fs_FileStager__expand_glob_local():
