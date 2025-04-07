@@ -12,3 +12,6 @@ $(OUTPUTS):
 
 %.out: %.txt %.yaml
 	@bash $< >$@ 2>&1 | true
+
+%.out: %.txt
+	@bash $< >$@ 2>&1 | true
