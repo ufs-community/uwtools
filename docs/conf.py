@@ -39,6 +39,7 @@ extlinks = {
     "condev": ("https://github.com/maddenp/condev/%s", "%s"),
     "coverage": ("https://coverage.readthedocs.io/en/7.3.4/%s", "%s"),
     "docformatter": ("https://docformatter.readthedocs.io/en/stable/%s", "%s"),
+    "fre-nctools": ("https://github.com/NOAA-GFDL/FRE-NCtools/blob/main/src/make-hgrid/%s", "%s"),
     "github-docs": ("https://docs.github.com/en/%s", "%s"),
     "iotaa-readme": ("https://github.com/maddenp/iotaa/blob/main/README.md#%s", "%s"),
     "jinja2": ("https://jinja.palletsprojects.com/%s", "%s"),
