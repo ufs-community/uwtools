@@ -14,7 +14,7 @@
               "type": "integer"
             },
             "max_leadtime": {
-              "minimum": 1,
+              "minimum": 0,
               "type": "integer"
             },
             "offset": {
