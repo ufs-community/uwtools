@@ -6,7 +6,7 @@ make_hgrid
 Structured YAML to run :ufs-utils:`make_hgrid<make-hgrid>` is validated by JSON Schema and requires the ``make_hgrid:`` block, described below. If ``make_hgrid`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 .. important::
-   YAML keys and their descriptions are taken largely verbatim from the ``make_hgrid`` tool source code, available `here <https://github.com/NOAA-GFDL/FRE-NCtools/blob/master/tools/make_hgrid/make_hgrid.c>`_. Best effort has been made to ensure its requirements are followed in the ``schema`` but users must ensure their parameters are valid to the source tool.
+   YAML keys and their descriptions are taken largely verbatim from the ``make_hgrid`` tool source code, available :fre-nctools:`here<make_hgrid.c>`. Best effort has been made to ensure its requirements are followed in the ``schema`` but users must ensure their parameters are valid to the source tool.
 
 Here is a prototype UW YAML ``make_hgrid:`` block, explained in detail below:
 
