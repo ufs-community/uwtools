@@ -206,6 +206,10 @@ def test_PBS_directives(pbs):
     ]
 
 
+def test_PBS_initcmds(pbs):
+    assert pbs.initcmds == ["cd /path/to/rundir"]
+
+
 def test_PBS__directive_separator(pbs):
     assert pbs._directive_separator == " "
 

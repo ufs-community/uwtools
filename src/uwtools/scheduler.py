@@ -224,9 +224,8 @@ class PBS(JobScheduler):
         """
         Additional initialization commands a PBS batch job must run.
         """
-        if rundir := self._props.get(_DirectivesOptional.RUNDIR):
-            return [f"cd {rundir}"]
-        return []
+        rundir = self._props.get(_DirectivesOptional.RUNDIR)
+        return [f"cd {rundir}"] if rundir else []
 
     @property
     def _directive_separator(self) -> str:
