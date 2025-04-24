@@ -27,11 +27,12 @@ class MPASInit(MPASBase):
         Boundary files.
         """
         yield self.taskname("boundary files")
-        lbcs = self.config["boundary_conditions"]
-        endhour = lbcs["length"]
-        interval = lbcs["interval_hours"]
+        bcs = self.config["boundary_conditions"]
+        offset = abs(bcs["offset"])
+        endhour = bcs["length"] + offset
+        interval = bcs["interval_hours"]
         symlinks = {}
-        boundary_filepath = lbcs["path"]
+        boundary_filepath = bcs["path"]
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
