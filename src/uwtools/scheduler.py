@@ -32,9 +32,9 @@ class JobScheduler(ABC):
     # Public methods
 
     @property
-    def directives(self) -> list[str]:
+    def directives_and_initcmds(self) -> tuple[list[str], list[str]]:
         """
-        The resource-request scheduler directives.
+        The resource-request scheduler directives and any additional setup commands.
         """
         pre, sep = self._prefix, self._directive_separator
         ds = []
@@ -52,7 +52,7 @@ class JobScheduler(ABC):
             else:
                 x = "" if key.endswith("=") else sep
                 ds.append("%s %s%s%s" % (pre, key, x, value))
-        return sorted(ds)
+        return sorted(ds), self._initcmds
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
@@ -95,6 +95,13 @@ class JobScheduler(ABC):
         """
         The character used to separate directive keys and values.
         """
+
+    @property
+    def _initcmds(self) -> list[str]:
+        """
+        Additional initialization commands a batch job must run.
+        """
+        return []
 
     @property
     @abstractmethod
@@ -225,6 +232,15 @@ class PBS(JobScheduler):
         Directives that this scheduler does not support.
         """
         return [_DirectivesOptional.RUNDIR]
+
+    @property
+    def _initcmds(self) -> list[str]:
+        """
+        Additional initialization commands a PBS batch job must run.
+        """
+        if rundir := self._props.get(_DirectivesOptional.RUNDIR):
+            return [f"cd {rundir}"]
+        return []
 
     @property
     def _managed_directives(self) -> dict[str, Any]:

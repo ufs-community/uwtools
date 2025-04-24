@@ -81,18 +81,20 @@ def test_JobScheduler(schedulerobj):
 
 
 def test_JobScheduler_directives(schedulerobj):
-    assert schedulerobj.directives == [
+    directives, cmds = schedulerobj.directives_and_initcmds
+    assert directives == [
         "#DIR --a=foo",
         "#DIR --pi=3.14",
         "#DIR --r=/path/to/rundir",
         "#DIR --t=01:10:00",
     ]
+    assert cmds == []
 
 
 def test_JobScheduler_get_scheduler_fail_bad_directive_specified(props):
     scheduler = ConcreteScheduler.get_scheduler(props={**props, "shell": "csh"})
     with raises(UWConfigError) as e:
-        assert scheduler.directives
+        assert scheduler.directives_and_initcmds
     assert str(e.value).startswith("Directive 'shell' invalid for scheduler 'slurm'")
 
 
@@ -198,12 +200,14 @@ def test_PBS(pbs):
 
 
 def test_PBS_directives(pbs):
-    assert pbs.directives == [
+    directives, cmds = pbs.directives_and_initcmds
+    assert directives == [
         "#PBS --pi 3.14",
         "#PBS -A foo",
         "#PBS -l select=ompthreads=1",
         "#PBS -l walltime=01:10:00",
     ]
+    assert cmds == []  # == ["cd /path/to/rundir"]
 
 
 def test_PBS__directive_separator(pbs):

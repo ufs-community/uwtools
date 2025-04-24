@@ -543,7 +543,7 @@ def test_Driver__runscript(driverobj):
     foo
     bar
     """
-    scheduler = Mock(directives=["#DIR --d1", "#DIR --d2"])
+    scheduler = Mock(directives_and_initcmds=(["#DIR --d1", "#DIR --d2"], []))
     assert (
         driverobj._runscript(
             execution=["foo", "bar"],
