@@ -34,7 +34,7 @@ class JobScheduler(ABC):
     @property
     def directives(self) -> list[str]:
         """
-        The resource-request scheduler directives and any additional setup commands.
+        The resource-request scheduler directives.
         """
         pre, sep = self._prefix, self._directive_separator
         ds = []
