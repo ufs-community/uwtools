@@ -32,7 +32,7 @@ class JobScheduler(ABC):
     # Public methods
 
     @property
-    def directives_and_initcmds(self) -> tuple[list[str], list[str]]:
+    def directives(self) -> list[str]:
         """
         The resource-request scheduler directives and any additional setup commands.
         """
@@ -52,7 +52,7 @@ class JobScheduler(ABC):
             else:
                 x = "" if key.endswith("=") else sep
                 ds.append("%s %s%s%s" % (pre, key, x, value))
-        return sorted(ds), self._initcmds
+        return sorted(ds)
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
@@ -72,6 +72,13 @@ class JobScheduler(ABC):
             raise UWConfigError(msg)
         msg = f"No 'scheduler' defined in {props}"
         raise UWConfigError(msg)
+
+    @property
+    def initcmds(self) -> list[str]:
+        """
+        Additional initialization commands a batch job must run.
+        """
+        return []
 
     def submit_job(self, runscript: Path, submit_file: Path | None = None) -> bool:
         """
@@ -95,13 +102,6 @@ class JobScheduler(ABC):
         """
         The character used to separate directive keys and values.
         """
-
-    @property
-    def _initcmds(self) -> list[str]:
-        """
-        Additional initialization commands a batch job must run.
-        """
-        return []
 
     @property
     @abstractmethod
@@ -220,6 +220,15 @@ class PBS(JobScheduler):
     """
 
     @property
+    def initcmds(self) -> list[str]:
+        """
+        Additional initialization commands a PBS batch job must run.
+        """
+        if rundir := self._props.get(_DirectivesOptional.RUNDIR):
+            return [f"cd {rundir}"]
+        return []
+
+    @property
     def _directive_separator(self) -> str:
         """
         The character used to separate directive keys and values.
@@ -232,15 +241,6 @@ class PBS(JobScheduler):
         Directives that this scheduler does not support.
         """
         return [_DirectivesOptional.RUNDIR]
-
-    @property
-    def _initcmds(self) -> list[str]:
-        """
-        Additional initialization commands a PBS batch job must run.
-        """
-        if rundir := self._props.get(_DirectivesOptional.RUNDIR):
-            return [f"cd {rundir}"]
-        return []
 
     @property
     def _managed_directives(self) -> dict[str, Any]:

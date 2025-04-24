@@ -497,12 +497,13 @@ class Driver(Assets):
 
         {execution}
         """
-        directives, cmds = scheduler.directives_and_initcmds if scheduler else ("", [])
+        directives = scheduler.directives if scheduler else ""
+        initcmds = scheduler.initcmds if scheduler else []
         rs = dedent(template).format(
             directives="\n".join(directives),
             envcmds="\n".join(envcmds or []),
             envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
-            execution="\n".join([*cmds, *execution]),
+            execution="\n".join([*initcmds, *execution]),
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
