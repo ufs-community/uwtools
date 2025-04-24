@@ -224,7 +224,7 @@ class PBS(JobScheduler):
         """
         Directives that this scheduler does not support.
         """
-        return []
+        return [_DirectivesOptional.RUNDIR]
 
     @property
     def _managed_directives(self) -> dict[str, Any]:
@@ -280,6 +280,7 @@ class PBS(JobScheduler):
         props.update(self._placement(props))
         props.pop(_DirectivesOptional.TASKS_PER_NODE, None)
         props.pop(_DirectivesOptional.NODES, None)
+        props.pop(_DirectivesOptional.RUNDIR, None)
         props.pop(_DirectivesOptional.THREADS, None)
         props.pop(_DirectivesOptional.MEMORY, None)
         props.pop("exclusive", None)

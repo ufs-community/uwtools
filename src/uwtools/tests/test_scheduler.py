@@ -14,14 +14,24 @@ from uwtools.scheduler import JobScheduler
 # Fixtures
 
 directive_separator = "="
-managed_directives = {"account": lambda x: f"--a={x}", "walltime": lambda x: f"--t={x}"}
+managed_directives = {
+    "account": lambda x: f"--a={x}",
+    "rundir": lambda x: f"--r={x}",
+    "walltime": lambda x: f"--t={x}",
+}
 prefix = "#DIR"
 submit_cmd = "sub"
 
 
 @fixture
 def props():
-    return {"scheduler": "slurm", "walltime": "01:10:00", "account": "foo", "--pi": 3.14}
+    return {
+        "--pi": 3.14,
+        "account": "foo",
+        "rundir": "/path/to/rundir",
+        "scheduler": "slurm",
+        "walltime": "01:10:00",
+    }
 
 
 @fixture
@@ -71,7 +81,12 @@ def test_JobScheduler(schedulerobj):
 
 
 def test_JobScheduler_directives(schedulerobj):
-    assert schedulerobj.directives == ["#DIR --a=foo", "#DIR --pi=3.14", "#DIR --t=01:10:00"]
+    assert schedulerobj.directives == [
+        "#DIR --a=foo",
+        "#DIR --pi=3.14",
+        "#DIR --r=/path/to/rundir",
+        "#DIR --t=01:10:00",
+    ]
 
 
 def test_JobScheduler_get_scheduler_fail_bad_directive_specified(props):
@@ -196,7 +211,7 @@ def test_PBS__directive_separator(pbs):
 
 
 def test_PBS__forbidden_directives(pbs):
-    assert pbs._forbidden_directives == []
+    assert pbs._forbidden_directives == ["rundir"]
 
 
 def test_PBS__managed_directives(pbs):
