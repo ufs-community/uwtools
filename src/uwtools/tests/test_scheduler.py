@@ -182,6 +182,15 @@ def test_PBS(pbs):
     assert isinstance(pbs, JobScheduler)
 
 
+def test_PBS_directives(pbs):
+    assert pbs.directives == [
+        "#PBS --pi 3.14",
+        "#PBS -A foo",
+        "#PBS -l select=ompthreads=1",
+        "#PBS -l walltime=01:10:00",
+    ]
+
+
 def test_PBS__directive_separator(pbs):
     assert pbs._directive_separator == " "
 

@@ -47,9 +47,11 @@ class JobScheduler(ABC):
                 if callable(switch) and (x := switch(value)) is not None:
                     ds.append("%s %s" % (pre, x))
                 else:
-                    ds.append("%s %s%s%s" % (pre, switch, sep, value))
+                    x = "" if switch.endswith("=") else sep
+                    ds.append("%s %s%s%s" % (pre, switch, x, value))
             else:
-                ds.append("%s %s%s%s" % (pre, key, sep, value))
+                x = "" if key.endswith("=") else sep
+                ds.append("%s %s%s%s" % (pre, key, x, value))
         return sorted(ds)
 
     @staticmethod
