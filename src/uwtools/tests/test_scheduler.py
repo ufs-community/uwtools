@@ -247,7 +247,12 @@ def test_PBS__prefix(pbs):
 
 
 def test_PBS__processed_props(pbs):
-    assert pbs._processed_props == pbs._props
+    assert pbs._processed_props == {
+        "--pi": 3.14,
+        "account": "foo",
+        "walltime": "01:10:00",
+        "-l select=": "ompthreads=1",
+    }
 
 
 def test_PBS__select(pbs):

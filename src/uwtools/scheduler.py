@@ -290,7 +290,7 @@ class PBS(JobScheduler):
         """
         Pre-processed runscript directives.
         """
-        props = self._props
+        props = deepcopy(self._props)
         props.update(self._select(props))
         props.update(self._placement(props))
         props.pop(_DirectivesOptional.TASKS_PER_NODE, None)
