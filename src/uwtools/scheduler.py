@@ -36,8 +36,8 @@ class JobScheduler(ABC):
         """
         The resource-request scheduler directives.
         """
-        pre, sep = self._prefix, self._directive_separator
-        sep_for = lambda val: "" if val.endswith("=") else sep
+        prefix, separator = self._prefix, self._directive_separator
+        sep = lambda val: "%s%s" % (val, "" if val.endswith("=") else separator)
         ds = []
         for key, value in self._processed_props.items():
             if key in self._forbidden_directives:
@@ -46,11 +46,11 @@ class JobScheduler(ABC):
             if key in self._managed_directives:
                 switch = self._managed_directives[key]
                 if callable(switch) and (x := switch(value)) is not None:
-                    ds.append("%s %s" % (pre, x))
+                    ds.append("%s %s" % (prefix, x))
                 else:
-                    ds.append("%s %s%s%s" % (pre, switch, sep_for(switch), value))
+                    ds.append("%s %s%s" % (prefix, sep(switch), value))
             else:
-                ds.append("%s %s%s%s" % (pre, key, sep_for(key), value))
+                ds.append("%s %s%s" % (prefix, sep(key), value))
         return sorted(ds)
 
     @staticmethod
