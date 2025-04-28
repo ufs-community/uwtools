@@ -81,7 +81,7 @@ def test_Shave_input_config_file(driverobj):
     nhalo = driverobj.config["config"]["nhalo"]
     input_file_path = driverobj._config["config"]["input_grid_file"]
     Path(input_file_path).touch()
-    output_file_path = driverobj._config["config"]["output_grid_file"]
+    output_file_path = driverobj.config["config"]["output_grid_file"]
     driverobj.input_config_file()
     content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 1
@@ -89,7 +89,7 @@ def test_Shave_input_config_file(driverobj):
 
 
 def test_Shave_output(driverobj):
-    pass
+    assert driverobj.output == {"shaved": Path(driverobj.config["config"]["output_grid_file"])}
 
 
 def test_Shave_provisioned_rundir(driverobj, ready_task):

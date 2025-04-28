@@ -59,8 +59,8 @@ class Shave(DriverTimeInvariant):
         return STR.shave
 
     @property
-    def output(self) -> dict[str, list[Path]]:
-        return {"foo": [Path("bar")]}
+    def output(self) -> dict[str, Path]:
+        return {"shaved": Path(self.config["config"]["output_grid_file"])}
 
     # Private helper methods
 
