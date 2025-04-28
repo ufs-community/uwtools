@@ -127,7 +127,7 @@ class UPP(DriverCycleLeadtimeBased):
                 else (None, lines)
             )
             lines = lines[self.NPARAMS * nvars.pop() :]
-        return {"outputs": paths}
+        return {"paths": paths}
 
     # Private helper methods
 
