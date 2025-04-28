@@ -100,7 +100,7 @@ class UPP(DriverCycleLeadtimeBased):
         return STR.upp
 
     @property
-    def output(self) -> dict[str, list[str]]:
+    def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
@@ -119,7 +119,7 @@ class UPP(DriverCycleLeadtimeBased):
         paths = []
         for _ in range(nblocks):
             identifier = lines[0]
-            paths.append(str(self.rundir / (identifier + suffix)))
+            paths.append(self.rundir / (identifier + suffix))
             fields, lines = lines[: self.NFIELDS], lines[self.NFIELDS :]
             _, lines = (
                 (lines[0], lines[1:])

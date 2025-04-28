@@ -171,7 +171,7 @@ def test_UPP_output(driverobj, tmp_path):
     control_file = tmp_path / "postxconfig-NT.txt"
     control_file.write_text("\n".join(control_data))
     driverobj._config["control_file"] = str(control_file)
-    expected = {"gribfiles": [str(driverobj.rundir / ("%s.GrbF24" % x)) for x in ("FOO", "BAR")]}
+    expected = {"gribfiles": [driverobj.rundir / ("%s.GrbF24" % x) for x in ("FOO", "BAR")]}
     assert driverobj.output == expected
 
 

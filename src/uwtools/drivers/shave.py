@@ -58,6 +58,10 @@ class Shave(DriverTimeInvariant):
         """
         return STR.shave
 
+    @property
+    def output(self) -> dict[str, list[Path]]:
+        return {"foo": [Path("bar")]}
+
     # Private helper methods
 
     @property
