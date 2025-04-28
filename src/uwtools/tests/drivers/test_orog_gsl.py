@@ -91,7 +91,8 @@ def test_OrogGSL_input_grid_file(driverobj):
 
 
 def test_OrogGSL_output(driverobj):
-    pass
+    outfile = lambda x: driverobj.rundir / f"C403_oro_data_{x}.tile7.halo4.nc"
+    assert driverobj.output == {"ls": outfile("ls"), "ss": outfile("ss")}
 
 
 def test_OrogGSL_provisioned_rundir(driverobj, ready_task):

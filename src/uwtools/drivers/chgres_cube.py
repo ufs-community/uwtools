@@ -118,7 +118,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        outfile = lambda x: Path(f"{self.rundir}/out.{x}.tile7.nc")
+        outfile = lambda x: self.rundir / f"out.{x}.tile7.nc"
         return {"atm": outfile("atm"), "sfc": outfile("sfc")}
 
 
