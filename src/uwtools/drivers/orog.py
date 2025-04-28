@@ -113,7 +113,7 @@ class Orog(DriverTimeInvariant):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        return {"output": self.rundir / "out.oro.nc"}
+        return {"path": self.rundir / "out.oro.nc"}
 
     # Private helper methods
 

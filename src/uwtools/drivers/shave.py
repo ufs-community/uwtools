@@ -63,7 +63,7 @@ class Shave(DriverTimeInvariant):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        return {"output": Path(self.config["config"]["output_grid_file"])}
+        return {"path": Path(self.config["config"]["output_grid_file"])}
 
     # Private helper methods
 

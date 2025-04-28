@@ -107,7 +107,9 @@ def test_FilterTopo_namelist_file(driverobj):
 
 
 def test_FilterTopo_output(driverobj):
-    pass
+    assert driverobj.output == {
+        "path": driverobj.rundir / driverobj.config["config"]["filtered_orog"]
+    }
 
 
 def test_FilterTopo_provisioned_rundir(driverobj, ready_task):

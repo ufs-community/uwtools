@@ -138,7 +138,7 @@ def test_Orog_input_config_file_old(driverobj):
 
 
 def test_Orog_output(driverobj):
-    assert driverobj.output == {"output": driverobj.rundir / "out.oro.nc"}
+    assert driverobj.output == {"path": driverobj.rundir / "out.oro.nc"}
 
 
 def test_Orog_provisioned_rundir(driverobj, ready_task):
