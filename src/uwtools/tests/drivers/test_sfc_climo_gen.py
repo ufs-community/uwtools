@@ -6,12 +6,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers import sfc_climo_gen
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -84,7 +83,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -118,9 +116,18 @@ def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_tas
 
 
 def test_SfcClimoGen_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    keys = [
+        "facsf",
+        "maximum_snow_albedo",
+        "slope_type",
+        "snowfree_albedo",
+        "soil_type",
+        "substrate_temperature",
+        "vegetation_greenness",
+        "vegetation_type",
+    ]
+    n = driverobj.config["namelist"]["update_values"]["config"]["halo"]
+    assert driverobj.output == {key: driverobj.rundir / f"{key}.tile7.halo{n}.nc" for key in keys}
 
 
 def test_SfcClimoGen_provisioned_rundir(driverobj, ready_task):

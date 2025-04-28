@@ -57,7 +57,6 @@ extlinks = {
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
     "schism": ("https://schism-dev.github.io/schism/master/%s", "%s"),
-    "sfc-climo-gen": ("https://ufs-community.github.io/UFS_UTILS/sfc_climo_gen/%s", "%s"),
     "ufs": ("https://ufs.epic.noaa.gov/%s", "%s"),
     "ufs-utils": ("https://noaa-emcufs-utils.readthedocs.io/en/latest/ufs_utils.html#%s", "%s"),
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
