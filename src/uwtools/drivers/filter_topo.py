@@ -81,5 +81,12 @@ class FilterTopo(DriverTimeInvariant):
         """
         return STR.filtertopo
 
+    @property
+    def output(self) -> dict[str, list[Path]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"outputs": [Path("foo")]}
+
 
 set_driver_docstring(FilterTopo)

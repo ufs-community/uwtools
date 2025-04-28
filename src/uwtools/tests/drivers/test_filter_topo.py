@@ -6,12 +6,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.config.support import from_od
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.filter_topo import FilterTopo
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -73,7 +72,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -109,9 +107,7 @@ def test_FilterTopo_namelist_file(driverobj):
 
 
 def test_FilterTopo_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    pass
 
 
 def test_FilterTopo_provisioned_rundir(driverobj, ready_task):

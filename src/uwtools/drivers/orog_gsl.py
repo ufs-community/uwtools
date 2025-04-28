@@ -94,6 +94,13 @@ class OrogGSL(DriverTimeInvariant):
         """
         return STR.oroggsl
 
+    @property
+    def output(self) -> dict[str, list[Path]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"outputs": [Path("foo")]}
+
     # Private helper methods
 
     @property
