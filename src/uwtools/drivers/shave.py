@@ -60,7 +60,10 @@ class Shave(DriverTimeInvariant):
 
     @property
     def output(self) -> dict[str, Path]:
-        return {"shaved": Path(self.config["config"]["output_grid_file"])}
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"output": Path(self.config["config"]["output_grid_file"])}
 
     # Private helper methods
 

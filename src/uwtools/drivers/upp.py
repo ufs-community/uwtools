@@ -127,7 +127,7 @@ class UPP(DriverCycleLeadtimeBased):
                 else (None, lines)
             )
             lines = lines[self.NPARAMS * nvars.pop() :]
-        return {"gribfiles": paths}
+        return {"outputs": paths}
 
     # Private helper methods
 

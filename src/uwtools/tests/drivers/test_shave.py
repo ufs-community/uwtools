@@ -89,7 +89,7 @@ def test_Shave_input_config_file(driverobj):
 
 
 def test_Shave_output(driverobj):
-    assert driverobj.output == {"shaved": Path(driverobj.config["config"]["output_grid_file"])}
+    assert driverobj.output == {"output": Path(driverobj.config["config"]["output_grid_file"])}
 
 
 def test_Shave_provisioned_rundir(driverobj, ready_task):
