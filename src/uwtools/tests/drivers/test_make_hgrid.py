@@ -74,8 +74,8 @@ def test_MakeHgrid_driver_name(driverobj):
 
 def test_MakeHgrid_output(driverobj):
     assert driverobj.output["path"] == driverobj.rundir / "horizontal_grid.nc"
-    driverobj._config["config"]["grid_name"] = "grid_name"
-    assert driverobj.output["path"] == driverobj.rundir / "grid_name.nc"
+    driverobj._config["config"]["grid_name"] = "foo"
+    assert driverobj.output["path"] == driverobj.rundir / "foo.nc"
 
 
 def test_MakeHgrid_provisioned_rundir(driverobj, ready_task):
