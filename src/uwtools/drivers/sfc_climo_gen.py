@@ -54,14 +54,15 @@ class SfcClimoGen(DriverTimeInvariant):
         ]
 
     @property
-    def output(self) -> dict[str, Path]:
+    def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
         cfg = self.config["namelist"]["update_values"]["config"]
-        n = cfg["halo"]
+        halo = cfg.get("halo")
+        ns = [0, halo] if halo else [0]
         keys = [m[1] for key in cfg if (m := re.match(r"^input_(.*)_file$", key))]
-        return {key: self.rundir / f"{key}.tile7.halo{n}.nc" for key in keys}
+        return {key: [self.rundir / f"{key}.tile7.halo{n}.nc" for n in ns] for key in keys}
 
     # Public helper methods
 

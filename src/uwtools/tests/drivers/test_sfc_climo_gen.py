@@ -115,7 +115,9 @@ def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_tas
     assert logged("  'string' is not of type 'integer'")
 
 
-def test_SfcClimoGen_output(driverobj):
+@mark.parametrize("halo", [1, None])
+def test_SfcClimoGen_output(driverobj, halo):
+    driverobj._config["namelist"]["update_values"]["config"]["halo"] = halo
     keys = [
         "facsf",
         "maximum_snow_albedo",
@@ -126,8 +128,10 @@ def test_SfcClimoGen_output(driverobj):
         "vegetation_greenness",
         "vegetation_type",
     ]
-    n = driverobj.config["namelist"]["update_values"]["config"]["halo"]
-    assert driverobj.output == {key: driverobj.rundir / f"{key}.tile7.halo{n}.nc" for key in keys}
+    ns = [0, halo] if halo else [0]
+    assert driverobj.output == {
+        key: [driverobj.rundir / f"{key}.tile7.halo{n}.nc" for n in ns] for key in keys
+    }
 
 
 def test_SfcClimoGen_provisioned_rundir(driverobj, ready_task):
