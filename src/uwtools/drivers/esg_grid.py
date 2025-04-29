@@ -58,5 +58,12 @@ class ESGGrid(DriverTimeInvariant):
         """
         return STR.esggrid
 
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"path": self.rundir / "regional_grid.nc"}
+
 
 set_driver_docstring(ESGGrid)
