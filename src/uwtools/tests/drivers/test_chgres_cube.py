@@ -139,8 +139,8 @@ def test_ChgresCube_namelist_file_missing_base_file(driverobj, logged):
 
 def test_ChgresCube_output(driverobj):
     assert driverobj.output == {
-        "atm": driverobj.rundir / "out.atm.tile7.nc",
-        "sfc": driverobj.rundir / "out.sfc.tile7.nc",
+        "atm": [driverobj.rundir / "out.atm.tile7.nc"],
+        "sfc": [driverobj.rundir / "out.sfc.tile7.nc"],
     }
 
 

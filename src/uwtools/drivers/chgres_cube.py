@@ -114,12 +114,12 @@ class ChgresCube(DriverCycleLeadtimeBased):
         return STR.chgrescube
 
     @property
-    def output(self) -> dict[str, Path]:
+    def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
         outfile = lambda x: self.rundir / f"out.{x}.tile7.nc"
-        return {"atm": outfile("atm"), "sfc": outfile("sfc")}
+        return {"atm": [outfile("atm")], "sfc": [outfile("sfc")]}
 
 
 set_driver_docstring(ChgresCube)
