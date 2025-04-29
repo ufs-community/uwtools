@@ -5,11 +5,10 @@ orog_gsl driver tests.
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog_gsl import OrogGSL
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -63,7 +62,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -93,9 +91,8 @@ def test_OrogGSL_input_grid_file(driverobj):
 
 
 def test_OrogGSL_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    outfile = lambda x: driverobj.rundir / f"C403_oro_data_{x}.tile7.halo4.nc"
+    assert driverobj.output == {"ls": outfile("ls"), "ss": outfile("ss")}
 
 
 def test_OrogGSL_provisioned_rundir(driverobj, ready_task):

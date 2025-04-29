@@ -5,11 +5,10 @@ Orog driver tests.
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
-from uwtools.exceptions import UWNotImplementedError
 from uwtools.scheduler import Slurm
 
 # Fixtures
@@ -73,7 +72,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "taskname",
     ],
@@ -140,9 +138,7 @@ def test_Orog_input_config_file_old(driverobj):
 
 
 def test_Orog_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output == {"path": driverobj.rundir / "out.oro.nc"}
 
 
 def test_Orog_provisioned_rundir(driverobj, ready_task):
