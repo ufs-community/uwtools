@@ -2,6 +2,8 @@
 A driver for make_hgrid.
 """
 
+from pathlib import Path
+
 from iotaa import tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
@@ -32,6 +34,14 @@ class MakeHgrid(DriverTimeInvariant):
         The name of this driver.
         """
         return STR.makehgrid
+
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        grid_name = self.config["config"].get("grid_name", "horizontal_grid")
+        return {"path": (self.rundir / grid_name).with_suffix(".nc")}
 
     # Private helper methods
 
