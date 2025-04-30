@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -34,7 +34,8 @@ class JobScheduler(ABC):
         """
         The resource-request scheduler directives.
         """
-        pre, sep = self._prefix, self._directive_separator
+        prefix, separator = self._prefix, self._directive_separator
+        sep = lambda val: "%s%s" % (val, "" if val.endswith("=") else separator)
         ds = []
         for key, value in self._processed_props.items():
             if key in self._forbidden_directives:
@@ -43,11 +44,11 @@ class JobScheduler(ABC):
             if key in self._managed_directives:
                 switch = self._managed_directives[key]
                 if callable(switch) and (x := switch(value)) is not None:
-                    ds.append("%s %s" % (pre, x))
+                    ds.append("%s %s" % (prefix, x))
                 else:
-                    ds.append("%s %s%s%s" % (pre, switch, sep, value))
+                    ds.append("%s %s%s" % (prefix, sep(switch), value))
             else:
-                ds.append("%s %s%s%s" % (pre, key, sep, value))
+                ds.append("%s %s%s" % (prefix, sep(key), value))
         return sorted(ds)
 
     @staticmethod
@@ -69,7 +70,14 @@ class JobScheduler(ABC):
             )
         raise UWConfigError(f"No 'scheduler' defined in {props}")
 
-    def submit_job(self, runscript: Path, submit_file: Optional[Path] = None) -> bool:
+    @property
+    def initcmds(self) -> list[str]:
+        """
+        Additional initialization commands a batch job must run.
+        """
+        return []
+
+    def submit_job(self, runscript: Path, submit_file: Path | None = None) -> bool:
         """
         Submit a job to the scheduler.
 
@@ -208,6 +216,14 @@ class PBS(JobScheduler):
     """
 
     @property
+    def initcmds(self) -> list[str]:
+        """
+        Additional initialization commands a PBS batch job must run.
+        """
+        rundir = self._props.get(_DirectivesOptional.RUNDIR)
+        return [f"cd {rundir}"] if rundir else []
+
+    @property
     def _directive_separator(self) -> str:
         """
         The character used to separate directive keys and values.
@@ -219,7 +235,7 @@ class PBS(JobScheduler):
         """
         Directives that this scheduler does not support.
         """
-        return []
+        return [_DirectivesOptional.RUNDIR]
 
     @property
     def _managed_directives(self) -> dict[str, Any]:
@@ -270,11 +286,12 @@ class PBS(JobScheduler):
         """
         Pre-processed runscript directives.
         """
-        props = self._props
+        props = deepcopy(self._props)
         props.update(self._select(props))
         props.update(self._placement(props))
         props.pop(_DirectivesOptional.TASKS_PER_NODE, None)
         props.pop(_DirectivesOptional.NODES, None)
+        props.pop(_DirectivesOptional.RUNDIR, None)
         props.pop(_DirectivesOptional.THREADS, None)
         props.pop(_DirectivesOptional.MEMORY, None)
         props.pop("exclusive", None)
