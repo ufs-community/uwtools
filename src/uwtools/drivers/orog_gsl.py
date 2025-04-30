@@ -94,6 +94,16 @@ class OrogGSL(DriverTimeInvariant):
         """
         return STR.oroggsl
 
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        vals = tuple(self.config["config"][k] for k in ["resolution", "tile", "halo"])
+        template = "C%s_oro_data_{x}.tile%s.halo%s.nc" % vals
+        outfile = lambda x: self.rundir / template.format(x=x)
+        return {"ls": outfile("ls"), "ss": outfile("ss")}
+
     # Private helper methods
 
     @property

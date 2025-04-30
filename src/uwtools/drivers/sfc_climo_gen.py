@@ -2,6 +2,7 @@
 A driver for sfc_climo_gen.
 """
 
+import re
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -51,6 +52,17 @@ class SfcClimoGen(DriverTimeInvariant):
             self.namelist_file(),
             self.runscript(),
         ]
+
+    @property
+    def output(self) -> dict[str, list[Path]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        cfg = self.config["namelist"]["update_values"]["config"]
+        halo = cfg.get("halo")
+        ns = [0, halo] if halo else [0]
+        keys = [m[1] for key in cfg if (m := re.match(r"^input_(.*)_file$", key))]
+        return {key: [self.rundir / f"{key}.tile7.halo{n}.nc" for n in ns] for key in keys}
 
     # Public helper methods
 

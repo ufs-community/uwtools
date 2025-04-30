@@ -3,7 +3,7 @@
 
 .. include:: ../shared/idempotent.rst
 
-The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>` component.
+The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``sfc_climo_gen``. Documentation for this UFS Utils component is :ufs-utils:`here <sfc-climo-gen>`.
 
 .. include:: help.rst
 
