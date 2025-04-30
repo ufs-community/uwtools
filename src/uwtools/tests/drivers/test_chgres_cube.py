@@ -138,9 +138,10 @@ def test_ChgresCube_namelist_file_missing_base_file(driverobj, logged):
 
 
 def test_ChgresCube_output(driverobj):
-    files = ["out.atm.tile7.nc", "out.sfc.tile7.nc"]
-    expected = {"netcdffiles": [str(driverobj.rundir / file) for file in files]}
-    assert driverobj.output == expected
+    assert driverobj.output == {
+        "atm": [driverobj.rundir / "out.atm.tile7.nc"],
+        "sfc": [driverobj.rundir / "out.sfc.tile7.nc"],
+    }
 
 
 def test_ChgresCube_provisioned_rundir(driverobj, ready_task):

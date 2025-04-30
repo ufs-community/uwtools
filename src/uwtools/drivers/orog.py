@@ -108,6 +108,13 @@ class Orog(DriverTimeInvariant):
         """
         return STR.orog
 
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"path": self.rundir / "out.oro.nc"}
+
     # Private helper methods
 
     @property

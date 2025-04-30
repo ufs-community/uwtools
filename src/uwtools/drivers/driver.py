@@ -428,7 +428,7 @@ class Driver(Assets):
     # Public methods
 
     @property
-    def output(self) -> dict[str, str] | dict[str, list[str]]:
+    def output(self) -> dict[str, Path] | dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
