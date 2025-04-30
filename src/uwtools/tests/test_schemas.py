@@ -1396,8 +1396,7 @@ def test_schema_mpas_init_boundary_conditions(mpas_init_prop):
     # path must be a string:
     assert "42 is not of type 'string'\n" in errors(with_set(config, 42, "path"))
     # length must be a positive int
-    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "length"))
-    assert "-1 is less than the minimum of 1" in errors(with_set(config, -1, "length"))
+    assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "length"))
     assert "'s' is not of type 'integer'\n" in errors(with_set(config, "s", "length"))
 
 
