@@ -2,16 +2,20 @@
 Convert atparse templates to Jinja2 templates.
 """
 
+from __future__ import annotations
+
 import re
-from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from uwtools.logging import log
 from uwtools.utils.file import readable, writable
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 def convert(
-    input_file: Optional[Path] = None, output_file: Optional[Path] = None, dry_run: bool = False
+    input_file: Path | None = None, output_file: Path | None = None, dry_run: bool = False
 ) -> None:
     """
     Replace atparse @[] tokens with Jinja2 {{}} equivalents.

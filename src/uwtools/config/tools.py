@@ -2,12 +2,14 @@
 Tools for working with configs.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, cast
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
-from uwtools.config.support import depth, format_to_config, log_and_error
+from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
@@ -19,8 +21,8 @@ from uwtools.utils.file import get_file_format
 def compare_configs(
     config_1_path: Path,
     config_2_path: Path,
-    config_1_format: Optional[str] = None,
-    config_2_format: Optional[str] = None,
+    config_1_format: str | None = None,
+    config_2_format: str | None = None,
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compare_configs.__doc__ definition below.
@@ -37,7 +39,7 @@ def compare_configs(
     return cfg_1.compare_config(cfg_2.as_dict())
 
 
-def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str) -> None:
+def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> None:
     """
     Check that the depth does not exceed the target format's max.
 
@@ -50,7 +52,7 @@ def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str
     _validate_depth(config_obj, target_format, "dump", bad_depth)
 
 
-def config_check_depths_realize(config_obj: Union[Config, dict], target_format: str) -> None:
+def config_check_depths_realize(config_obj: Config | dict, target_format: str) -> None:
     """
     Check that the depth does not exceed the target format's max.
 
@@ -62,7 +64,7 @@ def config_check_depths_realize(config_obj: Union[Config, dict], target_format: 
     _validate_depth(config_obj, target_format, "realize", bad_depth)
 
 
-def config_check_depths_update(config_obj: Union[Config, dict], target_format: str) -> None:
+def config_check_depths_update(config_obj: Config | dict, target_format: str) -> None:
     """
     Check that the depth does not exceed the target format's max.
 
@@ -75,13 +77,13 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 
 
 def realize_config(
-    input_config: Optional[Union[Config, Path, dict]] = None,
-    input_format: Optional[str] = None,
-    update_config: Optional[Union[Config, Path, dict]] = None,
-    update_format: Optional[str] = None,
-    output_file: Optional[Path] = None,
-    output_format: Optional[str] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    input_config: Config | Path | dict | None = None,
+    input_format: str | None = None,
+    update_config: Config | Path | dict | None = None,
+    update_format: str | None = None,
+    output_file: Path | None = None,
+    output_format: str | None = None,
+    key_path: list[YAMLKey] | None = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -103,31 +105,34 @@ def realize_config(
         _realize_config_values_needed(input_obj)
         return {}
     if total and unrendered(str(input_obj)):
-        raise UWConfigRealizeError("Config could not be totally realized")
-    output_class = format_to_config(output_format)
+        msg = "Config could not be totally realized"
+        raise UWConfigRealizeError(msg)
+    output_class = cast(Config, format_to_config(output_format))
     output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
 
 
-def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
+def walk_key_path(config: dict, key_path: list[YAMLKey]) -> tuple[dict, str]:
     """
     Navigate to the sub-config at the end of the path of given keys.
 
     :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :return: The sub-config and a string representation of the key path.
     """
     keys = []
     pathstr = "<unknown>"
     for key in key_path:
         keys.append(key)
-        pathstr = " -> ".join(keys)
+        pathstr = ".".join(str(key) for key in keys)
         try:
             subconfig = config[key]
         except KeyError as e:
-            raise log_and_error(f"Bad config path: {pathstr}") from e
+            msg = f"Bad config path: {pathstr}"
+            raise log_and_error(msg) from e
         if not isinstance(subconfig, dict):
-            raise log_and_error(f"Value at {pathstr} must be a dictionary")
+            msg = f"Value at {pathstr} must be a dictionary"
+            raise log_and_error(msg)
         config = subconfig
     return config, pathstr
 
@@ -136,7 +141,7 @@ def walk_key_path(config: dict, key_path: list[str]) -> tuple[dict, str]:
 
 
 def _ensure_format(
-    desc: str, fmt: Optional[str] = None, config: Optional[Union[Config, Path, dict]] = None
+    desc: str, fmt: str | None = None, config: Config | Path | dict | None = None
 ) -> str:
     """
     Return the given format, or the appropriate format as deduced from the config.
@@ -148,34 +153,19 @@ def _ensure_format(
     :raises: UWError if the format cannot be determined.
     """
     if isinstance(config, Config):
-        return config._get_format()  # pylint: disable=protected-access
+        return config._get_format()  # noqa: SLF001
     if isinstance(config, Path):
         return fmt or get_file_format(config)
     if isinstance(config, dict):
         return fmt or FORMAT.yaml
     if fmt is None:
-        raise UWError(f"Either {desc} path or format name must be specified")
+        msg = f"Either {desc} path or format name must be specified"
+        raise UWError(msg)
     return fmt
 
 
-def _print_config_section(config: dict, key_path: list[str]) -> None:
-    """
-    Print the contents of the located subtree as key=value pairs, one per line.
-
-    :param config: A config.
-    :param key_path: Path of keys to subsection of config file.
-    """
-    config, pathstr = walk_key_path(config, key_path)
-    output_lines = []
-    for key, value in config.items():
-        if type(value) not in (bool, float, int, str):
-            raise log_and_error(f"Non-scalar value {value} found at {pathstr}")
-        output_lines.append(f"{key}={value}")
-    print("\n".join(sorted(output_lines)))
-
-
 def _realize_config_input_setup(
-    input_config: Optional[Union[Config, Path, dict]] = None, input_format: Optional[str] = None
+    input_config: Config | Path | dict | None = None, input_format: str | None = None
 ) -> Config:
     """
     Set up config-realize input.
@@ -195,9 +185,9 @@ def _realize_config_input_setup(
 
 def _realize_config_output_setup(
     input_obj: Config,
-    output_file: Optional[Path] = None,
-    output_format: Optional[str] = None,
-    key_path: Optional[list[Union[str, int]]] = None,
+    output_file: Path | None = None,
+    output_format: str | None = None,
+    key_path: list[YAMLKey] | None = None,
 ) -> tuple[dict, str]:
     """
     Set up config-realize output.
@@ -205,12 +195,12 @@ def _realize_config_output_setup(
     :param input_obj: The input Config object.
     :param output_file: Output config destination (None => write to stdout).
     :param output_format: Format of the output config.
-    :param key_path: Path through keys to the desired output block.
+    :param key_path: Path of keys to config block to use.
     :return: The unrealized data to output and the output format name.
     """
     output_format = _ensure_format("output", output_format, output_file)
-    log.debug("Writing output to %s" % (output_file or "stdout"))
-    fmt = input_obj._get_format()  # pylint: disable=protected-access
+    log.debug("Writing output to %s", output_file or "stdout")
+    fmt = input_obj._get_format()  # noqa: SLF001
     _validate_format("output", output_format, fmt)
     output_data = input_obj.data
     if key_path is not None:
@@ -222,8 +212,8 @@ def _realize_config_output_setup(
 
 def _realize_config_update(
     input_obj: Config,
-    update_config: Optional[Union[Config, Path, dict]] = None,
-    update_format: Optional[str] = None,
+    update_config: Config | Path | dict | None = None,
+    update_format: str | None = None,
 ) -> Config:
     """
     Set up config-realize update.
@@ -235,8 +225,8 @@ def _realize_config_update(
     """
     if update_config or update_format:
         update_format = _ensure_format("update", update_format, update_config)
-        fmt = lambda x: x._get_format()  # pylint: disable=protected-access
-        depth_ = lambda x: x._depth  # pylint: disable=protected-access
+        fmt = lambda x: x._get_format()  # noqa: SLF001
+        depth_ = lambda x: x._depth  # noqa: SLF001
         if not update_config:
             log.debug("Reading update from stdin")
         _validate_format("update", update_format, fmt(input_obj))
@@ -259,7 +249,7 @@ def _realize_config_values_needed(input_obj: Config) -> None:
 
     :param input_obj: The config to update.
     """
-    complete, template = input_obj._characterize_values(  # pylint: disable=protected-access
+    complete, template = input_obj._characterize_values(  # noqa: SLF001
         input_obj.data, parent=""
     )
     if complete:
@@ -278,7 +268,7 @@ def _realize_config_values_needed(input_obj: Config) -> None:
 
 
 def _validate_depth(
-    config_obj: Union[Config, dict], target_format: str, action: str, bad_depth: Callable
+    config_obj: Config | dict, target_format: str, action: str, bad_depth: Callable
 ) -> None:
     """
     :param config_obj: The reference config object.
@@ -287,13 +277,16 @@ def _validate_depth(
     :param bad_depth: A function that returns True if the depth is bad.
     :raises: UWConfigError on excessive config object depth.
     """
-    target_class = format_to_config(target_format)
+    target_class = cast(Config, format_to_config(target_format))
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
-    depth_threshold = target_class._get_depth_threshold()  # pylint: disable=protected-access
+    depth_threshold = target_class._get_depth_threshold()  # noqa: SLF001
     if bad_depth(depth_threshold, depth(config)):
-        raise UWConfigError(
-            "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
+        msg = "Cannot %s depth-%s config to type-'%s' config" % (
+            action,
+            depth(config),
+            target_format,
         )
+        raise UWConfigError(msg)
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:
@@ -306,10 +299,13 @@ def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> Non
     :raises: UWError if other format is incompatible.
     """
     if FORMAT.yaml not in (input_fmt, other_fmt) and input_fmt != other_fmt:
-        raise UWError(
-            "Accepted %s formats for input format %s are %s or %s"
-            % (other_fmt_desc, input_fmt, input_fmt, FORMAT.yaml)
+        msg = "Accepted %s formats for input format %s are %s or %s" % (
+            other_fmt_desc,
+            input_fmt,
+            input_fmt,
+            FORMAT.yaml,
         )
+        raise UWError(msg)
 
 
 # Import-time code
@@ -328,9 +324,7 @@ Recognized file extensions are: {extensions}
 :param config_1_format: Format of 1st config file (optional if file's extension is recognized)
 :param config_2_format: Format of 2nd config file (optional if file's extension is recognized)
 :return: ``False`` if config files had differences, otherwise ``True``
-""".format(
-    extensions=", ".join(FORMAT.extensions())
-).strip()
+""".format(extensions=", ".join(FORMAT.extensions())).strip()
 
 
 realize_config.__doc__ = """
@@ -344,12 +338,10 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config.
 :param output_file: Output config destination (None => write to ``stdout``).
 :param output_format: Format of the output config.
-:param key_path: Path through keys to the desired output block.
+:param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
 :raises: UWConfigRealizeError if ``total`` is ``True`` and config cannot be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).
-""".format(
-    extensions=", ".join(FORMAT.extensions())
-).strip()
+""".format(extensions=", ".join(FORMAT.extensions())).strip()

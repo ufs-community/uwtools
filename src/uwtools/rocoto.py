@@ -2,14 +2,16 @@
 Support for creating Rocoto XML workflow documents.
 """
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass
 from math import log10
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 from lxml import etree
-from lxml.builder import E  # type: ignore
+from lxml.builder import E  # type: ignore[import-not-found]
 from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -19,9 +21,7 @@ from uwtools.logging import log
 from uwtools.utils.file import readable, resource_path, writable
 
 
-def realize_rocoto_xml(
-    config: Union[YAMLConfig, Optional[Path]], output_file: Optional[Path] = None
-) -> str:
+def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
     XML output.
@@ -33,13 +33,14 @@ def realize_rocoto_xml(
     rxml = _RocotoXML(config)
     xml = str(rxml).strip()
     if not validate_rocoto_xml_string(xml):
-        raise UWError("Internal error: Invalid Rocoto XML")
+        msg = "Internal error: Invalid Rocoto XML"
+        raise UWError(msg)
     with writable(output_file) as f:
         print(xml, file=f)
     return xml
 
 
-def validate_rocoto_xml_file(xml_file: Optional[Path]) -> bool:
+def validate_rocoto_xml_file(xml_file: Path | None) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
@@ -58,8 +59,8 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     :return: Did the XML conform to the schema?
     """
     tree = etree.fromstring(xml.encode("utf-8"))
-    with open(resource_path("rocoto/schema_with_metatasks.rng"), "r", encoding="utf-8") as f:
-        schema = etree.RelaxNG(etree.parse(f))
+    path = resource_path("rocoto/schema_with_metatasks.rng")
+    schema = etree.RelaxNG(etree.fromstring(path.read_text()))
     valid: bool = schema.validate(tree)
     nerr = len(schema.error_log)
     log_method = log.info if valid else log.error
@@ -71,7 +72,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
         lines = xml.strip().split("\n")
         fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
         for n, line in enumerate(lines):
-            log.error(fmtstr % (n + 1, line))
+            log.error(fmtstr, n + 1, line)
     return valid
 
 
@@ -80,7 +81,7 @@ class _RocotoXML:
     Generate a Rocoto XML document from a YAML config.
     """
 
-    def __init__(self, config: Union[dict, YAMLConfig, Optional[Path]] = None) -> None:
+    def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         self._config_validate(config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         self._config = cfgobj.data
@@ -93,10 +94,9 @@ class _RocotoXML:
             self._root, pretty_print=True, encoding="utf-8", xml_declaration=True
         ).decode()
         xml = re.sub(r"&amp;([^&]+;)", r"&\1", xml)
-        xml = self._insert_doctype(xml)
-        return xml
+        return self._insert_doctype(xml)
 
-    def dump(self, path: Optional[Path] = None) -> None:
+    def dump(self, path: Path | None = None) -> None:
         """
         Emit Rocoto XML document to file or stdout.
 
@@ -117,7 +117,7 @@ class _RocotoXML:
         config = config if isinstance(config, list) else [config]
         cyclestr = lambda x: E.cyclestr(x["cyclestr"]["value"], **x["cyclestr"].get("attrs", {}))
         items = [cyclestr(x) if isinstance(x, dict) else str(x) for x in [tag, *config]]
-        child: _Element = E(*items)  # pylint: disable=not-callable
+        child: _Element = E(*items)
         e.append(child)
         return child
 
@@ -222,7 +222,8 @@ class _RocotoXML:
         elif tag == STR.timedep:
             self._add_task_dependency_timedep(e, config)
         else:
-            raise UWConfigError("Unhandled dependency type %s" % tag)
+            msg = "Unhandled dependency type %s" % tag
+            raise UWConfigError(msg)
 
     def _add_task_dependency_datadep(self, e: _Element, config: dict) -> None:
         """
@@ -244,7 +245,7 @@ class _RocotoXML:
         self._set_attrs(SubElement(e, STR.metataskdep), config)
 
     def _add_task_dependency_sh(
-        self, e: _Element, config: dict, name_attr: Optional[str] = None
+        self, e: _Element, config: dict, name_attr: str | None = None
     ) -> None:
         """
         :param e: The parent element to add the new element to.
@@ -350,18 +351,23 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config: Union[dict, YAMLConfig, Optional[Path]]) -> None:
+    def _config_validate(self, config: dict | Path | YAMLConfig | None = None) -> None:
         """
         Validate the given YAML config.
 
         :param config: YAMLConfig object or path to YAML file (None => read stdin).
         :raises: UWConfigError if config fails validation.
         """
-        schema_file = resource_path("jsonschema/rocoto.jsonschema")
-        validate_yaml(schema_file=schema_file, desc="Rocoto config", config=config)
+        config_data, config_path = (None, config) if isinstance(config, Path) else (config, None)
+        validate_yaml(
+            schema_file=resource_path("jsonschema/rocoto.jsonschema"),
+            desc="Rocoto config",
+            config_data=config_data,
+            config_path=config_path,
+        )
 
     @property
-    def _doctype(self) -> Optional[str]:
+    def _doctype(self) -> str | None:
         """
         The <!DOCTYPE> block with <!ENTITY> definitions.
 

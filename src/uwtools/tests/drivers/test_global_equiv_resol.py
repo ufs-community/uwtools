@@ -1,9 +1,8 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 global_equiv_resol driver tests.
 """
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -72,10 +71,10 @@ def test_GlobalEquivResol_driver_name(driverobj):
 
 def test_GlobalEquivResol_input_file(driverobj):
     path = Path(driverobj.config["input_grid_file"])
-    assert not driverobj.input_file().ready()
+    assert not driverobj.input_file().refs.is_file()
     path.parent.mkdir()
     path.touch()
-    assert driverobj.input_file().ready()
+    assert driverobj.input_file().refs.is_file()
 
 
 def test_GlobalEquivResol_output(driverobj):
@@ -84,11 +83,11 @@ def test_GlobalEquivResol_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_GlobalEquivResol_provisioned_rundir(driverobj):
+def test_GlobalEquivResol_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_file=D,
-        runscript=D,
+        input_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

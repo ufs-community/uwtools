@@ -1,9 +1,8 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 SCHISM driver tests.
 """
-import datetime as dt
-from unittest.mock import DEFAULT as D
+
+from pathlib import Path
 from unittest.mock import patch
 
 import yaml
@@ -31,8 +30,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -57,18 +56,17 @@ def test_SCHISM_driver_name(driverobj):
 
 def test_SCHISM_namelist_file(driverobj):
     src = driverobj.config["namelist"]["template_file"]
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
+    Path(src).write_text(yaml.dump({}))
     dst = driverobj.rundir / "param.nml"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
 
 
-def test_SCHISM_provisioned_rundir(driverobj):
+def test_SCHISM_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        namelist_file=D,
+        namelist_file=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

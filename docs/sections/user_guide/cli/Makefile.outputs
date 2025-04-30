@@ -1,3 +1,5 @@
+export UWTOOLS_TIMESTAMP = 2025-01-02T03:04:05
+
 COMMANDS = $(wildcard *.cmd)
 OUTPUTS  = $(COMMANDS:cmd=out)
 
@@ -7,3 +9,9 @@ all: $(OUTPUTS)
 
 $(OUTPUTS):
 	@bash $(basename $@).cmd >$@ 2>&1 | true
+
+%.out: %.txt %.yaml
+	@bash $< >$@ 2>&1 | true
+
+%.out: %.txt
+	@bash $< >$@ 2>&1 | true

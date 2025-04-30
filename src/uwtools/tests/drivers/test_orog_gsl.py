@@ -1,16 +1,14 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 orog_gsl driver tests.
 """
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog_gsl import OrogGSL
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -64,7 +62,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -81,9 +78,7 @@ def test_OrogGSL_driver_name(driverobj):
 def test_OrogGSL_input_config_file(driverobj):
     driverobj.input_config_file()
     inputs = [str(driverobj.config["config"][k]) for k in ("tile", "resolution", "halo")]
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as cfg_file:
-        content = cfg_file.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 3
     assert content == inputs
 
@@ -96,19 +91,18 @@ def test_OrogGSL_input_grid_file(driverobj):
 
 
 def test_OrogGSL_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    outfile = lambda x: driverobj.rundir / f"C403_oro_data_{x}.tile7.halo4.nc"
+    assert driverobj.output == {"ls": outfile("ls"), "ss": outfile("ss")}
 
 
-def test_OrogGSL_provisioned_rundir(driverobj):
+def test_OrogGSL_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_config_file=D,
-        input_grid_file=D,
-        runscript=D,
-        topo_data_2p5m=D,
-        topo_data_30s=D,
+        input_config_file=ready_task,
+        input_grid_file=ready_task,
+        runscript=ready_task,
+        topo_data_2p5m=ready_task,
+        topo_data_30s=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

@@ -2,9 +2,10 @@
 API access to ``uwtools`` templating logic.
 """
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
@@ -14,13 +15,13 @@ from uwtools.utils.file import str2path as _str2path
 
 
 def render(
-    values_src: Optional[Union[dict, Path, str]] = None,
-    values_format: Optional[str] = None,
-    input_file: Optional[Union[Path, str]] = None,
-    output_file: Optional[Union[Path, str]] = None,
-    overrides: Optional[dict[str, str]] = None,
+    values_src: dict | Path | str | None = None,
+    values_format: str | None = None,
+    input_file: Path | str | None = None,
+    output_file: Path | str | None = None,
+    overrides: dict[str, str] | None = None,
     env: bool = False,
-    searchpath: Optional[list[str]] = None,
+    searchpath: list[str] | None = None,
     values_needed: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
@@ -59,17 +60,18 @@ def render(
         dry_run=dry_run,
     )
     if result is None:
-        raise UWTemplateRenderError("Could not render template")
+        msg = "Could not render template"
+        raise UWTemplateRenderError(msg)
     return result
 
 
-def render_to_str(  # pylint: disable=unused-argument
-    values_src: Optional[Union[dict, Path, str]] = None,
-    values_format: Optional[str] = None,
-    input_file: Optional[Union[Path, str]] = None,
-    overrides: Optional[dict[str, str]] = None,
+def render_to_str(
+    values_src: dict | Path | str | None = None,
+    values_format: str | None = None,
+    input_file: Path | str | None = None,
+    overrides: dict[str, str] | None = None,
     env: bool = False,
-    searchpath: Optional[list[str]] = None,
+    searchpath: list[str] | None = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> str:
@@ -82,8 +84,8 @@ def render_to_str(  # pylint: disable=unused-argument
 
 
 def translate(
-    input_file: Optional[Union[Path, str]] = None,
-    output_file: Optional[Union[Path, str]] = None,
+    input_file: Path | str | None = None,
+    output_file: Path | str | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:

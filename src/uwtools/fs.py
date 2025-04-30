@@ -2,20 +2,33 @@
 File and directory staging.
 """
 
-import datetime as dt
-from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Optional, Union
+from __future__ import annotations
 
-from iotaa import dryrun, tasks
+import glob
+import re
+from abc import ABC, abstractmethod
+from fnmatch import fnmatch
+from itertools import dropwhile, zip_longest
+from operator import eq
+from pathlib import Path
+from typing import TYPE_CHECKING
+from urllib.parse import urlparse
+
+from iotaa import tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import UWYAMLGlob, YAMLKey
+from uwtools.config.tools import walk_key_path
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
+from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import directory, filecopy, symlink
+
+if TYPE_CHECKING:
+    import datetime as dt
 
 
 class Stager(ABC):
@@ -25,12 +38,11 @@ class Stager(ABC):
 
     def __init__(
         self,
-        config: Optional[Union[dict, str, Path]] = None,
-        target_dir: Optional[Union[str, Path]] = None,
-        cycle: Optional[dt.datetime] = None,
-        leadtime: Optional[dt.timedelta] = None,
-        keys: Optional[list[str]] = None,
-        dry_run: bool = False,
+        config: dict | str | Path | None = None,
+        target_dir: str | Path | None = None,
+        cycle: dt.datetime | None = None,
+        leadtime: dt.timedelta | None = None,
+        key_path: list[YAMLKey] | None = None,
     ) -> None:
         """
         Stage files and directories.
@@ -39,12 +51,9 @@ class Stager(ABC):
         :param target_dir: Path to target directory.
         :param cycle: A ``datetime`` object to make available for use in the config.
         :param leadtime: A ``timedelta`` object to make available for use in the config.
-        :param keys: YAML keys leading to file dst/src block.
-        :param dry_run: Do not copy files.
+        :param key_path: Path of keys to config block to use.
         :raises: ``UWConfigError`` if config fails validation.
         """
-        dryrun(enable=dry_run)
-        self._keys = keys or []
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
         yaml_config.dereference(
@@ -54,42 +63,46 @@ class Stager(ABC):
                 **yaml_config.data,
             }
         )
-        self._config = yaml_config.data
-        self._set_config_block()
+        self._config, _ = walk_key_path(yaml_config.data, key_path or [])
         self._validate()
-        self._check_paths()
+        self._check_target_dir()
+        self._check_destination_paths()
 
-    def _check_paths(self) -> None:
+    def _check_destination_paths(self) -> None:
         """
-        Check that all paths are absolute if no target directory is specified.
+        Check that destination paths are valid.
 
-        :parm paths: The paths to check.
-        :raises: UWConfigError if no target directory is specified and a relative path is.
+        :raises: UWConfigError when a bad path is detected.
         """
-        if not self._target_dir:
-            errmsg = "Relative path '%s' requires the target directory to be specified"
-            for dst in self._dst_paths:
-                if not Path(dst).is_absolute():
-                    raise UWConfigError(errmsg % dst)
+        for dst in self._dst_paths:
+            scheme = urlparse(dst).scheme
+            absolute = scheme or Path(dst).is_absolute()
+            if scheme and scheme != STR.url_scheme_file:
+                msg = "Non-filesystem destination path '%s' not currently supported"
+                raise UWConfigError(msg % dst)
+            if self._target_dir and scheme:
+                msg = "Non-filesystem path '%s' invalid when target directory is specified"
+                raise UWConfigError(msg % dst)
+            if self._target_dir and absolute:
+                msg = "Path '%s' must be relative when target directory is specified"
+                raise UWConfigError(msg % dst)
+            if not self._target_dir and not absolute:
+                msg = "Relative path '%s' requires target directory to be specified"
+                raise UWConfigError(msg % dst)
 
-    def _set_config_block(self) -> None:
+    def _check_target_dir(self) -> None:
         """
-        Navigate keys to a config block.
+        Check that target directory is valid.
 
-        :raises: UWConfigError if no target directory is specified and a relative path is.
+        :raises: UWConfigError when a bad path is detected.
         """
-        cfg = self._config
-        nav = []
-        for key in self._keys:
-            nav.append(key)
-            if key not in cfg:
-                raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
-            log.debug("Following config key '%s'", key)
-            cfg = cfg[key]
-        if not isinstance(cfg, dict):
-            msg = "Expected block not found at key path: %s" % ".".join(self._keys)
-            raise UWConfigError(msg)
-        self._config = cfg
+        if (
+            self._target_dir
+            and (scheme := urlparse(str(self._target_dir)).scheme)
+            and scheme != STR.url_scheme_file
+        ):
+            msg = "Non-filesystem path '%s' invalid as target directory"
+            raise UWConfigError(msg % self._target_dir)
 
     @property
     @abstractmethod
@@ -111,7 +124,15 @@ class Stager(ABC):
 
         :raises: UWConfigError if config fails validation.
         """
-        validate_internal(schema_name=self._schema, desc="fs config", config=self._config)
+        config_data, config_path = (
+            (self._config, None) if isinstance(self._config, dict) else (None, self._config)
+        )
+        validate_internal(
+            schema_name=self._schema,
+            desc="fs config",
+            config_data=config_data,
+            config_path=config_path,
+        )
 
 
 class FileStager(Stager):
@@ -125,6 +146,77 @@ class FileStager(Stager):
         The paths to files to create.
         """
         return list(self._config.keys())
+
+    def _expand_glob(self) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
+        for dst, src in self._config.items():
+            if isinstance(src, str):
+                srcs.append((dst, src, True))
+            else:
+                assert isinstance(src, UWYAMLGlob)
+                parts = urlparse(src.value)
+                if parts.scheme == "hsi":
+                    srcs.extend(self._expand_glob_hsi(parts.path, dst))
+                if parts.scheme == "htar":
+                    srcs.extend(self._expand_glob_htar(parts.path, parts.query, dst))
+                elif parts.scheme in ["", "file"]:
+                    srcs.extend(self._expand_glob_local(parts.path, dst))
+                else:
+                    msg = "URL scheme '%s' incompatible with tag %s in: %s"
+                    log.error(msg, parts.scheme, src.tag, src)
+        return srcs
+
+    def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
+        hsi_errmsg_prefix = "***"
+        success, output = run_shell_cmd(f"{STR.hsi} -q ls -1 '{glob_pattern!s}'")
+        if success:
+            lines = output.strip().split("\n")
+            if matches := [line for line in lines if not line.startswith(hsi_errmsg_prefix)][1:]:
+                for path in matches:
+                    d, s, nonglob = self._expand_glob_resolve(glob_pattern, path, dst)
+                    srcs.append((d, f"{STR.hsi}://{s}", nonglob))
+            else:
+                log.warning(lines[1])
+        return srcs
+
+    def _expand_glob_htar(self, path: str, query: str, dst: str) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
+        archive_files = self._expand_glob_hsi(path, "<unused>")
+        for archive_file in [url.removeprefix(f"{STR.hsi}://") for _, url, _ in archive_files]:
+            success, output = run_shell_cmd(f"{STR.htar} -qtf '{archive_file}'")
+            if not success:
+                return []  # any failure => no results
+            for line in output.strip().split("\n"):
+                regex = r"^HTAR:\s+[^ ]{10}\s+[^ ]+\s+\d+\s+[^ ]{10}\s+[^ ]{5}\s+(.*)$"
+                # e.g.: HTAR: -rw-r--r--  Paul.Madden/rtruc         64 2025-04-04 04:37  a1.c
+                if m := re.match(regex, line):
+                    archive_member = m[1]
+                    if fnmatch(archive_member, query):
+                        d, s, nonglob = self._expand_glob_resolve(query, m[1], dst)
+                        srcs.append((d, f"{STR.htar}://{archive_file}?{s}", nonglob))
+        return srcs
+
+    def _expand_glob_local(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
+        srcs: list[tuple[str, str, bool]] = []
+        for path in glob.iglob(glob_pattern, recursive=True):
+            if Path(path).is_dir() and not isinstance(self, Linker):
+                log.warning("Ignoring directory %s", path)
+            else:
+                srcs.append(self._expand_glob_resolve(glob_pattern, path, dst))
+        return srcs
+
+    @staticmethod
+    def _expand_glob_resolve(glob_pattern: str, path: str, dst: str) -> tuple[str, str, bool]:
+        suffix: Path | str
+        if path == glob_pattern:  # degenerate case
+            suffix = Path(path).parts[-1]
+        else:
+            parts = zip_longest(*[Path(x).parts for x in (path, glob_pattern)])
+            pairs = dropwhile(lambda x: eq(*x), parts)
+            suffix = Path(*[pair[0] for pair in pairs if pair[0]])
+        nonglob = glob_pattern == glob.escape(glob_pattern)  # pattern has no glob characters
+        return (str(Path(dst).parent / suffix), path, nonglob)
 
     @property
     def _schema(self) -> str:
@@ -144,9 +236,26 @@ class Copier(FileStager):
         """
         Copy files.
         """
-        dst = lambda k: Path(self._target_dir / k if self._target_dir else k)
+
+        # If a source path is a glob pattern, the existence of the file(s) found via glob expansion
+        # is already assured and it is unnecessary to check again for their existence. If, however,
+        # a source path is a full explicit path, its existence should be checked before and attempt
+        # is made to copy it.
+
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._config.items()]
+        yield [
+            filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst), check=nonglob)
+            for dst, src, nonglob in self._expand_glob()
+        ]
+
+    @staticmethod
+    def _simple(path: Path | str) -> Path:
+        """
+        Convert a path, potentially prefixed with scheme file://, into a simple filesystem path.
+
+        :param path: The path to convert.
+        """
+        return Path(urlparse(str(path)).path)
 
 
 class Linker(FileStager):
@@ -159,9 +268,15 @@ class Linker(FileStager):
         """
         Link files.
         """
+
+        # See comment in Copier.go() in re: "check" argument.
+
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
-        yield [symlink(target=Path(v), linkname=linkname(k)) for k, v in self._config.items()]
+        yield [
+            symlink(target=Path(v), linkname=linkname(k), check=nonglob)
+            for k, v, nonglob in self._expand_glob()
+        ]
 
 
 class MakeDirs(Stager):

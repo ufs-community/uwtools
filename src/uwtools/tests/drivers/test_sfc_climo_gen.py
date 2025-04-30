@@ -1,31 +1,16 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 sfc_climo_gen driver tests.
 """
-import logging
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-from iotaa import asset, external, refs
-from pytest import fixture, mark, raises
+import f90nml  # type: ignore[import-untyped]
+from pytest import fixture, mark
 
 from uwtools.drivers import sfc_climo_gen
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen
-from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
-from uwtools.tests.support import logged
-
-# Helpers
-
-
-@external
-def ready(x):
-    yield x
-    yield asset(x, lambda: True)
-
 
 # Fixtures
 
@@ -98,7 +83,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -112,38 +96,49 @@ def test_SfcClimoGen_driver_name(driverobj):
     assert driverobj.driver_name() == SfcClimoGen.driver_name() == "sfc_climo_gen"
 
 
-def test_SfcClimoGen_namelist_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
-    with patch.object(sfc_climo_gen, "file", new=ready):
-        path = Path(refs(driverobj.namelist_file()))
+    with patch.object(sfc_climo_gen, "file", new=ready_task):
+        path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_task):
     driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
-    with patch.object(sfc_climo_gen, "file", new=ready):
-        path = Path(refs(driverobj.namelist_file()))
+    with patch.object(sfc_climo_gen, "file", new=ready_task):
+        path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  'string' is not of type 'integer'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  'string' is not of type 'integer'")
 
 
-def test_SfcClimoGen_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+@mark.parametrize("halo", [1, None])
+def test_SfcClimoGen_output(driverobj, halo):
+    driverobj._config["namelist"]["update_values"]["config"]["halo"] = halo
+    keys = [
+        "facsf",
+        "maximum_snow_albedo",
+        "slope_type",
+        "snowfree_albedo",
+        "soil_type",
+        "substrate_temperature",
+        "vegetation_greenness",
+        "vegetation_type",
+    ]
+    ns = [0, halo] if halo else [0]
+    assert driverobj.output == {
+        key: [driverobj.rundir / f"{key}.tile7.halo{n}.nc" for n in ns] for key in keys
+    }
 
 
-def test_SfcClimoGen_provisioned_rundir(driverobj):
+def test_SfcClimoGen_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        namelist_file=D,
-        runscript=D,
+        namelist_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

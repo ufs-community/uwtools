@@ -1,23 +1,18 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 FV3 driver tests.
 """
-import datetime as dt
-import logging
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
+import iotaa
 import yaml
-from iotaa import asset, external, refs
 from pytest import fixture, mark, raises
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
@@ -63,8 +58,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -74,10 +69,10 @@ def driverobj(config, cycle):
 
 @fixture
 def truetask():
-    @external
+    @iotaa.external
     def true():
         yield "true"
-        yield asset(True, lambda: True)
+        yield iotaa.asset(True, lambda: True)
 
     return true
 
@@ -141,7 +136,7 @@ def test_FV3_field_table(driverobj):
 
 
 @mark.parametrize(
-    "key,task,test",
+    ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
 def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
@@ -150,8 +145,7 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["fv3"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
     path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
+    path.write_text(yaml.dump(config))
     driverobj = FV3(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
@@ -163,12 +157,10 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
 
 
 @mark.parametrize("base_file_exists", [True, False])
-def test_FV3_model_configure(base_file_exists, caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_model_configure(base_file_exists, driverobj, logged):
     src = driverobj.rundir / "model_configure.in"
     if base_file_exists:
-        with open(src, "w", encoding="utf-8") as f:
-            yaml.dump({}, f)
+        src.write_text(yaml.dump({}))
     dst = driverobj.rundir / "model_configure"
     assert not dst.is_file()
     driverobj._config["model_configure"] = {"base_file": src}
@@ -177,38 +169,34 @@ def test_FV3_model_configure(base_file_exists, caplog, driverobj):
         assert dst.is_file()
     else:
         assert not dst.is_file()
-        assert regex_logged(caplog, f"{src}: State: Not Ready (external asset)")
+        assert logged(f"{src}: Not ready [external asset]")
 
 
-def test_FV3_namelist_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_namelist_file(driverobj, logged):
     src = driverobj.rundir / "input.nml.in"
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
+    src.write_text(yaml.dump({}))
     dst = driverobj.rundir / "input.nml"
     assert not dst.is_file()
     driverobj._config["namelist_file"] = {"base_file": src}
-    path = Path(refs(driverobj.namelist_file()))
-    assert logged(caplog, f"Wrote config to {path}")
+    path = Path(driverobj.namelist_file().refs)
+    assert logged(f"Wrote config to {path}")
     assert dst.is_file()
 
 
-def test_FV3_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["namsfc"]["foo"] = None
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
-def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_FV3_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+    assert logged("missing.nml: Not ready [external asset]")
 
 
 def test_FV3_output(driverobj):
@@ -217,20 +205,20 @@ def test_FV3_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-@mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_rundir(domain, driverobj):
+@mark.parametrize("domain", ["global", "regional"])
+def test_FV3_provisioned_rundir(domain, driverobj, ready_task):
     driverobj._config["domain"] = domain
     with patch.multiple(
         driverobj,
-        boundary_files=D,
-        diag_table=D,
-        field_table=D,
-        files_copied=D,
-        files_linked=D,
-        model_configure=D,
-        namelist_file=D,
-        restart_directory=D,
-        runscript=D,
+        boundary_files=ready_task,
+        diag_table=ready_task,
+        field_table=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        model_configure=ready_task,
+        namelist_file=ready_task,
+        restart_directory=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     excluded = ["boundary_files"] if domain == "global" else []

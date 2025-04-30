@@ -1,4 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config.formats.ini module.
 """
@@ -56,8 +55,7 @@ def test_ini_instantiation_depth():
 @mark.parametrize("func", [repr, str])
 def test_ini_repr_str(func):
     config = fixture_path("simple.ini")
-    with open(config, "r", encoding="utf-8") as f:
-        assert func(INIConfig(config)) == f.read().strip()
+    assert func(INIConfig(config)) == config.read_text().strip()
 
 
 def test_ini_simple(salad_base, tmp_path):
@@ -90,12 +88,10 @@ def test_ini_as_dict():
 def test_ini_dump(dumpkit):
     d, expected, path = dumpkit
     INIConfig(d).dump(path)
-    with open(path, "r", encoding="utf-8") as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected
 
 
 def test_ini_dump_dict(dumpkit):
     d, expected, path = dumpkit
     INIConfig.dump_dict(d, path=path)
-    with open(path, "r", encoding="utf-8") as f:
-        assert f.read().strip() == expected
+    assert path.read_text().strip() == expected

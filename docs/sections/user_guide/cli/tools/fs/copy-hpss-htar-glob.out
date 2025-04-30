@@ -1,0 +1,31 @@
+[2025-01-02T03:04:05]     INFO Validating config against internal schema: files-to-stage
+[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in fs config
+[2025-01-02T03:04:05]     INFO Running: hsi -q ls -1 '/BMC/rtrr/5year/uwtools/*.tar'
+[2025-01-02T03:04:05]     INFO Running: htar -qtf '/BMC/rtrr/5year/uwtools/code.tar'
+[2025-01-02T03:04:05]     INFO Running: htar -qtf '/BMC/rtrr/5year/uwtools/data.tar'
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.c -> dst/copy-hpss-htar-glob/a1.c: Executing
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.c -> dst/copy-hpss-htar-glob/a1.c: Running: htar -qxf '/BMC/rtrr/5year/uwtools/code.tar' 'a1.c' in dst/copy-hpss-htar-glob/.tmpdirfgmy4hxn
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.c -> dst/copy-hpss-htar-glob/a1.c: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.c -> dst/copy-hpss-htar-glob/a1.c: => HTAR: HTAR SUCCESSFUL
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.c -> dst/copy-hpss-htar-glob/a1.c: Moving dst/copy-hpss-htar-glob/.tmpdirfgmy4hxn/a1.c -> dst/copy-hpss-htar-glob/a1.c
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.c -> dst/copy-hpss-htar-glob/a1.c: Ready
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.py -> dst/copy-hpss-htar-glob/a1.py: Executing
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.py -> dst/copy-hpss-htar-glob/a1.py: Running: htar -qxf '/BMC/rtrr/5year/uwtools/code.tar' 'a1.py' in dst/copy-hpss-htar-glob/.tmpdir83p7619l
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.py -> dst/copy-hpss-htar-glob/a1.py: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.py -> dst/copy-hpss-htar-glob/a1.py: => HTAR: HTAR SUCCESSFUL
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.py -> dst/copy-hpss-htar-glob/a1.py: Moving dst/copy-hpss-htar-glob/.tmpdir83p7619l/a1.py -> dst/copy-hpss-htar-glob/a1.py
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/code.tar:a1.py -> dst/copy-hpss-htar-glob/a1.py: Ready
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-glob/a1.txt: Executing
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-glob/a1.txt: Running: htar -qxf '/BMC/rtrr/5year/uwtools/data.tar' 'a1.txt' in dst/copy-hpss-htar-glob/.tmpdir95rslkj_
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-glob/a1.txt: => [connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-glob/a1.txt: => HTAR: HTAR SUCCESSFUL
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-glob/a1.txt: Moving dst/copy-hpss-htar-glob/.tmpdir95rslkj_/a1.txt -> dst/copy-hpss-htar-glob/a1.txt
+[2025-01-02T03:04:05]     INFO HTAR /BMC/rtrr/5year/uwtools/data.tar:a1.txt -> dst/copy-hpss-htar-glob/a1.txt: Ready
+[2025-01-02T03:04:05]     INFO File copies: Ready
+
+dst/copy-hpss-htar-glob
+├── a1.c
+├── a1.py
+└── a1.txt
+
+1 directory, 3 files

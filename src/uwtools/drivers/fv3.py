@@ -40,7 +40,7 @@ class FV3(DriverCycleBased):
                     self.rundir / "INPUT" / f"gfs_bndy.tile{n}.{(boundary_hour - offset):03d}.nc"
                 )
                 symlinks[target] = linkname
-        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
+        yield [symlink(target=tgt, linkname=lnk) for tgt, lnk in symlinks.items()]
 
     @task
     def diag_table(self):

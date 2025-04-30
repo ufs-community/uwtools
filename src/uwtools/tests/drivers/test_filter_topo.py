@@ -1,19 +1,16 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 filter_topo driver tests.
 """
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-from iotaa import refs
-from pytest import fixture, mark, raises
+import f90nml  # type: ignore[import-untyped]
+from pytest import fixture, mark
 
 from uwtools.config.support import from_od
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.filter_topo import FilterTopo
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -75,7 +72,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -104,21 +100,25 @@ def test_FilterTopo_input_grid_file(driverobj):
 
 
 def test_FilterTopo_namelist_file(driverobj):
-    path = refs(driverobj.namelist_file())
+    path = driverobj.namelist_file().refs
     actual = from_od(f90nml.read(path).todict())
     expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected
 
 
 def test_FilterTopo_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output == {
+        "path": driverobj.rundir / driverobj.config["config"]["filtered_orog"]
+    }
 
 
-def test_FilterTopo_provisioned_rundir(driverobj):
+def test_FilterTopo_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
-        driverobj, input_grid_file=D, filtered_output_file=D, namelist_file=D, runscript=D
+        driverobj,
+        input_grid_file=ready_task,
+        filtered_output_file=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

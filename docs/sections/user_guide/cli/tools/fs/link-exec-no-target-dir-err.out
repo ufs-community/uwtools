@@ -1,3 +1,0 @@
-[2024-08-26T23:03:41]     INFO Validating config against internal schema: files-to-stage
-[2024-08-26T23:03:41]     INFO 0 UW schema-validation errors found in fs config
-[2024-08-26T23:03:41]    ERROR Relative path 'foo' requires the target directory to be specified

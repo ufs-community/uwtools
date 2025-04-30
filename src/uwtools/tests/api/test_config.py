@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring
-
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -32,7 +30,7 @@ def test_compare():
 
 
 @mark.parametrize(
-    "classname,f",
+    ("classname", "f"),
     [
         ("FieldTableConfig", config.get_fieldtable_config),
         ("INIConfig", config.get_ini_config),
@@ -88,7 +86,7 @@ def test_realize_to_dict():
     with patch.object(config, "realize") as realize:
         config.realize_to_dict(**kwargs)
     realize.assert_called_once_with(
-        **dict({**kwargs, **{"output_file": Path(os.devnull), "output_format": FORMAT.yaml}})
+        **{**kwargs, "output_file": Path(os.devnull), "output_format": FORMAT.yaml}
     )
 
 
@@ -117,9 +115,9 @@ def test_realize_update_config_none():
     )
 
 
-@mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
-def test_validate(cfg):
-    kwargs: dict = {"schema_file": "schema-file", "config": cfg}
+@mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={"foo": "bar"})])
+def test_validate_config_data(cfg):
+    kwargs: dict = {"schema_file": "schema-file", "config_data": cfg}
     with patch.object(config, "_validate_external") as _validate_external:
         assert config.validate(**kwargs) is True
         _validate_external.side_effect = UWConfigError()
@@ -127,18 +125,18 @@ def test_validate(cfg):
     _validate_external.assert_called_with(
         schema_file=Path(kwargs["schema_file"]),
         desc="config",
-        config=kwargs["config"],
+        config_data=kwargs["config_data"],
+        config_path=None,
     )
 
 
-@mark.parametrize("cast", (str, Path))
-def test_validate_config_file(cast, tmp_path):
+@mark.parametrize("cast", [str, Path])
+def test_validate_config_path(cast, tmp_path):
     cfg = tmp_path / "config.yaml"
-    with open(cfg, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
-    kwargs: dict = {"schema_file": "schema-file", "config": cast(cfg)}
+    cfg.write_text(yaml.dump({}))
+    kwargs: dict = {"schema_file": "schema-file", "config_path": cast(cfg)}
     with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)
     _validate_external.assert_called_once_with(
-        schema_file=Path(kwargs["schema_file"]), desc="config", config=cfg
+        schema_file=Path(kwargs["schema_file"]), desc="config", config_data=None, config_path=cfg
     )

@@ -1,4 +1,1 @@
-copy-dst
-copy-dst-timedep
-link-dst
-link-dst-timedep
+dst/

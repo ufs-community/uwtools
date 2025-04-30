@@ -1,5 +1,3 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
@@ -18,7 +16,6 @@ def execute_kwargs():
         "task": "atask",
         "config": "/some/config",
         "batch": True,
-        "dry_run": False,
         "graph_file": "/path/to/g.dot",
         "key_path": None,
         "schema_file": None,
@@ -49,14 +46,14 @@ def test_make_execute(execute_kwargs):
     assert ":param driver_class:" not in func.__doc__
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
-        assert func(**execute_kwargs) is True
+        assert func(**execute_kwargs, dry_run=True) is True
         _execute.assert_called_once_with(
-            driver_class=TestDriver, cycle=None, leadtime=None, **execute_kwargs
+            driver_class=TestDriver, dry_run=True, cycle=None, leadtime=None, **execute_kwargs
         )
 
 
-def test_make_execute_cycle(execute_kwargs):
-    execute_kwargs["cycle"] = dt.datetime.now()
+def test_make_execute_cycle(execute_kwargs, utc):
+    execute_kwargs["cycle"] = utc()
     func = api.make_execute(driver_class=TestDriver, with_cycle=True)
     assert func.__name__ == "execute"
     assert func.__doc__ is not None
@@ -64,12 +61,14 @@ def test_make_execute_cycle(execute_kwargs):
     assert ":param driver_class:" not in func.__doc__
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
-        assert func(**execute_kwargs) is True
-        _execute.assert_called_once_with(driver_class=TestDriver, leadtime=None, **execute_kwargs)
+        assert func(**execute_kwargs, dry_run=True) is True
+        _execute.assert_called_once_with(
+            driver_class=TestDriver, dry_run=True, leadtime=None, **execute_kwargs
+        )
 
 
-def test_make_execute_cycle_leadtime(execute_kwargs):
-    execute_kwargs["cycle"] = dt.datetime.now()
+def test_make_execute_cycle_leadtime(execute_kwargs, utc):
+    execute_kwargs["cycle"] = utc()
     execute_kwargs["leadtime"] = dt.timedelta(hours=24)
     func = api.make_execute(driver_class=TestDriver, with_cycle=True, with_leadtime=True)
     assert func.__name__ == "execute"
@@ -79,8 +78,8 @@ def test_make_execute_cycle_leadtime(execute_kwargs):
     assert ":param driver_class:" not in func.__doc__
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
-        assert func(**execute_kwargs) is True
-        _execute.assert_called_once_with(driver_class=TestDriver, **execute_kwargs)
+        assert func(**execute_kwargs, dry_run=True) is True
+        _execute.assert_called_once_with(driver_class=TestDriver, dry_run=True, **execute_kwargs)
 
 
 def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
@@ -91,13 +90,13 @@ def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
 
 
 @mark.parametrize("hours", [0, 24, 168])
-def test__execute(execute_kwargs, hours, tmp_path):
+def test__execute(execute_kwargs, hours, tmp_path, utc):
     graph_file = tmp_path / "g.dot"
     kwargs = {
         **execute_kwargs,
         "driver_class": TestDriverCL,
         "config": {"concrete": {"some": "config"}},
-        "cycle": dt.datetime.now(),
+        "cycle": utc(),
         "leadtime": dt.timedelta(hours=hours),
         "graph_file": graph_file,
     }

@@ -58,8 +58,8 @@
           "type": "object"
         },
         "length": {
-          "minimum": 1,
-          "type": "integer"
+          "exclusiveMinimum": 0,
+          "type": "number"
         },
         "namelist": {
           "additionalProperties": false,

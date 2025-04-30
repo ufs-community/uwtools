@@ -1,0 +1,6 @@
+&animal
+  name = 'human'
+  num_legs = 2
+  diet_type = 'omnivore'
+  location = 'Worldwide'
+/

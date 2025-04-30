@@ -1,4 +1,4 @@
-from iotaa import asset, task
+import iotaa
 
 from uwtools.drivers.driver import AssetsCycleBased
 
@@ -8,13 +8,13 @@ class TestDriver(AssetsCycleBased):
     TestDriver.
     """
 
-    @task
+    @iotaa.task
     def forty_two(self):
         """
-        42
+        Forty Two.
         """
         yield "42"
-        yield asset(42, lambda: True)
+        yield iotaa.asset(42, lambda: True)
         yield None
 
     @classmethod

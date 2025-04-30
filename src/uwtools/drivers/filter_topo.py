@@ -27,7 +27,7 @@ class FilterTopo(DriverTimeInvariant):
         """
         src = Path(self.config["config"]["input_grid_file"])
         dst = Path(self.config[STR.rundir], src.name)
-        yield self.taskname(f"Input grid {str(src)}")
+        yield self.taskname(f"Input grid {src!s}")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -37,8 +37,8 @@ class FilterTopo(DriverTimeInvariant):
         The filtered output file staged from raw input.
         """
         src = Path(self.config["config"]["input_raw_orog"])
-        dst = self.rundir / self.config["config"]["filtered_orog"]
-        yield self.taskname(f"Raw orog input {str(dst)}")
+        dst = self.output["path"]
+        yield self.taskname(f"Raw orog input {dst!s}")
         yield asset(dst, dst.is_file)
         yield filecopy(src=src, dst=dst)
 
@@ -80,6 +80,13 @@ class FilterTopo(DriverTimeInvariant):
         The name of this driver.
         """
         return STR.filtertopo
+
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"path": self.rundir / self.config["config"]["filtered_orog"]}
 
 
 set_driver_docstring(FilterTopo)

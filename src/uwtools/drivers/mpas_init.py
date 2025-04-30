@@ -27,18 +27,19 @@ class MPASInit(MPASBase):
         Boundary files.
         """
         yield self.taskname("boundary files")
-        lbcs = self.config["boundary_conditions"]
-        endhour = lbcs["length"]
-        interval = lbcs["interval_hours"]
+        bcs = self.config["boundary_conditions"]
+        offset = abs(bcs["offset"])
+        endhour = bcs["length"] + offset
+        interval = bcs["interval_hours"]
         symlinks = {}
-        boundary_filepath = lbcs["path"]
+        boundary_filepath = bcs["path"]
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             target = Path(boundary_filepath, fn)
             linkname = self.rundir / fn
             symlinks[target] = linkname
-        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
+        yield [symlink(target=tgt, linkname=lnk) for tgt, lnk in symlinks.items()]
 
     @task
     def namelist_file(self):

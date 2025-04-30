@@ -1,0 +1,6 @@
+files:
+  to:
+    link:
+      file1-link.nml: fixtures/fs/data/file1.nml
+      file2-link.txt: fixtures/fs/data/file2.txt
+      data/file3-link.csv: fixtures/fs/data/file3.csv

@@ -1,4 +1,5 @@
 {% set info = load_file_data("uwtools/resources/info.json") %}
+{% set pymin = "3.9" %}
 
 package:
   name: uwtools
@@ -10,28 +11,29 @@ build:
   noarch: python
   number: {{ info["buildnum"] }}
 requirements:
-  build:
+  host:
     - pip
+    - python {{ pymin }}
     - setuptools
   run:
     - f90nml 1.4.*
-    - iotaa 0.8.*
+    - iotaa 1.2.*
     - jinja2 3.1.*
     - jsonschema >=4.18,<4.24
-    - lxml 5.3.*
-    - python >=3.9,<3.13
+    - lxml 5.2.*
+    - python >={{ pymin }},<3.13
     - pyyaml 6.0.*
+    - requests 2.32.*
 test:
   requires:
-    - black 24.8.*
     - docformatter 1.7.*
-    - isort 5.13.*
     - jq 1.7.*
     - make 4.4.*
-    - mypy 1.11.*
-    - pylint 3.2.*
+    - mypy 1.15.*
     - pytest 8.3.*
-    - pytest-cov 5.0.*
+    - pytest-cov 6.0.*
     - pytest-xdist 3.6.*
+    - python {{ pymin }}
+    - ruff 0.11.*
 about:
   license: LGPL

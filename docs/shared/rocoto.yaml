@@ -1,0 +1,27 @@
+workflow:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledef:
+    - attrs:
+        group: howdy
+      spec: 202209290000 202209300000 06:00:00
+    - attrs:
+        group: hourly
+      spec: 0 * * * 2006-2010 *
+  entities:
+    ACCOUNT: myaccount
+    FOO: test.log
+  log: /some/path/to/&FOO;
+  tasks:
+    task_hello:
+      attrs:
+        cycledefs: howdy
+      account: "&ACCOUNT;"
+      command: "echo hello $person"
+      jobname: hello
+      native: --reservation my_reservation
+      nodes: 1:ppn=1
+      walltime: 00:01:00
+      envars:
+        person: siri

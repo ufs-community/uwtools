@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import configparser
 from io import StringIO
-from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class INIConfig(Config):
@@ -14,7 +18,7 @@ class INIConfig(Config):
     Work with INI configs.
     """
 
-    def __init__(self, config: Union[dict, Optional[Path]] = None):
+    def __init__(self, config: dict | Path | None = None):
         """
         :param config: Config file to load (None => read from stdin), or initial dict.
         """
@@ -44,7 +48,7 @@ class INIConfig(Config):
             return sio.getvalue().strip()
 
     @staticmethod
-    def _get_depth_threshold() -> Optional[int]:
+    def _get_depth_threshold() -> int | None:
         """
         Return the config's depth threshold.
         """
@@ -57,7 +61,7 @@ class INIConfig(Config):
         """
         return FORMAT.ini
 
-    def _load(self, config_file: Optional[Path]) -> dict:
+    def _load(self, config_file: Path | None) -> dict:
         """
         Read and parse an INI file.
 
@@ -78,7 +82,7 @@ class INIConfig(Config):
         """
         return self.data
 
-    def dump(self, path: Optional[Path] = None) -> None:
+    def dump(self, path: Path | None = None) -> None:
         """
         Dump the config in INI format.
 
@@ -87,7 +91,7 @@ class INIConfig(Config):
         self.dump_dict(self.data, path)
 
     @classmethod
-    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
+    def dump_dict(cls, cfg: dict, path: Path | None = None) -> None:
         """
         Dump a provided config dictionary in INI format.
 

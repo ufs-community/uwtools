@@ -1,16 +1,14 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Shave driver tests.
 """
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.shave import Shave
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -64,7 +62,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -84,26 +81,22 @@ def test_Shave_input_config_file(driverobj):
     nhalo = driverobj.config["config"]["nhalo"]
     input_file_path = driverobj._config["config"]["input_grid_file"]
     Path(input_file_path).touch()
-    output_file_path = driverobj._config["config"]["output_grid_file"]
+    output_file_path = driverobj.config["config"]["output_grid_file"]
     driverobj.input_config_file()
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as cfg_file:
-        content = cfg_file.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 1
     assert content[0] == f"{nx} {ny} {nhalo} '{input_file_path}' '{output_file_path}'"
 
 
 def test_Shave_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output == {"path": Path(driverobj.config["config"]["output_grid_file"])}
 
 
-def test_Shave_provisioned_rundir(driverobj):
+def test_Shave_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        input_config_file=D,
-        runscript=D,
+        input_config_file=ready_task,
+        runscript=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:

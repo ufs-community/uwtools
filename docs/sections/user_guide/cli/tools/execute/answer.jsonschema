@@ -1,0 +1,24 @@
+{
+  "properties": {
+    "answer": {
+      "additionalProperties": false,
+      "properties": {
+        "n": {
+          "type": "integer"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "n",
+        "rundir"
+      ],
+      "type": "object"
+    },
+    "required": [
+      "answer"
+    ],
+    "type": "object"
+  }
+}

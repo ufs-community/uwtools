@@ -1,36 +1,39 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 CDEPS driver tests.
 """
 
-import datetime as dt
-import logging
 from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-from iotaa import refs
+import f90nml  # type: ignore[import-untyped]
+import iotaa
 from pytest import fixture, mark
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers import cdeps
 from uwtools.drivers.cdeps import CDEPS
 from uwtools.drivers.driver import AssetsCycleBased
-from uwtools.logging import log
-from uwtools.tests.support import logged
 from uwtools.tests.test_schemas import CDEPS_CONFIG
 
 # Fixtures
 
 
 @fixture
-def driverobj(tmp_path):
+def driverobj(tmp_path, utc):
     return CDEPS(
-        config={"cdeps": {**deepcopy(CDEPS_CONFIG), "rundir": str(tmp_path / "run")}},
-        cycle=dt.datetime.now(),
+        config={"cdeps": {**deepcopy(CDEPS_CONFIG), "rundir": str(tmp_path / "run")}}, cycle=utc()
     )
+
+
+# Helpers
+
+
+@iotaa.external
+def ok():
+    yield "ok"
+    yield iotaa.asset(None, lambda: True)
 
 
 # Tests
@@ -45,8 +48,8 @@ def test_CDEPS(method):
 
 
 def test_CDEPS_atm(driverobj):
-    with patch.object(CDEPS, "atm_nml") as atm_nml:
-        with patch.object(CDEPS, "atm_stream") as atm_stream:
+    with patch.object(CDEPS, "atm_nml", wraps=ok()) as atm_nml:
+        with patch.object(CDEPS, "atm_stream", wraps=ok()) as atm_stream:
             driverobj.atm()
         atm_stream.assert_called_once_with()
     atm_nml.assert_called_once_with()
@@ -57,21 +60,20 @@ def test_CDEPS_driver_name(driverobj):
 
 
 @mark.parametrize("group", ["atm", "ocn"])
-def test_CDEPS_nml(caplog, driverobj, group):
-    log.setLevel(logging.DEBUG)
+def test_CDEPS_nml(driverobj, group, logged):
     dst = driverobj.rundir / f"d{group}_in"
     assert not dst.is_file()
     del driverobj._config[f"d{group}"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
-    path = Path(refs(task()))
+    path = Path(task().refs)
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
 def test_CDEPS_ocn(driverobj):
-    with patch.object(CDEPS, "ocn_nml") as ocn_nml:
-        with patch.object(CDEPS, "ocn_stream") as ocn_stream:
+    with patch.object(CDEPS, "ocn_nml", wraps=ok()) as ocn_nml:
+        with patch.object(CDEPS, "ocn_stream", wraps=ok()) as ocn_stream:
             driverobj.ocn()
         ocn_stream.assert_called_once_with()
     ocn_nml.assert_called_once_with()
@@ -98,11 +100,10 @@ def test_CDEPS_streams(driverobj, group):
     {{ streams.stream01.yearLast }}
     """
     template_file = driverobj.rundir.parent / "template.jinja2"
-    with open(template_file, "w", encoding="utf-8") as f:
-        print(dedent(template).strip(), file=f)
+    template_file.write_text(dedent(template).strip())
     driverobj._config["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
-    path = Path(refs(task()))
+    path = Path(task().refs)
     assert dst.is_file()
     expected = """
     1.5
@@ -120,8 +121,7 @@ def test_CDEPS_streams(driverobj, group):
     1
     1
     """
-    with open(path, "r", encoding="utf-8") as f:
-        assert f.read().strip() == dedent(expected).strip()
+    assert path.read_text().strip() == dedent(expected).strip()
 
 
 def test_CDEPS__model_namelist_file(driverobj):

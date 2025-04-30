@@ -2,6 +2,8 @@
 Modal CLI.
 """
 
+from __future__ import annotations
+
 import datetime as dt
 import json
 import re
@@ -13,7 +15,7 @@ from argparse import _SubParsersAction as Subparsers
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, NoReturn, Optional
+from typing import Any, Callable, NoReturn
 
 import uwtools.api
 import uwtools.api.config
@@ -94,7 +96,8 @@ def main() -> None:
         modes = {**tools, **drivers}
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
-        log.error(str(e))
+        for line in str(e).split("\n"):
+            log.error(line)
         sys.exit(1)
 
 
@@ -103,7 +106,7 @@ def main() -> None:
 
 def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     """
-    Add subparser for mode: config
+    Add subparser for mode: config.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -119,7 +122,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: config compare
+    Add subparser for mode: config compare.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -140,8 +143,8 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    checks = _add_args_verbosity(optional)
-    return checks + [
+    return [
+        *_add_args_verbosity(optional),
         partial(_check_file_vs_format, STR.file1path, STR.file1fmt),
         partial(_check_file_vs_format, STR.file2path, STR.file2fmt),
     ]
@@ -149,7 +152,7 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: config realize
+    Add subparser for mode: config realize.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -165,8 +168,8 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_verbosity(optional)
-    return checks + [
+    return [
+        *_add_args_verbosity(optional),
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
         _check_update,
@@ -175,7 +178,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: config validate
+    Add subparser for mode: config validate.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -236,9 +239,8 @@ def _dispatch_config_realize(args: Args) -> bool:
             stdin_ok=True,
         )
     except UWConfigRealizeError:
-        log.error(
-            "Config could not be realized. Try with %s for details." % _switch(STR.valsneeded)
-        )
+        msg = "Config could not be realized. Try with %s for details."
+        log.error(msg, _switch(STR.valsneeded))
         return False
     return True
 
@@ -251,7 +253,7 @@ def _dispatch_config_validate(args: Args) -> bool:
     """
     return uwtools.api.config.validate(
         schema_file=args[STR.schemafile],
-        config=args[STR.infile],
+        config_path=args[STR.infile],
         stdin_ok=True,
     )
 
@@ -261,7 +263,7 @@ def _dispatch_config_validate(args: Args) -> bool:
 
 def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     """
-    Add subparser for mode: execute
+    Add subparser for mode: execute.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -278,11 +280,7 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
-    _add_arg_key_path(
-        optional,
-        helpmsg="Dot-separated path of keys leading through the config "
-        "to the driver's configuration block",
-    )
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to driver config block")
     return {STR.execute: _add_args_verbosity(optional)}
 
 
@@ -292,7 +290,7 @@ def _dispatch_execute(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.execute.execute(
+    assets = uwtools.api.execute.execute(
         classname=args[STR.classname],
         module=args[STR.module],
         task=args[STR.task],
@@ -306,6 +304,7 @@ def _dispatch_execute(args: Args) -> bool:
         batch=args[STR.batch],
         stdin_ok=True,
     )
+    return bool(assets)
 
 
 # Mode fs
@@ -313,7 +312,7 @@ def _dispatch_execute(args: Args) -> bool:
 
 def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     """
-    Add subparser for mode: fs
+    Add subparser for mode: fs.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -329,7 +328,7 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     """
-    Perform common subparser setup for mode: fs {copy link makedirs}
+    Perform common subparser setup for mode: fs {copy link makedirs}.
 
     :param parser: The parser to configure.
     """
@@ -339,14 +338,14 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_verbosity(optional)
-    _add_arg_keys(optional)
-    return checks
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
+    _add_arg_report(optional)
+    return _add_args_verbosity(optional)
 
 
 def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: fs copy
+    Add subparser for mode: fs copy.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -356,7 +355,7 @@ def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: fs link
+    Add subparser for mode: fs link.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -366,7 +365,7 @@ def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: fs makedirs
+    Add subparser for mode: fs makedirs.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -394,15 +393,16 @@ def _dispatch_fs_copy(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.copy(
+    report = uwtools.api.fs.copy(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        keys=args[STR.keys],
+        key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
 def _dispatch_fs_link(args: Args) -> bool:
@@ -411,15 +411,16 @@ def _dispatch_fs_link(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.link(
+    report = uwtools.api.fs.link(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        keys=args[STR.keys],
+        key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
 def _dispatch_fs_makedirs(args: Args) -> bool:
@@ -428,15 +429,22 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fs.makedirs(
+    report = uwtools.api.fs.makedirs(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        keys=args[STR.keys],
+        key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
     )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
+
+
+def _dispatch_fs_report(report: dict[str, list[str]] | None) -> bool:
+    if report:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    return True
 
 
 # Mode rocoto
@@ -444,7 +452,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
 
 def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     """
-    Add subparser for mode: rocoto
+    Add subparser for mode: rocoto.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -459,7 +467,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: rocoto realize
+    Add subparser for mode: rocoto realize.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -467,21 +475,19 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
+    return _add_args_verbosity(optional)
 
 
 def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: rocoto validate
+    Add subparser for mode: rocoto validate.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.validate, "Validate Rocoto XML")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
+    return _add_args_verbosity(optional)
 
 
 def _dispatch_rocoto(args: Args) -> bool:
@@ -524,7 +530,7 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
 
 def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     """
-    Add subparser for mode: template
+    Add subparser for mode: template.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -539,7 +545,7 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
 
 def _add_subparser_template_translate(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: template translate
+    Add subparser for mode: template translate.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -553,7 +559,7 @@ def _add_subparser_template_translate(subparsers: Subparsers) -> ActionChecks:
 
 def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: template render
+    Add subparser for mode: template render.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
@@ -569,7 +575,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
-    return checks + [_check_template_render_vals_args]
+    return [*checks, _check_template_render_vals_args]
 
 
 def _dispatch_template(args: Args) -> bool:
@@ -659,11 +665,9 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
 
 
 def _add_arg_cycle(group: Group, required: bool = False) -> None:
-    offset = dt.timedelta(hours=(dt.datetime.now(dt.timezone.utc).hour // 6) * 6)
-    cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
-        help="The cycle in ISO8601 format (e.g. %s)" % cycle.strftime("%Y-%m-%dT%H"),
+        help="The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)",
         required=required,
         type=dt.datetime.fromisoformat,
     )
@@ -756,15 +760,6 @@ def _add_arg_key_path(group: Group, helpmsg: str) -> None:
     )
 
 
-def _add_arg_keys(group: Group) -> None:
-    group.add_argument(
-        STR.keys,
-        help="YAML key leading to file dst/src block",
-        metavar="KEY",
-        nargs="*",
-    )
-
-
 def _add_arg_leadtime(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.leadtime),
@@ -813,6 +808,14 @@ def _add_arg_quiet(group: Group) -> None:
     )
 
 
+def _add_arg_report(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.report),
+        action="store_true",
+        help="Show JSON report on [non]ready assets",
+    )
+
+
 def _add_arg_schema_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.schemafile),
@@ -841,9 +844,7 @@ def _add_arg_show_schema(group: Group) -> None:
     )
 
 
-def _add_arg_target_dir(
-    group: Group, required: bool = False, helpmsg: Optional[str] = None
-) -> None:
+def _add_arg_target_dir(group: Group, required: bool = False, helpmsg: str | None = None) -> None:
     group.add_argument(
         _switch(STR.targetdir),
         help=helpmsg or "Path to target directory",
@@ -928,9 +929,6 @@ def _add_arg_verbose(group: Group) -> None:
     )
 
 
-# pylint: enable=missing-function-docstring
-
-
 # Support
 
 
@@ -974,9 +972,9 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
 def _add_subparser_for_driver(
     name: str,
     subparsers: Subparsers,
-    with_batch: Optional[bool] = False,
-    with_cycle: Optional[bool] = False,
-    with_leadtime: Optional[bool] = False,
+    with_batch: bool | None = False,
+    with_cycle: bool | None = False,
+    with_leadtime: bool | None = False,
 ) -> ModeChecks:
     """
     Add subparser for a standalone-driver mode.
@@ -1003,9 +1001,9 @@ def _add_subparser_for_driver_task(
     subparsers: Subparsers,
     task: str,
     helpmsg: str,
-    with_batch: Optional[bool] = False,
-    with_cycle: Optional[bool] = False,
-    with_leadtime: Optional[bool] = False,
+    with_batch: bool | None = False,
+    with_cycle: bool | None = False,
+    with_leadtime: bool | None = False,
 ) -> ActionChecks:
     """
     Add subparser for a driver action.
@@ -1031,12 +1029,10 @@ def _add_subparser_for_driver_task(
     _add_arg_graph_file(optional)
     _add_arg_key_path(
         optional,
-        helpmsg="Dot-separated path of keys leading through the config "
-        "to the driver's configuration block",
+        helpmsg="Dot-separated path of keys to driver config block",
     )
     _add_arg_schema_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
+    return _add_args_verbosity(optional)
 
 
 def _add_subparsers(parser: Parser, dest: str, metavar: str, required: bool = True) -> Subparsers:
@@ -1083,16 +1079,14 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # will be taken from the environment or from key=value command-line pairs by default. But if a
     # values file IS specified, its format must either be explicitly specified, or deduced from its
     # extension.
-    if args.get(STR.valsfile) is not None:
-        if args.get(STR.valsfmt) is None:
-            args[STR.valsfmt] = get_file_format(args[STR.valsfile])
+    if args.get(STR.valsfile) is not None and args.get(STR.valsfmt) is None:
+        args[STR.valsfmt] = get_file_format(args[STR.valsfile])
     return args
 
 
 def _check_update(args: Args) -> Args:
-    if args.get(STR.updatefile) is not None:
-        if args.get(STR.updatefmt) is None:
-            args[STR.updatefmt] = get_file_format(args[STR.updatefile])
+    if args.get(STR.updatefile) is not None and args.get(STR.updatefmt) is None:
+        args[STR.updatefmt] = get_file_format(args[STR.updatefile])
     return args
 
 
@@ -1267,6 +1261,5 @@ def _version() -> str:
     """
     Return version information.
     """
-    with open(resource_path("info.json"), "r", encoding="utf-8") as f:
-        info = json.load(f)
-        return "version %s build %s" % (info["version"], info["buildnum"])
+    info = json.loads(resource_path("info.json").read_text())
+    return "version %s build %s" % (info["version"], info["buildnum"])

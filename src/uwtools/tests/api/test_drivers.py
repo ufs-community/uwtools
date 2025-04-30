@@ -1,9 +1,6 @@
-# pylint: disable=missing-function-docstring,protected-access
-
 import datetime as dt
 from unittest.mock import patch
 
-import iotaa
 from pytest import mark
 
 from uwtools.api import (
@@ -28,7 +25,6 @@ from uwtools.api import (
     upp,
     ww3,
 )
-from uwtools.drivers import support
 from uwtools.utils import api
 
 modules = [
@@ -58,7 +54,7 @@ with_leadtime = [upp]
 
 
 @mark.parametrize("module", modules)
-def test_api_execute(module):
+def test_api_execute(module, utc):
     kwbase = {
         "batch": True,
         "config": "/some/config",
@@ -71,7 +67,7 @@ def test_api_execute(module):
     }
     kwargs = {
         **kwbase,
-        **({"cycle": dt.datetime.now()} if module in with_cycle else {}),
+        **({"cycle": utc()} if module in with_cycle else {}),
         **({"leadtime": dt.timedelta(hours=24)} if module in with_leadtime else {}),
     }
     with patch.object(api, "_execute") as _execute:
@@ -80,13 +76,8 @@ def test_api_execute(module):
             driver_class=module._driver,
             cycle=kwargs["cycle"] if module in with_cycle else None,
             leadtime=kwargs["leadtime"] if module in with_leadtime else None,
-            **kwbase
+            **kwbase,
         )
-
-
-@mark.parametrize("module", modules)
-def test_api_graph(module):
-    assert module.graph is support.graph
 
 
 @mark.parametrize("module", modules)
@@ -96,6 +87,6 @@ def test_api_schema(module):
 
 @mark.parametrize("module", modules)
 def test_api_tasks(module):
-    with patch.object(iotaa, "tasknames") as tasknames:
+    with patch.object(module, "_tasks") as _tasks:
         module.tasks()
-        tasknames.assert_called_once_with(module._driver)
+        _tasks.assert_called_once_with(module._driver)

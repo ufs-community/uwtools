@@ -69,7 +69,7 @@ class OrogGSL(DriverTimeInvariant):
         fn = "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
         src = Path(self.config["config"]["topo_data_2p5m"])
         dst = self.rundir / fn
-        yield self.taskname("Input grid")
+        yield self.taskname("Topo data 2.5-min")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -81,7 +81,7 @@ class OrogGSL(DriverTimeInvariant):
         fn = "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
         src = Path(self.config["config"]["topo_data_30s"])
         dst = self.rundir / fn
-        yield self.taskname("Input grid")
+        yield self.taskname("Topo data 30-sec")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
@@ -93,6 +93,16 @@ class OrogGSL(DriverTimeInvariant):
         The name of this driver.
         """
         return STR.oroggsl
+
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        vals = tuple(self.config["config"][k] for k in ["resolution", "tile", "halo"])
+        template = "C%s_oro_data_{x}.tile%s.halo%s.nc" % vals
+        outfile = lambda x: self.rundir / template.format(x=x)
+        return {"ls": outfile("ls"), "ss": outfile("ss")}
 
     # Private helper methods
 

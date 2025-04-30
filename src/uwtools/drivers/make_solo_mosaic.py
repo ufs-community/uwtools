@@ -2,6 +2,8 @@
 A driver for make_solo_mosaic.
 """
 
+from __future__ import annotations
+
 from iotaa import tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
@@ -26,7 +28,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
 
     # Public helper methods
 
-    def taskname(self, suffix: str) -> str:
+    def taskname(self, suffix: str | None = None) -> str:
         """
         Return a common tag for graph-task log messages.
 

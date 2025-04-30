@@ -1,15 +1,16 @@
 #!/bin/bash -eu
 
-echo "=> Running black"
-black src
+echo "=> Formatting code"
+ruff format src
 
-echo "=> Running isort"
-isort -q src
+echo "=> Sorting imports"
+ruff check --select I --fix src
 
-echo "=> Running docformatter"
+echo "=> Formatting docstrings"
 (cd src && docformatter . || test $? -eq 3)
 
-echo "=> Running jq"
-for a in $(find src -type f -name "*.jsonschema"); do
-  b=$(jq -S . $a) && echo "$b" >$a || (echo "    in $a"; false)
+echo "=> Formatting JSON"
+for f in $(find src -not -path "*/.*" -type f -name "*.json" -o -name "*.jsonschema"); do
+  jq -S . $f >$f.new || (echo "    in $f" && rm $f.new && false)
+  cmp --quiet $f.new $f && rm $f.new || mv $f.new $f
 done

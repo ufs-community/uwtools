@@ -6,11 +6,11 @@ run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   env=python-$PYTHON_VERSION
   devpkgs=$(jq .packages.dev[] recipe/meta.json | tr -d ' "')
-  conda create --yes --name $env --quiet python=$PYTHON_VERSION $devpkgs
+  conda create --yes --name $env --quiet $devpkgs
   conda activate $env
+  conda install --yes python=$PYTHON_VERSION
   . notebooks/install-deps
   set -x
-  python --version
   git clean -dfx
   pip install --editable src # sets new Python version in entry-point scripts
   make test && make test-nb
@@ -20,7 +20,7 @@ run_tests() {
   return $status
 }
 
-source $(dirname ${BASH_SOURCE[0]})/common.sh
+. $(dirname ${BASH_SOURCE[0]})/common.sh
 ci_conda_activate
 for version in ${SUPPORTED_PYTHON_VERSIONS[*]}; do
   PYTHON_VERSION=$version

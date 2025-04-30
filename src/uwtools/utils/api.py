@@ -2,16 +2,21 @@
 Support for API modules.
 """
 
-import datetime as dt
+from __future__ import annotations
+
 import re
 from inspect import getfullargspec
 from pathlib import Path
-from typing import Callable, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, TypeVar
 
-from uwtools.drivers.driver import DriverT
-from uwtools.drivers.support import graph
 from uwtools.exceptions import UWError
 from uwtools.utils.file import str2path
+
+if TYPE_CHECKING:
+    import datetime as dt
+
+    from uwtools.config.support import YAMLKey
+    from uwtools.drivers.driver import DriverT
 
 T = TypeVar("T")
 
@@ -28,14 +33,15 @@ def ensure_data_source(data_source: T, stdin_ok: bool) -> T:
     :raises: UWError if no data source was provided and stdin read is disabled.
     """
     if data_source is None and not stdin_ok:
-        raise UWError("Set stdin_ok=True to permit read from stdin")
+        msg = "Set stdin_ok=True to permit read from stdin"
+        raise UWError(msg)
     return data_source
 
 
 def make_execute(
     driver_class: DriverT,
-    with_cycle: Optional[bool] = False,
-    with_leadtime: Optional[bool] = False,
+    with_cycle: bool | None = False,
+    with_leadtime: bool | None = False,
 ) -> Callable[..., bool]:
     """
     Return a function that executes tasks for the given driver.
@@ -47,12 +53,12 @@ def make_execute(
 
     def execute(
         task: str,
-        config: Optional[Union[Path, str]] = None,
+        config: Path | str | None = None,
         batch: bool = False,
         dry_run: bool = False,
-        graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
-        schema_file: Optional[Union[Path, str]] = None,
+        graph_file: Path | str | None = None,
+        key_path: list[YAMLKey] | None = None,
+        schema_file: Path | str | None = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -72,12 +78,12 @@ def make_execute(
     def execute_cycle(
         task: str,
         cycle: dt.datetime,
-        config: Optional[Union[Path, str]] = None,
+        config: Path | str | None = None,
         batch: bool = False,
         dry_run: bool = False,
-        graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
-        schema_file: Optional[Union[Path, str]] = None,
+        graph_file: Path | str | None = None,
+        key_path: list[YAMLKey] | None = None,
+        schema_file: Path | str | None = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -98,12 +104,12 @@ def make_execute(
         task: str,
         cycle: dt.datetime,
         leadtime: dt.timedelta,
-        config: Optional[Union[Path, str]] = None,
+        config: Path | str | None = None,
         batch: bool = False,
         dry_run: bool = False,
-        graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[list[str]] = None,
-        schema_file: Optional[Union[Path, str]] = None,
+        graph_file: Path | str | None = None,
+        key_path: list[YAMLKey] | None = None,
+        schema_file: Path | str | None = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -130,7 +136,8 @@ def make_execute(
     execute.__doc__ = re.sub(r"\n *:param cycle:.*\n", "\n", execute_cycle.__doc__)
 
     if with_leadtime and not with_cycle:
-        raise UWError("When leadtime is specified, cycle is required")
+        msg = "When leadtime is specified, cycle is required"
+        raise UWError(msg)
 
     if with_cycle:
         if with_leadtime:
@@ -145,14 +152,14 @@ def make_execute(
 def _execute(
     driver_class: DriverT,
     task: str,
-    config: Optional[Union[Path, str]] = None,
-    cycle: Optional[dt.datetime] = None,  # pylint: disable=unused-argument
-    leadtime: Optional[dt.timedelta] = None,  # pylint: disable=unused-argument
-    batch: bool = False,  # pylint: disable=unused-argument
+    config: Path | str | None = None,
+    cycle: dt.datetime | None = None,
+    leadtime: dt.timedelta | None = None,
+    batch: bool = False,
     dry_run: bool = False,
-    graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[list[str]] = None,
-    schema_file: Optional[Union[Path, str]] = None,
+    graph_file: Path | str | None = None,
+    key_path: list[YAMLKey] | None = None,
+    schema_file: Path | str | None = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -169,14 +176,13 @@ def _execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
-    :param key_path: Path of keys to subsection of config file.
+    :param key_path: Path of keys to config block to use.
     :param schema_file: The JSON Schema file to use for validation.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
     kwargs = dict(
         config=ensure_data_source(str2path(config), stdin_ok),
-        dry_run=dry_run,
         key_path=key_path,
         schema_file=schema_file,
     )
@@ -185,8 +191,7 @@ def _execute(
         if arg in accepted:
             kwargs[arg] = locals()[arg]
     obj = driver_class(**kwargs)
-    getattr(obj, task)()
+    node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
-        with open(graph_file, "w", encoding="utf-8") as f:
-            print(graph(), file=f)
+        Path(graph_file).write_text(f"{node.graph}\n")
     return True

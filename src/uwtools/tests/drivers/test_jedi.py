@@ -1,15 +1,12 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 JEDI driver tests.
 """
-import datetime as dt
-import logging
-from pathlib import Path
-from unittest.mock import DEFAULT as D
-from unittest.mock import Mock, call, patch
 
+from pathlib import Path
+from unittest.mock import call, patch
+
+import iotaa
 import yaml
-from iotaa import asset, external
 from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -17,8 +14,6 @@ from uwtools.drivers import jedi, jedi_base
 from uwtools.drivers.jedi import JEDI
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
-from uwtools.tests.support import regex_logged
 
 # Fixtures
 
@@ -66,8 +61,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -102,8 +97,7 @@ def test_JEDI(method):
 def test_JEDI_configuration_file(driverobj):
     basecfg = {"foo": "bar"}
     base_file = Path(driverobj.config["configuration_file"]["base_file"])
-    with open(base_file, "w", encoding="utf-8") as f:
-        yaml.dump(basecfg, f)
+    base_file.write_text(yaml.dump(basecfg))
     cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
     driverobj.configuration_file()
@@ -112,15 +106,14 @@ def test_JEDI_configuration_file(driverobj):
     assert newcfg == {**basecfg, "baz": "qux"}
 
 
-def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_JEDI_configuration_file_missing_base_file(driverobj, logged):
     base_file = Path(driverobj.config["rundir"], "missing")
     driverobj._config["configuration_file"]["base_file"] = base_file
     cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
-    assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
+    assert logged(f"{base_file}: Not ready [external asset]")
 
 
 def test_JEDI_driver_name(driverobj):
@@ -128,7 +121,7 @@ def test_JEDI_driver_name(driverobj):
 
 
 def test_JEDI_files_copied(driverobj):
-    with patch.object(jedi_base, "filecopy") as filecopy:
+    with patch.object(jedi_base, "filecopy", wraps=jedi_base.filecopy) as filecopy:
         driverobj._config["rundir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
@@ -142,7 +135,7 @@ def test_JEDI_files_copied(driverobj):
 
 
 def test_JEDI_files_linked(driverobj):
-    with patch.object(jedi_base, "symlink") as symlink:
+    with patch.object(jedi_base, "symlink", wraps=jedi_base.symlink) as symlink:
         driverobj._config["rundir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2
@@ -162,14 +155,14 @@ def test_JEDI_output(driverobj):
     assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
-def test_JEDI_provisioned_rundir(driverobj):
+def test_JEDI_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
-        configuration_file=D,
-        files_copied=D,
-        files_linked=D,
-        runscript=D,
-        validate_only=D,
+        configuration_file=ready_task,
+        files_copied=ready_task,
+        files_linked=ready_task,
+        runscript=ready_task,
+        validate_only=ready_task,
     ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
@@ -180,28 +173,24 @@ def test_JEDI_taskname(driverobj):
     assert driverobj.taskname("foo") == "20240201 18Z jedi foo"
 
 
-def test_JEDI_validate_only(caplog, driverobj):
-
-    @external
+def test_JEDI_validate_only(driverobj, logged):
+    @iotaa.external
     def file(path: Path):
         yield "Mocked file task for %s" % path
-        yield asset(path, lambda: True)
+        yield iotaa.asset(path, lambda: True)
 
-    logging.getLogger().setLevel(logging.INFO)
-    with patch.object(jedi, "file", file):
-        with patch.object(jedi, "run") as run:
-            result = Mock(output="", success=True)
-            run.return_value = result
-            driverobj.validate_only()
-            cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
-            cmds = [
-                "module load some-module",
-                "module load jedi-module",
-                "time %s --validate-only %s 2>&1"
-                % (driverobj.config["execution"]["executable"], cfgfile),
-            ]
-            run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
-    assert regex_logged(caplog, "Config is valid")
+    with patch.object(jedi, "file", file), patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
+        run_shell_cmd.return_value = (True, None)
+        driverobj.validate_only()
+        cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
+        cmds = [
+            "module load some-module",
+            "module load jedi-module",
+            "time %s --validate-only %s 2>&1"
+            % (driverobj.config["execution"]["executable"], cfgfile),
+        ]
+        run_shell_cmd.assert_called_once_with(" && ".join(cmds))
+    assert logged("Config is valid")
 
 
 def test_JEDI__config_fn(driverobj):

@@ -2,16 +2,21 @@
 Helpers for working with files and directories.
 """
 
+from __future__ import annotations
+
 import sys
 from contextlib import contextmanager
 from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Generator, Optional, Union
+from typing import IO, TYPE_CHECKING, Any
 
 from uwtools.exceptions import UWError
 from uwtools.strings import FORMAT
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 class StdinProxy:
@@ -36,7 +41,7 @@ class StdinProxy:
 
 
 @cache
-def _stdinproxy():
+def _stdinproxy() -> StdinProxy:
     return StdinProxy()
 
 
@@ -74,8 +79,8 @@ def path_if_it_exists(path: str) -> str:
 
 @contextmanager
 def readable(
-    filepath: Optional[Path] = None, mode: str = "r"
-) -> Generator[Union[IO, StdinProxy], None, None]:
+    filepath: Path | None = None, mode: str = "r"
+) -> Generator[IO | StdinProxy, None, None]:
     """
     If a path to a file is specified, open it and return a readable handle; if not, return readable
     stdin.
@@ -83,7 +88,7 @@ def readable(
     :param filepath: The path to a file to read.
     """
     if filepath:
-        with open(filepath, mode, encoding="utf-8") as f:
+        with Path(filepath).open(mode) as f:
             yield f
     else:
         yield _stdinproxy()
@@ -110,7 +115,7 @@ def str2path(val: Any) -> Any:
 
 
 @contextmanager
-def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, None, None]:
+def writable(filepath: Path | None = None, mode: str = "w") -> Generator[IO, None, None]:
     """
     If a path to a file is specified, open it and return a writable handle; if not, return writeable
     stdout.
@@ -119,7 +124,7 @@ def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, 
     """
     if filepath:
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, mode, encoding="utf-8") as f:
+        with filepath.open(mode) as f:
             yield f
     else:
         yield sys.stdout

@@ -100,7 +100,7 @@ class UPP(DriverCycleLeadtimeBased):
         return STR.upp
 
     @property
-    def output(self) -> dict[str, list[str]]:
+    def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
@@ -109,17 +109,17 @@ class UPP(DriverCycleLeadtimeBased):
         # from the block's identifier and the suffix defined above.
         cf = self.config["control_file"]
         try:
-            with open(cf, "r", encoding="utf-8") as f:
-                lines = f.read().split("\n")
+            lines = Path(cf).read_text().split("\n")
         except (FileNotFoundError, PermissionError) as e:
-            raise UWConfigError(f"Could not open UPP control file {cf}") from e
+            msg = f"Could not open UPP control file {cf}"
+            raise UWConfigError(msg) from e
         suffix = ".GrbF%02d" % int(self.leadtime.total_seconds() / 3600)
         nblocks, lines = int(lines[0]), lines[1:]
         nvars, lines = list(map(int, lines[:nblocks])), lines[nblocks:]
         paths = []
         for _ in range(nblocks):
             identifier = lines[0]
-            paths.append(str(self.rundir / (identifier + suffix)))
+            paths.append(self.rundir / (identifier + suffix))
             fields, lines = lines[: self.NFIELDS], lines[self.NFIELDS :]
             _, lines = (
                 (lines[0], lines[1:])
@@ -127,7 +127,7 @@ class UPP(DriverCycleLeadtimeBased):
                 else (None, lines)
             )
             lines = lines[self.NPARAMS * nvars.pop() :]
-        return {"gribfiles": paths}
+        return {"paths": paths}
 
     # Private helper methods
 

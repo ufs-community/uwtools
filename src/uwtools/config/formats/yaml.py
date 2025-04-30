@@ -1,23 +1,29 @@
+from __future__ import annotations
+
 from collections import OrderedDict
-from pathlib import Path
 from types import SimpleNamespace as ns
-from typing import Optional
+from typing import TYPE_CHECKING
 
 import yaml
-from f90nml import Namelist  # type: ignore
+from f90nml import Namelist  # type: ignore[import-untyped]
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
     UWYAMLConvert,
+    UWYAMLGlob,
+    UWYAMLRemove,
+    dict_to_yaml_str,
     from_od,
     log_and_error,
     uw_yaml_loader,
-    yaml_to_str,
 )
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _MSGS = ns(
     unhashable="""
@@ -58,9 +64,10 @@ class YAMLConfig(Config):
         """
         Add representers to the YAML dumper for custom types.
         """
-        yaml.add_representer(UWYAMLConvert, UWYAMLConvert.represent)
         yaml.add_representer(Namelist, cls._represent_namelist)
         yaml.add_representer(OrderedDict, cls._represent_ordereddict)
+        for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
+            yaml.add_representer(tag_class, tag_class.represent)
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
@@ -70,10 +77,10 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object.
         """
         cls._add_yaml_representers()
-        return yaml_to_str(cfg)
+        return dict_to_yaml_str(cfg)
 
     @staticmethod
-    def _get_depth_threshold() -> Optional[int]:
+    def _get_depth_threshold() -> int | None:
         """
         Return the config's depth threshold.
         """
@@ -86,7 +93,7 @@ class YAMLConfig(Config):
         """
         return FORMAT.yaml
 
-    def _load(self, config_file: Optional[Path]) -> dict:
+    def _load(self, config_file: Path | None) -> dict:
         """
         Read and parse a YAML file.
 
@@ -100,10 +107,12 @@ class YAMLConfig(Config):
                 if isinstance(config, dict):
                     return config
                 t = type(config).__name__
-                raise UWConfigError(
-                    "Parsed a%s %s value from %s, expected a dict"
-                    % ("n" if t[0] in "aeiou" else "", t, config_file or "stdin")
+                msg = "Parsed a%s %s value from %s, expected a dict" % (
+                    "n" if t[0] in "aeiou" else "",
+                    t,
+                    config_file or "stdin",
                 )
+                raise UWConfigError(msg)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:
@@ -170,7 +179,7 @@ class YAMLConfig(Config):
         """
         return self.data
 
-    def dump(self, path: Optional[Path] = None) -> None:
+    def dump(self, path: Path | None = None) -> None:
         """
         Dump the config in YAML format.
 
@@ -179,7 +188,7 @@ class YAMLConfig(Config):
         self.dump_dict(self.data, path)
 
     @classmethod
-    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
+    def dump_dict(cls, cfg: dict, path: Path | None = None) -> None:
         """
         Dump a provided config dictionary in YAML format.
 
@@ -190,11 +199,11 @@ class YAMLConfig(Config):
             print(cls._dict_to_str(cfg), file=f)
 
 
-def _write_plain_open_ended(self, *args, **kwargs) -> None:
+def _write_plain_open_ended(self: yaml.emitter.Emitter, *args, **kwargs) -> None:
     """
     Write YAML without the "..." end-of-stream marker.
     """
-    self.write_plain_base(*args, **kwargs)
+    self.write_plain_base(*args, **kwargs)  # type: ignore[attr-defined]
     self.open_ended = False
 
 

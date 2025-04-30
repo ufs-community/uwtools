@@ -1,30 +1,24 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 chgres_cube driver tests.
 """
+
 import datetime as dt
-import logging
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import f90nml  # type: ignore
-from iotaa import refs
-from pytest import fixture, mark, raises
+import f90nml  # type: ignore[import-untyped]
+from pytest import fixture, mark
 
 from uwtools.drivers.chgres_cube import ChgresCube
 from uwtools.drivers.driver import Driver
-from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
+def cycle(utc):
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -107,7 +101,6 @@ def leadtime():
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
     ],
 )
@@ -119,42 +112,40 @@ def test_ChgresCube_driver_name(driverobj):
     assert driverobj.driver_name() == ChgresCube.driver_name() == "chgres_cube"
 
 
-def test_ChgresCube_namelist_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_ChgresCube_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert dst.is_file()
-    assert logged(caplog, f"Wrote config to {path}")
+    assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  'string' is not of type 'boolean'")
+    assert logged(f"Failed to validate {path}")
+    assert logged("  'string' is not of type 'boolean'")
 
 
-def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
+def test_ChgresCube_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(refs(driverobj.namelist_file()))
+    path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
-    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
+    assert logged("missing.nml (namelist.base_file): Not ready [external asset]")
 
 
 def test_ChgresCube_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output == {
+        "atm": [driverobj.rundir / "out.atm.tile7.nc"],
+        "sfc": [driverobj.rundir / "out.sfc.tile7.nc"],
+    }
 
 
-def test_ChgresCube_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, namelist_file=D, runscript=D) as mocks:
+def test_ChgresCube_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(driverobj, namelist_file=ready_task, runscript=ready_task) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

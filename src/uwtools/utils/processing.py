@@ -2,18 +2,23 @@
 Utilities for interacting with external processes.
 """
 
-from pathlib import Path
+from __future__ import annotations
+
 from subprocess import STDOUT, CalledProcessError, check_output
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 from uwtools.logging import INDENT, log
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def run_shell_cmd(
     cmd: str,
-    cwd: Optional[Union[Path, str]] = None,
-    env: Optional[dict[str, str]] = None,
-    log_output: Optional[bool] = False,
+    cwd: Path | str | None = None,
+    env: dict[str, str] | None = None,
+    log_output: bool | None = False,
+    taskname: str | None = None,
 ) -> tuple[bool, str]:
     """
     Run a command in a shell.
@@ -22,16 +27,17 @@ def run_shell_cmd(
     :param cwd: Change to this directory before running cmd.
     :param env: Environment variables to set before running cmd.
     :param log_output: Log output from successful cmd? (Error output is always logged.)
+    :param taskname: Name of task executing this command, for logging.
     :return: A result object providing combined stder/stdout output and success values.
     """
-
-    log.info("Running: %s", cmd)
+    pre = f"{taskname}: " if taskname else ""
+    msg = f"%sRunning: {cmd}"
     if cwd:
-        log.info("%sin %s", INDENT, cwd)
+        msg += f" in {cwd}"
     if env:
-        log.info("%swith environment variables:", INDENT)
-        for key, val in env.items():
-            log.info("%s%s=%s", INDENT * 2, key, val)
+        kvpairs = " ".join(f"{k}={v}" for k, v in env.items())
+        msg += f" with environment variables {kvpairs}"
+    log.info(msg, pre)
     try:
         output = check_output(
             cmd, cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True
@@ -40,11 +46,11 @@ def run_shell_cmd(
         success = True
     except CalledProcessError as e:
         output = e.output
-        log.error("%sFailed with status: %s", INDENT, e.returncode)
+        log.error("%sFailed with status: %s", pre, e.returncode)
         logfunc = log.error
         success = False
     if output and (log_output or not success):
-        logfunc("%sOutput:", INDENT)
+        logfunc("%sOutput:", pre)
         for line in output.split("\n"):
-            logfunc("%s%s", INDENT * 2, line)
+            logfunc("%s%s%s", pre, INDENT, line)
     return success, output

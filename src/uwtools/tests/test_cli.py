@@ -1,7 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-
 import datetime as dt
-import logging
 import re
 import sys
 from argparse import ArgumentParser as Parser
@@ -19,8 +16,6 @@ import uwtools.api.template
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
-from uwtools.logging import log
-from uwtools.tests.support import regex_logged
 from uwtools.utils.file import FORMAT
 
 # Helpers
@@ -53,14 +48,15 @@ def args_config_realize():
 
 
 @fixture
-def args_dispatch_fs():
+def args_dispatch_fs(utc):
     return {
         "target_dir": "/target/dir",
         "config_file": "/config/file",
-        "cycle": dt.datetime.now(),
+        "cycle": utc(),
         "leadtime": dt.timedelta(hours=6),
-        "keys": ["a", "b"],
+        "key_path": ["a", "b"],
         "dry_run": False,
+        "report": True,
         "stdin_ok": True,
     }
 
@@ -162,8 +158,8 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-def test__dispatch_execute():
-    cycle = dt.datetime.now()
+def test__dispatch_execute(utc):
+    cycle = utc()
     args: dict = {
         "module": "testdriver",
         "classname": "TestDriver",
@@ -235,11 +231,7 @@ def test__check_file_vs_format_pass_explicit():
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
     args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
-    args = cli._check_file_vs_format(
-        file_arg=STR.infile,
-        format_arg=STR.infmt,
-        args=args,
-    )
+    args = cli._check_file_vs_format(file_arg=STR.infile, format_arg=STR.infmt, args=args)
     assert args[STR.infmt] == vars(FORMAT)[fmt]
 
 
@@ -271,7 +263,7 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
 
 
 @mark.parametrize(
-    "fmt,fn,ok",
+    ("fmt", "fn", "ok"),
     [
         (None, "update.txt", False),
         ("yaml", "udpate.txt", True),
@@ -291,16 +283,15 @@ def test__check_update(fmt, fn, ok):
 
 
 def test__check_verbosity_fail(capsys):
-    log.setLevel(logging.INFO)
     args = {STR.quiet: True, STR.verbose: True}
     with raises(SystemExit):
         cli._check_verbosity(args)
     assert "--quiet may not be used with --verbose" in capsys.readouterr().err
 
 
-@mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
+@mark.parametrize("flags", [[STR.quiet], [STR.verbose]])
 def test__check_verbosity_ok(flags):
-    args = {flag: True for flag in flags}
+    args = dict.fromkeys(flags, True)
     assert cli._check_verbosity(args) == args
 
 
@@ -355,11 +346,10 @@ def test__dispatch_config_realize(args_config_realize):
     )
 
 
-def test__dispatch_config_realize_fail(caplog, args_config_realize):
-    log.setLevel(logging.ERROR)
+def test__dispatch_config_realize_fail(args_config_realize, logged):
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
-    assert regex_logged(caplog, "Config could not be realized")
+    assert logged("Config could not be realized")
 
 
 def test__dispatch_config_validate_config_obj():
@@ -371,13 +361,14 @@ def test__dispatch_config_validate_config_obj():
         cli._dispatch_config_validate(_dispatch_config_validate_args)
     _validate_external_args = {
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
-        STR.config: _dispatch_config_validate_args[STR.infile],
+        "config_data": None,
+        "config_path": _dispatch_config_validate_args[STR.infile],
     }
     _validate_external.assert_called_once_with(**_validate_external_args, desc="config")
 
 
 @mark.parametrize(
-    "action, funcname",
+    ("action", "funcname"),
     [
         (STR.copy, "_dispatch_fs_copy"),
         (STR.link, "_dispatch_fs_link"),
@@ -394,17 +385,46 @@ def test__dispatch_fs(action, funcname):
 @mark.parametrize("action", ["copy", "link", "makedirs"])
 def test__dispatch_fs_action(action, args_dispatch_fs):
     args = args_dispatch_fs
-    with patch.object(cli.uwtools.api.fs, action) as a:
+    with (
+        patch.object(cli.uwtools.api.fs, action) as a,
+        patch.object(cli, "_dispatch_fs_report") as _dispatch_fs_report,
+    ):
+        a.return_value = {STR.ready: ["/present"], STR.notready: ["/missing"]}
         getattr(cli, f"_dispatch_fs_{action}")(args)
     a.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
         cycle=args["cycle"],
         leadtime=args["leadtime"],
-        keys=args["keys"],
+        key_path=args["key_path"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
     )
+    _dispatch_fs_report.assert_called_once_with(
+        report={STR.ready: ["/present"], STR.notready: ["/missing"]}
+    )
+
+
+def test__dispatch_fs_report_no(capsys):
+    report = None
+    cli._dispatch_fs_report(report=report)
+    assert capsys.readouterr().out.strip() == ""
+
+
+def test__dispatch_fs_report_yes(capsys):
+    report = {STR.ready: ["/present"], STR.notready: ["/missing"]}
+    cli._dispatch_fs_report(report=report)
+    expected = """
+    {
+      "not-ready": [
+        "/missing"
+      ],
+      "ready": [
+        "/present"
+      ]
+    }
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
 @mark.parametrize(
@@ -570,8 +590,8 @@ def test__dispatch_template_translate_no_optional():
 
 
 @mark.parametrize("hours", [0, 24, 168])
-def test__dispatch_to_driver(hours):
-    cycle = dt.datetime.now()
+def test__dispatch_to_driver(hours, utc):
+    cycle = utc()
     leadtime = dt.timedelta(hours=hours)
     args: dict = {
         "action": "foo",
@@ -605,9 +625,8 @@ def test__dispatch_to_driver(hours):
 
 def test__dispatch_to_driver_no_schema(capsys):
     adriver = Mock()
-    with patch.object(cli, "import_module", return_value=adriver):
-        with raises(SystemExit):
-            cli._dispatch_to_driver(name="adriver", args={})
+    with patch.object(cli, "import_module", return_value=adriver), raises(SystemExit):
+        cli._dispatch_to_driver(name="adriver", args={})
     assert "No TASK specified" in capsys.readouterr().err
 
 
@@ -636,15 +655,17 @@ def test_main_fail_checks(capsys, quiet, verbose):
         raw_args.append(cli._switch(STR.quiet))
     if verbose:
         raw_args.append(cli._switch(STR.verbose))
-    with patch.object(sys, "argv", raw_args):
-        with patch.object(cli, "_dispatch_template", return_value=True):
-            with raises(SystemExit) as e:
-                cli.main()
-            if quiet and verbose:
-                assert e.value.code == 1
-                assert "--quiet may not be used with --verbose" in capsys.readouterr().err
-            else:
-                assert e.value.code == 0
+    with (
+        patch.object(sys, "argv", raw_args),
+        patch.object(cli, "_dispatch_template", return_value=True),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    if quiet and verbose:
+        assert e.value.code == 1
+        assert "--quiet may not be used with --verbose" in capsys.readouterr().err
+    else:
+        assert e.value.code == 0
 
 
 @mark.parametrize("vals", [(True, 0), (False, 1)])
@@ -652,43 +673,49 @@ def test_main_fail_dispatch(vals):
     # Using mode 'template render' for testing.
     dispatch_retval, exit_status = vals
     raw_args = ["testing", STR.template, STR.render]
-    with patch.object(sys, "argv", raw_args):
-        with patch.object(cli, "_dispatch_template", return_value=dispatch_retval):
-            with raises(SystemExit) as e:
-                cli.main()
-            assert e.value.code == exit_status
+    with (
+        patch.object(sys, "argv", raw_args),
+        patch.object(cli, "_dispatch_template", return_value=dispatch_retval),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    assert e.value.code == exit_status
 
 
 def test_main_fail_exception_abort():
     # Mock setup_logging() to raise a UWError in main() before logging is configured, which triggers
     # a call to _abort().
     msg = "Catastrophe"
-    with patch.object(cli, "setup_logging", side_effect=UWError(msg)):
-        with patch.object(cli, "_abort", side_effect=SystemExit) as _abort:
-            with raises(SystemExit):
-                cli.main()
-        _abort.assert_called_once_with(msg)
+    with (
+        patch.object(cli, "setup_logging", side_effect=UWError(msg)),
+        patch.object(cli, "_abort", side_effect=SystemExit) as _abort,
+        raises(SystemExit),
+    ):
+        cli.main()
+    _abort.assert_called_once_with(msg)
 
 
 def test_main_fail_exception_log():
     # Mock _dispatch_template() to raise a UWError in main() after logging is configured, which logs
     # an error message and exists with exit status.
     msg = "Catastrophe"
-    with patch.object(cli, "_dispatch_template", side_effect=UWError(msg)):
-        with patch.object(cli, "log") as log:
-            with patch.object(sys, "argv", ["uw", "template", "render"]):
-                with raises(SystemExit) as e:
-                    cli.main()
-                assert e.value.code == 1
-            log.error.assert_called_once_with(msg)
+    with (
+        patch.object(cli, "_dispatch_template", side_effect=UWError(msg)),
+        patch.object(cli, "log") as log,
+        patch.object(sys, "argv", ["uw", "template", "render"]),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    assert e.value.code == 1
+    log.error.assert_called_once_with(msg)
 
 
 def test__parse_args():
     raw_args = ["testing", "--bar", "42"]
-    with patch.object(cli, "Parser") as Parser:
+    with patch.object(cli, "Parser") as p:
         cli._parse_args(raw_args)
-        Parser.assert_called_once()
-        parser = Parser()
+        p.assert_called_once()
+        parser = p()
         parser.parse_args.assert_called_with(raw_args)
 
 

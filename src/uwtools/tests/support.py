@@ -1,17 +1,17 @@
-import re
+from __future__ import annotations
+
 from copy import deepcopy
 from importlib import resources
 from pathlib import Path
-from typing import Any, Callable, Union
+from typing import Any, Callable
 
 import yaml
-from _pytest.logging import LogCaptureFixture
 
 from uwtools.config.validator import _validation_errors
 from uwtools.utils.file import resource_path
 
 
-def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
+def compare_files(path1: Path | str, path2: Path | str) -> bool:
     """
     Determine whether the two given files are identical up to any number of trailing newlines, which
     are ignored. Print the contents of both files when they do not match.
@@ -20,10 +20,9 @@ def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
     :param path2: Path to second file.
     :return: Do the files match?
     """
-    with open(path1, "r", encoding="utf-8") as f:
-        content1 = f.read().rstrip("\n")
-    with open(path2, "r", encoding="utf-8") as f:
-        content2 = f.read().rstrip("\n")
+    path1, path2 = map(Path, (path1, path2))
+    content1 = path1.read_text().rstrip("\n")
+    content2 = path2.read_text().rstrip("\n")
     if content1 != content2:
         print("1st file looks like:")
         print(content1)
@@ -43,8 +42,7 @@ def fixture_pathobj(suffix: str = "") -> Path:
         location.
     """
     with resources.as_file(resources.files("uwtools.tests.fixtures")) as prefix:
-        path = prefix / suffix
-    return path
+        return prefix / suffix
 
 
 def fixture_path(suffix: str = "") -> Path:
@@ -58,29 +56,6 @@ def fixture_path(suffix: str = "") -> Path:
     return fixture_pathobj(suffix)
 
 
-def logged(caplog: LogCaptureFixture, msg: str) -> bool:
-    """
-    Does the given message occur in the log capture?
-
-    :param caplog: The pytest log capture.
-    :param msg: The message sought.
-    :return: Does it?
-    """
-    return msg in [record.message for record in caplog.records]
-
-
-def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
-    """
-    Does the given regex match a line in the log capture?
-
-    :param caplog: The pytest log capture.
-    :param msg: The regex sought.
-    :return: Does it?
-    """
-    pattern = re.compile(re.escape(msg))
-    return any(pattern.search(record.message) for record in caplog.records)
-
-
 def schema_validator(schema_name: str, *args: Any) -> Callable:
     """
     Create a lambda that returns errors from validating a config input.
@@ -90,10 +65,7 @@ def schema_validator(schema_name: str, *args: Any) -> Callable:
     :returns: A lambda that, when called with an input to test, returns a string (possibly empty)
         containing the validation errors.
     """
-    with open(
-        resource_path("jsonschema") / f"{schema_name}.jsonschema", "r", encoding="utf-8"
-    ) as f:
-        schema = yaml.safe_load(f)
+    schema = yaml.safe_load((resource_path("jsonschema") / f"{schema_name}.jsonschema").read_text())
     defs = schema.get("$defs", {})
     for arg in args:
         schema = schema[arg]

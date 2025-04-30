@@ -1,6 +1,3 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
-
-import logging
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -9,8 +6,6 @@ from pytest import fixture, raises
 
 from uwtools.api import template
 from uwtools.exceptions import UWTemplateRenderError
-from uwtools.logging import log
-from uwtools.tests.support import logged
 
 
 @fixture
@@ -31,8 +26,7 @@ def kwargs():
 @fixture
 def template_file(tmp_path):
     path = tmp_path / "template.jinja2"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("roses are {{roses_color}}, violets are {{violets_color}}")
+    path.write_text("roses are {{roses_color}}, violets are {{violets_color}}")
     return path
 
 
@@ -50,9 +44,8 @@ def test_render(kwargs):
 
 
 def test_render_fail(kwargs):
-    with patch.object(template, "_render", return_value=None):
-        with raises(UWTemplateRenderError):
-            template.render(**kwargs)
+    with patch.object(template, "_render", return_value=None), raises(UWTemplateRenderError):
+        template.render(**kwargs)
 
 
 def test_render_to_str(kwargs):
@@ -62,11 +55,10 @@ def test_render_to_str(kwargs):
         render.assert_called_once_with(**{**kwargs, "output_file": Path(os.devnull)})
 
 
-def test_render_values_needed(caplog, template_file):
-    log.setLevel(logging.INFO)
+def test_render_values_needed(logged, template_file):
     template.render(input_file=template_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
-        assert logged(caplog, f"  {var}")
+        assert logged(f"  {var}")
 
 
 def test_translate():

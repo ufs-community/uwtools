@@ -1,20 +1,15 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Orog driver tests.
 """
-import logging
+
 from pathlib import Path
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog import Orog
-from uwtools.exceptions import UWNotImplementedError
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import regex_logged
 
 # Fixtures
 
@@ -77,7 +72,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "taskname",
     ],
@@ -91,32 +85,30 @@ def test_Orog_driver_name(driverobj):
 
 
 def test_Orog_files_linked(driverobj):
-    for _, src in driverobj.config["files_to_link"].items():
+    for src in driverobj.config["files_to_link"].values():
         Path(src).touch()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert not (driverobj.rundir / dst).is_file()
     driverobj.files_linked()
-    for dst, _ in driverobj.config["files_to_link"].items():
+    for dst in driverobj.config["files_to_link"]:
         assert (driverobj.rundir / dst).is_symlink()
 
 
 @mark.parametrize("exist", [True, False])
-def test_Orog_grid_file_existence(caplog, driverobj, exist):
-    log.setLevel(logging.DEBUG)
+def test_Orog_grid_file_existence(driverobj, logged, exist):
     grid_file = Path(driverobj.config["grid_file"])
-    status = f"Input grid file {str(grid_file)}: State: Not Ready (external asset)"
+    status = f"Input grid file {grid_file!s}: Not ready [external asset]"
     if exist:
         grid_file.touch()
-        status = f"Input grid file {str(grid_file)}: State: Ready"
+        status = f"Input grid file {grid_file!s}: Ready"
     driverobj.grid_file()
-    assert regex_logged(caplog, status)
+    assert logged(status)
 
 
-def test_Orog_grid_file_nonexistence(caplog, driverobj):
-    log.setLevel(logging.INFO)
+def test_Orog_grid_file_nonexistence(driverobj, logged):
     driverobj._config["grid_file"] = "none"
     driverobj.grid_file()
-    assert regex_logged(caplog, "Input grid file none: State: Ready")
+    assert logged("Input grid file none: Ready")
 
 
 def test_Orog_input_config_file_new(driverobj):
@@ -125,9 +117,7 @@ def test_Orog_input_config_file_new(driverobj):
     grid_file = Path(driverobj.config["grid_file"])
     grid_file.touch()
     driverobj.input_config_file()
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as inps:
-        content = inps.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 3
     assert content[0] == "'{}'".format(driverobj.config["grid_file"])
     assert content[1] == ".false."
@@ -138,9 +128,7 @@ def test_Orog_input_config_file_old(driverobj):
     grid_file = Path(driverobj.config["grid_file"])
     grid_file.touch()
     driverobj.input_config_file()
-    with open(driverobj._input_config_path, "r", encoding="utf-8") as inps:
-        content = inps.readlines()
-    content = [l.strip("\n") for l in content]
+    content = Path(driverobj._input_config_path).read_text().strip().split("\n")
     assert len(content) == 5
     assert len(content[0].split()) == 9
     assert content[1] == "'{}'".format(driverobj.config["grid_file"])
@@ -150,13 +138,13 @@ def test_Orog_input_config_file_old(driverobj):
 
 
 def test_Orog_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output == {"path": driverobj.rundir / "out.oro.nc"}
 
 
-def test_Orog_provisioned_rundir(driverobj):
-    with patch.multiple(driverobj, files_linked=D, input_config_file=D, runscript=D) as mocks:
+def test_Orog_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(
+        driverobj, files_linked=ready_task, input_config_file=ready_task, runscript=ready_task
+    ) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()

@@ -1,7 +1,6 @@
 usage: uw fs copy [-h] [--version] [--config-file PATH] [--target-dir PATH]
-                  [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run] [--quiet]
-                  [--verbose]
-                  [KEY ...]
+                  [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run]
+                  [--key-path KEY[.KEY...]] [--report] [--quiet] [--verbose]
 
 Copy files
 
@@ -15,14 +14,16 @@ Optional arguments:
   --target-dir PATH
       Root directory for relative destination paths
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-05-29T12)
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
   --leadtime LEADTIME
       The leadtime as hours[:minutes[:seconds]]
   --dry-run
       Only log info, making no changes
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys to config block to use
+  --report
+      Show JSON report on [non]ready assets
   --quiet, -q
       Print no logging messages
   --verbose, -v
       Print all logging messages
-  KEY
-      YAML key leading to file dst/src block

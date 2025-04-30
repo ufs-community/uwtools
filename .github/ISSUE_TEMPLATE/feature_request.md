@@ -1,48 +1,36 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+name: Feature Request
+about: Suggest a feature.
+title:
+labels: Feature
+assignees:
 
 ---
 
 <!--
-- - -  I N S T R U C T I O N S  --  P L E A S E  R E A D  - - -
-Please remove boiler plate instructions when filling out this template.
-Please remove unwanted/unrelated/irrelevant information such as comments provided as a reference in this template.
-Use proper formatting to separate code snippets from text description e.g. use ```code block``` or `in-line code`.
-Please copy any output files into a Github gist (for e.g.) and link to the gist, rather than relying on paths on platforms that might change or disappear.
+  Please:
+  * Use the Bug Report template if you are reporting a bug.
+  * Review the project's Issues to see if this feature has already been requested. Feel free to comment on an existing Issue.
+  * Format code snippets with backticks, either as ```code block``` or `inline code`.
+  * Attach small support files, if needed, via Issue comments; link to large files in GitHub Gists, Google Drive, etc.
 -->
-
-If this is a bug, please consider using the [Bug Report](./bug_report.md) template.
-Your issue may already have been created!
-
-Please look through the existing issues on the [Issue tracker](https://github.com/ufs-community/uwtools/issues) to see if this issue has been created.
-If so, please consider using that Issue to add any additional information.
 
 **Description**
-<!-- Provide a clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
-<!-- What problem needs to be fixed? -->
-<!-- What new capability needs to be added? -->
 
-**Requirements**
-<!-- If this is a new feature:  -->
-<!-- What does the new code need to accomplish? -->
-<!-- Does it require an update to version of software (e.g. updates to system tools e.g. python3, etc) -->
-<!-- If this is a bugfix: What is the expected behavior? -->
+<!-- What would this feature accomplish? Give examples of suggested inputs and outputs. -->
 
-**Describe alternatives you've considered**
-<!--
-A clear and concise description of any alternative solutions or features you've considered.
--->
+**Alternatives Considered**
 
-**Acceptance Criteria (Definition of Done)**
-<!--
-What does it mean for this to be finished?
--->
+<!-- If you have considered and rejected other solutions, please describe them. -->
 
-**Additional context**
-<!--
-Add any other context or screenshots about the feature request here.
--->
+**Acceptance Criteria**
+
+<!-- What does it mean for this request to be done? -->
+
+**Additional Context**
+
+<!-- Other helpful info, screenshots, etc. -->
+
+**Current Version**
+
+<!-- Which uwtools version are you using, from 'uw --version' or 'conda list | grep uwtools' -->
