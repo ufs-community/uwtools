@@ -5,11 +5,10 @@ global_equiv_resol driver tests.
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.global_equiv_resol import GlobalEquivResol
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -55,7 +54,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -78,9 +76,7 @@ def test_GlobalEquivResol_input_file(driverobj):
 
 
 def test_GlobalEquivResol_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output["path"] == Path(driverobj.config["input_grid_file"])
 
 
 def test_GlobalEquivResol_provisioned_rundir(driverobj, ready_task):

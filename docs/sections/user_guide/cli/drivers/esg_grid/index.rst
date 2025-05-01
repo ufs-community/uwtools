@@ -3,7 +3,7 @@
 
 .. include:: ../shared/idempotent.rst
 
-The ``uw`` mode for configuring and running the :ufs-utils:`regional_esg_grid<regional-esg-grid>` component.
+The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``regional_esg_grid``. Documentation for this UFS Utils component is :ufs-utils:`here <regional-esg-grid>`.
 
 .. include:: help.rst
 

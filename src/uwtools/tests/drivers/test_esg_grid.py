@@ -6,11 +6,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.esg_grid import ESGGrid
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -71,7 +70,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -111,9 +109,7 @@ def test_ESGGrid_namelist_file_missing_base_file(driverobj, logged):
 
 
 def test_ESGGrid_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output["path"] == driverobj.rundir / "regional_grid.nc"
 
 
 def test_ESGGrid_provisioned_rundir(driverobj, ready_task):
