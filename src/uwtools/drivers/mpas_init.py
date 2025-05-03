@@ -3,6 +3,7 @@ A driver for the MPAS Init component.
 """
 
 from datetime import timedelta
+from functools import reduce
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -93,15 +94,19 @@ class MPASInit(MPASBase):
         """
         return STR.mpasinit
 
+    # ruff: noqa: ERA001
     @property
     def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
+        cfg = self.config
         paths = []
-        for stream in [x for x in self.config["streams"].values() if x["type"] == "output"]:
-            template = stream["filename_template"]
-            for k, v in [
+        for stream in [
+            x for x in cfg["streams"].values() if x["type"] in ("output", "input;output")
+        ]:
+            # See MPAS User Guide section 5.1 in re: filename_template logic.
+            kvs = [
                 ("$Y", "%Y"),
                 ("$M", "%m"),
                 ("$D", "%d"),
@@ -109,10 +114,31 @@ class MPASInit(MPASBase):
                 ("$h", "%H"),
                 ("$m", "%M"),
                 ("$s", "%S"),
-            ]:
-                template = template.replace(k, v)
-            paths.append(self.rundir / self._cycle.strftime(template))
-        return {"paths": paths}
+            ]
+            template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
+            path = lambda ts: self.rundir / ts.strftime(template)  # noqa: B023
+            # See MPAS User Guide section 5.2 in re: filename_interval logic.
+            default_filename_interval = "output_interval"
+            if stream["type"] == "input;output" and stream["input_interval"] != "initial_only":
+                default_filename_interval = "input_interval"
+            filename_interval = stream.get("filename_interval", default_filename_interval)
+            if filename_interval == "none":
+                paths.append(path(self._cycle))
+            elif filename_interval == "output_interval":
+                bcs = cfg["boundary_conditions"]
+                final_ts = self._cycle + timedelta(hours=bcs["length"])
+                td = timedelta(hours=bcs["interval_hours"])
+                ts = self._cycle
+                tss = []
+                while ts <= final_ts:
+                    tss.append(ts)
+                    ts += td
+                paths.extend(map(path, tss))
+            elif filename_interval == "input_interval":
+                raise NotImplementedError(2)
+            else:  # timestamp pattern
+                raise NotImplementedError(3)
+        return {"paths": sorted(set(paths))}
 
     # Private helper methods
 

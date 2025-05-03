@@ -195,9 +195,15 @@ def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
 
 def test_MPASInit_output(driverobj):
     path = lambda fn: driverobj.rundir / fn
-    assert driverobj.output["paths"] == [path("conus.init.nc")]
     driverobj._config["streams"]["output"]["filename_template"] = "$Y-$M-$D_$d_$h-$m-$s.nc"
-    assert driverobj.output["paths"] == [path("2024-02-01_032_18-00-00.nc")]
+    driverobj._config["boundary_conditions"]["length"] = 1
+    assert driverobj.output["paths"] == [
+        path("2024-02-01_032_18-00-00.nc"),
+        path("2024-02-01_032_19-00-00.nc"),
+    ]
+    driverobj._config["streams"]["output"]["filename_template"] = "conus.init.nc"
+    driverobj._config["boundary_conditions"]["length"] = 0
+    assert driverobj.output["paths"] == [path("conus.init.nc")]
 
 
 def test_MPASInit_provisioned_rundir(driverobj, ready_task):
