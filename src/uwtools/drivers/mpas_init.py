@@ -2,7 +2,7 @@
 A driver for the MPAS Init component.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
 
@@ -53,13 +53,13 @@ class MPASInit(MPASBase):
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
-        stop_time = self._cycle + timedelta(hours=self.config["boundary_conditions"]["length"])
+        initial_ts, final_ts = self._initial_and_final_ts
         namelist = self.config[STR.namelist]
         update_values = namelist.get(STR.updatevalues, {})
         update_values.setdefault("nhyd_model", {}).update(
             {
-                "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:00:00"),
+                "config_start_time": initial_ts.strftime("%Y-%m-%d_%H:00:00"),
+                "config_stop_time": final_ts.strftime("%Y-%m-%d_%H:00:00"),
             }
         )
         namelist[STR.updatevalues] = update_values
@@ -126,10 +126,8 @@ class MPASInit(MPASBase):
                 paths.append(path(self._cycle))
             elif filename_interval == "output_interval":
                 bcs = cfg["boundary_conditions"]
-                final_ts = self._cycle + timedelta(hours=bcs["length"])
-                td = timedelta(hours=bcs["interval_hours"])
-                ts = self._cycle
-                tss = []
+                initial_ts, final_ts = self._initial_and_final_ts
+                ts, tss, td = initial_ts, [], timedelta(hours=bcs["interval_hours"])
                 while ts <= final_ts:
                     tss.append(ts)
                     ts += td
@@ -141,6 +139,12 @@ class MPASInit(MPASBase):
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
+
+    @property
+    def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
+        initial = self._cycle
+        final = initial + timedelta(hours=self.config["boundary_conditions"]["length"])
+        return initial, final
 
     @property
     def _streams_fn(self) -> str:
