@@ -19,6 +19,9 @@ class Ungrib(DriverCycleBased):
     A driver for ungrib.
     """
 
+    PREFIX = "FILE"
+    TIMEFMT = "%Y-%m-%d_%H:00:00"
+
     # Workflow tasks
 
     @tasks
@@ -49,15 +52,15 @@ class Ungrib(DriverCycleBased):
         d = {
             "update_values": {
                 "share": {
-                    "end_date": self._end_date.strftime("%Y-%m-%d_%H:00:00"),
+                    "end_date": self._end_date.strftime(self.TIMEFMT),
                     "interval_seconds": self._interval,
                     "max_dom": 1,
-                    "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
+                    "start_date": self._cycle.strftime(self.TIMEFMT),
                     "wrf_core": "ARW",
                 },
                 "ungrib": {
                     "out_format": "WPS",
-                    "prefix": "FILE",
+                    "prefix": self.PREFIX,
                 },
             }
         }
@@ -107,11 +110,17 @@ class Ungrib(DriverCycleBased):
         return STR.ungrib
 
     @property
-    def output(self) -> dict[str, Path]:
+    def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
-        return {"path": Path(self.config["config"]["output_grid_file"])}
+        paths = []
+        ts = self._cycle
+        while ts <= self._end_date:
+            fn = "%s:%s" % (self.PREFIX, ts.strftime(self.TIMEFMT))
+            paths.append(self.rundir / fn)
+            ts += timedelta(seconds=self._interval)
+        return {"paths": paths}
 
     # Private helper methods
 
