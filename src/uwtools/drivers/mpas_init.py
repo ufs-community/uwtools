@@ -125,9 +125,9 @@ class MPASInit(MPASBase):
             if filename_interval == "none":
                 paths.append(path(self._cycle))
             elif filename_interval == "output_interval":
-                bcs = cfg["boundary_conditions"]
-                initial_ts, final_ts = self._initial_and_final_ts
-                td, ts, tss = timedelta(hours=bcs["interval_hours"]), initial_ts, []
+                td = timedelta(hours=cfg["boundary_conditions"]["interval_hours"])
+                tss = []
+                ts, final_ts = self._initial_and_final_ts
                 while ts <= final_ts:
                     tss.append(ts)
                     ts += td
