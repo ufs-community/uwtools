@@ -94,22 +94,25 @@ class MPASInit(MPASBase):
         return STR.mpasinit
 
     @property
-    def output(self) -> dict[str, Path]:
+    def output(self) -> dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
-        template = self.config["streams"]["output"]["filename_template"]
-        for k, v in [
-            ("$Y", "%Y"),
-            ("$M", "%m"),
-            ("$D", "%d"),
-            ("$d", "%j"),
-            ("$h", "%H"),
-            ("$m", "%M"),
-            ("$s", "%S"),
-        ]:
-            template = template.replace(k, v)
-        return {"path": self.rundir / self._cycle.strftime(template)}
+        paths = []
+        for stream in [x for x in self.config["streams"].values() if x["type"] == "output"]:
+            template = stream["filename_template"]
+            for k, v in [
+                ("$Y", "%Y"),
+                ("$M", "%m"),
+                ("$D", "%d"),
+                ("$d", "%j"),
+                ("$h", "%H"),
+                ("$m", "%M"),
+                ("$s", "%S"),
+            ]:
+                template = template.replace(k, v)
+            paths.append(self.rundir / self._cycle.strftime(template))
+        return {"paths": paths}
 
     # Private helper methods
 
