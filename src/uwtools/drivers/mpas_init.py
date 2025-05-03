@@ -108,7 +108,7 @@ class MPASInit(MPASBase):
             ("$m", "%M"),
             ("$s", "%S"),
         ]:
-            template.replace(k, v)
+            template = template.replace(k, v)
         return {"path": self.rundir / self._cycle.strftime(template)}
 
     # Private helper methods
