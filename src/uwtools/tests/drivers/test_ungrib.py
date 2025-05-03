@@ -133,6 +133,10 @@ def test_Ungrib_vtable(driverobj):
     assert dst.is_symlink()
 
 
+def test_Ungrib__end_date(driverobj, utc):
+    assert driverobj._end_date == utc(2024, 2, 2, 6)
+
+
 def test_Ungrib__gribfile(driverobj):
     src = driverobj.rundir / "GRIBFILE.AAA.in"
     src.touch()
@@ -140,6 +144,10 @@ def test_Ungrib__gribfile(driverobj):
     assert not dst.is_symlink()
     driverobj._gribfile(src, dst)
     assert dst.is_symlink()
+
+
+def test_Ungrib__interval(driverobj):
+    assert driverobj._interval == 21600
 
 
 def test__ext():
