@@ -7,11 +7,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
-from uwtools.exceptions import UWNotImplementedError
 from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path
 
@@ -109,7 +108,6 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "streams_file",
@@ -196,9 +194,7 @@ def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
 
 
 def test_MPASInit_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output["path"] == driverobj.rundir / "conus.init.nc"
 
 
 def test_MPASInit_provisioned_rundir(driverobj, ready_task):
