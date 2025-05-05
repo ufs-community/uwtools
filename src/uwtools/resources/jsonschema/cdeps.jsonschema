@@ -10,6 +10,9 @@
             "data": {
               "additionalProperties": false,
               "properties": {
+                "combine": {
+                  "type": "boolean"
+                },
                 "end_point": {
                   "type": "string"
                 },
@@ -42,9 +45,6 @@
                   ]
                 },
                 "subset": {
-                  "type": "boolean"
-                },
-                "combine": {
                   "type": "boolean"
                 },
                 "target_directory": {
