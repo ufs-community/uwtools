@@ -4,11 +4,10 @@ make_hgrid driver tests.
 
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.make_hgrid import MakeHgrid
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -60,7 +59,6 @@ def driverobj(config):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "taskname",
@@ -75,9 +73,9 @@ def test_MakeHgrid_driver_name(driverobj):
 
 
 def test_MakeHgrid_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output["path"] == driverobj.rundir / "horizontal_grid.nc"
+    driverobj._config["config"]["grid_name"] = "foo"
+    assert driverobj.output["path"] == driverobj.rundir / "foo.nc"
 
 
 def test_MakeHgrid_provisioned_rundir(driverobj, ready_task):

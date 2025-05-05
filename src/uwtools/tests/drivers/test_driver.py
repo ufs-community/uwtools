@@ -540,10 +540,11 @@ def test_Driver__runscript(driverobj):
     export VAR1=1
     export VAR2=2
 
+    cd /path/to/rundir
     foo
     bar
     """
-    scheduler = Mock(directives=["#DIR --d1", "#DIR --d2"])
+    scheduler = Mock(directives=["#DIR --d1", "#DIR --d2"], initcmds=["cd /path/to/rundir"])
     assert (
         driverobj._runscript(
             execution=["foo", "bar"],

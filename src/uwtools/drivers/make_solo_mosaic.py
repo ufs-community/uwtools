@@ -4,11 +4,16 @@ A driver for make_solo_mosaic.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from iotaa import tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class MakeSoloMosaic(DriverTimeInvariant):
@@ -25,6 +30,14 @@ class MakeSoloMosaic(DriverTimeInvariant):
         """
         yield self.taskname("provisioned run directory")
         yield self.runscript()
+
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        mosaic_name = self.config["config"].get("mosaic_name", "mosaic")
+        return {"path": (self.rundir / mosaic_name).with_suffix(".nc")}
 
     # Public helper methods
 

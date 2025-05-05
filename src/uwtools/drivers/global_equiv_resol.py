@@ -47,6 +47,13 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         return STR.globalequivresol
 
+    @property
+    def output(self) -> dict[str, Path]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        return {"path": Path(self.config["input_grid_file"])}
+
     # Private helper methods
 
     @property
