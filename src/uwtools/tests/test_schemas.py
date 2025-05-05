@@ -12,7 +12,7 @@ from uwtools.tests.support import schema_validator, with_del, with_set
 
 
 CDEPS_CONFIG = {
-    "atm_in": {
+    "datm": {
         "base_file": "/path/to/atm.nml",
         "update_values": {
             "datm_nml": {
@@ -36,8 +36,6 @@ CDEPS_CONFIG = {
                 "skip_restart_read": True,
             },
         },
-    },
-    "atm_streams": {
         "streams": {
             "stream01": {
                 "dtlimit": 1.5,
@@ -56,9 +54,8 @@ CDEPS_CONFIG = {
                 "yearLast": 1,
             }
         },
-        "template_file": "/path/to/atm.jinja2",
     },
-    "ocn_in": {
+    "docn": {
         "base_file": "/path/to/ocn.nml",
         "update_values": {
             "docn_nml": {
@@ -73,8 +70,6 @@ CDEPS_CONFIG = {
                 "sst_constant_value": 3.14,
             },
         },
-    },
-    "ocn_streams": {
         "streams": {
             "stream01": {
                 "dtlimit": 1.5,
@@ -93,9 +88,8 @@ CDEPS_CONFIG = {
                 "yearLast": 1,
             }
         },
-        "template_file": "/path/to/atm.jinja2",
     },
-    "rundir": "/path/to/run/dir",
+    "template_file": "/path/to/atm.jinja2",
 }
 
 
@@ -358,16 +352,21 @@ def test_schema_cdeps(cdeps_config):
     errors = schema_validator("cdeps", "properties", "cdeps")
     # Basic correctness:
     assert not errors(cdeps_config)
+    # Some top-level keys are required:
+    for key in ["template_file"]:
+        assert f"'{key}' is a required property" in errors(with_del(cdeps_config, key))
+    # template_file must be a string:
+    assert "is not of type 'string'\n" in errors(with_set(cdeps_config, 1, "template_file"))
     # All top-level keys are optional:
-    for key in ["atm_in", "atm_streams", "ocn_in", "ocn_streams"]:
+    for key in ["datm", "docn"]:
         assert not errors(with_del(cdeps_config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors(with_set(cdeps_config, "bar", "foo"))
 
 
 def test_schema_cdeps_atm_in(cdeps_config):
-    block = cdeps_config["atm_in"]
-    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "atm_in")
+    block = cdeps_config["datm"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "datm")
     # Namelist values must be of the correct types:
     nmlerr = lambda k, v: errors(with_set(block, v, "update_values", "datm_nml", k))
     # boolean:
@@ -408,8 +407,8 @@ def test_schema_cdeps_atm_in(cdeps_config):
 
 @mark.parametrize("section", ["atm", "ocn"])
 def test_schema_cdeps_nml_common(cdeps_config, section):
-    block = cdeps_config[f"{section}_in"]
-    errors = schema_validator("cdeps", "properties", "cdeps", "properties", f"{section}_in")
+    block = cdeps_config[f"d{section}"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", f"d{section}")
     # Either base_file or update_values is sufficient:
     for k in ["base_file", "update_values"]:
         assert not errors(with_del(block, k))
@@ -426,8 +425,8 @@ def test_schema_cdeps_nml_common(cdeps_config, section):
 
 
 def test_schema_cdeps_ocn_in(cdeps_config):
-    block = cdeps_config["ocn_in"]
-    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "ocn_in")
+    block = cdeps_config["docn"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "docn")
     # Namelist values must be of the correct types:
     nmlerr = lambda k, v: errors(with_set(block, v, "update_values", "docn_nml", k))
     # boolean:
@@ -459,47 +458,39 @@ def test_schema_cdeps_ocn_in(cdeps_config):
 
 @mark.parametrize("section", ["atm", "ocn"])
 def test_schema_cdeps_streams(cdeps_config, section):
-    block = cdeps_config[f"{section}_streams"]
-    errors = schema_validator("cdeps", "properties", "cdeps", "properties", f"{section}_streams")
+    block = cdeps_config[f"d{section}"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", f"d{section}")
     # Both top-level keys are required:
-    for k in ["streams", "template_file"]:
+    for k in ["streams"]:
         assert f"'{k}' is a required property" in errors(with_del(block, k))
     # Correctly-named stream blocks are ok:
     for n in range(1, 10):
         assert not errors(with_set(block, block["streams"]["stream01"], "streams", f"stream0{n}"))
     # Arbitrarily-named stream blocks are not allowed:
     assert "does not match any of the regexes" in errors(with_set(block, {}, "streams", "foo"))
-    # template_file must be a string:
-    assert "is not of type 'string'\n" in errors(with_set(block, 1, "template_file"))
     # Values must be of the correct types:
     valerr = lambda k, v: errors(with_set(block, v, "streams", "stream01", k))
     # enum:
-    ks_enum = ["readmode"]
     assert "is not one of" in valerr("readmode", None)
     # integer:
-    ks_integer = ["stream_offset", "yearAlign", "yearFirst", "yearLast"]
-    for k in ks_integer:
+    for k in ["stream_offset", "yearAlign", "yearFirst", "yearLast"]:
         assert "is not of type 'integer'\n" in valerr(k, None)
     # number:
-    ks_number = ["dtlimit"]
-    for k in ks_number:
+    for k in ["dtlimit"]:
         assert "is not of type 'number'\n" in valerr(k, None)
     # string:
-    ks_string = ["mapalgo", "stream_lev_dimname", "stream_mesh_file", "taxmode", "tinterpalgo"]
-    for k in ks_string:
+    for k in ["mapalgo", "stream_lev_dimname", "stream_mesh_file", "taxmode", "tinterpalgo"]:
         assert "is not of type 'string'\n" in valerr(k, None)
     # string arrays:
-    ks_string_array = ["stream_data_files", "stream_data_variables"]
-    for k in ks_string_array:
+    for k in ["stream_data_files", "stream_data_variables"]:
         assert "is not of type 'array'\n" in valerr(k, None)
         assert "is not of type 'string'\n" in valerr(k, [1])
     # string or string array:
-    ks_string_or_string_array = ["stream_vectors"]
-    for k in ks_string_or_string_array:
+    for k in ["stream_vectors"]:
         assert "is not of type 'array', 'string'\n" in valerr(k, None)
         assert "is not of type 'string'\n" in valerr(k, [1])
-    # All keys are required:
-    for k in ks_enum + ks_integer + ks_number + ks_string + ks_string_array:
+    # Some keys are required:
+    for k in ["stream_data_files", "stream_data_variables", "stream_mesh_file"]:
         assert "is a required property" in errors(with_del(block, "streams", "stream01", k))
 
 
