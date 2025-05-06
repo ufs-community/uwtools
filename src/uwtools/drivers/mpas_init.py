@@ -103,21 +103,20 @@ class MPASInit(MPASBase):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        cfg = self.config
+        kvs = [
+            ("$Y", "%Y"),
+            ("$M", "%m"),
+            ("$D", "%d"),
+            ("$d", "%j"),
+            ("$h", "%H"),
+            ("$m", "%M"),
+            ("$s", "%S"),
+        ]
         paths = []
-        for stream in [
-            x for x in cfg["streams"].values() if x["type"] in ("output", "input;output")
-        ]:
+        for stream in self.config["streams"].values():
+            if stream["type"] not in ("output", "input;output"):
+                continue
             # See MPAS User Guide section 5.1 in re: filename_template logic.
-            kvs = [
-                ("$Y", "%Y"),
-                ("$M", "%m"),
-                ("$D", "%d"),
-                ("$d", "%j"),
-                ("$h", "%H"),
-                ("$m", "%M"),
-                ("$s", "%S"),
-            ]
             template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
             path = lambda ts: self.rundir / ts.strftime(template)  # noqa: B023
             # See MPAS User Guide section 5.2 in re: filename_interval logic.
@@ -134,7 +133,8 @@ class MPASInit(MPASBase):
                 if interval == "initial_only":
                     paths.append(path(self._cycle))
                 else:
-                    pass
+                    decoded = self._decode_interval(interval)
+                    assert decoded
             elif filename_interval == "input_interval":
                 raise NotImplementedError(2)
             else:  # timestamp pattern
@@ -144,7 +144,7 @@ class MPASInit(MPASBase):
     # Private helper methods
 
     @staticmethod
-    def _decode(interval: str) -> ns:
+    def _decode_interval(interval: str) -> ns:
         val = lambda x: int(x) if x else None
         parts = re.sub(r"[-_:]", " ", interval).split()[::-1]
         keys = ["years", "months", "days", "hours", "minutes", "seconds"]
