@@ -2,9 +2,12 @@
 A driver for the MPAS Init component.
 """
 
+import re
 from datetime import datetime, timedelta
 from functools import reduce
+from itertools import islice
 from pathlib import Path
+from types import SimpleNamespace as ns
 
 from iotaa import asset, task, tasks
 
@@ -125,13 +128,13 @@ class MPASInit(MPASBase):
             if filename_interval == "none":
                 paths.append(path(self._cycle))
             elif filename_interval == "output_interval":
-                td = timedelta(hours=cfg["boundary_conditions"]["interval_hours"])
-                tss = []
-                ts, final_ts = self._initial_and_final_ts
-                while ts <= final_ts:
-                    tss.append(ts)
-                    ts += td
-                paths.extend(map(path, tss))
+                interval = stream["output_interval"]
+                if interval == "none":
+                    continue
+                if interval == "initial_only":
+                    paths.append(path(self._cycle))
+                else:
+                    pass
             elif filename_interval == "input_interval":
                 raise NotImplementedError(2)
             else:  # timestamp pattern
@@ -139,6 +142,14 @@ class MPASInit(MPASBase):
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
+
+    @staticmethod
+    def _decode(interval: str) -> ns:
+        val = lambda x: int(x) if x else None
+        parts = re.sub(r"[-_:]", " ", interval).split()[::-1]
+        keys = ["years", "months", "days", "hours", "minutes", "seconds"]
+        vals = [val(x) for x in (next(islice(parts, i, i + 1), None) for i in range(6))][::-1]
+        return ns(**dict(zip(keys, vals)))
 
     @property
     def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
