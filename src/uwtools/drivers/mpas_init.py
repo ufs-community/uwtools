@@ -120,10 +120,10 @@ class MPASInit(MPASBase):
             template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
             path = lambda ts: self.rundir / ts.strftime(template)  # noqa: B023
             # See MPAS User Guide section 5.2 in re: filename_interval logic.
-            default_filename_interval = "output_interval"
+            filename_interval = "output_interval"
             if stream["type"] == "input;output" and stream["input_interval"] != "initial_only":
-                default_filename_interval = "input_interval"
-            filename_interval = stream.get("filename_interval", default_filename_interval)
+                filename_interval = "input_interval"
+            filename_interval = stream.get("filename_interval", filename_interval)
             if filename_interval == "none":
                 paths.append(path(self._cycle))
             elif filename_interval == "output_interval":
