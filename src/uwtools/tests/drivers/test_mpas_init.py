@@ -352,5 +352,12 @@ def test_MPASInit__interval_timestamps(driverobj, dtargs, interval, length):
     assert driverobj._interval_timestamps(interval=interval) == expected
 
 
+def test_MPASInit__path(driverobj):
+    t = "out.$Y_$M_$D-$d-$h_$m_$s.nc"
+    d = datetime(2025, 5, 7, 1, 2, 3, tzinfo=timezone.utc)
+    expected = driverobj.rundir / "out.2025_05_07-127-01_02_03.nc"
+    assert driverobj._path(template=t, dtobj=d) == expected
+
+
 def test_MPASInit__streams_fn(driverobj):
     assert driverobj._streams_fn == "streams.init_atmosphere"

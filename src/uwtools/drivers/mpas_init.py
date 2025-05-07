@@ -107,24 +107,25 @@ class MPASInit(MPASBase):
         """
         paths = []
         for stream in self.config["streams"].values():
+            template = stream["filename_template"]
             if stream["type"] not in ("output", "input;output"):
                 continue
             filename_interval = self._filename_interval(stream)
             if filename_interval == "none":
-                paths.append(self._path(stream, self._cycle))
+                paths.append(self._path(template, self._cycle))
             elif filename_interval in ("input_interval", "output_interval"):
                 interval = stream[filename_interval]
                 if interval == "none":
                     continue  # stream will not be written
                 if interval == "initial_only":
-                    paths.append(self._path(stream, self._cycle))
+                    paths.append(self._path(template, self._cycle))
                 else:  # interval is a timestamp
                     tss = self._interval_timestamps(interval)
-                    paths.extend(self._path(stream, ts) for ts in tss)
+                    paths.extend(self._path(template, ts) for ts in tss)
             else:  # filename_interval is a timestamp
                 reference_time = stream.get("reference_time")
                 tss = self._filename_interval_timestamps(filename_interval, reference_time)
-                paths.extend(self._path(stream, ts) for ts in tss)
+                paths.extend(self._path(template, ts) for ts in tss)
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
@@ -176,7 +177,7 @@ class MPASInit(MPASBase):
             ts = ts + delta
         return tss
 
-    def _path(self, stream: dict, dtobj: datetime) -> Path:
+    def _path(self, template: str, dtobj: datetime) -> Path:
         # See MPAS User Guide section 5.1 in re: filename_template logic.
         kvs = [
             ("$Y", "%Y"),
@@ -187,7 +188,7 @@ class MPASInit(MPASBase):
             ("$m", "%M"),
             ("$s", "%S"),
         ]
-        template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
+        template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, template)
         return self.rundir / dtobj.strftime(template)
 
     @property
