@@ -8,6 +8,7 @@ from functools import reduce
 from itertools import islice
 from pathlib import Path
 from types import SimpleNamespace as ns
+from typing import Callable, cast
 
 from iotaa import asset, task, tasks
 
@@ -103,33 +104,18 @@ class MPASInit(MPASBase):
         """
         Returns a description of the file(s) created when this component runs.
         """
-        kvs = [
-            ("$Y", "%Y"),
-            ("$M", "%m"),
-            ("$D", "%d"),
-            ("$d", "%j"),
-            ("$h", "%H"),
-            ("$m", "%M"),
-            ("$s", "%S"),
-        ]
         paths = []
         for stream in self.config["streams"].values():
             if stream["type"] not in ("output", "input;output"):
                 continue
-            # See MPAS User Guide section 5.1 in re: filename_template logic.
-            template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
-            path = lambda ts: self.rundir / ts.strftime(template)  # noqa: B023
-            # See MPAS User Guide section 5.2 in re: filename_interval logic.
-            filename_interval = "output_interval"
-            if stream["type"] == "input;output" and stream["input_interval"] != "initial_only":
-                filename_interval = "input_interval"
-            filename_interval = stream.get("filename_interval", filename_interval)
+            path = self._path(stream)
+            filename_interval = self._filename_interval(stream)
             if filename_interval == "none":
                 paths.append(path(self._cycle))
             elif filename_interval == "output_interval":
                 interval = stream["output_interval"]
                 if interval == "none":
-                    continue
+                    continue  # stream will not be written
                 if interval == "initial_only":
                     paths.append(path(self._cycle))
                 else:
@@ -151,11 +137,33 @@ class MPASInit(MPASBase):
         vals = [val(x) for x in (next(islice(parts, i, i + 1), None) for i in range(6))][::-1]
         return ns(**dict(zip(keys, vals)))
 
+    @staticmethod
+    def _filename_interval(stream: dict) -> str:
+        # See MPAS User Guide section 5.2 in re: filename_interval logic.
+        filename_interval = "output_interval"
+        if stream["type"] == "input;output" and stream["input_interval"] != "initial_only":
+            filename_interval = "input_interval"
+        return cast(str, stream.get("filename_interval", filename_interval))
+
     @property
     def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
         initial = self._cycle
         final = initial + timedelta(hours=self.config["boundary_conditions"]["length"])
         return initial, final
+
+    def _path(self, stream: dict) -> Callable:
+        # See MPAS User Guide section 5.1 in re: filename_template logic.
+        kvs = [
+            ("$Y", "%Y"),
+            ("$M", "%m"),
+            ("$D", "%d"),
+            ("$d", "%j"),
+            ("$h", "%H"),
+            ("$m", "%M"),
+            ("$s", "%S"),
+        ]
+        template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
+        return lambda ts: self.rundir / ts.strftime(template)
 
     @property
     def _streams_fn(self) -> str:
