@@ -117,12 +117,8 @@ class MPASInit(MPASBase):
                 if interval == "initial_only":
                     paths.append(self._path(stream, self._cycle))
                 else:  # interval is a timestamp
-                    kwargs = self._decode_interval(interval)
-                    delta = relativedelta(**kwargs)  # type: ignore[arg-type]
-                    ts, final_ts = self._initial_and_final_ts
-                    while ts <= final_ts:
-                        paths.append(self._path(stream, ts))
-                        ts = ts + delta
+                    tss = self._interval_timestamps(interval)
+                    paths.extend(self._path(stream, ts) for ts in tss)
             else:  # filename_interval is a timestamp
                 """
                 reference_ts = ( _self._decode_timestamp(stream["reference_time"]) if
@@ -160,6 +156,16 @@ class MPASInit(MPASBase):
         initial = self._cycle
         final = initial + timedelta(hours=self.config["boundary_conditions"]["length"])
         return initial, final
+
+    def _interval_timestamps(self, interval: str) -> list[datetime]:
+        kwargs = self._decode_interval(interval)
+        delta = relativedelta(**kwargs)  # type: ignore[arg-type]
+        ts, final_ts = self._initial_and_final_ts
+        tss = []
+        while ts <= final_ts:
+            tss.append(ts)
+            ts = ts + delta
+        return tss
 
     def _path(self, stream: dict, dtobj: datetime) -> Path:
         # See MPAS User Guide section 5.1 in re: filename_template logic.
