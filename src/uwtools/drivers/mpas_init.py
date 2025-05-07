@@ -98,7 +98,6 @@ class MPASInit(MPASBase):
         """
         return STR.mpasinit
 
-    # ruff: noqa: ERA001
     @property
     def output(self) -> dict[str, list[Path]]:
         """

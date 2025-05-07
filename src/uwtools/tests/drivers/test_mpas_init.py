@@ -201,7 +201,7 @@ def test_MPASInit_output__initial_only(driverobj):
     assert driverobj.output["paths"] == [path("conus.init.nc")]
 
 
-s = """
+"""
     # driverobj._config["streams"]["output"]["filename_template"] = "$Y-$M-$D_$d_$h-$m-$s.nc"
     # assert driverobj.output["paths"] == [
     #     path("2024-02-01_032_18-00-00.nc"),
