@@ -132,10 +132,14 @@ class MPASInit(MPASBase):
 
     @staticmethod
     def _decode_interval(interval: str) -> dict[str, int]:
-        val = lambda x: int(x) if x else 0
-        parts = re.sub(r"[-_:]", " ", interval).split()[::-1]
+        # See MPAS User Guide section 5 for a description of the interval format and semantics, but
+        # the general form is years-months-days_hours:minutes:seconds, e.g. 1-2-3_4:5:6 means 1
+        # year, 2 months, 3 days, 4 hours, 5 minutes, 6 seconds. Leading components can be omitted,
+        # so reverse for an ascending seconds -> years order, pad with trailing zeros as needed,
+        # then reverse again for a natural descending years -> seconds order.
         keys = ["years", "months", "days", "hours", "minutes", "seconds"]
-        vals = [val(x) for x in (next(islice(parts, i, i + 1), None) for i in range(6))][::-1]
+        components = re.sub(r"[-_:]", " ", interval).split()[::-1]
+        vals = [int(x) for x in (next(islice(components, i, i + 1), 0) for i in range(6))][::-1]
         return dict(zip(keys, vals))
 
     @staticmethod
