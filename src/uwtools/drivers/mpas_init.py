@@ -120,13 +120,12 @@ class MPASInit(MPASBase):
                     tss = self._interval_timestamps(interval)
                     paths.extend(self._path(stream, ts) for ts in tss)
             else:  # filename_interval is a timestamp
-                """
-                reference_ts = ( _self._decode_timestamp(stream["reference_time"]) if
-                "reference_time" in stream.
-
-                else initial_ts )
-                """
-                raise NotImplementedError(3)
+                tss = self._interval_timestamps(filename_interval)
+                if reference_time := stream.get("reference_time"):
+                    initial_ts, _ = self._initial_and_final_ts
+                    delta = initial_ts - self._decode_timestamp(reference_time)
+                    tss = [ts - delta for ts in tss]
+                paths.extend(self._path(stream, ts) for ts in tss)
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
@@ -153,7 +152,7 @@ class MPASInit(MPASBase):
 
     @property
     def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
-        initial = self._cycle
+        initial = self._cycle.replace(tzinfo=timezone.utc)
         final = initial + timedelta(hours=self.config["boundary_conditions"]["length"])
         return initial, final
 

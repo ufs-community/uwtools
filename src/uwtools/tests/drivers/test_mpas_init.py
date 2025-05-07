@@ -233,6 +233,35 @@ def test_MPASInit_output__filename_interval_output_interval_timestamp(driverobj,
     ]
 
 
+def test_MPASInit_output__filename_interval_timestamp(driverobj, outpath):
+    updates = {
+        "filename_interval": "1_00:00:00",
+        "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
+        "output_interval": "06:00:00",
+    }
+    driverobj._config["streams"]["output"].update(updates)
+    driverobj._config["boundary_conditions"].update({"interval_hours": 6, "length": 36})
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_18-00-00.nc"),
+        outpath("2024-02-02_033_18-00-00.nc"),
+    ]
+
+
+def test_MPASInit_output__filename_interval_timestamp_reference_time(driverobj, outpath):
+    updates = {
+        "filename_interval": "1_00:00:00",
+        "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
+        "output_interval": "06:00:00",
+        "reference_time": "2024-02-01_00:00:00",
+    }
+    driverobj._config["streams"]["output"].update(updates)
+    driverobj._config["boundary_conditions"].update({"interval_hours": 6, "length": 36})
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_00-00-00.nc"),
+        outpath("2024-02-02_033_00-00-00.nc"),
+    ]
+
+
 def test_MPASInit_output__non_output_stream(driverobj):
     driverobj._config["streams"]["output"].update({"type": "input"})
     assert driverobj.output["paths"] == []
