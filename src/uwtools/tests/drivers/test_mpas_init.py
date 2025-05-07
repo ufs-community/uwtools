@@ -339,5 +339,18 @@ def test_MPASInit__initial_and_final_ts(driverobj):
     assert driverobj._initial_and_final_ts == (initial, final)
 
 
+@mark.parametrize(
+    ("dtargs", "interval", "length"),
+    [
+        ([(2024, 2, 1, 18), (2024, 2, 2, 18), (2024, 2, 3, 18)], "1_00:00:00", 48),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 6)], "12:00:00", 18),
+    ],
+)
+def test_MPASInit__interval_timestamps(driverobj, dtargs, interval, length):
+    driverobj._config["boundary_conditions"]["length"] = length
+    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    assert driverobj._interval_timestamps(interval=interval) == expected
+
+
 def test_MPASInit__streams_fn(driverobj):
     assert driverobj._streams_fn == "streams.init_atmosphere"
