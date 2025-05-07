@@ -119,16 +119,12 @@ class MPASInit(MPASBase):
                 if interval == "initial_only":
                     paths.append(self._path(stream, self._cycle))
                 else:  # interval is a timestamp
-                    paths.extend(
-                        self._path(stream, ts) for ts in self._interval_timestamps(interval)
-                    )
+                    tss = self._interval_timestamps(interval)
+                    paths.extend(self._path(stream, ts) for ts in tss)
             else:  # filename_interval is a timestamp
-                paths.extend(
-                    self._path(stream, ts)
-                    for ts in self._filename_interval_timestamps(
-                        filename_interval, stream.get("reference_time")
-                    )
-                )
+                reference_time = stream.get("reference_time")
+                tss = self._filename_interval_timestamps(filename_interval, reference_time)
+                paths.extend(self._path(stream, ts) for ts in tss)
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
