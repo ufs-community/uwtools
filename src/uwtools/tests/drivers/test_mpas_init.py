@@ -200,20 +200,14 @@ def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
 
 def test_MPASInit_output__filename_interval_none(driverobj, outpath):
     driverobj._config["streams"]["output"].update(
-        {
-            "filename_interval": "none",
-            "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
-        },
+        {"filename_interval": "none", "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc"},
     )
     assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
 
 
 def test_MPASInit_output__filename_interval_output_interval_initial_only(driverobj, outpath):
     driverobj._config["streams"]["output"].update(
-        {
-            "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
-            "output_interval": "initial_only",
-        }
+        {"filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc", "output_interval": "initial_only"}
     )
     assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
 
@@ -222,17 +216,25 @@ def test_MPASInit_output__filename_interval_output_interval_initial_only(drivero
 def test_MPASInit_output__filename_interval_output_interval_none(driverobj, explicit):
     updates = {"output_interval": "none"}
     if explicit:
-        updates["filename_interval"] = "output_interval"  # also the default value
+        updates["filename_interval"] = "output_interval"
     driverobj._config["streams"]["output"].update(updates)
     assert driverobj.output["paths"] == []
 
 
+@mark.parametrize("explicit", [True, False])
+def test_MPASInit_output__filename_interval_output_interval_timestamp(driverobj, explicit, outpath):
+    updates = {"filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc", "output_interval": "01:00:00"}
+    if explicit:
+        updates["filename_interval"] = "output_interval"
+    driverobj._config["streams"]["output"].update(updates)
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_18-00-00.nc"),
+        outpath("2024-02-01_032_19-00-00.nc"),
+    ]
+
+
 def test_MPASInit_output__non_output_stream(driverobj):
-    driverobj._config["streams"]["output"].update(
-        {
-            "type": "input",
-        }
-    )
+    driverobj._config["streams"]["output"].update({"type": "input"})
     assert driverobj.output["paths"] == []
 
 

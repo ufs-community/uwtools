@@ -3,13 +3,13 @@ A driver for the MPAS Init component.
 """
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import reduce
 from itertools import islice
 from pathlib import Path
-from types import SimpleNamespace as ns
 from typing import cast
 
+from dateutil.relativedelta import relativedelta
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
@@ -112,28 +112,42 @@ class MPASInit(MPASBase):
                 paths.append(self._path(stream, self._cycle))
             elif filename_interval == "output_interval":
                 interval = stream["output_interval"]
+                if interval == "none":
+                    continue  # stream will not be written
                 if interval == "initial_only":
                     paths.append(self._path(stream, self._cycle))
-                elif interval == "none":
-                    continue  # stream will not be written
-                else:
-                    decoded = self._decode_interval(interval)
-                    assert decoded
+                else:  # output_interval is a timestamp
+                    kwargs = self._decode_interval(interval)
+                    delta = relativedelta(**kwargs)  # type: ignore[arg-type]
+                    ts, final_ts = self._initial_and_final_ts
+                    while ts <= final_ts:
+                        paths.append(self._path(stream, ts))
+                        ts = ts + delta
             elif filename_interval == "input_interval":
                 raise NotImplementedError(2)
-            else:  # timestamp pattern
+            else:  # filename_interval is a timestamp
+                """
+                reference_ts = ( _self._decode_timestamp(stream["reference_time"]) if
+                "reference_time" in stream.
+
+                else initial_ts )
+                """
                 raise NotImplementedError(3)
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
 
     @staticmethod
-    def _decode_interval(interval: str) -> ns:
-        val = lambda x: int(x) if x else None
+    def _decode_interval(interval: str) -> dict[str, int]:
+        val = lambda x: int(x) if x else 0
         parts = re.sub(r"[-_:]", " ", interval).split()[::-1]
         keys = ["years", "months", "days", "hours", "minutes", "seconds"]
         vals = [val(x) for x in (next(islice(parts, i, i + 1), None) for i in range(6))][::-1]
-        return ns(**dict(zip(keys, vals)))
+        return dict(zip(keys, vals))
+
+    @staticmethod
+    def _decode_timestamp(timestamp: str) -> datetime:
+        return datetime.strptime(timestamp, "%Y-%m-%d_%H:%M:%S").replace(tzinfo=timezone.utc)
 
     @staticmethod
     def _filename_interval(stream: dict) -> str:
