@@ -316,5 +316,22 @@ def test_MPASInit__filename_interval(expected, stream):
     assert MPASInit._filename_interval(stream) == expected
 
 
+@mark.parametrize(
+    ("dtargs", "interval", "reference_time"),
+    [
+        ([(2024, 2, 1), (2024, 2, 2)], "1_00:00:00", "2024-02-01_00:00:00"),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 12), (2024, 2, 3, 6)], "18:00:00", None),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 18)], "1_00:00:00", None),
+    ],
+)
+def test_MPASInit__filename_interval_timestamps(driverobj, dtargs, interval, reference_time):
+    driverobj._config["boundary_conditions"]["length"] = 36
+    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    assert (
+        driverobj._filename_interval_timestamps(interval=interval, reference_time=reference_time)
+        == expected
+    )
+
+
 def test_MPASInit__streams_fn(driverobj):
     assert driverobj._streams_fn == "streams.init_atmosphere"
