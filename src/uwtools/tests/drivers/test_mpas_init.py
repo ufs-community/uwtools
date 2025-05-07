@@ -208,7 +208,7 @@ def test_MPASInit_output__filename_interval_none(driverobj, outpath):
     assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
 
 
-def test_MPASInit_output__initial_only(driverobj, outpath):
+def test_MPASInit_output__filename_interval_output_interval_initial_only(driverobj, outpath):
     driverobj._config["streams"]["output"].update(
         {
             "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
@@ -218,22 +218,12 @@ def test_MPASInit_output__initial_only(driverobj, outpath):
     assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
 
 
-def test_MPASInit_output__output_interval_none_default(driverobj):
-    driverobj._config["streams"]["output"].update(
-        {
-            "output_interval": "none",
-        }
-    )
-    assert driverobj.output["paths"] == []
-
-
-def test_MPASInit_output__output_interval_none_explicit(driverobj):
-    driverobj._config["streams"]["output"].update(
-        {
-            "filename_interval": "output_interval",
-            "output_interval": "none",
-        }
-    )
+@mark.parametrize("explicit", [True, False])
+def test_MPASInit_output__filename_interval_output_interval_none(driverobj, explicit):
+    updates = {"output_interval": "none"}
+    if explicit:
+        updates["filename_interval"] = "output_interval"  # also the default value
+    driverobj._config["streams"]["output"].update(updates)
     assert driverobj.output["paths"] == []
 
 

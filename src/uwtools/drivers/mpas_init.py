@@ -112,10 +112,10 @@ class MPASInit(MPASBase):
                 paths.append(self._path(stream, self._cycle))
             elif filename_interval == "output_interval":
                 interval = stream["output_interval"]
-                if interval == "none":
-                    continue  # stream will not be written
                 if interval == "initial_only":
                     paths.append(self._path(stream, self._cycle))
+                elif interval == "none":
+                    continue  # stream will not be written
                 else:
                     decoded = self._decode_interval(interval)
                     assert decoded
