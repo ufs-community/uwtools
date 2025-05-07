@@ -158,6 +158,12 @@ class MPASInit(MPASBase):
     def _filename_interval_timestamps(
         self, interval: str, reference_time: str | None
     ) -> list[datetime]:
+        # See MPAS User Guide sections 5.2 and 5.3.3 for info on the semantics of reference_time.
+        # The idea here is to create a set of timestamps corresponding to the output filenames as
+        # defined by the filename_interval value when it is a timestamp pattern. By default, the
+        # first timestamp will correspond to the start time of the model, but reference_time can be
+        # provided to move the first timestamp to a different time, in which case the number of
+        # output files does not change, but their timestamps and contents do.
         tss = self._interval_timestamps(interval)
         if reference_time:
             initial_ts, _ = self._initial_and_final_ts
