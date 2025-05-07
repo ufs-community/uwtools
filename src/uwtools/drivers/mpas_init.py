@@ -144,6 +144,7 @@ class MPASInit(MPASBase):
     @staticmethod
     def _filename_interval(stream: dict) -> str:
         # See MPAS User Guide section 5.2 in re: filename_interval logic.
+        assert stream["type"] in ("output", "input;output")
         filename_interval = "output_interval"
         if stream["type"] == "input;output" and stream["input_interval"] != "initial_only":
             filename_interval = "input_interval"

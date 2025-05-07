@@ -2,7 +2,7 @@
 MPASInit driver tests.
 """
 
-import datetime as dt
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -126,14 +126,14 @@ def test_MPASInit(method):
 def test_MPASInit_boundary_files(cycle, driverobj):
     ns = (0, 1)
     links = [
-        driverobj.rundir / f"FILE:{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
+        driverobj.rundir / f"FILE:{(cycle + timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
     input_path = Path(driverobj.config["boundary_conditions"]["path"])
     input_path.mkdir()
     for n in ns:
-        (input_path / f"FILE:{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
+        (input_path / f"FILE:{(cycle + timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
@@ -245,7 +245,7 @@ def test_MPASInit_namelist_file__contents(cycle, driverobj):
     driverobj.namelist_file()
     assert dst.is_file()
     nml = f90nml.read(dst)
-    stop_time = cycle + dt.timedelta(hours=1)
+    stop_time = cycle + timedelta(hours=1)
     f = "%Y-%m-%d_%H:00:00"
     assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
     assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
@@ -296,6 +296,24 @@ def test_MPASInit__decode_interval():
     assert MPASInit._decode_interval(interval="4:5:6") == expected([0, 0, 0, 4, 5, 6])
     assert MPASInit._decode_interval(interval="5:6") == expected([0, 0, 0, 0, 5, 6])
     assert MPASInit._decode_interval(interval="6") == expected([0, 0, 0, 0, 0, 6])
+
+
+def test_MPASInit__decode_timestamp():
+    expected = datetime(2025, 5, 7, 15, 6, 1, tzinfo=timezone.utc)
+    assert MPASInit._decode_timestamp("2025-05-07_15:06:01") == expected
+
+
+@mark.parametrize(
+    ("expected", "stream"),
+    [
+        ("1_00:00:00", {"type": "output", "filename_interval": "1_00:00:00"}),
+        ("input_interval", {"type": "input;output", "input_interval": "none"}),
+        ("output_interval", {"type": "input;output", "input_interval": "initial_only"}),
+        ("output_interval", {"type": "output"}),
+    ],
+)
+def test_MPASInit__filename_interval(expected, stream):
+    assert MPASInit._filename_interval(stream) == expected
 
 
 def test_MPASInit__streams_fn(driverobj):
