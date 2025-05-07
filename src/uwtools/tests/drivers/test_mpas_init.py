@@ -286,5 +286,17 @@ def test_MPASInit_streams_file(config, driverobj):
     streams_file(config, driverobj, "mpas_init")
 
 
+def test_MPASInit__decode_interval():
+    keys = ("years", "months", "days", "hours", "minutes", "seconds")
+    expected = lambda vals: dict(zip(keys, vals))
+    assert MPASInit._decode_interval(interval="1-2-3_04:05:06") == expected([1, 2, 3, 4, 5, 6])
+    assert MPASInit._decode_interval(interval="1-2-3_4:5:6") == expected([1, 2, 3, 4, 5, 6])
+    assert MPASInit._decode_interval(interval="2-3_4:5:6") == expected([0, 2, 3, 4, 5, 6])
+    assert MPASInit._decode_interval(interval="3_4:5:6") == expected([0, 0, 3, 4, 5, 6])
+    assert MPASInit._decode_interval(interval="4:5:6") == expected([0, 0, 0, 4, 5, 6])
+    assert MPASInit._decode_interval(interval="5:6") == expected([0, 0, 0, 0, 5, 6])
+    assert MPASInit._decode_interval(interval="6") == expected([0, 0, 0, 0, 0, 6])
+
+
 def test_MPASInit__streams_fn(driverobj):
     assert driverobj._streams_fn == "streams.init_atmosphere"
