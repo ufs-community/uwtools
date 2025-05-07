@@ -2,6 +2,8 @@
 A driver for the MPAS Init component.
 """
 
+from __future__ import annotations
+
 import re
 from datetime import datetime, timedelta, timezone
 from functools import reduce
@@ -117,15 +119,16 @@ class MPASInit(MPASBase):
                 if interval == "initial_only":
                     paths.append(self._path(stream, self._cycle))
                 else:  # interval is a timestamp
-                    tss = self._interval_timestamps(interval)
-                    paths.extend(self._path(stream, ts) for ts in tss)
+                    paths.extend(
+                        self._path(stream, ts) for ts in self._interval_timestamps(interval)
+                    )
             else:  # filename_interval is a timestamp
-                tss = self._interval_timestamps(filename_interval)
-                if reference_time := stream.get("reference_time"):
-                    initial_ts, _ = self._initial_and_final_ts
-                    delta = initial_ts - self._decode_timestamp(reference_time)
-                    tss = [ts - delta for ts in tss]
-                paths.extend(self._path(stream, ts) for ts in tss)
+                paths.extend(
+                    self._path(stream, ts)
+                    for ts in self._filename_interval_timestamps(
+                        filename_interval, stream.get("reference_time")
+                    )
+                )
         return {"paths": sorted(set(paths))}
 
     # Private helper methods
@@ -149,6 +152,16 @@ class MPASInit(MPASBase):
         if stream["type"] == "input;output" and stream["input_interval"] != "initial_only":
             filename_interval = "input_interval"
         return cast(str, stream.get("filename_interval", filename_interval))
+
+    def _filename_interval_timestamps(
+        self, interval: str, reference_time: str | None
+    ) -> list[datetime]:
+        tss = self._interval_timestamps(interval)
+        if reference_time:
+            initial_ts, _ = self._initial_and_final_ts
+            delta = initial_ts - self._decode_timestamp(reference_time)
+            tss = [ts - delta for ts in tss]
+        return tss
 
     @property
     def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
