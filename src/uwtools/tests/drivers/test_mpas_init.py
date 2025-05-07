@@ -333,5 +333,11 @@ def test_MPASInit__filename_interval_timestamps(driverobj, dtargs, interval, ref
     )
 
 
+def test_MPASInit__initial_and_final_ts(driverobj):
+    initial = datetime(2024, 2, 1, 18, tzinfo=timezone.utc)
+    final = initial + timedelta(hours=1)
+    assert driverobj._initial_and_final_ts == (initial, final)
+
+
 def test_MPASInit__streams_fn(driverobj):
     assert driverobj._streams_fn == "streams.init_atmosphere"
