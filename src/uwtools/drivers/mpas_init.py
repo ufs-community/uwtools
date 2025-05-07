@@ -8,7 +8,7 @@ from functools import reduce
 from itertools import islice
 from pathlib import Path
 from types import SimpleNamespace as ns
-from typing import Callable, cast
+from typing import cast
 
 from iotaa import asset, task, tasks
 
@@ -107,16 +107,15 @@ class MPASInit(MPASBase):
         for stream in self.config["streams"].values():
             if stream["type"] not in ("output", "input;output"):
                 continue
-            path = self._path(stream)
             filename_interval = self._filename_interval(stream)
             if filename_interval == "none":
-                paths.append(path(self._cycle))
+                paths.append(self._path(stream))
             elif filename_interval == "output_interval":
                 interval = stream["output_interval"]
                 if interval == "none":
                     continue  # stream will not be written
                 if interval == "initial_only":
-                    paths.append(path(self._cycle))
+                    paths.append(self._path(stream))
                 else:
                     decoded = self._decode_interval(interval)
                     assert decoded
@@ -150,7 +149,7 @@ class MPASInit(MPASBase):
         final = initial + timedelta(hours=self.config["boundary_conditions"]["length"])
         return initial, final
 
-    def _path(self, stream: dict) -> Callable:
+    def _path(self, stream: dict) -> Path:
         # See MPAS User Guide section 5.1 in re: filename_template logic.
         kvs = [
             ("$Y", "%Y"),
@@ -162,7 +161,7 @@ class MPASInit(MPASBase):
             ("$s", "%S"),
         ]
         template = reduce(lambda m, e: m.replace(e[0], e[1]), kvs, stream["filename_template"])
-        return lambda ts: self.rundir / ts.strftime(template)
+        return self.rundir / self._cycle.strftime(template)
 
     @property
     def _streams_fn(self) -> str:
