@@ -196,9 +196,37 @@ def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
 def test_MPASInit_output__initial_only(driverobj):
     path = lambda fn: driverobj.rundir / fn
     driverobj._config["streams"]["output"].update(
-        {"filename_template": "conus.init.nc", "output_interval": "initial_only"}
+        {
+            "filename_template": "conus.init.nc",
+            "output_interval": "initial_only",
+        }
     )
     assert driverobj.output["paths"] == [path("conus.init.nc")]
+
+
+def test_MPASInit_output__filename_interval_none(driverobj):
+    path = lambda fn: driverobj.rundir / fn
+    driverobj._config["streams"]["output"].update(
+        {"filename_interval": "none", "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc"},
+    )
+    assert driverobj.output["paths"] == [path("2024-02-01_032_18-00-00.nc")]
+
+
+def test_MPASInit_output__output_interval_none_default(driverobj):
+    driverobj._config["streams"]["output"].update({"output_interval": "none"})
+    assert driverobj.output["paths"] == []
+
+
+def test_MPASInit_output__output_interval_none_explicit(driverobj):
+    driverobj._config["streams"]["output"].update(
+        {"filename_interval": "output_interval", "output_interval": "none"}
+    )
+    assert driverobj.output["paths"] == []
+
+
+def test_MPASInit_output__non_output_stream(driverobj):
+    driverobj._config["streams"]["output"].update({"type": "input"})
+    assert driverobj.output["paths"] == []
 
 
 """
