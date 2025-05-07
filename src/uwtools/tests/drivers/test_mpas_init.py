@@ -92,6 +92,11 @@ def driverobj(config, cycle):
     return MPASInit(config=config, cycle=cycle, batch=True)
 
 
+@fixture
+def outpath(driverobj):
+    return lambda fn: driverobj.rundir / fn
+
+
 # Tests
 
 
@@ -193,26 +198,24 @@ def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
     assert logged("Not ready [external asset]")
 
 
-def test_MPASInit_output__filename_interval_none(driverobj):
-    path = lambda fn: driverobj.rundir / fn
+def test_MPASInit_output__filename_interval_none(driverobj, outpath):
     driverobj._config["streams"]["output"].update(
         {
             "filename_interval": "none",
             "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
         },
     )
-    assert driverobj.output["paths"] == [path("2024-02-01_032_18-00-00.nc")]
+    assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
 
 
-def test_MPASInit_output__initial_only(driverobj):
-    path = lambda fn: driverobj.rundir / fn
+def test_MPASInit_output__initial_only(driverobj, outpath):
     driverobj._config["streams"]["output"].update(
         {
-            "filename_template": "conus.init.nc",
+            "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
             "output_interval": "initial_only",
         }
     )
-    assert driverobj.output["paths"] == [path("conus.init.nc")]
+    assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
 
 
 def test_MPASInit_output__output_interval_none_default(driverobj):
@@ -241,15 +244,6 @@ def test_MPASInit_output__non_output_stream(driverobj):
         }
     )
     assert driverobj.output["paths"] == []
-
-
-"""
-    # driverobj._config["streams"]["output"]["filename_template"] = "$Y-$M-$D_$d_$h-$m-$s.nc"
-    # assert driverobj.output["paths"] == [
-    #     path("2024-02-01_032_18-00-00.nc"),
-    #     path("2024-02-01_032_19-00-00.nc"),
-    # ]
-"""
 
 
 def test_MPASInit_provisioned_rundir(driverobj, ready_task):
