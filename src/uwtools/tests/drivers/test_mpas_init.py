@@ -146,7 +146,7 @@ def test_MPASInit_driver_name(driverobj):
     ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
-def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
+def test_MPASInit_files_copied_and_files_linked(config, cycle, key, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
@@ -159,43 +159,6 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
         src.touch()
     getattr(driverobj, task)()
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
-
-
-def test_MPASInit_namelist_contents(cycle, driverobj):
-    dst = driverobj.rundir / "namelist.init_atmosphere"
-    assert not dst.is_file()
-    driverobj.namelist_file()
-    assert dst.is_file()
-    nml = f90nml.read(dst)
-    stop_time = cycle + dt.timedelta(hours=1)
-    f = "%Y-%m-%d_%H:00:00"
-    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
-    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
-
-
-def test_MPASInit_namelist_file(driverobj, logged):
-    dst = driverobj.rundir / "namelist.init_atmosphere"
-    assert not dst.is_file()
-    path = Path(driverobj.namelist_file().refs)
-    assert dst.is_file()
-    assert logged(f"Wrote config to {path}")
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
-
-
-def test_MPASInit_namelist_file_fails_validation(driverobj, logged):
-    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(driverobj.namelist_file().refs)
-    assert not path.exists()
-    assert logged(f"Failed to validate {path}")
-    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
-
-
-def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
-    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
-    driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(driverobj.namelist_file().refs)
-    assert not path.exists()
-    assert logged("Not ready [external asset]")
 
 
 def test_MPASInit_output__filename_interval_none(driverobj, outpath):
@@ -265,6 +228,43 @@ def test_MPASInit_output__filename_interval_timestamp_reference_time(driverobj, 
 def test_MPASInit_output__non_output_stream(driverobj):
     driverobj._config["streams"]["output"].update({"type": "input"})
     assert driverobj.output["paths"] == []
+
+
+def test_MPASInit_namelist_file(driverobj, logged):
+    dst = driverobj.rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    path = Path(driverobj.namelist_file().refs)
+    assert dst.is_file()
+    assert logged(f"Wrote config to {path}")
+    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_MPASInit_namelist_file__contents(cycle, driverobj):
+    dst = driverobj.rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    driverobj.namelist_file()
+    assert dst.is_file()
+    nml = f90nml.read(dst)
+    stop_time = cycle + dt.timedelta(hours=1)
+    f = "%Y-%m-%d_%H:00:00"
+    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
+    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
+
+
+def test_MPASInit_namelist_file__fails_validation(driverobj, logged):
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(driverobj.namelist_file().refs)
+    assert not path.exists()
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
+def test_MPASInit_namelist_file__missing_base_file(driverobj, logged):
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
+    path = Path(driverobj.namelist_file().refs)
+    assert not path.exists()
+    assert logged("Not ready [external asset]")
 
 
 def test_MPASInit_provisioned_rundir(driverobj, ready_task):
