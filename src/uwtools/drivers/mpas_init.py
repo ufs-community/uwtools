@@ -110,21 +110,19 @@ class MPASInit(MPASBase):
             filename_interval = self._filename_interval(stream)
             if filename_interval == "none":
                 paths.append(self._path(stream, self._cycle))
-            elif filename_interval == "output_interval":
-                interval = stream["output_interval"]
+            elif filename_interval in ("input_interval", "output_interval"):
+                interval = stream[filename_interval]
                 if interval == "none":
                     continue  # stream will not be written
                 if interval == "initial_only":
                     paths.append(self._path(stream, self._cycle))
-                else:  # output_interval is a timestamp
+                else:  # interval is a timestamp
                     kwargs = self._decode_interval(interval)
                     delta = relativedelta(**kwargs)  # type: ignore[arg-type]
                     ts, final_ts = self._initial_and_final_ts
                     while ts <= final_ts:
                         paths.append(self._path(stream, ts))
                         ts = ts + delta
-            elif filename_interval == "input_interval":
-                raise NotImplementedError(2)
             else:  # filename_interval is a timestamp
                 """
                 reference_ts = ( _self._decode_timestamp(stream["reference_time"]) if
