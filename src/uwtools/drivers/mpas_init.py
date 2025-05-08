@@ -132,11 +132,11 @@ class MPASInit(MPASBase):
 
     @staticmethod
     def _decode_interval(interval: str) -> dict[str, int]:
-        # See MPAS User Guide section 5 for a description of the interval format and semantics, but
-        # the general form is years-months-days_hours:minutes:seconds, e.g. 1-2-3_4:5:6 means 1
-        # year, 2 months, 3 days, 4 hours, 5 minutes, 6 seconds. Leading components can be omitted,
-        # so reverse for an ascending seconds -> years order, pad with trailing zeros as needed,
-        # then reverse again for a natural descending years -> seconds order.
+        # See MPAS User Guide section 5 in re: interval format and semantics, but the general form
+        # is years-months-days_hours:minutes:seconds, e.g. 1-2-3_4:5:6 means 1 year, 2 months, 3
+        # days, 4 hours, 5 minutes, 6 seconds. Leading components can be omitted, so reverse for an
+        # ascending seconds -> years order, pad with trailing zeros as needed, then reverse again
+        # for a natural descending years -> seconds order.
         keys = ["years", "months", "days", "hours", "minutes", "seconds"]
         components = re.sub(r"[-_:]", " ", interval).split()[::-1]
         vals = [next(islice(components, i, i + 1), 0) for i in range(len(keys))][::-1]
@@ -158,7 +158,7 @@ class MPASInit(MPASBase):
     def _filename_interval_timestamps(
         self, interval: str, reference_time: str | None
     ) -> list[datetime]:
-        # See MPAS User Guide sections 5.2 and 5.3.3 for info on the semantics of reference_time.
+        # See MPAS User Guide sections 5.2 and 5.3.3 in re: the semantics of reference_time.
         # First, create a timestamp for each expected output file, per the timestamp-pattern value
         # of filename_interval. By default, the first timestamp will match the model start time, but
         # reference_time, if present, shifts it to a different time. In this case, the number of
