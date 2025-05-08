@@ -139,8 +139,8 @@ class MPASInit(MPASBase):
         # then reverse again for a natural descending years -> seconds order.
         keys = ["years", "months", "days", "hours", "minutes", "seconds"]
         components = re.sub(r"[-_:]", " ", interval).split()[::-1]
-        vals = [int(x) for x in (next(islice(components, i, i + 1), 0) for i in range(6))][::-1]
-        return dict(zip(keys, vals))
+        vals = [next(islice(components, i, i + 1), 0) for i in range(len(keys))][::-1]
+        return dict(zip(keys, map(int, vals)))
 
     @staticmethod
     def _decode_timestamp(timestamp: str) -> datetime:
