@@ -286,16 +286,21 @@ def test_MPASInit_streams_file(config, driverobj):
     streams_file(config, driverobj, "mpas_init")
 
 
-def test_MPASInit__decode_interval():
+@mark.parametrize(
+    ("interval", "vals"),
+    [
+        ("1-2-3_04:05:06", [1, 2, 3, 4, 5, 6]),
+        ("1-2-3_4:5:6", [1, 2, 3, 4, 5, 6]),
+        ("2-3_4:5:6", [0, 2, 3, 4, 5, 6]),
+        ("3_4:5:6", [0, 0, 3, 4, 5, 6]),
+        ("4:5:6", [0, 0, 0, 4, 5, 6]),
+        ("5:6", [0, 0, 0, 0, 5, 6]),
+        ("6", [0, 0, 0, 0, 0, 6]),
+    ],
+)
+def test_MPASInit__decode_interval(interval, vals):
     keys = ("years", "months", "days", "hours", "minutes", "seconds")
-    expected = lambda vals: dict(zip(keys, vals))
-    assert MPASInit._decode_interval(interval="1-2-3_04:05:06") == expected([1, 2, 3, 4, 5, 6])
-    assert MPASInit._decode_interval(interval="1-2-3_4:5:6") == expected([1, 2, 3, 4, 5, 6])
-    assert MPASInit._decode_interval(interval="2-3_4:5:6") == expected([0, 2, 3, 4, 5, 6])
-    assert MPASInit._decode_interval(interval="3_4:5:6") == expected([0, 0, 3, 4, 5, 6])
-    assert MPASInit._decode_interval(interval="4:5:6") == expected([0, 0, 0, 4, 5, 6])
-    assert MPASInit._decode_interval(interval="5:6") == expected([0, 0, 0, 0, 5, 6])
-    assert MPASInit._decode_interval(interval="6") == expected([0, 0, 0, 0, 0, 6])
+    assert MPASInit._decode_interval(interval=interval) == dict(zip(keys, vals))
 
 
 def test_MPASInit__decode_timestamp():
