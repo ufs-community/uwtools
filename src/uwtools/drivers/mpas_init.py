@@ -107,10 +107,10 @@ class MPASInit(MPASBase):
         """
         paths = []
         for stream in self.config["streams"].values():
-            template = stream["filename_template"]
             if stream["type"] not in ("output", "input;output"):
                 continue
             filename_interval = self._filename_interval(stream)
+            template = stream["filename_template"]
             if filename_interval == "none":
                 paths.append(self._path(template, self._cycle))
             elif filename_interval in ("input_interval", "output_interval"):
