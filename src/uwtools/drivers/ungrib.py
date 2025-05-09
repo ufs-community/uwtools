@@ -2,7 +2,7 @@
 A driver for the ungrib component.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -18,6 +18,9 @@ class Ungrib(DriverCycleBased):
     """
     A driver for ungrib.
     """
+
+    PREFIX = "FILE"
+    TIMEFMT = "%Y-%m-%d_%H:00:00"
 
     # Workflow tasks
 
@@ -46,23 +49,18 @@ class Ungrib(DriverCycleBased):
         """
         The namelist file.
         """
-        # Do not use offset here. It's relative to the MPAS fcst to run.
-        gribfiles = self.config["gribfiles"]
-        endhour = gribfiles["max_leadtime"]
-        end_date = self._cycle + timedelta(hours=endhour)
-        interval = int(gribfiles["interval_hours"]) * 3600  # hour to sec
         d = {
             "update_values": {
                 "share": {
-                    "end_date": end_date.strftime("%Y-%m-%d_%H:00:00"),
-                    "interval_seconds": interval,
+                    "end_date": self._end_date.strftime(self.TIMEFMT),
+                    "interval_seconds": self._interval,
                     "max_dom": 1,
-                    "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
+                    "start_date": self._cycle.strftime(self.TIMEFMT),
                     "wrf_core": "ARW",
                 },
                 "ungrib": {
                     "out_format": "WPS",
-                    "prefix": "FILE",
+                    "prefix": self.PREFIX,
                 },
             }
         }
@@ -111,7 +109,25 @@ class Ungrib(DriverCycleBased):
         """
         return STR.ungrib
 
+    @property
+    def output(self) -> dict[str, list[Path]]:
+        """
+        Returns a description of the file(s) created when this component runs.
+        """
+        paths = []
+        ts = self._cycle
+        while ts <= self._end_date:
+            fn = "%s:%s" % (self.PREFIX, ts.strftime(self.TIMEFMT))
+            paths.append(self.rundir / fn)
+            ts += timedelta(seconds=self._interval)
+        return {"paths": paths}
+
     # Private helper methods
+
+    @property
+    def _end_date(self) -> datetime:
+        endhour = self.config["gribfiles"]["max_leadtime"]
+        return self._cycle + timedelta(hours=endhour)
 
     @task
     def _gribfile(self, infile: Path, link: Path):
@@ -126,6 +142,10 @@ class Ungrib(DriverCycleBased):
         yield file(path=infile)
         link.parent.mkdir(parents=True, exist_ok=True)
         link.symlink_to(infile)
+
+    @property
+    def _interval(self) -> int:
+        return int(self.config["gribfiles"]["interval_hours"]) * 3600
 
 
 def _ext(n: int) -> str:

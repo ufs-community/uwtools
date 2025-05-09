@@ -2,16 +2,15 @@
 MPASInit driver tests.
 """
 
-import datetime as dt
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
-from uwtools.exceptions import UWNotImplementedError
 from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path
 
@@ -70,9 +69,9 @@ def config(tmp_path):
                     "output_interval": "initial_only",
                     "streams": ["stream1", "stream2"],
                     "type": "output",
-                    "vars": ["v1", "v2"],
                     "var_arrays": ["va1", "va2"],
                     "var_structs": ["vs1", "vs2"],
+                    "vars": ["v1", "v2"],
                 },
             },
         },
@@ -93,6 +92,11 @@ def driverobj(config, cycle):
     return MPASInit(config=config, cycle=cycle, batch=True)
 
 
+@fixture
+def outpath(driverobj):
+    return lambda fn: driverobj.rundir / fn
+
+
 # Tests
 
 
@@ -109,7 +113,6 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "streams_file",
@@ -123,14 +126,14 @@ def test_MPASInit(method):
 def test_MPASInit_boundary_files(cycle, driverobj):
     ns = (0, 1)
     links = [
-        driverobj.rundir / f"FILE:{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
+        driverobj.rundir / f"FILE:{(cycle + timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
     input_path = Path(driverobj.config["boundary_conditions"]["path"])
     input_path.mkdir()
     for n in ns:
-        (input_path / f"FILE:{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
+        (input_path / f"FILE:{(cycle + timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
@@ -143,7 +146,7 @@ def test_MPASInit_driver_name(driverobj):
     ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
-def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
+def test_MPASInit_files_copied_and_files_linked(config, cycle, key, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
@@ -158,16 +161,73 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-def test_MPASInit_namelist_contents(cycle, driverobj):
-    dst = driverobj.rundir / "namelist.init_atmosphere"
-    assert not dst.is_file()
-    driverobj.namelist_file()
-    assert dst.is_file()
-    nml = f90nml.read(dst)
-    stop_time = cycle + dt.timedelta(hours=1)
-    f = "%Y-%m-%d_%H:00:00"
-    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
-    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
+def test_MPASInit_output__filename_interval_none(driverobj, outpath):
+    driverobj._config["streams"]["output"].update(
+        {"filename_interval": "none", "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc"},
+    )
+    assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
+
+
+def test_MPASInit_output__filename_interval_output_interval_initial_only(driverobj, outpath):
+    driverobj._config["streams"]["output"].update(
+        {"filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc", "output_interval": "initial_only"}
+    )
+    assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
+
+
+@mark.parametrize("explicit", [True, False])
+def test_MPASInit_output__filename_interval_output_interval_none(driverobj, explicit):
+    updates = {"output_interval": "none"}
+    if explicit:
+        updates["filename_interval"] = "output_interval"
+    driverobj._config["streams"]["output"].update(updates)
+    assert driverobj.output["paths"] == []
+
+
+@mark.parametrize("explicit", [True, False])
+def test_MPASInit_output__filename_interval_output_interval_timestamp(driverobj, explicit, outpath):
+    updates = {"filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc", "output_interval": "01:00:00"}
+    if explicit:
+        updates["filename_interval"] = "output_interval"
+    driverobj._config["streams"]["output"].update(updates)
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_18-00-00.nc"),
+        outpath("2024-02-01_032_19-00-00.nc"),
+    ]
+
+
+def test_MPASInit_output__filename_interval_timestamp(driverobj, outpath):
+    updates = {
+        "filename_interval": "1_00:00:00",
+        "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
+        "output_interval": "06:00:00",
+    }
+    driverobj._config["streams"]["output"].update(updates)
+    driverobj._config["boundary_conditions"].update({"interval_hours": 6, "length": 36})
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_18-00-00.nc"),
+        outpath("2024-02-02_033_18-00-00.nc"),
+    ]
+
+
+def test_MPASInit_output__filename_interval_timestamp_reference_time(driverobj, outpath):
+    updates = {
+        "filename_interval": "1_00:00:00",
+        "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
+        "output_interval": "06:00:00",
+        "reference_time": "2024-02-01_00:00:00",
+    }
+    driverobj._config["streams"]["output"].update(updates)
+    driverobj._config["boundary_conditions"].update({"interval_hours": 6, "length": 36})
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_00-00-00.nc"),
+        outpath("2024-02-02_033_00-00-00.nc"),
+    ]
+
+
+def test_MPASInit_output__non_output_stream(driverobj):
+    driverobj._config["streams"]["output"].update({"type": "input"})
+    assert driverobj.output["paths"] == []
 
 
 def test_MPASInit_namelist_file(driverobj, logged):
@@ -179,7 +239,19 @@ def test_MPASInit_namelist_file(driverobj, logged):
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_MPASInit_namelist_file_fails_validation(driverobj, logged):
+def test_MPASInit_namelist_file__contents(cycle, driverobj):
+    dst = driverobj.rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    driverobj.namelist_file()
+    assert dst.is_file()
+    nml = f90nml.read(dst)
+    stop_time = cycle + timedelta(hours=1)
+    f = "%Y-%m-%d_%H:00:00"
+    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
+    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
+
+
+def test_MPASInit_namelist_file__fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
     path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
@@ -187,18 +259,12 @@ def test_MPASInit_namelist_file_fails_validation(driverobj, logged):
     assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
-def test_MPASInit_namelist_file_missing_base_file(driverobj, logged):
+def test_MPASInit_namelist_file__missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(driverobj.namelist_file().refs)
     assert not path.exists()
     assert logged("Not ready [external asset]")
-
-
-def test_MPASInit_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
 
 
 def test_MPASInit_provisioned_rundir(driverobj, ready_task):
@@ -218,6 +284,84 @@ def test_MPASInit_provisioned_rundir(driverobj, ready_task):
 
 def test_MPASInit_streams_file(config, driverobj):
     streams_file(config, driverobj, "mpas_init")
+
+
+@mark.parametrize(
+    ("interval", "vals"),
+    [
+        ("1-2-3_04:05:06", [1, 2, 3, 4, 5, 6]),
+        ("1-2-3_4:5:6", [1, 2, 3, 4, 5, 6]),
+        ("2-3_4:5:6", [0, 2, 3, 4, 5, 6]),
+        ("3_4:5:6", [0, 0, 3, 4, 5, 6]),
+        ("4:5:6", [0, 0, 0, 4, 5, 6]),
+        ("5:6", [0, 0, 0, 0, 5, 6]),
+        ("6", [0, 0, 0, 0, 0, 6]),
+    ],
+)
+def test_MPASInit__decode_interval(interval, vals):
+    keys = ("years", "months", "days", "hours", "minutes", "seconds")
+    assert MPASInit._decode_interval(interval=interval) == dict(zip(keys, vals))
+
+
+def test_MPASInit__decode_timestamp():
+    expected = datetime(2025, 5, 7, 15, 6, 1, tzinfo=timezone.utc)
+    assert MPASInit._decode_timestamp("2025-05-07_15:06:01") == expected
+
+
+@mark.parametrize(
+    ("expected", "stream"),
+    [
+        ("1_00:00:00", {"type": "output", "filename_interval": "1_00:00:00"}),
+        ("input_interval", {"type": "input;output", "input_interval": "none"}),
+        ("output_interval", {"type": "input;output", "input_interval": "initial_only"}),
+        ("output_interval", {"type": "output"}),
+    ],
+)
+def test_MPASInit__filename_interval(expected, stream):
+    assert MPASInit._filename_interval(stream) == expected
+
+
+@mark.parametrize(
+    ("dtargs", "interval", "reference_time"),
+    [
+        ([(2024, 2, 1), (2024, 2, 2)], "1_00:00:00", "2024-02-01_00:00:00"),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 12), (2024, 2, 3, 6)], "18:00:00", None),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 18)], "1_00:00:00", None),
+    ],
+)
+def test_MPASInit__filename_interval_timestamps(driverobj, dtargs, interval, reference_time):
+    driverobj._config["boundary_conditions"]["length"] = 36
+    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    assert (
+        driverobj._filename_interval_timestamps(interval=interval, reference_time=reference_time)
+        == expected
+    )
+
+
+def test_MPASInit__initial_and_final_ts(driverobj):
+    initial = datetime(2024, 2, 1, 18, tzinfo=timezone.utc)
+    final = initial + timedelta(hours=1)
+    assert driverobj._initial_and_final_ts == (initial, final)
+
+
+@mark.parametrize(
+    ("dtargs", "interval", "length"),
+    [
+        ([(2024, 2, 1, 18), (2024, 2, 2, 18), (2024, 2, 3, 18)], "1_00:00:00", 48),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 6)], "12:00:00", 18),
+    ],
+)
+def test_MPASInit__interval_timestamps(driverobj, dtargs, interval, length):
+    driverobj._config["boundary_conditions"]["length"] = length
+    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    assert driverobj._interval_timestamps(interval=interval) == expected
+
+
+def test_MPASInit__output_path(driverobj):
+    t = "out.$Y_$M_$D-$d-$h_$m_$s.nc"
+    d = datetime(2025, 5, 7, 1, 2, 3, tzinfo=timezone.utc)
+    expected = driverobj.rundir / "out.2025_05_07-127-01_02_03.nc"
+    assert driverobj._output_path(template=t, dtobj=d) == expected
 
 
 def test_MPASInit__streams_fn(driverobj):

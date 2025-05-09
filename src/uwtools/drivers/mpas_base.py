@@ -81,10 +81,10 @@ class MPASBase(DriverCycleBased):
                 stream.set(attr, v[attr])
             for attr in [
                 "clobber_mode",
+                "filename_interval",
                 "input_interval",
                 "io_type",
                 "output_interval",
-                "filename_interval",
                 "packages",
                 "precision",
                 "reference_time",

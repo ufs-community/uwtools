@@ -5,12 +5,11 @@ Ungrib driver tests.
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers import ungrib
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.ungrib import Ungrib
-from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
 
@@ -68,7 +67,6 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
     ],
@@ -105,9 +103,14 @@ def test_Ungrib_namelist_file(driverobj):
 
 
 def test_Ungrib_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    assert driverobj.output["paths"] == [
+        driverobj.rundir / f"FILE:{x}"
+        for x in (
+            "2024-02-01_18:00:00",
+            "2024-02-02_00:00:00",
+            "2024-02-02_06:00:00",
+        )
+    ]
 
 
 def test_Ungrib_provisioned_rundir(driverobj, ready_task):
@@ -137,6 +140,10 @@ def test_Ungrib_vtable(driverobj):
     assert dst.is_symlink()
 
 
+def test_Ungrib__end_date(driverobj, utc):
+    assert driverobj._end_date == utc(2024, 2, 2, 6)
+
+
 def test_Ungrib__gribfile(driverobj):
     src = driverobj.rundir / "GRIBFILE.AAA.in"
     src.touch()
@@ -144,6 +151,10 @@ def test_Ungrib__gribfile(driverobj):
     assert not dst.is_symlink()
     driverobj._gribfile(src, dst)
     assert dst.is_symlink()
+
+
+def test_Ungrib__interval(driverobj):
+    assert driverobj._interval == 21600
 
 
 def test__ext():
