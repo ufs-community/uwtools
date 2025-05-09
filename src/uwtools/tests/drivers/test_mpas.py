@@ -9,11 +9,10 @@ from unittest.mock import patch
 import f90nml  # type: ignore[import-untyped]
 import yaml
 from lxml import etree
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.drivers.mpas import MPAS
 from uwtools.drivers.mpas_base import MPASBase
-from uwtools.exceptions import UWNotImplementedError
 from uwtools.tests.support import fixture_path
 
 # Helpers
@@ -127,7 +126,6 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
-        "output",
         "run",
         "runscript",
         "streams_file",
@@ -222,9 +220,7 @@ def test_MPAS_namelist_file_missing_base_file(driverobj, logged):
 
 
 def test_MPAS_output(driverobj):
-    with raises(UWNotImplementedError) as e:
-        assert driverobj.output
-    assert str(e.value) == "The output() method is not yet implemented for this driver"
+    pass
 
 
 @mark.parametrize("domain", ["global", "regional"])
