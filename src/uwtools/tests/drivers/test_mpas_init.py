@@ -103,6 +103,12 @@ def outpath(driverobj):
 @mark.parametrize(
     "method",
     [
+        "_decode_interval",
+        "_decode_timestamp",
+        "_filename_interval",
+        "_filename_interval_timestamps",
+        "_interval_timestamps",
+        "_output_path",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -113,6 +119,7 @@ def outpath(driverobj):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "streams_file",
@@ -159,6 +166,43 @@ def test_MPASInit_files_copied_and_files_linked(config, cycle, key, task, test, 
         src.touch()
     getattr(driverobj, task)()
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
+
+
+def test_MPASInit_namelist_file(driverobj, logged):
+    dst = driverobj.rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    path = Path(driverobj.namelist_file().refs)
+    assert dst.is_file()
+    assert logged(f"Wrote config to {path}")
+    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_MPASInit_namelist_file__contents(cycle, driverobj):
+    dst = driverobj.rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    driverobj.namelist_file()
+    assert dst.is_file()
+    nml = f90nml.read(dst)
+    stop_time = cycle + timedelta(hours=1)
+    f = "%Y-%m-%d_%H:00:00"
+    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
+    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
+
+
+def test_MPASInit_namelist_file__fails_validation(driverobj, logged):
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(driverobj.namelist_file().refs)
+    assert not path.exists()
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
+def test_MPASInit_namelist_file__missing_base_file(driverobj, logged):
+    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
+    driverobj._config["namelist"]["base_file"] = base_file
+    path = Path(driverobj.namelist_file().refs)
+    assert not path.exists()
+    assert logged("Not ready [external asset]")
 
 
 def test_MPASInit_output__filename_interval_none(driverobj, outpath):
@@ -230,43 +274,6 @@ def test_MPASInit_output__non_output_stream(driverobj):
     assert driverobj.output["paths"] == []
 
 
-def test_MPASInit_namelist_file(driverobj, logged):
-    dst = driverobj.rundir / "namelist.init_atmosphere"
-    assert not dst.is_file()
-    path = Path(driverobj.namelist_file().refs)
-    assert dst.is_file()
-    assert logged(f"Wrote config to {path}")
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
-
-
-def test_MPASInit_namelist_file__contents(cycle, driverobj):
-    dst = driverobj.rundir / "namelist.init_atmosphere"
-    assert not dst.is_file()
-    driverobj.namelist_file()
-    assert dst.is_file()
-    nml = f90nml.read(dst)
-    stop_time = cycle + timedelta(hours=1)
-    f = "%Y-%m-%d_%H:00:00"
-    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
-    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
-
-
-def test_MPASInit_namelist_file__fails_validation(driverobj, logged):
-    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(driverobj.namelist_file().refs)
-    assert not path.exists()
-    assert logged(f"Failed to validate {path}")
-    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
-
-
-def test_MPASInit_namelist_file__missing_base_file(driverobj, logged):
-    base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
-    driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(driverobj.namelist_file().refs)
-    assert not path.exists()
-    assert logged("Not ready [external asset]")
-
-
 def test_MPASInit_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,
@@ -284,41 +291,6 @@ def test_MPASInit_provisioned_rundir(driverobj, ready_task):
 
 def test_MPASInit_streams_file(config, driverobj):
     streams_file(config, driverobj, "mpas_init")
-
-
-@mark.parametrize(
-    ("interval", "vals"),
-    [
-        ("1-2-3_04:05:06", [1, 2, 3, 4, 5, 6]),
-        ("1-2-3_4:5:6", [1, 2, 3, 4, 5, 6]),
-        ("2-3_4:5:6", [0, 2, 3, 4, 5, 6]),
-        ("3_4:5:6", [0, 0, 3, 4, 5, 6]),
-        ("4:5:6", [0, 0, 0, 4, 5, 6]),
-        ("5:6", [0, 0, 0, 0, 5, 6]),
-        ("6", [0, 0, 0, 0, 0, 6]),
-    ],
-)
-def test_MPASInit__decode_interval(interval, vals):
-    keys = ("years", "months", "days", "hours", "minutes", "seconds")
-    assert MPASInit._decode_interval(interval=interval) == dict(zip(keys, vals))
-
-
-def test_MPASInit__decode_timestamp():
-    expected = datetime(2025, 5, 7, 15, 6, 1, tzinfo=timezone.utc)
-    assert MPASInit._decode_timestamp("2025-05-07_15:06:01") == expected
-
-
-@mark.parametrize(
-    ("expected", "stream"),
-    [
-        ("1_00:00:00", {"type": "output", "filename_interval": "1_00:00:00"}),
-        ("input_interval", {"type": "input;output", "input_interval": "none"}),
-        ("output_interval", {"type": "input;output", "input_interval": "initial_only"}),
-        ("output_interval", {"type": "output"}),
-    ],
-)
-def test_MPASInit__filename_interval(expected, stream):
-    assert MPASInit._filename_interval(stream) == expected
 
 
 @mark.parametrize(

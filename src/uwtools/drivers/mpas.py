@@ -2,7 +2,7 @@
 A driver for the MPAS Atmosphere component.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -97,6 +97,12 @@ class MPAS(MPASBase):
         return STR.mpas
 
     # Private helper methods
+
+    @property
+    def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
+        initial = self._cycle.replace(tzinfo=timezone.utc)
+        final = initial + timedelta(hours=self.config["length"])
+        return initial, final
 
     @property
     def _streams_fn(self) -> str:
