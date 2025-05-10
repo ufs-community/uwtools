@@ -116,6 +116,12 @@ def driverobj(config, cycle):
 @mark.parametrize(
     "method",
     [
+        "_decode_interval",
+        "_decode_timestamp",
+        "_filename_interval",
+        "_filename_interval_timestamps",
+        "_interval_timestamps",
+        "_output_path",
         "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
@@ -126,6 +132,7 @@ def driverobj(config, cycle):
         "_scheduler",
         "_validate",
         "_write_runscript",
+        "output",
         "run",
         "runscript",
         "streams_file",
