@@ -84,7 +84,6 @@ def config(tmp_path):
                     "mutable": True,
                     "output_interval": "6:00:00",
                     "precision": "single",
-                    "reference_time": "2024-06-06 00:00:00",
                     "streams": ["stream1", "stream2"],
                     "type": "output",
                     "vars": ["v1", "v2"],
@@ -108,6 +107,11 @@ def cycle(utc):
 @fixture
 def driverobj(config, cycle):
     return MPAS(config=config, cycle=cycle, batch=True)
+
+
+@fixture
+def outpath(driverobj):
+    return lambda fn: driverobj.rundir / fn
 
 
 # Tests
@@ -224,8 +228,73 @@ def test_MPAS_namelist_file__missing_base_file(driverobj, logged):
     assert logged("missing.nml: Not ready [external asset]")
 
 
-def test_MPAS_output(driverobj):
-    pass
+def test_MPAS_output__filename_interval_none(driverobj, outpath):
+    driverobj._config["streams"]["output"].update(
+        {"filename_interval": "none", "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc"},
+    )
+    assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
+
+
+def test_MPAS_output__filename_interval_output_interval_initial_only(driverobj, outpath):
+    driverobj._config["streams"]["output"].update(
+        {"filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc", "output_interval": "initial_only"}
+    )
+    assert driverobj.output["paths"] == [outpath("2024-02-01_032_18-00-00.nc")]
+
+
+@mark.parametrize("explicit", [True, False])
+def test_MPAS_output__filename_interval_output_interval_none(driverobj, explicit):
+    updates = {"output_interval": "none"}
+    if explicit:
+        updates["filename_interval"] = "output_interval"
+    driverobj._config["streams"]["output"].update(updates)
+    assert driverobj.output["paths"] == []
+
+
+@mark.parametrize("explicit", [True, False])
+def test_MPAS_output__filename_interval_output_interval_timestamp(driverobj, explicit, outpath):
+    updates = {"filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc", "output_interval": "01:00:00"}
+    if explicit:
+        updates["filename_interval"] = "output_interval"
+    driverobj._config["streams"]["output"].update(updates)
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_18-00-00.nc"),
+        outpath("2024-02-01_032_19-00-00.nc"),
+    ]
+
+
+def test_MPAS_output__filename_interval_timestamp(driverobj, outpath):
+    updates = {
+        "filename_interval": "1_00:00:00",
+        "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
+        "output_interval": "06:00:00",
+    }
+    driverobj._config["streams"]["output"].update(updates)
+    driverobj._config["length"] = 36
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_18-00-00.nc"),
+        outpath("2024-02-02_033_18-00-00.nc"),
+    ]
+
+
+def test_MPAS_output__filename_interval_timestamp_reference_time(driverobj, outpath):
+    updates = {
+        "filename_interval": "1_00:00:00",
+        "filename_template": "$Y-$M-$D_$d_$h-$m-$s.nc",
+        "output_interval": "06:00:00",
+        "reference_time": "2024-02-01_00:00:00",
+    }
+    driverobj._config["streams"]["output"].update(updates)
+    driverobj._config["length"] = 36
+    assert driverobj.output["paths"] == [
+        outpath("2024-02-01_032_00-00-00.nc"),
+        outpath("2024-02-02_033_00-00-00.nc"),
+    ]
+
+
+def test_MPAS_output__non_output_stream(driverobj):
+    driverobj._config["streams"]["output"].update({"type": "input"})
+    assert driverobj.output["paths"] == []
 
 
 @mark.parametrize("domain", ["global", "regional"])
