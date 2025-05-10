@@ -2,7 +2,7 @@
 MPAS driver tests.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -102,7 +102,7 @@ def config(tmp_path):
 
 @fixture
 def cycle(utc):
-    return utc(2024, 3, 22, 6)
+    return utc(2024, 2, 1, 18)
 
 
 @fixture
@@ -167,7 +167,7 @@ def test_MPAS_driver_name(driverobj):
     ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
-def test_MPAS_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
+def test_MPAS_files_copied_and_files_linked(config, cycle, key, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
@@ -194,16 +194,8 @@ def test_MPAS_namelist_file(driverobj, logged):
     assert isinstance(nml, f90nml.Namelist)
 
 
-def test_MPAS_namelist_file_fails_validation(driverobj, logged):
-    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(driverobj.namelist_file().refs)
-    assert not path.exists()
-    assert logged(f"Failed to validate {path}")
-    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
-
-
 @mark.parametrize(("hours", "expected"), [(0.25, "00:15:00"), (120, "005_00:00:00")])
-def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
+def test_MPAS_namelist_file__durations(config, cycle, expected, hours, logged):
     config["mpas"]["length"] = hours
     driverobj = MPAS(config=config, cycle=cycle)
     dst = driverobj.rundir / "namelist.atmosphere"
@@ -216,7 +208,15 @@ def test_MPAS_namelist_file_durations(config, cycle, expected, hours, logged):
     assert nml["nhyd_model"]["config_run_duration"] == expected
 
 
-def test_MPAS_namelist_file_missing_base_file(driverobj, logged):
+def test_MPAS_namelist_file__fails_validation(driverobj, logged):
+    driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(driverobj.namelist_file().refs)
+    assert not path.exists()
+    assert logged(f"Failed to validate {path}")
+    assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
+def test_MPAS_namelist_file__missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
     path = Path(driverobj.namelist_file().refs)
@@ -253,10 +253,47 @@ def test_MPAS_streams_file(config, driverobj):
     streams_file(config, driverobj, "mpas")
 
 
+@mark.parametrize(
+    ("dtargs", "interval", "reference_time"),
+    [
+        ([(2024, 2, 1), (2024, 2, 2)], "1_00:00:00", "2024-02-01_00:00:00"),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 12), (2024, 2, 3, 6)], "18:00:00", None),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 18)], "1_00:00:00", None),
+    ],
+)
+def test_MPAS__filename_interval_timestamps(driverobj, dtargs, interval, reference_time):
+    driverobj._config["length"] = 36
+    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    assert (
+        driverobj._filename_interval_timestamps(interval=interval, reference_time=reference_time)
+        == expected
+    )
+
+
 def test_MPAS__initial_and_final_ts(driverobj):
-    initial = driverobj._cycle
+    initial = driverobj._cycle.replace(tzinfo=timezone.utc)
     final = initial + timedelta(hours=1)
     assert driverobj._initial_and_final_ts == (initial, final)
+
+
+@mark.parametrize(
+    ("dtargs", "interval", "length"),
+    [
+        ([(2024, 2, 1, 18), (2024, 2, 2, 18), (2024, 2, 3, 18)], "1_00:00:00", 48),
+        ([(2024, 2, 1, 18), (2024, 2, 2, 6)], "12:00:00", 18),
+    ],
+)
+def test_MPAS__interval_timestamps(driverobj, dtargs, interval, length):
+    driverobj._config["length"] = length
+    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    assert driverobj._interval_timestamps(interval=interval) == expected
+
+
+def test_MPAS__output_path(driverobj):
+    t = "out.$Y_$M_$D-$d-$h_$m_$s.nc"
+    d = datetime(2025, 5, 7, 1, 2, 3, tzinfo=timezone.utc)
+    expected = driverobj.rundir / "out.2025_05_07-127-01_02_03.nc"
+    assert driverobj._output_path(template=t, dtobj=d) == expected
 
 
 def test_MPAS__streams_fn(driverobj):
