@@ -181,8 +181,7 @@ class MPASBase(DriverCycleBased):
 
     @property
     @abstractmethod
-    def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
-        pass
+    def _initial_and_final_ts(self) -> tuple[datetime, datetime]: ...
 
     def _interval_timestamps(self, interval: str) -> list[datetime]:
         kwargs = self._decode_interval(interval)
