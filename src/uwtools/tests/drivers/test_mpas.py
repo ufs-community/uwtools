@@ -2,7 +2,7 @@
 MPAS driver tests.
 """
 
-import datetime as dt
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -146,16 +146,14 @@ def test_MPAS(method):
 def test_MPAS_boundary_files(driverobj, cycle):
     ns = (0, 1)
     links = [
-        driverobj.rundir / f"lbc.{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+        driverobj.rundir / f"lbc.{(cycle + timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
     infile_path = Path(driverobj.config["lateral_boundary_conditions"]["path"])
     infile_path.mkdir()
     for n in ns:
-        path = (
-            infile_path / f"lbc.{(cycle + dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
-        )
+        path = infile_path / f"lbc.{(cycle + timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
         path.touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
@@ -253,6 +251,12 @@ def test_MPAS_provisioned_rundir(domain, driverobj, ready_task):
 
 def test_MPAS_streams_file(config, driverobj):
     streams_file(config, driverobj, "mpas")
+
+
+def test_MPAS__initial_and_final_ts(driverobj):
+    initial = driverobj._cycle
+    final = initial + timedelta(hours=1)
+    assert driverobj._initial_and_final_ts == (initial, final)
 
 
 def test_MPAS__streams_fn(driverobj):
