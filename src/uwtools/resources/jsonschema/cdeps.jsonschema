@@ -7,6 +7,51 @@
         "^stream0[1-9]$": {
           "additionalProperties": false,
           "properties": {
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "combine": {
+                  "type": "boolean"
+                },
+                "end_point": {
+                  "type": "string"
+                },
+                "files": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "fxx": {
+                  "type": "number"
+                },
+                "length": {
+                  "type": "number"
+                },
+                "overwrite": {
+                  "type": "boolean"
+                },
+                "protocol": {
+                  "enum": [
+                    "herbie",
+                    "wget",
+                    "s3"
+                  ]
+                },
+                "source": {
+                  "enum": [
+                    "hrrr",
+                    "gfs"
+                  ]
+                },
+                "subset": {
+                  "type": "boolean"
+                },
+                "target_directory": {
+                  "type": "string"
+                }
+              }
+            },
             "dtlimit": {
               "type": "number"
             },
@@ -15,7 +60,8 @@
             },
             "readmode": {
               "enum": [
-                "single"
+                "single",
+                "full_file"
               ]
             },
             "stream_data_files": {
@@ -65,20 +111,9 @@
             }
           },
           "required": [
-            "dtlimit",
-            "mapalgo",
-            "readmode",
             "stream_data_files",
             "stream_data_variables",
-            "stream_lev_dimname",
-            "stream_mesh_file",
-            "stream_offset",
-            "stream_vectors",
-            "taxmode",
-            "tinterpalgo",
-            "yearAlign",
-            "yearFirst",
-            "yearLast"
+            "stream_mesh_file"
           ],
           "type": "object"
         }
@@ -90,7 +125,7 @@
     "cdeps": {
       "additionalProperties": false,
       "properties": {
-        "atm_in": {
+        "datm": {
           "additionalProperties": false,
           "anyOf": [
             {
@@ -107,6 +142,9 @@
           "properties": {
             "base_file": {
               "type": "string"
+            },
+            "streams": {
+              "$ref": "#/$defs/streams"
             },
             "update_values": {
               "properties": {
@@ -197,25 +235,12 @@
               "type": "object"
             }
           },
-          "type": "object"
-        },
-        "atm_streams": {
-          "additionalProperties": false,
-          "properties": {
-            "streams": {
-              "$ref": "#/$defs/streams"
-            },
-            "template_file": {
-              "type": "string"
-            }
-          },
           "required": [
-            "streams",
-            "template_file"
+            "streams"
           ],
           "type": "object"
         },
-        "ocn_in": {
+        "docn": {
           "additionalProperties": false,
           "anyOf": [
             {
@@ -232,6 +257,9 @@
           "properties": {
             "base_file": {
               "type": "string"
+            },
+            "streams": {
+              "$ref": "#/$defs/streams"
             },
             "update_values": {
               "properties": {
@@ -282,30 +310,20 @@
               "type": "object"
             }
           },
-          "type": "object"
-        },
-        "ocn_streams": {
-          "additionalProperties": false,
-          "properties": {
-            "streams": {
-              "$ref": "#/$defs/streams"
-            },
-            "template_file": {
-              "type": "string"
-            }
-          },
           "required": [
-            "streams",
-            "template_file"
+            "streams"
           ],
           "type": "object"
         },
         "rundir": {
           "type": "string"
+        },
+        "template_file": {
+          "type": "string"
         }
       },
       "required": [
-        "rundir"
+        "template_file"
       ]
     }
   },
