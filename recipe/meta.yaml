@@ -22,6 +22,7 @@ requirements:
     - jsonschema >=4.18,<4.24
     - lxml 5.2.*
     - python >={{ pymin }},<3.14
+    - python-dateutil 2.9.*
     - pyyaml 6.0.*
     - requests 2.32.*
 test:
