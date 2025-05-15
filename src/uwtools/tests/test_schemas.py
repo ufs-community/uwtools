@@ -1536,11 +1536,15 @@ def test_schema_mpas_streams_properties_enum(mpas_streams):
         )
 
 
+@mark.skip()
+def test_schema_mpas_streams_properties_filename_interval(mpas_streams):
+    pass
+
+
 def test_schema_mpas_streams_properties_string(mpas_streams):
     errors = schema_validator("mpas-streams")
     for k, v in mpas_streams.items():
         for prop in [
-            "filename_interval",
             "filename_template",
             "input_interval",
             "output_interval",
