@@ -1448,6 +1448,28 @@ def test_schema_mpas_streams(mpas_streams):
     assert not errors(mpas_streams)
 
 
+@mark.parametrize(
+    "val",
+    [
+        "input_interval",
+        "none",
+        "output_interval",
+        "1111-22-33_44:55:66",
+        "111-2-3_4:5:6",
+        "11-2-3_4:5:6",
+        "1-2-3_4:5:6",
+        "2-3_4:5:6",
+        "3_4:5:6",
+        "4:5:6",
+        "5:6",
+        "6",
+    ],
+)
+def test_schema_mpas_streams_properties_filename_interval_ok(mpas_streams, val):
+    errors = schema_validator("mpas-streams")
+    assert not errors(with_set(mpas_streams, val, "output", "filename_interval"))
+
+
 def test_schema_mpas_streams_intervals(mpas_streams):
     # Interval items are conditionally required based on input/output settings.
     errors = schema_validator("mpas-streams")
@@ -1534,11 +1556,6 @@ def test_schema_mpas_streams_properties_enum(mpas_streams):
         assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
             {k: {**v, "type": None}}
         )
-
-
-@mark.skip()
-def test_schema_mpas_streams_properties_filename_interval(mpas_streams):
-    pass
 
 
 def test_schema_mpas_streams_properties_string(mpas_streams):
