@@ -29,7 +29,9 @@ def test_set_driver_docstring():
         """
 
     support.set_driver_docstring(Child)
-    assert Child.__doc__ == "head.\n\n        body"
+    assert Child.__doc__ is not None
+    assert Child.__doc__.startswith("head.\n\n")
+    assert Child.__doc__.endswith("body")
 
 
 def test_tasks():

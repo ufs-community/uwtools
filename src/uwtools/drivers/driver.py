@@ -377,7 +377,7 @@ class Driver(Assets):
         A run.
         """
         yield self.taskname(STR.run)
-        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+        yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
 
     @task
     def runscript(self):
