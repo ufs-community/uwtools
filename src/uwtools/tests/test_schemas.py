@@ -1448,10 +1448,7 @@ def test_schema_mpas_streams(mpas_streams):
     assert not errors(mpas_streams)
 
 
-@mark.parametrize(
-    "val",
-    ["foo", "1-2-3"],
-)
+@mark.parametrize("val", ["foo", "1-2-3"])
 def test_schema_mpas_streams_properties_filename_interval_fail(mpas_streams, val):
     errors = schema_validator("mpas-streams")
     assert "is not valid" in errors(with_set(mpas_streams, val, "output", "filename_interval"))
