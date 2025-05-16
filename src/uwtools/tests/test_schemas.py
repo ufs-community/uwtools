@@ -1462,13 +1462,13 @@ errors = schema_validator("mpas-streams") assert "asdf" in errors({"stream": {"t
 "filename_interval": "output_interval"}})
 """
 
-"""
+
 @mark.parametrize(
     "val",
     [
-        # "input_interval",
+        "input_interval",
         "none",
-        # "output_interval",
+        "output_interval",
         "1111-22-33_44:55:66",
         "111-2-3_4:5:6",
         "11-2-3_4:5:6",
@@ -1483,7 +1483,6 @@ errors = schema_validator("mpas-streams") assert "asdf" in errors({"stream": {"t
 def test_schema_mpas_streams_properties_filename_interval_pass(mpas_streams, val):
     errors = schema_validator("mpas-streams")
     assert not errors(with_set(mpas_streams, val, "stream2", "filename_interval"))
-"""
 
 
 def test_schema_mpas_streams_intervals(mpas_streams):
