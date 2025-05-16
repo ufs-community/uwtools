@@ -12,7 +12,7 @@
         "if": {
           "properties": {
             "type": {
-              "pattern": "input.*"
+              "pattern": "^input$"
             }
           }
         },
@@ -42,7 +42,7 @@
         "if": {
           "properties": {
             "type": {
-              "pattern": ".*output"
+              "pattern": "^output$"
             }
           }
         },
@@ -64,6 +64,37 @@
             }
           },
           "required": [
+            "output_interval"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "pattern": "^input;output$"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "filename_interval": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "input_interval",
+                    "none",
+                    "output_interval"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/timespec"
+                }
+              ]
+            }
+          },
+          "required": [
+            "input_interval",
             "output_interval"
           ]
         }
