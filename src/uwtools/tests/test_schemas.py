@@ -240,25 +240,32 @@ def mpas_init_prop():
 @fixture
 def mpas_streams():
     return {
-        "input": {
-            "filename_template": "init.nc",
+        "stream-in": {
+            "filename_template": "in.nc",
             "input_interval": "initial_only",
             "mutable": False,
             "type": "input",
         },
-        "output": {
+        "stream-out": {
+            "filename_template": "out.nc",
+            "output_interval": "1_00:00:00",
+            "mutable": True,
+            "type": "output",
+        },
+        "stream-inout": {
             "clobber_mode": "overwrite",
-            "filename_interval": "input_interval",
+            "filename_interval": "output_interval",
             "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
             "files": ["f1", "f2"],
+            "input_interval": "initial_only",
             "io_type": "netcdf4",
             "mutable": True,
             "output_interval": "6:00:00",
             "packages": "pkg",
             "precision": "double",
-            "reference_time": "2014-01-01 00:00:00",
+            "reference_time": "2014-01-01_00:00:00",
             "streams": ["s1", "s2"],
-            "type": "output",
+            "type": "input;output",
             "var_arrays": ["va1", "va2"],
             "var_structs": ["vs1", "vs2"],
             "vars": ["v1", "v2"],
@@ -1448,14 +1455,65 @@ def test_schema_mpas_streams(mpas_streams):
     assert not errors(mpas_streams)
 
 
+@mark.parametrize("val", ["foo", "1-2-3"])
+def test_schema_mpas_streams_properties_filename_interval_fail_always(mpas_streams, val):
+    errors = schema_validator("mpas-streams")
+    assert "is not valid" in errors(
+        with_set(mpas_streams, val, "stream-inout", "filename_interval")
+    )
+
+
+@mark.parametrize(("bad", "good"), [("in", "out"), ("out", "in")])
+def test_schema_mpas_streams_properties_filename_interval_fail_io(bad, good, mpas_streams):
+    errors = schema_validator("mpas-streams")
+    assert f"'{good}put_interval' is a required property" in errors(
+        with_del(mpas_streams, f"stream-{good}", f"{good}put_interval")
+    )
+    assert "is not valid" in errors(
+        with_set(mpas_streams, f"{bad}put_interval", f"stream-{good}", "filename_interval")
+    )
+
+
+@mark.parametrize(
+    "val",
+    [
+        "input_interval",
+        "none",
+        "output_interval",
+        "1111-22-33_44:55:66",
+        "111-2-3_4:5:6",
+        "11-2-3_4:5:6",
+        "1-2-3_4:5:6",
+        "2-3_4:5:6",
+        "3_4:5:6",
+        "4:5:6",
+        "5:6",
+        "6",
+    ],
+)
+def test_schema_mpas_streams_properties_filename_interval_pass(mpas_streams, val):
+    errors = schema_validator("mpas-streams")
+    assert not errors(with_set(mpas_streams, val, "stream-inout", "filename_interval"))
+
+
+def test_schema_mpas_streams_properties_reference_time(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    assert not errors(
+        with_set(mpas_streams, "2025-05-16_12:00:00", "stream-inout", "reference_time")
+    )
+    assert "does not match" in errors(
+        with_set(mpas_streams, "2025-05-16T12:00:00", "stream-inout", "reference_time")
+    )
+
+
 def test_schema_mpas_streams_intervals(mpas_streams):
     # Interval items are conditionally required based on input/output settings.
     errors = schema_validator("mpas-streams")
     assert "'input_interval' is a required property" in errors(
-        with_del(mpas_streams, "input", "input_interval")
+        with_del(mpas_streams, "stream-in", "input_interval")
     )
     assert "'output_interval' is a required property" in errors(
-        with_del(mpas_streams, "output", "output_interval")
+        with_del(mpas_streams, "stream-out", "output_interval")
     )
     x = {"x": {"filename_template": "t", "mutable": False, "type": "input;output"}}
     assert "'input_interval' is a required property" in errors(
@@ -1540,7 +1598,6 @@ def test_schema_mpas_streams_properties_string(mpas_streams):
     errors = schema_validator("mpas-streams")
     for k, v in mpas_streams.items():
         for prop in [
-            "filename_interval",
             "filename_template",
             "input_interval",
             "output_interval",
