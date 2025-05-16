@@ -23,8 +23,7 @@
                 {
                   "enum": [
                     "input_interval",
-                    "none",
-                    "output_interval"
+                    "none"
                   ]
                 },
                 {
@@ -52,7 +51,6 @@
               "anyOf": [
                 {
                   "enum": [
-                    "input_interval",
                     "none",
                     "output_interval"
                   ]
