@@ -1504,7 +1504,7 @@ def test_schema_mpas_streams_intervals(mpas_streams):
     )
 
 
-def test_schema_mpas_streams_properties_optional(mpas_streams):  # PM parametrize
+def test_schema_mpas_streams_properties_optional(mpas_streams):
     props = {
         "clobber_mode",
         "filename_interval",
