@@ -1246,7 +1246,6 @@ def test_schema_makedirs():
 # mpas
 
 
-@mark.skip()
 def test_schema_mpas(mpas_streams):
     config = {
         "domain": "regional",
@@ -1351,7 +1350,6 @@ def test_schema_mpas_rundir(mpas_prop):
 # mpas-init
 
 
-@mark.skip()
 def test_schema_mpas_init(mpas_streams):
     config = {
         "boundary_conditions": {
@@ -1506,7 +1504,6 @@ def test_schema_mpas_streams_intervals(mpas_streams):
     )
 
 
-@mark.skip()
 def test_schema_mpas_streams_properties_optional(mpas_streams):  # PM parametrize
     props = {
         "clobber_mode",
