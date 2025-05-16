@@ -76,14 +76,16 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
     :return: Did the YAML file conform to the schema?
     """
     errors = _validation_errors(config, schema)
-    log_method = log.error if errors else log.info
-    log_msg = "%s schema-validation error%s found in %s"
-    log_method(log_msg, len(errors), "" if len(errors) == 1 else "s", desc)
-    for error in errors:
-        location = ".".join(str(k) for k in error.path) if error.path else "top level"
-        log.error("Error at %s:", location)
-        log.error("%s%s", INDENT, error.message)
-    return not bool(errors)
+    if valid := not bool(errors):
+        log.info("Schema validation succeeded for %s", desc)
+    else:
+        nerr = len(errors)
+        log.error("%s schema-validation error%s found in %s", nerr, "" if nerr == 1 else "s", desc)
+        for error in errors:
+            location = ".".join(str(k) for k in error.path) if error.path else "top level"
+            log.error("Error at %s:", location)
+            log.error("%s%s", INDENT, error.message)
+    return valid
 
 
 def validate_check_config(
