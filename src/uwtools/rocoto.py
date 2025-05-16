@@ -62,12 +62,13 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     path = resource_path("rocoto/schema_with_metatasks.rng")
     schema = etree.RelaxNG(etree.fromstring(path.read_text()))
     valid: bool = schema.validate(tree)
-    nerr = len(schema.error_log)
-    log_method = log.info if valid else log.error
-    log_method("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")
-    for err in list(schema.error_log):
-        log.error(err)
-    if not valid:
+    if valid:
+        log.info("Rocoto XML validated successfully")
+    else:
+        nerr = len(schema.error_log)
+        log.error("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")
+        for err in list(schema.error_log):
+            log.error(err)
         log.error("Invalid Rocoto XML:")
         lines = xml.strip().split("\n")
         fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
