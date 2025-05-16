@@ -147,7 +147,7 @@
         ]
       },
       "reference_time": {
-        "type": "string"
+        "$ref": "#/$defs/timespec"
       },
       "streams": {
         "items": {

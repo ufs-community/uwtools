@@ -263,7 +263,7 @@ def mpas_streams():
             "output_interval": "6:00:00",
             "packages": "pkg",
             "precision": "double",
-            "reference_time": "2014-01-01 00:00:00",
+            "reference_time": "2014-01-01_00:00:00",
             "streams": ["s1", "s2"],
             "type": "input;output",
             "var_arrays": ["va1", "va2"],
