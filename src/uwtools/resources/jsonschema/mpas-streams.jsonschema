@@ -17,6 +17,22 @@
           }
         },
         "then": {
+          "properties": {
+            "filename_interval": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "input_interval",
+                    "none",
+                    "output_interval"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/timespec"
+                }
+              ]
+            }
+          },
           "required": [
             "input_interval"
           ]
@@ -31,6 +47,22 @@
           }
         },
         "then": {
+          "properties": {
+            "filename_interval": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "input_interval",
+                    "none",
+                    "output_interval"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/timespec"
+                }
+              ]
+            }
+          },
           "required": [
             "output_interval"
           ]
@@ -46,20 +78,6 @@
           "replace_files",
           "never_modify",
           "append"
-        ]
-      },
-      "filename_interval": {
-        "anyOf": [
-          {
-            "enum": [
-              "input_interval",
-              "none",
-              "output_interval"
-            ]
-          },
-          {
-            "$ref": "#/$defs/timespec"
-          }
         ]
       },
       "filename_template": {
