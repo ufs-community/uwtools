@@ -1465,9 +1465,11 @@ def test_schema_mpas_streams_properties_filename_interval_fail_always(mpas_strea
 
 def test_schema_mpas_streams_properties_filename_interval_fail_input(mpas_streams):
     errors = schema_validator("mpas-streams")
-    assert "is not valid" in errors(
-        with_set(mpas_streams, "output_interval", "stream-in", "filename_interval")
-    )
+    for config in [
+        with_del(mpas_streams, "stream-in", "input_interval"),
+        with_set(mpas_streams, "output_interval", "stream-in", "filename_interval"),
+    ]:
+        assert "is not valid" in errors(config)
 
 
 @mark.parametrize(
