@@ -1496,6 +1496,16 @@ def test_schema_mpas_streams_properties_filename_interval_pass(mpas_streams, val
     assert not errors(with_set(mpas_streams, val, "stream-inout", "filename_interval"))
 
 
+def test_schema_mpas_streams_properties_reference_time(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    assert not errors(
+        with_set(mpas_streams, "2025-05-16_12:00:00", "stream-inout", "reference_time")
+    )
+    assert "does not match" in errors(
+        with_set(mpas_streams, "2025-05-16T12:00:00", "stream-inout", "reference_time")
+    )
+
+
 def test_schema_mpas_streams_intervals(mpas_streams):
     # Interval items are conditionally required based on input/output settings.
     errors = schema_validator("mpas-streams")
