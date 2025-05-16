@@ -240,13 +240,19 @@ def mpas_init_prop():
 @fixture
 def mpas_streams():
     return {
-        "stream1": {
-            "filename_template": "init.nc",
+        "stream-in": {
+            "filename_template": "in.nc",
             "input_interval": "initial_only",
             "mutable": False,
             "type": "input",
         },
-        "stream2": {
+        "stream-out": {
+            "filename_template": "out.nc",
+            "output_interval": "1_00:00:00",
+            "mutable": True,
+            "type": "output",
+        },
+        "stream-inout": {
             "clobber_mode": "overwrite",
             "filename_interval": "output_interval",
             "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
@@ -1452,15 +1458,16 @@ def test_schema_mpas_streams(mpas_streams):
 @mark.parametrize("val", ["foo", "1-2-3"])
 def test_schema_mpas_streams_properties_filename_interval_fail_always(mpas_streams, val):
     errors = schema_validator("mpas-streams")
-    assert "is not valid" in errors(with_set(mpas_streams, val, "stream2", "filename_interval"))
+    assert "is not valid" in errors(
+        with_set(mpas_streams, val, "stream-inout", "filename_interval")
+    )
 
 
-"""
-Def test_schema_mpas_streams_properties_filename_interval_fail_input():
-
-errors = schema_validator("mpas-streams") assert "asdf" in errors({"stream": {"type": "input",
-"filename_interval": "output_interval"}})
-"""
+def test_schema_mpas_streams_properties_filename_interval_fail_input(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    assert "is not valid" in errors(
+        with_set(mpas_streams, "output_interval", "stream-in", "filename_interval")
+    )
 
 
 @mark.parametrize(
@@ -1482,17 +1489,17 @@ errors = schema_validator("mpas-streams") assert "asdf" in errors({"stream": {"t
 )
 def test_schema_mpas_streams_properties_filename_interval_pass(mpas_streams, val):
     errors = schema_validator("mpas-streams")
-    assert not errors(with_set(mpas_streams, val, "stream2", "filename_interval"))
+    assert not errors(with_set(mpas_streams, val, "stream-inout", "filename_interval"))
 
 
 def test_schema_mpas_streams_intervals(mpas_streams):
     # Interval items are conditionally required based on input/output settings.
     errors = schema_validator("mpas-streams")
     assert "'input_interval' is a required property" in errors(
-        with_del(mpas_streams, "stream1", "input_interval")
+        with_del(mpas_streams, "stream-in", "input_interval")
     )
     assert "'output_interval' is a required property" in errors(
-        with_del(mpas_streams, "stream2", "output_interval")
+        with_del(mpas_streams, "stream-out", "output_interval")
     )
     x = {"x": {"filename_template": "t", "mutable": False, "type": "input;output"}}
     assert "'input_interval' is a required property" in errors(
