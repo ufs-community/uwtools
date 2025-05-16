@@ -1463,13 +1463,14 @@ def test_schema_mpas_streams_properties_filename_interval_fail_always(mpas_strea
     )
 
 
-def test_schema_mpas_streams_properties_filename_interval_fail_input(mpas_streams):
+@mark.parametrize(("bad", "good"), [("in", "out"), ("out", "in")])
+def test_schema_mpas_streams_properties_filename_interval_fail_io(bad, good, mpas_streams):
     errors = schema_validator("mpas-streams")
-    assert "'input_interval' is a required property" in errors(
-        with_del(mpas_streams, "stream-in", "input_interval")
+    assert f"'{good}put_interval' is a required property" in errors(
+        with_del(mpas_streams, f"stream-{good}", f"{good}put_interval")
     )
     assert "is not valid" in errors(
-        with_set(mpas_streams, "output_interval", "stream-in", "filename_interval")
+        with_set(mpas_streams, f"{bad}put_interval", f"stream-{good}", "filename_interval")
     )
 
 
