@@ -1,5 +1,5 @@
 config:
   files:
     foo: src/foo
-    licenses/gpl: https://www.gnu.org/licenses/gpl-3.0.txt
+    licenses/uwtools: https://raw.githubusercontent.com/ufs-community/uwtools/refs/heads/main/LICENSE
     subdir/bar: src/bar

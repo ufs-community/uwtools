@@ -1,9 +1,9 @@
 [2025-01-02T03:04:05]     INFO Validating config against internal schema: files-to-stage
-[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in fs config
+[2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy/foo: Executing
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy/foo: Ready
-[2025-01-02T03:04:05]     INFO HTTP https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Executing
-[2025-01-02T03:04:05]     INFO HTTP https://www.gnu.org/licenses/gpl-3.0.txt -> dst/copy/licenses/gpl: Ready
+[2025-01-02T03:04:05]     INFO HTTP https://raw.githubusercontent.com/ufs-community/uwtools/refs/heads/main/LICENSE -> dst/copy/licenses/uwtools: Executing
+[2025-01-02T03:04:05]     INFO HTTP https://raw.githubusercontent.com/ufs-community/uwtools/refs/heads/main/LICENSE -> dst/copy/licenses/uwtools: Ready
 [2025-01-02T03:04:05]     INFO Local src/bar -> dst/copy/subdir/bar: Executing
 [2025-01-02T03:04:05]     INFO Local src/bar -> dst/copy/subdir/bar: Ready
 [2025-01-02T03:04:05]     INFO File copies: Ready
@@ -11,7 +11,7 @@
 dst/copy
 ├── foo
 ├── licenses
-│   └── gpl
+│   └── uwtools
 └── subdir
     └── bar
 
