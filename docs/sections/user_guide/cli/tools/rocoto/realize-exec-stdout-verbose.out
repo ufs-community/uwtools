@@ -18,4 +18,4 @@
 [2025-01-02T03:04:05]    DEBUG [dereference]   walltime: 00:01:00
 [2025-01-02T03:04:05]    DEBUG [dereference]   envars:
 [2025-01-02T03:04:05]    DEBUG [dereference]     person: siri
-[2025-01-02T03:04:05]     INFO 0 Rocoto XML validation errors found
+[2025-01-02T03:04:05]     INFO Schema validation succeeded for Rocoto XML
