@@ -32,9 +32,9 @@ def test_exp_config_cb(load, tb):
     assert all(x in tb.cell_output_text(13) for x in deref_cfg)
     for line in [
         "Validating config against internal schema: chgres-cube",
-        "0 schema-validation errors found in chgres_cube config",
+        "Schema validation succeeded for chgres_cube config",
         "Validating config against internal schema: platform",
-        "0 schema-validation errors found in platform config",
+        "Schema validation succeeded for platform config",
         "chgres_cube valid schema: Ready",
     ]:
         assert line in tb.cell_output_text(15)

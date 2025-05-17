@@ -95,7 +95,7 @@ def test_config_compare(load, tb):
 def test_config_validate(load, tb):
     assert tb.cell_output_text(69) == load(base / "get-config.yaml")
     assert tb.cell_output_text(71) == load(base / "validate.jsonschema")
-    valid_out = ("INFO 0 schema-validation errors found", "True")
+    valid_out = ("INFO Schema validation succeeded for config", "True")
     assert all(x in tb.cell_output_text(73) for x in valid_out)
     invalid_out = (
         "ERROR 1 schema-validation error found",
