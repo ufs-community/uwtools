@@ -1,5 +1,5 @@
 [2025-01-02T03:04:05]     INFO Validating config against internal schema: makedirs
-[2025-01-02T03:04:05]     INFO 0 schema-validation errors found in fs config
+[2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]     INFO Directory makedirs-parent/foo: Executing
 [2025-01-02T03:04:05]     INFO Directory makedirs-parent/foo: Ready
 [2025-01-02T03:04:05]     INFO Directory makedirs-parent/bar: Executing

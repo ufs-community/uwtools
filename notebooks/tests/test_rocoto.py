@@ -15,8 +15,8 @@ def tb():
 def test_rocoto_building_simple_workflow(load, tb):
     assert tb.cell_output_text(5) == load(base / "simple-workflow.yaml")
     valid_out = (
-        "INFO 0 schema-validation errors found",
-        "INFO 0 Rocoto XML validation errors found",
+        "INFO Schema validation succeeded for Rocoto config",
+        "INFO Schema validation succeeded for Rocoto XML",
         "True",
     )
     assert all(x in tb.cell_output_text(7) for x in valid_out)
@@ -39,8 +39,8 @@ def test_rocoto_building_workflows(load, tb):
     assert tb.cell_output_text(15) == load(base / "ent-workflow.yaml")
     assert tb.cell_output_text(17) == load(base / "ent-cs-workflow.yaml")
     valid_out = (
-        "INFO 0 schema-validation errors found",
-        "INFO 0 Rocoto XML validation errors found",
+        "INFO Schema validation succeeded for Rocoto config",
+        "INFO Schema validation succeeded for Rocoto XML",
         "True",
     )
     assert all(x in tb.cell_output_text(19) for x in valid_out)
@@ -59,7 +59,7 @@ def test_rocoto_validate(tb):
     simple_xml = (base / "simple-workflow.xml").read_text().rstrip()
     err_xml = (base / "err-workflow.xml").read_text().rstrip()
     assert tb.cell_output_text(41) == simple_xml
-    valid_out = ("INFO 0 Rocoto XML validation errors found", "True")
+    valid_out = ("INFO Schema validation succeeded for Rocoto XML", "True")
     assert all(x in tb.cell_output_text(43) for x in valid_out)
     assert tb.cell_output_text(45) == err_xml
     err_out = (
