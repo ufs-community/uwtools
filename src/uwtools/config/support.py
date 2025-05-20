@@ -102,6 +102,11 @@ class UWYAMLTag:
         self.tag: str = node.tag
         self.value: str = node.value
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UWYAMLTag):
+            return NotImplemented
+        return self.tag == other.tag and self.value == other.value
+
     def __repr__(self) -> str:
         return ("%s %s" % (self.tag, self.value)).strip()
 
