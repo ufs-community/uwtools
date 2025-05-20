@@ -54,6 +54,17 @@ def test_config_support_log_and_error(logged):
     assert logged(msg)
 
 
+def test_config_support_UWYAMLTag__eq():
+    tag0, tag1 = [
+        support.UWYAMLTag(
+            yaml.SafeLoader("data"),
+            node=yaml.nodes.Node(tag="!foo", value="bar", start_mark=None, end_mark=None),
+        )
+        for _ in range(2)
+    ]
+    assert tag0 == tag1
+
+
 class TestUWYAMLConvert:
     """
     Tests for class uwtools.config.support.UWYAMLConvert.
