@@ -16,8 +16,6 @@ class UPP(DriverCycleLeadtimeBased, UPPCommon):
     A driver for UPP.
     """
 
-    namelist_file = lambda _: ...
-
     # Workflow tasks
 
     @tasks

@@ -4,15 +4,13 @@ An assets driver for UPP.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import tasks
 
-from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import AssetsCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.drivers.upp_common import UPPCommon
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
 
 
 class UPPAssets(AssetsCycleLeadtimeBased, UPPCommon):
@@ -21,23 +19,6 @@ class UPPAssets(AssetsCycleLeadtimeBased, UPPCommon):
     """
 
     # Workflow tasks
-
-    @task
-    def namelist_file(self):
-        """
-        The namelist file.
-        """
-        path = self.namelist_path
-        yield self.taskname(str(path))
-        yield asset(path, path.is_file)
-        base_file = self.config[STR.namelist].get(STR.basefile)
-        yield file(Path(base_file)) if base_file else None
-        self._create_user_updated_config(
-            config_class=NMLConfig,
-            config_values=self.config[STR.namelist],
-            path=path,
-            schema=self.namelist_schema(),
-        )
 
     @tasks
     def provisioned_rundir(self):
