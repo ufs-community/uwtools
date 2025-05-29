@@ -152,6 +152,10 @@ def test_UPP_namelist_file_missing_base_file(driverobj, logged):
     assert logged("missing.nml: Not ready [external asset]")
 
 
+def test_UPP_namelist_path(driverobj):
+    assert driverobj.namelist_path == driverobj.rundir / "itag"
+
+
 def test_UPP_output(driverobj, tmp_path):
     fields = ["?"] * (UPP.NFIELDS - 1)
     parameters = ["?"] * UPP.NPARAMS
@@ -196,10 +200,6 @@ def test_UPP_provisioned_rundir(driverobj, ready_task):
 
 def test_UPP_taskname(driverobj):
     assert driverobj.taskname("foo") == "20240507 12:00:00 upp foo"
-
-
-def test_UPP__namelist_path(driverobj):
-    assert driverobj._namelist_path == driverobj.rundir / "itag"
 
 
 def test_UPP__runcmd(driverobj):
