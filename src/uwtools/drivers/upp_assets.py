@@ -12,7 +12,7 @@ from uwtools.drivers.support import set_driver_docstring
 from uwtools.drivers.upp_common import UPPCommon
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file
 
 
 class UPPAssets(AssetsCycleLeadtimeBased, UPPCommon):
@@ -21,28 +21,6 @@ class UPPAssets(AssetsCycleLeadtimeBased, UPPCommon):
     """
 
     # Workflow tasks
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self.taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self.taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
-        ]
 
     @task
     def namelist_file(self):

@@ -9,7 +9,7 @@ from typing import ClassVar
 
 from iotaa import tasks
 
-from uwtools.utils.tasks import filecopy
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class UPPCommon:
@@ -34,6 +34,28 @@ class UPPCommon:
         yield filecopy(
             src=Path(self.config["control_file"]), dst=self.rundir / "postxconfig-NT.txt"
         )
+
+    @tasks
+    def files_copied(self):
+        """
+        Files copied for run.
+        """
+        yield self.taskname("files copied")
+        yield [
+            filecopy(src=Path(src), dst=self.rundir / dst)
+            for dst, src in self.config.get("files_to_copy", {}).items()
+        ]
+
+    @tasks
+    def files_linked(self):
+        """
+        Files linked for run.
+        """
+        yield self.taskname("files linked")
+        yield [
+            symlink(target=Path(target), linkname=self.rundir / linkname)
+            for linkname, target in self.config.get("files_to_link", {}).items()
+        ]
 
     # Helper methods:
 
