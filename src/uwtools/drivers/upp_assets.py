@@ -23,16 +23,6 @@ class UPPAssets(AssetsCycleLeadtimeBased, UPPCommon):
     # Workflow tasks
 
     @tasks
-    def control_file(self):
-        """
-        The GRIB control file.
-        """
-        yield self.taskname("GRIB control file")
-        yield filecopy(
-            src=Path(self.config["control_file"]), dst=self.rundir / "postxconfig-NT.txt"
-        )
-
-    @tasks
     def files_copied(self):
         """
         Files copied for run.
