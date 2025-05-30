@@ -1,3 +1,5 @@
+:orphan:
+
 .. literalinclude:: help.cmd
    :language: text
    :emphasize-lines: 1
