@@ -6,12 +6,11 @@ from iotaa import tasks
 
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
-from uwtools.drivers.upp_assets import UPPAssets
 from uwtools.drivers.upp_common import UPPCommon
 from uwtools.strings import STR
 
 
-class UPP(DriverCycleLeadtimeBased, UPPCommon):
+class UPP(UPPCommon, DriverCycleLeadtimeBased):
     """
     A driver for UPP.
     """
@@ -59,7 +58,3 @@ class UPP(DriverCycleLeadtimeBased, UPPCommon):
 
 
 set_driver_docstring(UPP)
-
-for k, v in vars(UPPAssets).items():
-    if not k.startswith("_") and k not in ["driver_name"]:
-        setattr(UPP, k, v)
