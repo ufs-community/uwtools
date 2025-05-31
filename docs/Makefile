@@ -1,7 +1,7 @@
-BUILDDIR     = build
-SOURCEDIR    = .
-SPHINXBUILD  = sphinx-build
-SPHINXOPTS   = -a -n -W --keep-going
+BUILDDIR    = build
+SOURCEDIR   = .
+SPHINXBUILD = sphinx-build
+SPHINXOPTS  = --fail-on-warning --nitpicky --write-all
 
 .PHONY: help clean docs examples
 

@@ -11,7 +11,7 @@ with open("../recipe/meta.json", "r", encoding="utf-8") as f:
     _metadata = json.loads(f.read())
 
 autoclass_content = "both"
-autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml", "referencing"]
+autodoc_mock_imports = ["dateutil", "f90nml", "iotaa", "jsonschema", "lxml", "referencing"]
 autodoc_typehints = "description"
 copyright = str(dt.datetime.now().year)
 exclude_patterns = ["**/shared/*.rst"]
