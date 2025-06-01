@@ -28,17 +28,11 @@ NPARAMS = 42
 
 
 def control_file(obj: UPP | UPPAssets):
-    """
-    The GRIB control file.
-    """
     yield obj.taskname("GRIB control file")
     yield filecopy(src=Path(obj.config["control_file"]), dst=obj.rundir / "postxconfig-NT.txt")
 
 
 def files_copied(obj: UPP | UPPAssets):
-    """
-    Files copied for run.
-    """
     yield obj.taskname("files copied")
     yield [
         filecopy(src=Path(src), dst=obj.rundir / dst)
@@ -47,9 +41,6 @@ def files_copied(obj: UPP | UPPAssets):
 
 
 def files_linked(obj: UPP | UPPAssets):
-    """
-    Files linked for run.
-    """
     yield obj.taskname("files linked")
     yield [
         symlink(target=Path(target), linkname=obj.rundir / linkname)
@@ -58,9 +49,6 @@ def files_linked(obj: UPP | UPPAssets):
 
 
 def namelist_file(obj: UPP | UPPAssets):
-    """
-    The namelist file.
-    """
     path = namelist_path(obj)
     yield obj.taskname(str(path))
     yield asset(path, path.is_file)
