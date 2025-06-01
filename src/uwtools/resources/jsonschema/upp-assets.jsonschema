@@ -1,6 +1,6 @@
 {
   "properties": {
-    "upp-assets": {
+    "upp_assets": {
       "additionalProperties": false,
       "properties": {
         "control_file": {

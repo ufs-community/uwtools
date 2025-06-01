@@ -18,7 +18,7 @@ def leadtime():
 
 @fixture
 def upp_config(tmp_path, upp_assets_config):
-    config = {"upp": upp_assets_config["upp-assets"]}
+    config = {"upp": upp_assets_config["upp_assets"]}
     config["upp"]["execution"] = {
         "batchargs": {
             "cores": 1,
@@ -32,7 +32,7 @@ def upp_config(tmp_path, upp_assets_config):
 @fixture
 def upp_assets_config(tmp_path):
     return {
-        "upp-assets": {
+        "upp_assets": {
             "control_file": "/path/to/postxconfig-NT.txt",
             "files_to_copy": {
                 "foo": str(tmp_path / "foo"),

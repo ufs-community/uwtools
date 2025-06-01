@@ -9,7 +9,7 @@ def test_UPPAssets_control_file(upp_assets_driverobj):
 
 
 def test_UPPAssets_driver_name(upp_assets_driverobj):
-    assert upp_assets_driverobj.driver_name() == UPPAssets.driver_name() == "upp-assets"
+    assert upp_assets_driverobj.driver_name() == UPPAssets.driver_name() == "upp_assets"
 
 
 def test_UPPAssets_files_copied(upp_assets_driverobj):
@@ -53,4 +53,4 @@ def test_UPPAssets_provisioned_rundir(upp_assets_driverobj, ready_task):
 
 
 def test_UPPAssets_taskname(upp_assets_driverobj):
-    assert upp_assets_driverobj.taskname("foo") == "20240507 12:00:00 upp-assets foo"
+    assert upp_assets_driverobj.taskname("foo") == "20240507 12:00:00 upp_assets foo"

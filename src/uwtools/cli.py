@@ -90,6 +90,7 @@ def main() -> None:
                 STR.shave,
                 STR.ungrib,
                 STR.upp,
+                STR.upp_assets,
                 STR.ww3,
             ]
         }
@@ -1179,7 +1180,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         component: partial(
             _add_subparser_for_driver, component, subparsers, with_cycle=True, with_leadtime=True
         )
-        for component in no_components
+        for component in [STR.upp_assets]
     }
     drivers = {
         component: partial(_add_subparser_for_driver, component, subparsers, with_batch=True)
