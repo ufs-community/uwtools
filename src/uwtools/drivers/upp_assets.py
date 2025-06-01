@@ -2,20 +2,43 @@
 An assets driver for UPP.
 """
 
-from iotaa import tasks
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from iotaa import task, tasks
+
+from uwtools.drivers import upp_common
 from uwtools.drivers.driver import AssetsCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
-from uwtools.drivers.upp_common import UPPCommon
 from uwtools.strings import STR
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-class UPPAssets(UPPCommon, AssetsCycleLeadtimeBased):
+
+class UPPAssets(AssetsCycleLeadtimeBased):
     """
     An assets driver for UPP.
     """
 
     # Workflow tasks
+
+    @tasks
+    def control_file(self):
+        yield from upp_common.control_file(self)
+
+    @tasks
+    def files_copied(self):
+        yield from upp_common.files_copied(self)
+
+    @tasks
+    def files_linked(self):
+        yield from upp_common.files_linked(self)
+
+    @task
+    def namelist_file(self):
+        yield from upp_common.namelist_file(self)
 
     @tasks
     def provisioned_rundir(self):
@@ -38,6 +61,10 @@ class UPPAssets(UPPCommon, AssetsCycleLeadtimeBased):
         The name of this driver.
         """
         return STR.upp_assets
+
+    @property
+    def output(self) -> dict[str, Path] | dict[str, list[Path]]:
+        return upp_common.output(self)
 
 
 set_driver_docstring(UPPAssets)

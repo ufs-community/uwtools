@@ -2,20 +2,43 @@
 A driver for UPP.
 """
 
-from iotaa import tasks
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from iotaa import task, tasks
+
+from uwtools.drivers import upp_common
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
 from uwtools.drivers.support import set_driver_docstring
-from uwtools.drivers.upp_common import UPPCommon
 from uwtools.strings import STR
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-class UPP(UPPCommon, DriverCycleLeadtimeBased):
+
+class UPP(DriverCycleLeadtimeBased):
     """
     A driver for UPP.
     """
 
     # Workflow tasks
+
+    @tasks
+    def control_file(self):
+        yield from upp_common.control_file(self)
+
+    @tasks
+    def files_copied(self):
+        yield from upp_common.files_copied(self)
+
+    @tasks
+    def files_linked(self):
+        yield from upp_common.files_linked(self)
+
+    @task
+    def namelist_file(self):
+        yield from upp_common.namelist_file(self)
 
     @tasks
     def provisioned_rundir(self):
@@ -40,6 +63,10 @@ class UPP(UPPCommon, DriverCycleLeadtimeBased):
         """
         return STR.upp
 
+    @property
+    def output(self) -> dict[str, Path] | dict[str, list[Path]]:
+        return upp_common.output(self)
+
     # Private helper methods
 
     @property
@@ -52,7 +79,7 @@ class UPP(UPPCommon, DriverCycleLeadtimeBased):
         components = [
             execution.get(STR.mpicmd),
             *[str(x) for x in mpiargs],
-            "%s < %s" % (execution[STR.executable], self.namelist_path.name),
+            "%s < %s" % (execution[STR.executable], upp_common.namelist_path(self).name),
         ]
         return " ".join(filter(None, components))
 

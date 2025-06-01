@@ -35,7 +35,7 @@ class SfcClimoGen(DriverTimeInvariant):
         input_paths += [Path(vals["mosaic_file_mdl"])]
         input_paths += [Path(vals["orog_dir_mdl"], fn) for fn in vals["orog_files_mdl"]]
         yield [file(input_path) for input_path in input_paths]
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=self.config[STR.namelist],
             path=path,

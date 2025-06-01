@@ -100,6 +100,68 @@ class Assets(ABC):
         """
         return deepcopy(self._config_full)
 
+    @staticmethod
+    def create_user_updated_config(
+        config_class: type[Config], config_values: dict, path: Path, schema: dict | None = None
+    ) -> None:
+        """
+        Create a config from a base file, user-provided values, or a combination of the two.
+
+        :param config_class: The Config subclass matching the config type.
+        :param config_values: The configuration object to update base values with.
+        :param path: Path to dump file to.
+        :param schema: Schema to validate final config against.
+        """
+        user_values = config_values.get(STR.updatevalues, {})
+        if base_file := config_values.get(STR.basefile):
+            cfgobj = config_class(base_file)
+            cfgobj.update_from(user_values)
+            cfgobj.dereference()
+            config = cfgobj.data
+            dump = partial(cfgobj.dump, path)
+        else:
+            config = user_values
+            dump = partial(config_class.dump_dict, config, path)
+        if validate(schema=schema or {"type": "object"}, desc="user-updated config", config=config):
+            dump()
+            log.debug("Wrote config to %s", path)
+        else:
+            log.debug("Failed to validate %s", path)
+
+    @classmethod
+    @abstractmethod
+    def driver_name(cls) -> str:
+        """
+        The name of this driver.
+        """
+
+    def namelist_schema(
+        self, config_keys: list[YAMLKey] | None = None, schema_keys: list[str] | None = None
+    ) -> dict:
+        """
+        Return the (sub)schema for validating the driver's namelist content.
+
+        :param config_keys: Keys leading to the namelist block in the driver config.
+        :param schema_keys: Keys leading to the namelist-validating (sub)schema.
+        """
+        schema: dict = {"type": "object"}
+        nmlcfg = self.config
+        for config_key in config_keys or [STR.namelist]:
+            nmlcfg = nmlcfg[config_key]
+        if nmlcfg.get(STR.validate, True):
+            schema_file = self.schema_file or internal_schema_file(schema_name=self._schema_name())
+            schema = bundle(json.loads(schema_file.read_text()))
+            for schema_key in schema_keys or [
+                STR.properties,
+                self.driver_name(),
+                STR.properties,
+                STR.namelist,
+                STR.properties,
+                STR.updatevalues,
+            ]:
+                schema = schema[schema_key]
+        return schema
+
     @property
     def rundir(self) -> Path:
         """
@@ -144,34 +206,6 @@ class Assets(ABC):
 
     # Private helper methods
 
-    @staticmethod
-    def _create_user_updated_config(
-        config_class: type[Config], config_values: dict, path: Path, schema: dict | None = None
-    ) -> None:
-        """
-        Create a config from a base file, user-provided values, or a combination of the two.
-
-        :param config_class: The Config subclass matching the config type.
-        :param config_values: The configuration object to update base values with.
-        :param path: Path to dump file to.
-        :param schema: Schema to validate final config against.
-        """
-        user_values = config_values.get(STR.updatevalues, {})
-        if base_file := config_values.get(STR.basefile):
-            cfgobj = config_class(base_file)
-            cfgobj.update_from(user_values)
-            cfgobj.dereference()
-            config = cfgobj.data
-            dump = partial(cfgobj.dump, path)
-        else:
-            config = user_values
-            dump = partial(config_class.dump_dict, config, path)
-        if validate(schema=schema or {"type": "object"}, desc="user-updated config", config=config):
-            dump()
-            log.debug("Wrote config to %s", path)
-        else:
-            log.debug("Failed to validate %s", path)
-
     def _delegate(self, controller: list[YAMLKey] | None, config_key: str) -> None:
         """
         Selectively delegate config to controller.
@@ -184,44 +218,6 @@ class Assets(ABC):
             for key in controller[1:]:
                 val = val[key]
             self._config[config_key] = val[config_key]
-
-    # Public helper methods
-
-    @classmethod
-    @abstractmethod
-    def driver_name(cls) -> str:
-        """
-        The name of this driver.
-        """
-
-    def namelist_schema(
-        self, config_keys: list[YAMLKey] | None = None, schema_keys: list[str] | None = None
-    ) -> dict:
-        """
-        Return the (sub)schema for validating the driver's namelist content.
-
-        :param config_keys: Keys leading to the namelist block in the driver config.
-        :param schema_keys: Keys leading to the namelist-validating (sub)schema.
-        """
-        schema: dict = {"type": "object"}
-        nmlcfg = self.config
-        for config_key in config_keys or [STR.namelist]:
-            nmlcfg = nmlcfg[config_key]
-        if nmlcfg.get(STR.validate, True):
-            schema_file = self.schema_file or internal_schema_file(schema_name=self._schema_name())
-            schema = json.loads(schema_file.read_text())
-            for schema_key in schema_keys or [
-                STR.properties,
-                self.driver_name(),
-                STR.properties,
-                STR.namelist,
-                STR.properties,
-                STR.updatevalues,
-            ]:
-                schema = schema[schema_key]
-        return schema
-
-    # Private helper methods
 
     @classmethod
     def _schema_name(cls) -> str:

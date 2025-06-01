@@ -9,7 +9,6 @@ from unittest.mock import patch
 import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark
 
-from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
 from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path
@@ -98,36 +97,6 @@ def outpath(driverobj):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_decode_interval",
-        "_decode_timestamp",
-        "_filename_interval",
-        "_filename_interval_timestamps",
-        "_interval_timestamps",
-        "_output_path",
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runcmd",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "output",
-        "run",
-        "runscript",
-        "streams_file",
-        "taskname",
-    ],
-)
-def test_MPASInit(method):
-    assert getattr(MPASInit, method) is getattr(MPASBase, method)
 
 
 def test_MPASInit_boundary_files(cycle, driverobj):

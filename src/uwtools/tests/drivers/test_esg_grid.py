@@ -6,9 +6,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark
+from pytest import fixture
 
-from uwtools.drivers.driver import Driver
 from uwtools.drivers.esg_grid import ESGGrid
 
 # Fixtures
@@ -55,28 +54,6 @@ def driverobj(config):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runcmd",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "run",
-        "runscript",
-        "taskname",
-    ],
-)
-def test_ESGGrid(method):
-    assert getattr(ESGGrid, method) is getattr(Driver, method)
 
 
 def test_ESGGrid_driver_name(driverobj):

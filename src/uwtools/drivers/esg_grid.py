@@ -31,7 +31,7 @@ class ESGGrid(DriverTimeInvariant):
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=self.config[STR.namelist],
             path=path,

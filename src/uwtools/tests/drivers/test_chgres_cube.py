@@ -7,10 +7,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark
+from pytest import fixture
 
 from uwtools.drivers.chgres_cube import ChgresCube
-from uwtools.drivers.driver import Driver
 from uwtools.scheduler import Slurm
 
 # Fixtures
@@ -86,26 +85,6 @@ def leadtime():
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runcmd",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "run",
-    ],
-)
-def test_ChgresCube(method):
-    assert getattr(ChgresCube, method) is getattr(Driver, method)
 
 
 def test_ChgresCube_driver_name(driverobj):

@@ -196,6 +196,30 @@ def test_Assets_controller(config, controller_schema):
         )
 
 
+@mark.parametrize(
+    ("base_file", "update_values", "expected"),
+    [
+        (False, False, {}),
+        (False, True, {"a": 33}),
+        (True, False, {"a": 11, "b": 22}),
+        (True, True, {"a": 33, "b": 22}),
+    ],
+)
+def test_Assets_create_user_updated_config_base_file(
+    assetsobj, base_file, expected, tmp_path, update_values
+):
+    path = tmp_path / "updated.yaml"
+    dc = assetsobj.config
+    if not base_file:
+        del dc["base_file"]
+    if not update_values:
+        del dc["update_values"]
+    ConcreteAssetsTimeInvariant.create_user_updated_config(
+        config_class=YAMLConfig, config_values=dc, path=path
+    )
+    assert yaml.safe_load(path.read_text()) == expected
+
+
 def test_Assets_cycle(config, utc):
     cycle = utc(2024, 7, 2, 12)
     obj = ConcreteAssetsCycleBased(config=config, cycle=cycle)
@@ -250,30 +274,6 @@ def test_Assets_validate_schema_file(logged, should_pass, t, tmp_path):
             assert logged("1 is not of type 'string'")
 
 
-@mark.parametrize(
-    ("base_file", "update_values", "expected"),
-    [
-        (False, False, {}),
-        (False, True, {"a": 33}),
-        (True, False, {"a": 11, "b": 22}),
-        (True, True, {"a": 33, "b": 22}),
-    ],
-)
-def test_Assets__create_user_updated_config_base_file(
-    assetsobj, base_file, expected, tmp_path, update_values
-):
-    path = tmp_path / "updated.yaml"
-    dc = assetsobj.config
-    if not base_file:
-        del dc["base_file"]
-    if not update_values:
-        del dc["update_values"]
-    ConcreteAssetsTimeInvariant._create_user_updated_config(
-        config_class=YAMLConfig, config_values=dc, path=path
-    )
-    assert yaml.safe_load(path.read_text()) == expected
-
-
 def test_Assets__delegate(driverobj):
     assert "roses" not in driverobj.config
     driverobj._config_intermediate["plants"] = {"flowers": {"roses": "red"}}
@@ -321,12 +321,6 @@ def test_Driver(driverobj):
     assert driverobj._batch is True
 
 
-def test_Driver_cycle(config, utc):
-    cycle = utc(2024, 7, 2, 12)
-    obj = ConcreteDriverCycleBased(config=config, cycle=cycle)
-    assert obj.cycle == cycle
-
-
 def test_Driver_controller(config, controller_schema):
     config["controller"] = {
         "execution": {"executable": "/path/to/coupled.exe"},
@@ -340,6 +334,35 @@ def test_Driver_controller(config, controller_schema):
         assert ConcreteDriverTimeInvariant(
             config=config, schema_file=controller_schema, controller=["controller"]
         )
+
+
+@mark.parametrize(
+    ("base_file", "update_values", "expected"),
+    [
+        (False, False, {}),
+        (False, True, {"a": 33}),
+        (True, False, {"a": 11, "b": 22}),
+        (True, True, {"a": 33, "b": 22}),
+    ],
+)
+def test_Driver_create_user_updated_config_base_file(
+    base_file, driverobj, expected, tmp_path, update_values
+):
+    path = tmp_path / "updated.yaml"
+    if not base_file:
+        del driverobj._config["base_file"]
+    if not update_values:
+        del driverobj._config["update_values"]
+    ConcreteDriverTimeInvariant.create_user_updated_config(
+        config_class=YAMLConfig, config_values=driverobj.config, path=path
+    )
+    assert yaml.safe_load(path.read_text()) == expected
+
+
+def test_Driver_cycle(config, utc):
+    cycle = utc(2024, 7, 2, 12)
+    obj = ConcreteDriverCycleBased(config=config, cycle=cycle)
+    assert obj.cycle == cycle
 
 
 def test_Driver_leadtime(config, utc):
@@ -446,29 +469,6 @@ def test_driver_show_output_fail(config, logged):
         output.side_effect = UWConfigError("FAIL")
         ConcreteDriverTimeInvariant(config).show_output()
     assert logged("FAIL")
-
-
-@mark.parametrize(
-    ("base_file", "update_values", "expected"),
-    [
-        (False, False, {}),
-        (False, True, {"a": 33}),
-        (True, False, {"a": 11, "b": 22}),
-        (True, True, {"a": 33, "b": 22}),
-    ],
-)
-def test_Driver__create_user_updated_config_base_file(
-    base_file, driverobj, expected, tmp_path, update_values
-):
-    path = tmp_path / "updated.yaml"
-    if not base_file:
-        del driverobj._config["base_file"]
-    if not update_values:
-        del driverobj._config["update_values"]
-    ConcreteDriverTimeInvariant._create_user_updated_config(
-        config_class=YAMLConfig, config_values=driverobj.config, path=path
-    )
-    assert yaml.safe_load(path.read_text()) == expected
 
 
 def test_Driver__run_via_batch_submission(driverobj):

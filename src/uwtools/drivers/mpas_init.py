@@ -62,7 +62,7 @@ class MPASInit(MPASBase):
             }
         )
         namelist[STR.updatevalues] = update_values
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
             path=path,

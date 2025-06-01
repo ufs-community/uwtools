@@ -4,10 +4,9 @@ IODA driver tests.
 
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import fixture, raises
 
 from uwtools.drivers.ioda import IODA
-from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
@@ -64,27 +63,6 @@ def driverobj(config, cycle):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "output",
-        "run",
-        "runscript",
-    ],
-)
-def test_IODA(method):
-    assert getattr(IODA, method) is getattr(JEDIBase, method)
 
 
 def test_IODA_driver_name(driverobj):

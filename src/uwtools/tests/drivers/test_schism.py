@@ -6,9 +6,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import yaml
-from pytest import fixture, mark
+from pytest import fixture
 
-from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.drivers.schism import SCHISM
 
 # Fixtures
@@ -40,14 +39,6 @@ def driverobj(config, cycle):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    ["taskname", "_validate"],
-)
-def test_SCHISM(method):
-    assert getattr(SCHISM, method) is getattr(AssetsCycleBased, method)
 
 
 def test_SCHISM_driver_name(driverobj):

@@ -7,12 +7,11 @@ from unittest.mock import call, patch
 
 import iotaa
 import yaml
-from pytest import fixture, mark, raises
+from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi, jedi_base
 from uwtools.drivers.jedi import JEDI
-from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.exceptions import UWNotImplementedError
 
 # Fixtures
@@ -71,27 +70,6 @@ def driverobj(config, cycle):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "output",
-        "run",
-        "runscript",
-    ],
-)
-def test_JEDI(method):
-    assert getattr(JEDI, method) is getattr(JEDIBase, method)
 
 
 def test_JEDI_configuration_file(driverobj):

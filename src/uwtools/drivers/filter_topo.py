@@ -52,7 +52,7 @@ class FilterTopo(DriverTimeInvariant):
         yield self.taskname(f"namelist file {fn}")
         yield asset(path, path.is_file)
         yield None
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=self.config[STR.namelist],
             path=path,

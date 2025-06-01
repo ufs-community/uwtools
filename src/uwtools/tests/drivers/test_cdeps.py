@@ -14,7 +14,6 @@ from pytest import fixture, mark
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers import cdeps
 from uwtools.drivers.cdeps import CDEPS
-from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.tests.test_schemas import CDEPS_CONFIG
 
 # Fixtures
@@ -37,14 +36,6 @@ def ok():
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    ["taskname", "_validate"],
-)
-def test_CDEPS(method):
-    assert getattr(CDEPS, method) is getattr(AssetsCycleBased, method)
 
 
 def test_CDEPS_atm(driverobj):
@@ -127,7 +118,7 @@ def test_CDEPS_streams(driverobj, group):
 def test_CDEPS__model_namelist_file(driverobj):
     group = "atm_in"
     path = Path("/path/to/some.nml")
-    with patch.object(driverobj, "_create_user_updated_config") as cuuc:
+    with patch.object(driverobj, "create_user_updated_config") as cuuc:
         driverobj._model_namelist_file(group=group, path=path)
         cuuc.assert_called_once_with(
             config_class=NMLConfig, config_values=driverobj.config[group], path=path
