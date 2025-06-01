@@ -1,5 +1,3 @@
-:orphan:
-
 * Specifying the ``--show-schema`` flag, with no other options, prints the driver's schema:
 
   .. literalinclude:: show-schema.cmd
