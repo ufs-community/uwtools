@@ -26,18 +26,30 @@ class UPPAssets(AssetsCycleLeadtimeBased):
 
     @tasks
     def control_file(self):
+        """
+        The GRIB control file.
+        """
         yield from upp_common.control_file(self)
 
     @tasks
     def files_copied(self):
+        """
+        Files copied for run.
+        """
         yield from upp_common.files_copied(self)
 
     @tasks
     def files_linked(self):
+        """
+        Files linked for run.
+        """
         yield from upp_common.files_linked(self)
 
     @task
     def namelist_file(self):
+        """
+        The namelist file.
+        """
         yield from upp_common.namelist_file(self)
 
     @tasks
