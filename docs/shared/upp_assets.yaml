@@ -23,6 +23,3 @@ upp_assets:
           - 1
     validate: true
   rundir: /path/to/run/dir
-platform:
-  account: me
-  scheduler: slurm
