@@ -4,6 +4,7 @@ channels:
 dependencies:
   - linkchecker 10.4.*
   - python >=3.9,<3.14 # keep in sync with meta.yaml run req
+  - sphinx 8.2.*
   - sphinx_rtd_theme 3.0.*
   - sphinxcontrib-bibtex 2.6.*
   - tree 2.2.*
