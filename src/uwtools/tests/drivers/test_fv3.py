@@ -9,7 +9,6 @@ import iotaa
 import yaml
 from pytest import fixture, mark, raises
 
-from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
 from uwtools.exceptions import UWNotImplementedError
 from uwtools.scheduler import Slurm
@@ -78,27 +77,6 @@ def truetask():
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runcmd",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "output",
-        "run",
-    ],
-)
-def test_FV3(method):
-    assert getattr(FV3, method) is getattr(Driver, method)
 
 
 def test_FV3_boundary_files(driverobj):

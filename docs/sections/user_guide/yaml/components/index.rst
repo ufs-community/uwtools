@@ -26,6 +26,7 @@ Available Drivers
    shave
    ungrib
    upp
+   upp_assets
    ww3
 
 Common Driver Blocks

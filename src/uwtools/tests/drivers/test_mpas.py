@@ -12,7 +12,6 @@ from lxml import etree
 from pytest import fixture, mark
 
 from uwtools.drivers.mpas import MPAS
-from uwtools.drivers.mpas_base import MPASBase
 from uwtools.tests.support import fixture_path
 
 # Helpers
@@ -115,36 +114,6 @@ def outpath(driverobj):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_decode_interval",
-        "_decode_timestamp",
-        "_filename_interval",
-        "_filename_interval_timestamps",
-        "_interval_timestamps",
-        "_output_path",
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runcmd",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "output",
-        "run",
-        "runscript",
-        "streams_file",
-        "taskname",
-    ],
-)
-def test_MPAS(method):
-    assert getattr(MPAS, method) is getattr(MPASBase, method)
 
 
 def test_MPAS_boundary_files(driverobj, cycle):

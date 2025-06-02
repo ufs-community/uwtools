@@ -31,7 +31,7 @@ class JEDIBase(DriverCycleBased):
         yield asset(path, path.is_file)
         base_file = self.config["configuration_file"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self.config["configuration_file"],
             path=path,

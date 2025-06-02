@@ -1,0 +1,26 @@
+usage: uw upp_assets [-h] [--version] [--show-schema] TASK ...
+
+Execute upp_assets tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --show-schema
+      Show driver schema and exit
+
+Positional arguments:
+  TASK
+    control_file
+      The GRIB control file
+    files_copied
+      Files copied for run
+    files_linked
+      Files linked for run
+    namelist_file
+      The namelist file
+    provisioned_rundir
+      Run directory provisioned with all required content
+    validate
+      Validate the UW driver config

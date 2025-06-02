@@ -111,7 +111,7 @@ class CDEPS(AssetsCycleBased):
         :param group: "atm_in" or "ocn_in".
         :param path: Path to write namelist to.
         """
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=NMLConfig, config_values=self.config[group], path=path
         )
 

@@ -147,6 +147,7 @@ class STR:
     updatefmt: str = "update_format"
     updatevalues: str = "update_values"
     upp: str = "upp"
+    upp_assets: str = "upp_assets"
     url_scheme_file: str = "file"
     url_scheme_hsi: str = "hsi"
     url_scheme_htar: str = "htar"

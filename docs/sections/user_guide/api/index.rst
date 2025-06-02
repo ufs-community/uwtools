@@ -30,4 +30,5 @@ API
    template
    ungrib
    upp
+   upp_assets
    ww3
