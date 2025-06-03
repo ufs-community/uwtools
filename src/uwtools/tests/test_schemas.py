@@ -1970,11 +1970,11 @@ def test_schema_rocoto_task_resources():
 def test_schema_rocoto_workflow_log():
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "log")
     # Basic spec:
-    assert not errors({"log": {"cyclestr": {"value": "foo"}}, "verbosity": 10})
-    # The "cyclestr" property is mandatory:
-    assert "cyclestr' is a required property" in errors({"log": {"verbosity": 10}})
+    assert not errors({"value": {"cyclestr": {"value": "foo"}}, "attrs": {"verbosity": 10}})
+    # The "value" property is mandatory:
+    assert "'value' is a required property" in errors({"attrs": {"verbosity": 10}})
     # Optional attribute "verbosity" is supported:
-    assert not errors({"log": {"cyclestr": {"value": "foo"}}})
+    assert not errors({"value": {"cyclestr": {"value": "foo"}}})
 
 
 # schism

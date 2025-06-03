@@ -436,7 +436,7 @@ class TestRocotoXML:
             "workflow": {
                 "attrs": {"realtime": True, "scheduler": "slurm"},
                 "cycledef": [],
-                "log": "1",
+                "log": {"value": "1"},
                 "tasks": {
                     "task_foo": {
                         "command": "echo hello",
@@ -475,14 +475,14 @@ class TestRocotoXML:
 
     def test__add_workflow_log_basic(self, instance, root):
         val = "/path/to/logfile"
-        instance._add_workflow_log(e=root, config={"log": val})
+        instance._add_workflow_log(e=root, config={"log": {"value": val}})
         log = root[0]
         assert log.tag == "log"
         assert log.text == val
 
     def test__add_workflow_log_cyclestr(self, instance, root):
         val = "/path/to/logfile-@Y@m@d@H"
-        instance._add_workflow_log(e=root, config={"log": {"cyclestr": {"value": val}}})
+        instance._add_workflow_log(e=root, config={"log": {"value": {"cyclestr": {"value": val}}}})
         log = root[0]
         assert log.tag == "log"
         assert log.xpath("cyclestr")[0].text == val
