@@ -566,6 +566,7 @@
         },
         "log": {
           "properties": {
+            "$ref": "#/$defs/compoundTimeString",
             "attrs": {
               "additionalProperties": false,
               "properties": {
@@ -574,10 +575,9 @@
                 }
               },
               "type": "object"
-            },
-            "$ref": "#/$defs/compoundTimeString"
+            }
           },
-	  "type": "object"
+          "type": "object"
         },
         "tasks": {
           "additionalProperties": false,
