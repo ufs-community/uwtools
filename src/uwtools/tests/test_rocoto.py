@@ -491,7 +491,8 @@ class TestRocotoXML:
         val = "10"
         config = {"log": {"attrs": {"verbosity": 10}, "value": {"cyclestr": {"value": val}}}}
         instance._add_workflow_log(e=root, config=config)
-        assert root.get("verbosity") == "10"
+        log = root[0]
+        assert log.attrib["verbosity"] == "10"
 
     def test__add_workflow_tasks(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2"}
