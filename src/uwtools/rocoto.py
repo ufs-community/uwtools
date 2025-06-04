@@ -339,7 +339,8 @@ class _RocotoXML:
         :param logfile: The path to the log file.
         """
         tag = STR.log
-        self._add_compound_time_string(e, config[tag], tag)
+        e = self._add_compound_time_string(e, config[tag][STR.value], tag)
+        self._set_attrs(e, config[tag])
 
     def _add_workflow_tasks(self, e: _Element, config: dict) -> None:
         """

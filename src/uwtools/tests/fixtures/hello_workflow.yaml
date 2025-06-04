@@ -10,7 +10,10 @@ workflow:
   entities:
     ACCOUNT: myaccount
     FOO: test.log
-  log: /some/path/to/&FOO;
+  log: 
+    attrs:
+      verbosity: 10
+    value: /some/path/to/&FOO;
   tasks:
     task_hello:
       attrs:
