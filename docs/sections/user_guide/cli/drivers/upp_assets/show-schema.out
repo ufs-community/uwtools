@@ -1,0 +1,20 @@
+{
+  "properties": {
+    "upp_assets": {
+      "additionalProperties": false,
+      "properties": {
+        "control_file": {
+          "type": "string"
+        },
+        "files_to_copy": {
+          "additionalProperties": {
+            "type": "fs_src"
+          },
+          "minProperties": 1,
+          "type": "object"
+        },
+        "files_to_link": {
+          "additionalProperties": {
+            "type": "fs_src"
+          },
+          "minProperties": 1,

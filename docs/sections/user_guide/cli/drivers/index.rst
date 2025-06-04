@@ -25,4 +25,5 @@ Drivers
    shave/index
    ungrib/index
    upp/index
+   upp_assets/index
    ww3/index

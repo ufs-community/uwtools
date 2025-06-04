@@ -1,0 +1,30 @@
+{
+  "properties": {
+    "upp_assets": {
+      "additionalProperties": false,
+      "properties": {
+        "control_file": {
+          "type": "string"
+        },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "namelist": {
+          "$ref": "urn:uwtools:upp-namelist"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "control_file",
+        "namelist",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  }
+}

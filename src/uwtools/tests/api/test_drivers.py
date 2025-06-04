@@ -23,6 +23,7 @@ from uwtools.api import (
     shave,
     ungrib,
     upp,
+    upp_assets,
     ww3,
 )
 from uwtools.utils import api
@@ -47,10 +48,24 @@ modules = [
     shave,
     ungrib,
     upp,
+    upp_assets,
     ww3,
 ]
-with_cycle = [cdeps, chgres_cube, fv3, ioda, jedi, mpas, mpas_init, schism, ungrib, upp, ww3]
-with_leadtime = [upp]
+with_cycle = [
+    cdeps,
+    chgres_cube,
+    fv3,
+    ioda,
+    jedi,
+    mpas,
+    mpas_init,
+    schism,
+    ungrib,
+    upp,
+    upp_assets,
+    ww3,
+]
+with_leadtime = [upp, upp_assets]
 
 
 @mark.parametrize("module", modules)

@@ -70,7 +70,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
                     grid_path = Path(config_files[k.replace("files", "dir")])
                     update_input_files(k, config_files, input_files)
         yield [file(Path(input_file), context) for input_file, context in input_files]
-        self._create_user_updated_config(
+        self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
             path=path,

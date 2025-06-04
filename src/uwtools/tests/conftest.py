@@ -36,10 +36,10 @@ def ready_task():
 
 @fixture
 def utc():
-    def datetime_utc(*args, **kwargs) -> datetime:
+    def utc(*args, **kwargs) -> datetime:
         # See https://github.com/python/mypy/issues/6799
         tz = timezone.utc
         dt = datetime(*args, **kwargs, tzinfo=tz) if args or kwargs else datetime.now(tz=tz)  # type: ignore[misc]
         return dt.replace(tzinfo=None)
 
-    return datetime_utc
+    return utc

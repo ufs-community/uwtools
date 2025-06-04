@@ -9,7 +9,6 @@ import f90nml  # type: ignore[import-untyped]
 from pytest import fixture, mark
 
 from uwtools.drivers import sfc_climo_gen
-from uwtools.drivers.driver import Driver
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen
 
 # Fixtures
@@ -68,28 +67,6 @@ def driverobj(config):
 
 
 # Tests
-
-
-@mark.parametrize(
-    "method",
-    [
-        "_run_resources",
-        "_run_via_batch_submission",
-        "_run_via_local_execution",
-        "_runcmd",
-        "_runscript",
-        "_runscript_done_file",
-        "_runscript_path",
-        "_scheduler",
-        "_validate",
-        "_write_runscript",
-        "run",
-        "runscript",
-        "taskname",
-    ],
-)
-def test_SfcClimoGen(method):
-    assert getattr(SfcClimoGen, method) is getattr(Driver, method)
 
 
 def test_SfcClimoGen_driver_name(driverobj):

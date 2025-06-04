@@ -1,0 +1,25 @@
+upp_assets:
+  control_file: /path/to/postxconfig-NT.txt
+  files_to_link:
+    eta_micro_lookup.dat: /path/to/nam_micro_lookup.dat
+    params_grib2_tbl_new: /path/to/params_grib2_tbl_new
+  namelist:
+    base_file: /path/to/base.nml
+    update_values:
+      model_inputs:
+        datestr: "{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}"
+        filename: /path/to/dynf{{ '%03d' % (leadtime.total_seconds() / 3600) }}.nc
+        filenameflux: /path/to/phyf{{ '%03d' % (leadtime.total_seconds() / 3600) }}.nc
+        grib: grib2
+        ioform: netcdf
+        modelname: FV3R
+        submodelname: RTMA
+      nampgb:
+        kpo: 3
+        numx: 1
+        po:
+          - 1000
+          - 100
+          - 1
+    validate: true
+  rundir: /path/to/run/dir

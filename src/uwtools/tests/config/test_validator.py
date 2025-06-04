@@ -6,7 +6,7 @@ import json
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
@@ -15,6 +15,9 @@ from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.utils.file import resource_path
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 # Fixtures
 
@@ -78,10 +81,14 @@ def rocoto_assets():
 @fixture
 def schema() -> dict[str, Any]:
     return {
+        "additionalProperties": False,
         "properties": {
             "color": {
                 "enum": ["blue", "red"],
                 "type": "string",
+            },
+            "cycle": {
+                "type": "datetime",
             },
             "dir": {
                 "format": "uri",
@@ -257,5 +264,7 @@ def test_config_validator__validation_errors_bad_number_value(config, schema):
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test_config_validator__validation_errors_pass(config, schema):
+def test_config_validator__validation_errors_pass(config, schema, utc):
+    cycle: datetime = utc(2025, 6, 3, 12)
+    config["cycle"] = cycle
     assert not validator._validation_errors(config, schema)

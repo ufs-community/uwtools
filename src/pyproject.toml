@@ -54,6 +54,7 @@ ignore = [
   "D401",    # non-imperative-mood
   "D404",    # docstring-starts-with-this
   "E731",    # lambda-assignment
+  "ERA001",  # commented-out-code
   "FBT001",  # boolean-type-hint-positional-argument
   "FBT002",  # boolean-default-value-positional-argument
   "FBT003",  # boolean-positional-value-in-call
