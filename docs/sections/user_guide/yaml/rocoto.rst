@@ -89,6 +89,7 @@ UW YAML ``cycledef:`` specs using the "crontab-like" syntax, following examples 
 The ``attrs:`` and ``cyclestr`` blocks are optional within the ``log:`` block. For example:
 
 .. code-block:: yaml
+
    log:
      attrs:
        verbosity: 10
