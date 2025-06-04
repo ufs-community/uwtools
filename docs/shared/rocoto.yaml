@@ -13,6 +13,8 @@ workflow:
     ACCOUNT: myaccount
     FOO: test.log
   log: 
+    attrs:
+      verbosity: 10
     value: /some/path/to/&FOO;
   tasks:
     task_hello:
