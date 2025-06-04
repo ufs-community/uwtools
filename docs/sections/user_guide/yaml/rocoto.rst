@@ -86,6 +86,24 @@ UW YAML ``cycledef:`` specs using the "crontab-like" syntax, following examples 
 
    <log>/some/path/to/&FOO;</log>
 
+The ``attrs:`` and ``cyclestr`` blocks are optional within the ``log:`` block. For example:
+
+.. code-block:: yaml
+   log:
+     attrs:
+       verbosity: 10
+     value:
+       cyclestr:
+         value: /some/path/to/&FOO;
+
+It corresponds to the ``<log>`` tag. For example:
+
+.. code-block:: xml
+  
+  <log verbosity="10">
+    <cyclestr>/some/path/to/&FOO;</cyclestr>
+  </log>
+
 ``tasks:`` -- This section is explained in the `Tasks Section`_.
 
 Using Cycle Strings
