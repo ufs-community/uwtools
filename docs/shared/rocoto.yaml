@@ -12,7 +12,8 @@ workflow:
   entities:
     ACCOUNT: myaccount
     FOO: test.log
-  log: /some/path/to/&FOO;
+  log: 
+    value: /some/path/to/&FOO;
   tasks:
     task_hello:
       attrs:

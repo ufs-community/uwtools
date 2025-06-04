@@ -26,7 +26,8 @@ Starting at the top level of the UW YAML config for Rocoto, there are several re
      entities:
        ACCOUNT: myaccount
        FOO: test.log
-     log: /some/path/to/&FOO;
+     log: 
+       value: /some/path/to/&FOO;
      tasks:
        ...
 
@@ -97,8 +98,9 @@ The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent componen
    entities:
      FOO: test@Y-@m-@dT@X.log
    log:
-     cyclestr:
-       value: /some/path/to/&FOO;
+     value:
+       cyclestr:
+         value: /some/path/to/&FOO;
 
 In the example, the resulting log would appear in the XML file as:
 
@@ -113,14 +115,15 @@ Wherever a ``cyclestr:`` block is accepted, a YAML sequence mixing text and ``cy
 .. code-block:: yaml
 
    log:
-     - cyclestr:
-         value: "%Y%m%d%H"
-     - -through-
-     - cyclestr:
-         attrs:
-           offset: "06:00:00"
-         value: "%Y%m%d%H"
-     - .log
+     - value:
+       - cyclestr:
+           value: "%Y%m%d%H"
+       - -through-
+       - cyclestr:
+           attrs:
+             offset: "06:00:00"
+           value: "%Y%m%d%H"
+       - .log
 
 would be rendered as
 
@@ -373,7 +376,8 @@ Defining the Workflow Log
 
 .. code-block:: yaml
 
-   log: /some/path/to/workflow.log
+   log:
+     value: /some/path/to/workflow.log
 
 .. code-block:: xml
 
@@ -384,8 +388,9 @@ A cycle string may be specified here instead.
 .. code-block:: yaml
 
    log:
-     cyclestr:
-       value: /some/path/to/workflow_@Y@m@d.log
+     value:
+       cyclestr:
+         value: /some/path/to/workflow_@Y@m@d.log
 
 .. code-block:: xml
 
