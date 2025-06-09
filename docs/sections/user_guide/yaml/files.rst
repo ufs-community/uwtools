@@ -132,7 +132,7 @@ Caveats
 * Glob patterns are not supported in combination with HTTP sources (see below).
 * In copy mode, directories identified by a glob pattern are ignored and not copied.
 * In link mode, directories identified by a glob pattern are linked.
-* Many interesting use cases for copying/linking are beyond the scope of this tool. For more control, including file-grained include and exclude, consider using the unrivaled `rsync <https://rsync.samba.org/>`_, which is available from `conda-forge <https://anaconda.org/conda-forge/rsync>`_ in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
+* Many interesting use cases for copying/linking are beyond the scope of this tool. For more control, including file-grained include and exclude, consider using the unrivaled `rsync <https://github.com/RsyncProject/rsync>`_, which is available from `conda-forge <https://anaconda.org/conda-forge/rsync>`_ in case your system does not already provide it. It can be called from shell scripts, or via :python:`subprocess <subprocess.html>` from Python.
 
 HTTP Support
 ------------

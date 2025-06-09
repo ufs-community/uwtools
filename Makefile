@@ -1,7 +1,7 @@
-CHANNELS  = $(addprefix -c ,$(shell tr '\n' ' ' <$(RECIPE_DIR)/channels)) -c local
-METADEPS  = $(addprefix $(RECIPE_DIR)/,meta.yaml) src/uwtools/resources/info.json
-METAJSON  = $(RECIPE_DIR)/meta.json
-TARGETS   = clean-devenv devshell docs env format lint meta package test test-nb typecheck unittest
+CHANNELS = $(addprefix -c ,$(shell tr '\n' ' ' <$(RECIPE_DIR)/channels)) -c local
+METADEPS = $(addprefix $(RECIPE_DIR)/,meta.yaml) src/uwtools/resources/info.json
+METAJSON = $(RECIPE_DIR)/meta.json
+TARGETS  = clean-devenv devshell docs env format lint meta package test test-nb typecheck unittest
 
 export RECIPE_DIR := $(shell cd ./recipe && pwd)
 
@@ -35,7 +35,7 @@ lint:
 
 meta: $(METAJSON)
 
-package: meta
+package:
 	conda build $(CHANNELS) --error-overlinking --override-channels $(RECIPE_DIR)
 
 test:
