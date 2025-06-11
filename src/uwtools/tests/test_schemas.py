@@ -1910,6 +1910,18 @@ def test_schema_rocoto_task_resources():
     assert not errors([{"native": "abc", "nodes": "1:ppn=12"}])
 
 
+def test_schema_rocoto_workflow_log():
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "log")
+    # Basic spec:
+    assert not errors({"value": "foo"})
+    # The "value" property is mandatory:
+    assert "'value' is a required property" in errors({"attrs": {"verbosity": 10}})
+    # Optional "verbosity" attribute is supported:
+    assert not errors({"value": {"cyclestr": {"value": "foo"}}, "attrs": {"verbosity": 10}})
+    # Optional "cyclestr" property is supported
+    assert not errors({"value": {"cyclestr": {"value": "foo"}}})
+
+
 # schism
 
 

@@ -7,8 +7,9 @@ workflow:
   entities:
     LOG: "@Y-@m-@d/test@X.log"
   log: 
-    cyclestr:
-      value: logs/&LOG;
+    value:
+      cyclestr:
+        value: logs/&LOG;
   tasks:
     task_greet:
       command: echo Hello, World!
