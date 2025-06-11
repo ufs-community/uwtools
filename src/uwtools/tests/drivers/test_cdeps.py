@@ -54,7 +54,7 @@ def test_CDEPS_driver_name(driverobj):
 def test_CDEPS_nml(driverobj, group, logged):
     dst = driverobj.rundir / f"d{group}_in"
     assert not dst.is_file()
-    del driverobj._config[f"{group}_in"]["base_file"]
+    del driverobj._config[f"d{group}"]["base_file"]
     task = getattr(driverobj, f"{group}_nml")
     path = Path(task().refs)
     assert dst.is_file()
@@ -92,7 +92,7 @@ def test_CDEPS_streams(driverobj, group):
     """
     template_file = driverobj.rundir.parent / "template.jinja2"
     template_file.write_text(dedent(template).strip())
-    driverobj._config[f"{group}_streams"]["template_file"] = template_file
+    driverobj._config["template_file"] = template_file
     task = getattr(driverobj, f"{group}_stream")
     path = Path(task().refs)
     assert dst.is_file()
@@ -116,7 +116,7 @@ def test_CDEPS_streams(driverobj, group):
 
 
 def test_CDEPS__model_namelist_file(driverobj):
-    group = "atm_in"
+    group = "datm"
     path = Path("/path/to/some.nml")
     with patch.object(driverobj, "create_user_updated_config") as cuuc:
         driverobj._model_namelist_file(group=group, path=path)
@@ -126,7 +126,7 @@ def test_CDEPS__model_namelist_file(driverobj):
 
 
 def test_CDEPS__model_stream_file(driverobj):
-    group = "atm_streams"
+    group = "datm"
     path = Path("/path/to/some.streams")
     template_file = Path("/path/to/some.jinja2")
     with patch.object(cdeps, "_render") as render:
