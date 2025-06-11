@@ -62,7 +62,7 @@ def test_utils_tasks_existing_hpss(available, wrapper):
         patch.object(tasks, "run_shell_cmd", return_value=(available, None)) as run_shell_cmd,
     ):
         val = tasks.existing_hpss(path=path)
-    assert val.refs == path
+    assert val.ref == path
     taskname = f"HPSS file {path}"
     run_shell_cmd.assert_called_once_with(f"{STR.hsi} -q ls -1 '{path}'", taskname=taskname)
 

@@ -160,7 +160,7 @@ def test_MPAS_files_copied_and_files_linked(config, cycle, key, task, test, tmp_
 def test_MPAS_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -173,7 +173,7 @@ def test_MPAS_namelist_file__durations(config, cycle, expected, hours, logged):
     driverobj = MPAS(config=config, cycle=cycle)
     dst = driverobj.rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -183,7 +183,7 @@ def test_MPAS_namelist_file__durations(config, cycle, expected, hours, logged):
 
 def test_MPAS_namelist_file__fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -192,7 +192,7 @@ def test_MPAS_namelist_file__fails_validation(driverobj, logged):
 def test_MPAS_namelist_file__missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged("missing.nml: Not ready [external asset]")
 

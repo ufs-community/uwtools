@@ -47,10 +47,10 @@ def test_GlobalEquivResol_driver_name(driverobj):
 
 def test_GlobalEquivResol_input_file(driverobj):
     path = Path(driverobj.config["input_grid_file"])
-    assert not driverobj.input_file().refs.is_file()
+    assert not driverobj.input_file().ref.is_file()
     path.parent.mkdir()
     path.touch()
-    assert driverobj.input_file().refs.is_file()
+    assert driverobj.input_file().ref.is_file()
 
 
 def test_GlobalEquivResol_output(driverobj):
