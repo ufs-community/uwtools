@@ -31,19 +31,19 @@ if TYPE_CHECKING:
 
 
 def compare(
-    config_1_path: Path | str,
-    config_2_path: Path | str,
-    config_1_format: str | None = None,
-    config_2_format: str | None = None,
+    path1: Path | str,
+    path2: Path | str,
+    format1: str | None = None,
+    format2: str | None = None,
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
     return _compare(
-        config_1_path=Path(config_1_path),
-        config_2_path=Path(config_2_path),
-        config_1_format=config_1_format,
-        config_2_format=config_2_format,
+        path1=Path(path1),
+        path2=Path(path2),
+        format1=format1,
+        format2=format2,
     )
 
 
@@ -212,10 +212,10 @@ Compare two config files.
 
 Recognized file extensions are: {extensions}
 
-:param config_1_path: Path to 1st config file.
-:param config_2_path: Path to 2nd config file.
-:param config_1_format: Format of 1st config file (optional if file's extension is recognized).
-:param config_2_format: Format of 2nd config file (optional if file's extension is recognized).
+:param path1: Path to 1st config file.
+:param path2: Path to 2nd config file.
+:param format1: Format of 1st config file (optional if file's extension is recognized).
+:param format2: Format of 2nd config file (optional if file's extension is recognized).
 :return: ``False`` if config files had differences, otherwise ``True``.
 """.format(extensions=", ".join(_FORMAT.extensions())).strip()
 

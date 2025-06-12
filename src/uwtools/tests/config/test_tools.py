@@ -107,9 +107,7 @@ def help_realize_config_simple(infn, infmt, tmpdir):
 
 def test_compare_configs_good(compare_configs_assets, logged):
     _, a, b = compare_configs_assets
-    assert tools.compare_configs(
-        config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
-    )
+    assert tools.compare_configs(path1=a, format1=FORMAT.yaml, path2=b, format2=FORMAT.yaml)
     assert logged(".*", regex=True)
 
 
@@ -118,9 +116,7 @@ def test_compare_configs_changed_value(compare_configs_assets, logged):
     d["baz"]["qux"] = 11
     with writable(b) as f:
         yaml.dump(d, f)
-    assert not tools.compare_configs(
-        config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
-    )
+    assert not tools.compare_configs(path1=a, format1=FORMAT.yaml, path2=b, format2=FORMAT.yaml)
     expected = """
     - %s
     + %s
@@ -148,9 +144,7 @@ def test_compare_configs_missing_key(compare_configs_assets, logged):
     with writable(b) as f:
         yaml.dump(d, f)
     # Note that a and b are swapped:
-    assert not tools.compare_configs(
-        config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
-    )
+    assert not tools.compare_configs(path1=b, format1=FORMAT.yaml, path2=a, format2=FORMAT.yaml)
     expected = """
     - %s
     + %s
@@ -171,10 +165,10 @@ def test_compare_configs_missing_key(compare_configs_assets, logged):
 
 def test_compare_configs_bad_format(logged):
     assert not tools.compare_configs(
-        config_1_path=Path("/not/used"),
-        config_1_format="jpg",
-        config_2_path=Path("/not/used"),
-        config_2_format=FORMAT.yaml,
+        path1=Path("/not/used"),
+        format1="jpg",
+        path2=Path("/not/used"),
+        format2=FORMAT.yaml,
     )
     msg = "Formats do not match: jpg vs yaml"
     assert logged(msg)

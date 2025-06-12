@@ -19,23 +19,23 @@ from uwtools.utils.file import get_file_format
 
 
 def compare_configs(
-    config_1_path: Path,
-    config_2_path: Path,
-    config_1_format: str | None = None,
-    config_2_format: str | None = None,
+    path1: Path,
+    path2: Path,
+    format1: str | None = None,
+    format2: str | None = None,
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compare_configs.__doc__ definition below.
     """
-    config_1_format = _ensure_format("1st config file", config_1_format, config_1_path)
-    config_2_format = _ensure_format("2nd config file", config_2_format, config_2_path)
-    if config_1_format != config_2_format:
-        log.error("Formats do not match: %s vs %s", config_1_format, config_2_format)
+    format1 = _ensure_format("1st config file", format1, path1)
+    format2 = _ensure_format("2nd config file", format2, path2)
+    if format1 != format2:
+        log.error("Formats do not match: %s vs %s", format1, format2)
         return False
-    cfg_1: Config = format_to_config(config_1_format)(config_1_path)
-    cfg_2: Config = format_to_config(config_2_format)(config_2_path)
-    log.info("- %s", config_1_path)
-    log.info("+ %s", config_2_path)
+    cfg_1: Config = format_to_config(format1)(path1)
+    cfg_2: Config = format_to_config(format2)(path2)
+    log.info("- %s", path1)
+    log.info("+ %s", path2)
     return cfg_1.compare_config(cfg_2.as_dict())
 
 
@@ -319,10 +319,10 @@ Compare two config files.
 
 Recognized file extensions are: {extensions}
 
-:param config_1_path: Path to 1st config file
-:param config_2_path: Path to 2nd config file
-:param config_1_format: Format of 1st config file (optional if file's extension is recognized)
-:param config_2_format: Format of 2nd config file (optional if file's extension is recognized)
+:param path1: Path to 1st config file
+:param path2: Path to 2nd config file
+:param format1: Format of 1st config file (optional if file's extension is recognized)
+:param format2: Format of 2nd config file (optional if file's extension is recognized)
 :return: ``False`` if config files had differences, otherwise ``True``
 """.format(extensions=", ".join(FORMAT.extensions())).strip()
 

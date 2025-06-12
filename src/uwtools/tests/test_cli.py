@@ -195,8 +195,8 @@ def test__dispatch_execute(utc):
 @mark.parametrize(
     "vals",
     [
-        (STR.file1path, STR.file1fmt),
-        (STR.file2path, STR.file2fmt),
+        (STR.path1, STR.fmt1),
+        (STR.path2, STR.fmt2),
         (STR.infile, STR.infmt),
         (STR.outfile, STR.outfmt),
         (STR.valsfile, STR.valsfmt),
@@ -317,14 +317,14 @@ def test__dispatch_config(params):
 
 
 def test__dispatch_config_compare():
-    args = {STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4}
+    args = {STR.path1: 1, STR.fmt1: 2, STR.path2: 3, STR.fmt2: 4}
     with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
     compare.assert_called_once_with(
-        config_1_path=args[STR.file1path],
-        config_1_format=args[STR.file1fmt],
-        config_2_path=args[STR.file2path],
-        config_2_format=args[STR.file2fmt],
+        path1=args[STR.path1],
+        format1=args[STR.fmt1],
+        path2=args[STR.path2],
+        format2=args[STR.fmt2],
     )
 
 

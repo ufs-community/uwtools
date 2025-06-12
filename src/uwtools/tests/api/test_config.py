@@ -13,18 +13,18 @@ from uwtools.utils.file import FORMAT
 
 def test_compare():
     kwargs: dict = {
-        "config_1_path": "path1",
-        "config_1_format": "fmt1",
-        "config_2_path": "path2",
-        "config_2_format": "fmt2",
+        "path1": "path1",
+        "format1": "fmt1",
+        "path2": "path2",
+        "format2": "fmt2",
     }
     with patch.object(config, "_compare") as _compare:
         config.compare(**kwargs)
     _compare.assert_called_once_with(
         **{
             **kwargs,
-            "config_1_path": Path(kwargs["config_1_path"]),
-            "config_2_path": Path(kwargs["config_2_path"]),
+            "path1": Path(kwargs["path1"]),
+            "path2": Path(kwargs["path2"]),
         }
     )
 
