@@ -77,7 +77,7 @@ def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready_task):
-        path = Path(driverobj.namelist_file().refs)
+        path = Path(driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -86,7 +86,7 @@ def test_SfcClimoGen_namelist_file(driverobj, logged, ready_task):
 def test_SfcClimoGen_namelist_file_fails_validation(driverobj, logged, ready_task):
     driverobj._config["namelist"]["update_values"]["config"]["halo"] = "string"
     with patch.object(sfc_climo_gen, "file", new=ready_task):
-        path = Path(driverobj.namelist_file().refs)
+        path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'integer'")

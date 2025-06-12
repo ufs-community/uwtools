@@ -94,7 +94,7 @@ def test_ChgresCube_driver_name(driverobj):
 def test_ChgresCube_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -102,7 +102,7 @@ def test_ChgresCube_namelist_file(driverobj, logged):
 
 def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'boolean'")
@@ -111,7 +111,7 @@ def test_ChgresCube_namelist_file_fails_validation(driverobj, logged):
 def test_ChgresCube_namelist_file_missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged("missing.nml (namelist.base_file): Not ready [external asset]")
 

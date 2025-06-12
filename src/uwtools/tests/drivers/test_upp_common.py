@@ -58,7 +58,7 @@ def control_file(upp_driverobj):
     cfg["control_file"] = str(path)
     task = upp_driverobj.control_file()
     assert task.ready
-    assert task.refs[0].read_text() == contents
+    assert task.ref[0].read_text() == contents
 
 
 def files_copied(upp_driverobj):
@@ -87,7 +87,7 @@ def namelist_file(upp_driverobj, logged):
     base_file.write_text("&model_inputs datestr='%s' / &nampgb kpv=42 /" % datestr)
     dst = upp_driverobj.rundir / "itag"
     assert not dst.is_file()
-    path = Path(upp_driverobj.namelist_file().refs)
+    path = Path(upp_driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -101,7 +101,7 @@ def namelist_file(upp_driverobj, logged):
 def namelist_file__fails_validation(upp_driverobj, logged):
     upp_driverobj._config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
     del upp_driverobj._config["namelist"]["base_file"]
-    path = Path(upp_driverobj.namelist_file().refs)
+    path = Path(upp_driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  'string' is not of type 'integer'")
@@ -110,7 +110,7 @@ def namelist_file__fails_validation(upp_driverobj, logged):
 def namelist_file__missing_base_file(upp_driverobj, logged):
     base_file = str(Path(upp_driverobj.config["rundir"], "missing.nml"))
     upp_driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(upp_driverobj.namelist_file().refs)
+    path = Path(upp_driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged("missing.nml: Not ready [external asset]")
 

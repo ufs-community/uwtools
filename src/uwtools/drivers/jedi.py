@@ -47,7 +47,7 @@ class JEDI(JEDIBase):
         executable = file(Path(self.config[STR.execution][STR.executable]))
         config = self.configuration_file()
         yield [executable, config]
-        cmd = "time %s --validate-only %s 2>&1" % (executable.refs, config.refs)
+        cmd = "time %s --validate-only %s 2>&1" % (executable.ref, config.ref)
         if envcmds := self.config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
         success, _ = run_shell_cmd(cmd)

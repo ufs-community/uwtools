@@ -67,14 +67,14 @@ def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
         patch.object(execute, "getfullargspec") as gfa,
     ):
         node = Mock(graph=graph_code)
-        node.refs = 42
+        node.ref = 42
         driverobj = Mock()
         driverobj.forty_two.return_value = node
         gdc.return_value = (Mock(return_value=driverobj), kwargs["module"])
         gfa().args = {"batch", "cycle"}
         val = execute.execute(**kwargs)
         assert val
-        assert val.refs == 42
+        assert val.ref == 42
     assert logged("Instantiated %s with" % kwargs["classname"])
     assert graph_file.read_text().strip() == graph_code
 

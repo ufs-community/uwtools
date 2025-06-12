@@ -77,7 +77,7 @@ def test_FilterTopo_input_grid_file(driverobj):
 
 
 def test_FilterTopo_namelist_file(driverobj):
-    path = driverobj.namelist_file().refs
+    path = driverobj.namelist_file().ref
     actual = from_od(f90nml.read(path).todict())
     expected = driverobj.config["namelist"]["update_values"]
     assert actual == expected

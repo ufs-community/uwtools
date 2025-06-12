@@ -140,7 +140,7 @@ def test_MPASInit_files_copied_and_files_linked(config, cycle, key, task, test, 
 def test_MPASInit_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
@@ -160,7 +160,7 @@ def test_MPASInit_namelist_file__contents(cycle, driverobj):
 
 def test_MPASInit_namelist_file__fails_validation(driverobj, logged):
     driverobj._config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged(f"Failed to validate {path}")
     assert logged("  None is not of type 'array', 'boolean', 'number', 'string'")
@@ -169,7 +169,7 @@ def test_MPASInit_namelist_file__fails_validation(driverobj, logged):
 def test_MPASInit_namelist_file__missing_base_file(driverobj, logged):
     base_file = str(Path(driverobj.config["rundir"], "missing.nml"))
     driverobj._config["namelist"]["base_file"] = base_file
-    path = Path(driverobj.namelist_file().refs)
+    path = Path(driverobj.namelist_file().ref)
     assert not path.exists()
     assert logged("Not ready [external asset]")
 
