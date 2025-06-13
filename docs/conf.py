@@ -26,7 +26,6 @@ numfig = True
 numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow Tools"
 release = _metadata["version"]
-user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 version = _metadata["version"]
 
 extlinks = {
