@@ -1,1 +1,1 @@
-uw config compare --file-1-path a.txt --file-1-format nml --file-2-path c.nml
+uw config compare --path1 a.txt --format1 nml --path2 c.nml

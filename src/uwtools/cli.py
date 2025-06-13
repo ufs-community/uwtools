@@ -129,25 +129,25 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.compare, "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_file_path(required, switch=_switch(STR.file1path), helpmsg="Path to file 1")
-    _add_arg_file_path(required, switch=_switch(STR.file2path), helpmsg="Path to file 2")
+    _add_arg_file_path(required, switch=_switch(STR.path1), helpmsg="Path to file 1")
+    _add_arg_file_path(required, switch=_switch(STR.path2), helpmsg="Path to file 2")
     optional = _basic_setup(parser)
     _add_arg_file_format(
         optional,
-        switch=_switch(STR.file1fmt),
+        switch=_switch(STR.fmt1),
         helpmsg="Format of file 1",
         choices=FORMATS,
     )
     _add_arg_file_format(
         optional,
-        switch=_switch(STR.file2fmt),
+        switch=_switch(STR.fmt2),
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
     return [
         *_add_args_verbosity(optional),
-        partial(_check_file_vs_format, STR.file1path, STR.file1fmt),
-        partial(_check_file_vs_format, STR.file2path, STR.file2fmt),
+        partial(_check_file_vs_format, STR.path1, STR.fmt1),
+        partial(_check_file_vs_format, STR.path2, STR.fmt2),
     ]
 
 
@@ -212,10 +212,10 @@ def _dispatch_config_compare(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.compare(
-        config_1_path=args[STR.file1path],
-        config_1_format=args[STR.file1fmt],
-        config_2_path=args[STR.file2path],
-        config_2_format=args[STR.file2fmt],
+        path1=args[STR.path1],
+        format1=args[STR.fmt1],
+        path2=args[STR.path2],
+        format2=args[STR.fmt2],
     )
 
 

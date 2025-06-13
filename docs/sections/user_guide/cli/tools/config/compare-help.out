@@ -1,14 +1,13 @@
-usage: uw config compare --file-1-path PATH --file-2-path PATH [-h]
-                         [--version] [--file-1-format {ini,nml,sh,yaml}]
-                         [--file-2-format {ini,nml,sh,yaml}] [--quiet]
-                         [--verbose]
+usage: uw config compare --path1 PATH --path2 PATH [-h] [--version]
+                         [--format1 {ini,nml,sh,yaml}]
+                         [--format2 {ini,nml,sh,yaml}] [--quiet] [--verbose]
 
 Compare configs
 
 Required arguments:
-  --file-1-path PATH
+  --path1 PATH
       Path to file 1
-  --file-2-path PATH
+  --path2 PATH
       Path to file 2
 
 Optional arguments:
@@ -16,9 +15,9 @@ Optional arguments:
       Show help and exit
   --version
       Show version info and exit
-  --file-1-format {ini,nml,sh,yaml}
+  --format1 {ini,nml,sh,yaml}
       Format of file 1
-  --file-2-format {ini,nml,sh,yaml}
+  --format2 {ini,nml,sh,yaml}
       Format of file 2
   --quiet, -q
       Print no logging messages
