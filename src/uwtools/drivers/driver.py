@@ -10,7 +10,10 @@ import stat
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from functools import partial
+from importlib import import_module
+from inspect import getmembers, isclass
 from pathlib import Path
+from pkgutil import iter_modules
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Union
 
@@ -692,3 +695,14 @@ _add_docstring(Driver)
 _add_docstring(DriverCycleBased, omit=[STR.leadtime])
 _add_docstring(DriverCycleLeadtimeBased)
 _add_docstring(DriverTimeInvariant, omit=[STR.cycle, STR.leadtime])
+
+
+def config_blocks_to_classes():
+    pkgname = "uwtools.api"
+    for x in iter_modules(import_module(pkgname).__path__):
+        module = import_module(f"{pkgname}.{x.name}")
+        members = getmembers(module)
+        classes = {obj for _, obj in members if isclass(obj)}
+        for c in classes:
+            if hasattr(c, "driver_name"):
+                print(c.driver_name(), c)
