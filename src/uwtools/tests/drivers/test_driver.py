@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, PropertyMock, patch
@@ -145,6 +146,20 @@ def test_Assets_fail_bad_config(config):
     with raises(UWConfigError) as e:
         ConcreteAssetsTimeInvariant(config=config["concrete"])
     assert str(e.value) == "Required 'concrete' block missing in config"
+
+
+def test_Assets_config_copy_from_dict(config):
+    original = deepcopy(config)
+    ConcreteAssetsTimeInvariant(config)
+    assert config == original
+
+
+def test_Assets_config_copy_from_yaml_config(config):
+    original = deepcopy(config)
+    yaml_config = YAMLConfig(config)
+    ConcreteAssetsTimeInvariant(yaml_config)
+    assert config == original
+    assert yaml_config.data == original
 
 
 def test_Assets___repr___cycle_based(config, utc):

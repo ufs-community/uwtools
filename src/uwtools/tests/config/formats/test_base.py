@@ -3,6 +3,7 @@ Tests for the uwtools.config.base module.
 """
 
 import os
+from copy import deepcopy
 from datetime import datetime
 from textwrap import dedent
 from typing import cast
@@ -188,6 +189,18 @@ def test_compare_config_ini(logged, salad_base):
 def test_config_from_config(config):
     assert config.config_file.name == "config.yaml"
     assert ConcreteConfig(config).data == config.data
+
+
+@mark.parametrize("f", [dict, ConcreteConfig])
+def test_config_from_config_immutable(f):
+    sub = {"shared": 1}
+    original = {"foo": "bar", "baz": sub}
+    config = f(deepcopy(original))
+    c = ConcreteConfig(config)
+    assert c.data == original
+    assert config == original
+    config["baz"]["shared"] = 2
+    assert c.data == original
 
 
 def test_config_from_file(config):
