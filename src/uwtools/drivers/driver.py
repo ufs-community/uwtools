@@ -55,15 +55,15 @@ class Assets(ABC):
         schema_file: Path | None = None,
         controller: list[YAMLKey] | None = None,
     ) -> None:
-        config_input = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        config_input.dereference(
+        config_copy = YAMLConfig(config)
+        config_copy.dereference(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
-                **config_input.data,
+                **config_copy.data,
             }
         )
-        self._config_full: dict = config_input.data
+        self._config_full: dict = config_copy.data
         self._config_intermediate, _ = walk_key_path(self._config_full, key_path or [])
         try:
             self._config: dict = self._config_intermediate[self.driver_name()]
