@@ -30,10 +30,10 @@ class Config(ABC, UserDict):
         super().__init__()
         if isinstance(config, dict):
             self._config_file = None
-            self.update(config)
+            self.update(deepcopy(config))
         elif isinstance(config, Config):
             self._config_file = config._config_file  # noqa: SLF001
-            self.update(config.data)
+            self.update(deepcopy(config.data))
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
