@@ -2243,7 +2243,7 @@ def test_schema_upp_namelist(upp_prop):
     assert "not one of ['grib2']" in errors({"update_values": {"model_inputs": {"grib": "grib1"}}})
     assert "not of type 'string'" in errors({"update_values": {"model_inputs": {"grib": 42}}})
     # model_inputs: Only certain ioform values are supported:
-    assert "not one of ['binarynemsio', 'netcdf']" in errors(
+    assert "not one of ['binarynemsio', 'netcdf', 'netcdfpara']" in errors(
         {"update_values": {"model_inputs": {"ioform": "jpg"}}}
     )
     # model_inputs: Only certain modelname values are supported:
