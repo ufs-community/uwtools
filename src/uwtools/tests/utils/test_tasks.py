@@ -112,7 +112,7 @@ def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
         with patch.object(tasks, "requests") as requests:
             response = requests.get()
             response.status_code = code
-            response.iter_content.return_value = iter([b"foo", b"bar", b"baz"])
+            response.iter_content.return_value = iter([b"f", b"o", b"o"])
             tasks.filecopy(src=src, dst=dst)
         requests.get.assert_called_with(src, allow_redirects=True, stream=True, timeout=3)
     assert dst.is_file() is expected
@@ -239,12 +239,12 @@ def test_utils_tasks_filecopy_http(ready_task, tmp_path):
         patch.object(tasks, "existing_http", wraps=ready_task) as existing_http,
     ):
         response = Mock(status_code=200)
-        response.iter_content.return_value = iter([b"foo", b"bar", b"baz"])
+        response.iter_content.return_value = iter([b"f", b"o", b"o"])
         get.return_value = response
         tasks.filecopy_http(url=url, dst=dst)
     existing_http.assert_called_once_with(url)
     get.assert_called_once_with(url, allow_redirects=True, stream=True, timeout=3)
-    assert dst.read_bytes() == b"foobarbaz"
+    assert dst.read_bytes() == b"foo"
 
 
 def test_utils_tasks_filecopy_local(tmp_path):
