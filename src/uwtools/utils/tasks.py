@@ -182,9 +182,11 @@ def filecopy_http(url: str, dst: Path, check: bool = True):
     yield asset(dst, dst.is_file)
     yield existing_http(url) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
-    response = requests.get(url, allow_redirects=True, timeout=3)
+    response = requests.get(url, allow_redirects=True, stream=True, timeout=3)
     if (code := response.status_code) == HTTPStatus.OK:
-        dst.write_bytes(response.content)
+        with dst.open(mode="wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
     else:
         log.error("Could not get '%s', HTTP status was: %s", url, code)
 
