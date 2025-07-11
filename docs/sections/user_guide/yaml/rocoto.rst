@@ -26,7 +26,7 @@ Starting at the top level of the UW YAML config for Rocoto, there are several re
      entities:
        ACCOUNT: myaccount
        FOO: test.log
-     log: 
+     log:
        value: /some/path/to/&FOO;
      tasks:
        ...
@@ -100,7 +100,7 @@ The ``attrs:`` and ``cyclestr`` blocks are optional within the ``log:`` block. F
 It corresponds to the ``<log>`` tag. For example:
 
 .. code-block:: xml
-  
+
   <log verbosity="10">
     <cyclestr>/some/path/to/&FOO;</cyclestr>
   </log>
@@ -134,7 +134,7 @@ Wherever a ``cyclestr:`` block is accepted, a YAML sequence mixing text and ``cy
 .. code-block:: yaml
 
    log:
-     - value:
+     value:
        - cyclestr:
            value: "%Y%m%d%H"
        - -through-
