@@ -254,8 +254,7 @@ class _RocotoXML:
         :param name_attr: XML name attribute for element.
         """
         e = self._add_compound_time_string(e, config[STR.command], STR.sh)
-        if STR.attrs not in config:
-            config[STR.attrs] = {}
+        config[STR.attrs] = config.get(STR.attrs, {})
         config[STR.attrs][STR.name] = name_attr
         self._set_attrs(e, config)
 
