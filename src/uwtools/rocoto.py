@@ -255,7 +255,8 @@ class _RocotoXML:
         """
         e = self._add_compound_time_string(e, config[STR.command], STR.sh)
         config[STR.attrs] = config.get(STR.attrs, {})
-        config[STR.attrs][STR.name] = name_attr
+        if name_attr:
+            config[STR.attrs][STR.name] = name_attr
         self._set_attrs(e, config)
 
     def _add_task_dependency_strequality(self, e: _Element, config: dict, tag: str) -> None:
