@@ -304,7 +304,19 @@ class TestRocotoXML:
         assert e.tag == "timedep"
         assert e.text == str(value)
 
-    def test__add_task_dependency_sh(self, instance, root):
+    def test__add_task_dependency_sh__no_attrs(self, instance, root):
+        config = {"sh_foo": {"command": "ls"}}
+        errors = schema_validator("rocoto", "$defs", "dependency")
+        assert not errors(config)
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        sh = dependency[0]
+        assert sh.tag == "sh"
+        assert sh.get("name") == "foo"
+        assert sh.text == "ls"
+
+    def test__add_task_dependency_sh__with_attrs(self, instance, root):
         config = {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "ls"}}
         errors = schema_validator("rocoto", "$defs", "dependency")
         assert not errors(config)
