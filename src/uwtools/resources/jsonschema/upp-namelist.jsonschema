@@ -47,7 +47,8 @@
             "ioform": {
               "enum": [
                 "binarynemsio",
-                "netcdf"
+                "netcdf",
+                "netcdfpara"
               ],
               "type": "string"
             },
