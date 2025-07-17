@@ -28,13 +28,13 @@ requirements:
 test:
   requires:
     - docformatter 1.7.*
-    - jq 1.7.*
+    - jq 1.8.*
     - make 4.4.*
-    - mypy 1.15.*
-    - pytest 8.3.*
-    - pytest-cov 6.1.*
-    - pytest-xdist 3.6.*
+    - mypy 1.17.*
+    - pytest 8.4.*
+    - pytest-cov 6.2.*
+    - pytest-xdist 3.8.*
     - python {{ pymin }}
-    - ruff 0.11.*
+    - ruff 0.12.*
 about:
   license: LGPL

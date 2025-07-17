@@ -107,6 +107,9 @@ class UWYAMLTag:
             return NotImplemented
         return self.tag == other.tag and self.value == other.value
 
+    def __hash__(self):
+        return hash(str(self))
+
     def __repr__(self) -> str:
         return ("%s %s" % (self.tag, self.value)).strip()
 

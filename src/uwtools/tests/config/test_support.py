@@ -60,6 +60,12 @@ def test_config_support_UWYAMLTag__eq():
     assert tag0 == tag1
 
 
+def test_config_support_UWYAMLTag__hash():
+    node = yaml.nodes.Node(tag="!foo", value="bar", start_mark=None, end_mark=None)
+    tag = support.UWYAMLTag(yaml.SafeLoader("data"), node=node)
+    assert hash(tag) == hash("!foo bar")
+
+
 class TestUWYAMLConvert:
     """
     Tests for class uwtools.config.support.UWYAMLConvert.
