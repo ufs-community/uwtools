@@ -121,7 +121,7 @@ def filecopy(src: Path | str, dst: Path | str, check: bool = True) -> Node:
         return filecopy_http(str(src), dst, check)
     if src_scheme in SCHEMES.local:
         return filecopy_local(_local_path(src), dst, check)
-    _bad_scheme(src, src_scheme)  # noqa: RET503
+    return _bad_scheme(src, src_scheme)
 
 
 @task
