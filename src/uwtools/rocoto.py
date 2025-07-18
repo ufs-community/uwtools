@@ -54,34 +54,86 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
     return xml
 
 
+class RocotoRunner:
+    def __init__(self, cycle: datetime, database: Path, task: str, workflow: Path):
+        self.cycle = cycle
+        self.database = database
+        self.task = task
+        self.workflow = workflow
+        self._connection: sqlite3.Connection | None = None
+        self._cursor = None
+        self._frequency = 10  # seconds
+
+    def close(self) -> None:
+        if self._connection:
+            self._connection.close()
+
+    @property
+    def connection(self):
+        if not self._connection:
+            if not self.database.is_file():
+                return None
+            self._connection = sqlite3.connect(self.database)
+        return self._connection
+
+    @property
+    def cursor(self):
+        if not self._cursor:
+            if not self.connection:
+                return None
+            self._cursor = self.connection.cursor()
+        return self._cursor
+
+    def iterate(self) -> bool:
+        cmd = "rocotorun -d %s -w %s" % (self.database, self.workflow)
+        success, _ = run_shell_cmd(cmd)
+        return success
+
+    def run(self) -> bool:
+        initialized = False
+        while True:
+            if initialized:
+                if not self.iterate():
+                    return False
+                initialized = True
+            if state := self.state:
+                if state in STATE["inactive"]:
+                    break
+                if state in STATE["transient"]:
+                    continue  # iterate immediately to update status
+            log.info("Sleeping %s seconds", self._frequency)
+            sleep(self._frequency)
+        return True
+
+    @property
+    def state(self) -> str | None:
+        if self.cursor:
+            result = self.cursor.execute(self._query_stmt, self._query_data)
+            state: str
+            (state,) = result.fetchone()
+            log.info(self._state_msg % state)
+            assert state in chain.from_iterable(STATE.values())
+            return state
+        return None
+
+    @property
+    def _query_stmt(self) -> str:
+        return "select state from jobs where taskname=:taskname and cycle=:cycle"
+
+    @property
+    def _query_data(self) -> dict:
+        return {"taskname": self.task, "cycle": int(self.cycle.timestamp())}
+
+    @property
+    def _state_msg(self) -> str:
+        return f"Rocoto task '{self.task}' for cycle {self.cycle}: %s"
+
+
 def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
-    iterate = "rocotorun -d %s -w %s" % (database, workflow)
-    query_stmt = "select state from jobs where taskname=:taskname and cycle=:cycle"
-    query_data = {"taskname": task, "cycle": int(cycle.timestamp())}
-    connection = None
-    ok = True  # optimistically
-    while True:
-        success, _ = run_shell_cmd(iterate)
-        if not success:
-            ok = False
-            break
-        if not connection:
-            connection = sqlite3.connect(database)
-            cursor = connection.cursor()
-        result = cursor.execute(query_stmt, query_data)
-        (state,) = result.fetchone()
-        log.info("Rocoto task '%s' for cycle %s: %s", task, cycle, state)
-        assert state in chain.from_iterable(STATE.values())
-        if state in STATE["inactive"]:
-            break
-        if state in STATE["transient"]:
-            continue  # iterate immediately to update status
-        frequency = 10  # seconds
-        log.info("Sleeping %s seconds", frequency)
-        sleep(frequency)
-    if connection:
-        connection.close()
-    return ok
+    runner = RocotoRunner(cycle, database, task, workflow)
+    success = runner.run()
+    runner.close()
+    return success
 
 
 def validate_file(xml_file: Path | None) -> bool:
