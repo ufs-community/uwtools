@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 import sqlite3
 from dataclasses import dataclass
+from itertools import chain
 from math import log10
 from pathlib import Path
 from time import sleep
@@ -49,6 +50,9 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
 def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
     query = "select state from jobs where taskname=:taskname and cycle=:cycle"
     data = {"taskname": task, "cycle": int(cycle.timestamp())}
+    active = ["QUEUED", "RUNNING"]
+    inactive = ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"]
+    intermediate = ["CREATED", "DYING", "STALLED", "SUBMITTING"]
     frequency = 10  # seconds
     connection = None
     while True:
@@ -60,9 +64,12 @@ def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
             cursor = connection.cursor()
         result = cursor.execute(query, data)
         (state,) = result.fetchone()
-        log.info("Rocoto task %s at %s: %s", task, cycle, state)
-        if state in ["SUCCEEDED"]:
+        log.info("Rocoto task '%s' for cycle %s: %s", task, cycle, state)
+        assert state in chain(active, inactive, intermediate)
+        if state in inactive:
             break
+        if state in intermediate:
+            continue  # iterate immediately to update status
         log.info("Sleeping %s seconds", frequency)
         sleep(frequency)
     if connection:
