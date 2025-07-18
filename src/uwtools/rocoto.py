@@ -95,14 +95,15 @@ class RocotoRunner:
             if initialized:
                 if not self.iterate():
                     return False
-                initialized = True
             if state := self.state:
                 if state in STATE["inactive"]:
                     break
                 if state in STATE["transient"]:
                     continue  # iterate immediately to update status
-            log.info("Sleeping %s seconds", self._frequency)
-            sleep(self._frequency)
+            if initialized:
+                log.info("Sleeping %s seconds", self._frequency)
+                sleep(self._frequency)
+            initialized = True
         return True
 
     @property
