@@ -28,32 +28,6 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-STATE = {
-    "active": ["QUEUED", "RUNNING"],
-    "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
-    "transient": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
-}
-
-
-def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
-    """
-    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
-    XML output.
-
-    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
-    :param output_file: Path to write rendered XML file (None => write to stdout).
-    :return: An XML string.
-    """
-    rxml = _RocotoXML(config)
-    xml = str(rxml).strip()
-    if not validate_string(xml):
-        msg = "Internal error: Invalid Rocoto XML"
-        raise UWError(msg)
-    with writable(output_file) as f:
-        print(xml, file=f)
-    return xml
-
-
 class RocotoRunner:
     def __init__(self, cycle: datetime, database: Path, task: str, workflow: Path):
         self.cycle = cycle
@@ -64,9 +38,11 @@ class RocotoRunner:
         self._cursor = None
         self._frequency = 10  # seconds
 
-    def close(self) -> None:
+    def __del__(self):
         if self._connection:
             self._connection.close()
+
+    # PM FIX TYPES
 
     @property
     def connection(self):
@@ -92,13 +68,12 @@ class RocotoRunner:
     def run(self) -> bool:
         initialized = False
         while True:
-            if initialized:
-                if not self.iterate():
-                    return False
+            if initialized and not self.iterate():
+                return False
             if state := self.state:
-                if state in STATE["inactive"]:
+                if state in self._state["inactive"]:
                     break
-                if state in STATE["transient"]:
+                if state in self._state["transient"]:
                     continue  # iterate immediately to update status
             if initialized:
                 log.info("Sleeping %s seconds", self._frequency)
@@ -113,7 +88,7 @@ class RocotoRunner:
             state: str
             (state,) = result.fetchone()
             log.info(self._state_msg % state)
-            assert state in chain.from_iterable(STATE.values())
+            assert state in chain.from_iterable(self._state.values())
             return state
         return None
 
@@ -126,15 +101,39 @@ class RocotoRunner:
         return {"taskname": self.task, "cycle": int(self.cycle.timestamp())}
 
     @property
+    def _state() -> dict:
+        return {
+            "active": ["QUEUED", "RUNNING"],
+            "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
+            "transient": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
+        }
+
+    @property
     def _state_msg(self) -> str:
         return f"Rocoto task '{self.task}' for cycle {self.cycle}: %s"
 
 
+def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
+    """
+    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
+    XML output.
+
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_file: Path to write rendered XML file (None => write to stdout).
+    :return: An XML string.
+    """
+    rxml = _RocotoXML(config)
+    xml = str(rxml).strip()
+    if not validate_string(xml):
+        msg = "Internal error: Invalid Rocoto XML"
+        raise UWError(msg)
+    with writable(output_file) as f:
+        print(xml, file=f)
+    return xml
+
+
 def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
-    runner = RocotoRunner(cycle, database, task, workflow)
-    success = runner.run()
-    runner.close()
-    return success
+    return RocotoRunner(cycle, database, task, workflow).run()
 
 
 def validate_file(xml_file: Path | None) -> bool:
