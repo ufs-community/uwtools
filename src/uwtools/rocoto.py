@@ -28,6 +28,13 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
+STATE = {
+    "active": ["QUEUED", "RUNNING"],
+    "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
+    "intermediate": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
+}
+
+
 def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
@@ -48,33 +55,33 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
 
 
 def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
-    query = "select state from jobs where taskname=:taskname and cycle=:cycle"
-    data = {"taskname": task, "cycle": int(cycle.timestamp())}
-    active = ["QUEUED", "RUNNING"]
-    inactive = ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"]
-    intermediate = ["CREATED", "DYING", "STALLED", "SUBMITTING"]
-    frequency = 10  # seconds
+    iterate = "rocotorun -d %s -w %s" % (database, workflow)
+    query_stmt = "select state from jobs where taskname=:taskname and cycle=:cycle"
+    query_data = {"taskname": task, "cycle": int(cycle.timestamp())}
     connection = None
+    ok = True  # optimistically
     while True:
-        success, _ = run_shell_cmd("rocotorun -d %s -w %s" % (database, workflow))
+        success, _ = run_shell_cmd(iterate)
         if not success:
-            return False
+            ok = False
+            break
         if not connection:
             connection = sqlite3.connect(database)
             cursor = connection.cursor()
-        result = cursor.execute(query, data)
+        result = cursor.execute(query_stmt, query_data)
         (state,) = result.fetchone()
         log.info("Rocoto task '%s' for cycle %s: %s", task, cycle, state)
-        assert state in chain(active, inactive, intermediate)
-        if state in inactive:
+        assert state in chain.from_iterable(STATE.values())
+        if state in STATE["inactive"]:
             break
-        if state in intermediate:
+        if state in STATE["intermediate"]:
             continue  # iterate immediately to update status
+        frequency = 10  # seconds
         log.info("Sleeping %s seconds", frequency)
         sleep(frequency)
     if connection:
         connection.close()
-    return True
+    return ok
 
 
 def validate_file(xml_file: Path | None) -> bool:
