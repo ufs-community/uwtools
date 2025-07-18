@@ -73,6 +73,7 @@ class STR:
     config: str = "config"
     copy: str = "copy"
     cycle: str = "cycle"
+    database: str = "database"
     dryrun: str = "dry_run"
     env: str = "env"
     envcmds: str = "envcmds"
@@ -159,4 +160,5 @@ class STR:
     valsneeded: str = "values_needed"
     verbose: str = "verbose"
     version: str = "version"
+    workflow: str = "workflow"
     ww3: str = "ww3"

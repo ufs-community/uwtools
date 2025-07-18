@@ -8,7 +8,7 @@ import re
 from dataclasses import dataclass
 from math import log10
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from lxml import etree
 from lxml.builder import E  # type: ignore[import-not-found]
@@ -19,6 +19,9 @@ from uwtools.config.validator import validate_external as validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.utils.file import readable, resource_path, writable
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
@@ -38,6 +41,14 @@ def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | Non
     with writable(output_file) as f:
         print(xml, file=f)
     return xml
+
+
+def run_workflow(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
+    assert cycle
+    assert database
+    assert task
+    assert workflow
+    return True
 
 
 def validate_rocoto_xml_file(xml_file: Path | None) -> bool:
