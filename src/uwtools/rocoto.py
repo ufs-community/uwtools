@@ -56,7 +56,7 @@ def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
     frequency = 10  # seconds
     connection = None
     while True:
-        success, output = run_shell_cmd("rocotorun -d %s -w %s" % (database, workflow))
+        success, _ = run_shell_cmd("rocotorun -d %s -w %s" % (database, workflow))
         if not success:
             return False
         if not connection:
