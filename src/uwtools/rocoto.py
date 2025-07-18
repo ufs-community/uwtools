@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 STATE = {
     "active": ["QUEUED", "RUNNING"],
     "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
-    "intermediate": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
+    "transient": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
 }
 
 
@@ -74,7 +74,7 @@ def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
         assert state in chain.from_iterable(STATE.values())
         if state in STATE["inactive"]:
             break
-        if state in STATE["intermediate"]:
+        if state in STATE["transient"]:
             continue  # iterate immediately to update status
         frequency = 10  # seconds
         log.info("Sleeping %s seconds", frequency)
