@@ -51,6 +51,6 @@ def run_shell_cmd(
         success = False
     if output and (log_output or not success):
         logfunc("%sOutput:", pre)
-        for line in output.split("\n"):
+        for line in output.strip().split("\n"):
             logfunc("%s%s%s", pre, INDENT, line)
     return success, output

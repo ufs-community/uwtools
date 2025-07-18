@@ -5,9 +5,11 @@ Support for creating Rocoto XML workflow documents.
 from __future__ import annotations
 
 import re
+import sqlite3
 from dataclasses import dataclass
 from math import log10
 from pathlib import Path
+from time import sleep
 from typing import TYPE_CHECKING, Any
 
 from lxml import etree
@@ -19,6 +21,7 @@ from uwtools.config.validator import validate_external as validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.utils.file import readable, resource_path, writable
+from uwtools.utils.processing import run_shell_cmd
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -44,10 +47,26 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
 
 
 def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
-    assert cycle
-    assert database
-    assert task
-    assert workflow
+    query = "select state from jobs where taskname=:taskname and cycle=:cycle"
+    data = {"taskname": task, "cycle": int(cycle.timestamp())}
+    frequency = 10  # seconds
+    connection = None
+    while True:
+        success, output = run_shell_cmd("rocotorun -d %s -w %s" % (database, workflow))
+        if not success:
+            return False
+        if not connection:
+            connection = sqlite3.connect(database)
+            cursor = connection.cursor()
+        result = cursor.execute(query, data)
+        (state,) = result.fetchone()
+        log.info("Rocoto task %s at %s: %s", task, cycle, state)
+        if state in ["SUCCEEDED"]:
+            break
+        log.info("Sleeping %s seconds", frequency)
+        sleep(frequency)
+    if connection:
+        connection.close()
     return True
 
 
