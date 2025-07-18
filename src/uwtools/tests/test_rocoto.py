@@ -36,56 +36,56 @@ def validation_assets(tmp_path):
 
 def test_realize_rocoto_invalid_xml(assets):
     cfgfile, outfile = assets
-    with patch.object(rocoto, "validate_rocoto_xml_string") as vrxs:
+    with patch.object(rocoto, "validate_string") as vrxs:
         vrxs.return_value = False
         with raises(UWError):
-            rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
+            rocoto.realize(config=cfgfile, output_file=outfile)
 
 
-def test_realize_rocoto_xml_cfg_to_file(assets):
+def test_realize_cfg_to_file(assets):
     cfgfile, outfile = assets
-    rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile), output_file=outfile)
-    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
+    rocoto.realize(config=YAMLConfig(cfgfile), output_file=outfile)
+    assert rocoto.validate_file(xml_file=outfile)
 
 
-def test_realize_rocoto_xml_file_to_file(assets):
+def test_realize_file_to_file(assets):
     cfgfile, outfile = assets
-    rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
-    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
+    rocoto.realize(config=cfgfile, output_file=outfile)
+    assert rocoto.validate_file(xml_file=outfile)
 
 
-def test_realize_rocoto_xml_cfg_to_stdout(capsys, assets):
+def test_realize_cfg_to_stdout(capsys, assets):
     cfgfile, outfile = assets
-    rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile))
+    rocoto.realize(config=YAMLConfig(cfgfile))
     outfile.write_text(capsys.readouterr().out)
-    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
+    assert rocoto.validate_file(xml_file=outfile)
 
 
-def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
+def test_realize_file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
-    rocoto.realize_rocoto_xml(config=cfgfile)
+    rocoto.realize(config=cfgfile)
     outfile.write_text(capsys.readouterr().out)
-    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
+    assert rocoto.validate_file(xml_file=outfile)
 
 
-def test_validate_rocoto_xml_file_fail(validation_assets):
+def test_validate_file_fail(validation_assets):
     xml_file_bad, _, _, _ = validation_assets
-    assert rocoto.validate_rocoto_xml_file(xml_file=xml_file_bad) is False
+    assert rocoto.validate_file(xml_file=xml_file_bad) is False
 
 
-def test_validate_rocoto_xml_file_pass(validation_assets):
+def test_validate_file_pass(validation_assets):
     _, xml_file_good, _, _ = validation_assets
-    assert rocoto.validate_rocoto_xml_file(xml_file=xml_file_good) is True
+    assert rocoto.validate_file(xml_file=xml_file_good) is True
 
 
-def test_validate_rocoto_xml_string_fail(validation_assets):
+def test_validate_string_fail(validation_assets):
     _, _, xml_string_bad, _ = validation_assets
-    assert rocoto.validate_rocoto_xml_string(xml=xml_string_bad) is False
+    assert rocoto.validate_string(xml=xml_string_bad) is False
 
 
-def test_validate_rocoto_xml_string_pass(validation_assets):
+def test_validate_string_pass(validation_assets):
     _, _, _, xml_string_good = validation_assets
-    assert rocoto.validate_rocoto_xml_string(xml=xml_string_good) is True
+    assert rocoto.validate_string(xml=xml_string_good) is True
 
 
 class TestRocotoXML:
@@ -551,4 +551,4 @@ class TestRocotoXML:
     def test_dump(self, instance, tmp_path):
         path = tmp_path / "out.xml"
         instance.dump(path=path)
-        assert rocoto.validate_rocoto_xml_file(path)
+        assert rocoto.validate_file(path)

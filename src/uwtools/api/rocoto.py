@@ -6,9 +6,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from uwtools.rocoto import realize_rocoto_xml as _realize
-from uwtools.rocoto import run_workflow as _run
-from uwtools.rocoto import validate_rocoto_xml_file as _validate
+from uwtools.rocoto import realize as _realize
+from uwtools.rocoto import run as _run
+from uwtools.rocoto import validate_file as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
 

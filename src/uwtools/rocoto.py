@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
+def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
     XML output.
@@ -35,7 +35,7 @@ def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | Non
     """
     rxml = _RocotoXML(config)
     xml = str(rxml).strip()
-    if not validate_rocoto_xml_string(xml):
+    if not validate_string(xml):
         msg = "Internal error: Invalid Rocoto XML"
         raise UWError(msg)
     with writable(output_file) as f:
@@ -43,7 +43,7 @@ def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | Non
     return xml
 
 
-def run_workflow(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
+def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
     assert cycle
     assert database
     assert task
@@ -51,7 +51,7 @@ def run_workflow(cycle: datetime, database: Path, task: str, workflow: Path) -> 
     return True
 
 
-def validate_rocoto_xml_file(xml_file: Path | None) -> bool:
+def validate_file(xml_file: Path | None) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
@@ -59,10 +59,10 @@ def validate_rocoto_xml_file(xml_file: Path | None) -> bool:
     :return: Did the XML conform to the schema?
     """
     with readable(xml_file) as f:
-        return validate_rocoto_xml_string(xml=f.read())
+        return validate_string(xml=f.read())
 
 
-def validate_rocoto_xml_string(xml: str) -> bool:
+def validate_string(xml: str) -> bool:
     """
     Validate purported Rocoto XML against its schema.
 
