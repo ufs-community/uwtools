@@ -35,17 +35,15 @@ class RocotoRunner:
         self.task = task
         self.workflow = workflow
         self._connection: sqlite3.Connection | None = None
-        self._cursor = None
+        self._cursor: sqlite3.Cursor | None = None
         self._frequency = 10  # seconds
 
     def __del__(self):
         if self._connection:
             self._connection.close()
 
-    # PM FIX TYPES
-
     @property
-    def connection(self):
+    def connection(self) -> sqlite3.Connection | None:
         if not self._connection:
             if not self.database.is_file():
                 return None
@@ -53,7 +51,7 @@ class RocotoRunner:
         return self._connection
 
     @property
-    def cursor(self):
+    def cursor(self) -> sqlite3.Cursor | None:
         if not self._cursor:
             if not self.connection:
                 return None
