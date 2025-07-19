@@ -34,44 +34,23 @@ class RocotoRunner:
         self.database = database
         self.task = task
         self.workflow = workflow
-        self._connection: sqlite3.Connection | None = None
-        self._cursor: sqlite3.Cursor | None = None
         self._frequency = 10  # seconds
+        self.__connection: sqlite3.Connection | None = None
+        self.__cursor: sqlite3.Cursor | None = None
 
     def __del__(self):
-        if self._connection:
-            self._connection.close()
-
-    @property
-    def connection(self) -> sqlite3.Connection | None:
-        if not self._connection:
-            if not self.database.is_file():
-                return None
-            self._connection = sqlite3.connect(self.database)
-        return self._connection
-
-    @property
-    def cursor(self) -> sqlite3.Cursor | None:
-        if not self._cursor:
-            if not self.connection:
-                return None
-            self._cursor = self.connection.cursor()
-        return self._cursor
-
-    def iterate(self) -> bool:
-        cmd = "rocotorun -d %s -w %s" % (self.database, self.workflow)
-        success, _ = run_shell_cmd(cmd)
-        return success
+        if self.__connection:
+            self.__connection.close()
 
     def run(self) -> bool:
         initialized = False
         while True:
-            if initialized and not self.iterate():
+            if initialized and not self._iterate():
                 return False
-            if state := self.state:
-                if state in self._state["inactive"]:
+            if state := self._state:
+                if state in self._states["inactive"]:
                     break
-                if state in self._state["transient"]:
+                if state in self._states["transient"]:
                     continue  # iterate immediately to update status
             if initialized:
                 log.info("Sleeping %s seconds", self._frequency)
@@ -80,15 +59,25 @@ class RocotoRunner:
         return True
 
     @property
-    def state(self) -> str | None:
-        if self.cursor:
-            result = self.cursor.execute(self._query_stmt, self._query_data)
-            state: str
-            (state,) = result.fetchone()
-            log.info(self._state_msg % state)
-            assert state in chain.from_iterable(self._state.values())
-            return state
-        return None
+    def _connection(self) -> sqlite3.Connection | None:
+        if not self.__connection:
+            if not self.database.is_file():
+                return None
+            self.__connection = sqlite3.connect(self.database)
+        return self.__connection
+
+    @property
+    def _cursor(self) -> sqlite3.Cursor | None:
+        if not self.__cursor:
+            if not (connection := self._connection):
+                return None
+            self.__cursor = connection.cursor()
+        return self.__cursor
+
+    def _iterate(self) -> bool:
+        cmd = "rocotorun -d %s -w %s" % (self.database, self.workflow)
+        success, _ = run_shell_cmd(cmd)
+        return success
 
     @property
     def _query_stmt(self) -> str:
@@ -99,7 +88,18 @@ class RocotoRunner:
         return {"taskname": self.task, "cycle": int(self.cycle.timestamp())}
 
     @property
-    def _state(self) -> dict:
+    def _state(self) -> str | None:
+        if cursor := self._cursor:
+            result = cursor.execute(self._query_stmt, self._query_data)
+            state: str
+            (state,) = result.fetchone()
+            log.info(self._state_msg % state)
+            assert state in chain.from_iterable(self._states.values())
+            return state
+        return None
+
+    @property
+    def _states(self) -> dict:
         return {
             "active": ["QUEUED", "RUNNING"],
             "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
