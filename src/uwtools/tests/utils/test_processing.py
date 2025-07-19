@@ -2,6 +2,11 @@
 Tests for uwtools.utils.processing module.
 """
 
+import logging
+
+from pytest import mark
+
+from uwtools.logging import log
 from uwtools.utils import processing
 
 
@@ -16,12 +21,18 @@ def test_utils_processing_run_shell_cmd__failure(logged):
     assert logged("  expr: division by zero")
 
 
-def test_utils_processing_run_shell_cmd__success(logged, tmp_path):
+@mark.parametrize("quiet", [True, False])
+def test_utils_processing_run_shell_cmd__success(caplog, logged, quiet, tmp_path):
     cmd = "echo hello $FOO"
+    if quiet:
+        log.setLevel(logging.INFO)
     success, _ = processing.run_shell_cmd(
-        cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True
+        cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=True, quiet=quiet
     )
     assert success
-    assert logged(f"Running: {cmd} in {tmp_path} with environment variables FOO=bar")
-    assert logged("Output:")
-    assert logged("  hello bar")
+    if quiet:
+        assert not caplog.messages
+    else:
+        assert logged(f"Running: {cmd} in {tmp_path} with environment variables FOO=bar")
+        assert logged("Output:")
+        assert logged("  hello bar")
