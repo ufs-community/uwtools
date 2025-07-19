@@ -101,7 +101,7 @@ class RocotoRunner:
         return {"taskname": self.task, "cycle": int(self.cycle.timestamp())}
 
     @property
-    def _state() -> dict:
+    def _state(self) -> dict:
         return {
             "active": ["QUEUED", "RUNNING"],
             "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
