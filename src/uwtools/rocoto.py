@@ -52,6 +52,8 @@ class RocotoRunner:
                     break
                 if state in self._states["transient"]:
                     continue  # iterate immediately to update status
+            else:
+                log.info(self._state_msg, "State not yet known")
             if initialized:
                 log.info("Sleeping %s seconds", self._frequency)
                 sleep(self._frequency)
