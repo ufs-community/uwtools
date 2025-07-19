@@ -52,8 +52,7 @@ class RocotoRunner:
                     break
                 if state in self._states["transient"]:
                     continue  # iterate immediately to update status
-            else:
-                log.info(self._state_msg, "State not yet known")
+            self._report()
             if initialized:
                 log.debug("Sleeping %s seconds", self._frequency)
                 sleep(self._frequency)
@@ -88,6 +87,13 @@ class RocotoRunner:
     @property
     def _query_stmt(self) -> str:
         return "select state from jobs where taskname=:taskname and cycle=:cycle"
+
+    def _report(self) -> None:
+        cmd = "rocotostat -d %s -w %s" % (self.database, self.workflow)
+        if self.database.is_file():
+            _, output = run_shell_cmd(cmd)
+            for line in output.split("\n"):
+                log.info(line)
 
     @property
     def _state(self) -> str | None:
