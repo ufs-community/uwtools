@@ -76,8 +76,9 @@ class RocotoRunner:
         return self.__cursor
 
     def _iterate(self) -> bool:
+        log.info("Iterating workflow")
         cmd = "rocotorun -d %s -w %s" % (self.database, self.workflow)
-        success, _ = run_shell_cmd(cmd)
+        success, _ = run_shell_cmd(cmd, quiet=True)
         return success
 
     @property
@@ -91,8 +92,9 @@ class RocotoRunner:
     def _report(self) -> None:
         cmd = "rocotostat -d %s -w %s" % (self.database, self.workflow)
         if self.database.is_file():
-            _, output = run_shell_cmd(cmd)
-            for line in output.split("\n"):
+            log.info("Workflow status:")
+            _, output = run_shell_cmd(cmd, quiet=True)
+            for line in output.strip().split("\n"):
                 log.info(line)
 
     @property
