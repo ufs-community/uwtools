@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-class RocotoRunner:
+class _RocotoRunner:
     def __init__(self, cycle: datetime, database: Path, task: str, workflow: Path):
         self.cycle = cycle
         self.database = database
@@ -142,7 +142,7 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
 
 
 def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
-    return RocotoRunner(cycle, database, task, workflow).run()
+    return _RocotoRunner(cycle, database, task, workflow).run()
 
 
 def validate_file(xml_file: Path | None) -> bool:
