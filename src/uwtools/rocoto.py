@@ -55,7 +55,7 @@ class RocotoRunner:
             else:
                 log.info(self._state_msg, "State not yet known")
             if initialized:
-                log.info("Sleeping %s seconds", self._frequency)
+                log.debug("Sleeping %s seconds", self._frequency)
                 sleep(self._frequency)
             initialized = True
         return True
