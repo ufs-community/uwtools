@@ -121,6 +121,7 @@ class STR:
     platform: str = "platform"
     properties: str = "properties"
     quiet: str = "quiet"
+    rate: str = "rate"
     ready: str = "ready"
     realize: str = "realize"
     render: str = "render"

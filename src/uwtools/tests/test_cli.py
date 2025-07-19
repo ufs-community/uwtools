@@ -459,12 +459,19 @@ def test__dispatch_rocoto_realize_no_optional():
 def test__dispatch_rocoto_run(utc):
     cycle = utc()
     database = Path("/path/to/rocoto.db")
+    rate = 11
     task = "foo"
     workflow = Path("/path/to/rocoto.xml")
-    args = {STR.cycle: cycle, STR.database: database, STR.task: task, STR.workflow: workflow}
+    args = {
+        STR.cycle: cycle,
+        STR.database: database,
+        STR.rate: rate,
+        STR.task: task,
+        STR.workflow: workflow,
+    }
     with patch.object(uwtools.api.rocoto, "_run") as _run:
         cli._dispatch_rocoto_run(args)
-    _run.assert_called_once_with(cycle=cycle, database=database, task=task, workflow=workflow)
+    _run.assert_called_once_with(**args)
 
 
 def test__dispatch_rocoto_validate_xml():

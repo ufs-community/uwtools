@@ -42,7 +42,9 @@ def realize(
     return True
 
 
-def run(cycle: datetime, database: Path | str, task: str, workflow: Path | str) -> bool:
+def run(
+    cycle: datetime, database: Path | str, task: str, workflow: Path | str, rate: int = 10
+) -> bool:
     """
     Run the specified Rocoto workflow to completion (or failure).
 
@@ -50,10 +52,12 @@ def run(cycle: datetime, database: Path | str, task: str, workflow: Path | str) 
     :param database: Path to the Rocoto database file.
     :param task: The workflow task to run.
     :param workflow: Path to the Rocoto XML workflow document.
+    :param rate: Seconds between workflow iterations (deault: 10)"
     """
     return _run(
         cycle=cycle,
         database=_ensure_data_source(_str2path(database), stdin_ok=False),
+        rate=rate,
         task=task,
         workflow=_ensure_data_source(_str2path(workflow), stdin_ok=False),
     )

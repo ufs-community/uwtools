@@ -17,12 +17,13 @@ def test_api_rocoto_realize():
 def test_api_rocoto_run(f, utc):
     cycle = utc()
     database = f("/path/to/rocoto.db")
+    rate = 11
     task = "foo"
     workflow = f("/path/to/rocoto.xml")
     with patch.object(rocoto, "_run") as _run:
-        rocoto.run(cycle=cycle, database=database, task=task, workflow=workflow)
+        rocoto.run(cycle=cycle, database=database, rate=rate, task=task, workflow=workflow)
     _run.assert_called_once_with(
-        cycle=cycle, database=Path(database), task=task, workflow=Path(workflow)
+        cycle=cycle, database=Path(database), rate=rate, task=task, workflow=Path(workflow)
     )
 
 

@@ -29,12 +29,12 @@ if TYPE_CHECKING:
 
 
 class _RocotoRunner:
-    def __init__(self, cycle: datetime, database: Path, task: str, workflow: Path):
-        self.cycle = cycle
-        self.database = database
-        self.task = task
-        self.workflow = workflow
-        self._frequency = 10  # seconds
+    def __init__(self, cycle: datetime, database: Path, rate: int, task: str, workflow: Path):
+        self._cycle = cycle
+        self._database = database
+        self._rate = rate
+        self._task = task
+        self._workflow = workflow
         self.__connection: sqlite3.Connection | None = None
         self.__cursor: sqlite3.Cursor | None = None
 
@@ -54,17 +54,17 @@ class _RocotoRunner:
                     continue  # iterate immediately to update status
             self._report()
             if initialized:
-                log.debug("Sleeping %s seconds", self._frequency)
-                sleep(self._frequency)
+                log.debug("Sleeping %s seconds", self._rate)
+                sleep(self._rate)
             initialized = True
         return True
 
     @property
     def _connection(self) -> sqlite3.Connection | None:
         if not self.__connection:
-            if not self.database.is_file():
+            if not self._database.is_file():
                 return None
-            self.__connection = sqlite3.connect(self.database)
+            self.__connection = sqlite3.connect(self._database)
         return self.__connection
 
     @property
@@ -77,21 +77,21 @@ class _RocotoRunner:
 
     def _iterate(self) -> bool:
         log.info("Iterating workflow")
-        cmd = "rocotorun -d %s -w %s" % (self.database, self.workflow)
+        cmd = "rocotorun -d %s -w %s" % (self._database, self._workflow)
         success, _ = run_shell_cmd(cmd, quiet=True)
         return success
 
     @property
     def _query_data(self) -> dict:
-        return {"taskname": self.task, "cycle": int(self.cycle.timestamp())}
+        return {"taskname": self._task, "cycle": int(self._cycle.timestamp())}
 
     @property
     def _query_stmt(self) -> str:
         return "select state from jobs where taskname=:taskname and cycle=:cycle"
 
     def _report(self) -> None:
-        cmd = "rocotostat -d %s -w %s" % (self.database, self.workflow)
-        if self.database.is_file():
+        cmd = "rocotostat -d %s -w %s" % (self._database, self._workflow)
+        if self._database.is_file():
             log.info("Workflow status:")
             _, output = run_shell_cmd(cmd, quiet=True)
             for line in output.strip().split("\n"):
@@ -111,7 +111,7 @@ class _RocotoRunner:
 
     @property
     def _state_msg(self) -> str:
-        return f"Rocoto task '{self.task}' for cycle {self.cycle}: %s"
+        return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
 
     @property
     def _states(self) -> dict:
@@ -141,8 +141,8 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
     return xml
 
 
-def run(cycle: datetime, database: Path, task: str, workflow: Path) -> bool:
-    return _RocotoRunner(cycle, database, task, workflow).run()
+def run(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
+    return _RocotoRunner(cycle, database, rate, task, workflow).run()
 
 
 def validate_file(xml_file: Path | None) -> bool:

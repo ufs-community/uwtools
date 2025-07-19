@@ -493,6 +493,7 @@ def _add_subparser_rocoto_run(subparsers: Subparsers) -> ActionChecks:
     _add_arg_task(required)
     _add_arg_workflow(required)
     optional = _basic_setup(parser)
+    _add_arg_rate(optional)
     return _add_args_verbosity(optional)
 
 
@@ -544,6 +545,7 @@ def _dispatch_rocoto_run(args: Args) -> bool:
     return uwtools.api.rocoto.run(
         cycle=args[STR.cycle],
         database=args[STR.database],
+        rate=args[STR.rate],
         task=args[STR.task],
         workflow=args[STR.workflow],
     )
@@ -848,6 +850,16 @@ def _add_arg_quiet(group: Group) -> None:
         "-q",
         action="store_true",
         help="Print no logging messages",
+    )
+
+
+def _add_arg_rate(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.rate),
+        "-r",
+        help="Seconds between workflow iterations",
+        required=False,
+        type=int,
     )
 
 
