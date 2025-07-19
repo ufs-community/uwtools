@@ -80,12 +80,12 @@ class RocotoRunner:
         return success
 
     @property
-    def _query_stmt(self) -> str:
-        return "select state from jobs where taskname=:taskname and cycle=:cycle"
-
-    @property
     def _query_data(self) -> dict:
         return {"taskname": self.task, "cycle": int(self.cycle.timestamp())}
+
+    @property
+    def _query_stmt(self) -> str:
+        return "select state from jobs where taskname=:taskname and cycle=:cycle"
 
     @property
     def _state(self) -> str | None:
@@ -99,16 +99,16 @@ class RocotoRunner:
         return None
 
     @property
+    def _state_msg(self) -> str:
+        return f"Rocoto task '{self.task}' for cycle {self.cycle}: %s"
+
+    @property
     def _states(self) -> dict:
         return {
             "active": ["QUEUED", "RUNNING"],
             "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
             "transient": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
         }
-
-    @property
-    def _state_msg(self) -> str:
-        return f"Rocoto task '{self.task}' for cycle {self.cycle}: %s"
 
 
 def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
