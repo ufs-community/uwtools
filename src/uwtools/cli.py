@@ -857,7 +857,9 @@ def _add_arg_rate(group: Group) -> None:
     group.add_argument(
         _switch(STR.rate),
         "-r",
-        help="Seconds between workflow iterations",
+        default=10,
+        help="Delay between workflow iterations (default: 10)",
+        metavar="SECONDS",
         required=False,
         type=int,
     )
