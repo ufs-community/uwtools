@@ -2,6 +2,7 @@
 Tests for uwtools.rocoto module.
 """
 
+from contextlib import contextmanager
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
 
@@ -116,6 +117,15 @@ class TestRocotoRunner:
     def instance(self, rocoto_runner_args):
         return rocoto._RocotoRunner(**rocoto_runner_args)
 
+    # Helpers
+
+    @contextmanager
+    def rrmocks(self):
+        with patch.multiple(
+            rocoto._RocotoRunner, _iterate=D, _report=D, _state=D, new_callable=PropertyMock
+        ) as mocks:
+            yield mocks
+
     # Tests
 
     def test_rocoto__RocotoRunner__init_and_del(self, rocoto_runner_args):
@@ -126,13 +136,11 @@ class TestRocotoRunner:
         con.close.assert_called_once_with()
 
     def test_rocoto__RocotoRunner_run__state_initially_inactive(self, instance):
-        with patch.multiple(
-            rocoto._RocotoRunner, _iterate=D, _report=D, _state=D, new_callable=PropertyMock
-        ) as mocks:
+        with self.rrmocks() as mocks:
             mocks["_state"].return_value = "COMPLETE"
             assert instance.run() is True
-        mocks["_iterate"].assert_not_called()
-        mocks["_report"].assert_not_called()
+            mocks["_iterate"].assert_not_called()
+            mocks["_report"].assert_not_called()
 
 
 class TestRocotoXML:
