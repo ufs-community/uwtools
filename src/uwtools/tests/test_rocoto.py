@@ -133,6 +133,7 @@ class TestRocotoRunner:
             patch.object(rocoto._RocotoRunner, "_report") as _report,
             patch.object(rocoto._RocotoRunner, "_state", new_callable=PropertyMock) as _state,
         ):
+            _iterate.return_value = True
             yield dict(sleep=sleep, _iterate=_iterate, _report=_report, _state=_state)
 
     # Tests
@@ -146,14 +147,13 @@ class TestRocotoRunner:
 
     def test_rocoto__RocotoRunner_run__active(self, instance):
         with self.mocks() as mocks:
-            mocks["_iterate"].return_value = True
             mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
             assert instance.run() is True
             self.check_mock_calls_counts(mocks, _iterate=1, _report=1, _state=2, sleep=0)
 
     def test_rocoto__RocotoRunner_run__inactive(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].return_value = "COMPLETE"
+            mocks["_state"].side_effect = ["COMPLETE"]
             assert instance.run() is True
             self.check_mock_calls_counts(mocks, _iterate=0, _report=0, _state=1, sleep=0)
 
@@ -169,6 +169,12 @@ class TestRocotoRunner:
             mocks["_iterate"].return_value = False
             assert instance.run() is False
             self.check_mock_calls_counts(mocks, _iterate=1, _report=0, _state=0, sleep=0)
+
+    def test_rocoto__RocotoRunner_run__sleeps(self, instance):
+        with self.mocks() as mocks:
+            mocks["_state"].side_effect = ["RUNNING", "RUNNING", "COMPLETE"]
+            assert instance.run() is True
+            self.check_mock_calls_counts(mocks, _iterate=2, _report=2, _state=3, sleep=1)
 
 
 class TestRocotoXML:
