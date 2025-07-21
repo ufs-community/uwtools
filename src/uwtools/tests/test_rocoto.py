@@ -120,15 +120,14 @@ class TestRocotoRunner:
     # Helpers
 
     @contextmanager
-    def rrmocks(self):
+    def mocks(self):
         with (
-            patch.multiple(
-                rocoto._RocotoRunner, _iterate=D, _report=D, _state=D, new_callable=PropertyMock
-            ) as mocks,
             patch.object(rocoto, "sleep") as sleep,
+            patch.object(rocoto._RocotoRunner, "_iterate") as _iterate,
+            patch.object(rocoto._RocotoRunner, "_report") as _report,
+            patch.object(rocoto._RocotoRunner, "_state", new_callable=PropertyMock) as _state,
         ):
-            mocks["sleep"] = sleep
-            yield mocks
+            yield dict(sleep=sleep, _iterate=_iterate, _report=_report, _state=_state)
 
     # Tests
 
@@ -139,12 +138,22 @@ class TestRocotoRunner:
         del rr
         con.close.assert_called_once_with()
 
-    def test_rocoto__RocotoRunner_run__state_initially_inactive(self, instance):
-        with self.rrmocks() as mocks:
+    def test_rocoto__RocotoRunner_run__initially_inactive(self, instance):
+        with self.mocks() as mocks:
             mocks["_state"].return_value = "COMPLETE"
             assert instance.run() is True
             mocks["_iterate"].assert_not_called()
             mocks["_report"].assert_not_called()
+            mocks["sleep"].assert_not_called()
+
+    def test_rocoto__RocotoRunner_run__iterate_failure(self, instance):
+        instance._initialized = True
+        with self.mocks() as mocks:
+            mocks["_iterate"].return_value = False
+            assert instance.run() is False
+            mocks["_iterate"].assert_called_once_with()
+            mocks["_report"].assert_not_called()
+            mocks["_state"].assert_not_called()
             mocks["sleep"].assert_not_called()
 
 
