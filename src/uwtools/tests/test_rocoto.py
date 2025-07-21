@@ -26,7 +26,7 @@ def assets(tmp_path):
 @fixture
 def rocoto_runner_args(utc, tmp_path):
     return {
-        "cycle": utc(),
+        "cycle": utc(2025, 7, 21, 12),
         "database": tmp_path / "rocoto.db",
         "rate": 11,
         "task": "foo",
@@ -192,12 +192,33 @@ class TestRocotoRunner:
         assert instance._cursor is None
 
     def test_rocoto__RocotoRunner__iterate(self, instance, logged):
-        with patch.object(rocoto, "run_shell_cmd", return_value=(True, "")) as run_shell_cmd:
+        retval = (True, "")
+        with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             assert instance._iterate() is True
         run_shell_cmd.assert_called_once_with(
             "rocotorun -d %s -w %s" % (instance._database, instance._workflow), quiet=True
         )
         assert logged("Iterating workflow")
+
+    def test_rocoto__RocotoRunner__query_data(self, instance):
+        assert instance._query_data == {"taskname": "foo", "cycle": 1753099200}
+
+    def test_rocoto__RocotoRunner__query_stmt(self, instance):
+        assert (
+            instance._query_stmt
+            == "select state from jobs where taskname=:taskname and cycle=:cycle"
+        )
+
+    def test_rocoto_RocotoRunner__report(self, instance, logged):
+        instance._database.touch()
+        retval = (True, "foo\nbar\n")
+        with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
+            instance._report()
+        for line in ["Workflow status:", "foo", "bar"]:
+            assert logged(line)
+        run_shell_cmd.assert_called_once_with(
+            "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
+        )
 
 
 class TestRocotoXML:
