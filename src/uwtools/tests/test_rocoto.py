@@ -125,6 +125,15 @@ class TestRocotoRunner:
         del rr
         con.close.assert_called_once_with()
 
+    def test_rocoto__RocotoRunner_run__state_initially_inactive(self, instance):
+        with patch.multiple(
+            rocoto._RocotoRunner, _iterate=D, _report=D, _state=D, new_callable=PropertyMock
+        ) as mocks:
+            mocks["_state"].return_value = "COMPLETE"
+            assert instance.run() is True
+        mocks["_iterate"].assert_not_called()
+        mocks["_report"].assert_not_called()
+
 
 class TestRocotoXML:
     """
