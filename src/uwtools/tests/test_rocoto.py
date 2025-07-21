@@ -138,23 +138,33 @@ class TestRocotoRunner:
         del rr
         con.close.assert_called_once_with()
 
+    def test_rocoto__RocotoRunner_run__initially_active(self, instance):
+        with self.mocks() as mocks:
+            mocks["_iterate"].return_value = True
+            mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
+            assert instance.run() is True
+            assert mocks["_iterate"].call_count == 1
+            assert mocks["_state"].call_count == 2
+            assert mocks["_report"].call_count == 1
+            assert mocks["sleep"].call_count == 0
+
     def test_rocoto__RocotoRunner_run__initially_inactive(self, instance):
         with self.mocks() as mocks:
             mocks["_state"].return_value = "COMPLETE"
             assert instance.run() is True
-            mocks["_iterate"].assert_not_called()
-            mocks["_report"].assert_not_called()
-            mocks["sleep"].assert_not_called()
+            assert mocks["_iterate"].call_count == 0
+            assert mocks["_report"].call_count == 0
+            assert mocks["sleep"].call_count == 0
 
     def test_rocoto__RocotoRunner_run__iterate_failure(self, instance):
         instance._initialized = True
         with self.mocks() as mocks:
             mocks["_iterate"].return_value = False
             assert instance.run() is False
-            mocks["_iterate"].assert_called_once_with()
-            mocks["_report"].assert_not_called()
-            mocks["_state"].assert_not_called()
-            mocks["sleep"].assert_not_called()
+            assert mocks["_iterate"].call_count == 1
+            assert mocks["_report"].call_count == 0
+            assert mocks["_state"].call_count == 0
+            assert mocks["sleep"].call_count == 0
 
 
 class TestRocotoXML:
