@@ -191,6 +191,14 @@ class TestRocotoRunner:
     def test_rocoto__RocotoRunner__cursor__no_file(self, instance):
         assert instance._cursor is None
 
+    def test_rocoto__RocotoRunner__iterate(self, instance, logged):
+        with patch.object(rocoto, "run_shell_cmd", return_value=(True, "")) as run_shell_cmd:
+            assert instance._iterate() is True
+        run_shell_cmd.assert_called_once_with(
+            "rocotorun -d %s -w %s" % (instance._database, instance._workflow), quiet=True
+        )
+        assert logged("Iterating workflow")
+
 
 class TestRocotoXML:
     """
