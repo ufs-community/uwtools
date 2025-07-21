@@ -241,6 +241,12 @@ mpas
 | **CLI**: ``uw mpas -h``
 | **API**: ``import uwtools.api.mpas``
 
+
+Support Policy
+--------------
+
+The latest three minor versions (in the `semantic versioning <https://semver.org/>`_ sense) of ``uwtools`` are considered actively supported, meaning that bugfix releases will be made as needed. Older versions are considered deprecated, and users may be advised to update to newer versions where bugs either have been or will be fixed. Users are encouraged to raise an :uwtools:`Issue <issues>` to report a bug or to request help, even with deprecated versions.
+
 ------------------
 
 **Disclaimer**
