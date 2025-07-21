@@ -78,14 +78,14 @@ The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
 Examples
 ^^^^^^^^
 
-.. note:: Use of ``uw rocoto run`` requires that the ``rocotorun`` and ``rocotostat`` executables are present on ``PATH``. on HPCs, this is typically achieved by loading a system module providing Rocoto.
+.. note:: Use of ``uw rocoto run`` requires presence of the ``rocotorun`` and ``rocotostat`` executables on ``PATH``. On HPCs, this is typically achieved by loading a system module providing Rocoto.
 
 The following examples make use of a simple Rocoto XML workflow document (which might have been created by ``uw rocoto realize``) similar to:
 
 .. literalinclude:: rocoto/foobar.xml
    :language: xml
 
-* To run only task ``foo``, which has no dependencies, iterating the workflow at the default rate (every 10 seconds):
+* To run only task ``foo``, which has no dependencies:
 
   .. literalinclude:: rocoto/run-foo.txt
      :language: text
@@ -101,12 +101,20 @@ The following examples make use of a simple Rocoto XML workflow document (which 
   .. literalinclude:: rocoto/run-foo-complete.out
      :language: text
 
-* To run task ``bar``, which depends on task ``foo``, iterating every 3 seconds (after deleting the ``foobar.db`` database file from the previous example):
+* To run task ``bar``, which depends on task ``foo``, iterating every 3 seconds, and after deleting the ``foobar.db`` database file from the previous example:
 
   .. literalinclude:: rocoto/run-bar.txt
      :language: text
      :emphasize-lines: 1
   .. literalinclude:: rocoto/run-bar.out
+     :language: text
+
+  A second invocation of ``uw rocoto run`` immediately shows task ``bar`` in its final state:
+
+  .. literalinclude:: rocoto/run-bar.txt
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/run-bar-complete.out
      :language: text
 
 .. _cli_rocoto_validate_examples:
