@@ -40,7 +40,7 @@ When the Linux diff tool just doesn't work for comparing unordered namelists wit
 Realize Action
 """"""""""""""
 
-To realiez a config is to render values encoded in :jinja2:`Jinja2 expressions<templates/#expressions>`, potentially overriding values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the contents of other files to build up a configuration from its pieces.
+To realize a config is to render values encoded in :jinja2:`Jinja2 expressions<templates/#expressions>`, potentially overriding values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the contents of other files to build up a configuration from its pieces.
 
 | :any:`CLI documentation with examples<cli_config_realize_examples>`
 
