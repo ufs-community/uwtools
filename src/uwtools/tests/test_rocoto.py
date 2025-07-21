@@ -121,9 +121,13 @@ class TestRocotoRunner:
 
     @contextmanager
     def rrmocks(self):
-        with patch.multiple(
-            rocoto._RocotoRunner, _iterate=D, _report=D, _state=D, new_callable=PropertyMock
-        ) as mocks:
+        with (
+            patch.multiple(
+                rocoto._RocotoRunner, _iterate=D, _report=D, _state=D, new_callable=PropertyMock
+            ) as mocks,
+            patch.object(rocoto, "sleep") as sleep,
+        ):
+            mocks["sleep"] = sleep
             yield mocks
 
     # Tests
@@ -141,6 +145,7 @@ class TestRocotoRunner:
             assert instance.run() is True
             mocks["_iterate"].assert_not_called()
             mocks["_report"].assert_not_called()
+            mocks["sleep"].assert_not_called()
 
 
 class TestRocotoXML:
