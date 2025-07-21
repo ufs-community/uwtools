@@ -95,12 +95,12 @@ class _RocotoRunner:
         self._rate = rate
         self._task = task
         self._workflow = workflow
-        self.__connection: sqlite3.Connection | None = None
-        self.__cursor: sqlite3.Cursor | None = None
+        self._con: sqlite3.Connection | None = None
+        self._cur: sqlite3.Cursor | None = None
 
     def __del__(self):
-        if self.__connection:
-            self.__connection.close()
+        if self._con:
+            self._con.close()
 
     def run(self) -> bool:
         initialized = False
@@ -121,19 +121,19 @@ class _RocotoRunner:
 
     @property
     def _connection(self) -> sqlite3.Connection | None:
-        if not self.__connection:
+        if not self._con:
             if not self._database.is_file():
                 return None
-            self.__connection = sqlite3.connect(self._database)
-        return self.__connection
+            self._con = sqlite3.connect(self._database)
+        return self._con
 
     @property
     def _cursor(self) -> sqlite3.Cursor | None:
-        if not self.__cursor:
+        if not self._cur:
             if not (connection := self._connection):
                 return None
-            self.__cursor = connection.cursor()
-        return self.__cursor
+            self._cur = connection.cursor()
+        return self._cur
 
     def _iterate(self) -> bool:
         log.info("Iterating workflow")
