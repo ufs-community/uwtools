@@ -159,15 +159,14 @@ class _RocotoRunner:
 
     @property
     def _state(self) -> str | None:
+        state = None
         if cursor := self._cursor:
             result = cursor.execute(self._query_stmt, self._query_data)
-            state = None
             if row := result.fetchone():
                 (state,) = row
                 log.info(self._state_msg % state)
                 assert state in chain.from_iterable(self._states.values())
-            return state
-        return None
+        return state
 
     @property
     def _state_msg(self) -> str:

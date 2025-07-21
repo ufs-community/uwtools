@@ -232,17 +232,24 @@ class TestRocotoRunner:
             "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
         )
 
-    def test_rocoto__RocotoRunner__state(self, instance):
+    def test_rocoto__RocotoRunner__state(self, instance, logged):
         self.dbsetup(instance)
         instance._cursor.execute(
             "insert into jobs values (:id, :taskname, :cycle, :state)",
             {"id": 1, "taskname": "foo", "cycle": instance._cycle.timestamp(), "state": "COMPLETE"},
         )
         assert instance._state == "COMPLETE"
+        assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
 
     def test_rocoto__RocotoRunner__state__none(self, instance):
         self.dbsetup(instance)
         assert instance._state is None
+
+    def test_rocoto__RocotoRunner__state_msg(self, instance):
+        assert instance._state_msg == "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"
+
+    def test_rocoto__RocotoRunner__states(self, instance):
+        assert list(instance._states.keys()) == ["active", "inactive", "transient"]
 
 
 class TestRocotoXML:
