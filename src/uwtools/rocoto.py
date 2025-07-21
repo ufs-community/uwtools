@@ -28,6 +28,66 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
+def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
+    """
+    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
+    XML output.
+
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_file: Path to write rendered XML file (None => write to stdout).
+    :return: An XML string.
+    """
+    rxml = _RocotoXML(config)
+    xml = str(rxml).strip()
+    if not validate_string(xml):
+        msg = "Internal error: Invalid Rocoto XML"
+        raise UWError(msg)
+    with writable(output_file) as f:
+        print(xml, file=f)
+    return xml
+
+
+def run(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
+    return _RocotoRunner(cycle, database, rate, task, workflow).run()
+
+
+def validate_file(xml_file: Path | None) -> bool:
+    """
+    Validate purported Rocoto XML file against its schema.
+
+    :param xml_file: Path to XML file (None => read stdin).
+    :return: Did the XML conform to the schema?
+    """
+    with readable(xml_file) as f:
+        return validate_string(xml=f.read())
+
+
+def validate_string(xml: str) -> bool:
+    """
+    Validate purported Rocoto XML against its schema.
+
+    :param xml: XML to validate.
+    :return: Did the XML conform to the schema?
+    """
+    tree = etree.fromstring(xml.encode("utf-8"))
+    path = resource_path("rocoto/schema_with_metatasks.rng")
+    schema = etree.RelaxNG(etree.fromstring(path.read_text()))
+    valid: bool = schema.validate(tree)
+    if valid:
+        log.info("Schema validation succeeded for Rocoto XML")
+    else:
+        nerr = len(schema.error_log)
+        log.error("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")
+        for err in list(schema.error_log):
+            log.error(err)
+        log.error("Invalid Rocoto XML:")
+        lines = xml.strip().split("\n")
+        fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
+        for n, line in enumerate(lines):
+            log.error(fmtstr, n + 1, line)
+    return valid
+
+
 class _RocotoRunner:
     def __init__(self, cycle: datetime, database: Path, rate: int, task: str, workflow: Path):
         self._cycle = cycle
@@ -120,66 +180,6 @@ class _RocotoRunner:
             "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
             "transient": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
         }
-
-
-def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
-    """
-    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
-    XML output.
-
-    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
-    :param output_file: Path to write rendered XML file (None => write to stdout).
-    :return: An XML string.
-    """
-    rxml = _RocotoXML(config)
-    xml = str(rxml).strip()
-    if not validate_string(xml):
-        msg = "Internal error: Invalid Rocoto XML"
-        raise UWError(msg)
-    with writable(output_file) as f:
-        print(xml, file=f)
-    return xml
-
-
-def run(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
-    return _RocotoRunner(cycle, database, rate, task, workflow).run()
-
-
-def validate_file(xml_file: Path | None) -> bool:
-    """
-    Validate purported Rocoto XML file against its schema.
-
-    :param xml_file: Path to XML file (None => read stdin).
-    :return: Did the XML conform to the schema?
-    """
-    with readable(xml_file) as f:
-        return validate_string(xml=f.read())
-
-
-def validate_string(xml: str) -> bool:
-    """
-    Validate purported Rocoto XML against its schema.
-
-    :param xml: XML to validate.
-    :return: Did the XML conform to the schema?
-    """
-    tree = etree.fromstring(xml.encode("utf-8"))
-    path = resource_path("rocoto/schema_with_metatasks.rng")
-    schema = etree.RelaxNG(etree.fromstring(path.read_text()))
-    valid: bool = schema.validate(tree)
-    if valid:
-        log.info("Schema validation succeeded for Rocoto XML")
-    else:
-        nerr = len(schema.error_log)
-        log.error("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")
-        for err in list(schema.error_log):
-            log.error(err)
-        log.error("Invalid Rocoto XML:")
-        lines = xml.strip().split("\n")
-        fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
-        for n, line in enumerate(lines):
-            log.error(fmtstr, n + 1, line)
-    return valid
 
 
 class _RocotoXML:
