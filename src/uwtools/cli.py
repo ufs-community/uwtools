@@ -854,11 +854,12 @@ def _add_arg_quiet(group: Group) -> None:
 
 
 def _add_arg_rate(group: Group) -> None:
+    default_rate = uwtools.rocoto.DEFAULT_ITERATION_RATE
     group.add_argument(
         _switch(STR.rate),
         "-r",
-        default=10,
-        help="Delay between workflow iterations (default: 10)",
+        default=default_rate,
+        help="Delay between workflow iterations (default: %s)" % default_rate,
         metavar="SECONDS",
         required=False,
         type=int,

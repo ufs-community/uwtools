@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from uwtools.rocoto import DEFAULT_ITERATION_RATE
 from uwtools.rocoto import realize as _realize
 from uwtools.rocoto import run as _run
 from uwtools.rocoto import validate_file as _validate
@@ -43,7 +44,11 @@ def realize(
 
 
 def run(
-    cycle: datetime, database: Path | str, task: str, workflow: Path | str, rate: int = 10
+    cycle: datetime,
+    database: Path | str,
+    task: str,
+    workflow: Path | str,
+    rate: int = DEFAULT_ITERATION_RATE,
 ) -> bool:
     """
     Run the specified Rocoto workflow to completion (or failure).
@@ -52,7 +57,7 @@ def run(
     :param database: Path to the Rocoto database file.
     :param task: The workflow task to run.
     :param workflow: Path to the Rocoto XML workflow document.
-    :param rate: Seconds between workflow iterations (deault: 10)"
+    :param rate: Seconds between workflow iterations.
     """
     return _run(
         cycle=cycle,

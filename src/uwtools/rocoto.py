@@ -28,6 +28,9 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
+DEFAULT_ITERATION_RATE = 10
+
+
 def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
