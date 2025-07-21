@@ -22,7 +22,7 @@ def assets(tmp_path):
 
 
 @fixture
-def runargs(utc, tmp_path):
+def rocoto_runner_args(utc, tmp_path):
     return {
         "cycle": utc(),
         "database": tmp_path / "rocoto.db",
@@ -79,10 +79,10 @@ def test_rocoto_realize__file_to_stdout(capsys, assets):
     assert rocoto.validate_file(xml_file=outfile)
 
 
-def test_rocoto_run(runargs):
+def test_rocoto_run(rocoto_runner_args):
     with patch.object(rocoto, "_RocotoRunner") as _RocotoRunner:  # noqa: N806
-        rocoto.run(**runargs)
-    _RocotoRunner.assert_called_once_with(*runargs.values())
+        rocoto.run(**rocoto_runner_args)
+    _RocotoRunner.assert_called_once_with(*rocoto_runner_args.values())
 
 
 def test_rocoto_validate__file_fail(validation_assets):
@@ -105,18 +105,25 @@ def test_rocoto_validate__string_pass(validation_assets):
     assert rocoto.validate_string(xml=xml_string_good) is True
 
 
-# PM#
+class TestRocotoRunner:
+    """
+    Tests for class uwtools.rocoto._RocotoRunner.
+    """
 
+    # Fixtures
 
-def test_rocoto__RocotoRunner__init_and_del(runargs):
-    rr = rocoto._RocotoRunner(**runargs)
-    con = Mock()
-    rr._con = con
-    del rr
-    con.close.assert_called_once_with()
+    @fixture
+    def instance(self, rocoto_runner_args):
+        return rocoto._RocotoRunner(**rocoto_runner_args)
 
+    # Tests
 
-# PM#
+    def test_rocoto__RocotoRunner__init_and_del(self, rocoto_runner_args):
+        rr = rocoto._RocotoRunner(**rocoto_runner_args)
+        con = Mock()
+        rr._con = con
+        del rr
+        con.close.assert_called_once_with()
 
 
 class TestRocotoXML:
