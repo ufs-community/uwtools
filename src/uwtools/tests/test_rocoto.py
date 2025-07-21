@@ -126,6 +126,18 @@ class TestRocotoRunner:
         assert mocks["_state"].call_count == _state
         assert mocks["sleep"].call_count == sleep
 
+    def dbsetup(self, instance):
+        instance._database.touch()
+        columns = ", ".join(
+            [
+                "id integer primary key",
+                "taskname varchar(64)",
+                "cycle datetime",
+                "state varchar(64)",
+            ]
+        )
+        instance._cursor.execute(f"create table jobs ({columns});")
+
     @contextmanager
     def mocks(self):
         with (
@@ -209,7 +221,7 @@ class TestRocotoRunner:
             == "select state from jobs where taskname=:taskname and cycle=:cycle"
         )
 
-    def test_rocoto_RocotoRunner__report(self, instance, logged):
+    def test_rocoto__RocotoRunner__report(self, instance, logged):
         instance._database.touch()
         retval = (True, "foo\nbar\n")
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
@@ -219,6 +231,18 @@ class TestRocotoRunner:
         run_shell_cmd.assert_called_once_with(
             "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
         )
+
+    def test_rocoto__RocotoRunner__state(self, instance):
+        self.dbsetup(instance)
+        instance._cursor.execute(
+            "insert into jobs values (:id, :taskname, :cycle, :state)",
+            {"id": 1, "taskname": "foo", "cycle": instance._cycle.timestamp(), "state": "COMPLETE"},
+        )
+        assert instance._state == "COMPLETE"
+
+    def test_rocoto__RocotoRunner__state__none(self, instance):
+        self.dbsetup(instance)
+        assert instance._state is None
 
 
 class TestRocotoXML:
