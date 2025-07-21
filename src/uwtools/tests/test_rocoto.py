@@ -119,6 +119,12 @@ class TestRocotoRunner:
 
     # Helpers
 
+    def check_mock_calls_counts(self, mocks, _iterate, _report, _state, sleep):
+        assert mocks["_iterate"].call_count == _iterate
+        assert mocks["_report"].call_count == _report
+        assert mocks["_state"].call_count == _state
+        assert mocks["sleep"].call_count == sleep
+
     @contextmanager
     def mocks(self):
         with (
@@ -138,33 +144,31 @@ class TestRocotoRunner:
         del rr
         con.close.assert_called_once_with()
 
-    def test_rocoto__RocotoRunner_run__initially_active(self, instance):
+    def test_rocoto__RocotoRunner_run__active(self, instance):
         with self.mocks() as mocks:
             mocks["_iterate"].return_value = True
             mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
             assert instance.run() is True
-            assert mocks["_iterate"].call_count == 1
-            assert mocks["_state"].call_count == 2
-            assert mocks["_report"].call_count == 1
-            assert mocks["sleep"].call_count == 0
+            self.check_mock_calls_counts(mocks, _iterate=1, _report=1, _state=2, sleep=0)
 
-    def test_rocoto__RocotoRunner_run__initially_inactive(self, instance):
+    def test_rocoto__RocotoRunner_run__inactive(self, instance):
         with self.mocks() as mocks:
             mocks["_state"].return_value = "COMPLETE"
             assert instance.run() is True
-            assert mocks["_iterate"].call_count == 0
-            assert mocks["_report"].call_count == 0
-            assert mocks["sleep"].call_count == 0
+            self.check_mock_calls_counts(mocks, _iterate=0, _report=0, _state=1, sleep=0)
+
+    def test_rocoto__RocotoRunner_run__transient(self, instance):
+        with self.mocks() as mocks:
+            mocks["_state"].side_effect = ["SUBMITTING", "RUNNING", "COMPLETE"]
+            assert instance.run() is True
+            self.check_mock_calls_counts(mocks, _iterate=1, _report=1, _state=3, sleep=0)
 
     def test_rocoto__RocotoRunner_run__iterate_failure(self, instance):
         instance._initialized = True
         with self.mocks() as mocks:
             mocks["_iterate"].return_value = False
             assert instance.run() is False
-            assert mocks["_iterate"].call_count == 1
-            assert mocks["_report"].call_count == 0
-            assert mocks["_state"].call_count == 0
-            assert mocks["sleep"].call_count == 0
+            self.check_mock_calls_counts(mocks, _iterate=1, _report=0, _state=0, sleep=0)
 
 
 class TestRocotoXML:
