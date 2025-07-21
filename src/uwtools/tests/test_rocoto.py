@@ -68,6 +68,29 @@ def test_rocoto_realize_file_to_stdout(capsys, assets):
     assert rocoto.validate_file(xml_file=outfile)
 
 
+# PM#
+
+
+@fixture
+def runargs(utc, tmp_path):
+    return {
+        "cycle": utc(),
+        "database": tmp_path / "rocoto.db",
+        "rate": 11,
+        "task": "foo",
+        "workflow": tmp_path / "rocoto.xml",
+    }
+
+
+def test_rocoto_run(runargs):
+    with patch.object(rocoto, "_RocotoRunner") as _RocotoRunner:  # noqa: N806
+        rocoto.run(**runargs)
+    _RocotoRunner.assert_called_once_with(*runargs.values())
+
+
+# PM#
+
+
 def test_rocoto_validate_file_fail(validation_assets):
     xml_file_bad, _, _, _ = validation_assets
     assert rocoto.validate_file(xml_file=xml_file_bad) is False
