@@ -2,6 +2,7 @@
 Tests for uwtools.rocoto module.
 """
 
+import sqlite3
 from contextlib import contextmanager
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
@@ -175,6 +176,20 @@ class TestRocotoRunner:
             mocks["_state"].side_effect = ["RUNNING", "RUNNING", "COMPLETE"]
             assert instance.run() is True
             self.check_mock_calls_counts(mocks, _iterate=2, _report=2, _state=3, sleep=1)
+
+    def test_rocoto__RocotoRunner__connection(self, instance):
+        instance._database.touch()
+        assert isinstance(instance._connection, sqlite3.Connection)
+
+    def test_rocoto__RocotoRunner__connection__no_file(self, instance):
+        assert instance._connection is None
+
+    def test_rocoto__RocotoRunner__cursor(self, instance):
+        instance._database.touch()
+        assert isinstance(instance._cursor, sqlite3.Cursor)
+
+    def test_rocoto__RocotoRunner__cursor__no_file(self, instance):
+        assert instance._cursor is None
 
 
 class TestRocotoXML:
