@@ -12,7 +12,7 @@ Required arguments:
   --classname CLASSNAME
       Name of driver class
   --task TASK
-      Driver task to execute
+      Task to execute
 
 Optional arguments:
   -h, --help

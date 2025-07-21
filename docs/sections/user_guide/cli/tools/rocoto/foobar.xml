@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<workflow realtime="F" scheduler="slurm">
+  <cycledef>202507170000 202507170000 00:00:01</cycledef>
+  <log>/path/to/foobar.log</log>
+  <task name="foo">
+    <account>account</account>
+    <command>echo foo >/path/tofoo.txt</command>
+    <cores>1</cores>
+    <join>/path/to/foo.batchout</join>
+    <partition>service</partition>
+    <queue>batch</queue>
+    <walltime>00:01:00</walltime>
+  </task>
+  <task name="bar">
+    <account>account</account>
+    <command>echo bar >/path/to/bar.txt</command>
+    <cores>1</cores>
+    <join>/path/to/bar.batchout</join>
+    <partition>service</partition>
+    <queue>batch</queue>
+    <walltime>00:01:00</walltime>
+    <dependency>
+      <taskdep task="foo"/>
+    </dependency>
+  </task>
+</workflow>

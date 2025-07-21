@@ -1,0 +1,27 @@
+usage: uw rocoto run [--cycle CYCLE] --database DATABASE --task TASK
+                     --workflow WORKFLOW [-h] [--version] [--rate SECONDS]
+                     [--quiet] [--verbose]
+
+Run a Rocoto workflow
+
+Required arguments:
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
+  --database DATABASE, -d DATABASE
+      The Rocoto database file
+  --task TASK
+      Task to execute
+  --workflow WORKFLOW, -w WORKFLOW
+      The Rocoto XML file
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --rate SECONDS, -r SECONDS
+      Delay between workflow iterations (default: 10)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

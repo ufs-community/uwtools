@@ -12,5 +12,7 @@ Positional arguments:
   ACTION
     realize
       Realize a Rocoto XML workflow document
+    run
+      Run a Rocoto workflow
     validate
       Validate Rocoto XML

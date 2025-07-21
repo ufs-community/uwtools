@@ -64,6 +64,36 @@ The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
      :language: xml
 
+.. _cli_rocoto_run_examples:
+
+``run``
+-------
+
+.. literalinclude:: rocoto/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/run-help.out
+   :language: text
+
+Examples
+^^^^^^^^
+
+.. note:: Use of ``uw rocoto run`` requires that the ``rocotorun`` and ``rocotostat`` executables are present on ``PATH``. on HPCs, this is typically achieved by loading a system module providing Rocoto.
+
+The following examples make use of a simple Rocoto XML workflow document similar to:
+
+.. literalinclude:: rocoto/foobar.xml
+   :language: xml
+
+* To run only the ``foo`` task, which has no dependencies:
+
+  .. literalinclude:: rocoto/run-foo.txt
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/run-foo.out
+     :language: text
+
+
 .. _cli_rocoto_validate_examples:
 
 ``validate``
