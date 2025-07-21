@@ -100,7 +100,6 @@ class _RocotoRunner:
         self._workflow = workflow
         self._con: sqlite3.Connection | None = None
         self._cur: sqlite3.Cursor | None = None
-        self._initialized = False
 
     def __del__(self):
         if self._con:
@@ -108,18 +107,15 @@ class _RocotoRunner:
 
     def run(self) -> bool:
         while True:
-            if self._initialized and not self._iterate():
+            if self._state in self._states["inactive"]:
+                break
+            if not self._iterate():
                 return False
-            if state := self._state:
-                if state in self._states["inactive"]:
-                    break
-                if state in self._states["transient"]:
-                    continue  # iterate immediately to update status
+            if self._state in self._states["transient"]:
+                continue
             self._report()
-            if self._initialized:
-                log.debug("Sleeping %s seconds", self._rate)
-                sleep(self._rate)
-            self._initialized = True
+            log.debug("Sleeping %s seconds", self._rate)
+            sleep(self._rate)
         return True
 
     @property
