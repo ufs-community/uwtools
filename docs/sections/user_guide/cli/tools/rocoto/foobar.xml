@@ -1,5 +1,5 @@
-<?xml version="1.0"?>
-<workflow realtime="F" scheduler="slurm">
+<?xml version='1.0' encoding='utf-8'?>
+<workflow realtime="False" scheduler="slurm">
   <cycledef>202507170000 202507170000 00:00:01</cycledef>
   <log>/path/to/foobar.log</log>
   <task name="foo">

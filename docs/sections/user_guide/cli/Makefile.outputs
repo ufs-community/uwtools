@@ -9,9 +9,3 @@ all: $(OUTPUTS)
 
 $(OUTPUTS):
 	@bash $(basename $@).cmd >$@ 2>&1 | true
-
-%.out: %.txt %.yaml
-	@bash $< >$@ 2>&1 | true
-
-%.out: %.txt
-	@bash $< >$@ 2>&1 | true

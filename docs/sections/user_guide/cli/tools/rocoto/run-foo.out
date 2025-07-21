@@ -1,0 +1,4 @@
+[2025-07-21T22:27:26]     INFO Iterating workflow
+[2025-07-21T22:27:57]     INFO Rocoto task 'foo' for cycle 2025-07-17 00:00:00: SUBMITTING
+[2025-07-21T22:27:57]     INFO Iterating workflow
+[2025-07-21T22:28:28]     INFO Rocoto task 'foo' for cycle 2025-07-17 00:00:00: SUCCEEDED
