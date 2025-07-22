@@ -47,23 +47,9 @@ def validation_assets(tmp_path):
 # Tests
 
 
-def test_rocoto_realize__rocoto_invalid_xml(assets):
-    cfgfile, outfile = assets
-    with patch.object(rocoto, "validate_string") as vrxs:
-        vrxs.return_value = False
-        with raises(UWError):
-            rocoto.realize(config=cfgfile, output_file=outfile)
-
-
 def test_rocoto_realize__cfg_to_file(assets):
     cfgfile, outfile = assets
     rocoto.realize(config=YAMLConfig(cfgfile), output_file=outfile)
-    assert rocoto.validate_file(xml_file=outfile)
-
-
-def test_rocoto_realize__file_to_file(assets):
-    cfgfile, outfile = assets
-    rocoto.realize(config=cfgfile, output_file=outfile)
     assert rocoto.validate_file(xml_file=outfile)
 
 
@@ -74,11 +60,25 @@ def test_rocoto_realize__cfg_to_stdout(capsys, assets):
     assert rocoto.validate_file(xml_file=outfile)
 
 
+def test_rocoto_realize__file_to_file(assets):
+    cfgfile, outfile = assets
+    rocoto.realize(config=cfgfile, output_file=outfile)
+    assert rocoto.validate_file(xml_file=outfile)
+
+
 def test_rocoto_realize__file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize(config=cfgfile)
     outfile.write_text(capsys.readouterr().out)
     assert rocoto.validate_file(xml_file=outfile)
+
+
+def test_rocoto_realize__invalid_xml(assets):
+    cfgfile, outfile = assets
+    with patch.object(rocoto, "validate_string") as vrxs:
+        vrxs.return_value = False
+        with raises(UWError):
+            rocoto.realize(config=cfgfile, output_file=outfile)
 
 
 def test_rocoto_run(rocoto_runner_args):
