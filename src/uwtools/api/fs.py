@@ -62,7 +62,12 @@ def link(
     symlink_fallback: bool = False,
 ) -> dict[str, list[str]]:
     """
-    Link files.
+    Create links to filesystem items.
+
+    When ``hardlink`` is ``False`` (the default), links may target files, hardlinks, symlinks, and
+    directories; when ``True``, links may not be made across filesystems, or to directories. When
+    ``symlink_fallback`` is ``True``, a symlink will be created, if possible, if a hardlink cannot
+    be created.
 
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param target_dir: Path to target directory.

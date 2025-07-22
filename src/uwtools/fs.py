@@ -288,7 +288,12 @@ class Linker(FileStager):
     @tasks
     def go(self):
         """
-        Link files.
+        Create links to filesystem items.
+
+        When ``hardlink`` is ``False`` (the default), links may target files, hardlinks, symlinks,
+        and directories; when ``True``, links may not be made across filesystems, or to directories.
+        When ``symlink_fallback`` is ``True``, a symlink will be created, if possible, if a hardlink
+        cannot be created.
         """
 
         # See comment in Copier.go() in re: "check" argument.
