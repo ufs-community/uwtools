@@ -232,7 +232,7 @@ def hardlink(
         if symlink_fallback:
             os.symlink(src, dst)
         else:
-            raise UWError("Could not hardlink %s -> %s" % (src, dst)) from e
+            raise UWError("Could not hardlink %s -> %s" % (dst, src)) from e
 
 
 @task

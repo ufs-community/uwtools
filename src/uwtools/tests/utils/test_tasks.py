@@ -262,7 +262,7 @@ def test_utils_tasks_hardlink_symlink__simple(prefix, task, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
     target.touch()
-    assert not link.is_file()
+    assert not link.exists()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
     task(target=t2, linkname=l2)
     assert link.stat().st_nlink == 2 if task is tasks.hardlink else link.is_symlink()
@@ -274,10 +274,25 @@ def test_utils_tasks_hardlink_symlink__directory_hierarchy(prefix, task, tmp_pat
     target = tmp_path / "target"
     link = tmp_path / "foo" / "bar" / "link"
     target.touch()
-    assert not link.is_file()
+    assert not link.exists()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
     task(target=t2, linkname=l2)
     assert link.stat().st_nlink == 2 if task is tasks.hardlink else link.is_symlink()
+
+
+@mark.parametrize("symlink_fallback", [True, False])
+@mark.parametrize("prefix", ["", "file://"])
+def test_utils_tasks_hardlink__cannot_hardlink(logged, prefix, symlink_fallback, tmp_path):
+    target = tmp_path / "target"
+    link = tmp_path / "link"
+    target.touch()
+    assert not link.exists()
+    t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
+    with patch.object(tasks.os, "link", side_effect=OSError):
+        tasks.hardlink(target=t2, linkname=l2, symlink_fallback=symlink_fallback)
+    assert link.is_symlink() is symlink_fallback
+    if not symlink_fallback:
+        assert logged("Could not hardlink %s -> %s" % (link, target))
 
 
 @mark.parametrize("wrapper", [Path, str])
