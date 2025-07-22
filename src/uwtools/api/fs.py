@@ -59,7 +59,7 @@ def link(
     key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-    symlink_fallback: bool | None = False,
+    symlink_fallback: bool = False,
 ) -> dict[str, list[str]]:
     """
     Link files.

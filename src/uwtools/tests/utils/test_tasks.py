@@ -279,14 +279,14 @@ def test_utils_tasks_symlink__directory_hierarchy(prefix, tmp_path):
 
 
 @mark.parametrize("wrapper", [Path, str])
-def test_utils_tasks_symlink_target(tmp_path, wrapper):
+def test_utils_tasks_link_target(tmp_path, wrapper):
     d, f, s = (tmp_path / x for x in ("d", "f", "s"))
     d.mkdir()
     f.touch()
     s.symlink_to(f)
     for x in [d, f, s]:
-        assert tasks.symlink_target(path=wrapper(x)).ready
-    assert not tasks.symlink_target(path=tmp_path / "foo").ready
+        assert tasks.link_target(path=wrapper(x)).ready
+    assert not tasks.link_target(path=tmp_path / "foo").ready
 
 
 def test_utils_tasks__local__path_fail():

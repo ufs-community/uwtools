@@ -100,7 +100,7 @@ def test__add_subparser_config_validate(subparsers):
 
 def test__add_subparser_file(subparsers):
     cli._add_subparser_fs(subparsers)
-    assert actions(subparsers.choices[STR.fs]) == [STR.copy, STR.link, STR.makedirs]
+    assert actions(subparsers.choices[STR.fs]) == [STR.copy, STR.hardlink, STR.link, STR.makedirs]
 
 
 def test__add_subparser_file_copy(subparsers):

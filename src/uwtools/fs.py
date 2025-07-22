@@ -271,7 +271,7 @@ class Linker(FileStager):
         hardlink: bool | None = False,
         leadtime: dt.timedelta | None = None,
         key_path: list[YAMLKey] | None = None,
-        symlink_fallback: bool | None = False,
+        symlink_fallback: bool = False,
     ) -> None:
         """
         Stage files and directories.

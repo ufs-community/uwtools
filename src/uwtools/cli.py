@@ -328,7 +328,7 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
+def _add_subparser_fs_common(parser: Parser) -> tuple[ActionChecks, Group]:
     """
     Perform common subparser setup for mode: fs {copy link makedirs}.
 
@@ -447,7 +447,7 @@ def _dispatch_fs_hardlink(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    report = uwtools.api.fs.hardlink(
+    report = uwtools.api.fs.link(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
