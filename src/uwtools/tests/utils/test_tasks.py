@@ -256,15 +256,19 @@ def test_utils_tasks_filecopy_local(tmp_path):
     assert dst.exists()
 
 
+@mark.parametrize("task", [tasks.hardlink, tasks.symlink])
 @mark.parametrize("prefix", ["", "file://"])
-def test_utils_tasks_symlink__simple(prefix, tmp_path):
+def test_utils_tasks_hardlink_symlink__simple(prefix, task, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
     target.touch()
     assert not link.is_file()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
-    tasks.symlink(target=t2, linkname=l2)
-    assert link.is_symlink()
+    task(target=t2, linkname=l2)
+    if task is tasks.symlink:
+        assert link.is_symlink()
+    else:
+        assert link.stat().st_nlink == 2  # i.e. a hardlink
 
 
 @mark.parametrize("prefix", ["", "file://"])
