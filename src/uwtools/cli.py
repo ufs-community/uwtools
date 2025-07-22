@@ -322,7 +322,7 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.copy: _add_subparser_fs_copy(subparsers),
-        STR.link: _add_subparser_fs_hardlink(subparsers),
+        STR.hardlink: _add_subparser_fs_hardlink(subparsers),
         STR.link: _add_subparser_fs_link(subparsers),
         STR.makedirs: _add_subparser_fs_makedirs(subparsers),
     }
@@ -423,9 +423,9 @@ def _dispatch_fs_copy(args: Args) -> bool:
     return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
-def _dispatch_fs_link(args: Args) -> bool:
+def _dispatch_fs_hardlink(args: Args) -> bool:
     """
-    Define dispatch logic for fs link action.
+    Define dispatch logic for fs hardlink action.
 
     :param args: Parsed command-line args.
     """
@@ -433,17 +433,19 @@ def _dispatch_fs_link(args: Args) -> bool:
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
+        hardlink=True,
         leadtime=args[STR.leadtime],
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
+        symlink_fallback=args[STR.symlinkfallback],
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
 
 
-def _dispatch_fs_hardlink(args: Args) -> bool:
+def _dispatch_fs_link(args: Args) -> bool:
     """
-    Define dispatch logic for fs hardlink action.
+    Define dispatch logic for fs link action.
 
     :param args: Parsed command-line args.
     """
