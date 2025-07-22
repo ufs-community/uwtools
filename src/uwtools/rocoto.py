@@ -113,6 +113,8 @@ class _RocotoRunner:
             if not self._iterate():
                 return False
             state = self._state
+            if state in self._states["inactive"]:
+                break
             if state in self._states["transient"]:
                 continue
             self._report()
