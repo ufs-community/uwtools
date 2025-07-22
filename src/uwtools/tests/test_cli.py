@@ -70,7 +70,7 @@ def subparsers():
 # Test functions
 
 
-def test__abort(capsys):
+def test_cli__abort(capsys):
     msg = "Aborting..."
     with raises(SystemExit) as e:
         cli._abort(msg)
@@ -78,42 +78,42 @@ def test__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
-def test__add_subparser_config(subparsers):
+def test_cli__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
 
 
-def test__add_subparser_config_compare(subparsers):
+def test_cli__add_subparser_config_compare(subparsers):
     cli._add_subparser_config_compare(subparsers)
     assert subparsers.choices[STR.compare]
 
 
-def test__add_subparser_config_realize(subparsers):
+def test_cli__add_subparser_config_realize(subparsers):
     cli._add_subparser_config_realize(subparsers)
     assert subparsers.choices[STR.realize]
 
 
-def test__add_subparser_config_validate(subparsers):
+def test_cli__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
     assert subparsers.choices[STR.validate]
 
 
-def test__add_subparser_file(subparsers):
+def test_cli__add_subparser_file(subparsers):
     cli._add_subparser_fs(subparsers)
     assert actions(subparsers.choices[STR.fs]) == [STR.copy, STR.hardlink, STR.link, STR.makedirs]
 
 
-def test__add_subparser_file_copy(subparsers):
+def test_cli__add_subparser_file_copy(subparsers):
     cli._add_subparser_fs_copy(subparsers)
     assert subparsers.choices[STR.copy]
 
 
-def test__add_subparser_file_link(subparsers):
+def test_cli__add_subparser_file_link(subparsers):
     cli._add_subparser_fs_link(subparsers)
     assert subparsers.choices[STR.link]
 
 
-def test__add_subparser_for_driver(subparsers):
+def test_cli__add_subparser_for_driver(subparsers):
     name = "adriver"
     adriver = Mock()
     adriver.tasks.return_value = {"task1": "task1 description", "task2": "task2 description"}
@@ -122,43 +122,43 @@ def test__add_subparser_for_driver(subparsers):
     assert actions(subparsers.choices[name]) == ["task1", "task2"]
 
 
-def test__add_subparser_for_driver_task(subparsers):
+def test_cli__add_subparser_for_driver_task(subparsers):
     assert not subparsers.choices
     cli._add_subparser_for_driver_task(subparsers, "task1", "task1 description", with_cycle=True)
     assert subparsers.choices["task1"]
 
 
-def test__add_subparser_rocoto(subparsers):
+def test_cli__add_subparser_rocoto(subparsers):
     cli._add_subparser_rocoto(subparsers)
     assert subparsers.choices[STR.rocoto]
 
 
-def test__add_subparser_rocoto_realize(subparsers):
+def test_cli__add_subparser_rocoto_realize(subparsers):
     cli._add_subparser_rocoto_realize(subparsers)
     assert subparsers.choices[STR.realize]
 
 
-def test__add_subparser_rocoto_validate(subparsers):
+def test_cli__add_subparser_rocoto_validate(subparsers):
     cli._add_subparser_rocoto_validate(subparsers)
     assert subparsers.choices[STR.validate]
 
 
-def test__add_subparser_template(subparsers):
+def test_cli__add_subparser_template(subparsers):
     cli._add_subparser_template(subparsers)
     assert actions(subparsers.choices[STR.template]) == [STR.render, STR.translate]
 
 
-def test__add_subparser_template_render(subparsers):
+def test_cli__add_subparser_template_render(subparsers):
     cli._add_subparser_template_render(subparsers)
     assert subparsers.choices[STR.render]
 
 
-def test__add_subparser_template_translate(subparsers):
+def test_cli__add_subparser_template_translate(subparsers):
     cli._add_subparser_template_translate(subparsers)
     assert subparsers.choices[STR.translate]
 
 
-def test__dispatch_execute(utc):
+def test_cli__dispatch_execute(utc):
     cycle = utc()
     args: dict = {
         "module": "testdriver",
@@ -202,7 +202,7 @@ def test__dispatch_execute(utc):
         (STR.valsfile, STR.valsfmt),
     ],
 )
-def test__check_file_vs_format_fail(capsys, vals):
+def test_cli__check_file_vs_format_fail(capsys, vals):
     # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
     # no filename to deduce it from.
     file_arg, format_arg = vals
@@ -215,7 +215,7 @@ def test__check_file_vs_format_fail(capsys, vals):
     )
 
 
-def test__check_file_vs_format_pass_explicit():
+def test_cli__check_file_vs_format_pass_explicit():
     # Accept explicitly-specified format, whatever it is.
     fmt = "jpg"
     args = {STR.infile: "/path/to/input.txt", STR.infmt: fmt}
@@ -228,14 +228,14 @@ def test__check_file_vs_format_pass_explicit():
 
 
 @mark.parametrize("fmt", FORMAT.formats())
-def test__check_file_vs_format_pass_implicit(fmt):
+def test_cli__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
     args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
     args = cli._check_file_vs_format(file_arg=STR.infile, format_arg=STR.infmt, args=args)
     assert args[STR.infmt] == vars(FORMAT)[fmt]
 
 
-def test__check_template_render_vals_args_implicit_fail():
+def test_cli__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
     args = {STR.valsfile: "a.jpg"}
     with raises(UWError) as e:
@@ -243,20 +243,20 @@ def test__check_template_render_vals_args_implicit_fail():
     assert "Cannot deduce format" in str(e.value)
 
 
-def test__check_template_render_vals_args_implicit_pass():
+def test_cli__check_template_render_vals_args_implicit_pass():
     # The values-file format is deduced from the filename.
     args = {STR.valsfile: "a.yaml"}
     checked = cli._check_template_render_vals_args(args)
     assert checked[STR.valsfmt] == FORMAT.yaml
 
 
-def test__check_template_render_vals_args_noop_no_valsfile():
+def test_cli__check_template_render_vals_args_noop_no_valsfile():
     # No values file is provided, so format is irrelevant.
     args = {STR.valsfile: None}
     assert cli._check_template_render_vals_args(args) == args
 
 
-def test__check_template_render_vals_args_noop_explicit_valsfmt():
+def test_cli__check_template_render_vals_args_noop_explicit_valsfmt():
     # An explicit values format is honored, valid or not.
     args = {STR.valsfile: "a.txt", STR.valsfmt: "jpg"}
     assert cli._check_template_render_vals_args(args) == args
@@ -272,7 +272,7 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
         ("jpg", "udpate.yaml", True),
     ],
 )
-def test__check_update(fmt, fn, ok):
+def test_cli__check_update(fmt, fn, ok):
     args = {STR.updatefile: fn, STR.updatefmt: fmt}
     if ok:
         assert cli._check_update(args) == args
@@ -282,7 +282,7 @@ def test__check_update(fmt, fn, ok):
         assert "Cannot deduce format" in str(e.value)
 
 
-def test__check_verbosity_fail(capsys):
+def test_cli__check_verbosity_fail(capsys):
     args = {STR.quiet: True, STR.verbose: True}
     with raises(SystemExit):
         cli._check_verbosity(args)
@@ -290,12 +290,12 @@ def test__check_verbosity_fail(capsys):
 
 
 @mark.parametrize("flags", [[STR.quiet], [STR.verbose]])
-def test__check_verbosity_ok(flags):
+def test_cli__check_verbosity_ok(flags):
     args = dict.fromkeys(flags, True)
     assert cli._check_verbosity(args) == args
 
 
-def test__dict_from_key_eq_val_strings():
+def test_cli__dict_from_key_eq_val_strings():
     assert not cli._dict_from_key_eq_val_strings([])
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
 
@@ -308,7 +308,7 @@ def test__dict_from_key_eq_val_strings():
         (STR.validate, "_dispatch_config_validate"),
     ],
 )
-def test__dispatch_config(params):
+def test_cli__dispatch_config(params):
     action, funcname = params
     args = {STR.action: action}
     with patch.object(cli, funcname) as func:
@@ -316,7 +316,7 @@ def test__dispatch_config(params):
     func.assert_called_once_with(args)
 
 
-def test__dispatch_config_compare():
+def test_cli__dispatch_config_compare():
     args = {STR.path1: 1, STR.fmt1: 2, STR.path2: 3, STR.fmt2: 4}
     with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
@@ -328,7 +328,7 @@ def test__dispatch_config_compare():
     )
 
 
-def test__dispatch_config_realize(args_config_realize):
+def test_cli__dispatch_config_realize(args_config_realize):
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args_config_realize)
     realize.assert_called_once_with(
@@ -346,13 +346,13 @@ def test__dispatch_config_realize(args_config_realize):
     )
 
 
-def test__dispatch_config_realize_fail(args_config_realize, logged):
+def test_cli__dispatch_config_realize_fail(args_config_realize, logged):
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
     assert logged("Config could not be realized")
 
 
-def test__dispatch_config_validate_config_obj():
+def test_cli__dispatch_config_validate_config_obj():
     _dispatch_config_validate_args = {
         STR.schemafile: Path("/path/to/a.jsonschema"),
         STR.infile: Path("/path/to/config.yaml"),
@@ -371,47 +371,55 @@ def test__dispatch_config_validate_config_obj():
     ("action", "funcname"),
     [
         (STR.copy, "_dispatch_fs_copy"),
+        (STR.hardlink, "_dispatch_fs_hardlink"),
         (STR.link, "_dispatch_fs_link"),
         (STR.makedirs, "_dispatch_fs_makedirs"),
     ],
 )
-def test__dispatch_fs(action, funcname):
+def test_cli__dispatch_fs(action, funcname):
     args = {STR.action: action}
     with patch.object(cli, funcname) as func:
         cli._dispatch_fs(args)
     func.assert_called_once_with(args)
 
 
-@mark.parametrize("action", ["copy", "link", "makedirs"])
-def test__dispatch_fs_action(action, args_dispatch_fs):
-    args = args_dispatch_fs
+@mark.parametrize("action", ["copy", "hardlink", "link", "makedirs"])
+def test_cli__dispatch_fs_action(action, args_dispatch_fs):
+    api_fn = action
+    args_actual = args_dispatch_fs
+    args_expected = {
+        "target_dir": args_actual["target_dir"],
+        "config": args_actual["config_file"],
+        "cycle": args_actual["cycle"],
+        "leadtime": args_actual["leadtime"],
+        "key_path": args_actual["key_path"],
+        "dry_run": args_actual["dry_run"],
+        "stdin_ok": args_actual["stdin_ok"],
+    }
+    if action == "hardlink":
+        api_fn = "link"
+        extra = {"hardlink": True, "symlink_fallback": False}
+        args_actual = {**args_actual, **extra}
+        args_expected = {**args_expected, **extra}
     with (
-        patch.object(cli.uwtools.api.fs, action) as a,
+        patch.object(cli.uwtools.api.fs, api_fn) as a,
         patch.object(cli, "_dispatch_fs_report") as _dispatch_fs_report,
     ):
         a.return_value = {STR.ready: ["/present"], STR.notready: ["/missing"]}
-        getattr(cli, f"_dispatch_fs_{action}")(args)
-    a.assert_called_once_with(
-        target_dir=args["target_dir"],
-        config=args["config_file"],
-        cycle=args["cycle"],
-        leadtime=args["leadtime"],
-        key_path=args["key_path"],
-        dry_run=args["dry_run"],
-        stdin_ok=args["stdin_ok"],
-    )
+        getattr(cli, f"_dispatch_fs_{action}")(args_actual)
+    a.assert_called_once_with(**args_expected)
     _dispatch_fs_report.assert_called_once_with(
         report={STR.ready: ["/present"], STR.notready: ["/missing"]}
     )
 
 
-def test__dispatch_fs_report_no(capsys):
+def test_cli__dispatch_fs_report_no(capsys):
     report = None
     cli._dispatch_fs_report(report=report)
     assert capsys.readouterr().out.strip() == ""
 
 
-def test__dispatch_fs_report_yes(capsys):
+def test_cli__dispatch_fs_report_yes(capsys):
     report = {STR.ready: ["/present"], STR.notready: ["/missing"]}
     cli._dispatch_fs_report(report=report)
     expected = """
@@ -434,7 +442,7 @@ def test__dispatch_fs_report_yes(capsys):
         (STR.validate, "_dispatch_rocoto_validate"),
     ],
 )
-def test__dispatch_rocoto(params):
+def test_cli__dispatch_rocoto(params):
     action, funcname = params
     args = {STR.action: action}
     with patch.object(cli, funcname) as func:
@@ -442,34 +450,34 @@ def test__dispatch_rocoto(params):
     func.assert_called_once_with(args)
 
 
-def test__dispatch_rocoto_realize():
+def test_cli__dispatch_rocoto_realize():
     args = {STR.cfgfile: 1, STR.outfile: 2}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
     _realize.assert_called_once_with(config=1, output_file=2)
 
 
-def test__dispatch_rocoto_realize_no_optional():
+def test_cli__dispatch_rocoto_realize_no_optional():
     args = {STR.cfgfile: None, STR.outfile: None}
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
     func.assert_called_once_with(config=None, output_file=None)
 
 
-def test__dispatch_rocoto_validate_xml():
+def test_cli__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
     with patch.object(uwtools.api.rocoto, "_validate") as _validate:
         cli._dispatch_rocoto_validate(args)
     _validate.assert_called_once_with(xml_file=1)
 
 
-def test__dispatch_rocoto_validate_xml_invalid():
+def test_cli__dispatch_rocoto_validate_xml_invalid():
     args = {STR.infile: 1, STR.verbose: False}
     with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
         assert cli._dispatch_rocoto_validate(args) is False
 
 
-def test__dispatch_rocoto_validate_xml_no_optional():
+def test_cli__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
     with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
@@ -480,7 +488,7 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     "params",
     [(STR.render, "_dispatch_template_render"), (STR.translate, "_dispatch_template_translate")],
 )
-def test__dispatch_template(params):
+def test_cli__dispatch_template(params):
     action, funcname = params
     args = {STR.action: action}
     with patch.object(cli, funcname) as func:
@@ -489,7 +497,7 @@ def test__dispatch_template(params):
 
 
 @mark.parametrize("valsneeded", [False, True])
-def test__dispatch_template_render_fail(valsneeded):
+def test_cli__dispatch_template_render_fail(valsneeded):
     args = {
         STR.infile: 1,
         STR.outfile: 2,
@@ -505,7 +513,7 @@ def test__dispatch_template_render_fail(valsneeded):
         assert cli._dispatch_template_render(args) is valsneeded
 
 
-def test__dispatch_template_render_no_optional():
+def test_cli__dispatch_template_render_no_optional():
     args: dict = {
         STR.infile: None,
         STR.outfile: None,
@@ -533,7 +541,7 @@ def test__dispatch_template_render_no_optional():
     )
 
 
-def test__dispatch_template_render_yaml():
+def test_cli__dispatch_template_render_yaml():
     args = {
         STR.infile: 1,
         STR.outfile: 2,
@@ -561,7 +569,7 @@ def test__dispatch_template_render_yaml():
     )
 
 
-def test__dispatch_template_translate():
+def test_cli__dispatch_template_translate():
     args = {
         STR.infile: 1,
         STR.outfile: 2,
@@ -574,7 +582,7 @@ def test__dispatch_template_translate():
     _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=2, dry_run=3)
 
 
-def test__dispatch_template_translate_no_optional():
+def test_cli__dispatch_template_translate_no_optional():
     args = {
         STR.dryrun: False,
         STR.infile: None,
@@ -590,7 +598,7 @@ def test__dispatch_template_translate_no_optional():
 
 
 @mark.parametrize("hours", [0, 24, 168])
-def test__dispatch_to_driver(hours, utc):
+def test_cli__dispatch_to_driver(hours, utc):
     cycle = utc()
     leadtime = dt.timedelta(hours=hours)
     args: dict = {
@@ -623,14 +631,14 @@ def test__dispatch_to_driver(hours, utc):
         )
 
 
-def test__dispatch_to_driver_no_schema(capsys):
+def test_cli__dispatch_to_driver_no_schema(capsys):
     adriver = Mock()
     with patch.object(cli, "import_module", return_value=adriver), raises(SystemExit):
         cli._dispatch_to_driver(name="adriver", args={})
     assert "No TASK specified" in capsys.readouterr().err
 
 
-def test__dispatch_to_driver_show_schema(capsys):
+def test_cli__dispatch_to_driver_show_schema(capsys):
     adriver = Mock()
     adriver.schema.return_value = {"fruit": {"b": "banana", "a": "apple"}}
     with patch.object(cli, "import_module", return_value=adriver):
@@ -648,7 +656,7 @@ def test__dispatch_to_driver_show_schema(capsys):
 
 @mark.parametrize("quiet", [False, True])
 @mark.parametrize("verbose", [False, True])
-def test_main_fail_checks(capsys, quiet, verbose):
+def test_cli_main_fail_checks(capsys, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
     if quiet:
@@ -669,7 +677,7 @@ def test_main_fail_checks(capsys, quiet, verbose):
 
 
 @mark.parametrize("vals", [(True, 0), (False, 1)])
-def test_main_fail_dispatch(vals):
+def test_cli_main_fail_dispatch(vals):
     # Using mode 'template render' for testing.
     dispatch_retval, exit_status = vals
     raw_args = ["testing", STR.template, STR.render]
@@ -682,7 +690,7 @@ def test_main_fail_dispatch(vals):
     assert e.value.code == exit_status
 
 
-def test_main_fail_exception_abort():
+def test_cli_main_fail_exception_abort():
     # Mock setup_logging() to raise a UWError in main() before logging is configured, which triggers
     # a call to _abort().
     msg = "Catastrophe"
@@ -695,7 +703,7 @@ def test_main_fail_exception_abort():
     _abort.assert_called_once_with(msg)
 
 
-def test_main_fail_exception_log():
+def test_cli_main_fail_exception_log():
     # Mock _dispatch_template() to raise a UWError in main() after logging is configured, which logs
     # an error message and exists with exit status.
     msg = "Catastrophe"
@@ -710,7 +718,7 @@ def test_main_fail_exception_log():
     log.error.assert_called_once_with(msg)
 
 
-def test__parse_args():
+def test_cli__parse_args():
     raw_args = ["testing", "--bar", "42"]
     with patch.object(cli, "Parser") as p:
         cli._parse_args(raw_args)
@@ -719,11 +727,11 @@ def test__parse_args():
         parser.parse_args.assert_called_with(raw_args)
 
 
-def test__switch():
+def test_cli__switch():
     assert cli._switch("foo_bar") == "--foo-bar"
 
 
-def test__timedelta_from_str(capsys):
+def test_cli__timedelta_from_str(capsys):
     assert cli._timedelta_from_str("111:222:333").total_seconds() == 111 * 3600 + 222 * 60 + 333
     assert cli._timedelta_from_str("111:222").total_seconds() == 111 * 3600 + 222 * 60
     assert cli._timedelta_from_str("111").total_seconds() == 111 * 3600
@@ -733,5 +741,5 @@ def test__timedelta_from_str(capsys):
     assert f"Specify leadtime as {cli.LEADTIME_DESC}" in capsys.readouterr().err
 
 
-def test__version():
+def test_cli__version():
     assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
