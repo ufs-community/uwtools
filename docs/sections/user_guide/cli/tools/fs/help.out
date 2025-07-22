@@ -12,6 +12,8 @@ Positional arguments:
   ACTION
     copy
       Copy files
+    hardlink
+      Hardlink files
     link
       Link files
     makedirs

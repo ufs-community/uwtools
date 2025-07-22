@@ -72,7 +72,7 @@ def link(
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
-    :param symlink_fallback: Create symlinks when hardlinks cannot be created?
+    :param symlink_fallback: Symlink if hardlink fails when hardlink=True?
     :return: A report on files linked / not linked.
     """
     stager = Linker(

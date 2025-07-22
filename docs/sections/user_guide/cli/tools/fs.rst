@@ -1,6 +1,11 @@
 ``fs``
 ======
 
+.. contents::
+   :backlinks: top
+   :depth: 1
+   :local:
+
 .. _cli_fs_mode:
 
 The ``uw`` mode for handling filesystem items (files and directories).
@@ -166,15 +171,26 @@ Use the ``!glob`` tag to extract multiple members from one or more HPSS archive 
 
 See :ref:`files_yaml_htar_glob_support` for more information on the use of the ``!glob`` tag in combination with ``htar://`` sources.
 
+``hardlink``
+------------
+
+The ``hardlink`` action stages items in a target directory by creating hardlinks to files or other links. It behaves similarly to the ``link`` action (see below), but note the following:
+
+* If a hardlink cannot be created but the ``--symlink-fallback`` option is specified, a symlink will be created instead, if possible. Hardlinks cannot target files on other filesystems, or directories.
+
+.. literalinclude:: fs/hardlink-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: fs/hardlink-help.out
+   :language: text
+
 ``link``
 --------
 
-The ``link`` action stages items in a target directory by creating symbolic links to files, directories, or other symbolic links. It otherwise behaves similarly to ``copy`` (see above), but note the following:
+The ``link`` action stages items in a target directory by creating symbolic links (symlinks) to files, directories, or other links. It otherwise behaves similarly to the ``copy`` action (see above), but note the following:
 
-* HTTP and HPSS sources are not supported.
-* In addition to file, directories and other symbolic links can be linked.
 * The ``link`` action links directories indentified by glob patterns, whereas the ``copy`` action ignores directories.
-* Support for glob-pattern source values is the same as for ``link``.
+* HTTP and HPSS sources are not supported.
 
 .. literalinclude:: fs/link-help.cmd
    :language: text

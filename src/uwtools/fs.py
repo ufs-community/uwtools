@@ -45,8 +45,6 @@ class Stager(ABC):
         key_path: list[YAMLKey] | None = None,
     ) -> None:
         """
-        Stage files and directories.
-
         :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
         :param target_dir: Path to target directory.
         :param cycle: A ``datetime`` object to make available for use in the config.
@@ -274,15 +272,13 @@ class Linker(FileStager):
         symlink_fallback: bool = False,
     ) -> None:
         """
-        Stage files and directories.
-
         :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
         :param target_dir: Path to target directory.
         :param cycle: A ``datetime`` object to make available for use in the config.
         :param hardlink: Create hardlinks instead of symlinks?
         :param leadtime: A ``timedelta`` object to make available for use in the config.
         :param key_path: Path of keys to config block to use.
-        :param symlink_fallback: Create symlinks when hardlinks cannot be created?
+        :param symlink_fallback: Symlink if hardlink fails when hardlink=True?
         :raises: ``UWConfigError`` if config fails validation.
         """
         super().__init__(config, target_dir, cycle, leadtime, key_path)

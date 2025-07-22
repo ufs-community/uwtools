@@ -1,6 +1,11 @@
 ``config``
 ==========
 
+.. contents::
+   :backlinks: top
+   :depth: 1
+   :local:
+
 The ``uw`` mode for handling configuration files (configs).
 
 .. literalinclude:: config/help.cmd

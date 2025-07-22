@@ -1,6 +1,11 @@
 ``template``
 ============
 
+.. contents::
+   :backlinks: top
+   :depth: 1
+   :local:
+
 The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
 .. literalinclude:: template/help.cmd

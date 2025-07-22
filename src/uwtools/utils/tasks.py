@@ -217,7 +217,7 @@ def hardlink(
     :param target: The existing file or directory.
     :param linkname: The symlink to create.
     :param check: Check existence of source before trying to link.
-    :param symlink_fallback: Create symlinks when hardlinks cannot be created?
+    :param symlink_fallback: Symlink if hardlink fails?
     """
     target, linkname = map(_local_path, [target, linkname])
     yield "Hardlink %s -> %s" % (linkname, target)

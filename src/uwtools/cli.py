@@ -858,7 +858,7 @@ def _add_arg_symlink_fallback(group: Group) -> None:
     group.add_argument(
         _switch(STR.symlinkfallback),
         action="store_true",
-        help="Create symlinks when hardlinks cannot be created",
+        help="Symlink if hardlink fails",
     )
 
 
