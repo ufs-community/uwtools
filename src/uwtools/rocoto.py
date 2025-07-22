@@ -110,8 +110,7 @@ class _RocotoRunner:
         while state not in self._states["inactive"]:
             if not self._iterate():
                 return False
-            state = self._state
-            if state not in chain(self._states["inactive"], self._states["transient"]):
+            if (state := self._state) in self._states["active"]:
                 self._report()
                 log.debug("Sleeping %s seconds", self._rate)
                 sleep(self._rate)
