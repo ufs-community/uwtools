@@ -107,19 +107,14 @@ class _RocotoRunner:
 
     def run(self) -> bool:
         state = self._state
-        while True:
-            if state in self._states["inactive"]:
-                break
+        while state not in self._states["inactive"]:
             if not self._iterate():
                 return False
             state = self._state
-            if state in self._states["inactive"]:
-                break
-            if state in self._states["transient"]:
-                continue
-            self._report()
-            log.debug("Sleeping %s seconds", self._rate)
-            sleep(self._rate)
+            if state not in chain(self._states["inactive"], self._states["transient"]):
+                self._report()
+                log.debug("Sleeping %s seconds", self._rate)
+                sleep(self._rate)
         return True
 
     @property
