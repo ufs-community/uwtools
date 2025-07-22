@@ -4,7 +4,7 @@ usage: uw fs hardlink [-h] [--version] [--config-file PATH]
                       [--key-path KEY[.KEY...]] [--report] [--quiet]
                       [--verbose] [--symlink-fallback]
 
-Hardlink files
+Create hardlinks
 
 Optional arguments:
   -h, --help

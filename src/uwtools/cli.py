@@ -362,7 +362,7 @@ def _add_subparser_fs_hardlink(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.hardlink, "Hardlink files")
+    parser = _add_subparser(subparsers, STR.hardlink, "Create hardlinks")
     checks, optional = _add_subparser_fs_common(parser)
     _add_arg_symlink_fallback(optional)
     return checks
@@ -374,7 +374,7 @@ def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.link, "Link files")
+    parser = _add_subparser(subparsers, STR.link, "Create symlinks")
     checks, _ = _add_subparser_fs_common(parser)
     return checks
 

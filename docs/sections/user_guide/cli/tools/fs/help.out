@@ -13,8 +13,8 @@ Positional arguments:
     copy
       Copy files
     hardlink
-      Hardlink files
+      Create hardlinks
     link
-      Link files
+      Create symlinks
     makedirs
       Make directories
