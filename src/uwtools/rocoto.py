@@ -106,12 +106,14 @@ class _RocotoRunner:
             self._con.close()
 
     def run(self) -> bool:
+        state = self._state
         while True:
-            if self._state in self._states["inactive"]:
+            if state in self._states["inactive"]:
                 break
             if not self._iterate():
                 return False
-            if self._state in self._states["transient"]:
+            state = self._state
+            if state in self._states["transient"]:
                 continue
             self._report()
             log.debug("Sleeping %s seconds", self._rate)

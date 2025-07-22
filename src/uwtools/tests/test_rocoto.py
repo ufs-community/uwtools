@@ -160,9 +160,9 @@ class TestRocotoRunner:
 
     def test_rocoto__RocotoRunner_run__active(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = ["RUNNING", "RUNNING", "COMPLETE"]
+            mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
             assert instance.run() is True
-            self.check_mock_calls_counts(mocks, _iterate=1, _report=1, _state=3, sleep=1)
+            self.check_mock_calls_counts(mocks, _iterate=1, _report=1, _state=2, sleep=1)
 
     def test_rocoto__RocotoRunner_run__inactive(self, instance):
         with self.mocks() as mocks:
@@ -172,9 +172,9 @@ class TestRocotoRunner:
 
     def test_rocoto__RocotoRunner_run__transient(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = [None, "SUBMITTING", "RUNNING", "RUNNING", "COMPLETE"]
+            mocks["_state"].side_effect = [None, "SUBMITTING", "RUNNING", "COMPLETE"]
             assert instance.run() is True
-            self.check_mock_calls_counts(mocks, _iterate=2, _report=1, _state=5, sleep=1)
+            self.check_mock_calls_counts(mocks, _iterate=3, _report=2, _state=4, sleep=2)
 
     def test_rocoto__RocotoRunner_run__iterate_failure(self, instance):
         with self.mocks() as mocks:
