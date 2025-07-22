@@ -1,10 +1,10 @@
-[2025-07-21T22:30:40]     INFO Iterating workflow
-[2025-07-21T22:31:11]     INFO Workflow status:
-[2025-07-21T22:31:12]     INFO CYCLE                    TASK                       JOBID               STATE         EXIT STATUS     TRIES      DURATION
-[2025-07-21T22:31:12]     INFO ================================================================================================================================
-[2025-07-21T22:31:12]     INFO 202507170000                     foo    druby://10.178.9.5:40925          SUBMITTING                   -         0           0.0
-[2025-07-21T22:31:12]     INFO 202507170000                     bar                           -                   -                   -         -             -
-[2025-07-21T22:31:15]     INFO Iterating workflow
-[2025-07-21T22:31:46]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUBMITTING
-[2025-07-21T22:31:46]     INFO Iterating workflow
-[2025-07-21T22:31:48]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUCCEEDED
+[2025-07-22T01:17:34]     INFO Iterating workflow
+[2025-07-22T01:18:06]     INFO Workflow status:
+[2025-07-22T01:18:07]     INFO CYCLE                    TASK                       JOBID               STATE         EXIT STATUS     TRIES      DURATION
+[2025-07-22T01:18:07]     INFO ================================================================================================================================
+[2025-07-22T01:18:07]     INFO 202507170000                     foo    druby://10.178.9.5:45143          SUBMITTING                   -         0           0.0
+[2025-07-22T01:18:07]     INFO 202507170000                     bar                           -                   -                   -         -             -
+[2025-07-22T01:18:10]     INFO Iterating workflow
+[2025-07-22T01:18:41]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUBMITTING
+[2025-07-22T01:18:41]     INFO Iterating workflow
+[2025-07-22T01:18:43]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUCCEEDED

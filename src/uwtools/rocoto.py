@@ -111,7 +111,7 @@ class _RocotoRunner:
             if not self._iterate():
                 return False
             state = self._state
-            if state is None or state in self._states["active"]:
+            if not state or state in self._states["active"]:
                 self._report()
                 log.debug("Sleeping %s seconds", self._rate)
                 sleep(self._rate)
