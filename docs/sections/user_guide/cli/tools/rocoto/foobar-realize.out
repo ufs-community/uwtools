@@ -1,0 +1,30 @@
+[2025-01-02T03:04:05]     INFO Schema validation succeeded for Rocoto config
+[2025-01-02T03:04:05]     INFO Schema validation succeeded for Rocoto XML
+<?xml version='1.0' encoding='utf-8'?>
+<workflow realtime="False" scheduler="slurm">
+  <cycledef group="default">202507170000 202507170000 00:00:01</cycledef>
+  <log>{{ 'ROOT' | env }}/log</log>
+  <task name="foo" cycledefs="default">
+    <account>wrfruc</account>
+    <cores>1</cores>
+    <partition>service</partition>
+    <queue>batch</queue>
+    <walltime>00:01:00</walltime>
+    <command>echo foo &gt;/some/path/foo</command>
+    <jobname>foo</jobname>
+    <join>/some/path/batchout</join>
+  </task>
+  <task name="bar" cycledefs="default">
+    <account>wrfruc</account>
+    <cores>1</cores>
+    <partition>service</partition>
+    <queue>batch</queue>
+    <walltime>00:01:00</walltime>
+    <command>echo bar &gt;/some/path/bar</command>
+    <jobname>bar</jobname>
+    <join>/some/path/batchout</join>
+    <dependency>
+      <taskdep task="foo"/>
+    </dependency>
+  </task>
+</workflow>

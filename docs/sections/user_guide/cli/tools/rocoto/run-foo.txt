@@ -1,1 +1,5 @@
-uw rocoto run --cycle 2025-07-17T00 --database foobar.db --task foo --workflow foobar.xml
+rm -rf /tmp/foobar/foo
+mkdir -pv /tmp/foobar/foo
+set -x
+uw rocoto run --cycle 2025-07-17T00 --database /tmp/foobar/foo/foobar.db --task foo --workflow foobar.xml
+uw rocoto run --cycle 2025-07-17T00 --database /tmp/foobar/foo/foobar.db --task foo --workflow foobar.xml

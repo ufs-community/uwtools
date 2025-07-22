@@ -80,26 +80,28 @@ Examples
 
 .. note:: Use of ``uw rocoto run`` requires presence of the ``rocotorun`` and ``rocotostat`` executables on ``PATH``. On HPCs, this is typically achieved by loading a system module providing Rocoto.
 
-The following examples make use of a simple Rocoto XML workflow document (which might have been created by ``uw rocoto realize``) similar to:
+The following examples make use of this simple UW YAML for Rocoto config:
 
-.. literalinclude:: rocoto/foobar.xml
+.. literalinclude:: rocoto/foobar.yaml
+   :language: yaml
+
+It could be rendered to a Rocoto XML document like this:
+
+.. literalinclude:: rocoto/foobar-realize.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/foobar-realize.out
    :language: xml
 
 * To run only task ``foo``, which has no dependencies:
 
   .. literalinclude:: rocoto/run-foo.txt
      :language: text
-     :emphasize-lines: 1
+     :emphasize-lines: 4-5
   .. literalinclude:: rocoto/run-foo.out
      :language: text
 
-  A second invocation of ``uw rocoto run`` immediately shows task ``foo`` in its final state:
-
-  .. literalinclude:: rocoto/run-foo.txt
-     :language: text
-     :emphasize-lines: 1
-  .. literalinclude:: rocoto/run-foo-complete.out
-     :language: text
+  Note that the second invocation of ``uw rocoto run`` immediately shows task ``foo`` in its final state.
 
 * To run task ``bar``, which depends on task ``foo``, iterating every 3 seconds, and after deleting the ``foobar.db`` database file from the previous example:
 
