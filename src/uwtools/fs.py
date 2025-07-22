@@ -25,7 +25,7 @@ from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.processing import run_shell_cmd
-from uwtools.utils.tasks import directory, filecopy, symlink
+from uwtools.utils.tasks import directory, filecopy, hardlink, symlink
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -263,6 +263,32 @@ class Linker(FileStager):
     Stage files by linking.
     """
 
+    def __init__(
+        self,
+        config: dict | str | Path | None = None,
+        target_dir: str | Path | None = None,
+        cycle: dt.datetime | None = None,
+        hardlink: bool | None = False,
+        leadtime: dt.timedelta | None = None,
+        key_path: list[YAMLKey] | None = None,
+        symlink_fallback: bool | None = False,
+    ) -> None:
+        """
+        Stage files and directories.
+
+        :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+        :param target_dir: Path to target directory.
+        :param cycle: A ``datetime`` object to make available for use in the config.
+        :param hardlink: Create hardlinks instead of symlinks?
+        :param leadtime: A ``timedelta`` object to make available for use in the config.
+        :param key_path: Path of keys to config block to use.
+        :param symlink_fallback: Create symlinks when hardlinks cannot be created?
+        :raises: ``UWConfigError`` if config fails validation.
+        """
+        super().__init__(config, target_dir, cycle, leadtime, key_path)
+        self.hardlink = hardlink
+        self.symlink_fallback = symlink_fallback
+
     @tasks
     def go(self):
         """
@@ -274,7 +300,18 @@ class Linker(FileStager):
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
         yield [
-            symlink(target=Path(v), linkname=linkname(k), check=nonglob)
+            hardlink(
+                target=Path(v),
+                linkname=linkname(k),
+                check=nonglob,
+                symlink_fallback=self.symlink_fallback,
+            )
+            if self.hardlink
+            else symlink(
+                target=Path(v),
+                linkname=linkname(k),
+                check=nonglob,
+            )
             for k, v, nonglob in self._expand_glob()
         ]
 

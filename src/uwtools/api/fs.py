@@ -54,10 +54,12 @@ def link(
     config: Path | dict | str | None = None,
     target_dir: Path | str | None = None,
     cycle: dt.datetime | None = None,
+    hardlink: bool | None = False,
     leadtime: dt.timedelta | None = None,
     key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
+    symlink_fallback: bool | None = False,
 ) -> dict[str, list[str]]:
     """
     Link files.
@@ -65,18 +67,22 @@ def link(
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param target_dir: Path to target directory.
     :param cycle: A datetime object to make available for use in the config.
+    :param hardlink: Create hardlinks instead of symlinks?
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
+    :param symlink_fallback: Create symlinks when hardlinks cannot be created?
     :return: A report on files linked / not linked.
     """
     stager = Linker(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(config, stdin_ok),
         cycle=cycle,
+        hardlink=hardlink,
         leadtime=leadtime,
         key_path=key_path,
+        symlink_fallback=symlink_fallback,
     )
     assets = cast(list, stager.go(dry_run=dry_run).assets)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
