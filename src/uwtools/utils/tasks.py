@@ -228,10 +228,11 @@ def hardlink(
     dst = linkname
     try:
         os.link(src, dst)
-    except OSError as e:
+    except Exception as e:
         if symlink_fallback:
             os.symlink(src, dst)
         else:
+            log.error(str(e))
             raise UWError("Could not hardlink %s -> %s" % (dst, src)) from e
 
 

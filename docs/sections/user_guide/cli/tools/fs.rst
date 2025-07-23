@@ -176,7 +176,8 @@ See :ref:`files_yaml_htar_glob_support` for more information on the use of the `
 
 The ``hardlink`` action stages items in a target directory by creating hardlinks to files or other links. It behaves similarly to the ``link`` action (see below), but note the following:
 
-* If a hardlink cannot be created but the ``--symlink-fallback`` option is specified, a symlink will be created instead, if possible. Hardlinks cannot target files on other filesystems, or directories.
+* Hardlinks cannot target: items on other filesystems, items the user does not have write permission to, or directories.
+* If a hardlink cannot be created but the ``--symlink-fallback`` option is specified, a symlink will be created instead, if possible.
 
 .. literalinclude:: fs/hardlink-help.cmd
    :language: text
