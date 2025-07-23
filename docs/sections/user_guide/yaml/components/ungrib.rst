@@ -27,7 +27,7 @@ Describes the GRIB-formatted files to be processed by ``ungrib``.
 
   **files:**
 
-  A list of absolute paths to the GRIB-formatted files to be processed by ``ungrib``. 
+  A list of absolute or relative paths to the GRIB-formatted files to be processed by ``ungrib``. 
 
   **interval_hours:**
 

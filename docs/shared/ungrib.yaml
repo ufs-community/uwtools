@@ -7,6 +7,8 @@ ungrib:
   gribfiles:
     files:
       - /path/to/dir/rap.t10z.wrfnatf00.grib2
+      - /path/to/dir/rap.t10z.wrfnatf06.grib2
+      - /path/to/dir/rap.t10z.wrfnatf12.grib2
     interval_hours: 6
     max_leadtime: 24
   rundir: /path/to/run/dir
