@@ -16,7 +16,7 @@ from urllib.parse import unquote, urlparse
 import requests
 from iotaa import Node, asset, external, task
 
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.processing import run_shell_cmd
@@ -208,31 +208,59 @@ def filecopy_local(src: Path, dst: Path, check: bool = True):
 
 
 @task
+def hardlink(
+    target: Path | str, linkname: Path | str, check: bool = True, symlink_fallback: bool = False
+):
+    """
+    A hardlink.
+
+    :param target: The existing file or directory.
+    :param linkname: The symlink to create.
+    :param check: Check existence of source before trying to link.
+    :param symlink_fallback: Symlink if hardlink fails?
+    """
+    target, linkname = map(_local_path, [target, linkname])
+    yield "Hardlink %s -> %s" % (linkname, target)
+    yield asset(linkname, linkname.exists)
+    yield link_target(target) if check else None
+    linkname.parent.mkdir(parents=True, exist_ok=True)
+    src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
+    dst = linkname
+    try:
+        os.link(src, dst)
+    except Exception as e:
+        if symlink_fallback:
+            os.symlink(src, dst)
+        else:
+            log.error(str(e))
+            raise UWError("Could not hardlink %s -> %s" % (dst, src)) from e
+
+
+@task
 def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     """
     A symbolic link.
 
     :param target: The existing file or directory.
     :param linkname: The symlink to create.
-    :param check: Check existence of source before trying to copy.
+    :param check: Check existence of source before trying to link.
     """
     target, linkname = map(_local_path, [target, linkname])
-    yield "Link %s -> %s" % (linkname, target)
+    yield "Symlink %s -> %s" % (linkname, target)
     yield asset(linkname, linkname.exists)
-    yield symlink_target(target) if check else None
+    yield link_target(target) if check else None
     linkname.parent.mkdir(parents=True, exist_ok=True)
-    os.symlink(
-        src=target if target.is_absolute() else os.path.relpath(target, linkname.parent),
-        dst=linkname,
-    )
+    src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
+    dst = linkname
+    os.symlink(src, dst)
 
 
 @external
-def symlink_target(path: Path | str):
+def link_target(path: Path | str):
     """
-    An existing file, symlink, or directory.
+    An existing file, link, or directory.
 
-    :param path: Path to the file, symlink, or directory.
+    :param path: Path to the file, link, or directory.
     :param context: Optional additional context for the file.
     """
     path = _local_path(path)

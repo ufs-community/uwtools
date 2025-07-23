@@ -1,6 +1,11 @@
 ``rocoto``
 ==========
 
+.. contents::
+   :backlinks: top
+   :depth: 1
+   :local:
+
 The ``uw`` mode for realizing and validating Rocoto XML documents.
 
 .. literalinclude:: rocoto/help.cmd
