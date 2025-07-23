@@ -27,9 +27,9 @@ def config(tmp_path):
             },
             "gribfiles": {
                 "files": [
-                    str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
-                    str(tmp_path / "gribfile2"),
-                    str(tmp_path / "gribfile3"),
+                    str(tmp_path / "rap.t10z.wrfnatf00.grib2"),
+                    str(tmp_path / "rap.t10z.wrfnatf03.grib2"),
+                    str(tmp_path / "rap.t10z.wrfnatf06.grib2"),
                 ],
                 "interval_hours": 6,
                 "max_leadtime": 12,

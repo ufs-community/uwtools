@@ -25,6 +25,10 @@ gribfiles:
 
 Describes the GRIB-formatted files to be processed by ``ungrib``.
 
+  **files:**
+
+  A list of absolute paths to the GRIB-formatted files to be processed by ``ungrib``. 
+
   **interval_hours:**
 
   Frequency interval of the given files, in integer hours.
@@ -32,14 +36,6 @@ Describes the GRIB-formatted files to be processed by ``ungrib``.
   **max_leadtime:**
 
   The maximum forecast leadtime to process. This may be the same as the forecast length, or a lower leadtime.
-
-  **offset:**
-
-  How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
-
-  **path:**
-
-  An absolute-path template to the GRIB-formatted files to be processed by ``ungrib``. The Python ``int`` variables ``cycle_hour`` and ``forecast_hour`` will be interpolated into, e.g., ``/path/to/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}``. Note that this is a Python string template rather than a Jinja2 template.
 
 rundir:
 ^^^^^^^
