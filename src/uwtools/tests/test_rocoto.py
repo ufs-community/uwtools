@@ -211,7 +211,7 @@ class TestRocotoRunner:
     def test_rocoto__RocotoRunner__query_stmt(self, instance):
         assert (
             instance._query_stmt
-            == "select state from jobs where taskname=:taskname and cycle=:cycle"
+            == "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
         )
 
     def test_rocoto__RocotoRunner__report(self, instance, logged):
