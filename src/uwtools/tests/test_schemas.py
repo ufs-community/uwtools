@@ -2139,10 +2139,9 @@ def test_schema_ungrib():
     config = {
         "execution": {"executable": "/some/ungrib.exe"},
         "gribfiles": {
+            "files": ["/some/gfs.t12z.pgrb2.0p25.f000"],
             "interval_hours": 6,
-            "max_leadtime": 24,
-            "offset": 0,
-            "path": "/some/gfs.t12z.pgrb2.0p25.f000",
+            "max_leadtime": 12,
         },
         "rundir": "/run",
         "vtable": "/some/Vtable.GFS",

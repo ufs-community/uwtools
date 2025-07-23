@@ -30,19 +30,10 @@ class Ungrib(DriverCycleBased):
         Symlinks to all the GRIB files.
         """
         yield self.taskname("GRIB files")
-        gribfiles = self.config["gribfiles"]
-        offset = abs(gribfiles["offset"])
-        endhour = gribfiles["max_leadtime"] + offset
-        interval = gribfiles["interval_hours"]
-        cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
-        links = []
-        for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
-            infile = Path(
-                gribfiles["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
-            )
-            link_name = self.rundir / f"GRIBFILE.{_ext(n)}"
-            links.append((infile, link_name))
-        yield [self._gribfile(infile, link) for infile, link in links]
+        files = [Path(p) for p in self.config["gribfiles"]["files"]]
+        yield [
+            self._gribfile(src, self.rundir / f"GRIBFILE.{_ext(i)}") for i, src in enumerate(files)
+        ]
 
     @task
     def namelist_file(self):

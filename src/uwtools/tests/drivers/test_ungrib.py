@@ -2,6 +2,7 @@
 Ungrib driver tests.
 """
 
+from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
@@ -25,10 +26,13 @@ def config(tmp_path):
                 "executable": str(tmp_path / "ungrib.exe"),
             },
             "gribfiles": {
+                "files": [
+                    str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
+                    str(tmp_path / "gribfile2"),
+                    str(tmp_path / "gribfile3"),
+                ],
                 "interval_hours": 6,
                 "max_leadtime": 12,
-                "offset": 6,
-                "path": str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
             },
             "rundir": str(tmp_path),
             "vtable": str(tmp_path / "Vtable.GFS"),
@@ -57,14 +61,12 @@ def test_Ungrib_driver_name(driverobj):
     assert driverobj.driver_name() == Ungrib.driver_name() == "ungrib"
 
 
-def test_Ungrib_gribfiles(driverobj, tmp_path):
-    links = []
-    cycle_hr = 12
-    for n, forecast_hour in enumerate((6, 12, 18)):
-        links = [driverobj.rundir / f"GRIBFILE.{ungrib._ext(n)}"]
-        infile = tmp_path / f"gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}"
-        infile.touch()
-    assert not any(link.is_file() for link in links)
+def test_Ungrib_gribfiles(driverobj):
+    files = [Path(p) for p in driverobj._config["gribfiles"]["files"]]
+    for file in files:
+        file.touch()
+    links = [driverobj.rundir / f"GRIBFILE.{ungrib._ext(i)}" for i in range(len(files))]
+    assert not any(link.exists() for link in links)
     driverobj.gribfiles()
     assert all(link.is_symlink() for link in links)
 

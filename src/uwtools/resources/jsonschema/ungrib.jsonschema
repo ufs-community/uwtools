@@ -9,6 +9,13 @@
         "gribfiles": {
           "additionalProperties": false,
           "properties": {
+            "files": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
             "interval_hours": {
               "minimum": 1,
               "type": "integer"
@@ -16,20 +23,12 @@
             "max_leadtime": {
               "minimum": 0,
               "type": "integer"
-            },
-            "offset": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "path": {
-              "type": "string"
             }
           },
           "required": [
+            "files",
             "interval_hours",
-            "max_leadtime",
-            "offset",
-            "path"
+            "max_leadtime"
           ],
           "type": "object"
         },
