@@ -288,10 +288,12 @@ def test_utils_tasks_hardlink__cannot_hardlink(logged, prefix, symlink_fallback,
     target.touch()
     assert not link.exists()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
-    with patch.object(tasks.os, "link", side_effect=OSError):
+    with patch.object(tasks.os, "link", side_effect=OSError("big\ntrouble\n")):
         tasks.hardlink(target=t2, linkname=l2, symlink_fallback=symlink_fallback)
     assert link.is_symlink() is symlink_fallback
     if not symlink_fallback:
+        assert logged("big")
+        assert logged("trouble")
         assert logged("Could not hardlink %s -> %s" % (link, target))
 
 
