@@ -237,7 +237,7 @@ class Copier(FileStager):
 
         # If a source path is a glob pattern, the existence of the file(s) found via glob expansion
         # is already assured and it is unnecessary to check again for their existence. If, however,
-        # a source path is a full explicit path, its existence should be checked before and attempt
+        # a source path is a full explicit path, its existence should be checked before any attempt
         # is made to copy it.
 
         yield "File copies"
