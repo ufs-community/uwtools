@@ -3,7 +3,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <workflow realtime="False" scheduler="slurm">
   <cycledef group="default">202507170000 202507170000 00:00:01</cycledef>
-  <log>{{ 'ROOT' | env }}/log</log>
+  <log>/some/path/log</log>
   <task name="foo" cycledefs="default">
     <account>wrfruc</account>
     <cores>1</cores>

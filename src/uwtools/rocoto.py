@@ -187,6 +187,7 @@ class _RocotoXML:
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         self._config_validate(config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        cfgobj.dereference()
         self._config = cfgobj.data
         self._add_workflow(self._config)
 
