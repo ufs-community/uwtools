@@ -71,8 +71,8 @@ This tool helps transform legacy configuration files templated with the atparse 
 
 | :any:`CLI documentation with examples<cli_template_translate_examples>`
 
-File/Directory Provisioning
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File/Link/Directory Provisioning
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 | **CLI**: ``uw fs -h``
 | **API**: ``import uwtools.api.fs``

@@ -322,12 +322,13 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.copy: _add_subparser_fs_copy(subparsers),
+        STR.hardlink: _add_subparser_fs_hardlink(subparsers),
         STR.link: _add_subparser_fs_link(subparsers),
         STR.makedirs: _add_subparser_fs_makedirs(subparsers),
     }
 
 
-def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
+def _add_subparser_fs_common(parser: Parser) -> tuple[ActionChecks, Group]:
     """
     Perform common subparser setup for mode: fs {copy link makedirs}.
 
@@ -341,7 +342,7 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     _add_arg_dry_run(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
     _add_arg_report(optional)
-    return _add_args_verbosity(optional)
+    return _add_args_verbosity(optional), optional
 
 
 def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
@@ -351,7 +352,20 @@ def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.copy, "Copy files")
-    return _add_subparser_fs_common(parser)
+    checks, _ = _add_subparser_fs_common(parser)
+    return checks
+
+
+def _add_subparser_fs_hardlink(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: fs hardlink.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.hardlink, "Create hardlinks")
+    checks, optional = _add_subparser_fs_common(parser)
+    _add_arg_symlink_fallback(optional)
+    return checks
 
 
 def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
@@ -360,8 +374,9 @@ def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.link, "Link files")
-    return _add_subparser_fs_common(parser)
+    parser = _add_subparser(subparsers, STR.link, "Create symlinks")
+    checks, _ = _add_subparser_fs_common(parser)
+    return checks
 
 
 def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
@@ -371,7 +386,8 @@ def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.makedirs, "Make directories")
-    return _add_subparser_fs_common(parser)
+    checks, _ = _add_subparser_fs_common(parser)
+    return checks
 
 
 def _dispatch_fs(args: Args) -> bool:
@@ -382,6 +398,7 @@ def _dispatch_fs(args: Args) -> bool:
     """
     actions = {
         STR.copy: _dispatch_fs_copy,
+        STR.hardlink: _dispatch_fs_hardlink,
         STR.link: _dispatch_fs_link,
         STR.makedirs: _dispatch_fs_makedirs,
     }
@@ -402,6 +419,26 @@ def _dispatch_fs_copy(args: Args) -> bool:
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
+    )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
+
+
+def _dispatch_fs_hardlink(args: Args) -> bool:
+    """
+    Define dispatch logic for fs hardlink action.
+
+    :param args: Parsed command-line args.
+    """
+    report = uwtools.api.fs.link(
+        target_dir=args[STR.targetdir],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        hardlink=True,
+        leadtime=args[STR.leadtime],
+        key_path=args[STR.keypath],
+        dry_run=args[STR.dryrun],
+        stdin_ok=True,
+        symlink_fallback=args[STR.symlinkfallback],
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
 
@@ -871,6 +908,14 @@ def _add_arg_report(group: Group) -> None:
         _switch(STR.report),
         action="store_true",
         help="Show JSON report on [non]ready assets",
+    )
+
+
+def _add_arg_symlink_fallback(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.symlinkfallback),
+        action="store_true",
+        help="Symlink if hardlink fails",
     )
 
 

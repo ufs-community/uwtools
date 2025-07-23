@@ -12,7 +12,9 @@ Positional arguments:
   ACTION
     copy
       Copy files
+    hardlink
+      Create hardlinks
     link
-      Link files
+      Create symlinks
     makedirs
       Make directories
