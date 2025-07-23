@@ -10,9 +10,9 @@
     <partition>service</partition>
     <queue>batch</queue>
     <walltime>00:01:00</walltime>
-    <command>echo foo &gt;/some/path/foo</command>
+    <command>/bin/true</command>
     <jobname>foo</jobname>
-    <join>/some/path/batchout</join>
+    <join>/some/path/slurm</join>
   </task>
   <task name="bar" cycledefs="default">
     <account>wrfruc</account>
@@ -20,9 +20,9 @@
     <partition>service</partition>
     <queue>batch</queue>
     <walltime>00:01:00</walltime>
-    <command>echo bar &gt;/some/path/bar</command>
+    <command>/bin/true</command>
     <jobname>bar</jobname>
-    <join>/some/path/batchout</join>
+    <join>/some/path/slurm</join>
     <dependency>
       <taskdep task="foo"/>
     </dependency>
