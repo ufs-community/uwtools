@@ -101,23 +101,17 @@ It could be rendered to a Rocoto XML document like this:
   .. literalinclude:: rocoto/run-foo.out
      :language: text
 
-  Note that the second invocation of ``uw rocoto run`` immediately shows task ``foo`` in its final state.
+  Note that the second invocation of ``uw rocoto run`` immediately shows task ``foo`` in its final state, without iterating the workflow.
 
-* To run task ``bar``, which depends on task ``foo``, iterating every 3 seconds, and after deleting the ``foobar.db`` database file from the previous example:
+* To run task ``bar``, which depends on task ``foo``, iterating every 3 seconds:
 
   .. literalinclude:: rocoto/run-bar.txt
      :language: text
-     :emphasize-lines: 1
+     :emphasize-lines: 4
   .. literalinclude:: rocoto/run-bar.out
      :language: text
 
-  A second invocation of ``uw rocoto run`` immediately shows task ``bar`` in its final state:
-
-  .. literalinclude:: rocoto/run-bar.txt
-     :language: text
-     :emphasize-lines: 1
-  .. literalinclude:: rocoto/run-bar-complete.out
-     :language: text
+  Note that the second invocation of ``uw rocoto run`` immediately shows task ``bar`` in its final state, without iterating the workflow.
 
 .. _cli_rocoto_validate_examples:
 
