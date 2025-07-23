@@ -145,7 +145,7 @@ class _RocotoRunner:
 
     @property
     def _query_stmt(self) -> str:
-        return "select state from jobs where taskname=:taskname and cycle=:cycle"
+        return "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
 
     def _report(self) -> None:
         cmd = "rocotostat -d %s -w %s" % (self._database, self._workflow)

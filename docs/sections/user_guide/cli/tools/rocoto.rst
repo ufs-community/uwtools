@@ -97,7 +97,7 @@ It could be rendered to a Rocoto XML document like this:
 
   .. literalinclude:: rocoto/run-foo.txt
      :language: text
-     :emphasize-lines: 4-5
+     :emphasize-lines: 6
   .. literalinclude:: rocoto/run-foo.out
      :language: text
 

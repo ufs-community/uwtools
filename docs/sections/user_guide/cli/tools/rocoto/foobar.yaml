@@ -1,8 +1,9 @@
 common: &common
   account: wrfruc
   attrs: {cycledefs: default}
+  command: /bin/true
   cores: 1
-  join: "{{ 'ROOT' | env }}/batchout"
+  join: "{{ 'RUNDIR' | env }}/slurm"
   partition: service
   queue: batch
   walltime: "00:01:00"
@@ -11,12 +12,10 @@ workflow:
   cycledef:
     - attrs: {group: default}
       spec: 202507170000 202507170000 00:00:01
-  log: {value: "{{ 'ROOT' | env }}/log" }
+  log: {value: "{{ 'RUNDIR' | env }}/log" }
   tasks:
     task_foo:
       <<: *common
-      command: echo foo >{{ 'ROOT' | env }}/foo
     task_bar:
       <<: *common
-      command: echo bar >{{ 'ROOT' | env }}/bar
       dependency: {taskdep: {attrs: {task: foo}}}

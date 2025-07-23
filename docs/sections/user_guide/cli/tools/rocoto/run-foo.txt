@@ -1,5 +1,9 @@
-rm -rf /tmp/foobar/foo
-mkdir -pv /tmp/foobar/foo
-set -x
-uw rocoto run --cycle 2025-07-17T00 --database /tmp/foobar/foo/foobar.db --task foo --workflow foobar.xml
-uw rocoto run --cycle 2025-07-17T00 --database /tmp/foobar/foo/foobar.db --task foo --workflow foobar.xml
+export RUNDIR=$(readlink -f $(mktemp -d -p $(dirname $0)))
+uw rocoto realize -c foobar.yaml >$RUNDIR/xml 2>/dev/null
+for invocation in 1 2; do (
+  cd $RUNDIR
+  set -x
+  uw rocoto run --cycle 2025-07-17T00 --database db --task foo --workflow xml
+)
+done
+rm -rf $RUNDIR
