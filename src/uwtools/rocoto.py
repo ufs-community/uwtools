@@ -28,7 +28,22 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-DEFAULT_ITERATION_RATE = 10
+DEFAULT_ITERATION_RATE = 10  # seconds
+
+
+def iterate(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
+    return _RocotoIterator(cycle, database, rate, task, workflow).iterate()
+
+
+def validate_file(xml_file: Path | None) -> bool:
+    """
+    Validate purported Rocoto XML file against its schema.
+
+    :param xml_file: Path to XML file (None => read stdin).
+    :return: Did the XML conform to the schema?
+    """
+    with readable(xml_file) as f:
+        return validate_string(xml=f.read())
 
 
 def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
@@ -48,21 +63,6 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
     with writable(output_file) as f:
         print(xml, file=f)
     return xml
-
-
-def run(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
-    return _RocotoRunner(cycle, database, rate, task, workflow).run()
-
-
-def validate_file(xml_file: Path | None) -> bool:
-    """
-    Validate purported Rocoto XML file against its schema.
-
-    :param xml_file: Path to XML file (None => read stdin).
-    :return: Did the XML conform to the schema?
-    """
-    with readable(xml_file) as f:
-        return validate_string(xml=f.read())
 
 
 def validate_string(xml: str) -> bool:
@@ -91,7 +91,7 @@ def validate_string(xml: str) -> bool:
     return valid
 
 
-class _RocotoRunner:
+class _RocotoIterator:
     def __init__(self, cycle: datetime, database: Path, rate: int, task: str, workflow: Path):
         self._cycle = cycle
         self._database = database
@@ -105,10 +105,10 @@ class _RocotoRunner:
         if self._con:
             self._con.close()
 
-    def run(self) -> bool:
+    def iterate(self) -> bool:
         state = self._state
         while state not in self._states["inactive"]:
-            if not self._iterate():
+            if not self._run():
                 return False
             state = self._state
             if not state or state in self._states["active"]:
@@ -133,12 +133,6 @@ class _RocotoRunner:
             self._cur = connection.cursor()
         return self._cur
 
-    def _iterate(self) -> bool:
-        log.info("Iterating workflow")
-        cmd = "rocotorun -d %s -w %s" % (self._database, self._workflow)
-        success, _ = run_shell_cmd(cmd, quiet=True)
-        return success
-
     @property
     def _query_data(self) -> dict:
         return {"taskname": self._task, "cycle": int(self._cycle.timestamp())}
@@ -154,6 +148,12 @@ class _RocotoRunner:
             _, output = run_shell_cmd(cmd, quiet=True)
             for line in output.strip().split("\n"):
                 log.info(line)
+
+    def _run(self) -> bool:
+        log.info("Iterating workflow")
+        cmd = "rocotorun -d %s -w %s" % (self._database, self._workflow)
+        success, _ = run_shell_cmd(cmd, quiet=True)
+        return success
 
     @property
     def _state(self) -> str | None:

@@ -107,7 +107,7 @@ Run Action
 
 Given a Rocoto XML workflow document, invoke Rocoto in a loop, monitoring its progress, until a specified task is complete.
 
-| :any:`CLI documentation with examples<cli_rocoto_run_examples>`
+| :any:`CLI documentation with examples<cli_rocoto_iterate_examples>`
 
 Validate Action
 """""""""""""""

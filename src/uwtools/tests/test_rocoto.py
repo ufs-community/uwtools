@@ -24,7 +24,7 @@ def assets(tmp_path):
 
 
 @fixture
-def rocoto_runner_args(utc, tmp_path):
+def rocoto_iterator_args(utc, tmp_path):
     return {
         "cycle": utc(2025, 7, 21, 12),
         "database": tmp_path / "rocoto.db",
@@ -45,6 +45,12 @@ def validation_assets(tmp_path):
 
 
 # Tests
+
+
+def test_rocoto_iterate(rocoto_iterator_args):
+    with patch.object(rocoto, "_RocotoIterator") as _RocotoIterator:  # noqa: N806
+        rocoto.iterate(**rocoto_iterator_args)
+    _RocotoIterator.assert_called_once_with(*rocoto_iterator_args.values())
 
 
 def test_rocoto_realize__cfg_to_file(assets):
@@ -81,12 +87,6 @@ def test_rocoto_realize__invalid_xml(assets):
             rocoto.realize(config=cfgfile, output_file=outfile)
 
 
-def test_rocoto_run(rocoto_runner_args):
-    with patch.object(rocoto, "_RocotoRunner") as _RocotoRunner:  # noqa: N806
-        rocoto.run(**rocoto_runner_args)
-    _RocotoRunner.assert_called_once_with(*rocoto_runner_args.values())
-
-
 def test_rocoto_validate__file_fail(validation_assets):
     xml_file_bad, _, _, _ = validation_assets
     assert rocoto.validate_file(xml_file=xml_file_bad) is False
@@ -107,22 +107,22 @@ def test_rocoto_validate__string_pass(validation_assets):
     assert rocoto.validate_string(xml=xml_string_good) is True
 
 
-class TestRocotoRunner:
+class TestRocotoIterator:
     """
-    Tests for class uwtools.rocoto._RocotoRunner.
+    Tests for class uwtools.rocoto._RocotoIterator.
     """
 
     # Fixtures
 
     @fixture
-    def instance(self, rocoto_runner_args):
-        return rocoto._RocotoRunner(**rocoto_runner_args)
+    def instance(self, rocoto_iterator_args):
+        return rocoto._RocotoIterator(**rocoto_iterator_args)
 
     # Helpers
 
-    def check_mock_calls_counts(self, mocks, _iterate, _report, _state, sleep):
-        assert mocks["_iterate"].call_count == _iterate
+    def check_mock_calls_counts(self, mocks, _report, _run, _state, sleep):
         assert mocks["_report"].call_count == _report
+        assert mocks["_run"].call_count == _run
         assert mocks["_state"].call_count == _state
         assert mocks["sleep"].call_count == sleep
 
@@ -142,79 +142,79 @@ class TestRocotoRunner:
     def mocks(self):
         with (
             patch.object(rocoto, "sleep") as sleep,
-            patch.object(rocoto._RocotoRunner, "_iterate") as _iterate,
-            patch.object(rocoto._RocotoRunner, "_report") as _report,
-            patch.object(rocoto._RocotoRunner, "_state", new_callable=PropertyMock) as _state,
+            patch.object(rocoto._RocotoIterator, "_report") as _report,
+            patch.object(rocoto._RocotoIterator, "_run") as _run,
+            patch.object(rocoto._RocotoIterator, "_state", new_callable=PropertyMock) as _state,
         ):
-            _iterate.return_value = True
-            yield dict(sleep=sleep, _iterate=_iterate, _report=_report, _state=_state)
+            _run.return_value = True
+            yield dict(sleep=sleep, _report=_report, _run=_run, _state=_state)
 
     # Tests
 
-    def test_rocoto__RocotoRunner__init_and_del(self, rocoto_runner_args):
-        rr = rocoto._RocotoRunner(**rocoto_runner_args)
+    def test_rocoto__RocotoIterator__init_and_del(self, rocoto_iterator_args):
+        rr = rocoto._RocotoIterator(**rocoto_iterator_args)
         con = Mock()
         rr._con = con
         del rr
         con.close.assert_called_once_with()
 
-    def test_rocoto__RocotoRunner_run__active(self, instance):
+    def test_rocoto__RocotoIterator_iterate__active(self, instance):
         with self.mocks() as mocks:
             mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
-            assert instance.run() is True
-            self.check_mock_calls_counts(mocks, _iterate=1, _report=0, _state=2, sleep=0)
+            assert instance.iterate() is True
+            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=2, sleep=0)
 
-    def test_rocoto__RocotoRunner_run__inactive(self, instance):
+    def test_rocoto__RocotoIterator_iterate__inactive(self, instance):
         with self.mocks() as mocks:
             mocks["_state"].side_effect = ["COMPLETE"]
-            assert instance.run() is True
-            self.check_mock_calls_counts(mocks, _iterate=0, _report=0, _state=1, sleep=0)
+            assert instance.iterate() is True
+            self.check_mock_calls_counts(mocks, _report=0, _run=0, _state=1, sleep=0)
 
-    def test_rocoto__RocotoRunner_run__transient(self, instance):
+    def test_rocoto__RocotoIterator_iterate__transient(self, instance):
         with self.mocks() as mocks:
             mocks["_state"].side_effect = [None, "SUBMITTING", "RUNNING", "COMPLETE"]
-            assert instance.run() is True
-            self.check_mock_calls_counts(mocks, _iterate=3, _report=1, _state=4, sleep=1)
+            assert instance.iterate() is True
+            self.check_mock_calls_counts(mocks, _report=1, _run=3, _state=4, sleep=1)
 
-    def test_rocoto__RocotoRunner_run__iterate_failure(self, instance):
+    def test_rocoto__RocotoIterator_iterate__run_failure(self, instance):
         with self.mocks() as mocks:
-            mocks["_iterate"].return_value = False
-            assert instance.run() is False
-            self.check_mock_calls_counts(mocks, _iterate=1, _report=0, _state=1, sleep=0)
+            mocks["_run"].return_value = False
+            assert instance.iterate() is False
+            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=1, sleep=0)
 
-    def test_rocoto__RocotoRunner__connection(self, instance):
+    def test_rocoto__RocotoIterator__connection(self, instance):
         instance._database.touch()
         assert isinstance(instance._connection, sqlite3.Connection)
 
-    def test_rocoto__RocotoRunner__connection__no_file(self, instance):
+    def test_rocoto__RocotoIterator__connection__no_file(self, instance):
         assert instance._connection is None
 
-    def test_rocoto__RocotoRunner__cursor(self, instance):
+    def test_rocoto__RocotoIterator__cursor(self, instance):
         instance._database.touch()
         assert isinstance(instance._cursor, sqlite3.Cursor)
 
-    def test_rocoto__RocotoRunner__cursor__no_file(self, instance):
+    def test_rocoto__RocotoIterator__cursor__no_file(self, instance):
         assert instance._cursor is None
 
-    def test_rocoto__RocotoRunner__iterate(self, instance, logged):
+    def test_rocoto__RocotoIterator__iterate(self, instance, logged):
         retval = (True, "")
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
-            assert instance._iterate() is True
+            assert instance._run() is True
         run_shell_cmd.assert_called_once_with(
             "rocotorun -d %s -w %s" % (instance._database, instance._workflow), quiet=True
         )
         assert logged("Iterating workflow")
 
-    def test_rocoto__RocotoRunner__query_data(self, instance):
+    def test_rocoto__RocotoIterator__query_data(self, instance):
         assert instance._query_data == {"taskname": "foo", "cycle": 1753099200}
 
-    def test_rocoto__RocotoRunner__query_stmt(self, instance):
+    def test_rocoto__RocotoIterator__query_stmt(self, instance):
         assert (
             instance._query_stmt
             == "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
         )
 
-    def test_rocoto__RocotoRunner__report(self, instance, logged):
+    def test_rocoto__RocotoIterator__report(self, instance, logged):
         instance._database.touch()
         retval = (True, "foo\nbar\n")
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
@@ -225,7 +225,7 @@ class TestRocotoRunner:
             "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
         )
 
-    def test_rocoto__RocotoRunner__state(self, instance, logged):
+    def test_rocoto__RocotoIterator__state(self, instance, logged):
         self.dbsetup(instance)
         instance._cursor.execute(
             "insert into jobs values (:id, :taskname, :cycle, :state)",
@@ -234,14 +234,14 @@ class TestRocotoRunner:
         assert instance._state == "COMPLETE"
         assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
 
-    def test_rocoto__RocotoRunner__state__none(self, instance):
+    def test_rocoto__RocotoIterator__state__none(self, instance):
         self.dbsetup(instance)
         assert instance._state is None
 
-    def test_rocoto__RocotoRunner__state_msg(self, instance):
+    def test_rocoto__RocotoIterator__state_msg(self, instance):
         assert instance._state_msg == "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"
 
-    def test_rocoto__RocotoRunner__states(self, instance):
+    def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == ["active", "inactive", "transient"]
 
 

@@ -69,7 +69,7 @@ The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
      :language: xml
 
-.. _cli_rocoto_run_examples:
+.. _cli_rocoto_iterate_examples:
 
 ``run``
 -------

@@ -450,21 +450,7 @@ def test_cli__dispatch_rocoto(params):
     func.assert_called_once_with(args)
 
 
-def test_cli__dispatch_rocoto_realize():
-    args = {STR.cfgfile: 1, STR.outfile: 2}
-    with patch.object(uwtools.api.rocoto, "_realize") as _realize:
-        cli._dispatch_rocoto_realize(args)
-    _realize.assert_called_once_with(config=1, output_file=2)
-
-
-def test_cli__dispatch_rocoto_realize_no_optional():
-    args = {STR.cfgfile: None, STR.outfile: None}
-    with patch.object(uwtools.api.rocoto, "_realize") as func:
-        cli._dispatch_rocoto_realize(args)
-    func.assert_called_once_with(config=None, output_file=None)
-
-
-def test_cli_dispatch_rocoto_run(utc):
+def test_cli_dispatch_rocoto_iterate(utc):
     cycle = utc()
     database = Path("/path/to/rocoto.db")
     rate = 11
@@ -477,9 +463,23 @@ def test_cli_dispatch_rocoto_run(utc):
         STR.task: task,
         STR.workflow: workflow,
     }
-    with patch.object(uwtools.api.rocoto, "_run") as _run:
-        cli._dispatch_rocoto_run(args)
-    _run.assert_called_once_with(**args)
+    with patch.object(uwtools.api.rocoto, "_iterate") as _iterate:
+        cli._dispatch_rocoto_iterate(args)
+    _iterate.assert_called_once_with(**args)
+
+
+def test_cli__dispatch_rocoto_realize():
+    args = {STR.cfgfile: 1, STR.outfile: 2}
+    with patch.object(uwtools.api.rocoto, "_realize") as _realize:
+        cli._dispatch_rocoto_realize(args)
+    _realize.assert_called_once_with(config=1, output_file=2)
+
+
+def test_cli__dispatch_rocoto_realize_no_optional():
+    args = {STR.cfgfile: None, STR.outfile: None}
+    with patch.object(uwtools.api.rocoto, "_realize") as func:
+        cli._dispatch_rocoto_realize(args)
+    func.assert_called_once_with(config=None, output_file=None)
 
 
 def test_cli__dispatch_rocoto_validate_xml():

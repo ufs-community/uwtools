@@ -96,6 +96,7 @@ class STR:
     infile: str = "input_file"
     infmt: str = "input_format"
     ioda: str = "ioda"
+    iterate: str = "iterate"
     jedi: str = "jedi"
     keypath: str = "key_path"
     keyvalpairs: str = "key_eq_val_pairs"
