@@ -1,0 +1,143 @@
+{
+  "properties": {
+      "additionalProperties": false,
+      "properties": {
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "namelist": {
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "base_file"
+                ]
+              },
+              {
+                "required": [
+                  "update_values"
+                ]
+              }
+            ],
+            "properties": {
+              "base_file": {
+                "type": "string"
+              },
+              "update_values": {
+                "additionalProperties": false,
+                "properties": {
+                  "block_decomp_file": {
+                    "type": "string"
+                  },
+                  "diag_file_input_grid": {
+                    "type": "string"
+                  },
+                  "dx": {
+                    "type": "number"
+                  },
+                  "dy": {
+                    "type": "number"
+                  },
+                  "esmf_log": {
+                    "type": "boolean"
+                  },
+                  "file_target_grid": {
+                    "type": "string"
+                  },
+                  "grid_file_input_grid": {
+                    "type": "string"
+                  },
+                  "hist_file_input_grid": {
+                    "type": "string"
+                  },
+                  "interp_diag": {
+                    "type": "boolean"
+                  },
+                  "interp_hist": {
+                    "type": "boolean"
+                  },
+                  "is_regional": {
+                    "type": "boolean"
+                  },
+                  "i_target": {
+                    "type": "integer"
+                  },
+                  "j_target": {
+                    "type": "integer"
+                  },
+                  "nx": {
+                    "type": "integer"
+                  },
+                  "ny": {
+                    "type": "integer"
+                  },
+                  "missing_value": {
+                    "type": "number"
+                  },
+                  "output_file": {
+                    "type": "string"
+                  },
+                  "pole_lat": {
+                    "type": "number"
+                  },
+                  "pole_lon": {
+                    "type": "number"
+                  },
+                  "ref_lat": {
+                    "type": "number"
+                  },
+                  "ref_lon": {
+                    "type": "number"
+                  },
+                  "ref_x": {
+                    "type": "number"
+                  },
+                  "ref_y": {
+                    "type": "number"
+                  },
+                  "stand_lon": {
+                    "type": "number"
+                  },
+                  "target_grid_type": {
+                    "enum": [
+                    "file",
+                    "lambert",
+                    "mercator",
+                    "polar",
+                    "lat-lon"
+                    ]
+                    "type": "string"
+                  },
+                  "truelat1": {
+                    "type": "number"
+                  },
+                  "truelat2": {
+                    "type": "number"
+                  },
+                  "wrf_mod_vars": {
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+
+        },
+        "rundir": {
+          "type": "string"
+        },
+        "validate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "namelist",
+        "rundir"
+      ],
+      "type": "object"
+    }
+}
