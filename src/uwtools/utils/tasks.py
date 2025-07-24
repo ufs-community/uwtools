@@ -232,7 +232,8 @@ def hardlink(
         if symlink_fallback:
             os.symlink(src, dst)
         else:
-            log.error(str(e))
+            for line in str(e).split("\n"):
+                log.error(line)
             raise UWError("Could not hardlink %s -> %s" % (dst, src)) from e
 
 

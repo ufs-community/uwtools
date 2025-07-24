@@ -498,9 +498,27 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
+        STR.iterate: _add_subparser_rocoto_iterate(subparsers),
         STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
     }
+
+
+def _add_subparser_rocoto_iterate(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: rocoto iterate.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.iterate, "Iterate a Rocoto workflow")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cycle(required)
+    _add_arg_database(required)
+    _add_arg_task(required)
+    _add_arg_workflow(required)
+    optional = _basic_setup(parser)
+    _add_arg_rate(optional)
+    return _add_args_verbosity(optional)
 
 
 def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
@@ -535,15 +553,31 @@ def _dispatch_rocoto(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     actions = {
+        STR.iterate: _dispatch_rocoto_iterate,
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }
     return actions[args[STR.action]](args)
 
 
+def _dispatch_rocoto_iterate(args: Args) -> bool:
+    """
+    Define dispatch logic for rocoto iterate action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.rocoto.iterate(
+        cycle=args[STR.cycle],
+        database=args[STR.database],
+        rate=args[STR.rate],
+        task=args[STR.task],
+        workflow=args[STR.workflow],
+    )
+
+
 def _dispatch_rocoto_realize(args: Args) -> bool:
     """
-    Define dispatch logic for rocoto realize action. Validate input and output.
+    Define dispatch logic for rocoto realize action.
 
     :param args: Parsed command-line args.
     """
@@ -677,7 +711,7 @@ def _add_arg_batch(group: Group) -> None:
     group.add_argument(
         _switch(STR.batch),
         action="store_true",
-        help="Submit run to batch scheduler",
+        help="Submit job to batch scheduler",
     )
 
 
@@ -708,6 +742,16 @@ def _add_arg_cycle(group: Group, required: bool = False) -> None:
         help="The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)",
         required=required,
         type=dt.datetime.fromisoformat,
+    )
+
+
+def _add_arg_database(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.database),
+        "-d",
+        help="The Rocoto database file",
+        required=True,
+        type=Path,
     )
 
 
@@ -846,6 +890,19 @@ def _add_arg_quiet(group: Group) -> None:
     )
 
 
+def _add_arg_rate(group: Group) -> None:
+    default_rate = uwtools.rocoto.DEFAULT_ITERATION_RATE
+    group.add_argument(
+        _switch(STR.rate),
+        "-r",
+        default=default_rate,
+        help="Delay between workflow iterations (default: %s)" % default_rate,
+        metavar="SECONDS",
+        required=False,
+        type=int,
+    )
+
+
 def _add_arg_report(group: Group) -> None:
     group.add_argument(
         _switch(STR.report),
@@ -903,7 +960,7 @@ def _add_arg_target_dir(group: Group, required: bool = False, helpmsg: str | Non
 def _add_arg_task(group: Group) -> None:
     group.add_argument(
         _switch(STR.task),
-        help="Driver task to execute",
+        help="Task to execute",
         required=True,
         type=str,
     )
@@ -972,6 +1029,16 @@ def _add_arg_verbose(group: Group) -> None:
         "-v",
         action="store_true",
         help="Print all logging messages",
+    )
+
+
+def _add_arg_workflow(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.workflow),
+        "-w",
+        help="The Rocoto XML file",
+        required=True,
+        type=Path,
     )
 
 

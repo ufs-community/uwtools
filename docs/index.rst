@@ -30,24 +30,24 @@ Configuration Management
 
 The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may use :jinja2:`Jinja2 syntax<templates>` to express values. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
 
-Compare Mode
-""""""""""""
+Compare Action
+""""""""""""""
 
 When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! The Fortran namelists are the *real* catalyst behind this gem, but it also works on the other configuration formats.
 
 | :any:`CLI documentation with examples<cli_config_compare_examples>`
 
-Realize Mode
-""""""""""""
+Realize Action
+""""""""""""""
 
-This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the contents of other files to build up a configuration from its pieces.
+To realize a config is to render values encoded in :jinja2:`Jinja2 expressions<templates/#expressions>`, potentially overriding values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the contents of other files to build up a configuration from its pieces.
 
 | :any:`CLI documentation with examples<cli_config_realize_examples>`
 
-Validate Mode
-"""""""""""""
+Validate Action
+"""""""""""""""
 
-In this mode, you can provide a :json-schema:`JSON Schema<>` file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
+Provide a :json-schema:`JSON Schema<>` file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
 
 | :any:`CLI documentation with examples<cli_config_validate_examples>`
 
@@ -57,15 +57,15 @@ Templating
 | **CLI**: ``uw template -h``
 | **API**: ``import uwtools.api.template``
 
-Render Mode
-"""""""""""
+Render Action
+"""""""""""""
 
-The ``render`` mode that gives you the full power of rendering a :jinja2:`Jinja2 template<templates>` in the same easy-to-use interface as your other workflow tools.
+This gives you the full power of rendering a :jinja2:`Jinja2 template<templates>` in the same easy-to-use interface as your other workflow tools.
 
 | :any:`CLI documentation with examples<cli_template_render_examples>`
 
-Translate Mode
-""""""""""""""
+Translate Action
+""""""""""""""""
 
 This tool helps transform legacy configuration files templated with the atparse tool (common at :noaa:`NOAA<>`) into :jinja2:`Jinja2 templates<templates>` for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
 
@@ -87,25 +87,32 @@ There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw f
 
    <iframe src="https://www.youtube.com/embed/b2HXOlt-Ulw" allowfullscreen frameborder="0" height="315" width="560"></iframe>
 
-Rocoto Configurability
-^^^^^^^^^^^^^^^^^^^^^^
+Rocoto Support
+^^^^^^^^^^^^^^
 
 | **CLI**: ``uw rocoto -h``
 | **API**: ``import uwtools.api.rocoto``
 
 This tool is all about creating a configurable interface to the :rocoto:`Rocoto<>` workflow manager tool that produces the Rocoto XML for a totally arbitrary set of tasks. The ``uwtools`` package defines a structured YAML interface that relies on tasks you define to run. Paired with the uw config tool suite, this interface becomes highly configurable and requires no XML syntax!
 
-Realize Mode
-""""""""""""
+Iterate Action
+""""""""""""""
+
+Given a Rocoto XML workflow document, invoke Rocoto in a loop, monitoring its progress, until a specified task is complete.
+
+| :any:`CLI documentation with examples<cli_rocoto_iterate_examples>`
+
+Realize Action
+""""""""""""""
 
 This is where you put in your structured YAML that defines your workflow of choice, and it pops out a verified Rocoto XML.
 
 | :any:`CLI documentation with examples<cli_rocoto_realize_examples>`
 
-Validate Mode
-"""""""""""""
+Validate Action
+"""""""""""""""
 
-Do you already have a Rocoto XML but don't want to run Rocoto to make sure it works? Use the validate mode to check to see if Rocoto will be happy.
+Do you already have a Rocoto XML but don't want to run Rocoto to make sure it works? Use ``rocoto validate`` to check to see if Rocoto will be happy.
 
 | :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
 

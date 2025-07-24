@@ -450,6 +450,24 @@ def test_cli__dispatch_rocoto(params):
     func.assert_called_once_with(args)
 
 
+def test_cli_dispatch_rocoto_iterate(utc):
+    cycle = utc()
+    database = Path("/path/to/rocoto.db")
+    rate = 11
+    task = "foo"
+    workflow = Path("/path/to/rocoto.xml")
+    args = {
+        STR.cycle: cycle,
+        STR.database: database,
+        STR.rate: rate,
+        STR.task: task,
+        STR.workflow: workflow,
+    }
+    with patch.object(uwtools.api.rocoto, "_iterate") as _iterate:
+        cli._dispatch_rocoto_iterate(args)
+    _iterate.assert_called_once_with(**args)
+
+
 def test_cli__dispatch_rocoto_realize():
     args = {STR.cfgfile: 1, STR.outfile: 2}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:

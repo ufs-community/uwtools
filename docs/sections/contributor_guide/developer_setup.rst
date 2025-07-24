@@ -63,7 +63,7 @@ As an alternative to installing the :anaconda-condev:`pre-built package<>`, the 
 .. code-block:: text
 
    # Activate your conda. Optionally, activate a non-'base' environment.
-   conda install -y conda-build conda-verify
+   conda install -y conda-build
    git clone https://github.com/maddenp/condev.git
    make -C condev package
    conda install -y -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels condev

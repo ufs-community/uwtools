@@ -6,12 +6,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from uwtools.rocoto import realize_rocoto_xml as _realize
-from uwtools.rocoto import validate_rocoto_xml_file as _validate
+from uwtools.rocoto import DEFAULT_ITERATION_RATE
+from uwtools.rocoto import iterate as _iterate
+from uwtools.rocoto import realize as _realize
+from uwtools.rocoto import validate_file as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
 
 if TYPE_CHECKING:
+    from datetime import datetime
     from pathlib import Path
 
     from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
@@ -38,6 +41,31 @@ def realize(
         config=_ensure_data_source(_str2path(config), stdin_ok), output_file=_str2path(output_file)
     )
     return True
+
+
+def iterate(
+    cycle: datetime,
+    database: Path | str,
+    task: str,
+    workflow: Path | str,
+    rate: int = DEFAULT_ITERATION_RATE,
+) -> bool:
+    """
+    Iterate the specified Rocoto workflow to completion (or failure).
+
+    :param cycle: A datetime object to make available for use in the config.
+    :param database: Path to the Rocoto database file.
+    :param task: The workflow task to iterate.
+    :param workflow: Path to the Rocoto XML workflow document.
+    :param rate: Seconds between workflow iterations.
+    """
+    return _iterate(
+        cycle=cycle,
+        database=_ensure_data_source(_str2path(database), stdin_ok=False),
+        rate=rate,
+        task=task,
+        workflow=_ensure_data_source(_str2path(workflow), stdin_ok=False),
+    )
 
 
 def validate(
