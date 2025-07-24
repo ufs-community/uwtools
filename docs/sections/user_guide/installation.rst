@@ -49,7 +49,7 @@ Build the ``uwtools`` Package Locally
 
    .. code-block:: text
 
-      conda install -y -c conda-forge --override-channels conda-build conda-verify
+      conda install -y -c conda-forge --override-channels conda-build
 
 #. In a clone of the :uwtools:`uwtools repository<>`, build the ``uwtools`` package:
 
