@@ -87,13 +87,20 @@ There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw f
 
    <iframe src="https://www.youtube.com/embed/b2HXOlt-Ulw" allowfullscreen frameborder="0" height="315" width="560"></iframe>
 
-Rocoto Configurability
-^^^^^^^^^^^^^^^^^^^^^^
+Rocoto Support
+^^^^^^^^^^^^^^
 
 | **CLI**: ``uw rocoto -h``
 | **API**: ``import uwtools.api.rocoto``
 
 This tool is all about creating a configurable interface to the :rocoto:`Rocoto<>` workflow manager tool that produces the Rocoto XML for a totally arbitrary set of tasks. The ``uwtools`` package defines a structured YAML interface that relies on tasks you define to run. Paired with the uw config tool suite, this interface becomes highly configurable and requires no XML syntax!
+
+Iterate Action
+""""""""""""""
+
+Given a Rocoto XML workflow document, invoke Rocoto in a loop, monitoring its progress, until a specified task is complete.
+
+| :any:`CLI documentation with examples<cli_rocoto_iterate_examples>`
 
 Realize Action
 """"""""""""""
@@ -101,13 +108,6 @@ Realize Action
 This is where you put in your structured YAML that defines your workflow of choice, and it pops out a verified Rocoto XML.
 
 | :any:`CLI documentation with examples<cli_rocoto_realize_examples>`
-
-Run Action
-""""""""""
-
-Given a Rocoto XML workflow document, invoke Rocoto in a loop, monitoring its progress, until a specified task is complete.
-
-| :any:`CLI documentation with examples<cli_rocoto_iterate_examples>`
 
 Validate Action
 """""""""""""""

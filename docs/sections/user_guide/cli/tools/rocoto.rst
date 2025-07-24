@@ -14,6 +14,55 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 .. literalinclude:: rocoto/help.out
    :language: text
 
+.. _cli_rocoto_iterate_examples:
+
+``iterate``
+-----------
+
+.. literalinclude:: rocoto/iterate-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/iterate-help.out
+   :language: text
+
+Examples
+^^^^^^^^
+
+.. note:: Use of ``uw rocoto iterate`` requires presence of the ``rocotorun`` and ``rocotostat`` executables on ``PATH``. On HPCs, this is typically achieved by loading a system module providing Rocoto.
+
+The following examples make use of this simple UW YAML for Rocoto config:
+
+.. literalinclude:: rocoto/foobar.yaml
+   :language: yaml
+
+It could be rendered to a Rocoto XML document like this:
+
+.. literalinclude:: rocoto/foobar-realize.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/foobar-realize.out
+   :language: xml
+
+* To iterate only task ``foo``, which has no dependencies:
+
+  .. literalinclude:: rocoto/iterate-foo.txt
+     :language: text
+     :emphasize-lines: 6
+  .. literalinclude:: rocoto/iterate-foo.out
+     :language: text
+
+  Note that the second invocation of ``uw rocoto iterate`` immediately shows task ``foo`` in its final state, without iterating the workflow.
+
+* To iterate task ``bar``, which depends on task ``foo``, iterating every 3 seconds:
+
+  .. literalinclude:: rocoto/iterate-bar.txt
+     :language: text
+     :emphasize-lines: 4
+  .. literalinclude:: rocoto/iterate-bar.out
+     :language: text
+
+  Note that the second invocation of ``uw rocoto iterate`` immediately shows task ``bar`` in its final state, without iterating the workflow.
+
 .. _cli_rocoto_realize_examples:
 
 ``realize``
@@ -68,55 +117,6 @@ The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
      :emphasize-lines: 2
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
      :language: xml
-
-.. _cli_rocoto_iterate_examples:
-
-``run``
--------
-
-.. literalinclude:: rocoto/run-help.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: rocoto/run-help.out
-   :language: text
-
-Examples
-^^^^^^^^
-
-.. note:: Use of ``uw rocoto run`` requires presence of the ``rocotorun`` and ``rocotostat`` executables on ``PATH``. On HPCs, this is typically achieved by loading a system module providing Rocoto.
-
-The following examples make use of this simple UW YAML for Rocoto config:
-
-.. literalinclude:: rocoto/foobar.yaml
-   :language: yaml
-
-It could be rendered to a Rocoto XML document like this:
-
-.. literalinclude:: rocoto/foobar-realize.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: rocoto/foobar-realize.out
-   :language: xml
-
-* To run only task ``foo``, which has no dependencies:
-
-  .. literalinclude:: rocoto/run-foo.txt
-     :language: text
-     :emphasize-lines: 6
-  .. literalinclude:: rocoto/run-foo.out
-     :language: text
-
-  Note that the second invocation of ``uw rocoto run`` immediately shows task ``foo`` in its final state, without iterating the workflow.
-
-* To run task ``bar``, which depends on task ``foo``, iterating every 3 seconds:
-
-  .. literalinclude:: rocoto/run-bar.txt
-     :language: text
-     :emphasize-lines: 4
-  .. literalinclude:: rocoto/run-bar.out
-     :language: text
-
-  Note that the second invocation of ``uw rocoto run`` immediately shows task ``bar`` in its final state, without iterating the workflow.
 
 .. _cli_rocoto_validate_examples:
 

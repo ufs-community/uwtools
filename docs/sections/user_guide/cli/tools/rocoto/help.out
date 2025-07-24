@@ -10,9 +10,9 @@ Optional arguments:
 
 Positional arguments:
   ACTION
+    iterate
+      Iterate a Rocoto workflow
     realize
       Realize a Rocoto XML workflow document
-    run
-      Run a Rocoto workflow
     validate
       Validate Rocoto XML

@@ -1,8 +1,8 @@
-usage: uw rocoto run [--cycle CYCLE] --database DATABASE --task TASK
-                     --workflow WORKFLOW [-h] [--version] [--rate SECONDS]
-                     [--quiet] [--verbose]
+usage: uw rocoto iterate [--cycle CYCLE] --database DATABASE --task TASK
+                         --workflow WORKFLOW [-h] [--version] [--rate SECONDS]
+                         [--quiet] [--verbose]
 
-Run a Rocoto workflow
+Iterate a Rocoto workflow
 
 Required arguments:
   --cycle CYCLE
