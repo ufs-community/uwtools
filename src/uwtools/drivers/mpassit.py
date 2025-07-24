@@ -56,7 +56,7 @@ class MPASSIT(DriverCycleBased):
         """
         The namelist file.
         """
-        fn = "mpassit.namelist"
+        fn = "fort.41"
         yield self.taskname(fn)
         path = slef.rundir / fn
         yield asset(path, path.is_file)
@@ -83,6 +83,13 @@ class MPASSIT(DriverCycleBased):
         ]
 
     # Public helper methods
+
+    @classmethod
+    def driver_name(cls) -> str:
+        """
+        The name of this driver.
+        """
+        return STR.mpassit
 
     @property
     def output(self) -> str:
