@@ -1,13 +1,13 @@
-+ uw rocoto run --cycle 2025-07-17T00 --database db --task bar --workflow xml
++ uw rocoto iterate --cycle 2025-07-17T00 --database db --task bar --workflow xml
 [2025-01-02T03:04:05]     INFO Iterating workflow
 [2025-01-02T03:04:05]     INFO Workflow status:
 [2025-01-02T03:04:05]     INFO CYCLE                    TASK                       JOBID               STATE         EXIT STATUS     TRIES      DURATION
 [2025-01-02T03:04:05]     INFO ================================================================================================================================
-[2025-01-02T03:04:05]     INFO 202507170000                     foo    druby://10.178.9.5:36657          SUBMITTING                   -         0           0.0
+[2025-01-02T03:04:05]     INFO 202507170000                     foo    druby://10.178.9.5:42537          SUBMITTING                   -         0           0.0
 [2025-01-02T03:04:05]     INFO 202507170000                     bar                           -                   -                   -         -             -
 [2025-01-02T03:04:05]     INFO Iterating workflow
 [2025-01-02T03:04:05]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUBMITTING
 [2025-01-02T03:04:05]     INFO Iterating workflow
 [2025-01-02T03:04:05]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUCCEEDED
-+ uw rocoto run --cycle 2025-07-17T00 --database db --task bar --workflow xml
++ uw rocoto iterate --cycle 2025-07-17T00 --database db --task bar --workflow xml
 [2025-01-02T03:04:05]     INFO Rocoto task 'bar' for cycle 2025-07-17 00:00:00: SUCCEEDED
