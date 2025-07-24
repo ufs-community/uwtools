@@ -57,7 +57,7 @@ It could be rendered to a Rocoto XML document like this:
 
   .. literalinclude:: rocoto/iterate-bar.txt
      :language: text
-     :emphasize-lines: 4
+     :emphasize-lines: 6
   .. literalinclude:: rocoto/iterate-bar.out
      :language: text
 
