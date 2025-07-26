@@ -4,6 +4,7 @@ Tests for uwtools.rocoto module.
 
 import sqlite3
 from contextlib import contextmanager
+from datetime import timezone
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
 
@@ -229,7 +230,12 @@ class TestRocotoIterator:
         self.dbsetup(instance)
         instance._cursor.execute(
             "insert into jobs values (:id, :taskname, :cycle, :state)",
-            {"id": 1, "taskname": "foo", "cycle": instance._cycle.timestamp(), "state": "COMPLETE"},
+            {
+                "id": 1,
+                "taskname": "foo",
+                "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
+                "state": "COMPLETE",
+            },
         )
         assert instance._state == "COMPLETE"
         assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
