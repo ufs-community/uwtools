@@ -4,25 +4,19 @@ A driver for the MPASSIT component.
 
 from __future__ import annotations
 
-import re
-from abc import abstractmethod
-from datetime import datetime, timezone
-from functools import reduce
-from itertools import islice
 from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import cast
+from tempfile import TemporaryDirectory
 
-from dateutil.relativedelta import relativedelta
 from iotaa import asset, task, tasks
-from lxml import etree
-from lxml.etree import Element, SubElement
 
-from uwtools.drivers.driver import DriverCycleBased
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.api.config import get_nml_config
+from uwtools.config.formats.nml import NMLConfig
+from uwtools.drivers.driver import DriverCycleLeadtimeBased
+from uwtools.strings import STR
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class MPASSIT(DriverCycleBased):
+class MPASSIT(DriverCycleLeadtimeBased):
     """
     A driver for MPASSIT.
     """
@@ -58,7 +52,7 @@ class MPASSIT(DriverCycleBased):
         """
         fn = "fort.41"
         yield self.taskname(fn)
-        path = slef.rundir / fn
+        path = self.rundir / fn
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
@@ -92,18 +86,17 @@ class MPASSIT(DriverCycleBased):
         return STR.mpassit
 
     @property
-    def output(self) -> str:
+    def output(self) -> dict[str, Path] | dict[str, list[Path]]:
         """
         Returns a description of the file(s) created when this component runs.
         """
-        with NamedTemporaryFile() as path:
-            base_file = self.config[STR.namelist].get(STR.basefile)
+        with TemporaryDirectory() as path:
+            nml = Path(path, "fort.41")
             self.create_user_updated_config(
                 config_class=NMLConfig,
                 config_values=self.config[STR.namelist],
-                path=path,
+                path=nml,
                 schema=self.namelist_schema(),
             )
-            namelist = get_nml_config(path)
-        return namelist["config"]["output_file"]
-
+            namelist = get_nml_config(nml)
+        return {"path": self.rundir / namelist["config"]["output_file"]}

@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
+import yaml
 from pytest import fixture, mark
 
 from uwtools.drivers import mpassit
@@ -16,6 +17,7 @@ from uwtools.drivers.mpassit import MPASSIT
 
 @fixture
 def config(tmp_path):
+    outfile = "MPAS-A_out.{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}.nc"
     return {
         "mpassit": {
             "execution": {
@@ -33,26 +35,26 @@ def config(tmp_path):
             "namelist": {
                 "update_values": {
                     "config": {
-                        "grid_file_input_grid": "x1.999.init.nc"
-                        "hist_file_input_grid": "/path/to/hist.nc"
-                        "diag_file_input_grid": "/path/to/diag.nc"
-                        "block_decomp_file": "/path/to/x1.999.graph.info.part.192"
-                        "is_regional": True
-                        "output_file": "MPAS-A_out.{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}.nc"
-                        "interp_diag": True
-                        "interp_hist": True
-                        "wrf_mod_vars": True
-                        "esmf_log": False
-                        "target_grid_type": "lambert"
-                        "nx": 180
-                        "ny": 106
-                        "dx": 30000.0
-                        "dy": 30000.0
-                        "ref_lat": 38.5
-                        "ref_lon": -97.5
-                        "truelat1": 38.5
-                        "truelat2": 38.5
-                        "stand_lon": -97.5
+                        "grid_file_input_grid": "x1.999.init.nc",
+                        "hist_file_input_grid": "/path/to/hist.nc",
+                        "diag_file_input_grid": "/path/to/diag.nc",
+                        "block_decomp_file": "/path/to/x1.999.graph.info.part.192",
+                        "is_regional": True,
+                        "output_file": outfile,
+                        "interp_diag": True,
+                        "interp_hist": True,
+                        "wrf_mod_vars": True,
+                        "esmf_log": False,
+                        "target_grid_type": "lambert",
+                        "nx": 180,
+                        "ny": 106,
+                        "dx": 30000.0,
+                        "dy": 30000.0,
+                        "ref_lat": 38.5,
+                        "ref_lon": -97.5,
+                        "truelat1": 38.5,
+                        "truelat2": 38.5,
+                        "stand_lon": -97.5,
                     }
                 },
                 "validate": True,
@@ -75,20 +77,21 @@ def driverobj(config, cycle, leadtime):
 
 
 def test_MPASSIT_driver_name(driverobj):
-    assert driverobj.driver_name() == MPASSIT.driver_name() == "MPASSIT"
+    assert driverobj.driver_name() == MPASSIT.driver_name() == "mpassit"
+
 
 @mark.parametrize(
     ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
-def test_MPASSIT_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
+def test_MPASSIT_files_copied_and_linked(config, cycle, key, leadtime, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["mpassit"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
     path = tmp_path / "config.yaml"
     path.write_text(yaml.dump(config))
-    driverobj = MPASSIT(config=path, cycle=cycle, batch=True)
+    driverobj = MPASSIT(config=path, cycle=cycle, leadtime=leadtime, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -101,7 +104,7 @@ def test_MPASSIT_files_copied_and_linked(config, cycle, key, task, test, tmp_pat
 def test_MPASSIT_namelist_file(driverobj, logged, ready_task):
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
-    with patch.object(sfc_climo_gen, "file", new=ready_task):
+    with patch.object(mpassit, "file", new=ready_task):
         path = Path(driverobj.namelist_file().ref)
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
@@ -117,8 +120,8 @@ def test_MPASSIT_namelist_file_fails_validation(driverobj, logged, ready_task):
     assert logged("  'string' is not of type 'integer'")
 
 
-def test_MPASSIT_output(driverobj, halo):
-    assert driverobj.output == "MPAS-A_out.2024-05-07_12:00:00.nc"
+def test_MPASSIT_output(driverobj, tmp_path):
+    assert driverobj.output == {"path": tmp_path / "MPAS-A_out.2024-05-07_12:00:00.nc"}
 
 
 def test_MPASSIT_provisioned_rundir(driverobj, ready_task):

@@ -1319,7 +1319,6 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.jedi,
             STR.mpas,
             STR.mpasinit,
-            STR.mpassit,
             STR.ungrib,
         ]
     }
@@ -1334,6 +1333,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         )
         for component in [
             STR.chgrescube,
+            STR.mpassit,
             STR.upp,
         ]
     }

@@ -7,7 +7,7 @@ from uwtools.drivers.support import tasks as _tasks
 from uwtools.utils.api import make_execute as _make_execute
 
 _driver = MPASSIT
-execute = _make_execute(_driver, with_cycle=True)
+execute = _make_execute(_driver, with_cycle=True, with_leadtime=True)
 
 
 def schema() -> dict:
