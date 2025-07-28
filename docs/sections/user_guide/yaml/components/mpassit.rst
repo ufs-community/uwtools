@@ -26,7 +26,7 @@ files_to_copy:
 
 See :ref:`this page <files_yaml>` for details.
 
-To reduce duplication of information in this section, it may be helpful to template the file that depends on the number of cores being used to run the executable. For example, instead of:
+To reduce duplication of information in this section, it may be helpful to reference the config value that specifies the number of cores used to run the executable. For example, instead of:
 
 .. code-block:: text
 
@@ -34,7 +34,7 @@ To reduce duplication of information in this section, it may be helpful to templ
      files_to_copy:
        x1.999.graph.info.part.192: /path/to/x1.999.graph.info.part.192
 
-Jinja2 expressions can be used to reference the number of cores used in execution:
+Jinja2 expressions can be used to reference the number of cores used for execution:
 
 .. code-block:: text
 
