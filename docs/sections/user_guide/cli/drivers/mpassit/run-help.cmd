@@ -1,0 +1,1 @@
+uw mpassit run --help

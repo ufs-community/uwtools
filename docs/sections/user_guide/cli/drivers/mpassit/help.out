@@ -1,0 +1,30 @@
+usage: uw mpassit [-h] [--version] [--show-schema] TASK ...
+
+Execute mpassit tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --show-schema
+      Show driver schema and exit
+
+Positional arguments:
+  TASK
+    files_copied
+      Files copied for run
+    files_linked
+      Files linked for run
+    namelist_file
+      The namelist file
+    provisioned_rundir
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    show_output
+      Show the output to be created by this component
+    validate
+      Validate the UW driver config
