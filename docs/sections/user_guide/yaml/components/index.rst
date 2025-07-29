@@ -19,6 +19,7 @@ Available Drivers
    make_solo_mosaic
    mpas
    mpas_init
+   mpassit
    orog
    orog_gsl
    schism

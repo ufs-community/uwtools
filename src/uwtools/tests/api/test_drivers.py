@@ -16,6 +16,7 @@ from uwtools.api import (
     make_solo_mosaic,
     mpas,
     mpas_init,
+    mpassit,
     orog,
     orog_gsl,
     schism,
@@ -41,6 +42,7 @@ modules = [
     make_solo_mosaic,
     mpas,
     mpas_init,
+    mpassit,
     orog,
     orog_gsl,
     schism,
@@ -59,13 +61,14 @@ with_cycle = [
     jedi,
     mpas,
     mpas_init,
+    mpassit,
     schism,
     ungrib,
     upp,
     upp_assets,
     ww3,
 ]
-with_leadtime = [upp, upp_assets]
+with_leadtime = [mpassit, upp, upp_assets]
 
 
 @mark.parametrize("module", modules)

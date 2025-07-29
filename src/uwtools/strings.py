@@ -110,6 +110,7 @@ class STR:
     module: str = "module"
     mpas: str = "mpas"
     mpasinit: str = "mpas_init"
+    mpassit: str = "mpassit"
     mpiargs: str = "mpiargs"
     mpicmd: str = "mpicmd"
     namelist: str = "namelist"

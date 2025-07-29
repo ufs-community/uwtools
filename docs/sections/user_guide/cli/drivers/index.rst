@@ -18,6 +18,7 @@ Drivers
    make_solo_mosaic/index
    mpas/index
    mpas_init/index
+   mpassit/index
    orog/index
    orog_gsl/index
    schism/index

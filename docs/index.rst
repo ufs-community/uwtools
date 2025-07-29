@@ -249,6 +249,14 @@ mpas
 | **API**: ``import uwtools.api.mpas``
 
 
+mpassit
+"""""""
+
+| **CLI**: ``uw mpassit -h``
+| **API**: ``import uwtools.api.mpassit``
+
+
+
 Support Policy
 --------------
 

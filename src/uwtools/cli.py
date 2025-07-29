@@ -83,6 +83,7 @@ def main() -> None:
                 STR.makesolomosaic,
                 STR.mpas,
                 STR.mpasinit,
+                STR.mpassit,
                 STR.orog,
                 STR.oroggsl,
                 STR.schism,
@@ -1332,6 +1333,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         )
         for component in [
             STR.chgrescube,
+            STR.mpassit,
             STR.upp,
         ]
     }

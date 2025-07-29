@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 import sqlite3
 from dataclasses import dataclass
+from datetime import timezone
 from itertools import chain
 from math import log10
 from pathlib import Path
@@ -135,7 +136,10 @@ class _RocotoIterator:
 
     @property
     def _query_data(self) -> dict:
-        return {"taskname": self._task, "cycle": int(self._cycle.timestamp())}
+        return {
+            "taskname": self._task,
+            "cycle": int(self._cycle.replace(tzinfo=timezone.utc).timestamp()),
+        }
 
     @property
     def _query_stmt(self) -> str:
