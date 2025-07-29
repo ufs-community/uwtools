@@ -1,0 +1,46 @@
+mpassit:
+  execution:
+    batchargs:
+      export: NONE
+      nodes: 1
+      stdout: /path/to/file
+      walltime: 00:02:00
+    envcmds:
+    - module use /some/path/to/modules
+    - module load some_module
+    executable: /path/to/mpassit
+    mpiargs:
+    - --export=ALL
+    - --ntasks $SLURM_CPUS_ON_NODE
+    mpicmd: srun
+  files_to_copy:
+    x1.999.init.nc: /path/to/some.init.nc
+    x1.999.graph.info.part.192: /path/to/x1.999.graph.info.part.192
+  namelist:
+    update_values:
+      config:
+        grid_file_input_grid: x1.999.init.nc
+        hist_file_input_grid: /path/to/hist.nc
+        diag_file_input_grid: /path/to/diag.nc
+        block_decomp_file: x1.999.graph.info.part.192
+        is_regional: true
+        output_file: MPAS-A_out.{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}.nc
+        interp_diag: true
+        interp_hist: true
+        wrf_mod_vars: true
+        esmf_log: false
+        target_grid_type: lambert
+        nx: 180
+        ny: 106
+        dx: 30000.0
+        dy: 30000.0
+        ref_lat: 38.5
+        ref_lon: -97.5
+        truelat1: 38.5
+        truelat2: 38.5
+        stand_lon: -97.5
+    validate: true
+  rundir: /path/to/run/dir
+platform:
+  account: me
+  scheduler: slurm

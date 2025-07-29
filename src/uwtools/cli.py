@@ -83,6 +83,7 @@ def main() -> None:
                 STR.makesolomosaic,
                 STR.mpas,
                 STR.mpasinit,
+                STR.mpassit,
                 STR.orog,
                 STR.oroggsl,
                 STR.schism,
@@ -322,12 +323,13 @@ def _add_subparser_fs(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.copy: _add_subparser_fs_copy(subparsers),
+        STR.hardlink: _add_subparser_fs_hardlink(subparsers),
         STR.link: _add_subparser_fs_link(subparsers),
         STR.makedirs: _add_subparser_fs_makedirs(subparsers),
     }
 
 
-def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
+def _add_subparser_fs_common(parser: Parser) -> tuple[ActionChecks, Group]:
     """
     Perform common subparser setup for mode: fs {copy link makedirs}.
 
@@ -341,7 +343,7 @@ def _add_subparser_fs_common(parser: Parser) -> ActionChecks:
     _add_arg_dry_run(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
     _add_arg_report(optional)
-    return _add_args_verbosity(optional)
+    return _add_args_verbosity(optional), optional
 
 
 def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
@@ -351,7 +353,20 @@ def _add_subparser_fs_copy(subparsers: Subparsers) -> ActionChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.copy, "Copy files")
-    return _add_subparser_fs_common(parser)
+    checks, _ = _add_subparser_fs_common(parser)
+    return checks
+
+
+def _add_subparser_fs_hardlink(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: fs hardlink.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.hardlink, "Create hardlinks")
+    checks, optional = _add_subparser_fs_common(parser)
+    _add_arg_symlink_fallback(optional)
+    return checks
 
 
 def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
@@ -360,8 +375,9 @@ def _add_subparser_fs_link(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.link, "Link files")
-    return _add_subparser_fs_common(parser)
+    parser = _add_subparser(subparsers, STR.link, "Create symlinks")
+    checks, _ = _add_subparser_fs_common(parser)
+    return checks
 
 
 def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
@@ -371,7 +387,8 @@ def _add_subparser_fs_makedirs(subparsers: Subparsers) -> ActionChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.makedirs, "Make directories")
-    return _add_subparser_fs_common(parser)
+    checks, _ = _add_subparser_fs_common(parser)
+    return checks
 
 
 def _dispatch_fs(args: Args) -> bool:
@@ -382,6 +399,7 @@ def _dispatch_fs(args: Args) -> bool:
     """
     actions = {
         STR.copy: _dispatch_fs_copy,
+        STR.hardlink: _dispatch_fs_hardlink,
         STR.link: _dispatch_fs_link,
         STR.makedirs: _dispatch_fs_makedirs,
     }
@@ -402,6 +420,26 @@ def _dispatch_fs_copy(args: Args) -> bool:
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
+    )
+    return _dispatch_fs_report(report=report if args[STR.report] else None)
+
+
+def _dispatch_fs_hardlink(args: Args) -> bool:
+    """
+    Define dispatch logic for fs hardlink action.
+
+    :param args: Parsed command-line args.
+    """
+    report = uwtools.api.fs.link(
+        target_dir=args[STR.targetdir],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        hardlink=True,
+        leadtime=args[STR.leadtime],
+        key_path=args[STR.keypath],
+        dry_run=args[STR.dryrun],
+        stdin_ok=True,
+        symlink_fallback=args[STR.symlinkfallback],
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
 
@@ -461,9 +499,27 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
+        STR.iterate: _add_subparser_rocoto_iterate(subparsers),
         STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
     }
+
+
+def _add_subparser_rocoto_iterate(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: rocoto iterate.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.iterate, "Iterate a Rocoto workflow")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cycle(required)
+    _add_arg_database(required)
+    _add_arg_task(required)
+    _add_arg_workflow(required)
+    optional = _basic_setup(parser)
+    _add_arg_rate(optional)
+    return _add_args_verbosity(optional)
 
 
 def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
@@ -498,15 +554,31 @@ def _dispatch_rocoto(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     actions = {
+        STR.iterate: _dispatch_rocoto_iterate,
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }
     return actions[args[STR.action]](args)
 
 
+def _dispatch_rocoto_iterate(args: Args) -> bool:
+    """
+    Define dispatch logic for rocoto iterate action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.rocoto.iterate(
+        cycle=args[STR.cycle],
+        database=args[STR.database],
+        rate=args[STR.rate],
+        task=args[STR.task],
+        workflow=args[STR.workflow],
+    )
+
+
 def _dispatch_rocoto_realize(args: Args) -> bool:
     """
-    Define dispatch logic for rocoto realize action. Validate input and output.
+    Define dispatch logic for rocoto realize action.
 
     :param args: Parsed command-line args.
     """
@@ -640,7 +712,7 @@ def _add_arg_batch(group: Group) -> None:
     group.add_argument(
         _switch(STR.batch),
         action="store_true",
-        help="Submit run to batch scheduler",
+        help="Submit job to batch scheduler",
     )
 
 
@@ -671,6 +743,16 @@ def _add_arg_cycle(group: Group, required: bool = False) -> None:
         help="The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)",
         required=required,
         type=dt.datetime.fromisoformat,
+    )
+
+
+def _add_arg_database(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.database),
+        "-d",
+        help="The Rocoto database file",
+        required=True,
+        type=Path,
     )
 
 
@@ -809,11 +891,32 @@ def _add_arg_quiet(group: Group) -> None:
     )
 
 
+def _add_arg_rate(group: Group) -> None:
+    default_rate = uwtools.rocoto.DEFAULT_ITERATION_RATE
+    group.add_argument(
+        _switch(STR.rate),
+        "-r",
+        default=default_rate,
+        help="Delay between workflow iterations (default: %s)" % default_rate,
+        metavar="SECONDS",
+        required=False,
+        type=int,
+    )
+
+
 def _add_arg_report(group: Group) -> None:
     group.add_argument(
         _switch(STR.report),
         action="store_true",
         help="Show JSON report on [non]ready assets",
+    )
+
+
+def _add_arg_symlink_fallback(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.symlinkfallback),
+        action="store_true",
+        help="Symlink if hardlink fails",
     )
 
 
@@ -858,7 +961,7 @@ def _add_arg_target_dir(group: Group, required: bool = False, helpmsg: str | Non
 def _add_arg_task(group: Group) -> None:
     group.add_argument(
         _switch(STR.task),
-        help="Driver task to execute",
+        help="Task to execute",
         required=True,
         type=str,
     )
@@ -927,6 +1030,16 @@ def _add_arg_verbose(group: Group) -> None:
         "-v",
         action="store_true",
         help="Print all logging messages",
+    )
+
+
+def _add_arg_workflow(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.workflow),
+        "-w",
+        help="The Rocoto XML file",
+        required=True,
+        type=Path,
     )
 
 
@@ -1220,6 +1333,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         )
         for component in [
             STR.chgrescube,
+            STR.mpassit,
             STR.upp,
         ]
     }

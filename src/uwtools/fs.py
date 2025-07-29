@@ -25,7 +25,7 @@ from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.api import str2path
 from uwtools.utils.processing import run_shell_cmd
-from uwtools.utils.tasks import directory, filecopy, symlink
+from uwtools.utils.tasks import directory, filecopy, hardlink, symlink
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -45,8 +45,6 @@ class Stager(ABC):
         key_path: list[YAMLKey] | None = None,
     ) -> None:
         """
-        Stage files and directories.
-
         :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
         :param target_dir: Path to target directory.
         :param cycle: A ``datetime`` object to make available for use in the config.
@@ -239,7 +237,7 @@ class Copier(FileStager):
 
         # If a source path is a glob pattern, the existence of the file(s) found via glob expansion
         # is already assured and it is unnecessary to check again for their existence. If, however,
-        # a source path is a full explicit path, its existence should be checked before and attempt
+        # a source path is a full explicit path, its existence should be checked before any attempt
         # is made to copy it.
 
         yield "File copies"
@@ -263,10 +261,39 @@ class Linker(FileStager):
     Stage files by linking.
     """
 
+    def __init__(
+        self,
+        config: dict | str | Path | None = None,
+        target_dir: str | Path | None = None,
+        cycle: dt.datetime | None = None,
+        hardlink: bool | None = False,
+        leadtime: dt.timedelta | None = None,
+        key_path: list[YAMLKey] | None = None,
+        symlink_fallback: bool = False,
+    ) -> None:
+        """
+        :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+        :param target_dir: Path to target directory.
+        :param cycle: A ``datetime`` object to make available for use in the config.
+        :param hardlink: Create hardlinks instead of symlinks?
+        :param leadtime: A ``timedelta`` object to make available for use in the config.
+        :param key_path: Path of keys to config block to use.
+        :param symlink_fallback: Symlink if hardlink fails when hardlink=True?
+        :raises: ``UWConfigError`` if config fails validation.
+        """
+        super().__init__(config, target_dir, cycle, leadtime, key_path)
+        self.hardlink = hardlink
+        self.symlink_fallback = symlink_fallback
+
     @tasks
     def go(self):
         """
-        Link files.
+        Create links to filesystem items.
+
+        When ``hardlink`` is ``False`` (the default), links may target files, hardlinks, symlinks,
+        and directories; when ``True``, links may not be made across filesystems, or to directories.
+        When ``symlink_fallback`` is ``True``, a symlink will be created, if possible, if a hardlink
+        cannot be created.
         """
 
         # See comment in Copier.go() in re: "check" argument.
@@ -274,7 +301,18 @@ class Linker(FileStager):
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
         yield "File links"
         yield [
-            symlink(target=Path(v), linkname=linkname(k), check=nonglob)
+            hardlink(
+                target=Path(v),
+                linkname=linkname(k),
+                check=nonglob,
+                symlink_fallback=self.symlink_fallback,
+            )
+            if self.hardlink
+            else symlink(
+                target=Path(v),
+                linkname=linkname(k),
+                check=nonglob,
+            )
             for k, v, nonglob in self._expand_glob()
         ]
 

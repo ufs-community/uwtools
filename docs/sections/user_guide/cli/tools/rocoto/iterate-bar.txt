@@ -1,0 +1,9 @@
+export RUNDIR=$(readlink -f $(mktemp -d -p $(dirname $0)))
+uw rocoto realize -c foobar.yaml >$RUNDIR/xml 2>/dev/null
+for invocation in 1 2; do (
+  cd $RUNDIR
+  set -x
+  uw rocoto iterate --cycle 2025-07-17T00 --database db --task bar --workflow xml
+)
+done
+rm -rf $RUNDIR

@@ -1,0 +1,21 @@
+common: &common
+  account: wrfruc
+  attrs: {cycledefs: default}
+  command: /bin/true
+  cores: 1
+  join: "{{ 'RUNDIR' | env }}/slurm"
+  partition: service
+  queue: batch
+  walltime: "00:01:00"
+workflow:
+  attrs: {realtime: false, scheduler: slurm}
+  cycledef:
+    - attrs: {group: default}
+      spec: 202507170000 202507170000 00:00:01
+  log: {value: "{{ 'RUNDIR' | env }}/log" }
+  tasks:
+    task_foo:
+      <<: *common
+    task_bar:
+      <<: *common
+      dependency: {taskdep: {attrs: {task: foo}}}

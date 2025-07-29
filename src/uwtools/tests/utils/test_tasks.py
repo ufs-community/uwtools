@@ -256,37 +256,56 @@ def test_utils_tasks_filecopy_local(tmp_path):
     assert dst.exists()
 
 
+@mark.parametrize("task", [tasks.hardlink, tasks.symlink])
 @mark.parametrize("prefix", ["", "file://"])
-def test_utils_tasks_symlink__simple(prefix, tmp_path):
+def test_utils_tasks_hardlink_symlink__simple(prefix, task, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
     target.touch()
-    assert not link.is_file()
+    assert not link.exists()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
-    tasks.symlink(target=t2, linkname=l2)
-    assert link.is_symlink()
+    task(target=t2, linkname=l2)
+    assert link.stat().st_nlink == 2 if task is tasks.hardlink else link.is_symlink()
 
 
+@mark.parametrize("task", [tasks.hardlink, tasks.symlink])
 @mark.parametrize("prefix", ["", "file://"])
-def test_utils_tasks_symlink__directory_hierarchy(prefix, tmp_path):
+def test_utils_tasks_hardlink_symlink__directory_hierarchy(prefix, task, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "foo" / "bar" / "link"
     target.touch()
-    assert not link.is_file()
+    assert not link.exists()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
-    tasks.symlink(target=t2, linkname=l2)
-    assert link.is_symlink()
+    task(target=t2, linkname=l2)
+    assert link.stat().st_nlink == 2 if task is tasks.hardlink else link.is_symlink()
+
+
+@mark.parametrize("symlink_fallback", [True, False])
+@mark.parametrize("prefix", ["", "file://"])
+def test_utils_tasks_hardlink__cannot_hardlink(logged, prefix, symlink_fallback, tmp_path):
+    target = tmp_path / "target"
+    link = tmp_path / "link"
+    target.touch()
+    assert not link.exists()
+    t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
+    with patch.object(tasks.os, "link", side_effect=OSError("big\ntrouble\n")):
+        tasks.hardlink(target=t2, linkname=l2, symlink_fallback=symlink_fallback)
+    assert link.is_symlink() is symlink_fallback
+    if not symlink_fallback:
+        assert logged("big")
+        assert logged("trouble")
+        assert logged("Could not hardlink %s -> %s" % (link, target))
 
 
 @mark.parametrize("wrapper", [Path, str])
-def test_utils_tasks_symlink_target(tmp_path, wrapper):
+def test_utils_tasks_link_target(tmp_path, wrapper):
     d, f, s = (tmp_path / x for x in ("d", "f", "s"))
     d.mkdir()
     f.touch()
     s.symlink_to(f)
     for x in [d, f, s]:
-        assert tasks.symlink_target(path=wrapper(x)).ready
-    assert not tasks.symlink_target(path=tmp_path / "foo").ready
+        assert tasks.link_target(path=wrapper(x)).ready
+    assert not tasks.link_target(path=tmp_path / "foo").ready
 
 
 def test_utils_tasks__local__path_fail():

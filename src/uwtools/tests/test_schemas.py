@@ -273,6 +273,51 @@ def mpas_streams():
     }
 
 
+MPASSIT_CONFIG = {
+    "execution": {
+        "executable": "/path/to/mpassit",
+    },
+    "namelist": {
+        "update_values": {
+            "config": {
+                "grid_file_input_grid": "x1.999.init.nc",
+                "hist_file_input_grid": "/path/to/hist.nc",
+                "diag_file_input_grid": "/path/to/diag.nc",
+                "block_decomp_file": "/path/to/x1.999.graph.info.part.192",
+                "is_regional": True,
+                "output_file": "MPAS-A.out",
+                "interp_diag": True,
+                "interp_hist": True,
+                "wrf_mod_vars": True,
+                "esmf_log": False,
+                "target_grid_type": "lambert",
+                "nx": 180,
+                "ny": 106,
+                "dx": 30000.0,
+                "dy": 30000.0,
+                "ref_lat": 38.5,
+                "ref_lon": -97.5,
+                "truelat1": 38.5,
+                "truelat2": 38.5,
+                "stand_lon": -97.5,
+            }
+        },
+        "validate": True,
+    },
+    "rundir": "/path/to/rundir",
+}
+
+
+@fixture
+def mpassit_config():
+    return MPASSIT_CONFIG
+
+
+@fixture
+def mpassit_prop():
+    return partial(schema_validator, "mpassit", "properties", "mpassit", "properties")
+
+
 @fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
@@ -1605,6 +1650,97 @@ def test_schema_mpas_streams_properties_string(mpas_streams):
             "reference_time",
         ]:
             assert "is not of type 'string'\n" in errors({k: {**v, prop: None}})
+
+
+# mpassit
+
+
+def test_schema_mpassit():
+    config = {
+        "execution": {"executable": "mpassit"},
+        "files_to_copy": {"a.txt": "/path/to/a.txt"},
+        "files_to_link": {"a.txt": "/path/to/a.txt"},
+        "namelist": {"base_file": "/path/to/simple.nml", "validate": True},
+        "rundir": "/path/to/rundir",
+    }
+    errors = schema_validator("mpassit", "properties", "mpassit")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys that are required
+    for key in ("execution", "namelist", "rundir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_mpassit_namelist(mpassit_prop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"config": {"esmf_log": True}}}
+    errors = mpassit_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_mpassit_namelist_update_values(mpassit_config, mpassit_prop):
+    config = mpassit_config["namelist"]["update_values"]["config"]
+    errors = mpassit_prop("namelist", "properties", "update_values", "properties", "config")
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # Namelist values must be of the correct type:
+    # boolean
+    for key in [
+        "esmf_log",
+        "interp_diag",
+        "interp_hist",
+        "is_regional",
+        "wrf_mod_vars",
+    ]:
+        assert "not of type 'boolean'" in errors(with_set(config, None, key))
+    # integer
+    for key in [
+        "i_target",
+        "j_target",
+        "nx",
+        "ny",
+    ]:
+        assert "not of type 'integer'" in errors(with_set(config, None, key))
+    # number
+    for key in [
+        "dx",
+        "dy",
+        "missing_value",
+        "pole_lat",
+        "pole_lon",
+        "ref_lat",
+        "ref_lon",
+        "ref_x",
+        "ref_y",
+        "stand_lon",
+        "truelat1",
+        "truelat2",
+    ]:
+        assert "not of type 'number'" in errors(with_set(config, None, key))
+    # string
+    for key in [
+        "block_decomp_file",
+        "diag_file_input_grid",
+        "file_target_grid",
+        "grid_file_input_grid",
+        "hist_file_input_grid",
+        "output_file",
+        "target_grid_type",
+    ]:
+        assert "not of type 'string'" in errors(with_set(config, None, key))
+    # enum
+    assert "is not one of" in errors(with_set(config, None, "target_grid_type"))
 
 
 # namelist

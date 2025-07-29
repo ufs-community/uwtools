@@ -5,10 +5,14 @@ Support for creating Rocoto XML workflow documents.
 from __future__ import annotations
 
 import re
+import sqlite3
 from dataclasses import dataclass
+from datetime import timezone
+from itertools import chain
 from math import log10
 from pathlib import Path
-from typing import Any
+from time import sleep
+from typing import TYPE_CHECKING, Any
 
 from lxml import etree
 from lxml.builder import E  # type: ignore[import-not-found]
@@ -19,9 +23,31 @@ from uwtools.config.validator import validate_external as validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.utils.file import readable, resource_path, writable
+from uwtools.utils.processing import run_shell_cmd
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
-def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
+DEFAULT_ITERATION_RATE = 10  # seconds
+
+
+def iterate(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
+    return _RocotoIterator(cycle, database, rate, task, workflow).iterate()
+
+
+def validate_file(xml_file: Path | None) -> bool:
+    """
+    Validate purported Rocoto XML file against its schema.
+
+    :param xml_file: Path to XML file (None => read stdin).
+    :return: Did the XML conform to the schema?
+    """
+    with readable(xml_file) as f:
+        return validate_string(xml=f.read())
+
+
+def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
     XML output.
@@ -32,7 +58,7 @@ def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | Non
     """
     rxml = _RocotoXML(config)
     xml = str(rxml).strip()
-    if not validate_rocoto_xml_string(xml):
+    if not validate_string(xml):
         msg = "Internal error: Invalid Rocoto XML"
         raise UWError(msg)
     with writable(output_file) as f:
@@ -40,18 +66,7 @@ def realize_rocoto_xml(config: YAMLConfig | Path | None, output_file: Path | Non
     return xml
 
 
-def validate_rocoto_xml_file(xml_file: Path | None) -> bool:
-    """
-    Validate purported Rocoto XML file against its schema.
-
-    :param xml_file: Path to XML file (None => read stdin).
-    :return: Did the XML conform to the schema?
-    """
-    with readable(xml_file) as f:
-        return validate_rocoto_xml_string(xml=f.read())
-
-
-def validate_rocoto_xml_string(xml: str) -> bool:
+def validate_string(xml: str) -> bool:
     """
     Validate purported Rocoto XML against its schema.
 
@@ -77,6 +92,97 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     return valid
 
 
+class _RocotoIterator:
+    def __init__(self, cycle: datetime, database: Path, rate: int, task: str, workflow: Path):
+        self._cycle = cycle
+        self._database = database
+        self._rate = rate
+        self._task = task
+        self._workflow = workflow
+        self._con: sqlite3.Connection | None = None
+        self._cur: sqlite3.Cursor | None = None
+
+    def __del__(self):
+        if self._con:
+            self._con.close()
+
+    def iterate(self) -> bool:
+        state = self._state
+        while state not in self._states["inactive"]:
+            if not self._run():
+                return False
+            state = self._state
+            if not state or state in self._states["active"]:
+                self._report()
+                log.debug("Sleeping %s seconds", self._rate)
+                sleep(self._rate)
+        return True
+
+    @property
+    def _connection(self) -> sqlite3.Connection | None:
+        if not self._con:
+            if not self._database.is_file():
+                return None
+            self._con = sqlite3.connect(self._database)
+        return self._con
+
+    @property
+    def _cursor(self) -> sqlite3.Cursor | None:
+        if not self._cur:
+            if not (connection := self._connection):
+                return None
+            self._cur = connection.cursor()
+        return self._cur
+
+    @property
+    def _query_data(self) -> dict:
+        return {
+            "taskname": self._task,
+            "cycle": int(self._cycle.replace(tzinfo=timezone.utc).timestamp()),
+        }
+
+    @property
+    def _query_stmt(self) -> str:
+        return "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
+
+    def _report(self) -> None:
+        cmd = "rocotostat -d %s -w %s" % (self._database, self._workflow)
+        if self._database.is_file():
+            log.info("Workflow status:")
+            _, output = run_shell_cmd(cmd, quiet=True)
+            for line in output.strip().split("\n"):
+                log.info(line)
+
+    def _run(self) -> bool:
+        log.info("Iterating workflow")
+        cmd = "rocotorun -d %s -w %s" % (self._database, self._workflow)
+        success, _ = run_shell_cmd(cmd, quiet=True)
+        return success
+
+    @property
+    def _state(self) -> str | None:
+        state = None
+        if cursor := self._cursor:
+            result = cursor.execute(self._query_stmt, self._query_data)
+            if row := result.fetchone():
+                (state,) = row
+                log.info(self._state_msg % state)
+                assert state in chain.from_iterable(self._states.values())
+        return state
+
+    @property
+    def _state_msg(self) -> str:
+        return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
+
+    @property
+    def _states(self) -> dict:
+        return {
+            "active": ["QUEUED", "RUNNING"],
+            "inactive": ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
+            "transient": ["CREATED", "DYING", "STALLED", "SUBMITTING"],
+        }
+
+
 class _RocotoXML:
     """
     Generate a Rocoto XML document from a YAML config.
@@ -85,6 +191,7 @@ class _RocotoXML:
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         self._config_validate(config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        cfgobj.dereference()
         self._config = cfgobj.data
         self._add_workflow(self._config)
 

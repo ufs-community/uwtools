@@ -1,0 +1,33 @@
+usage: uw fs hardlink [-h] [--version] [--config-file PATH]
+                      [--target-dir PATH] [--cycle CYCLE]
+                      [--leadtime LEADTIME] [--dry-run]
+                      [--key-path KEY[.KEY...]] [--report] [--quiet]
+                      [--verbose] [--symlink-fallback]
+
+Create hardlinks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --target-dir PATH
+      Root directory for relative destination paths
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
+  --leadtime LEADTIME
+      The leadtime as hours[:minutes[:seconds]]
+  --dry-run
+      Only log info, making no changes
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys to config block to use
+  --report
+      Show JSON report on [non]ready assets
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
+  --symlink-fallback
+      Symlink if hardlink fails

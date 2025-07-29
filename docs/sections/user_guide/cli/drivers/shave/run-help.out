@@ -12,7 +12,7 @@ Optional arguments:
   --config-file PATH, -c PATH
       Path to UW YAML config file (default: read from stdin)
   --batch
-      Submit run to batch scheduler
+      Submit job to batch scheduler
   --dry-run
       Only log info, making no changes
   --graph-file PATH

@@ -84,12 +84,7 @@ def test_Ungrib_namelist_file(driverobj):
 
 def test_Ungrib_output(driverobj):
     assert driverobj.output["paths"] == [
-        driverobj.rundir / f"FILE:{x}"
-        for x in (
-            "2024-02-01_18:00:00",
-            "2024-02-02_00:00:00",
-            "2024-02-02_06:00:00",
-        )
+        driverobj.rundir / f"FILE:{x}" for x in ("2024-02-01_18", "2024-02-02_00", "2024-02-02_06")
     ]
 
 

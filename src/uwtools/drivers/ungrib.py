@@ -20,7 +20,6 @@ class Ungrib(DriverCycleBased):
     """
 
     PREFIX = "FILE"
-    TIMEFMT = "%Y-%m-%d_%H:00:00"
 
     # Workflow tasks
 
@@ -40,13 +39,14 @@ class Ungrib(DriverCycleBased):
         """
         The namelist file.
         """
+        timefmt = "%Y-%m-%d_%H:00:00"
         d = {
             "update_values": {
                 "share": {
-                    "end_date": self._end_date.strftime(self.TIMEFMT),
+                    "end_date": self._end_date.strftime(timefmt),
                     "interval_seconds": self._interval,
                     "max_dom": 1,
-                    "start_date": self._cycle.strftime(self.TIMEFMT),
+                    "start_date": self._cycle.strftime(timefmt),
                     "wrf_core": "ARW",
                 },
                 "ungrib": {
@@ -108,7 +108,7 @@ class Ungrib(DriverCycleBased):
         paths = []
         ts = self._cycle
         while ts <= self._end_date:
-            fn = "%s:%s" % (self.PREFIX, ts.strftime(self.TIMEFMT))
+            fn = "%s:%s" % (self.PREFIX, ts.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
             ts += timedelta(seconds=self._interval)
         return {"paths": paths}
