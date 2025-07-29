@@ -273,41 +273,44 @@ def mpas_streams():
     }
 
 
+MPASSIT_CONFIG = {
+    "execution": {
+        "executable": "/path/to/mpassit",
+    },
+    "namelist": {
+        "update_values": {
+            "config": {
+                "grid_file_input_grid": "x1.999.init.nc",
+                "hist_file_input_grid": "/path/to/hist.nc",
+                "diag_file_input_grid": "/path/to/diag.nc",
+                "block_decomp_file": "/path/to/x1.999.graph.info.part.192",
+                "is_regional": True,
+                "output_file": "MPAS-A.out",
+                "interp_diag": True,
+                "interp_hist": True,
+                "wrf_mod_vars": True,
+                "esmf_log": False,
+                "target_grid_type": "lambert",
+                "nx": 180,
+                "ny": 106,
+                "dx": 30000.0,
+                "dy": 30000.0,
+                "ref_lat": 38.5,
+                "ref_lon": -97.5,
+                "truelat1": 38.5,
+                "truelat2": 38.5,
+                "stand_lon": -97.5,
+            }
+        },
+        "validate": True,
+    },
+    "rundir": "/path/to/rundir",
+}
+
+
 @fixture
 def mpassit_config():
-    return {
-        "execution": {
-            "executable": "/path/to/mpassit",
-        },
-        "namelist": {
-            "update_values": {
-                "config": {
-                    "grid_file_input_grid": "x1.999.init.nc",
-                    "hist_file_input_grid": "/path/to/hist.nc",
-                    "diag_file_input_grid": "/path/to/diag.nc",
-                    "block_decomp_file": "/path/to/x1.999.graph.info.part.192",
-                    "is_regional": True,
-                    "output_file": "MPAS-A.out",
-                    "interp_diag": True,
-                    "interp_hist": True,
-                    "wrf_mod_vars": True,
-                    "esmf_log": False,
-                    "target_grid_type": "lambert",
-                    "nx": 180,
-                    "ny": 106,
-                    "dx": 30000.0,
-                    "dy": 30000.0,
-                    "ref_lat": 38.5,
-                    "ref_lon": -97.5,
-                    "truelat1": 38.5,
-                    "truelat2": 38.5,
-                    "stand_lon": -97.5,
-                }
-            },
-            "validate": True,
-        },
-        "rundir": "/path/to/rundir",
-    }
+    return MPASSIT_CONFIG
 
 
 @fixture

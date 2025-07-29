@@ -2,6 +2,7 @@
 MPASSIT driver tests.
 """
 
+from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,6 +12,7 @@ from pytest import fixture, mark
 
 from uwtools.drivers import mpassit
 from uwtools.drivers.mpassit import MPASSIT
+from uwtools.tests.test_schemas import MPASSIT_CONFIG
 
 # Fixtures
 
@@ -18,54 +20,10 @@ from uwtools.drivers.mpassit import MPASSIT
 @fixture
 def config(tmp_path):
     outfile = "MPAS-A_out.{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}.nc"
-    return {
-        "mpassit": {
-            "execution": {
-                "batchargs": {
-                    "export": "NONE",
-                    "nodes": 1,
-                    "stdout": "/path/to/file",
-                    "walltime": "00:02:00",
-                },
-                "envcmds": ["cmd1", "cmd2"],
-                "executable": "/path/to/mpassit",
-                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-                "mpicmd": "srun",
-            },
-            "namelist": {
-                "update_values": {
-                    "config": {
-                        "grid_file_input_grid": "x1.999.init.nc",
-                        "hist_file_input_grid": "/path/to/hist.nc",
-                        "diag_file_input_grid": "/path/to/diag.nc",
-                        "block_decomp_file": "/path/to/x1.999.graph.info.part.192",
-                        "is_regional": True,
-                        "output_file": outfile,
-                        "interp_diag": True,
-                        "interp_hist": True,
-                        "wrf_mod_vars": True,
-                        "esmf_log": False,
-                        "target_grid_type": "lambert",
-                        "nx": 180,
-                        "ny": 106,
-                        "dx": 30000.0,
-                        "dy": 30000.0,
-                        "ref_lat": 38.5,
-                        "ref_lon": -97.5,
-                        "truelat1": 38.5,
-                        "truelat2": 38.5,
-                        "stand_lon": -97.5,
-                    }
-                },
-                "validate": True,
-            },
-            "rundir": str(tmp_path),
-        },
-        "platform": {
-            "account": "me",
-            "scheduler": "slurm",
-        },
-    }
+    mpassit_config: dict = {"mpassit": deepcopy(MPASSIT_CONFIG)}
+    mpassit_config["mpassit"]["rundir"] = str(tmp_path)
+    mpassit_config["mpassit"]["namelist"]["update_values"]["config"]["output_file"] = outfile
+    return mpassit_config
 
 
 @fixture
