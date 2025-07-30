@@ -21,6 +21,9 @@ workflow:
         maxtries: 2
       account: "&ACCOUNT;"
       command: "echo account for $person is &ACCOUNT; && true"
+      hangdependency:
+        sh_false:
+          command: /bin/false
       jobname:
         cyclestr:
           attrs:
@@ -46,3 +49,7 @@ workflow:
           taskdep:
             attrs:
               task: hello
+        hangdependency:
+          sh_false:
+            command: /bin/false
+
