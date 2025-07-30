@@ -50,9 +50,8 @@ class MPASSIT(DriverCycleLeadtimeBased):
         """
         The namelist file.
         """
-        fn = "fort.41"
-        yield self.taskname(fn)
-        path = self.rundir / fn
+        path = self._input_config_path
+        yield self.taskname(path.name)
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
@@ -91,7 +90,7 @@ class MPASSIT(DriverCycleLeadtimeBased):
         Returns a description of the file(s) created when this component runs.
         """
         with TemporaryDirectory() as path:
-            nml = Path(path, "fort.41")
+            nml = Path(path, self._input_config_path.name)
             self.create_user_updated_config(
                 config_class=NMLConfig,
                 config_values=self.config[STR.namelist],
@@ -100,3 +99,20 @@ class MPASSIT(DriverCycleLeadtimeBased):
             )
             namelist = get_nml_config(nml)
         return {"path": self.rundir / namelist["config"]["output_file"]}
+
+    # Private helper methods
+
+    @property
+    def _input_config_path(self) -> Path:
+        """
+        Path to the input config file.
+        """
+        return self.rundir / "mpassit.nml"
+
+    @property
+    def _runcmd(self) -> str:
+        """
+        The full command-line component invocation.
+        """
+        executable = self.config[STR.execution][STR.executable]
+        return "%s %s" % (executable, self._input_config_path.name)
