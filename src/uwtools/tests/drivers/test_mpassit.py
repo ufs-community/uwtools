@@ -60,7 +60,7 @@ def test_MPASSIT_files_copied_and_linked(config, cycle, key, leadtime, task, tes
 
 
 def test_MPASSIT_namelist_file(driverobj, logged, ready_task):
-    dst = driverobj.rundir / "fort.41"
+    dst = driverobj._input_config_path
     assert not dst.is_file()
     with patch.object(mpassit, "file", new=ready_task):
         path = Path(driverobj.namelist_file().ref)
@@ -93,3 +93,11 @@ def test_MPASSIT_provisioned_rundir(driverobj, ready_task):
         driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
+
+
+def test_MPASSIT__input_config_path(driverobj, tmp_path):
+    assert driverobj._input_config_path == tmp_path / "mpassit.nml"
+
+
+def test_MPASSIT__runcmd(driverobj):
+    assert driverobj._runcmd == "/path/to/mpassit mpassit.nml"
