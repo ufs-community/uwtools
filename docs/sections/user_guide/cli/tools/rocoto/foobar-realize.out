@@ -13,6 +13,9 @@
     <command>/bin/true</command>
     <jobname>foo</jobname>
     <join>/some/path/slurm</join>
+    <hangdependency>
+      <sh name="nohang">/bin/false</sh>
+    </hangdependency>
   </task>
   <task name="bar" cycledefs="default">
     <account>wrfruc</account>
