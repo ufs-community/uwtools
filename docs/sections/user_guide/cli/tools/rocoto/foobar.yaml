@@ -16,6 +16,9 @@ workflow:
   tasks:
     task_foo:
       <<: *common
+      hangdependency:
+        sh_ok:
+          command: /bin/false
     task_bar:
       <<: *common
       dependency: {taskdep: {attrs: {task: foo}}}

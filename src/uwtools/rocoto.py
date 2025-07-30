@@ -290,6 +290,8 @@ class _RocotoXML:
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
+        if STR.hangdependency in config:
+            self._add_task_hangdependency(e, config[STR.hangdependency])
 
     def _add_task_dependency(self, e: _Element, config: dict) -> None:
         """
@@ -414,6 +416,17 @@ class _RocotoXML:
         SubElement(e, STR.name).text = name
 
         self._add_compound_time_string(e, value, STR.value)
+
+    def _add_task_hangdependency(self, e: _Element, config: dict) -> None:
+        """
+        Add a <hangdependency> element to the <task>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        e = SubElement(e, STR.hangdependency)
+        for tag, subconfig in config.items():
+            self._add_task_dependency_child(e, subconfig, tag)
 
     def _add_workflow(self, config: dict) -> None:
         """
@@ -559,6 +572,7 @@ class STR:
     envar: str = "envar"
     envars: str = "envars"
     exclusive: str = "exclusive"
+    hangdependency: str = "hangdependency"
     jobname: str = "jobname"
     join: str = "join"
     log: str = "log"

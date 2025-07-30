@@ -172,6 +172,7 @@ Let's dissect the following task example:
      envars:
        person: siri
      dependency:
+     hangdependency:
 
 Each task is named by its UW YAML key. Blocks under ``tasks:`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
 
@@ -197,7 +198,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
      <value>siri</value>
    </envar>
 
-``dependency:`` -- [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
+``dependency:`` and ``hangdependency`` -- [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
 
 The other keys not specifically mentioned here follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
 
@@ -273,6 +274,11 @@ This would result in Rocoto XML in this form:
 The ``datadep_foo:`` and ``datadep_bar:`` UW YAML keys were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the YAML key prefix matches the Rocoto XML tag name.
 
 This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g., ``<or>``, ``<not>``, etc. The structure follows the tree in the Rocoto XML language in that each of the subelements of the ``<and>`` tag translates to a subtree in UW YAML. Multiple boolean operator tags can be set at the same level, just as with any other tag type, by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
+
+``hangdependency:``
+^^^^^^^^^^^^^^^^^^^
+
+A ``hangdependency:`` block supports syntax identical to a ``dependency:`` block. Rocoto will interpret the resulting ``<hangdependency>`` XML element as specifying one or more conditions that, when satisfied, indicate that the task is hung and should be killed.
 
 Defining Metatasks
 ------------------

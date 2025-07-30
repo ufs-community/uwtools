@@ -401,6 +401,9 @@
         "exclusive": {
           "type": "string"
         },
+        "hangdependency": {
+          "$ref": "#/$defs/dependency"
+        },
         "jobname": {
           "$ref": "#/$defs/compoundTimeString"
         },
