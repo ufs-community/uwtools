@@ -276,6 +276,7 @@ def mpas_streams():
 MPASSIT_CONFIG = {
     "execution": {
         "executable": "/path/to/mpassit",
+        "mpicmd": "srun",
     },
     "namelist": {
         "update_values": {

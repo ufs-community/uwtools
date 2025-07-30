@@ -100,4 +100,4 @@ def test_MPASSIT__input_config_path(driverobj, tmp_path):
 
 
 def test_MPASSIT__runcmd(driverobj):
-    assert driverobj._runcmd == "/path/to/mpassit mpassit.nml"
+    assert driverobj._runcmd == "srun /path/to/mpassit mpassit.nml"
