@@ -17,7 +17,7 @@ workflow:
     task_foo:
       <<: *common
       hangdependency:
-        sh_nohang:
+        sh_ok:
           command: /bin/false
     task_bar:
       <<: *common
