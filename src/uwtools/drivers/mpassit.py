@@ -114,5 +114,12 @@ class MPASSIT(DriverCycleLeadtimeBased):
         """
         The full command-line component invocation.
         """
-        executable = self.config[STR.execution][STR.executable]
-        return "%s %s" % (executable, self._input_config_path.name)
+        execution = self.config.get(STR.execution, {})
+        mpiargs = execution.get(STR.mpiargs, [])
+        components = [
+            execution.get(STR.mpicmd),  # MPI run program
+            *[str(x) for x in mpiargs],  # MPI arguments
+            execution[STR.executable],  # component executable name
+            self._input_config_path.name,  # namelist name
+        ]
+        return " ".join(filter(None, components))
