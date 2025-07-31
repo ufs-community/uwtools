@@ -81,7 +81,6 @@ def test_Ungrib_namelist_file(driverobj):
     assert nml["share"]["end_date"] == "2025-07-31_12:00:00"
 
 
-@mark.skip
 def test_Ungrib_output(driverobj):
     assert driverobj.output["paths"] == [
         driverobj.rundir / f"FILE:{x}" for x in ("2025-07-31_00", "2025-07-31_06", "2025-07-31_12")

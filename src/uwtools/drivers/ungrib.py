@@ -109,12 +109,15 @@ class Ungrib(DriverCycleBased):
         """
         Returns a description of the file(s) created when this component runs.
         """
+        bounds: list[str] = [self.config[x] for x in ("start", "stop")]
+        current, limit = map(_to_datetime, bounds)
+        if limit < current:
+            raise UWConfigError("Stop time %s precedes start time %s" % (current, limit))
         paths = []
-        ts = self._cycle
-        while ts <= _to_datetime(self.config["stop"]):
-            fn = "%s:%s" % (self.PREFIX, ts.strftime("%Y-%m-%d_%H"))
+        while current <= limit:
+            fn = "%s:%s" % (self.PREFIX, current.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
-            ts += timedelta(seconds=int(self._step.total_seconds()))
+            current += timedelta(seconds=int(self._step.total_seconds()))
         return {"paths": paths}
 
     # Private helper methods
@@ -141,17 +144,6 @@ class Ungrib(DriverCycleBased):
         keys = ["hours", "minutes", "seconds"]
         args = dict(zip(keys, map(int, step.split(":"))))
         return timedelta(**args)
-
-    @cached_property
-    def _validtimes(self) -> list[datetime]:
-        bounds: list[str] = [self.config[x] for x in ("start", "stop")]
-        start, stop = map(_to_datetime, bounds)
-        if stop < start:
-            raise UWConfigError("Stop time %s precedes start time %s" % (stop, start))
-        xs = [start]
-        while (x := xs[-1]) < stop:
-            xs.append(x + self._step)
-        return xs
 
 
 def _to_datetime(value: str | datetime) -> datetime:
