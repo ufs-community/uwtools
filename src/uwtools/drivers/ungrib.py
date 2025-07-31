@@ -126,8 +126,8 @@ class Ungrib(DriverCycleBased):
         start, stop = map(to_datetime, bounds)
         if stop < start:
             raise UWConfigError("Value 'stop' (%s) precedes 'start' (%s)" % (stop, start))
-        current = start
         increment = int(self._step.total_seconds())
+        current = start
         paths = []
         while current <= stop:
             fn = "%s:%s" % (self.PREFIX, current.strftime("%Y-%m-%d_%H"))

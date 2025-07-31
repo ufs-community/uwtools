@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial
 from importlib import import_module
 from typing import TYPE_CHECKING, Callable, Union
@@ -11,6 +11,7 @@ import yaml
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
+from uwtools.utils.time import to_datetime, to_timedelta
 
 if TYPE_CHECKING:
     from collections import OrderedDict
@@ -153,8 +154,8 @@ class UWYAMLConvert(UWYAMLTaggedStr):
     Support for YAML tags that specify type conversions.
     """
 
-    TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list")
-    TaggedValT = Union[bool, datetime, dict, float, int, list]
+    TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list", "!timedelta")
+    TaggedValT = Union[bool, datetime, dict, float, int, list, timedelta]
 
     def __repr__(self) -> str:
         return "%s %s" % (self.tag, self.converted)
@@ -171,12 +172,13 @@ class UWYAMLConvert(UWYAMLTaggedStr):
         """
         load_as = lambda t, v: t(yaml.safe_load(v))
         converters: list[Callable[..., UWYAMLConvert.TaggedValT]] = [
-            partial(load_as, bool),
-            datetime.fromisoformat,
-            partial(load_as, dict),
-            float,
-            int,
-            partial(load_as, list),
+            partial(load_as, bool),  # !bool
+            to_datetime,  # !datetime
+            partial(load_as, dict),  # !dict
+            float,  # !float
+            int,  # !int
+            partial(load_as, list),  # !list
+            to_timedelta,  # !timedelta
         ]
         return dict(zip(UWYAMLConvert.TAGS, converters))[self.tag](self.value)
 
