@@ -115,10 +115,7 @@ class UWYAMLTag:
         return ("%s %s" % (self.tag, self.value)).strip()
 
     @staticmethod
-    def represent(
-        _dumper: yaml.Dumper,
-        data: UWYAMLTag,
-    ) -> yaml.nodes.Node:
+    def represent(_dumper: yaml.Dumper, data: UWYAMLTag) -> yaml.nodes.Node:
         """
         Serialize a scalar value as "!type value".
 
