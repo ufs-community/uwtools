@@ -33,7 +33,7 @@ class Ungrib(DriverCycleBased):
         Symlinks to all the GRIB files.
         """
         yield self.taskname("GRIB files")
-        files = [Path(p) for p in self.config["gribfiles"]["files"]]
+        files = [Path(p) for p in self.config["gribfiles"]]
         yield [
             self._gribfile(src, self.rundir / f"GRIBFILE.{_ext(i)}") for i, src in enumerate(files)
         ]

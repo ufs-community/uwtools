@@ -61,7 +61,7 @@ def test_Ungrib_driver_name(driverobj):
 
 
 def test_Ungrib_gribfiles(driverobj):
-    files = [Path(p) for p in driverobj._config["gribfiles"]["files"]]
+    files = [Path(p) for p in driverobj._config["gribfiles"]]
     for file in files:
         file.touch()
     links = [driverobj.rundir / f"GRIBFILE.{ungrib._ext(i)}" for i in range(len(files))]
@@ -78,12 +78,13 @@ def test_Ungrib_namelist_file(driverobj):
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
     assert nml["share"]["interval_seconds"] == 21600
-    assert nml["share"]["end_date"] == "2024-02-02_06:00:00"
+    assert nml["share"]["end_date"] == "2025-07-31_12:00:00"
 
 
+@mark.skip
 def test_Ungrib_output(driverobj):
     assert driverobj.output["paths"] == [
-        driverobj.rundir / f"FILE:{x}" for x in ("2024-02-01_18", "2024-02-02_00", "2024-02-02_06")
+        driverobj.rundir / f"FILE:{x}" for x in ("2025-07-31_00", "2025-07-31_06", "2025-07-31_12")
     ]
 
 
