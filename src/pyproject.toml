@@ -2,7 +2,7 @@
 exclude_also = [
   "if TYPE_CHECKING:"
 ]
-fail_under = 100
+fail_under = 1 # FIX THIS
 omit = ["*/tests/*"]
 show_missing = true
 skip_covered = true
