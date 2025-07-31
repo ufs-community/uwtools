@@ -4,7 +4,7 @@ A driver for the ungrib component.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from functools import cached_property
 from pathlib import Path
 
@@ -17,6 +17,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
+from uwtools.utils.time import to_datetime
 
 
 class Ungrib(DriverCycleBased):
@@ -44,7 +45,7 @@ class Ungrib(DriverCycleBased):
         """
         The namelist file.
         """
-        fmttime = lambda key: _to_datetime(self.config[key]).strftime("%Y-%m-%d_%H:00:00")
+        fmttime = lambda key: to_datetime(self.config[key]).strftime("%Y-%m-%d_%H:00:00")
         d = {
             "update_values": {
                 "share": {
@@ -122,7 +123,7 @@ class Ungrib(DriverCycleBased):
         Returns a description of the file(s) created when this component runs.
         """
         bounds: list[str] = [self.config[x] for x in ("start", "stop")]
-        start, stop = map(_to_datetime, bounds)
+        start, stop = map(to_datetime, bounds)
         if stop < start:
             raise UWConfigError("Value 'stop' (%s) precedes 'start' (%s)" % (stop, start))
         current = start
@@ -164,12 +165,6 @@ class Ungrib(DriverCycleBased):
         if (val := int(td.total_seconds())) < 0:
             raise UWConfigError("Value for 'step' (%s) should be non-negative" % val)
         return td
-
-
-def _to_datetime(value: str | datetime) -> datetime:
-    if isinstance(value, datetime):
-        return value
-    return datetime.fromisoformat(value)
 
 
 def _ext(n: int) -> str:
