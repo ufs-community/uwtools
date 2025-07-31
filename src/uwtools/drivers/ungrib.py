@@ -43,14 +43,14 @@ class Ungrib(DriverCycleBased):
         """
         The namelist file.
         """
-        timefmt = "%Y-%m-%d_%H:00:00"
+        fmttime = lambda key: _to_datetime(self.config[key]).strftime("%Y-%m-%d_%H:00:00")
         d = {
             "update_values": {
                 "share": {
-                    "end_date": self._end_date.strftime(timefmt),
+                    "end_date": fmttime("stop"),
                     "interval_seconds": int(self._step.total_seconds()),
                     "max_dom": 1,
-                    "start_date": self._cycle.strftime(timefmt),
+                    "start_date": fmttime("start"),
                     "wrf_core": "ARW",
                 },
                 "ungrib": {
@@ -111,18 +111,13 @@ class Ungrib(DriverCycleBased):
         """
         paths = []
         ts = self._cycle
-        while ts <= self._end_date:
+        while ts <= _to_datetime(self.config["stop"]):
             fn = "%s:%s" % (self.PREFIX, ts.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
             ts += timedelta(seconds=int(self._step.total_seconds()))
         return {"paths": paths}
 
     # Private helper methods
-
-    @property
-    def _end_date(self) -> datetime:
-        endhour = self.config["gribfiles"]["max_leadtime"]
-        return self._cycle + timedelta(hours=endhour)
 
     @task
     def _gribfile(self, infile: Path, link: Path):
@@ -149,11 +144,6 @@ class Ungrib(DriverCycleBased):
 
     @cached_property
     def _validtimes(self) -> list[datetime]:
-        def _to_datetime(value: str | datetime) -> datetime:
-            if isinstance(value, datetime):
-                return value
-            return datetime.fromisoformat(value)
-
         bounds: list[str] = [self.config[x] for x in ("start", "stop")]
         start, stop = map(_to_datetime, bounds)
         if stop < start:
@@ -162,6 +152,12 @@ class Ungrib(DriverCycleBased):
         while (x := xs[-1]) < stop:
             xs.append(x + self._step)
         return xs
+
+
+def _to_datetime(value: str | datetime) -> datetime:
+    if isinstance(value, datetime):
+        return value
+    return datetime.fromisoformat(value)
 
 
 def _ext(n: int) -> str:
