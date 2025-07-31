@@ -17,5 +17,7 @@ def test_utils_time_to_timedelta():
     for value, expected in [
         ("01:02:03", timedelta(hours=1, minutes=2, seconds=3)),
         ("168:00:00", timedelta(days=7)),
+        (6, timedelta(hours=6)),
+        (timedelta(seconds=1), timedelta(seconds=1)),
     ]:
-        assert time.to_timedelta(value=value) == expected
+        assert time.to_timedelta(value=value) == expected  # type: ignore[arg-type]

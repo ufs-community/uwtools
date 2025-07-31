@@ -13,7 +13,9 @@ def to_datetime(value: str | datetime) -> datetime:
     return datetime.fromisoformat(value)
 
 
-def to_timedelta(value: str | int) -> timedelta:
+def to_timedelta(value: int | str | timedelta) -> timedelta:
+    if isinstance(value, timedelta):
+        return value
     if isinstance(value, int):
         return timedelta(hours=value)
     keys = ["hours", "minutes", "seconds"]

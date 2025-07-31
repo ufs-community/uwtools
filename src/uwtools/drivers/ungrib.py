@@ -17,7 +17,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
-from uwtools.utils.time import to_datetime
+from uwtools.utils.time import to_datetime, to_timedelta
 
 
 class Ungrib(DriverCycleBased):
@@ -155,13 +155,7 @@ class Ungrib(DriverCycleBased):
 
     @cached_property
     def _step(self) -> timedelta:
-        step = self.config["step"]
-        if isinstance(step, int):
-            td = timedelta(hours=step)
-        else:
-            keys = ["hours", "minutes", "seconds"]
-            args = dict(zip(keys, map(int, step.split(":"))))
-            td = timedelta(**args)
+        td = to_timedelta(self.config["step"])
         if (val := int(td.total_seconds())) < 0:
             raise UWConfigError("Value for 'step' (%s) should be non-negative" % val)
         return td
