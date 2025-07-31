@@ -2277,8 +2277,9 @@ def test_schema_ungrib():
         "execution": {"executable": "/some/ungrib.exe"},
         "gribfiles": {
             "files": ["/some/gfs.t12z.pgrb2.0p25.f000"],
-            "interval_hours": 6,
-            "max_leadtime": 12,
+            "start": "2025-07-31T00:00:00",
+            "step": "06:00:00",
+            "stop": "2025-07-31T12:00:00",
         },
         "rundir": "/run",
         "vtable": "/some/Vtable.GFS",
