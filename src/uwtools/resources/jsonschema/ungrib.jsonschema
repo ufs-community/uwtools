@@ -7,38 +7,35 @@
           "$ref": "urn:uwtools:execution-parallel"
         },
         "gribfiles": {
-          "additionalProperties": false,
-          "properties": {
-            "files": {
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1,
-              "type": "array"
-            },
-            "start": {
-              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$",
-              "type": "string"
-            },
-            "step": {
-              "pattern": "^[0-9]+(:[0-9]+(:[0-9]+)?)?$",
-              "type": "string"
-            },
-            "stop": {
-              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$",
-              "type": "string"
-            }
+          "items": {
+            "type": "string"
           },
-          "required": [
-            "files",
-            "start",
-            "step",
-            "stop"
-          ],
-          "type": "object"
+          "minItems": 1,
+          "type": "array"
         },
         "rundir": {
           "type": "string"
+        },
+        "start": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$",
+          "type": [
+            "datetime",
+            "string"
+          ]
+        },
+        "step": {
+          "pattern": "^[0-9]+(:[0-9]+(:[0-9]+)?)?$",
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "stop": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$",
+          "type": [
+            "datetime",
+            "string"
+          ]
         },
         "vtable": {
           "type": "string"
@@ -48,6 +45,9 @@
         "execution",
         "gribfiles",
         "rundir",
+        "start",
+        "step",
+        "stop",
         "vtable"
       ],
       "type": "object"

@@ -2275,13 +2275,11 @@ def test_schema_shave_rundir(shave_prop):
 def test_schema_ungrib():
     config = {
         "execution": {"executable": "/some/ungrib.exe"},
-        "gribfiles": {
-            "files": ["/some/gfs.t12z.pgrb2.0p25.f000"],
-            "start": "2025-07-31T00:00:00",
-            "step": "06:00:00",
-            "stop": "2025-07-31T12:00:00",
-        },
+        "gribfiles": ["/some/gfs.t12z.pgrb2.0p25.f000"],
         "rundir": "/run",
+        "start": "2025-07-31T00:00:00",
+        "step": "06:00:00",
+        "stop": "2025-07-31T12:00:00",
         "vtable": "/some/Vtable.GFS",
     }
     errors = schema_validator("ungrib", "properties", "ungrib")

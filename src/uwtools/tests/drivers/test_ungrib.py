@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers import ungrib
 from uwtools.drivers.ungrib import Ungrib
@@ -25,17 +25,15 @@ def config(tmp_path):
                 },
                 "executable": str(tmp_path / "ungrib.exe"),
             },
-            "gribfiles": {
-                "files": [
-                    str(tmp_path / "rap.t10z.wrfnatf00.grib2"),
-                    str(tmp_path / "rap.t10z.wrfnatf03.grib2"),
-                    str(tmp_path / "rap.t10z.wrfnatf06.grib2"),
-                ],
-                "start": "2025-07-31T00:00:00",
-                "step": "06:00:00",
-                "stop": "2025-07-31T12:00:00",
-            },
+            "gribfiles": [
+                str(tmp_path / "rap.t10z.wrfnatf00.grib2"),
+                str(tmp_path / "rap.t10z.wrfnatf03.grib2"),
+                str(tmp_path / "rap.t10z.wrfnatf06.grib2"),
+            ],
             "rundir": str(tmp_path),
+            "start": "2025-07-31T00:00:00",
+            "step": "06:00:00",
+            "stop": "2025-07-31T12:00:00",
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
         "platform": {
@@ -129,8 +127,10 @@ def test_Ungrib__gribfile(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib__interval(driverobj):
-    assert driverobj._interval == 21600
+@mark.parametrize("val", ["06:00:00", "06:00", "06", "6", 6])
+def test_Ungrib__step(driverobj, val):
+    driverobj._config["step"] = val
+    assert int(driverobj._step.total_seconds()) == 21600
 
 
 def test__ext():

@@ -2,7 +2,10 @@
 A driver for the ungrib component.
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timedelta
+from functools import cached_property
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -10,6 +13,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -44,7 +48,7 @@ class Ungrib(DriverCycleBased):
             "update_values": {
                 "share": {
                     "end_date": self._end_date.strftime(timefmt),
-                    "interval_seconds": self._interval,
+                    "interval_seconds": int(self._step.total_seconds()),
                     "max_dom": 1,
                     "start_date": self._cycle.strftime(timefmt),
                     "wrf_core": "ARW",
@@ -110,7 +114,7 @@ class Ungrib(DriverCycleBased):
         while ts <= self._end_date:
             fn = "%s:%s" % (self.PREFIX, ts.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
-            ts += timedelta(seconds=self._interval)
+            ts += timedelta(seconds=int(self._step.total_seconds()))
         return {"paths": paths}
 
     # Private helper methods
@@ -134,9 +138,30 @@ class Ungrib(DriverCycleBased):
         link.parent.mkdir(parents=True, exist_ok=True)
         link.symlink_to(infile)
 
-    @property
-    def _interval(self) -> int:
-        return int(self.config["gribfiles"]["interval_hours"]) * 3600
+    @cached_property
+    def _step(self) -> timedelta:
+        step = self.config["step"]
+        if isinstance(step, int):
+            return timedelta(hours=step)
+        keys = ["hours", "minutes", "seconds"]
+        args = dict(zip(keys, map(int, step.split(":"))))
+        return timedelta(**args)
+
+    @cached_property
+    def _validtimes(self) -> list[datetime]:
+        def _to_datetime(value: str | datetime) -> datetime:
+            if isinstance(value, datetime):
+                return value
+            return datetime.fromisoformat(value)
+
+        bounds: list[str] = [self.config[x] for x in ("start", "stop")]
+        start, stop = map(_to_datetime, bounds)
+        if stop < start:
+            raise UWConfigError("Stop time %s precedes start time %s" % (stop, start))
+        xs = [start]
+        while (x := xs[-1]) < stop:
+            xs.append(x + self._step)
+        return xs
 
 
 def _ext(n: int) -> str:
