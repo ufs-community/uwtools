@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
+from datetime import datetime
 from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING
 
@@ -66,6 +67,12 @@ class YAMLConfig(Config):
         """
         yaml.add_representer(Namelist, cls._represent_namelist)
         yaml.add_representer(OrderedDict, cls._represent_ordereddict)
+        yaml.add_representer(
+            datetime,
+            lambda dumper, data: dumper.represent_scalar(
+                "tag:yaml.org,2002:str", data.strftime("%Y-%m-%dT%H:%M:%S")
+            ),
+        )
         for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
             yaml.add_representer(tag_class, tag_class.represent)
 
