@@ -87,6 +87,12 @@ def test_Ungrib_output(driverobj):
     ]
 
 
+def test_Ungrib_output_step_zero(driverobj):
+    ts = "2025-07-31T12:00:00"
+    driverobj._config.update(start=ts, step=0, stop=ts)
+    assert driverobj.output["paths"] == [driverobj.rundir / "FILE:2025-07-31_12"]
+
+
 def test_Ungrib_provisioned_rundir(driverobj, ready_task):
     with patch.multiple(
         driverobj,

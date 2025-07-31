@@ -122,14 +122,18 @@ class Ungrib(DriverCycleBased):
         Returns a description of the file(s) created when this component runs.
         """
         bounds: list[str] = [self.config[x] for x in ("start", "stop")]
-        current, limit = map(_to_datetime, bounds)
-        if limit < current:
-            raise UWConfigError("Stop time %s precedes start time %s" % (current, limit))
+        start, stop = map(_to_datetime, bounds)
+        if stop < start:
+            raise UWConfigError("Value 'stop' (%s) precedes 'start' (%s)" % (stop, start))
+        current = start
+        increment = int(self._step.total_seconds())
         paths = []
-        while current <= limit:
+        while current <= stop:
             fn = "%s:%s" % (self.PREFIX, current.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
-            current += timedelta(seconds=int(self._step.total_seconds()))
+            if increment == 0:
+                break
+            current += timedelta(seconds=increment)
         return {"paths": paths}
 
     # Private helper methods
@@ -152,10 +156,14 @@ class Ungrib(DriverCycleBased):
     def _step(self) -> timedelta:
         step = self.config["step"]
         if isinstance(step, int):
-            return timedelta(hours=step)
-        keys = ["hours", "minutes", "seconds"]
-        args = dict(zip(keys, map(int, step.split(":"))))
-        return timedelta(**args)
+            td = timedelta(hours=step)
+        else:
+            keys = ["hours", "minutes", "seconds"]
+            args = dict(zip(keys, map(int, step.split(":"))))
+            td = timedelta(**args)
+        if (val := int(td.total_seconds())) < 0:
+            raise UWConfigError("Value for 'step' (%s) should be non-negative" % val)
+        return td
 
 
 def _to_datetime(value: str | datetime) -> datetime:
