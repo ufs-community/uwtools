@@ -27,11 +27,11 @@ from uwtools.utils.file import FORMAT, _stdinproxy
 @fixture
 def dumpkit(tmp_path, utc):
     yaml = """
-    section:
+    time:
       cycle: '2025-07-31T12:00:00'
       leadtime: !timedelta '6:00:00'
     """
-    d = {"section": {"cycle": utc(2025, 7, 31, 12), "leadtime": timedelta(seconds=21600)}}
+    d = {"time": {"cycle": utc(2025, 7, 31, 12), "leadtime": timedelta(seconds=21600)}}
     expected = dedent(yaml).strip()
     path = tmp_path / "config.yaml"
     return d, expected, path
