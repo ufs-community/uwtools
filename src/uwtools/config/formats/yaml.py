@@ -70,7 +70,7 @@ class YAMLConfig(Config):
         yaml.add_representer(
             datetime,
             lambda dumper, data: dumper.represent_scalar(
-                "tag:yaml.org,2002:str", data.strftime("%Y-%m-%dT%H:%M:%S")
+                "tag:yaml.org,2002:timestamp", data.strftime("%Y-%m-%dT%H:%M:%S")
             ),
         )
         yaml.add_representer(

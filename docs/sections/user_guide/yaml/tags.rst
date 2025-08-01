@@ -57,7 +57,7 @@ Converts the tagged node to a Python ``datetime`` object. For example, given ``i
 
    $ uw config realize -i input.yaml --output-format yaml
    date1: 2024-09-01
-   date2: 2024-09-01 00:00:00
+   date2: 2024-09-01T00:00:00
 
 The value provided to the tag must be in :python:`ISO 8601 format<datetime.html#datetime.datetime.fromisoformat>` to be interpreted correctly by the ``!datetime`` tag.
 
@@ -215,13 +215,15 @@ Converts the tagged node to a Python ``timedelta`` object. For example:
 
 .. code-block:: yaml
 
-   td: !timedelta "01:02:03"
-   seconds: !int "{{ td.total_seconds() }}"
+   base: !datetime 2025-07-31T12:00:00
+   offset: !timedelta 6
+   cycle: !datetime "{{ base + offset }}"
 
 .. code-block:: text
 
    $ uw config realize -i input.yaml --output-format yaml
-   date1: 2024-09-01
-   date2: 2024-09-01 00:00:00
+   base: 2025-07-31T12:00:00
+   offset: !timedelta '6:00:00'
+   cycle: 2025-07-31T18:00:00
 
 The value provided to the tag may be an integer number of hours, or a string of the form ``hours[:minutes[:seconds]]``, where the ``hours``, ``minutes``, and ``seconds`` components are (possibly zero-padded) integers.
