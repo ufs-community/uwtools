@@ -157,8 +157,8 @@ class Ungrib(DriverCycleBased):
     @cached_property
     def _step(self) -> timedelta:
         td = to_timedelta(self.config["step"])
-        if (val := int(td.total_seconds())) < 0:
-            raise UWConfigError("Value for 'step' (%s seconds) should be non-negative" % val)
+        if int(td.total_seconds()) < 0:
+            raise UWConfigError("Value for 'step' (%s) should be non-negative" % td)
         return td
 
 

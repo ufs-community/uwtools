@@ -164,11 +164,13 @@ def test_Ungrib__run_via_local_execution(driverobj):
 def test_Ungrib__step(driverobj, val):
     driverobj._config["step"] = val
     assert int(driverobj._step.total_seconds()) == 21600
+
+
 def test_Ungrib__step_negative(driverobj):
     driverobj._config["step"] = -6
     with raises(UWConfigError) as e:
         _ = driverobj._step
-    assert str(e.value) == f"Value for 'step' (-21600 seconds) should be non-negative"
+    assert str(e.value) == "Value for 'step' (-1 day, 18:00:00) should be non-negative"
 
 
 def test__ext():
