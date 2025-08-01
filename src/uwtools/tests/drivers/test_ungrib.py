@@ -93,7 +93,7 @@ def test_Ungrib_output_stop_precedes_start(driverobj):
     stop = "2025-07-31T00:00:00"
     driverobj._config.update(start=start, step=0, stop=stop)
     with raises(UWConfigError) as e:
-        assert driverobj.output
+        _ = driverobj.output
     assert str(e.value) == f"Value 'stop' ({stop}) precedes 'start' ({start})"
 
 
@@ -164,6 +164,11 @@ def test_Ungrib__run_via_local_execution(driverobj):
 def test_Ungrib__step(driverobj, val):
     driverobj._config["step"] = val
     assert int(driverobj._step.total_seconds()) == 21600
+def test_Ungrib__step_negative(driverobj):
+    driverobj._config["step"] = -6
+    with raises(UWConfigError) as e:
+        _ = driverobj._step
+    assert str(e.value) == f"Value for 'step' (-21600 seconds) should be non-negative"
 
 
 def test__ext():

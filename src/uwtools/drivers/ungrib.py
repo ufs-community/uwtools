@@ -158,7 +158,7 @@ class Ungrib(DriverCycleBased):
     def _step(self) -> timedelta:
         td = to_timedelta(self.config["step"])
         if (val := int(td.total_seconds())) < 0:
-            raise UWConfigError("Value for 'step' (%s) should be non-negative" % val)
+            raise UWConfigError("Value for 'step' (%s seconds) should be non-negative" % val)
         return td
 
 
