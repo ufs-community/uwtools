@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING
 
@@ -72,6 +72,10 @@ class YAMLConfig(Config):
             lambda dumper, data: dumper.represent_scalar(
                 "tag:yaml.org,2002:str", data.strftime("%Y-%m-%dT%H:%M:%S")
             ),
+        )
+        yaml.add_representer(
+            timedelta,
+            lambda dumper, data: dumper.represent_scalar("!timedelta", str(data)),
         )
         for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
             yaml.add_representer(tag_class, tag_class.represent)
