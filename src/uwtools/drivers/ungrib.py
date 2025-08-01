@@ -2,7 +2,10 @@
 A driver for the ungrib component.
 """
 
-from datetime import datetime, timedelta
+from __future__ import annotations
+
+from datetime import timedelta
+from functools import cached_property
 from pathlib import Path
 
 from iotaa import asset, task, tasks
@@ -10,8 +13,11 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
+from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
+from uwtools.utils.time import to_datetime, to_iso8601, to_timedelta
 
 
 class Ungrib(DriverCycleBased):
@@ -29,33 +35,24 @@ class Ungrib(DriverCycleBased):
         Symlinks to all the GRIB files.
         """
         yield self.taskname("GRIB files")
-        gribfiles = self.config["gribfiles"]
-        offset = abs(gribfiles["offset"])
-        endhour = gribfiles["max_leadtime"] + offset
-        interval = gribfiles["interval_hours"]
-        cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
-        links = []
-        for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
-            infile = Path(
-                gribfiles["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
-            )
-            link_name = self.rundir / f"GRIBFILE.{_ext(n)}"
-            links.append((infile, link_name))
-        yield [self._gribfile(infile, link) for infile, link in links]
+        files = [Path(p) for p in self.config["gribfiles"]]
+        yield [
+            self._gribfile(src, self.rundir / f"GRIBFILE.{_ext(i)}") for i, src in enumerate(files)
+        ]
 
     @task
     def namelist_file(self):
         """
         The namelist file.
         """
-        timefmt = "%Y-%m-%d_%H:00:00"
+        fmttime = lambda key: to_datetime(self.config[key]).strftime("%Y-%m-%d_%H:00:00")
         d = {
             "update_values": {
                 "share": {
-                    "end_date": self._end_date.strftime(timefmt),
-                    "interval_seconds": self._interval,
+                    "end_date": fmttime("stop"),
+                    "interval_seconds": int(self._step.total_seconds()),
                     "max_dom": 1,
-                    "start_date": self._cycle.strftime(timefmt),
+                    "start_date": fmttime("start"),
                     "wrf_core": "ARW",
                 },
                 "ungrib": {
@@ -100,6 +97,17 @@ class Ungrib(DriverCycleBased):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(Path(self.config["vtable"]))
 
+    @task
+    def _run_via_local_execution(self):
+        """
+        A run executed directly on the local system.
+        """
+        yield self.taskname("run via local execution")
+        yield [asset(path, path.is_file) for path in self.output["paths"]]
+        yield self.provisioned_rundir()
+        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
+        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
+
     # Public helper methods
 
     @classmethod
@@ -114,20 +122,20 @@ class Ungrib(DriverCycleBased):
         """
         Returns a description of the file(s) created when this component runs.
         """
+        bounds: list[str] = [self.config[x] for x in ("start", "stop")]
+        start, stop = map(to_datetime, bounds)
+        if stop < start:
+            msg = "Value 'stop' (%s) precedes 'start' (%s)" % tuple(map(to_iso8601, [stop, start]))
+            raise UWConfigError(msg)
+        current = start
         paths = []
-        ts = self._cycle
-        while ts <= self._end_date:
-            fn = "%s:%s" % (self.PREFIX, ts.strftime("%Y-%m-%d_%H"))
+        while current <= stop:
+            fn = "%s:%s" % (self.PREFIX, current.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
-            ts += timedelta(seconds=self._interval)
+            current += timedelta(seconds=int(self._step.total_seconds()))
         return {"paths": paths}
 
     # Private helper methods
-
-    @property
-    def _end_date(self) -> datetime:
-        endhour = self.config["gribfiles"]["max_leadtime"]
-        return self._cycle + timedelta(hours=endhour)
 
     @task
     def _gribfile(self, infile: Path, link: Path):
@@ -143,9 +151,12 @@ class Ungrib(DriverCycleBased):
         link.parent.mkdir(parents=True, exist_ok=True)
         link.symlink_to(infile)
 
-    @property
-    def _interval(self) -> int:
-        return int(self.config["gribfiles"]["interval_hours"]) * 3600
+    @cached_property
+    def _step(self) -> timedelta:
+        td = to_timedelta(self.config["step"])
+        if int(td.total_seconds()) <= 0:
+            raise UWConfigError("Value for 'step' (%s) must be positive" % td)
+        return td
 
 
 def _ext(n: int) -> str:

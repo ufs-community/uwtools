@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
+from datetime import datetime, timedelta
 from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING
 
@@ -21,6 +22,7 @@ from uwtools.config.support import (
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
+from uwtools.utils.time import to_iso8601
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -66,6 +68,16 @@ class YAMLConfig(Config):
         """
         yaml.add_representer(Namelist, cls._represent_namelist)
         yaml.add_representer(OrderedDict, cls._represent_ordereddict)
+        yaml.add_representer(
+            datetime,
+            lambda dumper, data: dumper.represent_scalar(
+                "tag:yaml.org,2002:timestamp", to_iso8601(data)
+            ),
+        )
+        yaml.add_representer(
+            timedelta,
+            lambda dumper, data: dumper.represent_scalar("!timedelta", str(data)),
+        )
         for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
             yaml.add_representer(tag_class, tag_class.represent)
 

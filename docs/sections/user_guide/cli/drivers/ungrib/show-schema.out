@@ -1,4 +1,13 @@
 {
+  "$defs": {
+    "iso8601": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}$",
+      "type": [
+        "datetime",
+        "string"
+      ]
+    }
+  },
   "properties": {
     "ungrib": {
       "additionalProperties": false,
@@ -9,12 +18,3 @@
             "batchargs": {
               "additionalProperties": true,
               "properties": {
-                "cores": {
-                  "type": "integer"
-                },
-                "debug": {
-                  "type": "boolean"
-                },
-                "exclusive": {
-                  "type": "boolean"
-                },

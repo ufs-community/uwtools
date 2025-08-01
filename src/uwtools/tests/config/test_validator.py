@@ -3,10 +3,11 @@ Tests for uwtools.config.validator module.
 """
 
 import json
+from datetime import timedelta
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
@@ -15,9 +16,6 @@ from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.utils.file import resource_path
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 # Fixtures
 
@@ -93,6 +91,9 @@ def schema() -> dict[str, Any]:
             "dir": {
                 "format": "uri",
                 "type": "string",
+            },
+            "leadtime": {
+                "type": "timedelta",
             },
             "number": {"type": "number"},
             "sub": {
@@ -265,6 +266,6 @@ def test_config_validator__validation_errors_bad_number_value(config, schema):
 
 
 def test_config_validator__validation_errors_pass(config, schema, utc):
-    cycle: datetime = utc(2025, 6, 3, 12)
-    config["cycle"] = cycle
+    config["cycle"] = utc(2025, 6, 3, 12)
+    config["leadtime"] = timedelta(hours=6)
     assert not validator._validation_errors(config, schema)

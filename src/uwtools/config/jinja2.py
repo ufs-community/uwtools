@@ -5,7 +5,7 @@ Support for rendering Jinja2 templates.
 from __future__ import annotations
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import cached_property
 from pathlib import Path
 from typing import Union
@@ -25,7 +25,7 @@ from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
 _ConfigVal = Union[
-    bool, datetime, dict, float, int, list, str, UWYAMLConvert, UWYAMLGlob, UWYAMLRemove
+    bool, datetime, dict, float, int, list, str, timedelta, UWYAMLConvert, UWYAMLGlob, UWYAMLRemove
 ]
 
 

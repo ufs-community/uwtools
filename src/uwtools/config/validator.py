@@ -5,7 +5,7 @@ Support for validating a config using JSON Schema.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
@@ -196,9 +196,13 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     :return: Any validation errors.
     """
     base = Draft202012Validator
-    type_checker = base.TYPE_CHECKER.redefine(
-        "fs_src", lambda _, x: any(isinstance(x, t) for t in [str, UWYAMLGlob])
-    ).redefine("datetime", lambda _, x: isinstance(x, datetime))
+    type_checker = (
+        base.TYPE_CHECKER.redefine(
+            "fs_src", lambda _, x: any(isinstance(x, t) for t in [str, UWYAMLGlob])
+        )
+        .redefine("datetime", lambda _, x: isinstance(x, datetime))
+        .redefine("timedelta", lambda _, x: isinstance(x, timedelta))
+    )
     uwvalidator = validators.extend(base, type_checker=type_checker)
     validator = uwvalidator(schema, registry=_registry())
     return list(validator.iter_errors(config))

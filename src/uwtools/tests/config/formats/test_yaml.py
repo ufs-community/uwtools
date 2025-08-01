@@ -2,10 +2,10 @@
 Tests for uwtools.config.formats.yaml module.
 """
 
-import datetime
 import filecmp
 import sys
 from collections import OrderedDict
+from datetime import datetime, timedelta
 from io import StringIO
 from textwrap import dedent
 from unittest.mock import patch
@@ -25,12 +25,16 @@ from uwtools.utils.file import FORMAT, _stdinproxy
 
 
 @fixture
-def dumpkit(tmp_path):
-    expected = """
-    section:
-      key: value
+def dumpkit(tmp_path, utc):
+    yaml = """
+    time:
+      cycle: 2025-07-31T12:00:00
+      leadtime: !timedelta '6:00:00'
     """
-    return {"section": {"key": "value"}}, dedent(expected).strip(), tmp_path / "config.yaml"
+    d = {"time": {"cycle": utc(2025, 7, 31, 12), "leadtime": timedelta(seconds=21600)}}
+    expected = dedent(yaml).strip()
+    path = tmp_path / "config.yaml"
+    return d, expected, path
 
 
 # Tests
@@ -41,10 +45,12 @@ def test_yaml__add_yaml_representers():
     representers = yaml.Dumper.yaml_representers
     for x in [
         OrderedDict,
+        datetime,
         f90nml.Namelist,
         support.UWYAMLConvert,
         support.UWYAMLGlob,
         support.UWYAMLRemove,
+        timedelta,
     ]:
         assert x in representers
 
@@ -83,7 +89,7 @@ def test_yaml_composite_types():
     cfgobj = YAMLConfig(fixture_path("result4.yaml"))
 
     assert cfgobj["step_cycle"] == "PT6H"
-    assert isinstance(cfgobj["init_cycle"], datetime.datetime)
+    assert isinstance(cfgobj["init_cycle"], datetime)
 
     generic_repos = cfgobj["generic_repos"]
     assert isinstance(generic_repos, list)
