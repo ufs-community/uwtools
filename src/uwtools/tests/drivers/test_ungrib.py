@@ -129,6 +129,27 @@ def test_Ungrib__gribfile(driverobj):
     assert dst.is_symlink()
 
 
+def test_Ungrib__run_via_local_execution(driverobj):
+    def make_output(*_args, **_kwargs):
+        for path in driverobj.output["paths"]:
+            path.touch()
+
+    with (
+        patch.object(driverobj, "provisioned_rundir") as provisioned_rundir,
+        patch.object(ungrib, "run_shell_cmd", side_effect=make_output) as run_shell_cmd,
+    ):
+        val = driverobj._run_via_local_execution()
+        assert val.ready
+        for path in val.ref:
+            assert path.exists()
+        run_shell_cmd.assert_called_once_with(
+            cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+            cwd=driverobj.rundir,
+            log_output=True,
+        )
+        provisioned_rundir.assert_called_once_with()
+
+
 @mark.parametrize("val", ["06:00:00", "06:00", "06", "6", 6])
 def test_Ungrib__step(driverobj, val):
     driverobj._config["step"] = val
