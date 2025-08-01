@@ -23,24 +23,27 @@ See :ref:`this page <execution_yaml>` for details.
 gribfiles:
 ^^^^^^^^^^
 
-Describes the GRIB-formatted files to be processed by ``ungrib``.
-
-  **files:**
-
-  A list of absolute or relative paths to the GRIB-formatted files to be processed by ``ungrib``. 
-
-  **interval_hours:**
-
-  Frequency interval of the given files, in integer hours.
-
-  **max_leadtime:**
-
-  The maximum forecast leadtime to process. This may be the same as the forecast length, or a lower leadtime.
+A list of paths to the GRIB-formatted files to be processed by ``ungrib``. 
 
 rundir:
 ^^^^^^^
 
 The path to the run directory.
+
+start:
+^^^^^^
+
+The validtime of the initial element of ``gribfiles`` as an ISO8601 timestamp.
+
+step:
+^^^^^
+
+The interval between successive elements of ``gribfiles`` as integer hours or as a string of the form ``hours[:minutes[:seconds]]``, where the ``hours``, ``minutes``, and ``seconds`` components are (possibly zero-padded) integers.
+
+stop:
+^^^^^
+
+The validtime of the final element of ``gribfiles`` as an ISO8601 timestamp.
 
 vtable:
 ^^^^^^^
