@@ -2,6 +2,7 @@
 Granular tests of JSON Schema schemas.
 """
 
+from datetime import timedelta
 from functools import partial
 
 from pytest import fixture, mark
@@ -2296,7 +2297,9 @@ def test_schema_ungrib():
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
     # An int can be specified for 'step':
     assert not errors(with_set(config, 6, "step"))
-    # The 'step' value must be positive:
+    # A timedelta can be specified for 'step':
+    assert not errors(with_set(config, timedelta(hours=6), "step"))
+    # The 'step' value, if an int, must be positive:
     assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "step"))
 
 

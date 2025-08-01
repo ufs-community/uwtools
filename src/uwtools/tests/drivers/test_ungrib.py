@@ -3,6 +3,7 @@ Ungrib driver tests.
 """
 
 import re
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -92,7 +93,7 @@ def test_Ungrib_output(driverobj):
 def test_Ungrib_output_stop_precedes_start(driverobj):
     start = "2025-07-31T12:00:00"
     stop = "2025-07-31T00:00:00"
-    driverobj._config.update(start=start, step=0, stop=stop)
+    driverobj._config.update(start=start, step=1, stop=stop)
     with raises(UWConfigError) as e:
         _ = driverobj.output
     assert str(e.value) == f"Value 'stop' ({stop}) precedes 'start' ({start})"
@@ -161,13 +162,13 @@ def test_Ungrib__run_via_local_execution(driverobj):
         provisioned_rundir.assert_called_once_with()
 
 
-@mark.parametrize("val", ["06:00:00", "06:00", "06", "6", 6])
+@mark.parametrize("val", ["06:00:00", "06:00", "06", "6", 6, timedelta(hours=6)])
 def test_Ungrib__step(driverobj, val):
     driverobj._config["step"] = val
     assert int(driverobj._step.total_seconds()) == 21600
 
 
-@mark.parametrize("val", [-6, 0])
+@mark.parametrize("val", [-6, 0, timedelta(hours=-1)])
 def test_Ungrib__step_bad(driverobj, val):
     driverobj._config["step"] = val
     with raises(UWConfigError) as e:
@@ -177,4 +178,7 @@ def test_Ungrib__step_bad(driverobj, val):
 
 def test__ext():
     assert ungrib._ext(0) == "AAA"
+    assert ungrib._ext(1) == "AAB"
+    assert ungrib._ext(2) == "AAC"
     assert ungrib._ext(26) == "ABA"
+    assert ungrib._ext(29) == "ABD"
