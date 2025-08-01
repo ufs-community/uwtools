@@ -2294,6 +2294,10 @@ def test_schema_ungrib():
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # An int can be specified for 'step':
+    assert not errors(with_set(config, 6, "step"))
+    # The 'step' value must be positive:
+    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "step"))
 
 
 def test_schema_ungrib_rundir(ungrib_prop):

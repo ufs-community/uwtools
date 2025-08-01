@@ -127,15 +127,12 @@ class Ungrib(DriverCycleBased):
         if stop < start:
             msg = "Value 'stop' (%s) precedes 'start' (%s)" % tuple(map(to_iso8601, [stop, start]))
             raise UWConfigError(msg)
-        increment = int(self._step.total_seconds())
         current = start
         paths = []
         while current <= stop:
             fn = "%s:%s" % (self.PREFIX, current.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
-            if increment == 0:  # the loop condition will never be false...
-                break  # ...so break to avoid infinite loop.
-            current += timedelta(seconds=increment)
+            current += timedelta(seconds=int(self._step.total_seconds()))
         return {"paths": paths}
 
     # Private helper methods
@@ -157,8 +154,8 @@ class Ungrib(DriverCycleBased):
     @cached_property
     def _step(self) -> timedelta:
         td = to_timedelta(self.config["step"])
-        if int(td.total_seconds()) < 0:
-            raise UWConfigError("Value for 'step' (%s) should be non-negative" % td)
+        if int(td.total_seconds()) <= 0:
+            raise UWConfigError("Value for 'step' (%s) must be positive" % td)
         return td
 
 

@@ -29,6 +29,7 @@
           "$ref": "#/$defs/iso8601"
         },
         "step": {
+          "minimum": 1,
           "pattern": "^[0-9]+(:[0-9]+(:[0-9]+)?)?$",
           "type": [
             "integer",

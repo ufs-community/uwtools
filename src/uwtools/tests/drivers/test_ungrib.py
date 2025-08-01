@@ -2,6 +2,7 @@
 Ungrib driver tests.
 """
 
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -97,9 +98,9 @@ def test_Ungrib_output_stop_precedes_start(driverobj):
     assert str(e.value) == f"Value 'stop' ({stop}) precedes 'start' ({start})"
 
 
-def test_Ungrib_output_step_is_zero(driverobj):
+def test_Ungrib_output_step_is_one(driverobj):
     ts = "2025-07-31T12:00:00"
-    driverobj._config.update(start=ts, step=0, stop=ts)
+    driverobj._config.update(start=ts, step=1, stop=ts)
     assert driverobj.output["paths"] == [driverobj.rundir / "FILE:2025-07-31_12"]
 
 
@@ -166,11 +167,12 @@ def test_Ungrib__step(driverobj, val):
     assert int(driverobj._step.total_seconds()) == 21600
 
 
-def test_Ungrib__step_negative(driverobj):
-    driverobj._config["step"] = -6
+@mark.parametrize("val", [-6, 0])
+def test_Ungrib__step_bad(driverobj, val):
+    driverobj._config["step"] = val
     with raises(UWConfigError) as e:
         _ = driverobj._step
-    assert str(e.value) == "Value for 'step' (-1 day, 18:00:00) should be non-negative"
+    assert re.match(r"Value for 'step' .* must be positive", str(e.value))
 
 
 def test__ext():
