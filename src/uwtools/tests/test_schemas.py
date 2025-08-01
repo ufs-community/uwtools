@@ -2285,6 +2285,10 @@ def test_schema_ungrib():
     errors = schema_validator("ungrib", "properties", "ungrib")
     # Basic correctness:
     assert not errors(config)
+    # A space in place of 'T' in an ISO8601 timestamp is allowed:
+    assert not errors(
+        with_set(with_set(config, "2025-07-31 00:00:00", "start"), "2025-07-31 12:00:00", "stop")
+    )
     # All top-level keys are required:
     for key in ("execution", "gribfiles", "rundir", "vtable"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
