@@ -28,7 +28,7 @@ from uwtools.utils.file import FORMAT, _stdinproxy
 def dumpkit(tmp_path, utc):
     yaml = """
     time:
-      cycle: '2025-07-31T12:00:00'
+      cycle: 2025-07-31T12:00:00
       leadtime: !timedelta '6:00:00'
     """
     d = {"time": {"cycle": utc(2025, 7, 31, 12), "leadtime": timedelta(seconds=21600)}}
