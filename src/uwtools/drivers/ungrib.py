@@ -133,8 +133,8 @@ class Ungrib(DriverCycleBased):
         while current <= stop:
             fn = "%s:%s" % (self.PREFIX, current.strftime("%Y-%m-%d_%H"))
             paths.append(self.rundir / fn)
-            if increment == 0:
-                break
+            if increment == 0:  # the loop condition will never be false...
+                break  # ...so break to avoid infinite loop.
             current += timedelta(seconds=increment)
         return {"paths": paths}
 
