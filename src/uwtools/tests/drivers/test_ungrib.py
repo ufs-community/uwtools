@@ -6,10 +6,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.drivers import ungrib
 from uwtools.drivers.ungrib import Ungrib
+from uwtools.exceptions import UWConfigError
 
 # Fixtures
 
@@ -87,7 +88,16 @@ def test_Ungrib_output(driverobj):
     ]
 
 
-def test_Ungrib_output_step_zero(driverobj):
+def test_Ungrib_output_stop_precedes_start(driverobj):
+    start = "2025-07-31T12:00:00"
+    stop = "2025-07-31T00:00:00"
+    driverobj._config.update(start=start, step=0, stop=stop)
+    with raises(UWConfigError) as e:
+        assert driverobj.output
+    assert str(e.value) == f"Value 'stop' ({stop}) precedes 'start' ({start})"
+
+
+def test_Ungrib_output_step_is_zero(driverobj):
     ts = "2025-07-31T12:00:00"
     driverobj._config.update(start=ts, step=0, stop=ts)
     assert driverobj.output["paths"] == [driverobj.rundir / "FILE:2025-07-31_12"]

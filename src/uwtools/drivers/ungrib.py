@@ -17,7 +17,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
-from uwtools.utils.time import to_datetime, to_timedelta
+from uwtools.utils.time import to_datetime, to_iso8601, to_timedelta
 
 
 class Ungrib(DriverCycleBased):
@@ -125,7 +125,8 @@ class Ungrib(DriverCycleBased):
         bounds: list[str] = [self.config[x] for x in ("start", "stop")]
         start, stop = map(to_datetime, bounds)
         if stop < start:
-            raise UWConfigError("Value 'stop' (%s) precedes 'start' (%s)" % (stop, start))
+            msg = "Value 'stop' (%s) precedes 'start' (%s)" % tuple(map(to_iso8601, [stop, start]))
+            raise UWConfigError(msg)
         increment = int(self._step.total_seconds())
         current = start
         paths = []

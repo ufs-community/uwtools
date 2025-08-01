@@ -22,6 +22,7 @@ from uwtools.config.support import (
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
+from uwtools.utils.time import to_iso8601
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -70,7 +71,7 @@ class YAMLConfig(Config):
         yaml.add_representer(
             datetime,
             lambda dumper, data: dumper.represent_scalar(
-                "tag:yaml.org,2002:timestamp", data.strftime("%Y-%m-%dT%H:%M:%S")
+                "tag:yaml.org,2002:timestamp", to_iso8601(data)
             ),
         )
         yaml.add_representer(
