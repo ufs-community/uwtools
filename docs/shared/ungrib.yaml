@@ -5,9 +5,9 @@ ungrib:
       walltime: "00:01:00"
     executable: /path/to/ungrib.exe
   gribfiles:
-    - /path/to/dir/rap.t10z.wrfnatf00.grib2
-    - /path/to/dir/rap.t10z.wrfnatf06.grib2
-    - /path/to/dir/rap.t10z.wrfnatf12.grib2
+    - /path/to/dir/rap.t00z.wrfnatf00.grib2
+    - /path/to/dir/rap.t00z.wrfnatf06.grib2
+    - /path/to/dir/rap.t00z.wrfnatf12.grib2
   rundir: /path/to/run/dir
   start: 2025-07-31T00:00:00
   step: 6
