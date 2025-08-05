@@ -1809,6 +1809,40 @@ def test_schema_rocoto_metatask_attrs():
     assert "'foo' is not of type 'integer'\n" in errors({"throttle": "foo"})
 
 
+def test_schema_rocoto_task_dependency():
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "tasks")
+    config = {
+        "task_foo": {
+            "command": "/bin/true",
+            "dependency": {
+                "sh_true": {
+                    "command": "/bin/true",
+                },
+            },
+            "cores": 1,
+            "walltime": "00:01:00",
+        }
+    }
+    assert not errors(config)
+
+
+def test_schema_rocoto_task_hangdependency():
+    errors = schema_validator("rocoto", "properties", "workflow", "properties", "tasks")
+    config = {
+        "task_foo": {
+            "command": "/bin/true",
+            "hangdependency": {
+                "sh_false": {
+                    "command": "/bin/false",
+                },
+            },
+            "cores": 1,
+            "walltime": "00:01:00",
+        }
+    }
+    assert not errors(config)
+
+
 def test_schema_rocoto_workflow_cycledef():
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
     # Basic spec:
