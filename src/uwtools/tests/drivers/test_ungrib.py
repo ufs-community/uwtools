@@ -29,9 +29,9 @@ def config(tmp_path):
                 "executable": str(tmp_path / "ungrib.exe"),
             },
             "gribfiles": [
-                str(tmp_path / "rap.t10z.wrfnatf00.grib2"),
-                str(tmp_path / "rap.t10z.wrfnatf03.grib2"),
-                str(tmp_path / "rap.t10z.wrfnatf06.grib2"),
+                str(tmp_path / "rap.t00z.wrfnatf00.grib2"),
+                str(tmp_path / "rap.t00z.wrfnatf03.grib2"),
+                str(tmp_path / "rap.t00z.wrfnatf06.grib2"),
             ],
             "rundir": str(tmp_path),
             "start": "2025-07-31T00:00:00",
