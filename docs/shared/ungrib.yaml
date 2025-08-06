@@ -5,11 +5,13 @@ ungrib:
       walltime: "00:01:00"
     executable: /path/to/ungrib.exe
   gribfiles:
-    interval_hours: 6
-    max_leadtime: 24
-    offset: 0
-    path: /path/to/dir/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}
+    - /path/to/dir/rap.t00z.wrfnatf00.grib2
+    - /path/to/dir/rap.t00z.wrfnatf06.grib2
+    - /path/to/dir/rap.t00z.wrfnatf12.grib2
   rundir: /path/to/run/dir
+  start: 2025-07-31T00:00:00
+  step: 6
+  stop: 2025-07-31T12:00:00
   vtable: /path/to/Vtable.GFS
 platform:
   account: me

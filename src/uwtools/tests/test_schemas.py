@@ -2,6 +2,7 @@
 Granular tests of JSON Schema schemas.
 """
 
+from datetime import timedelta
 from functools import partial
 
 from pytest import fixture, mark
@@ -2309,23 +2310,31 @@ def test_schema_shave_rundir(shave_prop):
 def test_schema_ungrib():
     config = {
         "execution": {"executable": "/some/ungrib.exe"},
-        "gribfiles": {
-            "interval_hours": 6,
-            "max_leadtime": 24,
-            "offset": 0,
-            "path": "/some/gfs.t12z.pgrb2.0p25.f000",
-        },
+        "gribfiles": ["/some/gfs.t12z.pgrb2.0p25.f000"],
         "rundir": "/run",
+        "start": "2025-07-31T00:00:00",
+        "step": "06:00:00",
+        "stop": "2025-07-31T12:00:00",
         "vtable": "/some/Vtable.GFS",
     }
     errors = schema_validator("ungrib", "properties", "ungrib")
     # Basic correctness:
     assert not errors(config)
+    # A space in place of 'T' in an ISO8601 timestamp is allowed:
+    assert not errors(
+        with_set(with_set(config, "2025-07-31 00:00:00", "start"), "2025-07-31 12:00:00", "stop")
+    )
     # All top-level keys are required:
     for key in ("execution", "gribfiles", "rundir", "vtable"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # An int can be specified for 'step':
+    assert not errors(with_set(config, 6, "step"))
+    # A timedelta can be specified for 'step':
+    assert not errors(with_set(config, timedelta(hours=6), "step"))
+    # The 'step' value, if an int, must be positive:
+    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "step"))
 
 
 def test_schema_ungrib_rundir(ungrib_prop):
