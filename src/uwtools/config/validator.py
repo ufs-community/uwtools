@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
 from jsonschema import Draft202012Validator, validators
+from jsonschema._utils import Unset
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -88,10 +89,12 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
             quantifiers = {"allOf": "All", "anyOf": "At least one", "oneOf": "Exactly one"}
             if error.validator in quantifiers:
                 pre = quantifiers[str(error.validator)]
-                if error.context:
-                    log.error("%s%s of the following must hold:", INDENT, pre)
-                    for item in error.context:
-                        log.error("%s%s", INDENT * 2, item.message)
+                log.error("%s%s of the following must hold:", INDENT, pre)
+                items = error.context or error.validator_value
+                assert not isinstance(items, Unset)
+                for item in items:
+                    msg = item.message if hasattr(item, "message") else item
+                    log.error("%s%s", INDENT * 2, msg)
             else:
                 log.error("%s%s", INDENT, error.message)
     return valid
