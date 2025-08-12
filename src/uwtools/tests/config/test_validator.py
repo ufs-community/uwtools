@@ -240,15 +240,6 @@ def test_config_validator_validate__fail_quantifier_any_of(caplog):
 
 def test_config_validator_validate__fail_quantifier_all_of(caplog):
     log.setLevel(logging.DEBUG)
-    # schema = {
-    #     "additionalProperties": False,
-    #     "oneOf": [
-    #         {"allOf": [{"required": ["color"]}, {"not": {"required": ["flower"]}}]},
-    #         {"allOf": [{"required": ["flower"]}, {"not": {"required": ["color"]}}]},
-    #     ],
-    #     "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
-    #     "type": "object",
-    # }
     schema = {
         "additionalProperties": False,
         "oneOf": [{"required": ["color"]}, {"required": ["flower"]}],
@@ -261,18 +252,6 @@ def test_config_validator_validate__fail_quantifier_all_of(caplog):
         assert ok(good)
         assert messages() == "Schema validation succeeded for test"
         caplog.clear()
-    bad: dict
-    for bad in [{}]:
-        assert not ok(bad)
-        expected = """
-        1 schema-validation error found in test
-        Error at top level:
-          Exactly one of the following must hold:
-            'color' is a required property
-            'flower' is a required property
-        """
-        assert messages() == dedent(expected).strip()
-        caplog.clear()
     for bad in [{"color": "blue", "flower": "rose"}]:
         assert not ok(bad)
         expected = """
@@ -281,6 +260,17 @@ def test_config_validator_validate__fail_quantifier_all_of(caplog):
           Exactly one of the following must hold:
             {'required': ['color']}
             {'required': ['flower']}
+        """
+        assert messages() == dedent(expected).strip()
+        caplog.clear()
+    for bad in [{}]:
+        assert not ok(bad)
+        expected = """
+        1 schema-validation error found in test
+        Error at top level:
+          Exactly one of the following must hold:
+            'color' is a required property
+            'flower' is a required property
         """
         assert messages() == dedent(expected).strip()
         caplog.clear()
