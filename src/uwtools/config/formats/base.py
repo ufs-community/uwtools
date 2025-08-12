@@ -276,4 +276,4 @@ class Config(ABC, UserDict):
                 else:
                     dst[key] = val
 
-        update(src.data if isinstance(src, UserDict) else src, self.data)
+        update(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)
