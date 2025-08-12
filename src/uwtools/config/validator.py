@@ -85,7 +85,17 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
         for error in errors:
             location = ".".join(str(k) for k in error.path) if error.path else "top level"
             log.error("Error at %s:", location)
-            log.error("%s%s", INDENT, error.message)
+            if error.context:
+                quantifier = {
+                    "allOf": "All",
+                    "anyOf": "At least one",
+                    "oneOf": "Exactly one",
+                }[str(error.validator)]
+                log.error("%s%s of the following must hold:", INDENT, quantifier)
+                for item in error.context:
+                    log.error("%s%s", INDENT * 2, item.message)
+            else:
+                log.error("%s%s", INDENT, error.message)
     return valid
 
 
