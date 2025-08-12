@@ -177,7 +177,37 @@ def test_config_validator_validate__dict(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
-def test_config_validator_validate__fail_bad_any_of(caplog):
+# def test_config_validator_validate__fail_quantifier_all_of(caplog):
+#     log.setLevel(logging.DEBUG)
+#     schema = {
+#         "additionalProperties": False,
+#         "allOf": [
+#             {"if": {"required": ["flower"]}, "then": {"required": ["color"]}},
+#             {"if": {"required": ["color"]}, "then": {"required": ["flower"]}},
+#         ],
+#         "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
+#         "type": "object",
+#     }
+#     messages = lambda: "\n".join(caplog.messages)
+#     ok = partial(validator.validate, schema, "test")
+#     for good in [{}, {"color": "blue", "flower": "rose"}]:
+#         assert ok(good)
+#         assert messages() == "Schema validation succeeded for test"
+#         caplog.clear()
+#     for bad in [{"color": "blue"}, {"flower": "rose"}]:
+#         assert not ok(bad)
+#         expected = """
+#         2 schema-validation errors found in test
+#         Error at top level:
+#           'flower' is a required property
+#         Error at top level:
+#           'color' is a required property
+#         """
+#         assert messages() == dedent(expected).strip()
+#         caplog.clear()
+
+
+def test_config_validator_validate__fail_quantifier_any_of(caplog):
     log.setLevel(logging.DEBUG)
     schema = {
         "additionalProperties": False,
@@ -190,19 +220,59 @@ def test_config_validator_validate__fail_bad_any_of(caplog):
     }
     messages = lambda: "\n".join(caplog.messages)
     ok = partial(validator.validate, schema, "test")
-    for config in [{"color": "blue", "flower": "rose"}, {"color": "blue"}, {"flower": "rose"}]:
-        assert ok(config)
+    for good in [{"color": "blue", "flower": "rose"}, {"color": "blue"}, {"flower": "rose"}]:
+        assert ok(good)
         assert messages() == "Schema validation succeeded for test"
         caplog.clear()
-    assert not ok({})
-    expected = """
-    1 schema-validation error found in test
-    Error at top level:
-      At least one of the following must hold:
-        'color' is a required property
-        'flower' is a required property
-    """
-    assert messages() == dedent(expected).strip()
+    bad: dict
+    for bad in [{}]:
+        assert not ok(bad)
+        expected = """
+        1 schema-validation error found in test
+        Error at top level:
+          At least one of the following must hold:
+            'color' is a required property
+            'flower' is a required property
+        """
+        assert messages() == dedent(expected).strip()
+        caplog.clear()
+
+
+# def test_config_validator_validate__fail_quantifier_all_of(caplog):
+#     log.setLevel(logging.DEBUG)
+#     # schema = {
+#     #     "additionalProperties": False,
+#     #     "oneOf": [
+#     #         {"allOf": [{"required": ["color"]}, {"not": {"required": ["flower"]}}]},
+#     #         {"allOf": [{"required": ["flower"]}, {"not": {"required": ["color"]}}]},
+#     #     ],
+#     #     "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
+#     #     "type": "object",
+#     # }
+#     schema = {
+#         "additionalProperties": False,
+#         "oneOf": [{"required": ["color"]}, {"required": ["flower"]}],
+#         "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
+#         "type": "object",
+#     }
+#     messages = lambda: "\n".join(caplog.messages)
+#     ok = partial(validator.validate, schema, "test")
+#     # for good in [{"color": "blue"}, {"flower": "rose"}]:
+#     #     assert ok(good)
+#     #     assert messages() == "Schema validation succeeded for test"
+#     #     caplog.clear()
+#     # for bad in [{}, {"color": "blue", "flower": "rose"}]:
+#     for bad in [{"color": "blue", "flower": "rose"}]:
+#         assert not ok(bad)
+#         expected = """
+#         1 schema-validation error found in test
+#         Error at top level:
+#           Exactly one of the following must hold:
+#             'color' is a required property
+#             'flower' is a required property
+#         """
+#         assert messages() == dedent(expected).strip()
+#         caplog.clear()
 
 
 def test_config_validator_validate__fail_bad_enum_val(config, logged, schema):
