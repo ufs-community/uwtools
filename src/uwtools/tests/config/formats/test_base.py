@@ -308,3 +308,18 @@ def test_update_from(config):
     """
     config.data.update({"a": "11", "b": "12", "c": "13"})
     assert config == {"foo": 42, "a": "11", "b": "12", "c": "13"}
+
+
+def test_update_from_immutatble():
+    """
+    Test that updating a config doesn't change the original config.
+    """
+    config1 = {"foo": 42}
+    sub = {"bar": 42}
+    config2 = {"foo": sub}
+    config = YAMLConfig({})
+    for cfg in (config1, config2):
+        config.update_from(cfg)
+    assert config1["foo"] == 42
+    assert config["foo"] == sub
+    assert config["foo"] is not config2["foo"]  # ensure the link is broken
