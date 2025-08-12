@@ -3,6 +3,7 @@ Tests for uwtools.config.validator module.
 """
 
 import json
+import logging
 from datetime import timedelta
 from functools import partial
 from pathlib import Path
@@ -15,6 +16,7 @@ from pytest import fixture, mark, raises
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.utils.file import resource_path
 
 # Fixtures
@@ -175,7 +177,8 @@ def test_config_validator_validate__dict(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
-def test_config_validator_validate__fail_bad_any_of(caplog, logged):
+def test_config_validator_validate__fail_bad_any_of(caplog):
+    log.setLevel(logging.DEBUG)
     schema = {
         "additionalProperties": False,
         "anyOf": [
@@ -185,11 +188,13 @@ def test_config_validator_validate__fail_bad_any_of(caplog, logged):
         "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
         "type": "object",
     }
-    check = partial(validator.validate, schema, "test")
-    assert check({"color": "blue", "flower": "rose"})
-    assert logged("Schema validation succeeded for test")
-    caplog.clear()
-    assert not check({})
+    messages = lambda: "\n".join(caplog.messages)
+    ok = partial(validator.validate, schema, "test")
+    for config in [{"color": "blue", "flower": "rose"}, {"color": "blue"}, {"flower": "rose"}]:
+        assert ok(config)
+        assert messages() == "Schema validation succeeded for test"
+        caplog.clear()
+    assert not ok({})
     expected = """
     1 schema-validation error found in test
     Error at top level:
@@ -197,7 +202,7 @@ def test_config_validator_validate__fail_bad_any_of(caplog, logged):
         'color' is a required property
         'flower' is a required property
     """
-    assert dedent(expected).strip() == "\n".join(caplog.messages)
+    assert messages() == dedent(expected).strip()
 
 
 def test_config_validator_validate__fail_bad_enum_val(config, logged, schema):
