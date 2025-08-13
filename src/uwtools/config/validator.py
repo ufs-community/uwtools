@@ -91,8 +91,7 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
                 if items := error.context:
                     log.error("%sCandidate rules are:", INDENT)
                     for item in items:
-                        msg = item.message if hasattr(item, "message") else item
-                        log.error("%s%s", INDENT * 2, msg)
+                        log.error("%s%s", INDENT * 2, item.message)
                 log.error("%s%s must match.", INDENT, quantifiers[str(error.validator)])
     return valid
 
