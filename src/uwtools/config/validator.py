@@ -85,15 +85,15 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
         for error in errors:
             location = ".".join(str(k) for k in error.path) if error.path else "top level"
             log.error("Error at %s:", location)
+            log.error("%s%s", INDENT, error.message)
             quantifiers = {"allOf": "All", "anyOf": "At least one", "oneOf": "Exactly one"}
-            if error.validator in quantifiers and (items := error.context):
-                pre = quantifiers[str(error.validator)]
-                log.error("%s%s of the following must hold:", INDENT, pre)
-                for item in items:
-                    msg = item.message if hasattr(item, "message") else item
-                    log.error("%s%s", INDENT * 2, msg)
-            else:
-                log.error("%s%s", INDENT, error.message)
+            if error.validator in quantifiers:
+                if items := error.context:
+                    log.error("%sCandidate rules are:", INDENT)
+                    for item in items:
+                        msg = item.message if hasattr(item, "message") else item
+                        log.error("%s%s", INDENT * 2, msg)
+                log.error("%s%s must match.", INDENT, quantifiers[str(error.validator)])
     return valid
 
 

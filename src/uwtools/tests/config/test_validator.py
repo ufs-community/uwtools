@@ -227,18 +227,23 @@ def test_config_validator_validate__fail_quantifier_any_of(caplog):
     bad: dict
     for bad in [{}]:
         assert not ok(bad)
-        expected = """
+        expected = (
+            """
         1 schema-validation error found in test
         Error at top level:
-          At least one of the following must hold:
+          %s is not valid under any of the given schemas
+          Candidate rules are:
             'color' is a required property
             'flower' is a required property
+          At least one must match.
         """
+            % bad
+        )
         assert messages() == dedent(expected).strip()
         caplog.clear()
 
 
-def test_config_validator_validate__fail_quantifier_all_of(caplog):
+def test_config_validator_validate__fail_quantifier_one_of(caplog):
     log.setLevel(logging.DEBUG)
     schema = {
         "additionalProperties": False,
@@ -259,6 +264,7 @@ def test_config_validator_validate__fail_quantifier_all_of(caplog):
         1 schema-validation error found in test
         Error at top level:
           %s is valid under each of {'required': ['flower']}, {'required': ['color']}
+          Exactly one must match.
         """
             % bad
         )
@@ -266,13 +272,18 @@ def test_config_validator_validate__fail_quantifier_all_of(caplog):
         caplog.clear()
     for bad in [{}]:
         assert not ok(bad)
-        expected = """
+        expected = (
+            """
         1 schema-validation error found in test
         Error at top level:
-          Exactly one of the following must hold:
+          %s is not valid under any of the given schemas
+          Candidate rules are:
             'color' is a required property
             'flower' is a required property
+          Exactly one must match.
         """
+            % bad
+        )
         assert messages() == dedent(expected).strip()
         caplog.clear()
 
