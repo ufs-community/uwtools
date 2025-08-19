@@ -3,6 +3,7 @@ Tests for uwtools.config.validator module.
 """
 
 import json
+import logging
 from datetime import timedelta
 from functools import partial
 from pathlib import Path
@@ -15,6 +16,7 @@ from pytest import fixture, mark, raises
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.utils.file import resource_path
 
 # Fixtures
@@ -167,29 +169,101 @@ def test_config_validator_internal_schema_file():
         ({"type": "string"}, "foo"),  # str
     ],
 )
-def test_config_validator_validate_alt_types(schema, config):
+def test_config_validator_validate__alt_types(schema, config):
     assert validator.validate(schema=schema, desc="test", config=config) is True
 
 
-def test_config_validator_validate_dict(config, schema):
+def test_config_validator_validate__dict(config, schema):
     assert validator.validate(schema=schema, desc="test", config=config)
 
 
-def test_config_validator_validate_fail_bad_enum_val(config, logged, schema):
+def test_config_validator_validate__fail_quantifier_any_of(caplog):
+    log.setLevel(logging.DEBUG)
+    schema = {
+        "additionalProperties": False,
+        "anyOf": [
+            {"if": {"not": {"required": ["flower"]}}, "then": {"required": ["color"]}},
+            {"if": {"not": {"required": ["color"]}}, "then": {"required": ["flower"]}},
+        ],
+        "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
+        "type": "object",
+    }
+    messages = lambda: "\n".join(caplog.messages)
+    ok = partial(validator.validate, schema, "test")
+    for good in [{"color": "blue", "flower": "rose"}, {"color": "blue"}, {"flower": "rose"}]:
+        assert ok(good)
+        assert messages() == "Schema validation succeeded for test"
+        caplog.clear()
+    bad: dict
+    for bad in [{}]:
+        assert not ok(bad)
+        expected = """
+        1 schema-validation error found in test
+        Error at top level:
+          %s is not valid under any of the given schemas
+          Candidate rules are:
+            'color' is a required property
+            'flower' is a required property
+          At least one must match.
+        """
+        assert messages() == dedent(expected % bad).strip()
+        caplog.clear()
+
+
+def test_config_validator_validate__fail_quantifier_one_of(caplog):
+    log.setLevel(logging.DEBUG)
+    schema = {
+        "additionalProperties": False,
+        "oneOf": [{"required": ["color"]}, {"required": ["flower"]}],
+        "properties": {"color": {"type": "string"}, "flower": {"type": "string"}},
+        "type": "object",
+    }
+    messages = lambda: "\n".join(caplog.messages)
+    ok = partial(validator.validate, schema, "test")
+    for good in [{"color": "blue"}, {"flower": "rose"}]:
+        assert ok(good)
+        assert messages() == "Schema validation succeeded for test"
+        caplog.clear()
+    for bad in [{"color": "blue", "flower": "rose"}]:
+        assert not ok(bad)
+        expected = """
+        1 schema-validation error found in test
+        Error at top level:
+          %s is valid under each of {'required': ['flower']}, {'required': ['color']}
+          Exactly one must match.
+        """
+        assert messages() == dedent(expected % bad).strip()
+        caplog.clear()
+    for bad in [{}]:
+        assert not ok(bad)
+        expected = """
+        1 schema-validation error found in test
+        Error at top level:
+          %s is not valid under any of the given schemas
+          Candidate rules are:
+            'color' is a required property
+            'flower' is a required property
+          Exactly one must match.
+        """
+        assert messages() == dedent(expected % bad).strip()
+        caplog.clear()
+
+
+def test_config_validator_validate__fail_bad_enum_val(config, logged, schema):
     config["color"] = "yellow"  # invalid enum value
     assert not validator.validate(schema=schema, desc="test", config=config)
     assert logged("1 schema-validation error found")
     assert logged("'yellow' is not one of")
 
 
-def test_config_validator_validate_fail_bad_number_val(config, logged, schema):
+def test_config_validator_validate__fail_bad_number_val(config, logged, schema):
     config["number"] = "string"  # invalid number value
     assert not validator.validate(schema=schema, desc="test", config=config)
     assert logged("1 schema-validation error found")
     assert logged("'string' is not of type 'number'")
 
 
-def test_config_validator_validate_fail_top_level(logged):
+def test_config_validator_validate__fail_top_level(logged):
     schema = {
         "additionalProperties": False,
         "properties": {"n": {"type": "integer"}},
@@ -221,7 +295,7 @@ def test_config_validator_validate_check_config(config_data, config_path):
         assert str(e.value) == "Specify at most one of config_data, config_path"
 
 
-def test_config_validator_validate_internal_no(logged, schema_file):
+def test_config_validator_validate_internal__no(logged, schema_file):
     with (
         patch.object(validator, "resource_path", return_value=schema_file.parent),
         raises(UWConfigError) as e,
@@ -232,7 +306,7 @@ def test_config_validator_validate_internal_no(logged, schema_file):
     assert str(e.value) == "YAML validation errors"
 
 
-def test_config_validator_validate_internal_ok(schema_file):
+def test_config_validator_validate_internal__ok(schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         validator.validate_internal(schema_name="a", desc="test", config_data={"color": "blue"})
 
@@ -255,17 +329,17 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-def test_config_validator__validation_errors_bad_enum_value(config, schema):
+def test_config_validator__validation_errors__bad_enum_value(config, schema):
     config["color"] = "yellow"
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test_config_validator__validation_errors_bad_number_value(config, schema):
+def test_config_validator__validation_errors__bad_number_value(config, schema):
     config["number"] = "string"
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test_config_validator__validation_errors_pass(config, schema, utc):
+def test_config_validator__validation_errors__pass(config, schema, utc):
     config["cycle"] = utc(2025, 6, 3, 12)
     config["leadtime"] = timedelta(hours=6)
     assert not validator._validation_errors(config, schema)
