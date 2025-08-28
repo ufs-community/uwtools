@@ -89,6 +89,7 @@ class STR:
     fv3: str = "fv3"
     globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"
+    gsi: str = "gsi"
     hardlink: str = "hardlink"
     help: str = "help"
     hsi: str = "hsi"

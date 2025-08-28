@@ -1,0 +1,79 @@
+{
+  "properties": {
+    "mpassit": {
+      "additionalProperties": false,
+      "properties": {
+        "coupler.res": {
+          "additionalProperties": false,
+          "properties": {
+            "template_file": {
+              "type": "string",
+            },
+            "template_values": {
+              "minProperties": 1,
+              "type": "object"
+            }
+          },
+          "required": [
+            "template_file"
+          ],
+          "type": "object"
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-parallel"
+        },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "$ref": "urn:uwtools:namelist"
+            },
+            "validate": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "obs_input_file": {
+          "type": "string"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "coupler.res",
+        "execution",
+        "namelist",
+        "obs_input_file",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "mpassit"
+  ],
+  "type": "object"
+}
