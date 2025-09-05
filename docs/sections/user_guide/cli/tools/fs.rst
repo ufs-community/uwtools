@@ -21,7 +21,7 @@ The ``uw`` mode for handling filesystem items (files and directories).
 
 The ``copy`` action stages files in a target directory by copying files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
-Source paths prefixed with ``http://``, ``https://``, or ``hsi://`` will be copied from their upstream network locations to the local filesystem.
+Source paths prefixed with ``http://``, ``https://``, ``hsi://``, or ``htar://`` will be copied from their upstream network locations to the local filesystem.
 
 .. literalinclude:: fs/copy-help.cmd
    :language: text
@@ -32,7 +32,15 @@ Source paths prefixed with ``http://``, ``https://``, or ``hsi://`` will be copi
 Local-filesystem and HTTP Sources
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Given a config containing a mapping from local-filesystem destination paths to source paths:
+Consider this source directory
+
+.. literalinclude:: fs/srctree.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: fs/srctree.out
+   :language: text
+
+and a config mapping local-filesystem destination paths to source paths:
 
 .. literalinclude:: fs/copy.yaml
    :language: yaml
@@ -42,7 +50,7 @@ Given a config containing a mapping from local-filesystem destination paths to s
 .. literalinclude:: fs/copy.out
    :language: text
 
-Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and ``gpl`` is a copy of the upstream network source.
+Here, ``foo`` and ``bar`` are copies of their respective local-filesystem source files, and the ``uwtools`` license file is a copy of the upstream network source.
 
 The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
 
@@ -74,7 +82,7 @@ When the ``--report`` option is specified, a report of files not copied ("not-re
 .. literalinclude:: fs/copy-report.out
    :language: text
 
-Since ``uwtools`` logs to ``stderr``, log and report output can be separated and the latter processed with a tool like ``jq``:
+Since ``uwtools`` logs to ``stderr``, log and report output can be separated and the latter processed with a tool like ``jq``, for example for extracting values for use elsewhere:
 
 .. literalinclude:: fs/copy-report-jq.cmd
    :language: text
@@ -109,6 +117,7 @@ The examples in this section use the following files
 
 .. literalinclude:: fs/copy-hpss-show-files.txt
    :language: text
+   :emphasize-lines: 1
 .. literalinclude:: fs/copy-hpss-show-files.out
    :language: text
 
@@ -116,8 +125,11 @@ with this content:
 
 .. literalinclude:: fs/copy-hpss-show-content.txt
    :language: text
+   :emphasize-lines: 1-2
 .. literalinclude:: fs/copy-hpss-show-content.out
    :language: text
+
+They also assume that the ``hsi`` and ``htar`` executable programs are available on ``PATH``.
 
 **HSI Support**
 
@@ -133,7 +145,7 @@ An ``hsi://`` URL can be used as a source path to copy full files from HPSS to t
 
 See :ref:`files_yaml_hsi_support` for more information on UW YAML support for ``hsi://`` sources.
 
-Use the ``!glob`` tag to copy multiple full HPSS files:
+Use the ``!glob`` tag to copy multiple full HPSS files. Here, ``<f>`` is a placeholder for the actual name of each glob-matched file.
 
 .. literalinclude:: fs/copy-hpss-hsi-glob.yaml
    :language: yaml
@@ -159,7 +171,7 @@ An ``htar://`` URL can be used as a source path to extract a member from an HPSS
 
 See :ref:`files_yaml_htar_support` for more information on UW YAML support for ``htar://`` sources.
 
-Use the ``!glob`` tag to extract multiple members from one or more HPSS archive files:
+Use the ``!glob`` tag to extract multiple members from one or more HPSS archive files. Here, ``<f>`` is a placeholder for the actual name of each glob-matched file.
 
 .. literalinclude:: fs/copy-hpss-htar-glob.yaml
    :language: yaml
@@ -176,7 +188,12 @@ See :ref:`files_yaml_htar_glob_support` for more information on the use of the `
 
 The ``hardlink`` action stages items in a target directory by creating hardlinks to files or other links. It behaves similarly to the ``link`` action (see below), but note the following:
 
-* Hardlinks cannot target: items on other filesystems, items the user does not have write permission to, or directories.
+* Hardlinks cannot target:
+
+  * Items on other filesystems
+  * Items the user does not have write permission to
+  * Directories
+
 * If a hardlink cannot be created but the ``--symlink-fallback`` option is specified, a symlink will be created instead, if possible.
 
 .. literalinclude:: fs/hardlink-help.cmd
