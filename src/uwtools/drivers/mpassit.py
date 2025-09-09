@@ -12,6 +12,7 @@ from iotaa import asset, task, tasks
 from uwtools.api.config import get_nml_config
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
+from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -30,8 +31,10 @@ class MPASSIT(DriverCycleLeadtimeBased):
         """
         yield self.taskname("files copied")
         yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
+            Copier(
+                config=self.config.get("files_to_copy", {}),
+                target_dir=self.rundir
+                ).go()
         ]
 
     @tasks
@@ -41,8 +44,10 @@ class MPASSIT(DriverCycleLeadtimeBased):
         """
         yield self.taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
+            Linker(
+                config=self.config.get("files_to_link", {}),
+                target_dir=self.rundir
+                ).go()
         ]
 
     @task

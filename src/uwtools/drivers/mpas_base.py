@@ -18,6 +18,7 @@ from lxml import etree
 from lxml.etree import Element, SubElement
 
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.fs import Copier, Linker
 from uwtools.utils.tasks import filecopy, symlink
 
 
@@ -42,8 +43,10 @@ class MPASBase(DriverCycleBased):
         """
         yield self.taskname("files copied")
         yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
+            Copier(
+                config=self.config.get("files_to_copy", {}),
+                target_dir=self.rundir
+                ).go()
         ]
 
     @tasks
@@ -53,8 +56,10 @@ class MPASBase(DriverCycleBased):
         """
         yield self.taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
+            Linker(
+                config=self.config.get("files_to_link", {}),
+                target_dir=self.rundir
+                ).go()
         ]
 
     @task

@@ -9,6 +9,7 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -44,8 +45,10 @@ class JEDIBase(DriverCycleBased):
         """
         yield self.taskname("files copied")
         yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
+            Copier(
+                config=self.config.get("files_to_copy", {}),
+                target_dir=self.rundir
+                ).go()
         ]
 
     @tasks
@@ -55,8 +58,10 @@ class JEDIBase(DriverCycleBased):
         """
         yield self.taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
+            Linker(
+                config=self.config.get("files_to_link", {}),
+                target_dir=self.rundir
+                ).go()
         ]
 
     @tasks

@@ -12,6 +12,7 @@ from iotaa import asset
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.upp_assets import UPPAssets
 from uwtools.exceptions import UWConfigError
+from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -35,16 +36,20 @@ def control_file(obj: UPP | UPPAssets):
 def files_copied(obj: UPP | UPPAssets):
     yield obj.taskname("files copied")
     yield [
-        filecopy(src=Path(src), dst=obj.rundir / dst)
-        for dst, src in obj.config.get("files_to_copy", {}).items()
+            Copier(
+                config=self.config.get("files_to_copy", {}),
+                target_dir=self.rundir
+                ).go()
     ]
 
 
 def files_linked(obj: UPP | UPPAssets):
     yield obj.taskname("files linked")
     yield [
-        symlink(target=Path(target), linkname=obj.rundir / linkname)
-        for linkname, target in obj.config.get("files_to_link", {}).items()
+            Linker(
+                config=self.config.get("files_to_link", {}),
+                target_dir=self.rundir
+                ).go()
     ]
 
 
