@@ -9,8 +9,7 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from functools import reduce
 from itertools import islice
-from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from dateutil.relativedelta import relativedelta
 from iotaa import asset, task, tasks
@@ -19,7 +18,9 @@ from lxml.etree import Element, SubElement
 
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.fs import Copier, Linker
-from uwtools.utils.tasks import filecopy, symlink
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class MPASBase(DriverCycleBased):
@@ -42,11 +43,21 @@ class MPASBase(DriverCycleBased):
         Files copied for run.
         """
         yield self.taskname("files copied")
+        yield [Copier(config=self.config.get("files_to_copy", {}), target_dir=self.rundir).go()]
+
+    @tasks
+    def files_hardlinked(self):
+        """
+        Files hard-linked for run.
+        """
+        yield self.taskname("files hard-linked")
         yield [
-            Copier(
-                config=self.config.get("files_to_copy", {}),
-                target_dir=self.rundir
-                ).go()
+            Linker(
+                config=self.config.get("files_to_hardlink", {}),
+                target_dir=self.rundir,
+                hardlink=True,
+                symlink_fallback=True,
+            ).go()
         ]
 
     @tasks
@@ -55,12 +66,7 @@ class MPASBase(DriverCycleBased):
         Files linked for run.
         """
         yield self.taskname("files linked")
-        yield [
-            Linker(
-                config=self.config.get("files_to_link", {}),
-                target_dir=self.rundir
-                ).go()
-        ]
+        yield [Linker(config=self.config.get("files_to_link", {}), target_dir=self.rundir).go()]
 
     @task
     @abstractmethod

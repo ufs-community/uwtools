@@ -14,7 +14,7 @@ from uwtools.drivers.upp_assets import UPPAssets
 from uwtools.exceptions import UWConfigError
 from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file, filecopy
 
 if TYPE_CHECKING:
     from uwtools.drivers.upp import UPP
@@ -35,22 +35,24 @@ def control_file(obj: UPP | UPPAssets):
 
 def files_copied(obj: UPP | UPPAssets):
     yield obj.taskname("files copied")
+    yield [Copier(config=obj.config.get("files_to_copy", {}), target_dir=obj.rundir).go()]
+
+
+def files_hardlinked(obj: UPP | UPPAssets):
+    yield obj.taskname("files hard-linked")
     yield [
-            Copier(
-                config=self.config.get("files_to_copy", {}),
-                target_dir=self.rundir
-                ).go()
+        Linker(
+            config=obj.config.get("files_to_hardlink", {}),
+            target_dir=obj.rundir,
+            hardlink=True,
+            symlink_fallback=True,
+        ).go()
     ]
 
 
 def files_linked(obj: UPP | UPPAssets):
     yield obj.taskname("files linked")
-    yield [
-            Linker(
-                config=self.config.get("files_to_link", {}),
-                target_dir=self.rundir
-                ).go()
-    ]
+    yield [Linker(config=obj.config.get("files_to_link", {}), target_dir=obj.rundir).go()]
 
 
 def namelist_file(obj: UPP | UPPAssets):

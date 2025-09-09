@@ -80,11 +80,21 @@ class FV3(DriverCycleBased):
         Files copied for run.
         """
         yield self.taskname("files copied")
+        yield [Copier(config=self.config.get("files_to_copy", {}), target_dir=self.rundir).go()]
+
+    @tasks
+    def files_hardlinked(self):
+        """
+        Files hard-linked for run.
+        """
+        yield self.taskname("files hard-linked")
         yield [
-            Copier(
-                config=self.config.get("files_to_copy", {}),
-                target_dir=self.rundir
-                ).go()
+            Linker(
+                config=self.config.get("files_to_hardlink", {}),
+                target_dir=self.rundir,
+                hardlink=True,
+                symlink_fallback=True,
+            ).go()
         ]
 
     @tasks
@@ -93,12 +103,7 @@ class FV3(DriverCycleBased):
         Files linked for run.
         """
         yield self.taskname("files linked")
-        yield [
-            Linker(
-                config=self.config.get("files_to_link", {}),
-                target_dir=self.rundir
-                ).go()
-        ]
+        yield [Linker(config=self.config.get("files_to_link", {}), target_dir=self.rundir).go()]
 
     @task
     def model_configure(self):

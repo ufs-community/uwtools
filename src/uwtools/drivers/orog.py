@@ -8,9 +8,9 @@ from iotaa import asset, external, task, tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.file import writable
-from uwtools.utils.tasks import symlink
 
 
 class Orog(DriverTimeInvariant):
@@ -21,14 +21,44 @@ class Orog(DriverTimeInvariant):
     # Workflow tasks
 
     @tasks
+    def files_copied(self):
+        """
+        Files copied for run.
+        """
+        yield self.taskname("files copied")
+        yield [
+            Copier(
+                config=self.config.get("files_to_copy", {}),
+                target_dir=self.rundir,
+            ).go()
+        ]
+
+    @tasks
+    def files_hardlinked(self):
+        """
+        Files hard-linked for run.
+        """
+        yield self.taskname("files hard-linked")
+        yield [
+            Linker(
+                config=self.config.get("files_to_hardlink", {}),
+                target_dir=self.rundir,
+                hardlink=True,
+                symlink_fallback=True,
+            ).go()
+        ]
+
+    @tasks
     def files_linked(self):
         """
         Files linked for run.
         """
         yield self.taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
+            Linker(
+                config=self.config.get("files_to_link", {}),
+                target_dir=self.rundir,
+            ).go()
         ]
 
     @external

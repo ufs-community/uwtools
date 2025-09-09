@@ -14,7 +14,7 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
 from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file
 
 
 class MPASSIT(DriverCycleLeadtimeBased):
@@ -30,11 +30,21 @@ class MPASSIT(DriverCycleLeadtimeBased):
         Files copied for run.
         """
         yield self.taskname("files copied")
+        yield [Copier(config=self.config.get("files_to_copy", {}), target_dir=self.rundir).go()]
+
+    @tasks
+    def files_hardlinked(self):
+        """
+        Files hard-linked for run.
+        """
+        yield self.taskname("files hard-linked")
         yield [
-            Copier(
-                config=self.config.get("files_to_copy", {}),
-                target_dir=self.rundir
-                ).go()
+            Linker(
+                config=self.config.get("files_to_hardlink", {}),
+                target_dir=self.rundir,
+                hardlink=True,
+                symlink_fallback=True,
+            ).go()
         ]
 
     @tasks
@@ -43,12 +53,7 @@ class MPASSIT(DriverCycleLeadtimeBased):
         Files linked for run.
         """
         yield self.taskname("files linked")
-        yield [
-            Linker(
-                config=self.config.get("files_to_link", {}),
-                target_dir=self.rundir
-                ).go()
-        ]
+        yield [Linker(config=self.config.get("files_to_link", {}), target_dir=self.rundir).go()]
 
     @task
     def namelist_file(self):
