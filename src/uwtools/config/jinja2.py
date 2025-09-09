@@ -152,6 +152,10 @@ def dereference(
         deref_debug("Rendering", val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
+    elif isinstance(val, UWYAMLGlob):
+        deref_debug("Rendering", val.value)
+        val.value = _deref_render(val.value, context, local)
+        rendered = val
     else:
         deref_debug("Accepting", val)
         rendered = val
