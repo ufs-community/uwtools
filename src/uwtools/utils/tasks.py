@@ -217,7 +217,7 @@ def hardlink(
     :param target: The existing file or directory.
     :param linkname: The symlink to create.
     :param check: Check existence of source before trying to link.
-    :param fallback: copy or symlink if hardlink fails?
+    :param fallback: Alternative if hardlink fails (choices: 'copy', 'symlink').
     """
     target, linkname = map(_local_path, [target, linkname])
     yield "Hardlink %s -> %s" % (linkname, target)
@@ -231,10 +231,10 @@ def hardlink(
     except Exception as e:
         if fallback == STR.symlink:
             os.symlink(src, dst)
-            log.info("Could not hardlink %s -> %s, symlink instead" % (dst, src))
+            log.info("Could not hardlink %s -> %s, symlinked instead" % (dst, src))
         elif fallback == STR.copy:
             copy(src, dst)
-            log.info("Could not hardlink %s -> %s, copy instead" % (dst, src))
+            log.info("Could not hardlink %s -> %s, copied instead" % (dst, src))
         else:
             for line in str(e).split("\n"):
                 log.error(line)
