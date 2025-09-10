@@ -17,7 +17,7 @@ Positional arguments:
     files_copied
       Files copied for run
     files_hardlinked
-      Files hard-linked for run
+      Files hardlinked for run
     files_linked
       Files linked for run
     namelist_file
