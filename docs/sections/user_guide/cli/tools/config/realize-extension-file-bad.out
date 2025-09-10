@@ -1,1 +1,7 @@
-Cannot deduce format of 'config.txt' from unknown extension 'txt'
+values:
+  date: 20240105
+  empty: null
+  greeting: Good Night
+  message: Good Night Moon Good Night Moon
+  recipient: Moon
+  repeat: 2
