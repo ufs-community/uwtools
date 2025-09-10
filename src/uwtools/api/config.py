@@ -246,11 +246,11 @@ rendered. Otherwise, such variables/expressions will be passed through unchanged
 Recognized file extensions are: {extensions}
 
 :param input_config: Input config file (``None`` => read ``stdin``).
-:param input_format: Format of the input config (optional if file's extension is recognized).
+:param input_format: Input config format (default: deduced from filename extension; ``yaml`` if that fails).
 :param update_config: Update config file (``None`` => read ``stdin``).
-:param update_format: Format of the update config (optional if file's extension is recognized).
+:param update_format:  Update config format (default: deduced from filename extension; ``yaml`` if that fails).
 :param output_file: Output config file (``None`` => write to ``stdout``).
-:param output_format: Format of the output config (optional if file's extension is recognized).
+:param output_format: Output config format (default: deduced from filename extension; ``yaml`` if that fails).
 :param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
@@ -258,7 +258,7 @@ Recognized file extensions are: {extensions}
 :param stdin_ok: OK to read from ``stdin``?
 :return: The ``dict`` representation of the realized config.
 :raises: ``UWConfigRealizeError`` if ``total`` is ``True`` and any Jinja2 syntax was not rendered.
-""".format(extensions=", ".join(_FORMAT.extensions())).strip()
+""".format(extensions=", ".join(_FORMAT.extensions())).strip()  # noqa: E501
 
 __all__ = [
     "Config",
