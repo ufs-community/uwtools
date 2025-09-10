@@ -65,9 +65,8 @@ def link(
     Create links to filesystem items.
 
     When ``hardlink`` is ``False`` (the default), links may target files, hardlinks, symlinks, and
-    directories; when ``True``, links may not be made across filesystems, or to directories. When
-    ``fallback`` is set, a copy or symlink will be created, if possible, if a hardlink cannot
-    be created.
+    directories; when ``True``, links may not be made across filesystems, or to directories.
+    Alternative if hardlink fails (choices: ``copy``, ``symlink``).
 
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param target_dir: Path to target directory.
