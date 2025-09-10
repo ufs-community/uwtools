@@ -9,6 +9,7 @@ from pytest import fixture
 from uwtools.api.config import get_yaml_config
 from uwtools.drivers.stager import FileStager
 
+# Need one file on a non-/tmp disk for testing hardlink fallback
 B_FILE = Path("./b.foo").resolve()
 
 
