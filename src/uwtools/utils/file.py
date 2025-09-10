@@ -56,9 +56,9 @@ def get_file_format(path: Path) -> str:
     suffix = Path(path).suffix.replace(".", "")
     try:
         return FORMAT.formats()[suffix]
-    except KeyError:
+    except KeyError as e:
         msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-        raise UWError(msg) from None
+        raise UWError(msg) from e
 
 
 def path_if_it_exists(path: str) -> str:

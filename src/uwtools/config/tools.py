@@ -144,7 +144,7 @@ def _ensure_format(
     desc: str, fmt: str | None = None, config: Config | Path | dict | None = None
 ) -> str:
     """
-    Return the given format, or the appropriate format as deduced from the config.
+    Return the given format, or the deduced format.
 
     :param desc: A description of the file.
     :param fmt: The config format name.
@@ -152,16 +152,20 @@ def _ensure_format(
     :return: The specified or deduced format.
     :raises: UWError if the format cannot be determined.
     """
+    if fmt:
+        return fmt
     if isinstance(config, Config):
         return config._get_format()  # noqa: SLF001
-    if isinstance(config, Path):
-        return fmt or get_file_format(config)
     if isinstance(config, dict):
-        return fmt or FORMAT.yaml
-    if fmt is None:
-        msg = f"Either {desc} path or format name must be specified"
-        raise UWError(msg)
-    return fmt
+        return FORMAT.yaml
+    default = FORMAT.yaml
+    if isinstance(config, Path):
+        try:
+            return get_file_format(config)
+        except UWError:
+            pass
+    log.debug("Defaulting to treating %s config as '%s'", desc, default)
+    return default
 
 
 def _realize_config_input_setup(
