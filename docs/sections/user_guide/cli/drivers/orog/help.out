@@ -12,6 +12,10 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    files_copied
+      Files copied for run
+    files_hardlinked
+      Files hard-linked for run
     files_linked
       Files linked for run
     grid_file

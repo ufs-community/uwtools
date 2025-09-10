@@ -2,7 +2,7 @@ usage: uw fs hardlink [-h] [--version] [--config-file PATH]
                       [--target-dir PATH] [--cycle CYCLE]
                       [--leadtime LEADTIME] [--dry-run]
                       [--key-path KEY[.KEY...]] [--report] [--quiet]
-                      [--verbose] [--symlink-fallback]
+                      [--verbose] [--fallback {copy,symlink}]
 
 Create hardlinks
 
@@ -29,5 +29,5 @@ Optional arguments:
       Print no logging messages
   --verbose, -v
       Print all logging messages
-  --symlink-fallback
-      Symlink if hardlink fails
+  --fallback {copy,symlink}
+      Alternative if hardlink fails
