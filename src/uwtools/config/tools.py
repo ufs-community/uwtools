@@ -4,8 +4,7 @@ Tools for working with configs.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Callable, cast
+from typing import TYPE_CHECKING, Callable, cast
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -13,7 +12,10 @@ from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_err
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
-from uwtools.utils.file import get_file_format
+from uwtools.utils.file import get_config_format
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # Public functions
 
@@ -150,7 +152,6 @@ def _ensure_format(
     :param fmt: The config format name.
     :param config: The input config.
     :return: The specified or deduced format.
-    :raises: UWError if the format cannot be determined.
     """
     if fmt:
         return fmt
@@ -158,14 +159,7 @@ def _ensure_format(
         return config._get_format()  # noqa: SLF001
     if isinstance(config, dict):
         return FORMAT.yaml
-    default = FORMAT.yaml
-    if isinstance(config, Path):
-        try:
-            return get_file_format(config)
-        except UWError:
-            pass
-    log.debug("Defaulting to treating %s config as '%s'", desc, default)
-    return default
+    return get_config_format(config, desc)
 
 
 def _realize_config_input_setup(

@@ -12,7 +12,7 @@ from io import StringIO
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
 
-from uwtools.exceptions import UWError
+from uwtools.logging import log
 from uwtools.strings import FORMAT
 
 if TYPE_CHECKING:
@@ -45,20 +45,22 @@ def _stdinproxy() -> StdinProxy:
     return StdinProxy()
 
 
-def get_file_format(path: Path) -> str:
+def get_config_format(path: str | Path | None, desc: str | None = None) -> str:
     """
-    Return a standardized file format name given a path/filename.
+    Return a standardized config format name for a path/filename, defaulting to 'yaml'.
 
     :param path: A path or filename.
+    :param desc: A description of the config.
     :return: One of a set of supported file-format names.
-    :raises: ValueError if the path/filename suffix is unrecognized.
     """
-    suffix = Path(path).suffix.replace(".", "")
-    try:
-        return FORMAT.formats()[suffix]
-    except KeyError as e:
-        msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-        raise UWError(msg) from e
+    default = FORMAT.yaml
+    if path:
+        path = Path(path)
+        suffix = path.suffix.replace(".", "")
+        return FORMAT.formats().get(suffix, default)
+    desc = f"{desc} config" if desc else str(path) if path else "config"
+    log.debug("Treating %s as '%s'", desc, default)
+    return default
 
 
 def path_if_it_exists(path: str) -> str:

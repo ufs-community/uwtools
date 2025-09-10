@@ -508,7 +508,7 @@ def test_realize_config__total_fail():
     assert str(e.value) == "Config could not be totally realized"
 
 
-def test_realize_config__update_bad_format(logged, tmp_path):
+def test_realize_config__update_bad_format_defaults_to_yaml(capsys, tmp_path):
     input_config = tmp_path / "a.yaml"
     update_config = tmp_path / "b.clj"
     with writable(input_config) as f:
@@ -519,9 +519,15 @@ def test_realize_config__update_bad_format(logged, tmp_path):
         input_config=input_config,
         update_config=update_config,
         output_format=FORMAT.yaml,
-        dry_run=True,
     )
-    assert logged(f"Defaulting to treating update config as '{FORMAT.yaml}'")
+    expected = """
+    '1': a
+    '2': b
+    '3': c
+    deref: b
+    temporalis: c
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
 def test_realize_config__update_none(capsys, tmp_path):
@@ -625,7 +631,7 @@ def test_walk_key_path__fail_bad_leaf_value():
 
 def test__ensure_format__no_path_no_format(logged):
     assert tools._ensure_format(desc="foo") == FORMAT.yaml
-    assert logged(f"Defaulting to treating foo config as '{FORMAT.yaml}'")
+    assert logged(f"Treating foo config as '{FORMAT.yaml}'")
 
 
 def test__ensure_format__config_obj():
