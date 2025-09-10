@@ -10,6 +10,7 @@ from iotaa import task, tasks
 
 from uwtools.drivers import upp_common
 from uwtools.drivers.driver import AssetsCycleLeadtimeBased
+from uwtools.drivers.stager import FileStager
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-class UPPAssets(AssetsCycleLeadtimeBased):
+class UPPAssets(AssetsCycleLeadtimeBased, FileStager):
     """
     An assets driver for UPP.
     """
@@ -30,20 +31,6 @@ class UPPAssets(AssetsCycleLeadtimeBased):
         The GRIB control file.
         """
         yield from upp_common.control_file(self)
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield from upp_common.files_copied(self)
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield from upp_common.files_linked(self)
 
     @task
     def namelist_file(self):

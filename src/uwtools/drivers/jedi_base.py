@@ -9,12 +9,12 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
-from uwtools.fs import Copier, Linker
+from uwtools.drivers.stager import FileStager
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class JEDIBase(DriverCycleBased):
+class JEDIBase(DriverCycleBased, FileStager):
     """
     A base class for the JEDI-like drivers.
     """
@@ -37,37 +37,6 @@ class JEDIBase(DriverCycleBased):
             config_values=self.config["configuration_file"],
             path=path,
         )
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self.taskname("files copied")
-        yield [Copier(config=self.config.get("files_to_copy", {}), target_dir=self.rundir).go()]
-
-    @tasks
-    def files_hardlinked(self):
-        """
-        Files hard-linked for run.
-        """
-        yield self.taskname("files hard-linked")
-        yield [
-            Linker(
-                config=self.config.get("files_to_hardlink", {}),
-                target_dir=self.rundir,
-                hardlink=True,
-                symlink_fallback=True,
-            ).go()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self.taskname("files linked")
-        yield [Linker(config=self.config.get("files_to_link", {}), target_dir=self.rundir).go()]
 
     @tasks
     @abstractmethod

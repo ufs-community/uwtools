@@ -12,7 +12,6 @@ from iotaa import asset
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.upp_assets import UPPAssets
 from uwtools.exceptions import UWConfigError
-from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy
 
@@ -31,28 +30,6 @@ NPARAMS = 42
 def control_file(obj: UPP | UPPAssets):
     yield obj.taskname("GRIB control file")
     yield filecopy(src=Path(obj.config["control_file"]), dst=obj.rundir / "postxconfig-NT.txt")
-
-
-def files_copied(obj: UPP | UPPAssets):
-    yield obj.taskname("files copied")
-    yield [Copier(config=obj.config.get("files_to_copy", {}), target_dir=obj.rundir).go()]
-
-
-def files_hardlinked(obj: UPP | UPPAssets):
-    yield obj.taskname("files hard-linked")
-    yield [
-        Linker(
-            config=obj.config.get("files_to_hardlink", {}),
-            target_dir=obj.rundir,
-            hardlink=True,
-            symlink_fallback=True,
-        ).go()
-    ]
-
-
-def files_linked(obj: UPP | UPPAssets):
-    yield obj.taskname("files linked")
-    yield [Linker(config=obj.config.get("files_to_link", {}), target_dir=obj.rundir).go()]
 
 
 def namelist_file(obj: UPP | UPPAssets):
