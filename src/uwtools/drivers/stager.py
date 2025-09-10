@@ -1,5 +1,5 @@
 """
-A base class for tasks that stage files.
+A mixin class for tasks that stage files.
 """
 
 from iotaa import tasks
@@ -30,9 +30,9 @@ class FileStager:
     @tasks
     def files_hardlinked(self):
         """
-        Files hard-linked for run.
+        Files hardlinked for run.
         """
-        yield self.taskname("files hard-linked")
+        yield self.taskname("files hardlinked")
         yield [
             Linker(
                 config=self.config.get("files_to_hardlink", {}),
