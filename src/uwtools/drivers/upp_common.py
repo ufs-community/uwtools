@@ -13,7 +13,7 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.upp_assets import UPPAssets
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file, filecopy
 
 if TYPE_CHECKING:
     from uwtools.drivers.upp import UPP
@@ -30,22 +30,6 @@ NPARAMS = 42
 def control_file(obj: UPP | UPPAssets):
     yield obj.taskname("GRIB control file")
     yield filecopy(src=Path(obj.config["control_file"]), dst=obj.rundir / "postxconfig-NT.txt")
-
-
-def files_copied(obj: UPP | UPPAssets):
-    yield obj.taskname("files copied")
-    yield [
-        filecopy(src=Path(src), dst=obj.rundir / dst)
-        for dst, src in obj.config.get("files_to_copy", {}).items()
-    ]
-
-
-def files_linked(obj: UPP | UPPAssets):
-    yield obj.taskname("files linked")
-    yield [
-        symlink(target=Path(target), linkname=obj.rundir / linkname)
-        for linkname, target in obj.config.get("files_to_link", {}).items()
-    ]
 
 
 def namelist_file(obj: UPP | UPPAssets):

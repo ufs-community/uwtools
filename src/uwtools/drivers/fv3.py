@@ -10,12 +10,13 @@ from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.stager import FileStager
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class FV3(DriverCycleBased):
+class FV3(DriverCycleBased, FileStager):
     """
     A driver for the FV3 model.
     """
@@ -72,28 +73,6 @@ class FV3(DriverCycleBased):
         path = self.rundir / fn
         yield asset(path, path.is_file)
         yield filecopy(src=Path(self.config["field_table"][STR.basefile]), dst=path)
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self.taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self.taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
-        ]
 
     @task
     def model_configure(self):

@@ -7,29 +7,18 @@ from pathlib import Path
 from iotaa import asset, external, task, tasks
 
 from uwtools.drivers.driver import DriverTimeInvariant
+from uwtools.drivers.stager import FileStager
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.file import writable
-from uwtools.utils.tasks import symlink
 
 
-class Orog(DriverTimeInvariant):
+class Orog(DriverTimeInvariant, FileStager):
     """
     A driver for orog.
     """
 
     # Workflow tasks
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self.taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
-        ]
 
     @external
     def grid_file(self):

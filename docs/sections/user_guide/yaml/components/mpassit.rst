@@ -21,12 +21,9 @@ execution:
 
 See :ref:`this page <execution_yaml>` for details.
 
-files_to_copy:
-^^^^^^^^^^^^^^
+.. include:: /shared/stager.rst
 
-See :ref:`this page <files_yaml>` for details.
-
-To reduce duplication of information in this section, it may be helpful to reference the config value that specifies the number of cores used to run the executable. For example, instead of:
+To reduce duplication of information in these sections, it may be helpful to reference the config value that specifies the number of cores used to run the executable. For example, instead of:
 
 .. code-block:: text
 
@@ -41,11 +38,6 @@ Jinja2 expressions can be used to reference the number of cores used for executi
    mpassit:
      files_to_copy:
        x1.999.graph.info.part.{{ mpassit.execution.batchargs.cores }}: /path/to/x1.999.graph.info.part.{{ mpassit.execution.batchargs.cores }}
-
-files_to_link:
-^^^^^^^^^^^^^^
-
-Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
 
 namelist:
 ^^^^^^^^^

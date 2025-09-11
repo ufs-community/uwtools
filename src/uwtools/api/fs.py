@@ -59,15 +59,14 @@ def link(
     key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
-    symlink_fallback: bool = False,
+    fallback: str | None = None,
 ) -> dict[str, list[str]]:
     """
     Create links to filesystem items.
 
     When ``hardlink`` is ``False`` (the default), links may target files, hardlinks, symlinks, and
-    directories; when ``True``, links may not be made across filesystems, or to directories. When
-    ``symlink_fallback`` is ``True``, a symlink will be created, if possible, if a hardlink cannot
-    be created.
+    directories; when ``True``, links may not be made across filesystems, or to directories.
+    Alternative if hardlink fails (choices: ``copy``, ``symlink``).
 
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param target_dir: Path to target directory.
@@ -77,7 +76,7 @@ def link(
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
-    :param symlink_fallback: Symlink if hardlink fails when hardlink=True?
+    :param fallback: Alternative if hardlink fails (choices: ``copy``, ``symlink``).
     :return: A report on files linked / not linked.
     """
     stager = Linker(
@@ -87,7 +86,7 @@ def link(
         hardlink=hardlink,
         leadtime=leadtime,
         key_path=key_path,
-        symlink_fallback=symlink_fallback,
+        fallback=fallback,
     )
     assets = cast(list, stager.go(dry_run=dry_run).assets)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
