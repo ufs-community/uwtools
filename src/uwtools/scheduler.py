@@ -348,6 +348,7 @@ class Slurm(JobScheduler):
         A mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
+            _DirectivesOptional.CLUSTERS: "--clusters",
             _DirectivesOptional.CORES: "--ntasks",
             _DirectivesOptional.DEBUG: lambda b: "--verbose" if b else None,
             _DirectivesOptional.EXCLUSIVE: lambda b: "--exclusive" if b else None,
@@ -394,6 +395,7 @@ class _DirectivesOptional:
     Keys for optional directives.
     """
 
+    CLUSTERS: str = "clusters"
     CORES: str = "cores"
     DEBUG: str = "debug"
     EXCLUSIVE: str = "exclusive"
