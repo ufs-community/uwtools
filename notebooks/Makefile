@@ -1,4 +1,4 @@
-TARGETS = format lint test-nb unittest
+TARGETS = format lint notebook test-nb unittest
 
 .PHONY: $(TARGETS)
 
@@ -11,6 +11,10 @@ format:
 
 lint:
 	ruff check tests
+
+notebook:
+	TZ=UTC jupyter nbconvert --to notebook --inplace --execute *.ipynb
+	jupyter nbconvert --to notebook --coalesce-streams --inplace --ClearMetadataPreprocessor.enabled=True --ClearNotebookMetadataPreprocessor.enabled=True *.ipynb
 
 test: test-nb
 
