@@ -2128,15 +2128,57 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_examples(spec):
 
 
 def test_schema_rocoto_task_resources():
-    errors = schema_validator("rocoto", "$defs", "task", "properties")
-    # Basic resource options
-    assert not errors([{"cores": 1}])
-    assert not errors([{"native": "abc"}])
-    assert not errors([{"native": {"cyclestr": {"value": "def"}}}])
-    assert not errors([{"nodes": "1:ppn=12"}])
-    # Combined valid resources
-    assert not errors([{"cores": 1, "native": "abc"}])
-    assert not errors([{"native": "abc", "nodes": "1:ppn=12"}])
+    errors = schema_validator("rocoto", "$defs", "task")
+    config = {"command": "/bin/true", "nodes": 1, "walltime": "00:01:00"}
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ["command", "walltime"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    assert errors(with_del(config, "nodes"))
+    # 'cores' or 'native' are allowed in place of 'nodes':
+    assert not errors(with_set(with_del(config, "nodes"), 8, "cores"))
+    assert not errors(with_set(with_del(config, "nodes"), "--slurm options", "native"))
+    # 'cores' must be a non-negative integer:
+    assert not errors(with_set(config, 8, "cores"))
+    assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "cores"))
+    # 'nodes' can also be a string:
+    assert not errors(with_set(config, "1:ppn=1", "nodes"))
+    # 'nodes' cannot be anything else:
+    assert "None is not of type 'integer', 'string'" in errors(with_set(config, None, "nodes"))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # Some values are only ok with or without others:
+    assert "should not be valid" in errors(
+        with_set(with_set(config, "foo", "exclusive"), "bar", "shared")
+    )
+    assert not errors(with_set(config, "foo", "exclusive"))
+    assert not errors(with_set(config, "bar", "shared"))
+    assert "should not be valid" in errors(
+        with_set(with_set(config, "foo", "join"), "bar", "stdout")
+    )
+    assert not errors(with_set(config, "foo", "join"))
+    assert not errors(
+        with_set(
+            with_set(
+                config,
+                "bar",
+                "stdout",
+            ),
+            "baz",
+            "stderr",
+        )
+    )
+    assert "'stderr' is a required property" in errors(with_set(config, "bar", "stdout"))
+    assert "'stdout' is a required property" in errors(with_set(config, "baz", "stderr"))
+    # Some values must be strings:
+    for key in ["account", "exclusive", "memory", "partition", "queue", "rewind", "shared"]:
+        assert "None is not of type 'string'" in errors(with_set(config, None, key))
+    # Some values can be compound time strings:
+    for key in ["command", "deadline", "jobname", "join", "native", "stderr", "stdout"]:
+        assert "is not valid" in errors(with_set(config, None, key))
+    # 'walltime' must be non-negative:
+    assert "is not valid" in errors(with_set(config, "-01:00:00", "walltime"))
 
 
 def test_schema_rocoto_workflow_log():
