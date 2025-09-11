@@ -366,21 +366,24 @@
           "type": "string"
         },
         "attrs": {
-          "cycledefs": {
-            "type": "string"
+          "additionalProperties": false,
+          "properties": {
+            "cycledefs": {
+              "type": "string"
+            },
+            "final": {
+              "type": "boolean"
+            },
+            "maxtries": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "throttle": {
+              "minimum": 0,
+              "type": "integer"
+            }
           },
-          "final": {
-            "type": "boolean"
-          },
-          "maxtries": {
-            "format": "number",
-            "minimum": 0,
-            "type": "string"
-          },
-          "throttle": {
-            "minimum": 0,
-            "type": "integer"
-          }
+          "type": "object"
         },
         "command": {
           "$ref": "#/$defs/compoundTimeString"
