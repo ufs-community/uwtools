@@ -16,7 +16,7 @@ import uwtools.api.template
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
-from uwtools.utils.file import FORMAT
+from uwtools.strings import FORMAT
 
 # Helpers
 
@@ -193,7 +193,7 @@ def test_cli__dispatch_execute(utc):
 
 
 @mark.parametrize(
-    "vals",
+    ("file_arg", "format_arg"),
     [
         (STR.path1, STR.fmt1),
         (STR.path2, STR.fmt2),
@@ -202,17 +202,13 @@ def test_cli__dispatch_execute(utc):
         (STR.valsfile, STR.valsfmt),
     ],
 )
-def test_cli__check_file_vs_format_fail(capsys, vals):
-    # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
-    # no filename to deduce it from.
-    file_arg, format_arg = vals
-    args = dict(file_arg=None, format_arg=None)
-    with raises(SystemExit):
-        cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
-    assert (
-        "Specify %s when %s is not specified" % (cli._switch(format_arg), cli._switch(file_arg))
-        in capsys.readouterr().err
-    )
+def test_cli__check_file_vs_format_fail(file_arg, format_arg):
+    # When reading/writing from/to stdin/stdout, the data format is assumed to be YAML when not
+    # otherwise specified.
+    args = {file_arg: None, format_arg: None}
+    actual = cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
+    expected = {**args, format_arg: FORMAT.yaml}
+    assert actual == expected
 
 
 def test_cli__check_file_vs_format_pass_explicit():
@@ -238,9 +234,8 @@ def test_cli__check_file_vs_format_pass_implicit(fmt):
 def test_cli__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
     args = {STR.valsfile: "a.jpg"}
-    with raises(UWError) as e:
-        cli._check_template_render_vals_args(args)
-    assert "Cannot deduce format" in str(e.value)
+    expected = {"values_file": "a.jpg", "values_format": FORMAT.yaml}
+    assert cli._check_template_render_vals_args(args) == expected
 
 
 def test_cli__check_template_render_vals_args_implicit_pass():
@@ -263,23 +258,19 @@ def test_cli__check_template_render_vals_args_noop_explicit_valsfmt():
 
 
 @mark.parametrize(
-    ("fmt", "fn", "ok"),
+    ("expected", "fmt", "fn"),
     [
-        (None, "update.txt", False),
-        ("yaml", "udpate.txt", True),
-        (None, "update.yaml", True),
-        ("yaml", "update.yaml", True),
-        ("jpg", "udpate.yaml", True),
+        (FORMAT.yaml, None, "a.yaml"),  # yaml correctly deduced
+        (FORMAT.yaml, "yaml", "a.nml"),  # explicit yaml overrides deduced nml
+        (FORMAT.yaml, "yaml", "a.txt"),  # explicit yaml overrides unrecognized txt
+        (FORMAT.nml, None, "a.nml"),  # nml correctly deduced
+        (FORMAT.ini, None, "a.ini"),  # ini correctly deduced
+        (FORMAT.sh, None, "a.sh"),  # sh correctly deduced
     ],
 )
-def test_cli__check_update(fmt, fn, ok):
+def test_cli__check_update(expected, fmt, fn):
     args = {STR.updatefile: fn, STR.updatefmt: fmt}
-    if ok:
-        assert cli._check_update(args) == args
-    else:
-        with raises(UWError) as e:
-            cli._check_update(args)
-        assert "Cannot deduce format" in str(e.value)
+    assert cli._check_update(args) == {STR.updatefile: fn, STR.updatefmt: expected}
 
 
 def test_cli__check_verbosity_fail(capsys):

@@ -4,8 +4,7 @@ Tools for working with configs.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Callable, cast
+from typing import TYPE_CHECKING, Callable, cast
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -13,7 +12,10 @@ from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_err
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
-from uwtools.utils.file import get_file_format
+from uwtools.utils.file import get_config_format
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # Public functions
 
@@ -144,24 +146,20 @@ def _ensure_format(
     desc: str, fmt: str | None = None, config: Config | Path | dict | None = None
 ) -> str:
     """
-    Return the given format, or the appropriate format as deduced from the config.
+    Return the given format, or the deduced format.
 
     :param desc: A description of the file.
     :param fmt: The config format name.
     :param config: The input config.
     :return: The specified or deduced format.
-    :raises: UWError if the format cannot be determined.
     """
+    if fmt:
+        return fmt
     if isinstance(config, Config):
         return config._get_format()  # noqa: SLF001
-    if isinstance(config, Path):
-        return fmt or get_file_format(config)
     if isinstance(config, dict):
-        return fmt or FORMAT.yaml
-    if fmt is None:
-        msg = f"Either {desc} path or format name must be specified"
-        raise UWError(msg)
-    return fmt
+        return FORMAT.yaml
+    return get_config_format(config, desc)
 
 
 def _realize_config_input_setup(
@@ -333,11 +331,11 @@ Realize an output config based on an input config and optional values-providing 
 Recognized file extensions are: {extensions}
 
 :param input_config: Input config source (None => read ``stdin``).
-:param input_format: Format of the input config.
+:param input_format: Input config format.
 :param update_config: Input config source (None => read ``stdin``).
-:param update_format: Format of the update config.
+:param update_format: Update config format.
 :param output_file: Output config destination (None => write to ``stdout``).
-:param output_format: Format of the output config.
+:param output_format: Output config format.
 :param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
