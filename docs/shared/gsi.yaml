@@ -1,0 +1,79 @@
+gsi:
+  execution:
+    batchargs:
+      walltime: "00:50:00"
+      cores: 120
+      exclusive: true
+    envcmds:
+      - module use /some/path/to/modulefiles
+      - module load some_module
+      - ulimit -s unlimited
+    executable: /path/to/gsi.x
+    mpicmd: srun
+    stacksize: 300M
+    threads: 1
+  coupler.res:
+    template_file: '/path/to/template/for/fv3_coupler.res'
+    template_values:
+      yyyy: "{{ cycle.year }}"
+      mm: "{{ cycle.month }}"
+      dd: "{{ cycle.day }}"
+      hh: "{{ cycle.hour }}"
+  files_to_copy:
+    anavinfo: "{{ platform.gsi_fixdir }}/anavinfo.rrfs_conv_dbz"
+    berror_stats: "{{ platform.gsi_fixdir }}/rrfs_glb_berror.l127y770.f77"
+    satinfo: "{{ platform.gsi_fixdir }}/global_satinfo.txt"
+    convinfo: "{{ platform.gsi_fixdir }}/convinfo.rrfs"
+    ozinfo: "{{ platform.gsi_fixdir }}/global_ozinfo.txt"
+    pcpinfo: "{{ platform.gsi_fixdir }}/global_pcpinfo.txt"
+    errtable: "{{ platform.gsi_fixdir }}/errtable.rrfs"
+    atms_beamwidth.txt: "{{ platform.gsi_fixdir }}/atms_beamwidth.txt"
+  files_to_link:
+    fv3_akbk: "{{ platform.gsi_fixdir }}/RRFS_CONUS_13km/fv3_akbk"
+    fv3_grid_spec: "{{ platform.gsi_fixdir }}/RRFS_CONUS_13km/fv3_grid_spec"
+    fv3_dynvars: "/path/to/previous/fv3/RESTART/fv_core.res.tile1.nc"
+    fv3_tracer: "/path/to/previous/fv3/RESTART/fv_tracer.res.tile1.nc"
+    fv3_sfcdata: "/path/to/previous/fv3/RESTART/sfc_data.nc"
+    fv3_phyvars: "/path/to/previous/fv3/RESTART/phy_data.nc"
+    crtm_coeffs/Nalli.IRwater.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/Nalli.IRwater.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.IRice.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.IRice.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.IRsnow.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.IRsnow.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.IRland.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.IRland.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.VISice.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.VISice.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.VISland.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.VISland.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.VISsnow.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.VISsnow.EmisCoeff.bin"
+    crtm_coeffs/NPOESS.VISwater.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/NPOESS.VISwater.EmisCoeff.bin"
+    crtm_coeffs/FASTEM6.MWwater.EmisCoeff.bin: "{{ platform.crtm_fixdir }}/FASTEM6.MWwater.EmisCoeff.bin"
+    crtm_coeffs/AerosolCoeff.bin: "{{ platform.crtm_fixdir }}/AerosolCoeff.bin"
+    crtm_coeffs/CloudCoeff.bin: "{{ platform.crtm_fixdir }}/CloudCoeff.bin"
+    crtm_coeffs/<tau>: !glob "{{ platform.crtm_fixdir }}/*TauCoeff.bin"
+    crtm_coeffs/<spc>: !glob "{{ platform.crtm_fixdir }}/*SpcCoeff.bin"
+    prepbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.prepbufr.tm00"
+    satwndbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.satwnd.tm00.bufr_d"
+    l2rwbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.nexrad.tm00.bufr_d"
+    amsuabufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.1bamua.tm00.bufr_d"
+    amsuabufrears: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.esamua.tm00.bufr_d"
+    mhsbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.1bmhs.tm00.bufr_d"
+    mhsbufrears: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.esmhs.tm00.bufr_d"
+    atmsbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.atms.tm00.bufr_d"
+    atmsbufrears: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.esatms.tm00.bufr_d"
+    atmsbufr_db: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.atmsdb.tm00.bufr_d"
+    crisfsbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.crisf4.tm00.bufr_d"
+    crisfsbufr_db: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.crsfdb.tm00.bufr_d"
+    iasibufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.mtiasi.tm00.bufr_d"
+    iasibufrears: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.esiasi.tm00.bufr_d"
+    iasibufr_db: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.iasidb.tm00.bufr_d"
+    abibufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.gsrcsr.tm00.bufr_d"
+    ssmisbufr: "{{ platform.obspath }}/{{ timevars.yyyymmddhh }}.rap.t{{ timevars.hh }}z.ssmisu.tm00.bufr_d"
+  namelist:
+    base_file: /path/to/a/run-ready/gsiparm.anl
+  obs_input_file: /path/to/OBS_INPUT/text_block/obs_input.txt"
+  rundir: /path/to/run/dir
+platform: 
+  crtm_fixdir: /path/to/crtm/fix/files
+  gsi_fixdir: /path/to/gsi/fix/files
+  scheduler: slurm
+  account: wrfruc
+timevars:
+  yyyymmddhh: '{{ cycle.strftime("%Y%m%d%H") }}'
+  hh: '{{ cycle.strftime("%H") }}'
