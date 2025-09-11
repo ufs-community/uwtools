@@ -13,13 +13,14 @@ from uwtools.api.config import get_nml_config, get_yaml_config
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.stager import FileStager
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file
 
 
-class GSI(DriverCycleBased):
+class GSI(DriverCycleBased, FileStager):
     """
     A driver for GSI.
     """
@@ -44,32 +45,6 @@ class GSI(DriverCycleBased):
                 **self.config[fn].get("template_values", {}),
             },
         )
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self.taskname("files copied")
-        yield [
-            Copier(
-                config=self.config["files_to_copy"],
-                target_dir=self.rundir,
-            ).go()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self.taskname("files linked")
-        yield [
-            Linker(
-                config=self.config["files_to_link"],
-                target_dir=self.rundir,
-            ).go()
-        ]
 
     @task
     def namelist_file(self):
@@ -103,6 +78,7 @@ class GSI(DriverCycleBased):
         task_list = [
             self.coupler_res(),
             self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),

@@ -78,6 +78,7 @@ class MPAS(MPASBase):
         yield self.taskname("provisioned run directory")
         required = [
             self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),

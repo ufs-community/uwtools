@@ -140,6 +140,7 @@ class FV3(DriverCycleBased):
             self.diag_table(),
             self.field_table(),
             self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.model_configure(),
             self.namelist_file(),

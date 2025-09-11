@@ -61,6 +61,7 @@ class UPP(DriverCycleLeadtimeBased):
         yield [
             self.control_file(),
             self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),

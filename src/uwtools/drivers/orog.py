@@ -78,6 +78,8 @@ class Orog(DriverTimeInvariant):
         """
         yield self.taskname("provisioned run directory")
         yield [
+            self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.input_config_file(),
             self.runscript(),
