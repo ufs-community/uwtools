@@ -280,18 +280,19 @@ def test_utils_tasks_hardlink_symlink__directory_hierarchy(prefix, task, tmp_pat
     assert link.stat().st_nlink == 2 if task is tasks.hardlink else link.is_symlink()
 
 
-@mark.parametrize("symlink_fallback", [True, False])
+@mark.parametrize("fallback", ["copy", "symlink", None])
 @mark.parametrize("prefix", ["", "file://"])
-def test_utils_tasks_hardlink__cannot_hardlink(logged, prefix, symlink_fallback, tmp_path):
+def test_utils_tasks_hardlink__cannot_hardlink(logged, prefix, fallback, tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
     target.touch()
     assert not link.exists()
     t2, l2 = ["%s%s" % (prefix, x) if prefix else x for x in (target, link)]
     with patch.object(tasks.os, "link", side_effect=OSError("big\ntrouble\n")):
-        tasks.hardlink(target=t2, linkname=l2, symlink_fallback=symlink_fallback)
-    assert link.is_symlink() is symlink_fallback
-    if not symlink_fallback:
+        tasks.hardlink(target=t2, linkname=l2, fallback=fallback)
+    assert link.is_symlink() if fallback == "symlink" else True
+    assert link.is_file() if fallback == "copy" else True
+    if not fallback:
         assert logged("big")
         assert logged("trouble")
         assert logged("Could not hardlink %s -> %s" % (link, target))

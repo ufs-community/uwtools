@@ -3,14 +3,14 @@ JEDI driver tests.
 """
 
 from pathlib import Path
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import iotaa
 import yaml
 from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers import jedi, jedi_base
+from uwtools.drivers import jedi
 from uwtools.drivers.jedi import JEDI
 from uwtools.exceptions import UWNotImplementedError
 
@@ -96,35 +96,6 @@ def test_JEDI_configuration_file_missing_base_file(driverobj, logged):
 
 def test_JEDI_driver_name(driverobj):
     assert driverobj.driver_name() == JEDI.driver_name() == "jedi"
-
-
-def test_JEDI_files_copied(driverobj):
-    with patch.object(jedi_base, "filecopy", wraps=jedi_base.filecopy) as filecopy:
-        driverobj._config["rundir"] = "/path/to/run"
-        driverobj.files_copied()
-        assert filecopy.call_count == 2
-        assert (
-            call(src=Path("/path/to/baz"), dst=Path("/path/to/run/bar/baz"))
-            in filecopy.call_args_list
-        )
-        assert (
-            call(src=Path("/path/to/foo"), dst=Path("/path/to/run/foo")) in filecopy.call_args_list
-        )
-
-
-def test_JEDI_files_linked(driverobj):
-    with patch.object(jedi_base, "symlink", wraps=jedi_base.symlink) as symlink:
-        driverobj._config["rundir"] = "/path/to/run"
-        driverobj.files_linked()
-        assert symlink.call_count == 2
-        assert (
-            call(target=Path("/path/to/baz"), linkname=Path("/path/to/run/bar/baz"))
-            in symlink.call_args_list
-        )
-        assert (
-            call(target=Path("/path/to/foo"), linkname=Path("/path/to/run/foo"))
-            in symlink.call_args_list
-        )
 
 
 def test_JEDI_output(driverobj):

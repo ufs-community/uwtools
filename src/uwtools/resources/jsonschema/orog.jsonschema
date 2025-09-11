@@ -6,6 +6,12 @@
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
         },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_hardlink": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
         "files_to_link": {
           "$ref": "urn:uwtools:files-to-stage"
         },

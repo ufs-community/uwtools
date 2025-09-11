@@ -20,6 +20,8 @@ Positional arguments:
       The field_table file
     files_copied
       Files copied for run
+    files_hardlinked
+      Files hardlinked for run
     files_linked
       Files linked for run
     model_configure

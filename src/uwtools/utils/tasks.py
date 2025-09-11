@@ -209,7 +209,7 @@ def filecopy_local(src: Path, dst: Path, check: bool = True):
 
 @task
 def hardlink(
-    target: Path | str, linkname: Path | str, check: bool = True, symlink_fallback: bool = False
+    target: Path | str, linkname: Path | str, check: bool = True, fallback: str | None = None
 ):
     """
     A hardlink.
@@ -217,7 +217,7 @@ def hardlink(
     :param target: The existing file or directory.
     :param linkname: The symlink to create.
     :param check: Check existence of source before trying to link.
-    :param symlink_fallback: Symlink if hardlink fails?
+    :param fallback: Alternative if hardlink fails (choices: 'copy', 'symlink').
     """
     target, linkname = map(_local_path, [target, linkname])
     yield "Hardlink %s -> %s" % (linkname, target)
@@ -229,8 +229,12 @@ def hardlink(
     try:
         os.link(src, dst)
     except Exception as e:
-        if symlink_fallback:
+        if fallback == STR.symlink:
             os.symlink(src, dst)
+            log.info("Could not hardlink %s -> %s, symlinked instead" % (dst, src))
+        elif fallback == STR.copy:
+            copy(src, dst)
+            log.info("Could not hardlink %s -> %s, copied instead" % (dst, src))
         else:
             for line in str(e).split("\n"):
                 log.error(line)

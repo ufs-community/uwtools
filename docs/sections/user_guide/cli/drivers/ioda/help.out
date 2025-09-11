@@ -16,6 +16,8 @@ Positional arguments:
       The executable's YAML configuration file
     files_copied
       Files copied for run
+    files_hardlinked
+      Files hardlinked for run
     files_linked
       Files linked for run
     provisioned_rundir

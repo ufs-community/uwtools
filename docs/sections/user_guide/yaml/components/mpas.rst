@@ -49,12 +49,9 @@ length:
 
 The length of the forecast in integer hours.
 
-files_to_copy:
-^^^^^^^^^^^^^^
+.. include:: /shared/stager.rst
 
-See :ref:`this page <files_yaml>` for details.
-
-To reduce duplication of information in this section, it may be helpful to template the file that depends on the number of cores being used to run the executable. For example, instead of:
+To reduce duplication of information in these sections, it may be helpful to template the file that depends on the number of cores being used to run the executable. For example, instead of:
 
 .. code-block:: text
 
@@ -69,11 +66,6 @@ Jinja2 expressions can be used to reference the number of cores used in executio
    mpas:
      files_to_copy:
        conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}: /path/to/conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}
-
-files_to_link:
-^^^^^^^^^^^^^^
-
-Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
 
 namelist:
 ^^^^^^^^^

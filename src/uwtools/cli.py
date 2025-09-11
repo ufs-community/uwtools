@@ -365,7 +365,7 @@ def _add_subparser_fs_hardlink(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.hardlink, "Create hardlinks")
     checks, optional = _add_subparser_fs_common(parser)
-    _add_arg_symlink_fallback(optional)
+    _add_arg_fallback(optional)
     return checks
 
 
@@ -439,7 +439,7 @@ def _dispatch_fs_hardlink(args: Args) -> bool:
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
-        symlink_fallback=args[STR.symlinkfallback],
+        fallback=args[STR.fallback],
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
 
@@ -912,11 +912,12 @@ def _add_arg_report(group: Group) -> None:
     )
 
 
-def _add_arg_symlink_fallback(group: Group) -> None:
+def _add_arg_fallback(group: Group) -> None:
     group.add_argument(
-        _switch(STR.symlinkfallback),
-        action="store_true",
-        help="Symlink if hardlink fails",
+        _switch(STR.fallback),
+        choices=[STR.copy, STR.symlink],
+        help="Alternative if hardlink fails",
+        type=str,
     )
 
 

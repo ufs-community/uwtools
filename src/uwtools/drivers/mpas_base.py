@@ -9,8 +9,7 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from functools import reduce
 from itertools import islice
-from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from dateutil.relativedelta import relativedelta
 from iotaa import asset, task, tasks
@@ -18,10 +17,13 @@ from lxml import etree
 from lxml.etree import Element, SubElement
 
 from uwtools.drivers.driver import DriverCycleBased
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.drivers.stager import FileStager
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
-class MPASBase(DriverCycleBased):
+class MPASBase(DriverCycleBased, FileStager):
     """
     A base class for MPAS drivers.
     """
@@ -35,29 +37,6 @@ class MPASBase(DriverCycleBased):
         Boundary files.
         """
 
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self.taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self.taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
-        ]
-
-    @task
     @abstractmethod
     def namelist_file(self):
         """
