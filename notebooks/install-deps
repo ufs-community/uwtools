@@ -1,1 +1,1 @@
-conda install -q -y --repodata-fn repodata.json "jupyterlab<4.4" "testbook<0.5" "tree 2.2.*" "freezetime"
+conda install -q -y --repodata-fn repodata.json "jupyterlab<4.4" "testbook<0.5" "tree 2.2.*" "freezegun"
