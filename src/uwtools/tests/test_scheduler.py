@@ -279,6 +279,7 @@ def test_Slurm__forbidden_directives(slurm):
 
 def test_Slurm__managed_directives(slurm):
     mds = slurm._managed_directives
+    assert mds["clusters"] == "--clusters"
     assert mds["cores"] == "--ntasks"
     assert mds["debug"](True) == "--verbose"
     assert mds["debug"](False) is None
