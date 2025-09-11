@@ -50,6 +50,7 @@ def test_UPP_provisioned_rundir(upp_driverobj, ready_task):
     with patch.multiple(
         upp_driverobj,
         files_copied=ready_task,
+        files_hardlinked=ready_task,
         files_linked=ready_task,
         namelist_file=ready_task,
         runscript=ready_task,

@@ -207,6 +207,11 @@ def global_equiv_resol_prop():
 
 
 @fixture
+def gsi_prop():
+    return partial(schema_validator, "gsi", "properties", "gsi", "properties")
+
+
+@fixture
 def ioda_prop():
     return partial(schema_validator, "ioda", "properties", "ioda", "properties")
 
@@ -1083,6 +1088,84 @@ def test_schema_global_equiv_resol():
 @mark.parametrize("schema_entry", ["rundir", "input_grid_file"])
 def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
     errors = global_equiv_resol_prop(schema_entry)
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "42 is not of type 'string'\n" in errors(42)
+
+
+# gsi
+
+
+def test_schema_gsi():
+    config = {
+        "coupler.res": {"template_file": "/some/path/to/file"},
+        "execution": {"executable": "/some/ioda.exe"},
+        "files_to_copy": {"file1": "src1", "file2": "src2"},
+        "files_to_link": {"link1": "src3", "link2": "src4"},
+        "files_to_hardlink": {"link3": "src4"},
+        "namelist": {"base_file": "/path/to/nml.in"},
+        "obs_input_file": "/path/to/obs.txt",
+        "rundir": "/run",
+    }
+    errors = schema_validator("gsi", "properties", "gsi")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("coupler.res", "execution", "namelist", "obs_input_file", "rundir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_gsi_coupler_res(gsi_prop):
+    errors = gsi_prop("coupler.res")
+    # At least template_file is required:
+    assert "'template_file' is a required property" in errors({})
+    # Just template_file is ok:
+    assert not errors({"template_file": "/path/to/t.txt"})
+    # Both template_file and template_values are ok:
+    assert not errors(
+        {
+            "template_file": "/path/to/t.txt",
+            "template_values": {"dt": 100},
+        }
+    )
+
+
+def test_schema_gsi_namelist(gsi_prop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"nml": {"var": "val"}}}
+    errors = gsi_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "42 is not of type 'string'\n" in errors({"base_file": 42})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_gsi_namelist_update_values(gsi_prop):
+    errors = gsi_prop("namelist", "properties", "update_values")
+    # array, boolean, number, and string values are ok:
+    assert not errors(
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 42, "float": 3.14, "string": "foo"}}
+    )
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'\n" in errors(
+        {"nml": {"null": None}}
+    )
+    # At least one namelist entry is required:
+    assert non_empty_dict(errors({}))
+    # At least one val/var pair is required:
+    assert non_empty_dict(errors({"nml": {}}))
+
+
+def test_schema_gsi_rundir(gsi_prop):
+    errors = gsi_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "42 is not of type 'string'\n" in errors(42)

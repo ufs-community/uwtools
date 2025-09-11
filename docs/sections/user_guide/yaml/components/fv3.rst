@@ -18,7 +18,13 @@ UW YAML for the ``fv3:`` Block
 diag_table:
 ^^^^^^^^^^^
 
-The path to the ``diag_table`` file. It does not currently support edits, so must be pre-configured as needed. See FV3 ``diag_table`` documentation :weather-model-io:`here<diag-table-file>`.
+  **template_file:**
+
+    The path to a Jinja2 template file to be rendered, using the values from the ``template_values:`` block for the ``diag_table`` file. See FV3 ``diag_table`` documentation :weather-model-io:`here<diag-table-file>`.
+
+  **template_values:**
+
+    The key/value pairs that are required by the ``template_file``.
 
 domain:
 ^^^^^^^

@@ -192,6 +192,7 @@ def test_FV3_provisioned_rundir(domain, driverobj, ready_task):
         diag_table=ready_task,
         field_table=ready_task,
         files_copied=ready_task,
+        files_hardlinked=ready_task,
         files_linked=ready_task,
         model_configure=ready_task,
         namelist_file=ready_task,

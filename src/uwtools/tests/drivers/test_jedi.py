@@ -109,6 +109,7 @@ def test_JEDI_provisioned_rundir(driverobj, ready_task):
         driverobj,
         configuration_file=ready_task,
         files_copied=ready_task,
+        files_hardlinked=ready_task,
         files_linked=ready_task,
         runscript=ready_task,
         validate_only=ready_task,

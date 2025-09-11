@@ -1,13 +1,13 @@
 {
   "properties": {
-    "mpassit": {
+    "gsi": {
       "additionalProperties": false,
       "properties": {
         "coupler.res": {
           "additionalProperties": false,
           "properties": {
             "template_file": {
-              "type": "string",
+              "type": "string"
             },
             "template_values": {
               "minProperties": 1,
@@ -76,7 +76,7 @@
     }
   },
   "required": [
-    "mpassit"
+    "gsi"
   ],
   "type": "object"
 }

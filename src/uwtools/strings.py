@@ -141,6 +141,7 @@ class STR:
     sfcclimogen: str = "sfc_climo_gen"
     shave: str = "shave"
     showschema: str = "show_schema"
+    stacksize: str = "stacksize"
     stdout: str = "stdout"
     symlink: str = "symlink"
     targetdir: str = "target_dir"

@@ -5,17 +5,14 @@ A driver for the GSI component.
 from __future__ import annotations
 
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from iotaa import asset, task, tasks
 
-from uwtools.api.config import get_nml_config, get_yaml_config
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.stager import FileStager
 from uwtools.drivers.support import set_driver_docstring
-from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
@@ -84,7 +81,6 @@ class GSI(DriverCycleBased, FileStager):
             self.runscript(),
         ]
         yield task_list
-
 
     @task
     def runscript(self):
