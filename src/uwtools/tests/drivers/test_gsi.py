@@ -7,34 +7,10 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
 import yaml
-from lxml import etree
 from pytest import fixture, mark
 
 from uwtools.drivers.gsi import GSI
 from uwtools.tests.support import fixture_path
-
-# Helpers
-
-
-def streams_file(config, driverobj, drivername):
-    array_elements = {"file", "stream", "var", "var_array", "var_struct"}
-    array_elements_tested = set()
-    driverobj.streams_file()
-    path = Path(driverobj.config["rundir"], driverobj._streams_fn)
-    xml = etree.fromstring(path.read_text())
-    assert xml.tag == "streams"
-    for child in xml.getchildren():  # type: ignore[attr-defined]
-        block = config[drivername]["streams"][child.get("name")]
-        for k, v in block.items():
-            if k not in [*[f"{e}s" for e in array_elements], "mutable"]:
-                assert child.get(k) == v
-        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
-        for e in array_elements:
-            for name in block.get(f"{e}s", []):
-                assert child.xpath(f"//{e}[@name='{name}']")
-                array_elements_tested.add(e)
-    assert array_elements_tested == array_elements
-
 
 # Fixtures
 
@@ -80,11 +56,6 @@ def cycle(utc):
 @fixture
 def driverobj(config, cycle):
     return GSI(config=config, cycle=cycle, batch=True)
-
-
-@fixture
-def outpath(driverobj):
-    return lambda fn: driverobj.rundir / fn
 
 
 # Tests
