@@ -43,7 +43,7 @@ workflow:
           maxtries: 1
         account: "&ACCOUNT;"
         command: "echo hello #member#"
-        nodes: 1
+        nodes: 1:ppn=1
         walltime: 00:01:00
         dependency:
           taskdep:
