@@ -210,8 +210,14 @@ UPP
 | **CLI**: ``uw upp -h``
 | **API**: ``import uwtools.api.upp``
 
-Driver for JEDI
-^^^^^^^^^^^^^^^
+Drivers for Data Assimilation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+GSI
+"""
+
+| **CLI**: ``uw gsi -h``
+| **API**: ``import uwtools.api.gsi``
 
 IODA
 """"
