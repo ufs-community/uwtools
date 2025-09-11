@@ -22,7 +22,7 @@ from uwtools.config.support import (
     uw_yaml_loader,
 )
 from uwtools.logging import INDENT, MSGWIDTH, log
-from uwtools.utils.file import get_file_format, readable, writable
+from uwtools.utils.file import get_config_format, readable, writable
 
 _ConfigVal = Union[
     bool, datetime, dict, float, int, list, str, timedelta, UWYAMLConvert, UWYAMLGlob, UWYAMLRemove
@@ -378,7 +378,7 @@ def _supplement_values(
     """
     values: dict
     if isinstance(values_src, Path):
-        values_format = values_format or get_file_format(values_src)
+        values_format = values_format or get_config_format(values_src)
         values_src_class = format_to_config(values_format)
         values = values_src_class(values_src).data
         log.debug("Read initial template values from %s", values_src)

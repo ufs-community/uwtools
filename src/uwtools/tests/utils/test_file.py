@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from pytest import fixture, mark, raises
 
-from uwtools.exceptions import UWError
+from uwtools.strings import FORMAT
 from uwtools.utils import file
 
 
@@ -71,13 +71,12 @@ def test__stdinproxy():
         "yml": "yaml",
     }.items(),
 )
-def test_get_file_format(ext, file_type):
-    assert file.get_file_format(Path(f"a.{ext}")) == file_type
+def test_get_config_format(ext, file_type):
+    assert file.get_config_format(Path(f"a.{ext}")) == file_type
 
 
-def test_get_file_format_unrecognized():
-    with raises(UWError):
-        file.get_file_format(Path("a.jpg"))
+def test_get_config_format_unrecognized():
+    assert file.get_config_format(Path("a.jpg")) == FORMAT.yaml
 
 
 def test_path_if_it_exists(tmp_path):

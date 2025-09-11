@@ -29,7 +29,7 @@ import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
-from uwtools.utils.file import get_file_format, resource_path
+from uwtools.utils.file import get_config_format, resource_path
 
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
@@ -1183,9 +1183,7 @@ def _basic_setup(parser: Parser) -> Group:
 
 def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     if args.get(format_arg) is None:
-        if args.get(file_arg) is None:
-            _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
-        args[format_arg] = get_file_format(args[file_arg])
+        args[format_arg] = get_config_format(args[file_arg])
     return args
 
 
@@ -1195,13 +1193,13 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # values file IS specified, its format must either be explicitly specified, or deduced from its
     # extension.
     if args.get(STR.valsfile) is not None and args.get(STR.valsfmt) is None:
-        args[STR.valsfmt] = get_file_format(args[STR.valsfile])
+        args[STR.valsfmt] = get_config_format(args[STR.valsfile])
     return args
 
 
 def _check_update(args: Args) -> Args:
     if args.get(STR.updatefile) is not None and args.get(STR.updatefmt) is None:
-        args[STR.updatefmt] = get_file_format(args[STR.updatefile])
+        args[STR.updatefmt] = get_config_format(args[STR.updatefile])
     return args
 
 

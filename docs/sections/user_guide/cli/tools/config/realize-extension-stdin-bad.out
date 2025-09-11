@@ -1,1 +1,7 @@
-Specify --input-format when --input-file is not specified
+values:
+  date: 20240105
+  empty: null
+  greeting: Good Night
+  message: Good Night Moon Good Night Moon
+  recipient: Moon
+  repeat: 2
