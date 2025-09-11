@@ -417,7 +417,10 @@
           "$ref": "#/$defs/compoundTimeString"
         },
         "nodes": {
-          "type": "string"
+          "type": [
+            "integer",
+            "string"
+          ]
         },
         "partition": {
           "type": "string"
