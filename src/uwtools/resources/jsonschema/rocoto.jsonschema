@@ -420,8 +420,8 @@
           "$ref": "#/$defs/compoundTimeString"
         },
         "nodes": {
+          "pattern": "^\\d+:ppn=\\d+(:tpp=\\d+)?(\\+\\d+:ppn=\\d+(:tpp=\\d+)?)*$",
           "type": [
-            "integer",
             "string"
           ]
         },
