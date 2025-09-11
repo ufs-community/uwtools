@@ -389,7 +389,7 @@ def test_cli__dispatch_fs_action(action, args_dispatch_fs):
     }
     if action == "hardlink":
         api_fn = "link"
-        extra = {"hardlink": True, "symlink_fallback": False}
+        extra = {"hardlink": True, "fallback": None}
         args_actual = {**args_actual, **extra}
         args_expected = {**args_expected, **extra}
     with (

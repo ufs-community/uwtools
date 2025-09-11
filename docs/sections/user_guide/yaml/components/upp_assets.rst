@@ -16,15 +16,7 @@ Here is a prototype UW YAML ``upp_assets:`` block, explained in detail below:
 UW YAML for the ``upp_assets:`` Block
 -------------------------------------
 
-files_to_copy:
-^^^^^^^^^^^^^^
-
-See :ref:`this page <files_yaml>` for details.
-
-files_to_link:
-^^^^^^^^^^^^^^
-
-Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
+.. include:: /shared/stager.rst
 
 namelist:
 ^^^^^^^^^

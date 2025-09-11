@@ -35,15 +35,7 @@ field_table:
 
 The path to a :weather-model-io:`valid field-table file<field-table-file>` to be copied into the run directory.
 
-files_to_copy:
-^^^^^^^^^^^^^^
-
-See :ref:`this page <files_yaml>` for details.
-
-files_to_link:
-^^^^^^^^^^^^^^
-
-Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
+.. include:: /shared/stager.rst
 
 lateral_boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

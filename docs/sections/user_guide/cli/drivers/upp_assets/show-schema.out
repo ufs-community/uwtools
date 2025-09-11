@@ -13,7 +13,7 @@
           "minProperties": 1,
           "type": "object"
         },
-        "files_to_link": {
+        "files_to_hardlink": {
           "additionalProperties": {
             "type": "fs_src"
           },
