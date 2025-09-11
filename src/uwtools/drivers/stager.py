@@ -1,5 +1,5 @@
 """
-A mixin class for tasks that stage files.
+A mixin class providing tasks that stage files.
 """
 
 from iotaa import tasks
