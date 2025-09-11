@@ -2150,6 +2150,9 @@ def test_schema_rocoto_task_resources():
         "1:ppn=1+2:ppn=4:tpp=4+3:ppn=8:tpp=2",
     ]:
         assert not errors(with_set(config, val, "nodes"))
+    # Other 'nodes' values are not ok:
+    assert "1 is not of type 'string'" in errors(with_set(config, 1, "nodes"))
+    assert "'1' does not match" in errors(with_set(config, "1", "nodes"))
     # 'cores' or 'native' are allowed in place of 'nodes':
     assert not errors(with_set(with_del(config, "nodes"), 8, "cores"))
     assert not errors(with_set(with_del(config, "nodes"), "--slurm options", "native"))
