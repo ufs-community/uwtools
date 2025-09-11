@@ -10,9 +10,11 @@ from tempfile import TemporaryDirectory
 from iotaa import asset, task, tasks
 
 from uwtools.api.config import get_nml_config, get_yaml_config
+from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -40,7 +42,7 @@ class GSI(DriverCycleBased):
             output_file=path,
             overrides={
                 **self.config[fn].get("template_values", {}),
-                },
+            },
         )
 
     @tasks
@@ -50,8 +52,10 @@ class GSI(DriverCycleBased):
         """
         yield self.taskname("files copied")
         yield [
-            filecopy(src=Path(src), dst=self.rundir / dst)
-            for dst, src in self.config.get("files_to_copy", {}).items()
+            Copier(
+                config=self.config["files_to_copy"],
+                target_dir=self.rundir,
+            ).go()
         ]
 
     @tasks
@@ -61,8 +65,10 @@ class GSI(DriverCycleBased):
         """
         yield self.taskname("files linked")
         yield [
-            symlink(target=Path(target), linkname=self.rundir / linkname)
-            for linkname, target in self.config.get("files_to_link", {}).items()
+            Linker(
+                config=self.config["files_to_link"],
+                target_dir=self.rundir,
+            ).go()
         ]
 
     @task
@@ -83,12 +89,10 @@ class GSI(DriverCycleBased):
             path=path,
             schema=self.namelist_schema(),
         )
-        obs_input = Path(self.config["obs_input_file"]).read_text()
-        with open(path, "a", 
-
-
-
-        #TODO: tack on the stupid section
+        if path.is_file():
+            obs_input = Path(self.config["obs_input_file"]).read_text()
+            with path.open(mode="a") as nml:
+                nml.write(obs_input)
 
     @tasks
     def provisioned_rundir(self):
@@ -106,6 +110,21 @@ class GSI(DriverCycleBased):
         yield task_list
 
 
+    @task
+    def runscript(self):
+        """
+        The runscript.
+        """
+        path = self._runscript_path
+        yield self.taskname(path.name)
+        yield asset(path, path.is_file)
+        yield None
+        envvars = {
+            "OMP_NUM_THREADS": self.config.get(STR.execution, {}).get(STR.threads, 1),
+            "OMP_STACKSIZE": self.config.get(STR.execution, {}).get(STR.stacksize, "1024M"),
+        }
+        self._write_runscript(path=path, envvars=envvars)
+
     # Public helper methods
 
     @classmethod
@@ -115,7 +134,6 @@ class GSI(DriverCycleBased):
         """
         return STR.gsi
 
-
     # Private helper methods
 
     @property
@@ -123,8 +141,7 @@ class GSI(DriverCycleBased):
         """
         Path to the input config file.
         """
-        return self.rundir / "gsiparm.nml"
-
+        return self.rundir / "gsiparm.anl"
 
     @property
     def _runcmd(self) -> str:
@@ -139,5 +156,6 @@ class GSI(DriverCycleBased):
             "%s < %s" % (execution[STR.executable], self._input_config_path),
         ]
         return " ".join(filter(None, components))
+
 
 set_driver_docstring(GSI)
