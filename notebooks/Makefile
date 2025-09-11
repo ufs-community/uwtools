@@ -13,7 +13,7 @@ lint:
 	ruff check tests
 
 notebook:
-	TZ=UTC jupyter nbconvert --to notebook --inplace --execute *.ipynb
+	TZ=UTC FAKE_NOW=True jupyter nbconvert --to notebook --inplace --execute *.ipynb
 	jupyter nbconvert --to notebook --coalesce-streams --inplace --ClearMetadataPreprocessor.enabled=True --ClearNotebookMetadataPreprocessor.enabled=True *.ipynb
 
 test: test-nb
