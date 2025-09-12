@@ -52,8 +52,6 @@ class GSI(DriverCycleBased, FileStager):
         yield self.taskname(path.name)
         yield asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
-        # add a dependency on anything that might require a namelist change.
-        # are there enough ensemble files? etc.
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
             config_class=NMLConfig,
