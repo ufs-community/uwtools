@@ -4,7 +4,6 @@ import difflib
 import re
 from abc import ABC, abstractmethod
 from collections import UserDict
-from contextlib import suppress
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
@@ -13,7 +12,13 @@ from typing import Any
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import INCLUDE_TAG, depth, dict_to_yaml_str, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLConvert,
+    depth,
+    dict_to_yaml_str,
+    log_and_error,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
@@ -64,10 +69,15 @@ class Config(ABC, UserDict):
         :return: Lists of of complete and template-placeholder values.
         """
 
-        def is_jinja2(val: Any) -> bool:
-            with suppress(ValueError):
-                val = str(val)
-            return "{{" in val or "{%" in val
+        def jinja2val(val: Any) -> str | None:
+            try:
+                s = str(val)
+            except ValueError:
+                if isinstance(val, UWYAMLConvert):
+                    s = f"{val.tag} {val.value}"
+                else:
+                    raise
+            return s if "{{" in s or "{%" in s else None
 
         complete: list[str] = []
         template: list[str] = []
@@ -82,10 +92,10 @@ class Config(ABC, UserDict):
                         c, t = self._characterize_values(item, parent)
                         complete, template = complete + c, template + t
                         complete.append(f"{INDENT}{parent}{key}")
-                    elif is_jinja2(val):
+                    elif val := jinja2val(val):
                         template.append(f"{INDENT}{parent}{key}: {val}")
                         break
-            elif is_jinja2(val):
+            elif val := jinja2val(val):
                 template.append(f"{INDENT}{parent}{key}: {val}")
             else:
                 complete.append(f"{INDENT}{parent}{key}")
