@@ -610,6 +610,7 @@
         }
       },
       "required": [
+        "attrs",
         "cycledef",
         "log",
         "tasks"
