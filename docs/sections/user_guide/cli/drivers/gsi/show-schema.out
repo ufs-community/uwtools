@@ -1,0 +1,20 @@
+{
+  "properties": {
+    "gsi": {
+      "additionalProperties": false,
+      "properties": {
+        "coupler.res": {
+          "additionalProperties": false,
+          "properties": {
+            "template_file": {
+              "type": "string"
+            },
+            "template_values": {
+              "minProperties": 1,
+              "type": "object"
+            }
+          },
+          "required": [
+            "template_file"
+          ],
+          "type": "object"

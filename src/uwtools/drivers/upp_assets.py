@@ -48,6 +48,7 @@ class UPPAssets(AssetsCycleLeadtimeBased, FileStager):
         yield [
             self.control_file(),
             self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.namelist_file(),
         ]

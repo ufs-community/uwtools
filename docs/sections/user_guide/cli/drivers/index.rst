@@ -12,6 +12,7 @@ Drivers
    filter_topo/index
    fv3/index
    global_equiv_resol/index
+   gsi/index
    ioda/index
    jedi/index
    make_hgrid/index

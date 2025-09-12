@@ -14,6 +14,7 @@ API
    fs
    fv3
    global_equiv_resol
+   gsi
    ioda
    jedi
    logging

@@ -25,6 +25,7 @@ class IODA(JEDIBase):
         yield [
             self.configuration_file(),
             self.files_copied(),
+            self.files_hardlinked(),
             self.files_linked(),
             self.runscript(),
         ]

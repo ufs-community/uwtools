@@ -87,6 +87,7 @@ def test_MPASSIT_provisioned_rundir(driverobj, ready_task):
         driverobj,
         namelist_file=ready_task,
         files_copied=ready_task,
+        files_hardlinked=ready_task,
         files_linked=ready_task,
         runscript=ready_task,
     ) as mocks:

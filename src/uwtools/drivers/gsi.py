@@ -1,28 +1,47 @@
 """
-A driver for the MPASSIT component.
+A driver for the GSI component.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from iotaa import asset, task, tasks
 
-from uwtools.api.config import get_nml_config
+from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import DriverCycleLeadtimeBased
+from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.stager import FileStager
+from uwtools.drivers.support import set_driver_docstring
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class MPASSIT(DriverCycleLeadtimeBased, FileStager):
+class GSI(DriverCycleBased, FileStager):
     """
-    A driver for MPASSIT.
+    A driver for GSI.
     """
 
     # Workflow tasks
+
+    @task
+    def coupler_res(self):
+        """
+        The coupler.res file.
+        """
+        fn = "coupler.res"
+        yield self.taskname(fn)
+        path = self.rundir / fn
+        yield asset(path, path.is_file)
+        template_file = Path(self.config[fn]["template_file"])
+        yield file(template_file)
+        render(
+            input_file=template_file,
+            output_file=path,
+            overrides={
+                **self.config[fn].get("template_values", {}),
+            },
+        )
 
     @task
     def namelist_file(self):
@@ -40,6 +59,10 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
             path=path,
             schema=self.namelist_schema(),
         )
+        if path.is_file():
+            obs_input = Path(self.config["obs_input_file"]).read_text()
+            with path.open(mode="a") as nml:
+                nml.write(obs_input)
 
     @tasks
     def provisioned_rundir(self):
@@ -47,13 +70,30 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
         Run directory provisioned with all required content.
         """
         yield self.taskname("provisioned run directory")
-        yield [
+        task_list = [
+            self.coupler_res(),
             self.files_copied(),
             self.files_hardlinked(),
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),
         ]
+        yield task_list
+
+    @task
+    def runscript(self):
+        """
+        The runscript.
+        """
+        path = self._runscript_path
+        yield self.taskname(path.name)
+        yield asset(path, path.is_file)
+        yield None
+        envvars = {
+            "OMP_NUM_THREADS": self.config.get(STR.execution, {}).get(STR.threads, 1),
+            "OMP_STACKSIZE": self.config.get(STR.execution, {}).get(STR.stacksize, "1024M"),
+        }
+        self._write_runscript(path=path, envvars=envvars)
 
     # Public helper methods
 
@@ -62,23 +102,7 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
         """
         The name of this driver.
         """
-        return STR.mpassit
-
-    @property
-    def output(self) -> dict[str, Path] | dict[str, list[Path]]:
-        """
-        Returns a description of the file(s) created when this component runs.
-        """
-        with TemporaryDirectory() as path:
-            nml = Path(path, self._input_config_path.name)
-            self.create_user_updated_config(
-                config_class=NMLConfig,
-                config_values=self.config[STR.namelist],
-                path=nml,
-                schema=self.namelist_schema(),
-            )
-            namelist = get_nml_config(nml)
-        return {"path": self.rundir / namelist["config"]["output_file"]}
+        return STR.gsi
 
     # Private helper methods
 
@@ -87,7 +111,7 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
         """
         Path to the input config file.
         """
-        return self.rundir / "mpassit.nml"
+        return self.rundir / "gsiparm.anl"
 
     @property
     def _runcmd(self) -> str:
@@ -97,9 +121,11 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
         execution = self.config.get(STR.execution, {})
         mpiargs = execution.get(STR.mpiargs, [])
         components = [
-            execution.get(STR.mpicmd),  # MPI run program
-            *[str(x) for x in mpiargs],  # MPI arguments
-            execution[STR.executable],  # component executable name
-            self._input_config_path.name,  # namelist name
+            execution.get(STR.mpicmd),
+            *[str(x) for x in mpiargs],
+            "%s < %s" % (execution[STR.executable], self._input_config_path),
         ]
         return " ".join(filter(None, components))
+
+
+set_driver_docstring(GSI)

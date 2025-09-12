@@ -44,6 +44,7 @@ def test_UPPAssets_provisioned_rundir(upp_assets_driverobj, ready_task):
     with patch.multiple(
         upp_assets_driverobj,
         files_copied=ready_task,
+        files_hardlinked=ready_task,
         files_linked=ready_task,
         namelist_file=ready_task,
     ) as mocks:
