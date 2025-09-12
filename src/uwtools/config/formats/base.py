@@ -4,9 +4,11 @@ import difflib
 import re
 from abc import ABC, abstractmethod
 from collections import UserDict
+from contextlib import suppress
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -61,6 +63,12 @@ class Config(ABC, UserDict):
         :param parent: Parent key.
         :return: Lists of of complete and template-placeholder values.
         """
+
+        def is_jinja2(val: Any) -> bool:
+            with suppress(ValueError):
+                val = str(val)
+            return "{{" in val or "{%" in val
+
         complete: list[str] = []
         template: list[str] = []
         for key, val in values.items():
@@ -74,10 +82,10 @@ class Config(ABC, UserDict):
                         c, t = self._characterize_values(item, parent)
                         complete, template = complete + c, template + t
                         complete.append(f"{INDENT}{parent}{key}")
-                    elif "{{" in str(val) or "{%" in str(val):
+                    elif is_jinja2(val):
                         template.append(f"{INDENT}{parent}{key}: {val}")
                         break
-            elif "{{" in str(val) or "{%" in str(val):
+            elif is_jinja2(val):
                 template.append(f"{INDENT}{parent}{key}: {val}")
             else:
                 complete.append(f"{INDENT}{parent}{key}")
