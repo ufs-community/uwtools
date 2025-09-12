@@ -70,10 +70,18 @@ class ConcreteConfig(Config):
 
 
 def test__characterize_values(config):
-    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 42}, 5: [{"b": 43}], 6: "string"}
+    values = {
+        1: "",
+        2: None,
+        3: "{{ n }}",
+        4: {"a": 42},
+        5: [{"b": 43}],
+        6: "string",
+        7: "{% for n in range(3) %}{{ n }}{% endfor %}",
+    }
     complete, template = config._characterize_values(values=values, parent="p")
     assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert template == ["  p3: {{ n }}"]
+    assert template == ["  p3: {{ n }}", "  p7: {% for n in range(3) %}{{ n }}{% endfor %}"]
 
 
 def test__depth(config):
