@@ -8,7 +8,6 @@ from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
 
 
-# mypy: disable-error-code="attr-defined"
 class FileStager:
     """
     A base class for tasks that stage files.
@@ -19,24 +18,21 @@ class FileStager:
         """
         Files copied for run.
         """
-        yield self.taskname("files copied")
-        yield [
-            Copier(
-                config=self.config.get("files_to_copy", {}),
-                target_dir=self.rundir,
-            ).go()
-        ]
+        taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
+        yield taskname("files copied")
+        yield [Copier(config=config.get("files_to_copy", {}), target_dir=rundir).go()]
 
     @tasks
     def files_hardlinked(self):
         """
         Files hardlinked for run.
         """
-        yield self.taskname("files hardlinked")
+        taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
+        yield taskname("files hardlinked")
         yield [
             Linker(
-                config=self.config.get("files_to_hardlink", {}),
-                target_dir=self.rundir,
+                config=config.get("files_to_hardlink", {}),
+                target_dir=rundir,
                 hardlink=True,
                 fallback=STR.copy,
             ).go()
@@ -47,10 +43,6 @@ class FileStager:
         """
         Files linked for run.
         """
-        yield self.taskname("files linked")
-        yield [
-            Linker(
-                config=self.config.get("files_to_link", {}),
-                target_dir=self.rundir,
-            ).go()
-        ]
+        taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
+        yield taskname("files linked")
+        yield [Linker(config=config.get("files_to_link", {}), target_dir=rundir).go()]
