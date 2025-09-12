@@ -15,7 +15,7 @@ from pytest import fixture, mark, raises
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import depth
+from uwtools.config.support import depth, uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, readable
@@ -79,9 +79,16 @@ def test__characterize_values(config):
         6: "string",
         7: "{% for n in range(3) %}{{ n }}{% endfor %}",
     }
-    complete, template = config._characterize_values(values=values, parent="p")
-    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert template == ["  p3: {{ n }}", "  p7: {% for n in range(3) %}{{ n }}{% endfor %}"]
+    complete, template = config._characterize_values(values=values, parent="p.")
+    assert complete == ["  p.1", "  p.2", "  p.4", "  p.4.a", "  p.b", "  p.5", "  p.6"]
+    assert template == ["  p.3: {{ n }}", "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}"]
+
+
+def test__characterize_values__tagged_convert(config):
+    d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
+    complete, template = config._characterize_values(values=d, parent="p.")
+    assert complete == []
+    assert template == ["  p.1: !int '{{ foo }}'"]
 
 
 def test__depth(config):
