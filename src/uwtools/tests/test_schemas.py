@@ -1981,6 +1981,31 @@ def test_schema_rocoto_task_hangdependency():
     assert not errors(config)
 
 
+def test_schema_rocoto_workflow_top():
+    errors = schema_validator("rocoto", "properties", "workflow")
+    config = {
+        "attrs": {"realtime": False, "scheduler": "slurm"},
+        "cycledef": [{"spec": "202311291200 202312011200 06:00:00"}],
+        "log": {"value": "/path/to/log"},
+        "tasks": {
+            "task_foo": {
+                "account": "a",
+                "attrs": {"cycledefs": "default"},
+                "command": "/bin/true",
+                "nodes": "1:ppn=1",
+                "walltime": "01:00:00",
+            }
+        },
+    }
+    # Basic correctness:
+    assert not errors(config)
+    # A set of top-level keys is required:
+    for key in ["attrs", "cycledef", "log", "tasks"]:
+        assert "is a required property" in errors(with_del(config, key))
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+
+
 def test_schema_rocoto_workflow_cycledef():
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
     # Basic spec:
