@@ -71,7 +71,7 @@ with_cycle = [
     upp_assets,
     ww3,
 ]
-with_leadtime = [mpassit, upp, upp_assets]
+with_leadtime = [chgres_cube, mpassit, upp, upp_assets]
 
 
 @mark.parametrize("module", modules)
