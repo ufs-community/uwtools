@@ -179,6 +179,13 @@ class UWYAMLConvert(UWYAMLTaggedStr):
         ]
         return dict(zip(UWYAMLConvert.TAGS, converters))[self.tag](self.value)
 
+    @property
+    def tagged_string(self) -> str:
+        """
+        Return the string representation of the value, with tag.
+        """
+        return f"{self.tag} '{self.value}'"
+
 
 class UWYAMLGlob(UWYAMLTaggedStr):
     """
