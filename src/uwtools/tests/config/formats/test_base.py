@@ -15,7 +15,7 @@ from pytest import fixture, mark, raises
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import depth
+from uwtools.config.support import depth, uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, readable
@@ -66,21 +66,36 @@ class ConcreteConfig(Config):
         pass
 
 
-# Tests
+# Tests on module functions.
 
 
-def test__characterize_values(config):
-    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 42}, 5: [{"b": 43}], 6: "string"}
-    complete, template = config._characterize_values(values=values, parent="p")
-    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert template == ["  p3: {{ n }}"]
+def test_config_base__characterize_values(config):
+    values = {
+        1: "",
+        2: None,
+        3: "{{ n }}",
+        4: {"a": 42},
+        5: [{"b": 43}],
+        6: "string",
+        7: "{% for n in range(3) %}{{ n }}{% endfor %}",
+    }
+    complete, template = config._characterize_values(values=values, parent="p.")
+    assert complete == ["  p.1", "  p.2", "  p.4", "  p.4.a", "  p.b", "  p.5", "  p.6"]
+    assert template == ["  p.3: {{ n }}", "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}"]
 
 
-def test__depth(config):
+def test_config_base__characterize_values__tagged_convert(config):
+    d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
+    complete, template = config._characterize_values(values=d, parent="p.")
+    assert complete == []
+    assert template == ["  p.1: !int '{{ foo }}'"]
+
+
+def test_config_base__depth(config):
     assert config._depth == 1
 
 
-def test__load_paths(config, tmp_path):
+def test_config_base__load_paths(config, tmp_path):
     paths = (tmp_path / fn for fn in ("f1", "f2"))
     for path in paths:
         path.write_text(yaml.dump({path.name: "defined"}))
@@ -89,7 +104,7 @@ def test__load_paths(config, tmp_path):
         assert cfg[path.name] == "present"
 
 
-def test__parse_include(config):
+def test_config_base__parse_include(config):
     """
     Test that non-YAML handles include tags properly.
     """
@@ -112,8 +127,11 @@ def test__parse_include(config):
     assert len(config["config"]) == 2
 
 
+# Tests with/on instantiated objects:
+
+
 @mark.parametrize("fmt", [FORMAT.nml, FORMAT.yaml])
-def test_compare_config(fmt, logged, salad_base):
+def test_config_base__obj_compare_config(fmt, logged, salad_base):
     """
     Compare two config objects.
     """
@@ -148,7 +166,7 @@ def test_compare_config(fmt, logged, salad_base):
         assert logged(line)
 
 
-def test_compare_config_ini(logged, salad_base):
+def test_config_base__obj_compare_config_ini(logged, salad_base):
     """
     Compare two config objects.
     """
@@ -186,13 +204,13 @@ def test_compare_config_ini(logged, salad_base):
         assert not logged(line)
 
 
-def test_config_from_config(config):
+def test_config_base__obj_config_from_config(config):
     assert config.config_file.name == "config.yaml"
     assert ConcreteConfig(config).data == config.data
 
 
 @mark.parametrize("f", [dict, ConcreteConfig])
-def test_config_from_config_immutable(f):
+def test_config_base__obj_config_from_config_immutable(f):
     sub = {"shared": 1}
     original = {"foo": "bar", "baz": sub}
     config = f(deepcopy(original))
@@ -203,12 +221,12 @@ def test_config_from_config_immutable(f):
     assert c.data == original
 
 
-def test_config_from_file(config):
+def test_config_base__obj_config_from_file(config):
     assert config.config_file.name == "config.yaml"
     assert config.config_file.is_file()
 
 
-def test_dereference(tmp_path):
+def test_config_base__obj_dereference(tmp_path):
     # Test demonstrates that:
     #   - Config dereferencing ignores environment variables.
     #   - Initially-unrenderable values do not cause errors.
@@ -279,7 +297,7 @@ l: "22"
     }
 
 
-def test_dereference_context_override(tmp_path, utc):
+def test_config_base__obj_dereference__context_override(tmp_path, utc):
     yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
     path = tmp_path / "config.yaml"
     path.write_text(yaml)
@@ -289,7 +307,7 @@ def test_dereference_context_override(tmp_path, utc):
 
 
 @mark.parametrize("fmt2", [FORMAT.ini, FORMAT.sh])
-def test_invalid_config(fmt2, tmp_path):
+def test_config_base__obj_invalid_config(fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.
     """
@@ -302,7 +320,7 @@ def test_invalid_config(fmt2, tmp_path):
     assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
 
 
-def test_update_from(config):
+def test_config_base__obj_update_from(config):
     """
     Test that a config object can be updated.
     """
@@ -310,7 +328,7 @@ def test_update_from(config):
     assert config == {"foo": 42, "a": "11", "b": "12", "c": "13"}
 
 
-def test_update_from_immutatble():
+def test_config_base__obj_update_from_immutatble():
     """
     Test that updating a config doesn't change the original config.
     """
