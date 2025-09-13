@@ -132,6 +132,7 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     :param d: A dict object.
     :param sort: Sort dict/mapping keys?
     """
+    add_yaml_representers()
     return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
 
 
