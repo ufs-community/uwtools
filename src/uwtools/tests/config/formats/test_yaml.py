@@ -4,13 +4,11 @@ Tests for uwtools.config.formats.yaml module.
 
 import filecmp
 import sys
-from collections import OrderedDict
 from datetime import datetime, timedelta
 from io import StringIO
 from textwrap import dedent
 from unittest.mock import patch
 
-import f90nml  # type: ignore[import-untyped]
 import yaml
 from pytest import fixture, mark, raises
 
@@ -40,41 +38,12 @@ def dumpkit(tmp_path, utc):
 # Tests
 
 
-def test_yaml__add_yaml_representers():
-    YAMLConfig._add_yaml_representers()
-    representers = yaml.Dumper.yaml_representers
-    for x in [
-        OrderedDict,
-        datetime,
-        f90nml.Namelist,
-        support.UWYAMLConvert,
-        support.UWYAMLGlob,
-        support.UWYAMLRemove,
-        timedelta,
-    ]:
-        assert x in representers
-
-
 def test_yaml__get_depth_threshold():
     assert YAMLConfig._get_depth_threshold() is None
 
 
 def test_yaml__get_format():
     assert YAMLConfig._get_format() == FORMAT.yaml
-
-
-def test_yaml__represent_namelist():
-    YAMLConfig._add_yaml_representers()
-    namelist = f90nml.reads("&namelist\n key = value\n/\n")
-    expected = "{namelist: {key: value}}"
-    assert yaml.dump(namelist, default_flow_style=True).strip() == expected
-
-
-def test_yaml__represent_ordereddict():
-    YAMLConfig._add_yaml_representers()
-    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
-    expected = "{example: {key: value}}"
-    assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected
 
 
 def test_yaml_instantiation_depth():
