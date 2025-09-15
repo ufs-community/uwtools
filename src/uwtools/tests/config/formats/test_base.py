@@ -310,13 +310,14 @@ def test_config_base__obj_dereference__context_override(tmp_path, utc):
 def test_config_base__obj_dereference__self_context(self_as_context, tmp_path):
     yaml = """
     a: !int '{{ 1 + 1 }}'
-    b: !int '{{ a + 1 }}'
+    sub:
+      a: !int '{{ a + 1 }}'
     """
     path = tmp_path / "config.yaml"
     path.write_text(yaml)
     config = YAMLConfig(path)
     context = YAMLConfig(path).data if self_as_context else None
-    assert config.dereference(context=context).data == {"a": 2, "b": 3}
+    assert config.dereference(context=context).data == {"a": 2, "sub": {"a": 3}}
 
 
 @mark.parametrize("fmt2", [FORMAT.ini, FORMAT.sh])
