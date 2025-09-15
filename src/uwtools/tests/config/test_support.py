@@ -3,7 +3,9 @@ Tests for uwtools.config.jinja2 module.
 """
 
 from collections import OrderedDict
+from datetime import datetime, timedelta
 
+import f90nml  # type: ignore[import-untyped]
 import yaml
 from pytest import fixture, mark, raises
 
@@ -21,6 +23,35 @@ def loader():
 
 
 # Tests
+
+
+def test_config_support_add_yaml_representers():
+    support.add_yaml_representers()
+    representers = yaml.Dumper.yaml_representers
+    for x in [
+        OrderedDict,
+        datetime,
+        f90nml.Namelist,
+        support.UWYAMLConvert,
+        support.UWYAMLGlob,
+        support.UWYAMLRemove,
+        timedelta,
+    ]:
+        assert x in representers
+
+
+def test_config_support_add_yaml_representers__represent_namelist():
+    support.add_yaml_representers()
+    namelist = f90nml.reads("&namelist\n key = value\n/\n")
+    expected = "{namelist: {key: value}}"
+    assert yaml.dump(namelist, default_flow_style=True).strip() == expected
+
+
+def test_config_support_add_yaml_representers__represent_ordereddict():
+    support.add_yaml_representers()
+    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
+    expected = "{example: {key: value}}"
+    assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected
 
 
 @mark.parametrize(
@@ -150,6 +181,12 @@ class TestUWYAMLConvert:
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="[1,2,3,]"))
         assert ts.converted == [1, 2, 3]
         self.comp(ts, "!list '[1,2,3,]'")
+
+    def test_UWYAMLConvert_tagged_string(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="{{ foo }}"))
+        assert ts.tagged_string == "!list '{{ foo }}'"
+        with raises(yaml.constructor.ConstructorError):
+            assert ts.converted
 
     def test_UWYAMLConvert___repr__(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="[ 1,2,3, ]"))

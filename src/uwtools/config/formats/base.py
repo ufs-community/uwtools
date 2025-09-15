@@ -74,7 +74,7 @@ class Config(ABC, UserDict):
                 s = str(val)
             except ValueError:
                 assert isinstance(val, UWYAMLConvert)
-                s = f"{val.tag} '{val.value}'"
+                s = val.tagged_string
             return s if "{{" in s or "{%" in s else None
 
         complete: list[str] = []
