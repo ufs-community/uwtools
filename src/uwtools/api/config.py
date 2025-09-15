@@ -39,12 +39,7 @@ def compare(
     """
     NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
-    return _compare(
-        path1=Path(path1),
-        path2=Path(path2),
-        format1=format1,
-        format2=format2,
-    )
+    return _compare(path1=Path(path1), path2=Path(path2), format1=format1, format2=format2)
 
 
 def get_fieldtable_config(
