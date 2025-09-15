@@ -297,17 +297,8 @@ l: "22"
     }
 
 
-def test_config_base__obj_dereference__context_override(tmp_path, utc):
-    yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
-    path = tmp_path / "config.yaml"
-    path.write_text(yaml)
-    config = YAMLConfig(path)
-    config.dereference(context={"cycle": utc(2024, 2, 12, 6)})
-    assert config["file"] == "gfs.t06z.atmanl.nc"
-
-
 @mark.parametrize("self_as_context", [False, True])
-def test_config_base__obj_dereference__self_context(self_as_context, tmp_path):
+def test_config_base__obj_dereference__context_is_self(self_as_context, tmp_path):
     yaml = """
     a: !int '{{ 1 + 1 }}'
     sub:
@@ -317,7 +308,26 @@ def test_config_base__obj_dereference__self_context(self_as_context, tmp_path):
     path.write_text(yaml)
     config = YAMLConfig(path)
     context = YAMLConfig(path).data if self_as_context else None
-    assert config.dereference(context=context).data == {"a": 2, "sub": {"a": 3}}
+    config.dereference(context=context)
+    assert config.data == {"a": 2, "sub": {"a": 3}}
+
+
+def test_config_base__obj_dereference__context_absent_from_config(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text("foo: '{{ bar }}'")
+    config = YAMLConfig(path)
+    config.dereference(context={"bar": "baz"})
+    # The context should become part of the config, i.e. bar: baz should not be present.
+    assert config.data == {"foo": "baz"}
+
+
+def test_config_base__obj_dereference__context_override(tmp_path, utc):
+    yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml)
+    config = YAMLConfig(path)
+    config.dereference(context={"cycle": utc(2024, 2, 12, 6)})
+    assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
 @mark.parametrize("fmt2", [FORMAT.ini, FORMAT.sh])
