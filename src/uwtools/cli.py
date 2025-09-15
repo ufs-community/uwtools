@@ -118,6 +118,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
+        STR.compose: _add_subparser_config_compose(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
         STR.validate: _add_subparser_config_validate(subparsers),
     }
@@ -151,6 +152,21 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
         partial(_check_file_vs_format, STR.path1, STR.fmt1),
         partial(_check_file_vs_format, STR.path2, STR.fmt2),
     ]
+
+
+def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: config compose.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.compose, "Compose configs")
+    optional = _basic_setup(parser)
+    _add_arg_input_format(optional, choices=FORMATS)
+    _add_arg_output_format(optional, choices=FORMATS)
+    checks = _add_args_verbosity(optional)
+    parser.add_argument("file", metavar="FILE", nargs="+", type=Path)
+    return checks
 
 
 def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:

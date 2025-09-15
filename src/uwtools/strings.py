@@ -70,6 +70,7 @@ class STR:
     chgrescube: str = "chgres_cube"
     classname: str = "classname"
     compare: str = "compare"
+    compose: str = "compose"
     config: str = "config"
     copy: str = "copy"
     cycle: str = "cycle"

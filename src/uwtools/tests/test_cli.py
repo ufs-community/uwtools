@@ -80,7 +80,12 @@ def test_cli__abort(capsys):
 
 def test_cli__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
-    assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
+    assert actions(subparsers.choices[STR.config]) == [
+        STR.compare,
+        STR.compose,
+        STR.realize,
+        STR.validate,
+    ]
 
 
 def test_cli__add_subparser_config_compare(subparsers):
