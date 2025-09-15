@@ -13,9 +13,9 @@ Optional arguments:
   --version
       Show version info and exit
   --input-file PATH, -i PATH
-      Path to input file (defaults to stdin)
+      Path to input file (default: stdin)
   --output-file PATH, -o PATH
-      Path to output file (defaults to stdout)
+      Path to output file (default: stdout)
   --values-file PATH
       Path to file providing override or interpolation values
   --values-format {ini,nml,sh,yaml}

@@ -17,7 +17,7 @@ Optional arguments:
   --version
       Show version info and exit
   --config-file PATH, -c PATH
-      Path to UW YAML config file (default: read from stdin)
+      Path to UW YAML config file (default: stdin)
   --batch
       Submit job to batch scheduler
   --dry-run

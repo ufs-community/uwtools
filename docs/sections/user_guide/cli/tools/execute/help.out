@@ -20,7 +20,7 @@ Optional arguments:
   --version
       Show version info and exit
   --config-file PATH, -c PATH
-      Path to UW YAML config file (default: read from stdin)
+      Path to UW YAML config file (default: stdin)
   --schema-file PATH
       Path to schema file to use for validation
   --cycle CYCLE
