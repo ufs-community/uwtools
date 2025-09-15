@@ -250,7 +250,6 @@ class Config(ABC, UserDict):
         self.update_from(context or {})
         while True:
             logstate("current")
-            # new = jinja2.dereference(val=self.data, context=context or self.data)
             new = jinja2.dereference(val=self.data, context=self.data)
             assert isinstance(new, dict)
             if new == self.data:
