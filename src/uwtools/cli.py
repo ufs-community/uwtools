@@ -1364,6 +1364,8 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         **drivers_with_cycle_and_leadtime,
     }
     checks = {k: modes[k]() for k in sorted(modes.keys())}
+    # Return a dict version of the Namespace object returned by parse_args(), supporting lookups
+    # like args[STR.foo], which would otherwise have to be the even noisier getattr(args, STR.foo).
     return vars(parser.parse_args(raw_args)), checks
 
 
