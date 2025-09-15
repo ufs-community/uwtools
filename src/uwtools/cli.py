@@ -164,6 +164,7 @@ def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_format(optional, choices=FORMATS)
+    _add_arg_output_file(optional)
     checks = _add_args_verbosity(optional)
     parser.add_argument("file", metavar="FILE", nargs="+", type=Path)
     return checks
@@ -743,7 +744,7 @@ def _add_arg_classname(group: Group) -> None:
 
 
 def _add_arg_config_file(group: Group, required: bool = False) -> None:
-    msg = "Path to UW YAML config file" + ("" if required else " (default: read from stdin)")
+    msg = "Path to UW YAML config file" + ("" if required else " (default: stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
@@ -824,7 +825,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.infile),
         "-i",
-        help="Path to input file (defaults to stdin)",
+        help="Path to input file (default: stdin)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -835,7 +836,8 @@ def _add_arg_input_format(group: Group, choices: list[str], required: bool = Fal
     group.add_argument(
         _switch(STR.infmt),
         choices=choices,
-        help="Input format",
+        default=FORMAT.yaml,
+        help=f"Input format (default: {FORMAT.yaml})",
         required=required,
         type=str,
     )
@@ -882,7 +884,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
         "-o",
-        help="Path to output file (defaults to stdout)",
+        help="Path to output file (default: stdout)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -893,7 +895,8 @@ def _add_arg_output_format(group: Group, choices: list[str], required: bool = Fa
     group.add_argument(
         _switch(STR.outfmt),
         choices=choices,
-        help="Output format",
+        default=FORMAT.yaml,
+        help=f"Output format (default: {FORMAT.yaml})",
         required=required,
         type=str,
     )
@@ -997,7 +1000,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.updatefile),
         "-u",
-        help="Path to update file (defaults to stdin)",
+        help="Path to update file (default: stdin)",
         metavar="PATH",
         required=required,
         type=Path,
