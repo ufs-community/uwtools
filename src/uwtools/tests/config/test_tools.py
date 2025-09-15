@@ -29,7 +29,7 @@ from uwtools.utils.file import writable
 
 
 @fixture
-def compare_configs_assets(tmp_path):
+def compare_assets(tmp_path):
     d = {"foo": {"bar": 42}, "baz": {"qux": 43}}
     a = tmp_path / "a"
     b = tmp_path / "b"
@@ -105,18 +105,18 @@ def help_realize_config_simple(infn, infmt, tmpdir):
 # Tests
 
 
-def test_compare_configs__good(compare_configs_assets, logged):
-    _, a, b = compare_configs_assets
-    assert tools.compare_configs(path1=a, format1=FORMAT.yaml, path2=b, format2=FORMAT.yaml)
+def test_compare__good(compare_assets, logged):
+    _, a, b = compare_assets
+    assert tools.compare(path1=a, format1=FORMAT.yaml, path2=b, format2=FORMAT.yaml)
     assert logged(".*", regex=True)
 
 
-def test_compare_configs__changed_value(compare_configs_assets, logged):
-    d, a, b = compare_configs_assets
+def test_compare__changed_value(compare_assets, logged):
+    d, a, b = compare_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
         yaml.dump(d, f)
-    assert not tools.compare_configs(path1=a, format1=FORMAT.yaml, path2=b, format2=FORMAT.yaml)
+    assert not tools.compare(path1=a, format1=FORMAT.yaml, path2=b, format2=FORMAT.yaml)
     expected = """
     - %s
     + %s
@@ -138,13 +138,13 @@ def test_compare_configs__changed_value(compare_configs_assets, logged):
         assert logged(line)
 
 
-def test_compare_configs__missing_key(compare_configs_assets, logged):
-    d, a, b = compare_configs_assets
+def test_compare__missing_key(compare_assets, logged):
+    d, a, b = compare_assets
     del d["baz"]
     with writable(b) as f:
         yaml.dump(d, f)
     # Note that a and b are swapped:
-    assert not tools.compare_configs(path1=b, format1=FORMAT.yaml, path2=a, format2=FORMAT.yaml)
+    assert not tools.compare(path1=b, format1=FORMAT.yaml, path2=a, format2=FORMAT.yaml)
     expected = """
     - %s
     + %s
@@ -163,8 +163,8 @@ def test_compare_configs__missing_key(compare_configs_assets, logged):
         assert logged(line)
 
 
-def test_compare_configs__bad_format(logged):
-    assert not tools.compare_configs(
+def test_compare__bad_format(logged):
+    assert not tools.compare(
         path1=Path("/not/used"),
         format1="jpg",
         path2=Path("/not/used"),

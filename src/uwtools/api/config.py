@@ -14,7 +14,8 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.tools import compare_configs as _compare
+from uwtools.config.tools import compare as _compare
+from uwtools.config.tools import compose as _compose
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import ConfigDataT, ConfigPathT
 from uwtools.config.validator import validate_check_config as _validate_check_config
@@ -40,12 +41,17 @@ def compare(
 
 
 def compose(
-    configs: list[str | Path],  # noqa: ARG001
-    output_file: Path | str | None = None,  # noqa: ARG001
-    input_format: str | None = None,  # noqa: ARG001
-    output_format: str | None = None,  # noqa: ARG001
+    configs: list[str | Path],
+    output_file: Path | str | None = None,
+    input_format: str | None = None,
+    output_format: str | None = None,
 ) -> bool:
-    return True
+    return _compose(
+        configs=list(map(Path, configs)),
+        output_file=Path(output_file) if output_file else None,
+        input_format=input_format,
+        output_format=output_format,
+    )
 
 
 def get_fieldtable_config(

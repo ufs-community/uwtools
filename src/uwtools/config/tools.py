@@ -20,14 +20,11 @@ if TYPE_CHECKING:
 # Public functions
 
 
-def compare_configs(
-    path1: Path,
-    path2: Path,
-    format1: str | None = None,
-    format2: str | None = None,
+def compare(
+    path1: Path, path2: Path, format1: str | None = None, format2: str | None = None
 ) -> bool:
     """
-    NB: This docstring is dynamically replaced: See compare_configs.__doc__ definition below.
+    NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
     format1 = _ensure_format("1st config file", format1, path1)
     format2 = _ensure_format("2nd config file", format2, path2)
@@ -39,6 +36,15 @@ def compare_configs(
     log.info("- %s", path1)
     log.info("+ %s", path2)
     return cfg_1.compare_config(cfg_2.as_dict())
+
+
+def compose(
+    configs: list[Path],  # noqa: ARG001
+    output_file: Path | None = None,  # noqa: ARG001
+    input_format: str | None = None,  # noqa: ARG001
+    output_format: str | None = None,  # noqa: ARG001
+) -> bool:
+    return True
 
 
 def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> None:
@@ -312,7 +318,7 @@ def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> Non
 # work if the docstrings are inlined in the functions. They must remain separate statements to avoid
 # hardcoding values into them.
 
-compare_configs.__doc__ = """
+compare.__doc__ = """
 Compare two config files.
 
 Recognized file extensions are: {extensions}
