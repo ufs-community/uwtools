@@ -37,6 +37,7 @@ ignore = [
   "ANN401",  # any-type
   "B010",    # set-attr-with-constant
   "C408",    # unnecessary-collection-call
+  "C901",    # complex-structure
   "COM812",  # missing-trailing-comma
   "D100",    # undocumented-public-module
   "D101",    # undocumented-public-class

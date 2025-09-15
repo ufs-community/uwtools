@@ -7,11 +7,18 @@ from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from typing import Any
 
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import INCLUDE_TAG, depth, dict_to_yaml_str, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLConvert,
+    depth,
+    dict_to_yaml_str,
+    log_and_error,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
@@ -61,6 +68,15 @@ class Config(ABC, UserDict):
         :param parent: Parent key.
         :return: Lists of of complete and template-placeholder values.
         """
+
+        def jinja2val(val: Any) -> str | None:
+            try:
+                s = str(val)
+            except ValueError:
+                assert isinstance(val, UWYAMLConvert)
+                s = f"{val.tag} '{val.value}'"
+            return s if "{{" in s or "{%" in s else None
+
         complete: list[str] = []
         template: list[str] = []
         for key, val in values.items():
@@ -74,10 +90,10 @@ class Config(ABC, UserDict):
                         c, t = self._characterize_values(item, parent)
                         complete, template = complete + c, template + t
                         complete.append(f"{INDENT}{parent}{key}")
-                    elif "{{" in str(val) or "{%" in str(val):
+                    elif val := jinja2val(val):
                         template.append(f"{INDENT}{parent}{key}: {val}")
                         break
-            elif "{{" in str(val) or "{%" in str(val):
+            elif val := jinja2val(val):
                 template.append(f"{INDENT}{parent}{key}: {val}")
             else:
                 complete.append(f"{INDENT}{parent}{key}")
