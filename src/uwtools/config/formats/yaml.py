@@ -1,28 +1,21 @@
 from __future__ import annotations
 
-from collections import OrderedDict
-from datetime import datetime, timedelta
 from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING
 
 import yaml
-from f90nml import Namelist  # type: ignore[import-untyped]
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
-    UWYAMLConvert,
-    UWYAMLGlob,
-    UWYAMLRemove,
+    add_yaml_representers,
     dict_to_yaml_str,
-    from_od,
     log_and_error,
     uw_yaml_loader,
 )
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
-from uwtools.utils.time import to_iso8601
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -62,33 +55,13 @@ class YAMLConfig(Config):
     # Private methods
 
     @classmethod
-    def _add_yaml_representers(cls) -> None:
-        """
-        Add representers to the YAML dumper for custom types.
-        """
-        yaml.add_representer(Namelist, cls._represent_namelist)
-        yaml.add_representer(OrderedDict, cls._represent_ordereddict)
-        yaml.add_representer(
-            datetime,
-            lambda dumper, data: dumper.represent_scalar(
-                "tag:yaml.org,2002:timestamp", to_iso8601(data)
-            ),
-        )
-        yaml.add_representer(
-            timedelta,
-            lambda dumper, data: dumper.represent_scalar("!timedelta", str(data)),
-        )
-        for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
-            yaml.add_representer(tag_class, tag_class.represent)
-
-    @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
         Return the YAML representation of the given dict.
 
         :param cfg: The in-memory config object.
         """
-        cls._add_yaml_representers()
+        add_yaml_representers()
         return dict_to_yaml_str(cfg)
 
     @staticmethod
@@ -137,32 +110,6 @@ class YAMLConfig(Config):
                 else:
                     msg = str(e)
                 raise log_and_error(msg) from e
-
-    @classmethod
-    def _represent_namelist(cls, dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
-        """
-        Convert an f90nml Namelist to an OrderedDict, then represent as a YAML mapping.
-
-        :param dumper: The YAML dumper.
-        :param data: The f90nml Namelist to serialize.
-        :return: A YAML mapping.
-        """
-        namelist_dict = data.todict()
-        return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
-
-    @classmethod
-    def _represent_ordereddict(
-        cls, dumper: yaml.Dumper, data: OrderedDict
-    ) -> yaml.nodes.MappingNode:
-        """
-        Recursrively convert an OrderedDict to a dict, then represent as a YAML mapping.
-
-        :param dumper: The YAML dumper.
-        :param data: The OrderedDict to serialize.
-        :return: A YAML mapping.
-        """
-
-        return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
