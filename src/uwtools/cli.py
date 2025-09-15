@@ -166,7 +166,7 @@ def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
     checks = _add_args_verbosity(optional)
-    parser.add_argument("file", metavar="FILE", nargs="+", type=Path)
+    parser.add_argument("configs", metavar="CONFIG", nargs="+", type=Path)
     return checks
 
 
@@ -218,6 +218,7 @@ def _dispatch_config(args: Args) -> bool:
     """
     actions = {
         STR.compare: _dispatch_config_compare,
+        STR.compose: _dispatch_config_compose,
         STR.realize: _dispatch_config_realize,
         STR.validate: _dispatch_config_validate,
     }
@@ -235,6 +236,20 @@ def _dispatch_config_compare(args: Args) -> bool:
         format1=args[STR.fmt1],
         path2=args[STR.path2],
         format2=args[STR.fmt2],
+    )
+
+
+def _dispatch_config_compose(args: Args) -> bool:
+    """
+    Define dispatch logic for config compose action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.config.compose(
+        configs=args[STR.configs],
+        output_file=args[STR.outfile],
+        input_format=args[STR.infmt],
+        output_format=args[STR.outfmt],
     )
 
 

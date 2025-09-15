@@ -31,15 +31,21 @@ if TYPE_CHECKING:
 
 
 def compare(
-    path1: Path | str,
-    path2: Path | str,
-    format1: str | None = None,
-    format2: str | None = None,
+    path1: Path | str, path2: Path | str, format1: str | None = None, format2: str | None = None
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
     return _compare(path1=Path(path1), path2=Path(path2), format1=format1, format2=format2)
+
+
+def compose(
+    configs: list[str | Path],  # noqa: ARG001
+    output_file: Path | str | None = None,  # noqa: ARG001
+    input_format: str | None = None,  # noqa: ARG001
+    output_format: str | None = None,  # noqa: ARG001
+) -> bool:
+    return True
 
 
 def get_fieldtable_config(

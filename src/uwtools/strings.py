@@ -72,6 +72,7 @@ class STR:
     compare: str = "compare"
     compose: str = "compose"
     config: str = "config"
+    configs: str = "configs"
     copy: str = "copy"
     cycle: str = "cycle"
     database: str = "database"
