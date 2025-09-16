@@ -47,16 +47,15 @@ def compose(
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
-    # _validate_format("output format", output_format, input_format)
     basepath = configs[0]
-    input_format = input_format or get_config_format(basepath)
+    input_format = input_format or get_config_format(basepath, "input")
     input_class = format_to_config(input_format)
-    log.debug("Reading %s as base %s config to compose onto", basepath, input_format)
+    log.debug("Reading %s as base '%s' config", basepath, input_format)
     config = input_class(basepath)
     for path in configs[1:]:
-        log.debug("Composing %s config from %s", input_format, path)
+        log.debug("Composing '%s' config from %s", input_format, path)
         config.update_from(input_class(path))
-    output_format = output_format or get_config_format(output_file)
+    output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config = output_class(config)
     output_config.dump(output_file)
