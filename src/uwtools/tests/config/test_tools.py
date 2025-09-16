@@ -40,7 +40,7 @@ def compare_assets(tmp_path):
 
 
 @fixture
-def compose_assets():
+def compose_assets_yaml():
     d1 = {"one": 1, "foo": "bar"}
     d2 = {"one": {"two": 2, "baz": "qux"}, "foo": "bar"}
     d3 = {"one": {"two": {"three": 3, "asdf": "qwer"}, "baz": "qux"}, "foo": "bar"}
@@ -186,8 +186,8 @@ def test_config_tools_compare__bad_format(logged):
 
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__single_yaml(compose_assets, logged, suffix, tmp_path, tofile):
-    d1, d2, d3, _, _, _ = compose_assets
+def test_config_tools_compose__yaml_single(compose_assets_yaml, logged, suffix, tmp_path, tofile):
+    d1, d2, d3, _, _, _ = compose_assets_yaml
     dpath = (tmp_path / "d").with_suffix(suffix)
     for d in (d1, d2, d3):
         dpath.unlink(missing_ok=True)
@@ -199,7 +199,7 @@ def test_config_tools_compose__single_yaml(compose_assets, logged, suffix, tmp_p
         if tofile:
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
-        tools.compose(**kwargs)
+        assert tools.compose(**kwargs) is True
         assert logged(f"Reading {dpath} as base 'yaml' config")
         if tofile:
             assert YAMLConfig(outpath) == d
@@ -208,8 +208,8 @@ def test_config_tools_compose__single_yaml(compose_assets, logged, suffix, tmp_p
 
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__double_yaml(compose_assets, logged, suffix, tmp_path, tofile):
-    d1, d2, d3, u1, u2, u3 = compose_assets
+def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, tmp_path, tofile):
+    d1, d2, d3, u1, u2, u3 = compose_assets_yaml
     dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
     for d, u in [(d1, u1), (d2, u2), (d3, u3)]:
         for path in [dpath, upath]:
@@ -223,8 +223,9 @@ def test_config_tools_compose__double_yaml(compose_assets, logged, suffix, tmp_p
         if tofile:
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
-        tools.compose(**kwargs)
+        assert tools.compose(**kwargs) is True
         assert logged(f"Reading {dpath} as base 'yaml' config")
+        assert logged(f"Composing 'yaml' config from {upath}")
         if tofile:
             expected = {
                 str(u1): {"one": "won", "two": "too", "foo": "bar"},
@@ -239,6 +240,26 @@ def test_config_tools_compose__double_yaml(compose_assets, logged, suffix, tmp_p
             }
             assert YAMLConfig(outpath) == expected[str(u)]
             outpath.unlink()
+
+
+def test_config_tools_compose__nml_double(logged, tmp_path):
+    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
+    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
+    dpath, upath = [tmp_path / x for x in ("d.nml", "u.nml")]
+    NMLConfig(d).dump(dpath)
+    NMLConfig(u).dump(upath)
+    outpath = tmp_path / "out.nml"
+    kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
+    assert tools.compose(**kwargs) is True
+    assert logged(f"Reading {dpath} as base 'nml' config")
+    assert logged(f"Composing 'nml' config from {upath}")
+    assert NMLConfig(outpath) == NMLConfig(
+        {
+            "constants": {"pi": 3.142, "e": 2.718},
+            "trees": {"leaf": "elm", "needle": "fir"},
+            "colors": {"red": "crimson", "green": "clover"},
+        }
+    )
 
 
 @mark.parametrize(
