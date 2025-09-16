@@ -27,8 +27,14 @@ def dumpkit(tmp_path):
 # Tests
 
 
-def test_ini__get_depth_threshold():
-    assert INIConfig._get_depth_threshold() == 2
+@mark.parametrize("depth", [1, 3])
+def test_ini__depth_ok__no(depth):
+    assert not INIConfig._depth_ok(depth=depth)
+
+
+@mark.parametrize("depth", [2])
+def test_ini__depth_ok__yes(depth):
+    assert INIConfig._depth_ok(depth=depth)
 
 
 def test_ini__get_format():
@@ -49,7 +55,7 @@ def test_ini__parse_include():
 def test_ini_instantiation_depth():
     with raises(UWConfigError) as e:
         INIConfig(config={1: {2: {3: 4}}})
-    assert str(e.value) == "Cannot instantiate depth-2 INIConfig with depth-3 config"
+    assert str(e.value) == "Cannot instantiate INIConfig from depth-3 config"
 
 
 @mark.parametrize("func", [repr, str])

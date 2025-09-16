@@ -5,7 +5,7 @@ import shlex
 from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
-from uwtools.config.tools import config_check_depths_dump
+from uwtools.config.tools import validate_depth
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -28,6 +28,16 @@ class SHConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
+        # Shell configs are a series of key=value pairs, so are exactly depth 1.
+
+        return depth == 1
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -35,18 +45,11 @@ class SHConfig(Config):
 
         :param cfg: A dict object.
         """
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
+        validate_depth(cfg, FORMAT.sh)
         lines = []
         for key, value in cfg.items():
             lines.append("%s=%s" % (key, shlex.quote(str(value))))
         return "\n".join(lines)
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return 1
 
     @staticmethod
     def _get_format() -> str:
@@ -89,7 +92,7 @@ class SHConfig(Config):
 
         :param path: Path to dump config to (default: stdout).
         """
-        config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
+        validate_depth(self, FORMAT.sh)
         self.dump_dict(self.data, path)
 
     @classmethod

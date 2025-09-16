@@ -33,8 +33,14 @@ def dumpkit(tmp_path):
 # Tests
 
 
-def test_nml__get_depth_threshold():
-    assert NMLConfig._get_depth_threshold() is None
+@mark.parametrize("depth", [-1, 0, 1])
+def test_nml__depth_ok__no(depth):
+    assert not NMLConfig._depth_ok(depth=depth)
+
+
+@mark.parametrize("depth", [2, 10])
+def test_nml__depth_ok__yes(depth):
+    assert NMLConfig._depth_ok(depth=depth)
 
 
 def test_nml__get_format():
