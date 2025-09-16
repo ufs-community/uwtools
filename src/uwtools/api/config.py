@@ -52,8 +52,8 @@ def compose(
     return _compose(
         configs=list(map(Path, configs)),
         output_file=Path(output_file) if output_file else None,
-        input_format=input_format or _FORMAT.yaml,
-        output_format=output_format or _FORMAT.yaml,
+        input_format=input_format,
+        output_format=output_format,
     )
 
 

@@ -39,23 +39,26 @@ def compare(
 
 
 def compose(
-    configs: list[Path], output_file: Path | None, input_format: str, output_format: str
+    configs: list[Path],
+    output_file: Path | None,
+    input_format: str | None,
+    output_format: str | None,
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
-    _validate_format("output format", output_format, input_format)
+    # _validate_format("output format", output_format, input_format)
+    basepath = configs[0]
+    input_format = input_format or get_config_format(basepath)
     input_class = format_to_config(input_format)
-    log.debug("Reading %s as base config to compose onto", configs[0])
-    config = input_class(configs[0])
+    log.debug("Reading %s as base %s config to compose onto", basepath, input_format)
+    config = input_class(basepath)
     for path in configs[1:]:
-        log.debug("Composing %s onto base", path)
-        c = input_class(path)
-        # config_check_depths_update(c, input_format)
-        config.update_from(c)
+        log.debug("Composing %s config from %s", input_format, path)
+        config.update_from(input_class(path))
+    output_format = output_format or get_config_format(output_file)
     output_class = format_to_config(output_format)
     output_config = output_class(config)
-    # config_check_depths_dump(config, output_format)
     output_config.dump(output_file)
     return True
 

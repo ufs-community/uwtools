@@ -851,7 +851,6 @@ def _add_arg_input_format(group: Group, choices: list[str], required: bool = Fal
     group.add_argument(
         _switch(STR.infmt),
         choices=choices,
-        default=FORMAT.yaml,
         help=f"Input format (default: {FORMAT.yaml})",
         required=required,
         type=str,
@@ -910,7 +909,6 @@ def _add_arg_output_format(group: Group, choices: list[str], required: bool = Fa
     group.add_argument(
         _switch(STR.outfmt),
         choices=choices,
-        default=FORMAT.yaml,
         help=f"Output format (default: {FORMAT.yaml})",
         required=required,
         type=str,

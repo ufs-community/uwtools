@@ -45,8 +45,8 @@ def test_api_config_compose(output_file, input_format, output_format):
     _compose.assert_called_once_with(
         configs=list(map(Path, pathstrs)),
         output_file=None if output_file is None else Path(output_file),
-        input_format=input_format or FORMAT.yaml,
-        output_format=output_format or FORMAT.yaml,
+        input_format=input_format,
+        output_format=output_format,
     )
 
 
