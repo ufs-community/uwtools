@@ -106,13 +106,13 @@ Examples
 * Consider three YAML configs:
 
   .. literalinclude:: config/compose-base.yaml
-     :caption: ``compose-base.yaml``
+     :caption: compose-base.yaml
      :language: yaml
   .. literalinclude:: config/compose-update-1.yaml
-     :caption: ``compose-update-1.yaml``
+     :caption: compose-update-1.yaml
      :language: yaml
   .. literalinclude:: config/compose-update-2.yaml
-     :caption: ``compose-update-2.yaml``
+     :caption: compose-update-2.yaml
      :language: yaml
 
 Compose the three together, writing to ``stdout``:
@@ -128,6 +128,8 @@ Values provided by update configs override or augment values provided in the bas
 The ``--output-file`` / ``-o`` option can be used to direct the output to a file.
 
 The ``--input-config`` and ``--output-config`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. The the formats are neither explicitly provided or deduced, ``yaml`` is implied.
+
+Configs of ``ini``, ``nml``, and ``sh`` format can be similarly composed.
 
 .. _cli_config_realize_examples:
 
