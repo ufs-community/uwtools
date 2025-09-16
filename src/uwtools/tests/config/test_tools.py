@@ -51,6 +51,13 @@ def compose_assets_yaml():
 
 
 @fixture
+def compose_assets_depth_2():
+    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
+    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
+    return d, u
+
+
+@fixture
 def realize_testobj(realize_yaml_input):
     return YAMLConfig(config=realize_yaml_input)
 
@@ -242,9 +249,27 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
             outpath.unlink()
 
 
-def test_config_tools_compose__nml_double(logged, tmp_path):
-    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
-    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
+# def test_config_tools_compose__ini_double(compose_assets_ini, logged, tmp_path):
+#     d, u = compose_assets_ini
+#     dpath, upath = [tmp_path / x for x in ("d.ini", "u.ini")]
+#     INIConfig(d).dump(dpath)
+#     INIConfig(u).dump(upath)
+#     outpath = tmp_path / "out.ini"
+#     kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
+#     assert tools.compose(**kwargs) is True
+#     assert logged(f"Reading {dpath} as base 'ini' config")
+#     assert logged(f"Composing 'ini' config from {upath}")
+#     assert INIConfig(outpath) == INIConfig(
+#         {
+#             "constants": {"pi": 3.142, "e": 2.718},
+#             "trees": {"leaf": "elm", "needle": "fir"},
+#             "colors": {"red": "crimson", "green": "clover"},
+#         }
+#     )
+
+
+def test_config_tools_compose__nml_double(compose_assets_depth_2, logged, tmp_path):
+    d, u = compose_assets_depth_2
     dpath, upath = [tmp_path / x for x in ("d.nml", "u.nml")]
     NMLConfig(d).dump(dpath)
     NMLConfig(u).dump(upath)
