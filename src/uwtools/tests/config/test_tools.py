@@ -51,13 +51,6 @@ def compose_assets_yaml():
 
 
 @fixture
-def compose_assets_depth_2():
-    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
-    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
-    return d, u
-
-
-@fixture
 def realize_testobj(realize_yaml_input):
     return YAMLConfig(config=realize_yaml_input)
 
@@ -250,10 +243,9 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
 
 
 @mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
-def test_config_tools_compose__ini_nml_double(
-    compose_assets_depth_2, configclass, fmt, logged, tmp_path
-):
-    d, u = compose_assets_depth_2
+def test_config_tools_compose__ini_nml_double(configclass, fmt, logged, tmp_path):
+    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
+    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
     suffix = f".{fmt}"
     dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
     configclass(d).dump(dpath)
