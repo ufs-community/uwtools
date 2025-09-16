@@ -5,7 +5,7 @@ from io import StringIO
 from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
-from uwtools.config.tools import config_check_depths_dump
+from uwtools.config.tools import validate_depth
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
@@ -27,6 +27,17 @@ class INIConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
+        # INI configs have one level for the [section], and one level for each key, so are exactly
+        # depth 2.
+
+        return depth == 2  # noqa: PLR2004
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -40,19 +51,12 @@ class INIConfig(Config):
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
 
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
+        validate_depth(cfg, FORMAT.ini)
         parser = configparser.ConfigParser()
         parser.read_dict(cfg)
         with StringIO() as sio:
             parser.write(sio)
             return sio.getvalue().strip()
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return 2
 
     @staticmethod
     def _get_format() -> str:

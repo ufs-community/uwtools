@@ -26,8 +26,14 @@ def dumpkit(tmp_path):
 # Tests
 
 
-def test_sh__get_depth_threshold():
-    assert SHConfig._get_depth_threshold() == 1
+@mark.parametrize("depth", [-1, 0, 2])
+def test_sh__depth_ok__no(depth):
+    assert not SHConfig._depth_ok(depth=depth)
+
+
+@mark.parametrize("depth", [1])
+def test_sh__depth_ok__yes(depth):
+    assert SHConfig._depth_ok(depth=depth)
 
 
 def test_sh__get_format():
@@ -48,7 +54,7 @@ def test_sh__parse_include():
 def test_sh_instantiation_depth():
     with raises(UWConfigError) as e:
         SHConfig(config={1: {2: {3: 4}}})
-    assert str(e.value) == "Cannot instantiate depth-1 SHConfig with depth-3 config"
+    assert str(e.value) == "Cannot instantiate SHConfig from depth-3 config"
 
 
 @mark.parametrize("func", [repr, str])

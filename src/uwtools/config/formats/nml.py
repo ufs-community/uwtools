@@ -9,7 +9,7 @@ from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import from_od
-from uwtools.config.tools import config_check_depths_dump
+from uwtools.config.tools import validate_depth
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
@@ -33,6 +33,29 @@ class NMLConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
+        # Fortran namelist configs must be at least depth 2, as they must have levels for namelist
+        # names as well as keys (Fortran variables). The depth upper bound is harder to quantify:
+        # Derived-typed component references in namelists may reference any number of intermediate
+        # components, and each intermediate component is reflected as a YAML mapping. For example,
+        # the namelist
+        #
+        #   &a b%c%d%e%f = 42 /
+        #
+        # is represented in YAML as
+        #
+        #   a: {b: {c: {d: {e: {f: 42}}}}}
+        #
+        # per f90nml. uwtools can map back and forth between these formats, but it should be clear
+        # that a ceiling cannot be defined for the YAML depth.
+
+        return depth >= 2  # noqa: PLR2004
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -46,18 +69,11 @@ class NMLConfig(Config):
                 {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
             )
 
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
+        validate_depth(cfg, FORMAT.nml)
         nml: Namelist = Namelist(to_od(cfg)) if not isinstance(cfg, Namelist) else cfg
         with StringIO() as sio:
             nml.write(sio, sort=False)
             return sio.getvalue().strip()
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return None
 
     @staticmethod
     def _get_format() -> str:

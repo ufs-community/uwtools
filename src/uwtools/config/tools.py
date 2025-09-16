@@ -4,7 +4,7 @@ Tools for working with configs.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, cast
+from typing import TYPE_CHECKING, cast
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -60,43 +60,6 @@ def compose(
     return True
 
 
-def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> None:
-    """
-    Ensure that the depth does not exceed the target format's max.
-
-    :param config_obj: The reference config dictionary.
-    :param target_format: The target format.
-    :raises: UWConfigError on excessive config object dictionary depth.
-    """
-    # Define a function with the conditions of an invalid depth.
-    bad_depth = lambda need, have: need and have > need
-    _validate_depth(config_obj, target_format, "dump", bad_depth)
-
-
-def config_check_depths_realize(config_obj: Config | dict, target_format: str) -> None:
-    """
-    Ensure that the depth is that required by the target format.
-
-    :param config_obj: The reference config object.
-    :param target_format: The target format.
-    """
-    # Define a function with the conditions of an invalid depth.
-    bad_depth = lambda need, have: need and have != need
-    _validate_depth(config_obj, target_format, "realize", bad_depth)
-
-
-def config_check_depths_update(config_obj: Config | dict, target_format: str) -> None:
-    """
-    Ensure that the depth does not exceed the target format's max.
-
-    :param config_obj: The reference config object.
-    :param target_format: The target format.
-    """
-    # Define a function with the conditions of an invalid depth.
-    bad_depth = lambda need, have: need and have > need
-    _validate_depth(config_obj, target_format, "update", bad_depth)
-
-
 def realize(
     input_config: Config | Path | dict | None = None,
     input_format: str | None = None,
@@ -131,6 +94,19 @@ def realize(
     output_class = cast(Config, format_to_config(output_format))
     output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
+
+
+def validate_depth(config_obj: Config | dict, target_format: str) -> None:
+    """
+    :param config_obj: The reference config object.
+    :param target_format: The target format.
+    :raises: UWConfigError on excessive config object depth.
+    """
+    target_class = cast(Config, format_to_config(target_format))
+    config = config_obj.data if isinstance(config_obj, Config) else config_obj
+    if not target_class._depth_ok(depth(config)):  # noqa: SLF001
+        msg = "Cannot treat depth-%s config as '%s'" % (depth(config), target_format)
+        raise UWConfigError(msg)
 
 
 def walk_key_path(config: dict, key_path: list[YAMLKey]) -> tuple[dict, str]:
@@ -223,7 +199,7 @@ def _realize_output_setup(
     if key_path is not None:
         for key in key_path:
             output_data = output_data[key]
-    config_check_depths_realize(output_data, output_format)
+    validate_depth(output_data, output_format)
     return output_data, output_format
 
 
@@ -254,7 +230,7 @@ def _realize_update(
         )
         log.debug("Initial input config depth: %s", depth_(input_obj))
         log.debug("Update config depth: %s", depth_(update_obj))
-        config_check_depths_update(update_obj, fmt(input_obj))
+        validate_depth(update_obj, fmt(input_obj))
         input_obj.update_from(update_obj)
         log.debug("Final input config depth: %s", depth_(input_obj))
     return input_obj
@@ -282,28 +258,6 @@ def _realize_values_needed(input_obj: Config) -> None:
             log.info(var)
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
-
-
-def _validate_depth(
-    config_obj: Config | dict, target_format: str, action: str, bad_depth: Callable
-) -> None:
-    """
-    :param config_obj: The reference config object.
-    :param target_format: The target format.
-    :param action: The action being performed.
-    :param bad_depth: A function that returns True if the depth is bad.
-    :raises: UWConfigError on excessive config object depth.
-    """
-    target_class = cast(Config, format_to_config(target_format))
-    config = config_obj.data if isinstance(config_obj, Config) else config_obj
-    depth_threshold = target_class._get_depth_threshold()  # noqa: SLF001
-    if bad_depth(depth_threshold, depth(config)):
-        msg = "Cannot %s depth-%s config to type-'%s' config" % (
-            action,
-            depth(config),
-            target_format,
-        )
-        raise UWConfigError(msg)
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:

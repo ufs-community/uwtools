@@ -7,7 +7,7 @@ from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -44,12 +44,8 @@ class Config(ABC, UserDict):
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
-        if self._get_depth_threshold() and self._depth != self._get_depth_threshold():
-            msg = "Cannot instantiate depth-%s %s with depth-%s config" % (
-                self._get_depth_threshold(),
-                type(self).__name__,
-                self._depth,
-            )
+        if not self._depth_ok(self._depth):
+            msg = "Cannot instantiate %s from depth-%s config" % (type(self).__name__, self._depth)
             raise UWConfigError(msg)
 
     def __repr__(self) -> str:
@@ -126,6 +122,13 @@ class Config(ABC, UserDict):
         """
         return depth(self.data)
 
+    @staticmethod
+    @abstractmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
     @classmethod
     @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
@@ -133,13 +136,6 @@ class Config(ABC, UserDict):
         Return the string representation of the given dict.
 
         :param cfg: A dict object.
-        """
-
-    @staticmethod
-    @abstractmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
         """
 
     @staticmethod
@@ -247,12 +243,27 @@ class Config(ABC, UserDict):
             for line in dict_to_yaml_str(self.data).split("\n"):
                 jinja2.deref_debug("%s%s" % (INDENT, line))
 
+        # Context object 'ctx', from which Jinja2 will try to retrieve values for rendering template
+        # expressions found in config keys and values, starts as a deep copy of the current config,
+        # so that self-references can be dereferenced. It is structurally updated from a deep copy,
+        # performed in update_from(), of the optional 'context' object, to provide additional and/or
+        # overriding values. Deep copies are used to avoid structural sharing between 'ctx' and its
+        # precursors.
+        #
+        # During each iteration of the loop, which terminates when a fixed point is found (i.e. no
+        # more template expressions can be rendered), `ctx` is updated to replace unrendered values
+        # with newly rendered ones, so that they can be used to render yet more values in the next
+        # iteration.
+
+        ctx = deepcopy(self)
+        ctx.update_from(context or {})
         while True:
             logstate("current")
-            new = jinja2.dereference(val=self.data, context=context or self.data)
+            new = jinja2.dereference(val=self.data, context=cast(dict, ctx))
             assert isinstance(new, dict)
             if new == self.data:
                 break
+            ctx.update_from(new)
             self.data = new
         logstate("final")
         return self
