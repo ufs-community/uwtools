@@ -1,0 +1,25 @@
+usage: uw config compose [-h] [--version] [--input-format {ini,nml,sh,yaml}]
+                         [--output-format {ini,nml,sh,yaml}]
+                         [--output-file PATH] [--quiet] [--verbose]
+                         CONFIG [CONFIG ...]
+
+Compose configs
+
+positional arguments:
+  CONFIG
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --input-format {ini,nml,sh,yaml}
+      Input format (default: yaml)
+  --output-format {ini,nml,sh,yaml}
+      Output format (default: yaml)
+  --output-file PATH, -o PATH
+      Path to output file (default: write to stdout)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

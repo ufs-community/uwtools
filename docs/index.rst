@@ -37,6 +37,13 @@ When the Linux diff tool just doesn't work for comparing unordered namelists wit
 
 | :any:`CLI documentation with examples<cli_config_compare_examples>`
 
+Compose Action
+""""""""""""""
+
+To compose configs is to start with a base config and to update its values, structurally, with the context of one or more other configs of the same type (YAML, Fortran namelist, etc.). Composition supportings building up complex experiment configurations by, for example, combining default values appropriate to the overall application with values needed on a particular machine, and then with specific user requrements, each stored in its own config file. Such a hierarchical approach to configuration management provides flexibility and avoids repetition of common values across files.
+
+| :any:`CLI documentation with examples<cli_config_compose_examples>`
+
 Realize Action
 """"""""""""""
 

@@ -87,6 +87,22 @@ The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` wi
   .. literalinclude:: config/compare-format-mismatch.out
      :language: text
 
+.. _cli_config_compose_examples:
+
+``compose``
+-----------
+
+The ``compose`` action builds up a final config by repeatedly updating a base config with the contents of other cofigs of the same format.
+
+.. literalinclude:: config/compose-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: config/compose-help.out
+   :language: text
+
+Examples
+^^^^^^^^
+
 .. _cli_config_realize_examples:
 
 ``realize``
