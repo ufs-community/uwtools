@@ -44,6 +44,7 @@ def compose(
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
+    _validate_format("output format", output_format, input_format)
     input_class = format_to_config(input_format)
     log.debug("Reading %s as base config to compose onto", configs[0])
     config = input_class(configs[0])
