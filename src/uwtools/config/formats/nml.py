@@ -9,7 +9,7 @@ from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import from_od
-from uwtools.config.tools import config_check_depths_dump
+from uwtools.config.tools import validate_depth
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
@@ -69,7 +69,7 @@ class NMLConfig(Config):
                 {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
             )
 
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
+        validate_depth(cfg, FORMAT.nml)
         nml: Namelist = Namelist(to_od(cfg)) if not isinstance(cfg, Namelist) else cfg
         with StringIO() as sio:
             nml.write(sio, sort=False)

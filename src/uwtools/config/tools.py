@@ -41,37 +41,6 @@ def compare_configs(
     return cfg_1.compare_config(cfg_2.as_dict())
 
 
-def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> None:
-    """
-    Check that the depth does not exceed the target format's max.
-
-    :param config_obj: The reference config dictionary.
-    :param target_format: The target format.
-    :raises: UWConfigError on excessive config object dictionary depth.
-    """
-    validate_depth(config_obj, target_format, "dump")
-
-
-def config_check_depths_realize(config_obj: Config | dict, target_format: str) -> None:
-    """
-    Check that the depth does not exceed the target format's max.
-
-    :param config_obj: The reference config object.
-    :param target_format: The target format.
-    """
-    validate_depth(config_obj, target_format, "realize")
-
-
-def config_check_depths_update(config_obj: Config | dict, target_format: str) -> None:
-    """
-    Check that the depth does not exceed the target format's max.
-
-    :param config_obj: The reference config object.
-    :param target_format: The target format.
-    """
-    validate_depth(config_obj, target_format, "update")
-
-
 def realize_config(
     input_config: Config | Path | dict | None = None,
     input_format: str | None = None,
@@ -108,21 +77,16 @@ def realize_config(
     return input_obj.data
 
 
-def validate_depth(config_obj: Config | dict, target_format: str, action: str) -> None:
+def validate_depth(config_obj: Config | dict, target_format: str) -> None:
     """
     :param config_obj: The reference config object.
     :param target_format: The target format.
-    :param action: The action being performed.
     :raises: UWConfigError on excessive config object depth.
     """
     target_class = cast(Config, format_to_config(target_format))
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
     if not target_class._depth_ok(depth(config)):  # noqa: SLF001
-        msg = "Cannot %s depth-%s config to type-'%s' config" % (
-            action,
-            depth(config),
-            target_format,
-        )
+        msg = "Cannot treat depth-%s config as '%s'" % (depth(config), target_format)
         raise UWConfigError(msg)
 
 
@@ -216,7 +180,7 @@ def _realize_config_output_setup(
     if key_path is not None:
         for key in key_path:
             output_data = output_data[key]
-    config_check_depths_realize(output_data, output_format)
+    validate_depth(output_data, output_format)
     return output_data, output_format
 
 
@@ -247,7 +211,7 @@ def _realize_config_update(
         )
         log.debug("Initial input config depth: %s", depth_(input_obj))
         log.debug("Update config depth: %s", depth_(update_obj))
-        config_check_depths_update(update_obj, fmt(input_obj))
+        validate_depth(update_obj, fmt(input_obj))
         input_obj.update_from(update_obj)
         log.debug("Final input config depth: %s", depth_(input_obj))
     return input_obj

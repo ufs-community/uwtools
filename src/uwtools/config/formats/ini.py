@@ -5,7 +5,7 @@ from io import StringIO
 from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
-from uwtools.config.tools import config_check_depths_dump
+from uwtools.config.tools import validate_depth
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
@@ -47,7 +47,7 @@ class INIConfig(Config):
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
 
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
+        validate_depth(cfg, FORMAT.ini)
         parser = configparser.ConfigParser()
         parser.read_dict(cfg)
         with StringIO() as sio:

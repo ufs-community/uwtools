@@ -18,7 +18,6 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.strings import FORMAT
 from uwtools.tests.support import compare_files, fixture_path
@@ -172,24 +171,6 @@ def test_config_tools_compare_configs__bad_format(logged):
     )
     msg = "Formats do not match: jpg vs yaml"
     assert logged(msg)
-
-
-def test_config_tools_config_check_depths_realize__fail(realize_config_testobj):
-    depthin = depth(realize_config_testobj.data)
-    with raises(UWConfigError) as e:
-        tools.config_check_depths_realize(
-            config_obj=realize_config_testobj, target_format=FORMAT.ini
-        )
-    assert f"Cannot realize depth-{depthin} config to type-'ini' config" in str(e.value)
-
-
-def test_config_tools_config_check_depths_update__fail(realize_config_testobj):
-    depthin = depth(realize_config_testobj.data)
-    with raises(UWConfigError) as e:
-        tools.config_check_depths_update(
-            config_obj=realize_config_testobj, target_format=FORMAT.ini
-        )
-    assert f"Cannot update depth-{depthin} config to type-'ini' config" in str(e.value)
 
 
 @mark.parametrize(
@@ -624,14 +605,9 @@ def test_config_tools_realize_config__values_needed_yaml(logged):
     ],
 )
 def test_config_tools_validate_depth__fail(fmt, obj):
-    action = "frobnicate"
     with raises(UWConfigError) as e:
-        tools.validate_depth(config_obj=obj, target_format=fmt, action=action)
-    assert str(e.value) == "Cannot %s depth-%s config to type-'%s' config" % (
-        action,
-        tools.depth(obj),
-        fmt,
-    )
+        tools.validate_depth(config_obj=obj, target_format=fmt)
+    assert str(e.value) == "Cannot treat depth-%s config as '%s'" % (tools.depth(obj), fmt)
 
 
 @mark.parametrize(
@@ -644,7 +620,7 @@ def test_config_tools_validate_depth__fail(fmt, obj):
     ],
 )
 def test_config_tools_validate_depth__pass(fmt, obj):
-    tools.validate_depth(config_obj=obj, target_format=fmt, action="frobnicate")
+    tools.validate_depth(config_obj=obj, target_format=fmt)
 
 
 def test_config_tools_walk_key_path():

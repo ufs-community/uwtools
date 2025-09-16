@@ -317,7 +317,7 @@ def test_config_base__obj_invalid_config(fmt2, tmp_path):
     depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
         cast(Config, tools.format_to_config(fmt2)).dump_dict(cfg=cfgin.data, path=outfile)
-    assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
+    assert f"Cannot treat depth-{depthin} config as '{fmt2}'" in str(e.value)
 
 
 def test_config_base__obj_update_from(config):

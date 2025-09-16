@@ -5,7 +5,7 @@ import shlex
 from typing import TYPE_CHECKING
 
 from uwtools.config.formats.base import Config
-from uwtools.config.tools import config_check_depths_dump
+from uwtools.config.tools import validate_depth
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -42,7 +42,7 @@ class SHConfig(Config):
 
         :param cfg: A dict object.
         """
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
+        validate_depth(cfg, FORMAT.sh)
         lines = []
         for key, value in cfg.items():
             lines.append("%s=%s" % (key, shlex.quote(str(value))))
@@ -89,7 +89,7 @@ class SHConfig(Config):
 
         :param path: Path to dump config to (default: stdout).
         """
-        config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
+        validate_depth(self, FORMAT.sh)
         self.dump_dict(self.data, path)
 
     @classmethod
