@@ -41,12 +41,13 @@ def compare(
 def compose(
     configs: list[Path], output_file: Path | None, input_format: str, output_format: str
 ) -> bool:
-    config, configs = configs[0], configs[1:]
-    print(output_file, input_format, output_format, config)  # PM# REMOVE
-    # input_class = cast(Config, format_to_config(input_format))
-    # output_class = cast(Config, format_to_config(output_format))
-    # input_class = Config, format_to_config(input_format)
-    # output_class = Config, format_to_config(output_format)
+    input_class = format_to_config(input_format)
+    config, rest = input_class(configs[0]), list(map(input_class, configs[1:]))
+    for c in rest:
+        config.update_from(c)
+    output_class = format_to_config(output_format)
+    output_config = output_class(config)
+    output_config.dump(output_file)
     return True
 
 
