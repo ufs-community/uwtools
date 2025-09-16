@@ -40,6 +40,14 @@ def compare_assets(tmp_path):
 
 
 @fixture
+def compose_assets():
+    d1 = {"one": 1}
+    d2 = {"one": {"two": 2}}
+    d3 = {"one": {"two": {"three": 3}}}
+    return d1, d2, d3
+
+
+@fixture
 def realize_testobj(realize_yaml_input):
     return YAMLConfig(config=realize_yaml_input)
 
@@ -171,6 +179,21 @@ def test_config_tools_compare__bad_format(logged):
     )
     msg = "Formats do not match: jpg vs yaml"
     assert logged(msg)
+
+
+@mark.parametrize("suffix", ["", ".yaml", ".foo"])
+def test_config_tools_compose__single_default_stdout(compose_assets, logged, suffix, tmp_path):
+    path = (tmp_path / "config").with_suffix(suffix)
+    for d in compose_assets:
+        path.unlink(missing_ok=True)
+        assert not path.exists()
+        path.write_text(yaml.dump(d))
+        kwargs: dict = {"configs": [path]}
+        if suffix and suffix != ".yaml":
+            kwargs["input_format"] = FORMAT.yaml
+        tools.compose(**kwargs)
+        assert logged(f"Reading {path} as base 'yaml' config")
+        assert YAMLConfig(path) == d
 
 
 @mark.parametrize(

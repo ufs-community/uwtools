@@ -40,9 +40,9 @@ def compare(
 
 def compose(
     configs: list[Path],
-    output_file: Path | None,
-    input_format: str | None,
-    output_format: str | None,
+    output_file: Path | None = None,
+    input_format: str | None = None,
+    output_format: str | None = None,
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
