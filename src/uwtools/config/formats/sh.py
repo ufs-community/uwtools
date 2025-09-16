@@ -28,6 +28,13 @@ class SHConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+        return depth == 1
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -40,13 +47,6 @@ class SHConfig(Config):
         for key, value in cfg.items():
             lines.append("%s=%s" % (key, shlex.quote(str(value))))
         return "\n".join(lines)
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return 1
 
     @staticmethod
     def _get_format() -> str:

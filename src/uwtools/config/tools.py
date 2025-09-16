@@ -4,7 +4,7 @@ Tools for working with configs.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, cast
+from typing import TYPE_CHECKING, cast
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -49,9 +49,7 @@ def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> N
     :param target_format: The target format.
     :raises: UWConfigError on excessive config object dictionary depth.
     """
-    # Define a function with the conditions of an invalid depth.
-    bad_depth = lambda need, have: need and have > need
-    _validate_depth(config_obj, target_format, "dump", bad_depth)
+    _validate_depth(config_obj, target_format, "dump")
 
 
 def config_check_depths_realize(config_obj: Config | dict, target_format: str) -> None:
@@ -61,9 +59,7 @@ def config_check_depths_realize(config_obj: Config | dict, target_format: str) -
     :param config_obj: The reference config object.
     :param target_format: The target format.
     """
-    # Define a function with the conditions of an invalid depth.
-    bad_depth = lambda need, have: need and have != need
-    _validate_depth(config_obj, target_format, "realize", bad_depth)
+    _validate_depth(config_obj, target_format, "realize")
 
 
 def config_check_depths_update(config_obj: Config | dict, target_format: str) -> None:
@@ -73,9 +69,7 @@ def config_check_depths_update(config_obj: Config | dict, target_format: str) ->
     :param config_obj: The reference config object.
     :param target_format: The target format.
     """
-    # Define a function with the conditions of an invalid depth.
-    bad_depth = lambda need, have: need and have > need
-    _validate_depth(config_obj, target_format, "update", bad_depth)
+    _validate_depth(config_obj, target_format, "update")
 
 
 def realize_config(
@@ -265,20 +259,16 @@ def _realize_config_values_needed(input_obj: Config) -> None:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
 
 
-def _validate_depth(
-    config_obj: Config | dict, target_format: str, action: str, bad_depth: Callable
-) -> None:
+def _validate_depth(config_obj: Config | dict, target_format: str, action: str) -> None:
     """
     :param config_obj: The reference config object.
     :param target_format: The target format.
     :param action: The action being performed.
-    :param bad_depth: A function that returns True if the depth is bad.
     :raises: UWConfigError on excessive config object depth.
     """
     target_class = cast(Config, format_to_config(target_format))
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
-    depth_threshold = target_class._get_depth_threshold()  # noqa: SLF001
-    if bad_depth(depth_threshold, depth(config)):
+    if not target_class._depth_ok(depth(config)):  # noqa: SLF001
         msg = "Cannot %s depth-%s config to type-'%s' config" % (
             action,
             depth(config),

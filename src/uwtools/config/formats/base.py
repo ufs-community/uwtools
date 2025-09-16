@@ -44,12 +44,8 @@ class Config(ABC, UserDict):
         else:
             self._config_file = str2path(config) if config else None
             self.data = self._load(self._config_file)
-        if self._get_depth_threshold() and self._depth != self._get_depth_threshold():
-            msg = "Cannot instantiate depth-%s %s with depth-%s config" % (
-                self._get_depth_threshold(),
-                type(self).__name__,
-                self._depth,
-            )
+        if not self._depth_ok(self._depth):
+            msg = "Cannot instantiate %s from depth-%s config" % (type(self).__name__, self._depth)
             raise UWConfigError(msg)
 
     def __repr__(self) -> str:
@@ -126,6 +122,13 @@ class Config(ABC, UserDict):
         """
         return depth(self.data)
 
+    @staticmethod
+    @abstractmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
     @classmethod
     @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
@@ -133,13 +136,6 @@ class Config(ABC, UserDict):
         Return the string representation of the given dict.
 
         :param cfg: A dict object.
-        """
-
-    @staticmethod
-    @abstractmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
         """
 
     @staticmethod

@@ -44,8 +44,8 @@ class ConcreteConfig(Config):
         pass
 
     @staticmethod
-    def _get_depth_threshold():
-        pass
+    def _depth_ok(depth: int) -> bool:
+        return depth >= 1
 
     @staticmethod
     def _get_format():

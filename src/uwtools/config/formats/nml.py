@@ -33,6 +33,29 @@ class NMLConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
+        # Fortran namelist configs must be at least depth 2, as they must have levels for namelist
+        # names as well as keys (Fortran variables). The depth upper bound is harder to quantify:
+        # Derived-typed component references in namelists may reference any number of intermediate
+        # components, and each intermediate component is reflected as a YAML mapping. For example,
+        # the namelist
+        #
+        #   &a b%c%d%e%f = 42 /
+        #
+        # is represented in YAML as
+        #
+        #   a: {b: {c: {d: {e: {f: 42}}}}}
+        #
+        # per f90nml. uwtools can map back and forth between these formats, but it should be clear
+        # that a ceiling cannot be defined for the YAML depth.
+
+        return depth >= 2  # noqa: PLR2004
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -51,13 +74,6 @@ class NMLConfig(Config):
         with StringIO() as sio:
             nml.write(sio, sort=False)
             return sio.getvalue().strip()
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return None
 
     @staticmethod
     def _get_format() -> str:

@@ -27,6 +27,13 @@ class INIConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+        return depth == 2  # noqa: PLR2004
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -46,13 +53,6 @@ class INIConfig(Config):
         with StringIO() as sio:
             parser.write(sio)
             return sio.getvalue().strip()
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return 2
 
     @staticmethod
     def _get_format() -> str:
