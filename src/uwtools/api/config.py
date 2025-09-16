@@ -227,7 +227,7 @@ Recognized file extensions are: {extensions}
 :param format1: Format of 1st config file (optional if file's extension is recognized).
 :param format2: Format of 2nd config file (optional if file's extension is recognized).
 :return: ``False`` if config files had differences, otherwise ``True``.
-""".format(extensions=", ".join(["``{x}``" for x in _FORMAT.extensions()])).strip()
+""".format(extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()])).strip()
 
 compose.__doc__ = """
 Compose config files.
@@ -242,7 +242,7 @@ Recognized file extensions are: {extensions}.
 :return: ``True`` if no errors were encountered.
 """.format(
     default=_FORMAT.yaml,
-    extensions=", ".join(["``{x}``" for x in _FORMAT.extensions()]),
+    extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()]),
     choices=", ".join([f"``{x}``" for x in (_FORMAT.ini, _FORMAT.nml, _FORMAT.sh, _FORMAT.yaml)]),
 ).strip()
 
@@ -284,7 +284,7 @@ Recognized file extensions are: {extensions}
 :param stdin_ok: OK to read from ``stdin``?
 :return: The ``dict`` representation of the realized config.
 :raises: ``UWConfigRealizeError`` if ``total`` is ``True`` and any Jinja2 syntax was not rendered.
-""".format(extensions=", ".join(["``{x}``" for x in _FORMAT.extensions()])).strip()  # noqa: E501
+""".format(extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()])).strip()  # noqa: E501
 
 __all__ = [
     "Config",
