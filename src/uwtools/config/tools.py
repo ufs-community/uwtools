@@ -62,7 +62,7 @@ def compose(
 
 def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> None:
     """
-    Check that the depth does not exceed the target format's max.
+    Ensure that the depth does not exceed the target format's max.
 
     :param config_obj: The reference config dictionary.
     :param target_format: The target format.
@@ -75,7 +75,7 @@ def config_check_depths_dump(config_obj: Config | dict, target_format: str) -> N
 
 def config_check_depths_realize(config_obj: Config | dict, target_format: str) -> None:
     """
-    Check that the depth does not exceed the target format's max.
+    Ensure that the depth is that required by the target format.
 
     :param config_obj: The reference config object.
     :param target_format: The target format.
@@ -87,7 +87,7 @@ def config_check_depths_realize(config_obj: Config | dict, target_format: str) -
 
 def config_check_depths_update(config_obj: Config | dict, target_format: str) -> None:
     """
-    Check that the depth does not exceed the target format's max.
+    Ensure that the depth does not exceed the target format's max.
 
     :param config_obj: The reference config object.
     :param target_format: The target format.
