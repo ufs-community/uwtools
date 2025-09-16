@@ -41,10 +41,13 @@ def compare_assets(tmp_path):
 
 @fixture
 def compose_assets():
-    d1 = {"one": 1}
-    d2 = {"one": {"two": 2}}
-    d3 = {"one": {"two": {"three": 3}}}
-    return d1, d2, d3
+    d1 = {"one": 1, "foo": "bar"}
+    d2 = {"one": {"two": 2, "baz": "qux"}, "foo": "bar"}
+    d3 = {"one": {"two": {"three": 3, "asdf": "qwer"}, "baz": "qux"}, "foo": "bar"}
+    u1 = {"one": "won", "two": "too"}
+    u2 = {"one": {"two": "too"}, "won": 1}
+    u3 = {"one": {"two": {"three": ["drei", "tres"], "also": 3}}}
+    return d1, d2, d3, u1, u2, u3
 
 
 @fixture
@@ -181,19 +184,61 @@ def test_config_tools_compare__bad_format(logged):
     assert logged(msg)
 
 
+@mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__single_default_stdout(compose_assets, logged, suffix, tmp_path):
-    path = (tmp_path / "config").with_suffix(suffix)
-    for d in compose_assets:
-        path.unlink(missing_ok=True)
-        assert not path.exists()
-        path.write_text(yaml.dump(d))
-        kwargs: dict = {"configs": [path]}
+def test_config_tools_compose__single_yaml(compose_assets, logged, suffix, tmp_path, tofile):
+    d1, d2, d3, _, _, _ = compose_assets
+    dpath = (tmp_path / "d").with_suffix(suffix)
+    for d in (d1, d2, d3):
+        dpath.unlink(missing_ok=True)
+        assert not dpath.exists()
+        dpath.write_text(yaml.dump(d))
+        kwargs: dict = {"configs": [dpath]}
         if suffix and suffix != ".yaml":
             kwargs["input_format"] = FORMAT.yaml
+        if tofile:
+            outpath = (tmp_path / "out").with_suffix(suffix)
+            kwargs["output_file"] = outpath
         tools.compose(**kwargs)
-        assert logged(f"Reading {path} as base 'yaml' config")
-        assert YAMLConfig(path) == d
+        assert logged(f"Reading {dpath} as base 'yaml' config")
+        if tofile:
+            assert YAMLConfig(outpath) == d
+            outpath.unlink()
+
+
+@mark.parametrize("tofile", [False, True])
+@mark.parametrize("suffix", ["", ".yaml", ".foo"])
+def test_config_tools_compose__double_yaml(compose_assets, logged, suffix, tmp_path, tofile):
+    d1, d2, d3, u1, u2, u3 = compose_assets
+    dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
+    for d, u in [(d1, u1), (d2, u2), (d3, u3)]:
+        for path in [dpath, upath]:
+            path.unlink(missing_ok=True)
+            assert not path.exists()
+        dpath.write_text(yaml.dump(d))
+        upath.write_text(yaml.dump(u))
+        kwargs: dict = {"configs": [dpath, upath]}
+        if suffix and suffix != ".yaml":
+            kwargs["input_format"] = FORMAT.yaml
+        if tofile:
+            outpath = (tmp_path / "out").with_suffix(suffix)
+            kwargs["output_file"] = outpath
+        tools.compose(**kwargs)
+        assert logged(f"Reading {dpath} as base 'yaml' config")
+        if tofile:
+            expected = {
+                str(u1): {"one": "won", "two": "too", "foo": "bar"},
+                str(u2): {"one": {"two": "too", "baz": "qux"}, "foo": "bar", "won": 1},
+                str(u3): {
+                    "one": {
+                        "two": {"three": ["drei", "tres"], "asdf": "qwer", "also": 3},
+                        "baz": "qux",
+                    },
+                    "foo": "bar",
+                },
+            }
+            assert YAMLConfig(outpath) == expected[str(u)]
+            outpath.unlink()
 
 
 @mark.parametrize(
