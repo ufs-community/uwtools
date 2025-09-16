@@ -24,9 +24,9 @@ def test_config_get_config(load, tb):
 
 def test_config_depth(tb):
     assert tb.cell_output_text(11) == "greeting=Salutations\nrecipient=Mars"
-    assert tb.cell_output_text(13) == "Cannot instantiate depth-1 SHConfig with depth-2 config"
+    assert tb.cell_output_text(13) == "Cannot instantiate SHConfig from depth-2 config"
     assert tb.cell_output_text(15) == "[message]\ngreeting = Salutations\nrecipient = Mars"
-    assert tb.cell_output_text(17) == "Cannot instantiate depth-2 INIConfig with depth-1 config"
+    assert tb.cell_output_text(17) == "Cannot instantiate INIConfig from depth-1 config"
 
 
 def test_config_realize(load, tb):

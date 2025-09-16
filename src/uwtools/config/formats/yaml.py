@@ -54,6 +54,17 @@ class YAMLConfig(Config):
 
     # Private methods
 
+    @staticmethod
+    def _depth_ok(depth: int) -> bool:
+        """
+        Is the given config depth compatible with this format?
+        """
+
+        # Valid YAML may consist of a single scalar value, with no dict/mapping or list/sequence
+        # structure, so the depth may be 0, and can be arbitrarily deep.
+
+        return depth >= 0
+
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
@@ -63,13 +74,6 @@ class YAMLConfig(Config):
         """
         add_yaml_representers()
         return dict_to_yaml_str(cfg)
-
-    @staticmethod
-    def _get_depth_threshold() -> int | None:
-        """
-        Return the config's depth threshold.
-        """
-        return None
 
     @staticmethod
     def _get_format() -> str:

@@ -44,8 +44,14 @@ def ref():
 # Tests
 
 
-def test_fieldtable__get_depth_threshold():
-    assert FieldTableConfig._get_depth_threshold() is None
+@mark.parametrize("depth", [-1, 0])
+def test_fieldtable__depth_ok__no(depth):
+    assert not FieldTableConfig._depth_ok(depth=depth)
+
+
+@mark.parametrize("depth", [1, 10])
+def test_fieldtable__depth_ok__yes(depth):
+    assert FieldTableConfig._depth_ok(depth=depth)
 
 
 def test_fieldtable__get_format():

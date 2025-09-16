@@ -38,8 +38,14 @@ def dumpkit(tmp_path, utc):
 # Tests
 
 
-def test_yaml__get_depth_threshold():
-    assert YAMLConfig._get_depth_threshold() is None
+@mark.parametrize("depth", [-1])
+def test_yaml__depth_ok__no(depth):
+    assert not YAMLConfig._depth_ok(depth=depth)
+
+
+@mark.parametrize("depth", [0, 1, 10])
+def test_yaml__depth_ok__yes(depth):
+    assert YAMLConfig._depth_ok(depth=depth)
 
 
 def test_yaml__get_format():
