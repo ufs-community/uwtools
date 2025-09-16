@@ -87,7 +87,7 @@ The MPI launch program (``mpiexec``, ``srun``, et al.). This entry is only used 
 stacksize:
 """"""""""
 
-For drivers implementing support, exports the ``OMP_STACKSIZE`` environment variable to the execution environment, specifying the size of the stack for threads created by OpenMP. The value of this environment takes the form: *size* | *size*\ **B** | *size*\ **K** | *size*\ **M** | *size*\ **G**. When only *size* is provided, the unit is assumed to be kilobytes.
+For drivers implementing support, exports the ``OMP_STACKSIZE`` environment variable to the execution environment, specifying the size of the stack for threads created by OpenMP. The value takes the form: *size* | *size*\ **B** | *size*\ **K** | *size*\ **M** | *size*\ **G**. When only *size* is provided, the unit is assumed to be kilobytes.
 
 threads:
 """"""""
