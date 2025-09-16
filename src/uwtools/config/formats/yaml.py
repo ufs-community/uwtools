@@ -61,7 +61,7 @@ class YAMLConfig(Config):
         """
 
         # Valid YAML may consist of a single scalar value, with no dict/mapping or list/sequence
-        # structure, so the depth may be 0.
+        # structure, so the depth may be 0, and can be arbitrarily deep.
 
         return depth >= 0
 

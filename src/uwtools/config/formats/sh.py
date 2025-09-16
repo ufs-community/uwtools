@@ -33,6 +33,9 @@ class SHConfig(Config):
         """
         Is the given config depth compatible with this format?
         """
+
+        # Shell configs are a series of key=value pairs, so are exactly depth 1.
+
         return depth == 1
 
     @classmethod

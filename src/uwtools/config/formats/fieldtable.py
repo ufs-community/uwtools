@@ -22,6 +22,9 @@ class FieldTableConfig(YAMLConfig):
         """
         Is the given config depth compatible with this format?
         """
+
+        # FieldTable configs can be arbitrarily deep, but must have at least one level.
+
         return depth > 0
 
     @classmethod

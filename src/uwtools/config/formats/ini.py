@@ -32,6 +32,10 @@ class INIConfig(Config):
         """
         Is the given config depth compatible with this format?
         """
+
+        # INI configs have one level for the [section], and one level for each key, so are exactly
+        # depth 2.
+
         return depth == 2  # noqa: PLR2004
 
     @classmethod
