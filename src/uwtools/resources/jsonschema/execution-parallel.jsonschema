@@ -22,6 +22,9 @@
     "mpicmd": {
       "type": "string"
     },
+    "stacksize": {
+      "type": "string"
+    },
     "threads": {
       "minimum": 1,
       "type": "integer"

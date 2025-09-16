@@ -50,7 +50,19 @@
               "type": "string"
             },
             "update_values": {
-              "$ref": "urn:uwtools:namelist"
+              "additionalProperties": {
+                "additionalProperties": {
+                  "type": [
+                    "array",
+                    "boolean",
+                    "number",
+                    "string"
+                  ]
+                },
+                "type": "object"
+              },
+              "minProperties": 1,
+              "type": "object"
             },
             "validate": {
               "type": "boolean"

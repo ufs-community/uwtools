@@ -1160,8 +1160,8 @@ def test_schema_gsi_namelist_update_values(gsi_prop):
     )
     # At least one namelist entry is required:
     assert non_empty_dict(errors({}))
-    # At least one val/var pair is required:
-    assert non_empty_dict(errors({"nml": {}}))
+    # Allow for empty namelist entries:
+    assert not errors({"nml": {}})
 
 
 def test_schema_gsi_rundir(gsi_prop):
