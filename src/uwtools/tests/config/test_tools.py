@@ -265,6 +265,20 @@ def test_config_tools_compose__ini_nml_double(configclass, fmt, logged, tmp_path
     assert configclass(outpath) == configclass(expected)
 
 
+def test_config_tools_compose__sh_double(logged, tmp_path):
+    d = {"foo": 1, "bar": 2}
+    u = {"foo": 3, "baz": 4}
+    dpath, upath = [tmp_path / x for x in ("d.sh", "u.sh")]
+    SHConfig(d).dump(dpath)
+    SHConfig(u).dump(upath)
+    outpath = tmp_path / "out.sh"
+    kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
+    assert tools.compose(**kwargs) is True
+    assert logged(f"Reading {dpath} as base 'sh' config")
+    assert logged(f"Composing 'sh' config from {upath}")
+    assert SHConfig(outpath) == SHConfig({"foo": "3", "bar": "2", "baz": "4"})
+
+
 @mark.parametrize(
     ("cfgtype", "fmt"),
     [
