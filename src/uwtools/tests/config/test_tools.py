@@ -249,42 +249,28 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
             outpath.unlink()
 
 
-# def test_config_tools_compose__ini_double(compose_assets_ini, logged, tmp_path):
-#     d, u = compose_assets_ini
-#     dpath, upath = [tmp_path / x for x in ("d.ini", "u.ini")]
-#     INIConfig(d).dump(dpath)
-#     INIConfig(u).dump(upath)
-#     outpath = tmp_path / "out.ini"
-#     kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
-#     assert tools.compose(**kwargs) is True
-#     assert logged(f"Reading {dpath} as base 'ini' config")
-#     assert logged(f"Composing 'ini' config from {upath}")
-#     assert INIConfig(outpath) == INIConfig(
-#         {
-#             "constants": {"pi": 3.142, "e": 2.718},
-#             "trees": {"leaf": "elm", "needle": "fir"},
-#             "colors": {"red": "crimson", "green": "clover"},
-#         }
-#     )
-
-
-def test_config_tools_compose__nml_double(compose_assets_depth_2, logged, tmp_path):
+@mark.parametrize(("configclass", "suffix"), [(INIConfig, ".ini"), (NMLConfig, ".nml")])
+def test_config_tools_compose__ini_nml_double(
+    compose_assets_depth_2, configclass, logged, suffix, tmp_path
+):
     d, u = compose_assets_depth_2
-    dpath, upath = [tmp_path / x for x in ("d.nml", "u.nml")]
-    NMLConfig(d).dump(dpath)
-    NMLConfig(u).dump(upath)
-    outpath = tmp_path / "out.nml"
+    dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
+    configclass(d).dump(dpath)
+    configclass(u).dump(upath)
+    outpath = (tmp_path / "out").with_suffix(suffix)
     kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
     assert tools.compose(**kwargs) is True
-    assert logged(f"Reading {dpath} as base 'nml' config")
-    assert logged(f"Composing 'nml' config from {upath}")
-    assert NMLConfig(outpath) == NMLConfig(
-        {
-            "constants": {"pi": 3.142, "e": 2.718},
-            "trees": {"leaf": "elm", "needle": "fir"},
-            "colors": {"red": "crimson", "green": "clover"},
-        }
-    )
+    fmt = suffix.lstrip(".")
+    assert logged(f"Reading {dpath} as base '{fmt}' config")
+    assert logged(f"Composing '{fmt}' config from {upath}")
+    expected = {
+        "constants": {"pi": 3.142, "e": 2.718},
+        "trees": {"leaf": "elm", "needle": "fir"},
+        "colors": {"red": "crimson", "green": "clover"},
+    }
+    if fmt == "ini":
+        expected["constants"] = {"pi": "3.142", "e": "2.718"}
+    assert configclass(outpath) == configclass(expected)
 
 
 @mark.parametrize(
