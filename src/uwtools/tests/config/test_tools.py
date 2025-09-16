@@ -249,18 +249,18 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
             outpath.unlink()
 
 
-@mark.parametrize(("configclass", "suffix"), [(INIConfig, ".ini"), (NMLConfig, ".nml")])
+@mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
 def test_config_tools_compose__ini_nml_double(
-    compose_assets_depth_2, configclass, logged, suffix, tmp_path
+    compose_assets_depth_2, configclass, fmt, logged, tmp_path
 ):
     d, u = compose_assets_depth_2
+    suffix = f".{fmt}"
     dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
     configclass(d).dump(dpath)
     configclass(u).dump(upath)
     outpath = (tmp_path / "out").with_suffix(suffix)
     kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
     assert tools.compose(**kwargs) is True
-    fmt = suffix.lstrip(".")
     assert logged(f"Reading {dpath} as base '{fmt}' config")
     assert logged(f"Composing '{fmt}' config from {upath}")
     expected = {
@@ -268,7 +268,7 @@ def test_config_tools_compose__ini_nml_double(
         "trees": {"leaf": "elm", "needle": "fir"},
         "colors": {"red": "crimson", "green": "clover"},
     }
-    if fmt == "ini":
+    if fmt == FORMAT.ini:
         expected["constants"] = {"pi": "3.142", "e": "2.718"}
     assert configclass(outpath) == configclass(expected)
 
