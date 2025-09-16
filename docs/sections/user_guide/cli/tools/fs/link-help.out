@@ -10,7 +10,7 @@ Optional arguments:
   --version
       Show version info and exit
   --config-file PATH, -c PATH
-      Path to UW YAML config file (default: stdin)
+      Path to UW YAML config file (default: read from stdin)
   --target-dir PATH
       Root directory for relative destination paths
   --cycle CYCLE

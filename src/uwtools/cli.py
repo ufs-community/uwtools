@@ -759,7 +759,7 @@ def _add_arg_classname(group: Group) -> None:
 
 
 def _add_arg_config_file(group: Group, required: bool = False) -> None:
-    msg = "Path to UW YAML config file" + ("" if required else " (default: stdin)")
+    msg = "Path to UW YAML config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
@@ -840,7 +840,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.infile),
         "-i",
-        help="Path to input file (default: stdin)",
+        help="Path to input file (default: read from stdin)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -899,7 +899,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
         "-o",
-        help="Path to output file (default: stdout)",
+        help="Path to output file (default: write to stdout)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -1015,7 +1015,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.updatefile),
         "-u",
-        help="Path to update file (default: stdin)",
+        help="Path to update file (default: read from stdin)",
         metavar="PATH",
         required=required,
         type=Path,

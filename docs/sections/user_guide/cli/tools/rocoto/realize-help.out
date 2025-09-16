@@ -9,9 +9,9 @@ Optional arguments:
   --version
       Show version info and exit
   --config-file PATH, -c PATH
-      Path to UW YAML config file (default: stdin)
+      Path to UW YAML config file (default: read from stdin)
   --output-file PATH, -o PATH
-      Path to output file (default: stdout)
+      Path to output file (default: write to stdout)
   --quiet, -q
       Print no logging messages
   --verbose, -v
