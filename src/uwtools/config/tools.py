@@ -88,7 +88,7 @@ def config_check_depths_update(config_obj: Config | dict, target_format: str) ->
     _validate_depth(config_obj, target_format, "update", bad_depth)
 
 
-def realize_config(
+def realize(
     input_config: Config | Path | dict | None = None,
     input_format: str | None = None,
     update_config: Config | Path | dict | None = None,
@@ -101,12 +101,12 @@ def realize_config(
     dry_run: bool = False,
 ) -> dict:
     """
-    NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
+    NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
-    input_obj = _realize_config_input_setup(input_config, input_format)
-    input_obj = _realize_config_update(input_obj, update_config, update_format)
+    input_obj = _realize_input_setup(input_config, input_format)
+    input_obj = _realize_update(input_obj, update_config, update_format)
     input_obj.dereference()
-    output_data, output_format = _realize_config_output_setup(
+    output_data, output_format = _realize_output_setup(
         input_obj, output_file, output_format, key_path
     )
     if dry_run:
@@ -114,7 +114,7 @@ def realize_config(
             log.info(line)
         return {}
     if values_needed:
-        _realize_config_values_needed(input_obj)
+        _realize_values_needed(input_obj)
         return {}
     if total and unrendered(str(input_obj)):
         msg = "Config could not be totally realized"
@@ -172,7 +172,7 @@ def _ensure_format(
     return get_config_format(config, desc)
 
 
-def _realize_config_input_setup(
+def _realize_input_setup(
     input_config: Config | Path | dict | None = None, input_format: str | None = None
 ) -> Config:
     """
@@ -191,7 +191,7 @@ def _realize_config_input_setup(
     return config_obj
 
 
-def _realize_config_output_setup(
+def _realize_output_setup(
     input_obj: Config,
     output_file: Path | None = None,
     output_format: str | None = None,
@@ -218,7 +218,7 @@ def _realize_config_output_setup(
     return output_data, output_format
 
 
-def _realize_config_update(
+def _realize_update(
     input_obj: Config,
     update_config: Config | Path | dict | None = None,
     update_format: str | None = None,
@@ -251,7 +251,7 @@ def _realize_config_update(
     return input_obj
 
 
-def _realize_config_values_needed(input_obj: Config) -> None:
+def _realize_values_needed(input_obj: Config) -> None:
     """
     Print a report characterizing input values as complete, empty, or template placeholders.
 
@@ -335,7 +335,7 @@ Recognized file extensions are: {extensions}
 """.format(extensions=", ".join(FORMAT.extensions())).strip()
 
 
-realize_config.__doc__ = """
+realize.__doc__ = """
 Realize an output config based on an input config and optional values-providing configs.
 
 Recognized file extensions are: {extensions}

@@ -16,7 +16,7 @@ from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import compare as _compare
 from uwtools.config.tools import compose as _compose
-from uwtools.config.tools import realize_config as _realize
+from uwtools.config.tools import realize as _realize
 from uwtools.config.validator import ConfigDataT, ConfigPathT
 from uwtools.config.validator import validate_check_config as _validate_check_config
 from uwtools.config.validator import validate_external as _validate_external
