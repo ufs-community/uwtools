@@ -267,7 +267,7 @@ l: "22"
     with patch.dict(os.environ, {"N": "999"}, clear=True):
         retval = config.dereference()
     assert retval is config
-    # assert config["a"] == 44
+    assert config["a"] == 44
     assert config["b"] == {"c": 33}
     assert config["b"]["c"] == 33
     assert config["d"] == "{{ X }}"
