@@ -1,0 +1,5 @@
+constants:
+  pi: 3.142
+  e: 2.718
+color: blue
+flower: rose

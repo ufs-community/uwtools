@@ -103,6 +103,32 @@ The ``compose`` action builds up a final config by repeatedly updating a base co
 Examples
 ^^^^^^^^
 
+* Consider three YAML configs:
+
+  .. literalinclude:: config/compose-base.yaml
+     :caption: ``compose-base.yaml``
+     :language: yaml
+  .. literalinclude:: config/compose-update-1.yaml
+     :caption: ``compose-update-1.yaml``
+     :language: yaml
+  .. literalinclude:: config/compose-update-2.yaml
+     :caption: ``compose-update-2.yaml``
+     :language: yaml
+
+Compose the three together, writing to ``stdout``:
+
+.. literalinclude:: config/compose-1.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: config/compose-1.out
+   :language: yaml
+
+Values provided by update configs override or augment values provided in the base config, while unaffected values survive to the final config. Priority of values increases from left to right.
+
+The ``--output-file`` / ``-o`` option can be used to direct the output to a file.
+
+The ``--input-config`` and ``--output-config`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. The the formats are neither explicitly provided or deduced, ``yaml`` is implied.
+
 .. _cli_config_realize_examples:
 
 ``realize``

@@ -21,3 +21,13 @@ html.writer-html5 .rst-content table.docutils td>p {
 .wy-table-responsive table td, .wy-table-responsive table th {
   white-space: inherit;
 }
+
+/* Left align captions. */
+
+.rst-content .caption-number {
+  display: none;
+}
+
+.rst-content .code-block-caption {
+  text-align: left;
+}
