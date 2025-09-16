@@ -247,10 +247,9 @@ class Config(ABC, UserDict):
             for line in dict_to_yaml_str(self.data).split("\n"):
                 jinja2.deref_debug("%s%s" % (INDENT, line))
 
-        self.update_from(context or {})
         while True:
             logstate("current")
-            new = jinja2.dereference(val=self.data, context=self.data)
+            new = jinja2.dereference(val=self.data, context=context or self.data)
             assert isinstance(new, dict)
             if new == self.data:
                 break
