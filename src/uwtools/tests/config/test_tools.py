@@ -192,7 +192,7 @@ def test_config_tools_config_tools_format_to_config__fail():
         tools.format_to_config("no-such-config-type")
 
 
-def test_config_tools_realize_config__conversion_cfg_to_yaml(tmp_path):
+def test_config_tools_realize__conversion_cfg_to_yaml(tmp_path):
     """
     Test that a .cfg file can be used to create a YAML object.
     """
@@ -212,7 +212,7 @@ def test_config_tools_realize_config__conversion_cfg_to_yaml(tmp_path):
     assert outfile.read_text()[-1] == "\n"
 
 
-def test_config_tools_realize_config__depth_mismatch_to_ini(realize_config_yaml_input):
+def test_config_tools_realize__depth_mismatch_to_ini(realize_yaml_input):
     with raises(UWConfigError):
         tools.realize(
             input_config=realize_yaml_input,
@@ -221,7 +221,7 @@ def test_config_tools_realize_config__depth_mismatch_to_ini(realize_config_yaml_
         )
 
 
-def test_config_tools_realize_config__depth_mismatch_to_sh(realize_config_yaml_input):
+def test_config_tools_realize__depth_mismatch_to_sh(realize_yaml_input):
     with raises(UWConfigError):
         tools.realize(
             input_config=realize_yaml_input,
@@ -230,7 +230,7 @@ def test_config_tools_realize_config__depth_mismatch_to_sh(realize_config_yaml_i
         )
 
 
-def test_config_tools_realize_config__double_tag_flat(tmp_path):
+def test_config_tools_realize__double_tag_flat(tmp_path):
     config = """
     a: 1
     b: 2
@@ -246,7 +246,7 @@ def test_config_tools_realize_config__double_tag_flat(tmp_path):
     help_realize_double_tag(config, expected, tmp_path)
 
 
-def test_config_tools_realize_config__double_tag_nest(tmp_path):
+def test_config_tools_realize__double_tag_nest(tmp_path):
     config = """
     a: 1.0
     b: 2.0
@@ -264,7 +264,7 @@ def test_config_tools_realize_config__double_tag_nest(tmp_path):
     help_realize_double_tag(config, expected, tmp_path)
 
 
-def test_config_tools_realize_config__double_tag_nest_forward_reference(tmp_path):
+def test_config_tools_realize__double_tag_nest_forward_reference(tmp_path):
     config = """
     a: true
     b: false
@@ -282,7 +282,7 @@ def test_config_tools_realize_config__double_tag_nest_forward_reference(tmp_path
     help_realize_double_tag(config, expected, tmp_path)
 
 
-def test_config_tools_realize_config__dry_run(logged):
+def test_config_tools_realize__dry_run(logged):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
     """
@@ -298,7 +298,7 @@ def test_config_tools_realize_config__dry_run(logged):
     assert logged(str(yaml_config), multiline=True)
 
 
-def test_config_tools_realize_config__field_table(tmp_path):
+def test_config_tools_realize__field_table(tmp_path):
     """
     Test reading a YAML config object and generating a field file table.
     """
@@ -319,7 +319,7 @@ def test_config_tools_realize_config__field_table(tmp_path):
         assert line1 in line2
 
 
-def test_config_tools_realize_config__fmt2fmt_nml2nml(tmp_path):
+def test_config_tools_realize__fmt2fmt_nml2nml(tmp_path):
     """
     Test that providing a namelist base input file and a config file will create and update namelist
     config file.
@@ -327,7 +327,7 @@ def test_config_tools_realize_config__fmt2fmt_nml2nml(tmp_path):
     help_realize_fmt2fmt("simple.nml", FORMAT.nml, "simple2.nml", FORMAT.nml, tmp_path)
 
 
-def test_config_tools_realize_config__fmt2fmt_ini2ini(tmp_path):
+def test_config_tools_realize__fmt2fmt_ini2ini(tmp_path):
     """
     Test that providing an INI base input file and an INI config file will create and update INI
     config file.
@@ -335,7 +335,7 @@ def test_config_tools_realize_config__fmt2fmt_ini2ini(tmp_path):
     help_realize_fmt2fmt("simple.ini", FORMAT.ini, "simple2.ini", FORMAT.ini, tmp_path)
 
 
-def test_config_tools_realize_config__fmt2fmt_yaml2yaml(tmp_path):
+def test_config_tools_realize__fmt2fmt_yaml2yaml(tmp_path):
     """
     Test that providing a YAML base input file and a YAML config file will create and update YAML
     config file.
@@ -345,7 +345,7 @@ def test_config_tools_realize_config__fmt2fmt_yaml2yaml(tmp_path):
     )
 
 
-def test_config_tools_realize_config__incompatible_file_type():
+def test_config_tools_realize__incompatible_file_type():
     """
     Test that providing an incompatible file type for input base file will return print statement.
     """
@@ -357,7 +357,7 @@ def test_config_tools_realize_config__incompatible_file_type():
         )
 
 
-def test_config_tools_realize_config__output_file_format(tmp_path):
+def test_config_tools_realize__output_file_format(tmp_path):
     """
     Test that output_format overrides bad output_file extension.
     """
@@ -371,7 +371,7 @@ def test_config_tools_realize_config__output_file_format(tmp_path):
     assert compare_files(outfile, infile)
 
 
-def test_config_tools_realize_config__remove_nml_to_nml(tmp_path):
+def test_config_tools_realize__remove_nml_to_nml(tmp_path):
     input_config = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
     s = """
     constants:
@@ -389,7 +389,7 @@ def test_config_tools_realize_config__remove_nml_to_nml(tmp_path):
     assert f90nml.read(output_file) == {"constants": {"pi": 3.141}}
 
 
-def test_config_tools_realize_config__remove_yaml_to_yaml_scalar(tmp_path):
+def test_config_tools_realize__remove_yaml_to_yaml_scalar(tmp_path):
     input_config = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
     s = """
     a:
@@ -405,7 +405,7 @@ def test_config_tools_realize_config__remove_yaml_to_yaml_scalar(tmp_path):
     ) == {"a": {"b": {"c": 11, "e": 33}}}
 
 
-def test_config_tools_realize_config__remove_yaml_to_yaml_subtree(tmp_path):
+def test_config_tools_realize__remove_yaml_to_yaml_subtree(tmp_path):
     input_config = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
     s = """
     a:
@@ -420,7 +420,7 @@ def test_config_tools_realize_config__remove_yaml_to_yaml_subtree(tmp_path):
     ) == {"a": {}}
 
 
-def test_config_tools_realize_config__scalar_value(capsys):
+def test_config_tools_realize__scalar_value(capsys):
     stdinproxy.cache_clear()
     tools.realize(
         input_config=YAMLConfig(config={"foo": {"bar": "baz"}}),
@@ -430,35 +430,35 @@ def test_config_tools_realize_config__scalar_value(capsys):
     assert capsys.readouterr().out.strip() == "baz"
 
 
-def test_config_tools_realize_config__simple_ini(tmp_path):
+def test_config_tools_realize__simple_ini(tmp_path):
     """
     Test that providing an INI file with necessary settings will create an INI config file.
     """
     help_realize_simple("simple.ini", FORMAT.ini, tmp_path)
 
 
-def test_config_tools_realize_config__simple_namelist(tmp_path):
+def test_config_tools_realize__simple_namelist(tmp_path):
     """
     Test that providing a namelist file with necessary settings will create a namelist config file.
     """
     help_realize_simple("simple.nml", FORMAT.nml, tmp_path)
 
 
-def test_config_tools_realize_config__simple_sh(tmp_path):
+def test_config_tools_realize__simple_sh(tmp_path):
     """
     Test that providing an sh file with necessary settings will create an sh config file.
     """
     help_realize_simple("simple.sh", FORMAT.sh, tmp_path)
 
 
-def test_config_tools_realize_config__simple_yaml(tmp_path):
+def test_config_tools_realize__simple_yaml(tmp_path):
     """
     Test that providing a YAML base file with necessary settings will create a YAML config file.
     """
     help_realize_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
-def test_config_tools_realize_config__single_dereference(capsys, tmp_path):
+def test_config_tools_realize__single_dereference(capsys, tmp_path):
     input_config = tmp_path / "a.yaml"
     update_config = tmp_path / "b.yaml"
     with writable(input_config) as f:
@@ -481,7 +481,7 @@ def test_config_tools_realize_config__single_dereference(capsys, tmp_path):
     assert actual == dedent(expected).strip()
 
 
-def test_config_tools_realize_config__total_fail():
+def test_config_tools_realize__total_fail():
     with raises(UWConfigError) as e:
         tools.realize(
             input_config=YAMLConfig({"foo": "{{ bar }}"}), output_format=FORMAT.yaml, total=True
@@ -489,7 +489,7 @@ def test_config_tools_realize_config__total_fail():
     assert str(e.value) == "Config could not be totally realized"
 
 
-def test_config_tools_realize_config__update_bad_format_defaults_to_yaml(capsys, tmp_path):
+def test_config_tools_realize__update_bad_format_defaults_to_yaml(capsys, tmp_path):
     input_config = tmp_path / "a.yaml"
     update_config = tmp_path / "b.clj"
     with writable(input_config) as f:
@@ -511,7 +511,7 @@ def test_config_tools_realize_config__update_bad_format_defaults_to_yaml(capsys,
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
-def test_config_tools_realize_config__update_none(capsys, tmp_path):
+def test_config_tools_realize__update_none(capsys, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
@@ -530,7 +530,7 @@ def test_config_tools_realize_config__update_none(capsys, tmp_path):
     assert actual == dedent(expected).strip()
 
 
-def test_config_tools_realize_config__values_needed_ini(logged):
+def test_config_tools_realize__values_needed_ini(logged):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
@@ -562,7 +562,7 @@ def test_config_tools_realize_config__values_needed_ini(logged):
     assert logged(dedent(expected), multiline=True)
 
 
-def test_config_tools_realize_config__values_needed_yaml(logged):
+def test_config_tools_realize__values_needed_yaml(logged):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
@@ -673,14 +673,14 @@ def test_config_tools__ensure_format__explicitly_specified_with_path():
     )
 
 
-def test_config_tools__realize_config_input_setup__ini_cfgobj():
+def test_config_tools__realize_input_setup__ini_cfgobj():
     data = {"section": {"foo": "bar"}}
     cfgobj = INIConfig(config=data)
     input_obj = tools._realize_input_setup(input_config=cfgobj)
     assert input_obj.data == data
 
 
-def test_config_tools__realize_config_input_setup__ini_file(tmp_path):
+def test_config_tools__realize_input_setup__ini_file(tmp_path):
     data = """
     [section]
     foo = bar
@@ -691,7 +691,7 @@ def test_config_tools__realize_config_input_setup__ini_file(tmp_path):
     assert input_obj.data == {"section": {"foo": "bar"}}
 
 
-def test_config_tools__realize_config_input_setup__ini_stdin(logged):
+def test_config_tools__realize_input_setup__ini_stdin(logged):
     data = """
     [section]
     foo = bar
@@ -707,14 +707,14 @@ def test_config_tools__realize_config_input_setup__ini_stdin(logged):
     assert logged("Reading input from stdin")
 
 
-def test_config_tools__realize_config_input_setup__nml_cfgobj():
+def test_config_tools__realize_input_setup__nml_cfgobj():
     data = {"nl": {"pi": 3.14}}
     cfgobj = NMLConfig(config=data)
     input_obj = tools._realize_input_setup(input_config=cfgobj)
     assert input_obj.data == data
 
 
-def test_config_tools__realize_config_input_setup__nml_file(tmp_path):
+def test_config_tools__realize_input_setup__nml_file(tmp_path):
     data = """
     &nl
       pi = 3.14
@@ -726,7 +726,7 @@ def test_config_tools__realize_config_input_setup__nml_file(tmp_path):
     assert input_obj["nl"]["pi"] == 3.14
 
 
-def test_config_tools__realize_config_input_setup__nml_stdin(logged):
+def test_config_tools__realize_input_setup__nml_stdin(logged):
     data = """
     &nl
       pi = 3.14
@@ -742,14 +742,14 @@ def test_config_tools__realize_config_input_setup__nml_stdin(logged):
     assert logged("Reading input from stdin")
 
 
-def test_config_tools__realize_config_input_setup__sh_cfgobj():
+def test_config_tools__realize_input_setup__sh_cfgobj():
     data = {"foo": "bar"}
     cfgobj = SHConfig(config=data)
     input_obj = tools._realize_input_setup(input_config=cfgobj)
     assert input_obj.data == data
 
 
-def test_config_tools__realize_config_input_setup__sh_file(tmp_path):
+def test_config_tools__realize_input_setup__sh_file(tmp_path):
     data = """
     foo=bar
     """
@@ -759,7 +759,7 @@ def test_config_tools__realize_config_input_setup__sh_file(tmp_path):
     assert input_obj.data == {"foo": "bar"}
 
 
-def test_config_tools__realize_config_input_setup__sh_stdin(logged):
+def test_config_tools__realize_input_setup__sh_stdin(logged):
     data = """
     foo=bar
     """
@@ -773,14 +773,14 @@ def test_config_tools__realize_config_input_setup__sh_stdin(logged):
     assert logged("Reading input from stdin")
 
 
-def test_config_tools__realize_config_input_setup__yaml_cfgobj():
+def test_config_tools__realize_input_setup__yaml_cfgobj():
     data = {"foo": "bar"}
     cfgobj = YAMLConfig(config=data)
     input_obj = tools._realize_input_setup(input_config=cfgobj)
     assert input_obj.data == data
 
 
-def test_config_tools__realize_config_input_setup__yaml_file(tmp_path):
+def test_config_tools__realize_input_setup__yaml_file(tmp_path):
     data = """
     foo: bar
     """
@@ -790,7 +790,7 @@ def test_config_tools__realize_config_input_setup__yaml_file(tmp_path):
     assert input_obj.data == {"foo": "bar"}
 
 
-def test_config_tools__realize_config_input_setup__yaml_stdin(logged):
+def test_config_tools__realize_input_setup__yaml_stdin(logged):
     data = """
     foo: bar
     """
@@ -804,7 +804,7 @@ def test_config_tools__realize_config_input_setup__yaml_stdin(logged):
     assert logged("Reading input from stdin")
 
 
-def test_config_tools__realize_config_output_setup(logged, tmp_path):
+def test_config_tools__realize_output_setup(logged, tmp_path):
     input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
     output_file = tmp_path / "output.yaml"
     assert tools._realize_output_setup(

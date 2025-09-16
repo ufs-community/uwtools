@@ -51,11 +51,11 @@ def compose(
     for path in configs[1:]:
         log.debug("Composing %s onto base", path)
         c = input_class(path)
-        config_check_depths_update(c, input_format)
+        # config_check_depths_update(c, input_format)
         config.update_from(c)
     output_class = format_to_config(output_format)
     output_config = output_class(config)
-    config_check_depths_dump(config, output_format)
+    # config_check_depths_dump(config, output_format)
     output_config.dump(output_file)
     return True
 
