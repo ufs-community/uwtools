@@ -246,7 +246,6 @@ Recognized file extensions are: {extensions}.
     choices=", ".join([f"``{x}``" for x in (_FORMAT.ini, _FORMAT.nml, _FORMAT.sh, _FORMAT.yaml)]),
 ).strip()
 
-
 realize.__doc__ = """
 Realize a config based on a base input config and an optional update config.
 

@@ -41,6 +41,9 @@ def compare(
 def compose(
     configs: list[Path], output_file: Path | None, input_format: str, output_format: str
 ) -> bool:
+    """
+    NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
+    """
     input_class = format_to_config(input_format)
     config, rest = input_class(configs[0]), list(map(input_class, configs[1:]))
     for c in rest:
@@ -178,7 +181,7 @@ def _realize_input_setup(
     """
     Set up config-realize input.
 
-    :param input_config: Input config source (None => read stdin).
+    :param input_config: Input config source (None => read from stdin).
     :param input_format: Format of the input config.
     :return: The input Config object.
     """
@@ -227,7 +230,7 @@ def _realize_update(
     Set up config-realize update.
 
     :param input_obj: The input Config object.
-    :param update_config: Input config source (None => read stdin).
+    :param update_config: Input config source (None => read from stdin).
     :param update_format: Format of the update config.
     :return: The updated but unrealized Config object.
     """
@@ -331,25 +334,40 @@ Recognized file extensions are: {extensions}
 :param path2: Path to 2nd config file
 :param format1: Format of 1st config file (optional if file's extension is recognized)
 :param format2: Format of 2nd config file (optional if file's extension is recognized)
-:return: ``False`` if config files had differences, otherwise ``True``
+:return: False if config files had differences, otherwise True
 """.format(extensions=", ".join(FORMAT.extensions())).strip()
 
+compose.__doc__ = """
+Compose config files.
+
+Recognized file extensions are: {extensions}
+
+:param configs: Paths to configs to compose.
+:param output_file: Output config destination (default: write to stdout).
+:param input_format: Format of configs to compose (choices: {choices}, default: {default})
+:param output_format: Format of output config (choices: {choices}, default: {default})
+:return: True if no errors were encountered.
+""".format(
+    default=FORMAT.yaml,
+    extensions=", ".join(FORMAT.extensions()),
+    choices=", ".join([FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]),
+).strip()
 
 realize.__doc__ = """
 Realize an output config based on an input config and optional values-providing configs.
 
 Recognized file extensions are: {extensions}
 
-:param input_config: Input config source (None => read ``stdin``).
+:param input_config: Input config source (None => read from stdin).
 :param input_format: Input config format.
-:param update_config: Input config source (None => read ``stdin``).
+:param update_config: Input config source (None => read from stdin).
 :param update_format: Update config format.
-:param output_file: Output config destination (None => write to ``stdout``).
+:param output_file: Output config destination (None => write to stdout).
 :param output_format: Output config format.
 :param key_path: Path of keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
-:raises: UWConfigRealizeError if ``total`` is ``True`` and config cannot be totally realized.
+:raises: UWConfigRealizeError if total is True and config cannot be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(extensions=", ".join(FORMAT.extensions())).strip()
