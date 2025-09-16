@@ -39,11 +39,14 @@ def compare(
 
 
 def compose(
-    configs: list[Path],  # noqa: ARG001
-    output_file: Path | None = None,  # noqa: ARG001
-    input_format: str | None = None,  # noqa: ARG001
-    output_format: str | None = None,  # noqa: ARG001
+    configs: list[Path], output_file: Path | None, input_format: str, output_format: str
 ) -> bool:
+    config, configs = configs[0], configs[1:]
+    print(output_file, input_format, output_format, config)  # PM# REMOVE
+    # input_class = cast(Config, format_to_config(input_format))
+    # output_class = cast(Config, format_to_config(output_format))
+    # input_class = Config, format_to_config(input_format)
+    # output_class = Config, format_to_config(output_format)
     return True
 
 
