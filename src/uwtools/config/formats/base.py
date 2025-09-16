@@ -7,7 +7,7 @@ from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -247,12 +247,15 @@ class Config(ABC, UserDict):
             for line in dict_to_yaml_str(self.data).split("\n"):
                 jinja2.deref_debug("%s%s" % (INDENT, line))
 
+        ctx = deepcopy(self)
+        ctx.update_from(deepcopy(context or {}))
         while True:
             logstate("current")
-            new = jinja2.dereference(val=self.data, context=context or self.data)
+            new = jinja2.dereference(val=self.data, context=cast(dict, ctx))
             assert isinstance(new, dict)
             if new == self.data:
                 break
+            ctx.update_from(new)
             self.data = new
         logstate("final")
         return self
