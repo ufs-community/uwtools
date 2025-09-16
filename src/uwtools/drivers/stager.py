@@ -20,7 +20,8 @@ class FileStager:
         """
         taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
         yield taskname("files copied")
-        yield [Copier(config=config.get("files_to_copy", {}), target_dir=rundir).go()]
+        files = config.get("files_to_copy", {})
+        yield [Copier(config=files, target_dir=rundir).go() if files else None]
 
     @tasks
     def files_hardlinked(self):
@@ -29,13 +30,16 @@ class FileStager:
         """
         taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
         yield taskname("files hardlinked")
+        files = config.get("files_to_hardlink", {})
         yield [
             Linker(
-                config=config.get("files_to_hardlink", {}),
+                config=files,
                 target_dir=rundir,
                 hardlink=True,
                 fallback=STR.copy,
             ).go()
+            if files
+            else None
         ]
 
     @tasks
@@ -45,4 +49,5 @@ class FileStager:
         """
         taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
         yield taskname("files linked")
-        yield [Linker(config=config.get("files_to_link", {}), target_dir=rundir).go()]
+        files = config.get("files_to_link", {})
+        yield [Linker(config=files, target_dir=rundir).go() if files else None]
