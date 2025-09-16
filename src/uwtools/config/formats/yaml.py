@@ -59,6 +59,10 @@ class YAMLConfig(Config):
         """
         Is the given config depth compatible with this format?
         """
+
+        # Valid YAML may consist of a single scalar value, with no dict/mapping or list/sequence
+        # structure, so the depth may be 0.
+
         return depth >= 0
 
     @classmethod
