@@ -250,12 +250,12 @@ class Config(ABC, UserDict):
         # Context object 'ctx', from which Jinja2 will try to retrieve values for rendering template
         # expressions found in config keys and values, starts as a deep copy of the current config,
         # so that self-references can be dereferenced. It is structurally updated from a deep copy,
-        # performed in update_from(), of the optional 'context' object to provide additional and/or
-        # overriding values. Deep copies are used to avoid sturctural sharing between 'ctx` and its
+        # performed in update_from(), of the optional 'context' object, to provide additional and/or
+        # overriding values. Deep copies are used to avoid sturctural sharing between 'ctx' and its
         # precursors.
         #
         # During each iteration of the loop, which terminates when a fixed point is found (i.e. no
-        # more template expressions can be rendered) `ctx` is updated to replace unrendered values
+        # more template expressions can be rendered), `ctx` is updated to replace unrendered values
         # with newly rendered ones, so that they can be used to render yet more values in the next
         # iteration.
 
