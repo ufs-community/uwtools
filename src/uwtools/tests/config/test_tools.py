@@ -41,13 +41,13 @@ def compare_assets(tmp_path):
 
 @fixture
 def compose_assets_yaml():
-    d1 = {"one": 1, "foo": "bar"}
-    d2 = {"one": {"two": 2, "baz": "qux"}, "foo": "bar"}
-    d3 = {"one": {"two": {"three": 3, "asdf": "qwer"}, "baz": "qux"}, "foo": "bar"}
-    u1 = {"one": "won", "two": "too"}
-    u2 = {"one": {"two": "too"}, "won": 1}
-    u3 = {"one": {"two": {"three": ["drei", "tres"], "also": 3}}}
-    return d1, d2, d3, u1, u2, u3
+    d1 = {"k10": "v10", "k11": "v11"}
+    u1 = {"k10": "u10", "k12": "v12"}
+    d2 = {"k10": {"k21": "v21", "k22": "v22"}, "k11": "v11"}
+    u2 = {"k10": {"k21": "u21"}, "k12": "v12"}
+    d3 = {"k10": {"k21": {"k31": "v31", "k32": "v32"}, "k22": "v22"}, "k11": "v11"}
+    u3 = {"k10": {"k21": {"k31": ["v310", "v311"], "k33": "v33"}}}
+    return d1, u1, d2, u2, d3, u3
 
 
 @fixture
@@ -187,7 +187,7 @@ def test_config_tools_compare__bad_format(logged):
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
 def test_config_tools_compose__yaml_single(compose_assets_yaml, logged, suffix, tmp_path, tofile):
-    d1, d2, d3, _, _, _ = compose_assets_yaml
+    d1, _, d2, _, d3, _ = compose_assets_yaml
     dpath = (tmp_path / "d").with_suffix(suffix)
     for d in (d1, d2, d3):
         dpath.unlink(missing_ok=True)
@@ -209,7 +209,7 @@ def test_config_tools_compose__yaml_single(compose_assets_yaml, logged, suffix, 
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
 def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, tmp_path, tofile):
-    d1, d2, d3, u1, u2, u3 = compose_assets_yaml
+    d1, u1, d2, u2, d3, u3 = compose_assets_yaml
     dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
     for d, u in [(d1, u1), (d2, u2), (d3, u3)]:
         for path in [dpath, upath]:
@@ -228,14 +228,14 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
         assert logged(f"Composing 'yaml' config from {upath}")
         if tofile:
             expected = {
-                str(u1): {"one": "won", "two": "too", "foo": "bar"},
-                str(u2): {"one": {"two": "too", "baz": "qux"}, "foo": "bar", "won": 1},
+                str(u1): {"k10": "u10", "k11": "v11", "k12": "v12"},
+                str(u2): {"k10": {"k21": "u21", "k22": "v22"}, "k11": "v11", "k12": "v12"},
                 str(u3): {
-                    "one": {
-                        "two": {"three": ["drei", "tres"], "asdf": "qwer", "also": 3},
-                        "baz": "qux",
+                    "k10": {
+                        "k21": {"k31": ["v310", "v311"], "k32": "v32", "k33": "v33"},
+                        "k22": "v22",
                     },
-                    "foo": "bar",
+                    "k11": "v11",
                 },
             }
             assert YAMLConfig(outpath) == expected[str(u)]
