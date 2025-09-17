@@ -238,7 +238,7 @@ Specify explicit input or output formats to override default treatment baseed on
 Recognized file extensions are: {extensions}.
 
 :param configs: Paths to configs to compose.
-:param realize: Try to render template expressions.
+:param realize: Render template expressions where possible.
 :param output_file: Output config destination (default: write to ``stdout``).
 :param input_format: Format of configs to compose (choices: {choices}, default: ``{default}``)
 :param output_format: Format of output config (choices: {choices}, default: ``{default}``)

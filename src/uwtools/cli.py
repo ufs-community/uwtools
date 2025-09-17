@@ -943,7 +943,7 @@ def _add_arg_realize(group: Group) -> None:
     group.add_argument(
         _switch(STR.realize),
         action="store_true",
-        help="Try to render template expressions",
+        help="Render template expressions where possible",
     )
 
 
