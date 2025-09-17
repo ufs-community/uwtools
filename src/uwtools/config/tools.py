@@ -309,8 +309,8 @@ Recognized file extensions are: {extensions}
 
 :param configs: Paths to configs to compose.
 :param output_file: Output config destination (default: write to stdout).
-:param input_format: Format of configs to compose (choices: {choices}, default: {default})
-:param output_format: Format of output config (choices: {choices}, default: {default})
+:param input_format: Format of configs to compose (choices: {choices}, default: {default}).
+:param output_format: Format of output config (choices: {choices}, default: {default}).
 :return: True if no errors were encountered.
 """.format(
     default=FORMAT.yaml,
