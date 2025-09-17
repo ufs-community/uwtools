@@ -335,6 +335,7 @@ def test_cli__dispatch_config_compose():
     outfile = "/path/to/output"
     args = {
         STR.configs: configs,
+        STR.realize: True,
         STR.outfile: outfile,
         STR.infmt: FORMAT.yaml,
         STR.outfmt: FORMAT.yaml,
@@ -342,7 +343,11 @@ def test_cli__dispatch_config_compose():
     with patch.object(cli.uwtools.api.config, "compose") as compose:
         cli._dispatch_config_compose(args)
     compose.assert_called_once_with(
-        configs=configs, output_file=outfile, input_format=FORMAT.yaml, output_format=FORMAT.yaml
+        configs=configs,
+        realize=True,
+        output_file=outfile,
+        input_format=FORMAT.yaml,
+        output_format=FORMAT.yaml,
     )
 
 

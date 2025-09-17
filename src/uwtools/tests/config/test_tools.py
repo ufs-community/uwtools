@@ -184,16 +184,53 @@ def test_config_tools_compare__bad_format(logged):
     assert logged(msg)
 
 
+@mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
+def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path):
+    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
+    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
+    suffix = f".{fmt}"
+    dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
+    configclass(d).dump(dpath)
+    configclass(u).dump(upath)
+    outpath = (tmp_path / "out").with_suffix(suffix)
+    kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
+    assert tools.compose(**kwargs) is True
+    assert logged(f"Reading {dpath} as base '{fmt}' config")
+    assert logged(f"Composing '{fmt}' config from {upath}")
+    expected = {
+        "constants": {"pi": 3.142, "e": 2.718},
+        "trees": {"leaf": "elm", "needle": "fir"},
+        "colors": {"red": "crimson", "green": "clover"},
+    }
+    if fmt == FORMAT.ini:
+        expected["constants"] = {"pi": "3.142", "e": "2.718"}
+    assert configclass(outpath) == configclass(expected)
+
+
+def test_config_tools_compose__fmt_sh_2x(logged, tmp_path):
+    d = {"foo": 1, "bar": 2}
+    u = {"foo": 3, "baz": 4}
+    dpath, upath = [tmp_path / x for x in ("d.sh", "u.sh")]
+    SHConfig(d).dump(dpath)
+    SHConfig(u).dump(upath)
+    outpath = tmp_path / "out.sh"
+    kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
+    assert tools.compose(**kwargs) is True
+    assert logged(f"Reading {dpath} as base 'sh' config")
+    assert logged(f"Composing 'sh' config from {upath}")
+    assert SHConfig(outpath) == SHConfig({"foo": "3", "bar": "2", "baz": "4"})
+
+
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__yaml_single(compose_assets_yaml, logged, suffix, tmp_path, tofile):
+def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, logged, suffix, tmp_path, tofile):
     d1, _, d2, _, d3, _ = compose_assets_yaml
     dpath = (tmp_path / "d").with_suffix(suffix)
     for d in (d1, d2, d3):
         dpath.unlink(missing_ok=True)
         assert not dpath.exists()
         dpath.write_text(yaml.dump(d))
-        kwargs: dict = {"configs": [dpath]}
+        kwargs: dict = {"configs": [dpath], "realize": False}
         if suffix and suffix != ".yaml":
             kwargs["input_format"] = FORMAT.yaml
         if tofile:
@@ -208,7 +245,7 @@ def test_config_tools_compose__yaml_single(compose_assets_yaml, logged, suffix, 
 
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, tmp_path, tofile):
+def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, tmp_path, tofile):
     d1, u1, d2, u2, d3, u3 = compose_assets_yaml
     dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
     for d, u in [(d1, u1), (d2, u2), (d3, u3)]:
@@ -217,7 +254,7 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
             assert not path.exists()
         dpath.write_text(yaml.dump(d))
         upath.write_text(yaml.dump(u))
-        kwargs: dict = {"configs": [dpath, upath]}
+        kwargs: dict = {"configs": [dpath, upath], "realize": False}
         if suffix and suffix != ".yaml":
             kwargs["input_format"] = FORMAT.yaml
         if tofile:
@@ -242,41 +279,23 @@ def test_config_tools_compose__yaml_double(compose_assets_yaml, logged, suffix, 
             outpath.unlink()
 
 
-@mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
-def test_config_tools_compose__ini_nml_double(configclass, fmt, logged, tmp_path):
-    d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
-    u = {"trees": {"needle": "fir"}, "colors": {"red": "crimson", "green": "clover"}}
-    suffix = f".{fmt}"
-    dpath, upath = [(tmp_path / x).with_suffix(suffix) for x in ("d", "u")]
-    configclass(d).dump(dpath)
-    configclass(u).dump(upath)
-    outpath = (tmp_path / "out").with_suffix(suffix)
-    kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
-    assert tools.compose(**kwargs) is True
-    assert logged(f"Reading {dpath} as base '{fmt}' config")
-    assert logged(f"Composing '{fmt}' config from {upath}")
-    expected = {
-        "constants": {"pi": 3.142, "e": 2.718},
-        "trees": {"leaf": "elm", "needle": "fir"},
-        "colors": {"red": "crimson", "green": "clover"},
-    }
-    if fmt == FORMAT.ini:
-        expected["constants"] = {"pi": "3.142", "e": "2.718"}
-    assert configclass(outpath) == configclass(expected)
-
-
-def test_config_tools_compose__sh_double(logged, tmp_path):
-    d = {"foo": 1, "bar": 2}
-    u = {"foo": 3, "baz": 4}
-    dpath, upath = [tmp_path / x for x in ("d.sh", "u.sh")]
-    SHConfig(d).dump(dpath)
-    SHConfig(u).dump(upath)
-    outpath = tmp_path / "out.sh"
-    kwargs: dict = {"configs": [dpath, upath], "output_file": outpath}
-    assert tools.compose(**kwargs) is True
-    assert logged(f"Reading {dpath} as base 'sh' config")
-    assert logged(f"Composing 'sh' config from {upath}")
-    assert SHConfig(outpath) == SHConfig({"foo": "3", "bar": "2", "baz": "4"})
+@mark.parametrize("realize", [False, True])
+def test_config_tools_compose__realize(realize, tmp_path):
+    dyaml = """
+    radius: !float '{{ 2.0 * pi * r }}'
+    """
+    dpath = tmp_path / "d.yaml"
+    dpath.write_text(dedent(dyaml))
+    uyaml = """
+    pi: 3.142
+    r: 1.0
+    """
+    upath = tmp_path / "u.yaml"
+    upath.write_text(dedent(uyaml))
+    outpath = tmp_path / "out.yaml"
+    assert tools.compose(configs=[dpath, upath], realize=realize, output_file=outpath) is True
+    radius = YAMLConfig(outpath)["radius"]
+    assert (radius == 6.284) if realize else (radius.tagged_string == "!float '{{ 2.0 * pi * r }}'")
 
 
 @mark.parametrize(

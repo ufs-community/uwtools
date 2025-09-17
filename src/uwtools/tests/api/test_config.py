@@ -36,6 +36,7 @@ def test_api_config_compose(output_file, input_format, output_format):
     pathstrs = ["/path/to/c1.yaml", "/path/to/c2.yaml"]
     kwargs: dict = {
         "configs": pathstrs,
+        "realize": False,
         "output_file": output_file,
         "input_format": input_format,
         "output_format": output_format,
@@ -44,6 +45,7 @@ def test_api_config_compose(output_file, input_format, output_format):
         config.compose(**kwargs)
     _compose.assert_called_once_with(
         configs=list(map(Path, pathstrs)),
+        realize=False,
         output_file=None if output_file is None else Path(output_file),
         input_format=input_format,
         output_format=output_format,

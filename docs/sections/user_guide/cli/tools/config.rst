@@ -115,21 +115,46 @@ Examples
      :caption: compose-update-2.yaml
      :language: yaml
 
-Compose the three together, writing to ``stdout``:
+  Compose the three together, writing to ``stdout``:
 
-.. literalinclude:: config/compose-1.cmd
-   :language: text
-   :emphasize-lines: 1
-.. literalinclude:: config/compose-1.out
-   :language: yaml
+  .. literalinclude:: config/compose-basic.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compose-basic.out
+     :language: yaml
 
-Values provided by update configs override or augment values provided in the base config, while unaffected values survive to the final config. Priority of values increases from left to right.
+  Values provided by update configs override or augment values provided in the base config, while unaffected values survive to the final config. Priority of values increases from left to right.
 
-Additionally:
+  Additionally:
 
-  * Sets of configs in the ``ini``, ``nml``, and ``sh`` formats can be similarly composed.
-  * The ``--input-format`` and ``--output-format`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. When the formats are neither explicitly specified or deduced, ``yaml`` is assumed.
-  * The ``--output-file`` / ``-o`` option can be added to write the final config to a file instead of to ``stdout``.
+    * Sets of configs in the ``ini``, ``nml``, and ``sh`` formats can be similarly composed.
+    * The ``--input-format`` and ``--output-format`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. When the formats are neither explicitly specified or deduced, ``yaml`` is assumed.
+    * The ``--output-file`` / ``-o`` option can be added to write the final config to a file instead of to ``stdout``.
+
+* The optional ``--realize`` switch can be used to render as many Jinja2 template expressions as possible in the final config, using the config itself as a source of values. For example:
+
+  .. literalinclude:: config/compose-template.yaml
+     :caption: compose-template.yaml
+     :language: yaml
+  .. literalinclude:: config/compose-values.yaml
+     :caption: compose-values.yaml
+     :language: yaml
+
+  Without the ``--realize`` switch:
+
+  .. literalinclude:: config/compose-realize-no.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compose-realize-no.out
+     :language: yaml
+
+  And with ``--realize``:
+
+  .. literalinclude:: config/compose-realize-yes.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compose-realize-yes.out
+     :language: yaml
 
 .. _cli_config_realize_examples:
 

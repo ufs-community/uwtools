@@ -40,6 +40,7 @@ def compare(
 
 def compose(
     configs: list[Path],
+    realize: bool,
     output_file: Path | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
@@ -58,6 +59,8 @@ def compose(
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config = output_class(config)
+    if realize:
+        output_config.dereference()
     output_config.dump(output_file)
     return True
 

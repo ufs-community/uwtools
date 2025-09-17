@@ -42,6 +42,7 @@ def compare(
 
 def compose(
     configs: list[str | Path],
+    realize: bool = False,
     output_file: Path | str | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
@@ -51,6 +52,7 @@ def compose(
     """
     return _compose(
         configs=list(map(Path, configs)),
+        realize=realize,
         output_file=Path(output_file) if output_file else None,
         input_format=input_format,
         output_format=output_format,
@@ -236,6 +238,7 @@ Specify explicit input or output formats to override default treatment baseed on
 Recognized file extensions are: {extensions}.
 
 :param configs: Paths to configs to compose.
+:param realize: Try to render template expressions.
 :param output_file: Output config destination (default: write to ``stdout``).
 :param input_format: Format of configs to compose (choices: {choices}, default: ``{default}``)
 :param output_format: Format of output config (choices: {choices}, default: ``{default}``)

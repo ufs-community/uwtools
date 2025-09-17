@@ -162,9 +162,10 @@ def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.compose, "Compose configs")
     optional = _basic_setup(parser)
+    _add_arg_realize(optional)
+    _add_arg_output_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_format(optional, choices=FORMATS)
-    _add_arg_output_file(optional)
     checks = _add_args_verbosity(optional)
     parser.add_argument("configs", metavar="CONFIG", nargs="+", type=Path)
     return checks
@@ -248,6 +249,7 @@ def _dispatch_config_compose(args: Args) -> bool:
     return uwtools.api.config.compose(
         configs=args[STR.configs],
         output_file=args[STR.outfile],
+        realize=args[STR.realize],
         input_format=args[STR.infmt],
         output_format=args[STR.outfmt],
     )
@@ -934,6 +936,14 @@ def _add_arg_rate(group: Group) -> None:
         metavar="SECONDS",
         required=False,
         type=int,
+    )
+
+
+def _add_arg_realize(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.realize),
+        action="store_true",
+        help="Try to render template expressions",
     )
 
 
