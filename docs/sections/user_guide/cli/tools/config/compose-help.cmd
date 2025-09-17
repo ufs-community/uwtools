@@ -1,0 +1,1 @@
+uw config compose --help

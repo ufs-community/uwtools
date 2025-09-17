@@ -118,6 +118,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
+        STR.compose: _add_subparser_config_compose(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
         STR.validate: _add_subparser_config_validate(subparsers),
     }
@@ -151,6 +152,23 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
         partial(_check_file_vs_format, STR.path1, STR.fmt1),
         partial(_check_file_vs_format, STR.path2, STR.fmt2),
     ]
+
+
+def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: config compose.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.compose, "Compose configs")
+    optional = _basic_setup(parser)
+    _add_arg_realize(optional)
+    _add_arg_output_file(optional)
+    _add_arg_input_format(optional, choices=FORMATS)
+    _add_arg_output_format(optional, choices=FORMATS)
+    checks = _add_args_verbosity(optional)
+    parser.add_argument("configs", metavar="CONFIG", nargs="+", type=Path)
+    return checks
 
 
 def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
@@ -201,6 +219,7 @@ def _dispatch_config(args: Args) -> bool:
     """
     actions = {
         STR.compare: _dispatch_config_compare,
+        STR.compose: _dispatch_config_compose,
         STR.realize: _dispatch_config_realize,
         STR.validate: _dispatch_config_validate,
     }
@@ -218,6 +237,21 @@ def _dispatch_config_compare(args: Args) -> bool:
         format1=args[STR.fmt1],
         path2=args[STR.path2],
         format2=args[STR.fmt2],
+    )
+
+
+def _dispatch_config_compose(args: Args) -> bool:
+    """
+    Define dispatch logic for config compose action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.config.compose(
+        configs=args[STR.configs],
+        output_file=args[STR.outfile],
+        realize=args[STR.realize],
+        input_format=args[STR.infmt],
+        output_format=args[STR.outfmt],
     )
 
 
@@ -808,7 +842,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.infile),
         "-i",
-        help="Path to input file (defaults to stdin)",
+        help="Path to input file (default: read from stdin)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -819,7 +853,7 @@ def _add_arg_input_format(group: Group, choices: list[str], required: bool = Fal
     group.add_argument(
         _switch(STR.infmt),
         choices=choices,
-        help="Input format",
+        help=f"Input format (default: {FORMAT.yaml})",
         required=required,
         type=str,
     )
@@ -866,7 +900,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
         "-o",
-        help="Path to output file (defaults to stdout)",
+        help="Path to output file (default: write to stdout)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -877,7 +911,7 @@ def _add_arg_output_format(group: Group, choices: list[str], required: bool = Fa
     group.add_argument(
         _switch(STR.outfmt),
         choices=choices,
-        help="Output format",
+        help=f"Output format (default: {FORMAT.yaml})",
         required=required,
         type=str,
     )
@@ -902,6 +936,14 @@ def _add_arg_rate(group: Group) -> None:
         metavar="SECONDS",
         required=False,
         type=int,
+    )
+
+
+def _add_arg_realize(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.realize),
+        action="store_true",
+        help="Render template expressions where possible",
     )
 
 
@@ -981,7 +1023,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.updatefile),
         "-u",
-        help="Path to update file (defaults to stdin)",
+        help="Path to update file (default: read from stdin)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -1348,6 +1390,8 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         **drivers_with_cycle_and_leadtime,
     }
     checks = {k: modes[k]() for k in sorted(modes.keys())}
+    # Return a dict version of the Namespace object returned by parse_args(), supporting lookups
+    # like args[STR.foo], which would otherwise have to be the even noisier getattr(args, STR.foo).
     return vars(parser.parse_args(raw_args)), checks
 
 

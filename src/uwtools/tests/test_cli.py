@@ -80,12 +80,22 @@ def test_cli__abort(capsys):
 
 def test_cli__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
-    assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
+    assert actions(subparsers.choices[STR.config]) == [
+        STR.compare,
+        STR.compose,
+        STR.realize,
+        STR.validate,
+    ]
 
 
 def test_cli__add_subparser_config_compare(subparsers):
     cli._add_subparser_config_compare(subparsers)
     assert subparsers.choices[STR.compare]
+
+
+def test_cli__add_subparser_config_compose(subparsers):
+    cli._add_subparser_config_compose(subparsers)
+    assert subparsers.choices[STR.compose]
 
 
 def test_cli__add_subparser_config_realize(subparsers):
@@ -295,6 +305,7 @@ def test_cli__dict_from_key_eq_val_strings():
     "params",
     [
         (STR.compare, "_dispatch_config_compare"),
+        (STR.compose, "_dispatch_config_compose"),
         (STR.realize, "_dispatch_config_realize"),
         (STR.validate, "_dispatch_config_validate"),
     ],
@@ -316,6 +327,27 @@ def test_cli__dispatch_config_compare():
         format1=args[STR.fmt1],
         path2=args[STR.path2],
         format2=args[STR.fmt2],
+    )
+
+
+def test_cli__dispatch_config_compose():
+    configs = ["/path/to/a", "/path/to/b"]
+    outfile = "/path/to/output"
+    args = {
+        STR.configs: configs,
+        STR.realize: True,
+        STR.outfile: outfile,
+        STR.infmt: FORMAT.yaml,
+        STR.outfmt: FORMAT.yaml,
+    }
+    with patch.object(cli.uwtools.api.config, "compose") as compose:
+        cli._dispatch_config_compose(args)
+    compose.assert_called_once_with(
+        configs=configs,
+        realize=True,
+        output_file=outfile,
+        input_format=FORMAT.yaml,
+        output_format=FORMAT.yaml,
     )
 
 

@@ -21,3 +21,15 @@ html.writer-html5 .rst-content table.docutils td>p {
 .wy-table-responsive table td, .wy-table-responsive table th {
   white-space: inherit;
 }
+
+/* Hide "Listing ..." text in captions */
+
+.rst-content .caption-number {
+  display: none;
+}
+
+/* Left align captions. */
+
+.rst-content .code-block-caption {
+  text-align: left;
+}

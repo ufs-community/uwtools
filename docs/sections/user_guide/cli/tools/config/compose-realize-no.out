@@ -1,0 +1,3 @@
+radius: !float '{{ 2.0 * pi * r }}'
+pi: 3.142
+r: 1.0

@@ -14,8 +14,9 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.tools import compare_configs as _compare
-from uwtools.config.tools import realize_config as _realize
+from uwtools.config.tools import compare as _compare
+from uwtools.config.tools import compose as _compose
+from uwtools.config.tools import realize as _realize
 from uwtools.config.validator import ConfigDataT, ConfigPathT
 from uwtools.config.validator import validate_check_config as _validate_check_config
 from uwtools.config.validator import validate_external as _validate_external
@@ -31,19 +32,30 @@ if TYPE_CHECKING:
 
 
 def compare(
-    path1: Path | str,
-    path2: Path | str,
-    format1: str | None = None,
-    format2: str | None = None,
+    path1: Path | str, path2: Path | str, format1: str | None = None, format2: str | None = None
 ) -> bool:
     """
     NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
-    return _compare(
-        path1=Path(path1),
-        path2=Path(path2),
-        format1=format1,
-        format2=format2,
+    return _compare(path1=Path(path1), path2=Path(path2), format1=format1, format2=format2)
+
+
+def compose(
+    configs: list[str | Path],
+    realize: bool = False,
+    output_file: Path | str | None = None,
+    input_format: str | None = None,
+    output_format: str | None = None,
+) -> bool:
+    """
+    NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
+    """
+    return _compose(
+        configs=list(map(Path, configs)),
+        realize=realize,
+        output_file=Path(output_file) if output_file else None,
+        input_format=input_format,
+        output_format=output_format,
     )
 
 
@@ -217,8 +229,25 @@ Recognized file extensions are: {extensions}
 :param format1: Format of 1st config file (optional if file's extension is recognized).
 :param format2: Format of 2nd config file (optional if file's extension is recognized).
 :return: ``False`` if config files had differences, otherwise ``True``.
-""".format(extensions=", ".join(_FORMAT.extensions())).strip()
+""".format(extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()])).strip()
 
+compose.__doc__ = """
+Compose config files.
+
+Specify explicit input or output formats to override default treatment based on file extension.
+Recognized file extensions are: {extensions}.
+
+:param configs: Paths to configs to compose.
+:param realize: Render template expressions where possible.
+:param output_file: Output config destination (default: write to ``stdout``).
+:param input_format: Format of configs to compose (choices: {choices}, default: ``{default}``)
+:param output_format: Format of output config (choices: {choices}, default: ``{default}``)
+:return: ``True`` if no errors were encountered.
+""".format(
+    default=_FORMAT.yaml,
+    extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()]),
+    choices=", ".join([f"``{x}``" for x in (_FORMAT.ini, _FORMAT.nml, _FORMAT.sh, _FORMAT.yaml)]),
+).strip()
 
 realize.__doc__ = """
 Realize a config based on a base input config and an optional update config.
@@ -258,7 +287,7 @@ Recognized file extensions are: {extensions}
 :param stdin_ok: OK to read from ``stdin``?
 :return: The ``dict`` representation of the realized config.
 :raises: ``UWConfigRealizeError`` if ``total`` is ``True`` and any Jinja2 syntax was not rendered.
-""".format(extensions=", ".join(_FORMAT.extensions())).strip()  # noqa: E501
+""".format(extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()])).strip()  # noqa: E501
 
 __all__ = [
     "Config",
@@ -268,6 +297,7 @@ __all__ = [
     "SHConfig",
     "YAMLConfig",
     "compare",
+    "compose",
     "get_fieldtable_config",
     "get_ini_config",
     "get_nml_config",

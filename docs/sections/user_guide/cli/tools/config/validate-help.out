@@ -13,7 +13,7 @@ Optional arguments:
   --version
       Show version info and exit
   --input-file PATH, -i PATH
-      Path to input file (defaults to stdin)
+      Path to input file (default: read from stdin)
   --quiet, -q
       Print no logging messages
   --verbose, -v

@@ -15,17 +15,17 @@ Optional arguments:
   --version
       Show version info and exit
   --input-file PATH, -i PATH
-      Path to input file (defaults to stdin)
+      Path to input file (default: read from stdin)
   --input-format {ini,nml,sh,yaml}
-      Input format
+      Input format (default: yaml)
   --update-file PATH, -u PATH
-      Path to update file (defaults to stdin)
+      Path to update file (default: read from stdin)
   --update-format {ini,nml,sh,yaml}
       Update format
   --output-file PATH, -o PATH
-      Path to output file (defaults to stdout)
+      Path to output file (default: write to stdout)
   --output-format {ini,nml,sh,yaml}
-      Output format
+      Output format (default: yaml)
   --key-path KEY[.KEY...]
       Dot-separated path of keys to the block to be output
   --values-needed

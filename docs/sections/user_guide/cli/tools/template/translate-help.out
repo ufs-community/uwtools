@@ -10,9 +10,9 @@ Optional arguments:
   --version
       Show version info and exit
   --input-file PATH, -i PATH
-      Path to input file (defaults to stdin)
+      Path to input file (default: read from stdin)
   --output-file PATH, -o PATH
-      Path to output file (defaults to stdout)
+      Path to output file (default: write to stdout)
   --dry-run
       Only log info, making no changes
   --quiet, -q

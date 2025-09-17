@@ -12,6 +12,8 @@ Positional arguments:
   ACTION
     compare
       Compare configs
+    compose
+      Compose configs
     realize
       Realize config
     validate
