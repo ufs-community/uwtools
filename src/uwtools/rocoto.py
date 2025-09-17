@@ -14,14 +14,16 @@ from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Any
 
+from jinja2 import Environment, StrictUndefined, meta
 from lxml import etree
 from lxml.builder import E  # type: ignore[import-not-found]
 from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.jinja2 import unrendered
 from uwtools.config.validator import validate_external as validate_yaml
-from uwtools.exceptions import UWConfigError, UWError
-from uwtools.logging import log
+from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
+from uwtools.logging import INDENT, log
 from uwtools.utils.file import readable, resource_path, writable
 from uwtools.utils.processing import run_shell_cmd
 
@@ -58,6 +60,15 @@ def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -
     """
     rxml = _RocotoXML(config)
     xml = str(rxml).strip()
+    if unrendered(xml):
+        log.error(xml)
+        log.error("Value(s) needed to render this XML are:")
+        for var in meta.find_undeclared_variables(
+            Environment(undefined=StrictUndefined).parse(xml)
+        ):
+            log.error("%s%s", INDENT, var)
+        msg = "Rocoto XML could not be totally realized"
+        raise UWConfigRealizeError(msg)
     if not validate_string(xml):
         msg = "Internal error: Invalid Rocoto XML"
         raise UWError(msg)
