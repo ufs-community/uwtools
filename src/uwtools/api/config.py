@@ -234,7 +234,7 @@ Recognized file extensions are: {extensions}
 compose.__doc__ = """
 Compose config files.
 
-Specify explicit input or output formats to override default treatment baseed on file extension.
+Specify explicit input or output formats to override default treatment based on file extension.
 Recognized file extensions are: {extensions}.
 
 :param configs: Paths to configs to compose.
