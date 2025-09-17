@@ -127,9 +127,9 @@ Values provided by update configs override or augment values provided in the bas
 
 Additionally:
 
-  * Configs in the ``ini``, ``nml``, and ``sh`` formats can be similarly composed.
-  * The ``--input-config`` and ``--output-config`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. The the formats are neither explicitly provided or deduced, ``yaml`` is assumed.
-  * The ``--output-file`` / ``-o`` option can be added to direct the output to a file.
+  * Sets of configs in the ``ini``, ``nml``, and ``sh`` formats can be similarly composed.
+  * The ``--input-format`` and ``--output-format`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. When the formats are neither explicitly specified or deduced, ``yaml`` is assumed.
+  * The ``--output-file`` / ``-o`` option can be added to write the final config to a file instead of to ``stdout``.
 
 .. _cli_config_realize_examples:
 
