@@ -197,13 +197,15 @@ def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path
     assert tools.compose(**kwargs) is True
     assert logged(f"Reading {dpath} as base '{fmt}' config")
     assert logged(f"Composing '{fmt}' config from {upath}")
+    constants = {"pi": 3.142, "e": 2.718}
     expected = {
-        "constants": {"pi": 3.142, "e": 2.718},
+        "constants": constants,
         "trees": {"leaf": "elm", "needle": "fir"},
         "colors": {"red": "crimson", "green": "clover"},
     }
     if fmt == FORMAT.ini:
-        expected["constants"] = {"pi": "3.142", "e": "2.718"}
+        # All values in INI configs are strings:
+        expected["constants"] = {k: str(v) for k, v in constants.items()}
     assert configclass(outpath) == configclass(expected)
 
 
