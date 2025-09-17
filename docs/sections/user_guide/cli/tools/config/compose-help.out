@@ -15,7 +15,7 @@ Optional arguments:
   --version
       Show version info and exit
   --realize
-      Try to render template expressions
+      Render template expressions where possible
   --output-file PATH, -o PATH
       Path to output file (default: write to stdout)
   --input-format {ini,nml,sh,yaml}
