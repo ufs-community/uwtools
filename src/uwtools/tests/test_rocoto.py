@@ -13,7 +13,7 @@ from pytest import fixture, mark, raises
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.tests.support import fixture_path, schema_validator
 
 # Fixtures
@@ -86,6 +86,19 @@ def test_rocoto_realize__invalid_xml(assets):
         vrxs.return_value = False
         with raises(UWError):
             rocoto.realize(config=cfgfile, output_file=outfile)
+
+
+def test_rocoto_realize__unrendered_xml(assets, logged):
+    cfgfile, outfile = assets
+    template = "Hello {{ world }}."
+    with (
+        patch.object(rocoto, "_RocotoXML", return_value=template),
+        raises(UWConfigRealizeError, match=r"Rocoto XML could not be totally realized"),
+    ):
+        rocoto.realize(config=cfgfile, output_file=outfile)
+    assert logged(template)
+    assert logged("Value(s) needed to render this XML are:")
+    assert logged("world")
 
 
 def test_rocoto_validate__file_fail(validation_assets):
