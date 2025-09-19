@@ -194,7 +194,7 @@ The ``hardlink`` action stages items in a target directory by creating hardlinks
   * Items the user does not have write permission to
   * Directories
 
-* If a hardlink cannot be created but the ``--symlink-fallback`` option is specified, a symlink will be created instead, if possible.
+* If a hardlink cannot be created but the ``--fallback`` option is specified, a copy (given ``--fallback copy``) or a symlink (given ``--fallback symlink``)  will be created instead, if possible.
 
 .. literalinclude:: fs/hardlink-help.cmd
    :language: text
