@@ -394,9 +394,7 @@ class Driver(Assets):
 
         class Encoder(json.JSONEncoder):
             def default(self, obj: Any):
-                if isinstance(obj, Path):
-                    return str(obj)
-                return json.JSONEncoder.default(self, obj)
+                return str(obj)
 
         yield self.taskname("expected output")
         try:
