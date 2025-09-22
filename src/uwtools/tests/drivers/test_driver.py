@@ -424,7 +424,10 @@ def test_Driver_namelist_schema_default_disable(driverobj):
 
 def test_Driver_output(config):
     driverobj = ConcreteDriverTimeInvariant(config)
-    assert driverobj.output == {"foo": "/path/to/foo", "bar": ["/path/to/bar1", "/path/to/bar2"]}
+    assert driverobj.output == {
+        "foo": Path("/path/to/foo"),
+        "bar": ["/path/to/bar1", "/path/to/bar2"],
+    }
 
 
 @mark.parametrize("cls", [ConcreteDriverCycleBased, ConcreteDriverCycleLeadtimeBased])
