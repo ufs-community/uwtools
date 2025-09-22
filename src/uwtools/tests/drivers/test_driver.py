@@ -67,7 +67,7 @@ class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
     @property
     def output(self):
         # The dict keys are intentionally out-of-alphabetical-order to test JSON sorting.
-        return {"bar": ["/path/to/bar1", "/path/to/bar2"], "foo": "/path/to/foo"}
+        return {"bar": ["/path/to/bar1", "/path/to/bar2"], "foo": Path("/path/to/foo")}
 
 
 def write(path: Path, x):
@@ -424,7 +424,10 @@ def test_Driver_namelist_schema_default_disable(driverobj):
 
 def test_Driver_output(config):
     driverobj = ConcreteDriverTimeInvariant(config)
-    assert driverobj.output == {"foo": "/path/to/foo", "bar": ["/path/to/bar1", "/path/to/bar2"]}
+    assert driverobj.output == {
+        "foo": Path("/path/to/foo"),
+        "bar": ["/path/to/bar1", "/path/to/bar2"],
+    }
 
 
 @mark.parametrize("cls", [ConcreteDriverCycleBased, ConcreteDriverCycleLeadtimeBased])

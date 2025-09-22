@@ -391,9 +391,14 @@ class Driver(Assets):
         """
         Show the output to be created by this component.
         """
+
+        class Encoder(json.JSONEncoder):
+            def default(self, obj: Any):
+                return str(obj)
+
         yield self.taskname("expected output")
         try:
-            print(json.dumps(self.output, indent=2, sort_keys=True))
+            print(json.dumps(self.output, cls=Encoder, indent=2, sort_keys=True))
         except UWConfigError as e:
             log.error(e)
         yield asset(None, lambda: True)
