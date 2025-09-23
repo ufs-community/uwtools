@@ -71,3 +71,18 @@ def test_files_to_link(driver, tmp_path):
     for fn in ["c", "d", "output/a", "output/b"]:
         fp = Path(tmp_path / f"{fn}.foo")
         assert fp.is_symlink()
+
+
+@mark.parametrize(
+    ("stage_task", "section"),
+    [
+        ("files_copied", "files_to_copy"),
+        ("files_hardlinked", "files_to_hardlink"),
+        ("files_linked", "files_to_link"),
+    ],
+)
+def test_files_to_stage_missing(driver, section, stage_task):
+    del driver.config[section]
+    task = driver.__getattribute__(stage_task)()
+    assert not task.requirements
+    assert task.ready
