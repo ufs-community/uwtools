@@ -23,6 +23,8 @@ The ``copy`` action stages files in a target directory by copying files. Any ``K
 
 Source paths prefixed with ``http://``, ``https://``, ``hsi://``, or ``htar://`` will be copied from their upstream network locations to the local filesystem.
 
+Source paths prefixed with ``file://`` will be treated as local-filesystem paths.
+
 .. literalinclude:: fs/copy-help.cmd
    :language: text
    :emphasize-lines: 1
