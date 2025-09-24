@@ -21,7 +21,7 @@ The ``uw`` mode for handling filesystem items (files and directories).
 
 The ``copy`` action stages files in a target directory by copying files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
-Source paths prefixed with ``http://``, ``https://``, ``hsi://``, or ``htar://`` will be copied from their upstream network locations to the local filesystem.
+Source paths prefixed with ``file://``, ``http://``, ``https://``, ``hsi://``, or ``htar://``, as well as regular filesystem paths, will be copied from their upstream network locations to the local filesystem.
 
 .. literalinclude:: fs/copy-help.cmd
    :language: text
