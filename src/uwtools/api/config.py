@@ -46,7 +46,7 @@ def compose(
     output_file: Path | str | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
-) -> bool:
+) -> Config:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """

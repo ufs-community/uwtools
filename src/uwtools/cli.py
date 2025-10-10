@@ -246,13 +246,14 @@ def _dispatch_config_compose(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.compose(
+    uwtools.api.config.compose(
         configs=args[STR.configs],
         output_file=args[STR.outfile],
         realize=args[STR.realize],
         input_format=args[STR.infmt],
         output_format=args[STR.outfmt],
     )
+    return True
 
 
 def _dispatch_config_realize(args: Args) -> bool:

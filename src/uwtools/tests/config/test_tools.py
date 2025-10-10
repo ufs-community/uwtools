@@ -13,6 +13,7 @@ import yaml
 from pytest import fixture, mark, raises
 
 from uwtools.config import tools
+from uwtools.config.formats.base import Config
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -194,7 +195,7 @@ def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path
     configclass(u).dump(upath)
     outpath = (tmp_path / "out").with_suffix(suffix)
     kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
-    assert tools.compose(**kwargs) is True
+    assert isinstance(tools.compose(**kwargs), Config)
     assert logged(f"Reading {dpath} as base '{fmt}' config")
     assert logged(f"Composing '{fmt}' config from {upath}")
     constants = {"pi": 3.142, "e": 2.718}
@@ -217,7 +218,7 @@ def test_config_tools_compose__fmt_sh_2x(logged, tmp_path):
     SHConfig(u).dump(upath)
     outpath = tmp_path / "out.sh"
     kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
-    assert tools.compose(**kwargs) is True
+    assert isinstance(tools.compose(**kwargs), Config)
     assert logged(f"Reading {dpath} as base 'sh' config")
     assert logged(f"Composing 'sh' config from {upath}")
     assert SHConfig(outpath) == SHConfig({"foo": "3", "bar": "2", "baz": "4"})
@@ -238,7 +239,7 @@ def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, logged, suffix, 
         if tofile:
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
-        assert tools.compose(**kwargs) is True
+        assert isinstance(tools.compose(**kwargs), Config)
         assert logged(f"Reading {dpath} as base 'yaml' config")
         if tofile:
             assert YAMLConfig(outpath) == d
@@ -262,7 +263,7 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
         if tofile:
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
-        assert tools.compose(**kwargs) is True
+        assert isinstance(tools.compose(**kwargs), Config)
         assert logged(f"Reading {dpath} as base 'yaml' config")
         assert logged(f"Composing 'yaml' config from {upath}")
         if tofile:
@@ -295,7 +296,9 @@ def test_config_tools_compose__realize(realize, tmp_path):
     upath = tmp_path / "u.yaml"
     upath.write_text(dedent(uyaml))
     outpath = tmp_path / "out.yaml"
-    assert tools.compose(configs=[dpath, upath], realize=realize, output_file=outpath) is True
+    assert isinstance(
+        tools.compose(configs=[dpath, upath], realize=realize, output_file=outpath), Config
+    )
     radius = YAMLConfig(outpath)["radius"]
     assert (radius == 6.284) if realize else (radius.tagged_string == "!float '{{ 2.0 * pi * r }}'")
 
