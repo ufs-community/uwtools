@@ -1174,6 +1174,16 @@ def test_schema_gsi_coupler_res(gsi_prop):
     )
 
 
+def test_schema_gsi_filelist(gsi_prop):
+    errors = gsi_prop("filelist")
+    # Make sure it's a list of strings
+    assert not errors(["a", "b"])
+    assert "is not of type 'array'" in errors({"a": "foo", "b": "bar"})
+    assert "is not of type 'string'" in errors([1, 2])
+    # Make sure it has entries
+    assert "should be non-empty" in errors([])
+
+
 def test_schema_gsi_namelist(gsi_prop):
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": {"nml": {"var": "val"}}}

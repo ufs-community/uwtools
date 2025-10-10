@@ -3,7 +3,7 @@ GSI driver tests.
 """
 
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import DEFAULT, patch
 
 import f90nml  # type: ignore[import-untyped]
 import yaml
@@ -75,6 +75,18 @@ def test_GSI_driver_name(driverobj):
     assert driverobj.driver_name() == GSI.driver_name() == "gsi"
 
 
+def test_GSI_filelist(driverobj):
+    driverobj._config["filelist"] = {"foo", "bar", "baz"}
+    filelist = driverobj.rundir / "filelist03"
+    assert not filelist.is_file()
+    driverobj.filelist()
+    assert filelist.is_file()
+    expected_content = """bar
+baz
+foo"""
+    assert filelist.read_text() == expected_content
+
+
 @mark.parametrize(
     ("key", "task", "test"),
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
@@ -128,19 +140,29 @@ def test_GSI_namelist_file__missing_base_file(driverobj, logged):
     assert logged("missing.nml: Not ready [external asset]")
 
 
-def test_GSI_provisioned_rundir(driverobj, ready_task):
-    with patch.multiple(
-        driverobj,
-        coupler_res=ready_task,
-        files_copied=ready_task,
-        files_hardlinked=ready_task,
-        files_linked=ready_task,
-        namelist_file=ready_task,
-        runscript=ready_task,
-    ) as mocks:
+@mark.parametrize("filelist", [[], ["a", "b"]])
+def test_GSI_provisioned_rundir(driverobj, filelist):
+    expected_mocks = dict.fromkeys(
+        [
+            "coupler_res",
+            "files_copied",
+            "files_hardlinked",
+            "files_linked",
+            "namelist_file",
+            "runscript",
+        ],
+        DEFAULT,
+    )
+    if filelist:
+        driverobj._config["filelist"] = filelist
+        expected_mocks["filelist"] = DEFAULT
+    with patch.multiple(driverobj, **expected_mocks) as mocks:
         driverobj.provisioned_rundir()
     for m in mocks:
-        mocks[m].assert_called_once_with()
+        if m == "filelist" and not filelist:
+            mocks[m].assert_not_called()
+        else:
+            mocks[m].assert_called_once_with()
 
 
 def test_GSI__input_config_path(driverobj):

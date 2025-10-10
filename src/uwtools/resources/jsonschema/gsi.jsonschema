@@ -22,6 +22,13 @@
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
         },
+        "filelist": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
         "files_to_copy": {
           "$ref": "urn:uwtools:files-to-stage"
         },

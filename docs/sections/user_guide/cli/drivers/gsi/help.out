@@ -14,6 +14,8 @@ Positional arguments:
   TASK
     coupler_res
       The coupler.res file
+    filelist
+      Optional filelist file for global ensemble background error
     files_copied
       Files copied for run
     files_hardlinked

@@ -36,6 +36,12 @@ See :ref:`this page <execution_yaml>` for details.
 
 .. include:: /shared/stager.rst
 
+filelist:
+^^^^^^^^^
+
+An optional list of files to be included in the ``filelist03`` text file required by GSI when
+running with ``regional_ensemble_option = 1`` for global ensembles.
+
 namelist:
 ^^^^^^^^^
 

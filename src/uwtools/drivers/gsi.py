@@ -44,6 +44,18 @@ class GSI(DriverCycleBased, FileStager):
         )
 
     @task
+    def filelist(self):
+        """
+        Optional filelist file for global ensemble background error.
+        """
+        path = self.rundir / "filelist03"
+        yield self.taskname(path.name)
+        yield asset(path, path.is_file)
+        yield None
+        files = self.config["filelist"]
+        path.write_text("\n".join(sorted(files)))
+
+    @task
     def namelist_file(self):
         """
         The namelist file.
@@ -78,6 +90,8 @@ class GSI(DriverCycleBased, FileStager):
             self.namelist_file(),
             self.runscript(),
         ]
+        if self.config.get("filelist"):
+            task_list.append(self.filelist())
         yield task_list
 
     @task
