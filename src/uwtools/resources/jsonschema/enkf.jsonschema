@@ -1,0 +1,91 @@
+{
+  "properties": {
+    "enkf": {
+      "additionalProperties": false,
+      "properties": {
+        "background_files": {
+          "additionalProperties": false,
+          "properties": {
+            "ensemble_size": {
+              "minimum": 2,
+              "type": "integer"
+            },
+            "files": {
+              "$ref": "urn:uwtools:files-to-stage"
+            }
+          },
+          "required": [
+            "ensemble_size",
+            "files"
+          ],
+          "type": "object"
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-parallel"
+        },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_hardlink": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "type": [
+                    "array",
+                    "boolean",
+                    "number",
+                    "string"
+                  ]
+                },
+                "type": "object"
+              },
+              "minProperties": 1,
+              "type": "object"
+            },
+            "validate": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "background_files",
+        "execution",
+        "namelist",
+        "rundir"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "enkf"
+  ],
+  "type": "object"
+}

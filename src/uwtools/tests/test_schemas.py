@@ -171,6 +171,11 @@ def chgres_cube_prop():
 
 
 @fixture
+def enkf_prop():
+    return partial(schema_validator, "enkf", "properties", "enkf", "properties")
+
+
+@fixture
 def esg_grid_prop():
     return partial(schema_validator, "esg-grid", "properties", "esg_grid", "properties")
 
@@ -662,6 +667,43 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
         assert "is not of type 'array', 'string'\n" in errors(with_set(config, None, key))
         assert "is not of type 'string'\n" in errors(with_set(config, [1, 2, 3], key))
         assert not errors(with_set(config, ["foo", "bar", "baz"], key))
+
+
+# enkf
+
+
+def test_schema_enkf():
+    config = {
+        "background_files": {"files": {"a": "/some/path"}, "ensemble_size": 3},
+        "execution": {"executable": "/some/ioda.exe"},
+        "files_to_copy": {"file1": "src1", "file2": "src2"},
+        "files_to_link": {"link1": "src3", "link2": "src4"},
+        "files_to_hardlink": {"link3": "src4"},
+        "namelist": {"base_file": "/path/to/nml.in"},
+        "rundir": "/run",
+    }
+    errors = schema_validator("enkf", "properties", "enkf")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("background_files", "execution", "namelist", "rundir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_enkf_background_files(enkf_prop):
+    errors = enkf_prop("background_files")
+    # Both properties are required
+    assert "'files' is a required property" in errors({"ensemble_size": 2})
+    assert "'ensemble_size' is a required property" in errors({"files": {"foo": "bar"}})
+    # Correct
+    assert not errors(
+        {
+            "ensemble_size": 80,
+            "files": {"foo": "bar"},
+        }
+    )
 
 
 # esg-grid

@@ -73,6 +73,7 @@ def main() -> None:
             for x in [
                 STR.cdeps,
                 STR.chgrescube,
+                STR.enkf,
                 STR.esggrid,
                 STR.filtertopo,
                 STR.fv3,
@@ -1357,6 +1358,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             _add_subparser_for_driver, component, subparsers, with_batch=True, with_cycle=True
         )
         for component in [
+            STR.enkf,
             STR.fv3,
             STR.gsi,
             STR.ioda,

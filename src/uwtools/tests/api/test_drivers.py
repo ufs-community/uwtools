@@ -6,6 +6,7 @@ from pytest import mark
 from uwtools.api import (
     cdeps,
     chgres_cube,
+    enkf,
     esg_grid,
     filter_topo,
     fv3,
@@ -33,6 +34,7 @@ from uwtools.utils import api
 modules = [
     cdeps,
     chgres_cube,
+    enkf,
     esg_grid,
     filter_topo,
     fv3,
@@ -58,6 +60,7 @@ modules = [
 with_cycle = [
     cdeps,
     chgres_cube,
+    enkf,
     fv3,
     gsi,
     ioda,
