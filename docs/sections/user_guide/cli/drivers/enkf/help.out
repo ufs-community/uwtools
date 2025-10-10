@@ -1,0 +1,34 @@
+usage: uw enkf [-h] [--version] [--show-schema] TASK ...
+
+Execute enkf tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --show-schema
+      Show driver schema and exit
+
+Positional arguments:
+  TASK
+    background_files
+      The ensemble background files
+    files_copied
+      Files copied for run
+    files_hardlinked
+      Files hardlinked for run
+    files_linked
+      Files linked for run
+    namelist_file
+      The namelist file
+    provisioned_rundir
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    show_output
+      Show the output to be created by this component
+    validate
+      Validate the UW driver config

@@ -9,6 +9,7 @@ Available Drivers
 
    cdeps
    chgres_cube
+   enkf
    esg_grid
    filter_topo
    fv3

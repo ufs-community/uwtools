@@ -8,6 +8,7 @@ Drivers
 
    cdeps/index
    chgres_cube/index
+   enkf/index
    esg_grid/index
    filter_topo/index
    fv3/index
