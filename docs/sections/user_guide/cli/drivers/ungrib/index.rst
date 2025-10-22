@@ -3,7 +3,7 @@
 
 .. include:: ../shared/idempotent.rst
 
-The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``. Documentation for this component is :wps:`here <program-ungrib>`.
+The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``. Documentation for this component is :wps:`here <>`.
 
 .. include:: help.rst
 
