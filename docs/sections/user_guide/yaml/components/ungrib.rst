@@ -3,7 +3,7 @@
 ungrib
 ======
 
-Structured YAML to run the WRF preprocessing component ``ungrib`` (:wps:`documentation <program-ungrib>`) is validated by JSON Schema and requires the ``ungrib:`` block, described below. If ``ungrib`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
+Structured YAML to run the WRF preprocessing component ``ungrib`` (part of :wps:`WPS <>`) is validated by JSON Schema and requires the ``ungrib:`` block, described below. If ``ungrib`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 .. include:: /shared/injected_cycle.rst
 

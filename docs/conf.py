@@ -62,7 +62,7 @@ extlinks = {
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
     "weather-model-io": ("https://ufs-weather-model.readthedocs.io/en/latest/InputsOutputs.html#%s", "%s"),
-    "wps": ("https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/wps.html#%s", "%s"),
+    "wps": ("https://github.com/wrf-model/WPS#%s", "%s"),
     "ww3": ("https://polar.ncep.noaa.gov/waves/wavewatch/%s", "%s"),
 }
 
