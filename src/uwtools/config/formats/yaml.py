@@ -4,7 +4,6 @@ from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING, NoReturn
 
 import yaml
-from yaml.composer import ComposerError
 from yaml.constructor import ConstructorError
 
 from uwtools.config.formats.base import Config
@@ -96,8 +95,6 @@ class YAMLConfig(Config):
             s = f.read()
         try:
             config = yaml.load(s, Loader=self._yaml_loader)
-        except ComposerError as e:
-            s = self._load_handle_composer_error(e)
         except ConstructorError as e:
             self._load_handle_constructor_error(config_file, e)
         if not isinstance(config, dict):
@@ -109,18 +106,6 @@ class YAMLConfig(Config):
         source = config_file or "stdin"
         msg = "Parsed %s %s value from %s, expected a dict" % (article, t, source)
         raise UWConfigError(msg)
-
-    def _load_handle_composer_error(self, e: ComposerError) -> str:
-        if (
-            e.problem
-            and "undefined alias" in e.problem
-            and e.problem_mark
-            and e.problem_mark.buffer
-        ):
-            s = e.problem_mark.buffer
-            i = e.problem_mark.index
-            return f"{s[:i]}_{s[i + 1 :]}"[:-1]
-        raise e
 
     def _load_handle_constructor_error(
         self, config_file: Path | None, e: ConstructorError
