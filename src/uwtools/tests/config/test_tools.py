@@ -195,7 +195,6 @@ def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path
     outpath = (tmp_path / "out").with_suffix(suffix)
     kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
     assert tools.compose(**kwargs) is True
-    assert logged(f"Reading {dpath} as base '{fmt}' config")
     assert logged(f"Composing '{fmt}' config from {upath}")
     constants = {"pi": 3.142, "e": 2.718}
     expected = {
@@ -218,14 +217,13 @@ def test_config_tools_compose__fmt_sh_2x(logged, tmp_path):
     outpath = tmp_path / "out.sh"
     kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
     assert tools.compose(**kwargs) is True
-    assert logged(f"Reading {dpath} as base 'sh' config")
     assert logged(f"Composing 'sh' config from {upath}")
     assert SHConfig(outpath) == SHConfig({"foo": "3", "bar": "2", "baz": "4"})
 
 
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, logged, suffix, tmp_path, tofile):
+def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, suffix, tmp_path, tofile):
     d1, _, d2, _, d3, _ = compose_assets_yaml
     dpath = (tmp_path / "d").with_suffix(suffix)
     for d in (d1, d2, d3):
@@ -239,7 +237,6 @@ def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, logged, suffix, 
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
         assert tools.compose(**kwargs) is True
-        assert logged(f"Reading {dpath} as base 'yaml' config")
         if tofile:
             assert YAMLConfig(outpath) == d
             outpath.unlink()
@@ -263,7 +260,6 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
         assert tools.compose(**kwargs) is True
-        assert logged(f"Reading {dpath} as base 'yaml' config")
         assert logged(f"Composing 'yaml' config from {upath}")
         if tofile:
             expected = {

@@ -4,6 +4,7 @@ Tools for working with configs.
 
 from __future__ import annotations
 
+from functools import reduce
 from typing import TYPE_CHECKING, cast
 
 from uwtools.config.formats.base import Config
@@ -48,14 +49,16 @@ def compose(
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
+
+    def update(config: Config, path: Path) -> Config:
+        log.debug("Composing '%s' config from %s", input_format, path)
+        config.update_from(input_class(path))
+        return config
+
     basepath = configs[0]
     input_format = input_format or get_config_format(basepath, "input")
     input_class = format_to_config(input_format)
-    log.debug("Reading %s as base '%s' config", basepath, input_format)
-    config = input_class(basepath)
-    for path in configs[1:]:
-        log.debug("Composing '%s' config from %s", input_format, path)
-        config.update_from(input_class(path))
+    config = reduce(update, configs, input_class(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config = output_class(config)
