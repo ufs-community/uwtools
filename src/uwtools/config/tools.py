@@ -5,7 +5,12 @@ Tools for working with configs.
 from __future__ import annotations
 
 from functools import reduce
+from tempfile import NamedTemporaryFile
+from textwrap import indent
 from typing import TYPE_CHECKING, cast
+from uuid import uuid4
+
+from yaml.composer import ComposerError
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -50,14 +55,40 @@ def compose(
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
 
+    def get(path: Path) -> Config:
+        try:
+            return input_class(path)
+        except ComposerError as e:
+            if e.problem and "undefined alias" in e.problem:
+                current = path.read_text().strip()
+                keys = []
+                for config in configs:
+                    if config != path:
+                        while True:
+                            key = uuid4().hex
+                            if key not in current:
+                                break
+                        keys.append(key)
+                        other = indent(config.read_text().strip(), prefix="  ")
+                        current = "\n".join([f"{key}:", other, current])
+                with NamedTemporaryFile(mode="w", delete=False) as tmp:
+                    print(current, file=tmp)
+                    tmp.close()
+                    new = input_class(tmp.name)
+                    for key in keys:
+                        del new[key]
+                    return new
+            else:
+                raise
+
     def update(config: Config, path: Path) -> Config:
         log.debug("Composing '%s' config from %s", input_format, path)
-        config.update_from(input_class(path))
+        config.update_from(get(path))
         return config
 
     input_format = input_format or get_config_format(configs[0], "input")
-    input_class = format_to_config(input_format)
-    config = reduce(update, configs, input_class(configs[0]))
+    input_class: type[Config] = format_to_config(input_format)
+    config = reduce(update, configs, get(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config = output_class(config)
