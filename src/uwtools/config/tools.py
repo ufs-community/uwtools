@@ -55,8 +55,7 @@ def compose(
         config.update_from(input_class(path))
         return config
 
-    basepath = configs[0]
-    input_format = input_format or get_config_format(basepath, "input")
+    input_format = input_format or get_config_format(configs[0], "input")
     input_class = format_to_config(input_format)
     config = reduce(update, configs, input_class(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
