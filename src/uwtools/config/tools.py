@@ -65,8 +65,7 @@ def compose(
                 for config in configs:
                     if config != path:
                         while True:
-                            key = uuid4().hex
-                            if key not in current:
+                            if (key := uuid4().hex) not in current:
                                 break
                         keys.append(key)
                         other = indent(config.read_text().strip(), prefix="  ")
@@ -78,8 +77,7 @@ def compose(
                     for key in keys:
                         del new[key]
                     return new
-            else:
-                raise
+            raise
 
     def update(config: Config, path: Path) -> Config:
         log.debug("Composing '%s' config from %s", input_format, path)
