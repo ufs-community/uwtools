@@ -56,22 +56,27 @@ def compose(
     """
 
     def get(path: Path) -> Config:
+        # If config-object instantiation fails due to presence of an udefined YAML alias, construct
+        # in-memory YAML combining the bad YAML with that of each of the other to-be-composed files,
+        # expecting that one the latter defines the required anchor. Hide the other-file YAML blocks
+        # under unique top-level keys to avoid conflicts. After successfull instantiation, remove
+        # the other-file key-value pairs.
         try:
             return input_class(path)
         except ComposerError as e:
             if e.problem and "undefined alias" in e.problem:
-                current = path.read_text().strip()
+                combined = path.read_text().strip()
                 keys = []
                 for config in configs:
                     if config != path:
                         while True:
-                            if (key := uuid4().hex) not in current:
+                            if (key := uuid4().hex) not in combined:
                                 break
                         keys.append(key)
                         other = indent(config.read_text().strip(), prefix="  ")
-                        current = "\n".join([f"{key}:", other, current])
+                        combined = "\n".join([f"{key}:", other, combined])
                 with NamedTemporaryFile(mode="w", delete=False) as tmp:
-                    print(current, file=tmp)
+                    print(combined, file=tmp)
                     tmp.close()
                     new = input_class(tmp.name)
                     for key in keys:
