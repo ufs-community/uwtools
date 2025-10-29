@@ -1,0 +1,7 @@
+values:
+  e: 2.718
+  pi: 3.142
+  foo: bar
+constants:
+  e: 2.718
+  pi: 3.142

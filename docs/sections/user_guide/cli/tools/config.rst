@@ -156,6 +156,41 @@ Examples
   .. literalinclude:: config/compose-realize-yes.out
      :language: yaml
 
+* The ``compose`` action supports defining YAML `anchors and aliases <https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/>`_ in separate files, something not supported natively by the underlying `PyYAML <https://pyyaml.org/>`_ library. For example:
+
+  .. literalinclude:: config/alias.yaml
+     :caption: alias.yaml
+     :language: yaml
+  .. literalinclude:: config/anchor.yaml
+     :caption: anchor.yaml
+     :language: yaml
+  .. literalinclude:: config/compose-anchor-alias.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compose-anchor-alias.out
+     :language: yaml
+
+  This example is trivial, but a YAML-anchored block could provide many more configuration values, and an alias to that block could be repeated many times in a config, or across many configs, avoiding hard-to-maintain and error-prone repeated values.
+
+  Note that anchor names must be unique across all files passed to ``uw config compose``, as YAML does not permit repetition of anchor names.
+
+* Configs in any format supported by ``uwtools`` can be composed, but all composed configs must be of the same format. For example, Fortran namelist configs may be composed:
+
+  .. literalinclude:: config/compose-base.nml
+     :caption: compose-base.nml
+     :language: fortran
+  .. literalinclude:: config/compose-update-1.nml
+     :caption: compose-update-1.nml
+     :language: fortran
+  .. literalinclude:: config/compose-update-2.nml
+     :caption: compose-update-2.nml
+     :language: fortran
+  .. literalinclude:: config/compose-nml.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compose-nml.out
+     :language: fortran
+
 .. _cli_config_realize_examples:
 
 ``realize``
