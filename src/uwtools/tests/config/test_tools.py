@@ -28,6 +28,28 @@ from uwtools.utils.file import writable
 
 
 @fixture
+def compose_anchor_alias_assets(tmp_path):
+    path_a, path_b, path_c = [tmp_path / f"{x}.yaml" for x in ("a", "b", "c")]
+    yaml_a = """
+    a:
+      <<: *B
+      <<: *C
+      apple: green
+    """
+    yaml_b = """
+    b: &B
+      banana: yellow
+    """
+    yaml_c = """
+    c: &C
+      cherry: red
+    """
+    for path, text in [(path_a, yaml_a), (path_b, yaml_b), (path_c, yaml_c)]:
+        path.write_text(dedent(text))
+    return path_a, path_b, path_c
+
+
+@fixture
 def compare_assets(tmp_path):
     d = {"foo": {"bar": 42}, "baz": {"qux": 43}}
     a = tmp_path / "a"
@@ -184,6 +206,20 @@ def test_config_tools_compare__bad_format(logged):
     assert logged(msg)
 
 
+def test_config_tools_compose__bad_duplicate_anchor(tmp_path):
+    config = tmp_path / "config.yaml"
+    text = """
+    a1: &A
+      foo: bar
+    a2: &A
+      baz: qux
+    """
+    config.write_text(dedent(text))
+    with raises(yaml.composer.ComposerError) as e:
+        tools.compose(configs=[config], realize=False, output_file=tmp_path / "out.yaml")
+    assert "found duplicate anchor 'A'" in str(e.value)
+
+
 @mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
 def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path):
     d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
@@ -294,6 +330,23 @@ def test_config_tools_compose__realize(realize, tmp_path):
     assert tools.compose(configs=[dpath, upath], realize=realize, output_file=outpath) is True
     radius = YAMLConfig(outpath)["radius"]
     assert (radius == 6.284) if realize else (radius.tagged_string == "!float '{{ 2.0 * pi * r }}'")
+
+
+def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):
+    path_a, path_b, path_c = compose_anchor_alias_assets
+    outpath = path_a.parent / "out.yaml"
+    tools.compose(configs=[path_a, path_b, path_c], realize=False, output_file=outpath)
+    expected = {"apple": "green", "banana": "yellow", "cherry": "red"}
+    assert yaml.safe_load(outpath.read_text())["a"] == expected
+
+
+def test_config_tools_compose__split_anchor_alias_bad_duplicate_anchor(compose_anchor_alias_assets):
+    path_a, path_b, path_c = compose_anchor_alias_assets
+    path_c.write_text(path_c.read_text().replace("&C", "&B"))  # duplicate &B anchor
+    outpath = path_a.parent / "out.yaml"
+    with raises(yaml.composer.ComposerError) as e:
+        tools.compose(configs=[path_a, path_b, path_c], realize=False, output_file=outpath)
+    assert "found duplicate anchor 'B'" in str(e.value)
 
 
 @mark.parametrize(
