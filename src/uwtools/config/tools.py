@@ -56,11 +56,13 @@ def compose(
     """
 
     def get(path: Path) -> Config:
-        # If config-object instantiation fails due to presence of an udefined YAML alias, construct
-        # in-memory YAML combining the bad YAML with that of each of the other to-be-composed files,
-        # expecting that one the latter defines the required anchor. Hide the other-file YAML blocks
-        # under unique top-level keys to avoid conflicts. After successfull instantiation, remove
-        # the other-file key-value pairs.
+        # If config-object instantiation fails due to an undefined YAML alias, construct in-memory
+        # YAML that combines the failing YAML with that of each of the other to-be-composed files,
+        # expecting that one of the latter defines the required anchor. Nest the other-file YAML
+        # blocks under unique top-level keys to avoid conflicts. After successfull instantiation,
+        # remove the other-file key-value pairs. Note that this procedure applies only to YAML
+        # configs: Configs in other formats will receive no special treatment.
+
         try:
             return input_class(path)
         except ComposerError as e:
