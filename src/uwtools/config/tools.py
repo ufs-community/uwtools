@@ -16,6 +16,7 @@ from uuid import uuid4
 from yaml.composer import ComposerError
 
 from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
@@ -85,16 +86,29 @@ def compose(
                 del new[key]
             return new
 
-    def instantiate(yaml: str) -> Config:
+    def instantiate(yaml: str) -> YAMLConfig:
+        """
+        Write YAML to a temp file, instantiate a config from it, then clean up.
+
+        :param yaml: The YAML string from which to instantiate the config.
+        :return: A YAMLConfig object.
+        """
         tmp_fd, tmp_name = mkstemp(text=True)
         os.close(tmp_fd)
         tmp = Path(tmp_name)
         tmp.write_text(yaml)
-        new = input_class(tmp)
+        new = YAMLConfig(tmp)
         tmp.unlink()
         return new
 
     def update(config: Config, path: Path) -> Config:
+        """
+        Update the given Config object with config data from the given file.
+
+        :param config: The Config objet to update.
+        :param path: Path to the file containing config data to update with.
+        :return: And updated Config object.
+        """
         log.debug("Composing '%s' config from %s", input_format, path)
         config.update_from(get(path))
         return config
