@@ -101,7 +101,7 @@ def compose(
 
     input_format = input_format or get_config_format(configs[0], "input")
     input_class: type[Config] = format_to_config(input_format)
-    config = reduce(update, configs, get(configs[0]))
+    config = reduce(update, configs[1:], get(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config = output_class(config)
