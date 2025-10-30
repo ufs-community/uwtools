@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 from functools import reduce
+from itertools import count
 from pathlib import Path
 from tempfile import mkstemp
 from textwrap import indent
@@ -76,9 +77,7 @@ def compose(
                 combined = path.read_text().strip()
                 keys = []
                 for config in filter(lambda x: x != path, configs):
-                    while True:
-                        if (key := uuid4().hex) not in combined:
-                            break
+                    key = next(filter(lambda x: x not in combined, (uuid4().hex for _ in count())))
                     keys.append(key)
                     other = indent(config.read_text().strip(), prefix="  ")
                     combined = "\n".join([f"{key}:", other, combined])
