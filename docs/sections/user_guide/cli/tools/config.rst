@@ -172,7 +172,9 @@ Examples
 
   This example is trivial, but a YAML-anchored block could provide many more configuration values, and an alias to that block could be repeated many times in a config, or across many configs, avoiding hard-to-maintain and error-prone repeated values.
 
-  Note that anchor names must be unique across all files passed to ``uw config compose``, as YAML does not permit repetition of anchor names.
+.. note:: Anchor names must be unique across all files passed to ``uw config compose``, as YAML does not permit repetition of anchor names.
+
+.. note:: Anchors must be defined either in the current file, or in a file that follows the current file in the list of YAML configs to compose. For example, given the invocation ``uw config compose 1.yaml 2.yaml 3.yaml``, if ``*A`` appears in ``1.yaml``, then ``&A`` may be defined in any one of the three YAML files. If, ``*A`` appears instead in ``2.yaml``, then ``&A`` must be defined either in ``2.yaml`` or ``3.yaml``. And if ``*A`` appears in ``3.yaml``, then ``&A`` must be defined in ``3.yaml``.
 
 * Configs in any format supported by ``uwtools`` can be composed, but all composed configs must be of the same format. For example, Fortran namelist configs may be composed:
 
