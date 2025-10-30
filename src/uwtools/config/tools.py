@@ -59,39 +59,37 @@ def compose(
         """
         Get a Config object representing the data in the specified file.
 
-        If config-object instantiation fails due to an undefined YAML alias, construct in-memory
-        YAML that combines the failing YAML with that of each of the other to-be-composed files,
-        expecting that one of the latter defines the required anchor. Nest the other-file YAML
-        blocks under unique top-level keys to avoid conflicts. After successful instantiation,
-        remove the other-file key-value pairs. Note that this procedure applies only to YAML
-        configs: Configs in other formats will receive no special treatment.
+        If instantiation fails due to an undefined YAML alias, build in-memory YAML combining the
+        bad YAML with that of each subsequent to-be-composed file, expecting that one of the latter
+        defines the missing anchor. Nest the other-file YAML blocks under unique top-level keys to
+        avoid conflicts. After successful instantiation, remove the added key-value pairs. Note that
+        this procedure applies only to YAML configs.
 
         :param path: Path to the config file.
         :return: An instance of the subclass of Config appropriate to the format of the config.
         """
-
         try:
             return input_class(path)
         except ComposerError as e:
-            if e.problem and "found undefined alias" in e.problem:
-                combined = path.read_text().strip()
-                keys = []
-                for config in filter(lambda x: x != path, configs):
-                    key = next(filter(lambda x: x not in combined, (uuid4().hex for _ in count())))
-                    keys.append(key)
-                    other = indent(config.read_text().strip(), prefix="  ")
-                    combined = "\n".join([f"{key}:", other, combined])
-                new = instantiate(combined)
-                for key in keys:
-                    del new[key]
-                return new
-            raise
+            if not (e.problem and "found undefined alias" in e.problem):
+                raise
+            yaml = path.read_text().strip()
+            keys = []
+            for config in configs[configs.index(path) + 1 :]:
+                key = next(filter(lambda x: x not in yaml, (uuid4().hex for _ in count())))
+                keys.append(key)
+                other = indent(config.read_text().strip(), prefix="  ")
+                yaml = "\n".join([f"{key}:", other, yaml])
+            new = instantiate(yaml)
+            for key in keys:
+                del new[key]
+            return new
 
-    def instantiate(combined: str) -> Config:
+    def instantiate(yaml: str) -> Config:
         tmp_fd, tmp_name = mkstemp(text=True)
         os.close(tmp_fd)
         tmp = Path(tmp_name)
-        tmp.write_text(combined)
+        tmp.write_text(yaml)
         new = input_class(tmp)
         tmp.unlink()
         return new
