@@ -81,16 +81,20 @@ def compose(
                     keys.append(key)
                     other = indent(config.read_text().strip(), prefix="  ")
                     combined = "\n".join([f"{key}:", other, combined])
-                tmp_fd, tmp_name = mkstemp(text=True)
-                os.close(tmp_fd)
-                tmp = Path(tmp_name)
-                tmp.write_text(combined)
-                new = input_class(tmp)
-                tmp.unlink()
+                new = instantiate(combined)
                 for key in keys:
                     del new[key]
                 return new
             raise
+
+    def instantiate(combined: str) -> Config:
+        tmp_fd, tmp_name = mkstemp(text=True)
+        os.close(tmp_fd)
+        tmp = Path(tmp_name)
+        tmp.write_text(combined)
+        new = input_class(tmp)
+        tmp.unlink()
+        return new
 
     def update(config: Config, path: Path) -> Config:
         log.debug("Composing '%s' config from %s", input_format, path)
