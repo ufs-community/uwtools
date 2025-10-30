@@ -4,6 +4,7 @@ Tools for working with configs.
 
 from __future__ import annotations
 
+import os
 from functools import reduce
 from pathlib import Path
 from tempfile import mkstemp
@@ -82,7 +83,9 @@ def compose(
                         keys.append(key)
                         other = indent(config.read_text().strip(), prefix="  ")
                         combined = "\n".join([f"{key}:", other, combined])
-                tmp = Path(mkstemp(text=True)[1])
+                tmp_fd, tmp_name = mkstemp(text=True)
+                os.close(tmp_fd)
+                tmp = Path(tmp_name)
                 tmp.write_text(combined)
                 new = input_class(tmp)
                 tmp.unlink()
