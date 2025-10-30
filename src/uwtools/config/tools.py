@@ -75,14 +75,13 @@ def compose(
             if e.problem and "found undefined alias" in e.problem:
                 combined = path.read_text().strip()
                 keys = []
-                for config in configs:
-                    if config != path:
-                        while True:
-                            if (key := uuid4().hex) not in combined:
-                                break
-                        keys.append(key)
-                        other = indent(config.read_text().strip(), prefix="  ")
-                        combined = "\n".join([f"{key}:", other, combined])
+                for config in filter(lambda x: x != path, configs):
+                    while True:
+                        if (key := uuid4().hex) not in combined:
+                            break
+                    keys.append(key)
+                    other = indent(config.read_text().strip(), prefix="  ")
+                    combined = "\n".join([f"{key}:", other, combined])
                 tmp_fd, tmp_name = mkstemp(text=True)
                 os.close(tmp_fd)
                 tmp = Path(tmp_name)
