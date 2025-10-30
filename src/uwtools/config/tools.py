@@ -5,9 +5,10 @@ Tools for working with configs.
 from __future__ import annotations
 
 from functools import reduce
-from tempfile import NamedTemporaryFile
+from pathlib import Path
+from tempfile import mkstemp
 from textwrap import indent
-from typing import TYPE_CHECKING, cast
+from typing import cast
 from uuid import uuid4
 
 from yaml.composer import ComposerError
@@ -19,9 +20,6 @@ from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_config_format
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 # Public functions
 
@@ -84,13 +82,13 @@ def compose(
                         keys.append(key)
                         other = indent(config.read_text().strip(), prefix="  ")
                         combined = "\n".join([f"{key}:", other, combined])
-                with NamedTemporaryFile(mode="w", delete=False) as tmp:
-                    print(combined, file=tmp)
-                    tmp.close()
-                    new = input_class(tmp.name)
-                    for key in keys:
-                        del new[key]
-                    return new
+                tmp = Path(mkstemp(text=True)[1])
+                tmp.write_text(combined)
+                new = input_class(tmp)
+                tmp.unlink()
+                for key in keys:
+                    del new[key]
+                return new
             raise
 
     def update(config: Config, path: Path) -> Config:
