@@ -72,7 +72,7 @@ def compose(
         try:
             return input_class(path)
         except ComposerError as e:
-            if e.problem and "undefined alias" in e.problem:
+            if e.problem and "found undefined alias" in e.problem:
                 combined = path.read_text().strip()
                 keys = []
                 for config in configs:
