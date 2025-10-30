@@ -56,7 +56,7 @@ def compose(
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
 
-    def get(path: Path) -> Config:
+    def get_cfgobj(path: Path) -> Config:
         """
         Get a Config object representing the data in the specified file.
 
@@ -81,12 +81,24 @@ def compose(
                 keys.append(key)
                 other = indent(config.read_text().strip(), prefix="  ")
                 yaml = "\n".join([f"{key}:", other, yaml])
-            new = instantiate(yaml)
+            cfgobj = yaml_str_to_cfgobj(yaml)
             for key in keys:
-                del new[key]
-            return new
+                del cfgobj[key]
+            return cfgobj
 
-    def instantiate(yaml: str) -> YAMLConfig:
+    def update(config: Config, path: Path) -> Config:
+        """
+        Update the given Config object with config data from the given file.
+
+        :param config: The Config objet to update.
+        :param path: Path to the file containing config data to update with.
+        :return: And updated Config object.
+        """
+        log.debug("Composing '%s' config from %s", input_format, path)
+        config.update_from(get_cfgobj(path))
+        return config
+
+    def yaml_str_to_cfgobj(yaml: str) -> YAMLConfig:
         """
         Write YAML to a temp file, instantiate a config from it, then clean up.
 
@@ -101,21 +113,9 @@ def compose(
         tmp.unlink()
         return new
 
-    def update(config: Config, path: Path) -> Config:
-        """
-        Update the given Config object with config data from the given file.
-
-        :param config: The Config objet to update.
-        :param path: Path to the file containing config data to update with.
-        :return: And updated Config object.
-        """
-        log.debug("Composing '%s' config from %s", input_format, path)
-        config.update_from(get(path))
-        return config
-
     input_format = input_format or get_config_format(configs[0], "input")
     input_class: type[Config] = format_to_config(input_format)
-    config = reduce(update, configs[1:], get(configs[0]))
+    config = reduce(update, configs[1:], get_cfgobj(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config = output_class(config)
