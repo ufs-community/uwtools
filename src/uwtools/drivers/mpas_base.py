@@ -128,7 +128,7 @@ class MPASBase(DriverCycleBased, FileStager):
         keys = ["years", "months", "days", "hours", "minutes", "seconds"]
         components = re.sub(r"[-_:]", " ", interval).split()[::-1]
         vals = [next(islice(components, i, i + 1), 0) for i in range(len(keys))][::-1]
-        return dict(zip(keys, map(int, vals)))
+        return dict(zip(keys, map(int, vals), strict=True))
 
     @staticmethod
     def _decode_timestamp(timestamp: str) -> datetime:

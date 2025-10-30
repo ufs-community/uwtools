@@ -441,7 +441,7 @@ def test_config_tools_realize__field_table(tmp_path):
     f2_lines = outfile.read_text().split("\n")
     reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1_lines]
     outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2_lines]
-    lines = zip(outlist, reflist)
+    lines = zip(outlist, reflist, strict=False)
     for line1, line2 in lines:
         assert line1 in line2
 

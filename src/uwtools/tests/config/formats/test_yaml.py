@@ -172,7 +172,7 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
 def test_yaml_repr_str(func):
     config = fixture_path("simple.yaml")
     for actual, expected in zip(
-        func(YAMLConfig(config)).split("\n"), config.read_text().split("\n")
+        func(YAMLConfig(config)).split("\n"), config.read_text().split("\n"), strict=False
     ):
         assert actual.strip() == expected.strip()
 
