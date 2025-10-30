@@ -29,7 +29,7 @@ from uwtools.utils.file import writable
 
 @fixture
 def compose_anchor_alias_assets(tmp_path):
-    path_a, path_b, path_c = [tmp_path / f"{x}.yaml" for x in ("a", "b", "c")]
+    path_a, path_b, path_c, path_d = [tmp_path / f"{x}.yaml" for x in ("a", "b", "c", "d")]
     yaml_a = """
     a:
       <<: *B
@@ -39,14 +39,19 @@ def compose_anchor_alias_assets(tmp_path):
     yaml_b = """
     b: &B
       banana: yellow
+      <<: *D
     """
     yaml_c = """
     c: &C
       cherry: red
     """
-    for path, text in [(path_a, yaml_a), (path_b, yaml_b), (path_c, yaml_c)]:
+    yaml_d = """
+    d: &D
+      date: brown
+    """
+    for path, text in [(path_a, yaml_a), (path_b, yaml_b), (path_c, yaml_c), (path_d, yaml_d)]:
         path.write_text(dedent(text))
-    return path_a, path_b, path_c
+    return path_a, path_b, path_c, path_d
 
 
 @fixture
@@ -333,19 +338,19 @@ def test_config_tools_compose__realize(realize, tmp_path):
 
 
 def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):
-    path_a, path_b, path_c = compose_anchor_alias_assets
+    path_a, path_b, path_c, path_d = compose_anchor_alias_assets
     outpath = path_a.parent / "out.yaml"
-    tools.compose(configs=[path_a, path_b, path_c], realize=False, output_file=outpath)
-    expected = {"apple": "green", "banana": "yellow", "cherry": "red"}
+    tools.compose(configs=[path_a, path_b, path_c, path_d], realize=False, output_file=outpath)
+    expected = {"apple": "green", "banana": "yellow", "cherry": "red", "date": "brown"}
     assert yaml.safe_load(outpath.read_text())["a"] == expected
 
 
 def test_config_tools_compose__split_anchor_alias_bad_duplicate_anchor(compose_anchor_alias_assets):
-    path_a, path_b, path_c = compose_anchor_alias_assets
+    path_a, path_b, path_c, path_d = compose_anchor_alias_assets
     path_c.write_text(path_c.read_text().replace("&C", "&B"))  # duplicate &B anchor
     outpath = path_a.parent / "out.yaml"
     with raises(yaml.composer.ComposerError) as e:
-        tools.compose(configs=[path_a, path_b, path_c], realize=False, output_file=outpath)
+        tools.compose(configs=[path_a, path_b, path_c, path_d], realize=False, output_file=outpath)
     assert "found duplicate anchor 'B'" in str(e.value)
 
 
