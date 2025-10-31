@@ -12,7 +12,7 @@ from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 from iotaa import asset, external, task, tasks
 
@@ -661,7 +661,7 @@ class DriverTimeInvariant(Driver):
         )
 
 
-DriverT = Union[type[Assets], type[Driver]]
+DriverT = type[Assets] | type[Driver]
 
 
 def _add_docstring(class_: type, omit: list[str] | None = None) -> None:

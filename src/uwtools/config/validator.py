@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta
 from functools import cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from jsonschema import Draft202012Validator, validators
 from referencing import Registry, Resource
@@ -25,9 +25,9 @@ if TYPE_CHECKING:
 
 # Public functions
 
-JSONValueT = Union[bool, dict, float, int, list, str]
-ConfigDataT = Union[JSONValueT, YAMLConfig]
-ConfigPathT = Union[str, Path]
+JSONValueT = bool | dict | float | int | list | str
+ConfigDataT = JSONValueT | YAMLConfig
+ConfigPathT = str | Path
 
 
 def bundle(schema: dict, keys: list | None = None) -> dict:

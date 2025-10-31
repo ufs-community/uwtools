@@ -8,7 +8,6 @@ import os
 from datetime import datetime, timedelta
 from functools import cached_property
 from pathlib import Path
-from typing import Union
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
@@ -24,9 +23,19 @@ from uwtools.config.support import (
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_config_format, readable, writable
 
-_ConfigVal = Union[
-    bool, datetime, dict, float, int, list, str, timedelta, UWYAMLConvert, UWYAMLGlob, UWYAMLRemove
-]
+_ConfigVal = (
+    bool
+    | datetime
+    | dict
+    | float
+    | int
+    | list
+    | str
+    | timedelta
+    | UWYAMLConvert
+    | UWYAMLGlob
+    | UWYAMLRemove
+)
 
 
 class J2Template:

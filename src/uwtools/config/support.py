@@ -5,7 +5,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 from functools import partial
 from importlib import import_module
-from typing import Callable, Union
+from typing import TYPE_CHECKING
 
 import yaml
 from f90nml import Namelist  # type: ignore[import-untyped]
@@ -15,8 +15,11 @@ from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.time import to_datetime, to_iso8601, to_timedelta
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 INCLUDE_TAG = "!include"
-YAMLKey = Union[bool, float, int, str]
+YAMLKey = bool | float | int | str
 
 # Public functions
 
@@ -195,7 +198,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
     """
 
     TAGS = ("!bool", "!datetime", "!dict", "!float", "!int", "!list", "!timedelta")
-    TaggedValT = Union[bool, datetime, dict, float, int, list, timedelta]
+    TaggedValT = bool | datetime | dict | float | int | list | timedelta
 
     def __repr__(self) -> str:
         return "%s %s" % (self.tag, self.converted)
@@ -220,7 +223,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
             partial(load_as, list),  # !list
             to_timedelta,  # !timedelta
         ]
-        return dict(zip(UWYAMLConvert.TAGS, converters))[self.tag](self.value)
+        return dict(zip(UWYAMLConvert.TAGS, converters, strict=True))[self.tag](self.value)
 
     @property
     def tagged_string(self) -> str:

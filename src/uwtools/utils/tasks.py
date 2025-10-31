@@ -230,7 +230,7 @@ def hardlink(
         os.link(src, dst)
     except Exception as e:
         if fallback == STR.symlink:
-            os.symlink(src, dst)
+            Path(dst).symlink_to(src)
             log.info("Could not hardlink %s -> %s, symlinked instead" % (dst, src))
         elif fallback == STR.copy:
             copy(src, dst)
@@ -257,7 +257,7 @@ def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     linkname.parent.mkdir(parents=True, exist_ok=True)
     src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
     dst = linkname
-    os.symlink(src, dst)
+    Path(dst).symlink_to(src)
 
 
 @external
