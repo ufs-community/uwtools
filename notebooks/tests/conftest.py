@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from collections.abs import Callable
+from typing import TYPE_CHECKING
 
 from pytest import fixture
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @fixture
