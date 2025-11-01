@@ -13,10 +13,6 @@ class TestDriver(AssetsCycleBased):
         """
         Forty Two.
         """
-        yield "42"
-        yield iotaa.asset(42, lambda: True)
-        yield None
 
     @classmethod
-    def driver_name(cls):
-        return "testdriver"
+    def driver_name(cls): ...
