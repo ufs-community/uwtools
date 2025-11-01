@@ -47,22 +47,13 @@ def _expand_glob_assets(tmp_path):
 
 
 class ConcreteStager(fs.Stager):
-    def _validate(self):
-        pass
+    def _validate(self): ...
 
     @property
-    def _dst_paths(self):
-        return list(self._config.keys())
+    def _dst_paths(self): ...
 
     @property
-    def _schema(self):
-        return "some-schema"
-
-
-@iotaa.external
-def exists(*_args, **_kwargs):
-    yield "exists"
-    yield iotaa.asset(None, lambda: True)
+    def _schema(self): ...
 
 
 # Tests
