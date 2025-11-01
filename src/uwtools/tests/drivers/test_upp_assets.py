@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from uwtools.drivers.upp_assets import UPPAssets
 from uwtools.tests.drivers import test_upp_common
 
@@ -36,6 +38,18 @@ def test_UPPAssets_output(upp_assets_driverobj, tmp_path):
 
 def test_UPPAssets_output__fail(upp_assets_driverobj):
     test_upp_common.output__fail(upp_assets_driverobj)
+
+
+def test_UPPAssets_provisioned_rundir(upp_assets_driverobj, ready_task):
+    with patch.multiple(
+        upp_assets_driverobj,
+        control_file=ready_task,
+        files_copied=ready_task,
+        files_hardlinked=ready_task,
+        files_linked=ready_task,
+        namelist_file=ready_task,
+    ):
+        assert upp_assets_driverobj.provisioned_rundir().ready
 
 
 def test_UPPAssets_taskname(upp_assets_driverobj):

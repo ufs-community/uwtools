@@ -62,10 +62,8 @@ def test_GlobalEquivResol_provisioned_rundir(driverobj, ready_task):
         driverobj,
         input_file=ready_task,
         runscript=ready_task,
-    ) as mocks:
-        driverobj.provisioned_rundir()
-    for m in mocks:
-        mocks[m].assert_called_once_with()
+    ):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_GlobalEquivResol__runcmd(driverobj):

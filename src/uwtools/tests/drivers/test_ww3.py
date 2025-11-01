@@ -3,6 +3,7 @@ WaveWatchIII driver tests.
 """
 
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 from pytest import fixture
@@ -51,6 +52,11 @@ def test_WaveWatchIII_namelist_file(driverobj):
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
+
+
+def test_WaveWatchIII_provisioned_rundir(driverobj, ready_task):
+    with patch.multiple(driverobj, namelist_file=ready_task, restart_directory=ready_task):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_WaveWatchIII_restart_directory(driverobj):
