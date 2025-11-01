@@ -3,7 +3,6 @@ exclude_also = [
   "if TYPE_CHECKING:"
 ]
 fail_under = 100
-omit = ["*/tests/*"]
 show_missing = true
 skip_covered = true
 
