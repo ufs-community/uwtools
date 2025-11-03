@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import iotaa
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi
@@ -121,7 +121,11 @@ def test_JEDI_taskname(driverobj):
     assert driverobj.taskname("foo") == "20240201 18Z jedi foo"
 
 
-def test_JEDI_validate_only(driverobj, logged):
+@mark.parametrize("supply_envcmds", [True, False])
+def test_JEDI_validate_only(driverobj, logged, supply_envcmds):
+    if not supply_envcmds:
+        del driverobj._config["execution"]["envcmds"]
+
     @iotaa.external
     def file(path: Path):
         yield "Mocked file task for %s" % path
@@ -131,12 +135,12 @@ def test_JEDI_validate_only(driverobj, logged):
         run_shell_cmd.return_value = (True, None)
         driverobj.validate_only()
         cfgfile = Path(driverobj.config["rundir"], "jedi.yaml")
-        cmds = [
-            "module load some-module",
-            "module load jedi-module",
+        envcmds = ["module load some-module", "module load jedi-module"] if supply_envcmds else []
+        runcmds = [
             "time %s --validate-only %s 2>&1"
-            % (driverobj.config["execution"]["executable"], cfgfile),
+            % (driverobj.config["execution"]["executable"], cfgfile)
         ]
+        cmds = envcmds + runcmds
         run_shell_cmd.assert_called_once_with(" && ".join(cmds))
     assert logged("Config is valid")
 

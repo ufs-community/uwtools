@@ -52,9 +52,9 @@ class JEDI(JEDIBase):
         if envcmds := self.config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
         success, _ = run_shell_cmd(cmd)
-        if success:
-            log.info("%s: Config is valid", taskname)
-            a.ready = lambda: True
+        assert success
+        log.info("%s: Config is valid", taskname)
+        a.ready = lambda: True
 
     # Public helper methods
 
