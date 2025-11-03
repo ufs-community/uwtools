@@ -198,7 +198,9 @@ class TestRocotoIterator:
 
     def test_rocoto__RocotoIterator__connection(self, instance):
         instance._database.touch()
-        assert isinstance(instance._connection, sqlite3.Connection)
+        # Run twice to exercise both branches of "if" condition:
+        for _ in range(2):
+            assert isinstance(instance._connection, sqlite3.Connection)
 
     def test_rocoto__RocotoIterator__connection__no_file(self, instance):
         assert instance._connection is None
@@ -228,30 +230,40 @@ class TestRocotoIterator:
             == "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
         )
 
-    def test_rocoto__RocotoIterator__report(self, instance, logged):
-        instance._database.touch()
+    @mark.parametrize("create_database", [True, False])
+    def test_rocoto__RocotoIterator__report(self, create_database, instance, logged):
+        if create_database:
+            instance._database.touch()
         retval = (True, "foo\nbar\n")
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             instance._report()
-        for line in ["Workflow status:", "foo", "bar"]:
-            assert logged(line)
-        run_shell_cmd.assert_called_once_with(
-            "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
-        )
+        if create_database:
+            for line in ["Workflow status:", "foo", "bar"]:
+                assert logged(line)
+            run_shell_cmd.assert_called_once_with(
+                "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
+            )
+        else:
+            run_shell_cmd.assert_not_called()
 
-    def test_rocoto__RocotoIterator__state(self, instance, logged):
-        self.dbsetup(instance)
-        instance._cursor.execute(
-            "insert into jobs values (:id, :taskname, :cycle, :state)",
-            {
-                "id": 1,
-                "taskname": "foo",
-                "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
-                "state": "COMPLETE",
-            },
-        )
-        assert instance._state == "COMPLETE"
-        assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
+    @mark.parametrize("set_up_database", [True, False])
+    def test_rocoto__RocotoIterator__state(self, set_up_database, instance, logged):
+        if set_up_database:
+            self.dbsetup(instance)
+            instance._cursor.execute(
+                "insert into jobs values (:id, :taskname, :cycle, :state)",
+                {
+                    "id": 1,
+                    "taskname": "foo",
+                    "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
+                    "state": "COMPLETE",
+                },
+            )
+        if set_up_database:
+            assert instance._state == "COMPLETE"
+            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
+        else:
+            assert instance._state is None
 
     def test_rocoto__RocotoIterator__state__none(self, instance):
         self.dbsetup(instance)

@@ -365,9 +365,7 @@ class _RocotoXML:
         """
         self._set_attrs(SubElement(e, STR.metataskdep), config)
 
-    def _add_task_dependency_sh(
-        self, e: _Element, config: dict, name_attr: str | None = None
-    ) -> None:
+    def _add_task_dependency_sh(self, e: _Element, config: dict, name_attr: str) -> None:
         """
         :param e: The parent element to add the new element to.
         :param config: Configuration data for the tag.
@@ -375,8 +373,7 @@ class _RocotoXML:
         """
         e = self._add_compound_time_string(e, config[STR.command], STR.sh)
         config[STR.attrs] = config.get(STR.attrs, {})
-        if name_attr:
-            config[STR.attrs][STR.name] = name_attr
+        config[STR.attrs][STR.name] = name_attr
         self._set_attrs(e, config)
 
     def _add_task_dependency_strequality(self, e: _Element, config: dict, tag: str) -> None:
