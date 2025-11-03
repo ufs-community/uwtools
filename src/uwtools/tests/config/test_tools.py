@@ -491,11 +491,11 @@ def test_config_tools_realize__field_table(tmp_path):
         output_file=outfile,
         output_format=FORMAT.fieldtable,
     )
-    f1_lines = fixture_path("field_table.FV3_GFS_v16").read_text().split("\n")
-    f2_lines = outfile.read_text().split("\n")
-    reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1_lines]
-    outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2_lines]
-    lines = zip(outlist, reflist)
+    f1_lines = fixture_path("field_table.FV3_GFS_v16").read_text().strip().split("\n")
+    f2_lines = outfile.read_text().strip().split("\n")
+    reflist = [line.replace("'", "") for line in f1_lines]
+    outlist = [line.replace("'", "") for line in f2_lines]
+    lines = zip(outlist, reflist, strict=True)
     for line1, line2 in lines:
         assert line1 in line2
 

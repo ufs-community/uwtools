@@ -12,10 +12,11 @@ from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
+from collections.abc import Callable
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, NoReturn
+from typing import Any, NoReturn
 
 import uwtools.api
 import uwtools.api.config

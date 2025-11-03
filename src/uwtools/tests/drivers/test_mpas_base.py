@@ -23,7 +23,7 @@ from uwtools.drivers.mpas_base import MPASBase
 )
 def test_mpas_base__decode_interval(interval, vals):
     keys = ("years", "months", "days", "hours", "minutes", "seconds")
-    assert MPASBase._decode_interval(interval=interval) == dict(zip(keys, vals))
+    assert MPASBase._decode_interval(interval=interval) == dict(zip(keys, vals, strict=True))
 
 
 def test_mpas_base__decode_timestamp():
