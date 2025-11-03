@@ -23,9 +23,8 @@ from uwtools.strings import FORMAT
 
 def actions(parser: Parser) -> list[str]:
     # Return actions (named subparsers) belonging to the given parser.
-    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
-        return list(actions[0].choices.keys())
-    return []
+    actions = [x for x in parser._actions if isinstance(x, _SubParsersAction)]
+    return list(actions[0].choices.keys())
 
 
 # Fixtures

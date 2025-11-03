@@ -55,10 +55,8 @@ def test_WaveWatchIII_namelist_file(driverobj):
 
 
 def test_WaveWatchIII_provisioned_rundir(driverobj, ready_task):
-    with patch.multiple(driverobj, namelist_file=ready_task, restart_directory=ready_task) as mocks:
-        driverobj.provisioned_rundir()
-    for m in mocks:
-        mocks[m].assert_called_once_with()
+    with patch.multiple(driverobj, namelist_file=ready_task, restart_directory=ready_task):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_WaveWatchIII_restart_directory(driverobj):

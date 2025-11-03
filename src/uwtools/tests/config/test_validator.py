@@ -17,7 +17,6 @@ from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.utils.file import resource_path
 
 # Fixtures
 
@@ -41,41 +40,6 @@ def config(tmp_path) -> dict[str, Any]:
             "dir": str(tmp_path),
         },
     }
-
-
-@fixture
-def prep_config_dict():
-    return {"roses": "{{ color }}", "color": "red"}
-
-
-@fixture
-def rocoto_assets():
-    schema_file = resource_path("jsonschema/rocoto.jsonschema")
-    kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
-    config = {
-        "workflow": {
-            "cycledef": [{"spec": "202209290000 202209300000 06:00:00"}],
-            "log": "/some/path/to/&FOO;",
-            "tasks": {
-                "metatask": {
-                    "var": {"member": "foo bar baz"},
-                    "task": {
-                        "cores": 42,
-                        "command": "some-command",
-                        "walltime": "00:01:00",
-                        "dependency": {
-                            "taskdep": {
-                                "attrs": {
-                                    "task": "hello",
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        }
-    }
-    return kwargs, config
 
 
 @fixture

@@ -37,14 +37,11 @@ def test_set_driver_docstring():
 def test_tasks():
     class SomeDriver(DriverTimeInvariant):
         @classmethod
-        def driver_name(cls):
-            pass
+        def driver_name(cls): ...
 
-        def provisioned_rundir(self):
-            pass
+        def provisioned_rundir(self): ...
 
-        def taskname(self, suffix=None):
-            pass
+        def taskname(self, suffix=None): ...
 
         @iotaa.external
         def t1(self):
@@ -59,11 +56,9 @@ def test_tasks():
             """@tasks t3."""
 
         @property
-        def _resources(self):
-            pass
+        def _resources(self): ...
 
-        def _validate(self, schema_file: Path | None = None):
-            pass
+        def _validate(self, schema_file: Path | None = None): ...
 
     assert support.tasks(SomeDriver) == {
         "run": "A run.",
