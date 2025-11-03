@@ -82,8 +82,7 @@ def execute(
     )
     required = non_optional & accepted
     for arg in sorted([STR.batch, *required]):
-        if arg in accepted:
-            kwargs[arg] = args[arg]
+        kwargs.update({arg: args[arg] for arg in accepted})
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
     node: Node = getattr(driverobj, task)(dry_run=dry_run)
@@ -134,17 +133,16 @@ def _get_driver_module_explicit(module: Path) -> ModuleType | None:
     :param module: Name of driver module to load.
     """
     log.debug("Loading module %s", module)
-    if spec := spec_from_file_location(module.name, module):
+    if (spec := spec_from_file_location(module.name, module)) and spec.loader:
         m = module_from_spec(spec)
-        if loader := spec.loader:
-            try:
-                loader.exec_module(m)
-            except Exception:  # noqa: BLE001
-                for line in format_exc().strip().split("\n"):
-                    log.error(line)
-            else:
-                log.debug("Loaded module %s", module)
-                return m
+        try:
+            spec.loader.exec_module(m)
+        except Exception:  # noqa: BLE001
+            for line in format_exc().strip().split("\n"):
+                log.error(line)
+        else:
+            log.debug("Loaded module %s", module)
+            return m
     return None
 
 
