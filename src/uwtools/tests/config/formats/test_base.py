@@ -40,30 +40,25 @@ class ConcreteConfig(Config):
     """
 
     @classmethod
-    def _dict_to_str(cls, cfg):
-        pass
+    def _dict_to_str(cls, cfg): ...
 
     @staticmethod
     def _depth_ok(depth: int) -> bool:
         return depth >= 1
 
     @staticmethod
-    def _get_format():
-        pass
+    def _get_format(): ...
 
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
 
-    def as_dict(self):
-        return self.data
+    def as_dict(self): ...
 
-    def dump(self, path=None):
-        pass
+    def dump(self, path=None): ...
 
     @staticmethod
-    def dump_dict(cfg, path=None):
-        pass
+    def dump_dict(cfg, path=None): ...
 
 
 # Tests on module functions.
@@ -96,12 +91,12 @@ def test_config_base__depth(config):
 
 
 def test_config_base__load_paths(config, tmp_path):
-    paths = (tmp_path / fn for fn in ("f1", "f2"))
+    paths = [tmp_path / fn for fn in ("f1", "f2")]
     for path in paths:
         path.write_text(yaml.dump({path.name: "defined"}))
     cfg = config._load_paths(config_files=paths)
     for path in paths:
-        assert cfg[path.name] == "present"
+        assert cfg[path.name] == "defined"
 
 
 def test_config_base__parse_include(config):
@@ -136,8 +131,6 @@ def test_config_base__obj_compare_config(fmt, logged, salad_base):
     Compare two config objects.
     """
     cfgobj = tools.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
-    if fmt == FORMAT.ini:
-        salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
     assert not logged(".*")

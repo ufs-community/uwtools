@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from types import SimpleNamespace as ns
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NoReturn
 
 import yaml
+from yaml.constructor import ConstructorError
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import (
@@ -30,7 +31,7 @@ value is enclosed in quotes.
 ERROR:
 The input config file contains a constructor that is not registered with the uwtools package.
 
-constructor: {constructor}
+constructor: {ctor}
 config file: {config_file}
 
 Define the constructor before proceeding.
@@ -91,29 +92,33 @@ class YAMLConfig(Config):
         :param config_file: Path to config file to load.
         """
         with readable(config_file) as f:
-            try:
-                config = yaml.load(f.read(), Loader=self._yaml_loader)
-                if isinstance(config, dict):
-                    return config
-                t = type(config).__name__
-                msg = "Parsed a%s %s value from %s, expected a dict" % (
-                    "n" if t[0] in "aeiou" else "",
-                    t,
-                    config_file or "stdin",
-                )
-                raise UWConfigError(msg)
-            except yaml.constructor.ConstructorError as e:
-                if e.problem:
-                    if "unhashable" in e.problem:
-                        msg = _MSGS.unhashable
-                    else:
-                        constructor = e.problem.split()[-1]
-                        msg = _MSGS.unregistered_constructor.format(
-                            config_file=config_file, constructor=constructor
-                        )
-                else:
-                    msg = str(e)
-                raise log_and_error(msg) from e
+            s = f.read()
+        try:
+            config = yaml.load(s, Loader=self._yaml_loader)
+        except ConstructorError as e:
+            self._load_handle_constructor_error(config_file, e)
+        if not isinstance(config, dict):
+            self._load_handle_non_dict_value(type(config).__name__, config_file)
+        return config
+
+    def _load_handle_non_dict_value(self, t: str, config_file: Path | None) -> NoReturn:
+        article = "an" if t[0] in "aeiou" else "a"
+        source = config_file or "stdin"
+        msg = "Parsed %s %s value from %s, expected a dict" % (article, t, source)
+        raise UWConfigError(msg)
+
+    def _load_handle_constructor_error(
+        self, config_file: Path | None, e: ConstructorError
+    ) -> NoReturn:
+        if e.problem:
+            if "unhashable" in e.problem:
+                msg = _MSGS.unhashable
+            else:
+                ctor = e.problem.split()[-1]
+                msg = _MSGS.unregistered_constructor.format(config_file=config_file, ctor=ctor)
+        else:
+            msg = str(e)
+        raise log_and_error(msg) from e
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """

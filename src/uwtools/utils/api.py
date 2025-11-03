@@ -7,13 +7,14 @@ from __future__ import annotations
 import re
 from inspect import getfullargspec
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from uwtools.exceptions import UWError
 from uwtools.utils.file import str2path
 
 if TYPE_CHECKING:
     import datetime as dt
+    from collections.abc import Callable
 
     from uwtools.config.support import YAMLKey
     from uwtools.drivers.driver import DriverT

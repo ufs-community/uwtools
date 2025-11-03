@@ -49,15 +49,14 @@ def test_UPP_output__fail(upp_driverobj):
 def test_UPP_provisioned_rundir(upp_driverobj, ready_task):
     with patch.multiple(
         upp_driverobj,
+        control_file=ready_task,
         files_copied=ready_task,
         files_hardlinked=ready_task,
         files_linked=ready_task,
         namelist_file=ready_task,
         runscript=ready_task,
-    ) as mocks:
-        upp_driverobj.provisioned_rundir()
-    for m in mocks:
-        mocks[m].assert_called_once_with()
+    ):
+        assert upp_driverobj.provisioned_rundir().ready
 
 
 def test_UPP_taskname(upp_driverobj):

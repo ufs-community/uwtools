@@ -3,7 +3,10 @@ from __future__ import annotations
 from copy import deepcopy
 from importlib import resources
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 import yaml
 
@@ -23,14 +26,7 @@ def compare_files(path1: Path | str, path2: Path | str) -> bool:
     path1, path2 = map(Path, (path1, path2))
     content1 = path1.read_text().rstrip("\n")
     content2 = path2.read_text().rstrip("\n")
-    if content1 != content2:
-        print("1st file looks like:")
-        print(content1)
-        print("*" * 80)
-        print("2nd file looks like:")
-        print(content2)
-        return False
-    return True
+    return content1 == content2
 
 
 def fixture_pathobj(suffix: str = "") -> Path:

@@ -25,5 +25,5 @@ def to_timedelta(value: int | str | timedelta) -> timedelta:
     if isinstance(value, int):
         return timedelta(hours=value)
     keys = ["hours", "minutes", "seconds"]
-    args = dict(zip(keys, map(int, value.split(":"))))
+    args = dict(zip(keys, map(int, value.split(":")), strict=False))
     return timedelta(**args)

@@ -4,18 +4,24 @@ Tools for working with configs.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+import os
+from functools import reduce
+from pathlib import Path
+from tempfile import mkstemp
+from textwrap import indent
+from typing import cast
+from uuid import uuid4
+
+from yaml.composer import ComposerError
 
 from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_config_format
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 # Public functions
 
@@ -48,14 +54,68 @@ def compose(
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
-    basepath = configs[0]
-    input_format = input_format or get_config_format(basepath, "input")
-    input_class = format_to_config(input_format)
-    log.debug("Reading %s as base '%s' config", basepath, input_format)
-    config = input_class(basepath)
-    for path in configs[1:]:
+
+    def cfgobj_from_yaml(yaml: str) -> YAMLConfig:
+        """
+        Write YAML to a temp file, instantiate a config from it, then clean up.
+
+        :param yaml: The YAML string from which to instantiate the config.
+        :return: A YAMLConfig object.
+        """
+        tmp_fd, tmp_name = mkstemp(text=True)
+        os.close(tmp_fd)
+        tmp = Path(tmp_name)
+        tmp.write_text(yaml)
+        new = YAMLConfig(tmp)
+        tmp.unlink()
+        return new
+
+    def cfgobj_get(path: Path) -> Config:
+        """
+        Get a Config object representing the data in the specified file.
+
+        If instantiation fails due to an undefined YAML alias, build in-memory YAML combining the
+        bad YAML with that of each subsequent to-be-composed file, expecting that one of the latter
+        defines the missing anchor. Nest the other-file YAML blocks under unique top-level keys to
+        avoid conflicts. After successful instantiation, remove the added key-value pairs. Note that
+        this procedure applies only to YAML configs.
+
+        :param path: Path to the config file.
+        :return: An instance of the subclass of Config appropriate to the format of the config.
+        """
+        try:
+            return input_class(path)
+        except ComposerError as e:
+            if not (e.problem and "found undefined alias" in e.problem):
+                raise
+            yaml = path.read_text().strip()
+            keys = []
+            for config in configs[configs.index(path) + 1 :]:
+                while (key := uuid4().hex) in yaml:
+                    ...
+                keys.append(key)
+                other = indent(config.read_text().strip(), prefix="  ")
+                yaml = "\n".join([f"{key}:", other, yaml])
+            cfgobj = cfgobj_from_yaml(yaml)
+            for key in keys:
+                del cfgobj[key]
+            return cfgobj
+
+    def cfgobj_update(config: Config, path: Path) -> Config:
+        """
+        Update the given Config object with config data from the given file.
+
+        :param config: The Config objet to update.
+        :param path: Path to the file containing config data to update with.
+        :return: And updated Config object.
+        """
         log.debug("Composing '%s' config from %s", input_format, path)
-        config.update_from(input_class(path))
+        config.update_from(cfgobj_get(path))
+        return config
+
+    input_format = input_format or get_config_format(configs[0], "input")
+    input_class: type[Config] = format_to_config(input_format)
+    config = reduce(cfgobj_update, configs[1:], cfgobj_get(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config: Config = output_class(config)

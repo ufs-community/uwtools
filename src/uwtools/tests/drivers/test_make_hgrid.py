@@ -57,10 +57,8 @@ def test_MakeHgrid_output(driverobj):
 
 
 def test_MakeHgrid_provisioned_rundir(driverobj, ready_task):
-    with patch.multiple(driverobj, runscript=ready_task) as mocks:
-        driverobj.provisioned_rundir()
-    for m in mocks:
-        mocks[m].assert_called_once_with()
+    with patch.multiple(driverobj, runscript=ready_task):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_MakeHgrid__runcmd(driverobj):

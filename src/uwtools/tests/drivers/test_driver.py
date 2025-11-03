@@ -36,8 +36,7 @@ class Common:
     def driver_name(cls) -> str:
         return "concrete"
 
-    def provisioned_rundir(self):
-        pass
+    def provisioned_rundir(self): ...
 
     def _validate(self, schema_file: Path | None = None) -> None:
         pass

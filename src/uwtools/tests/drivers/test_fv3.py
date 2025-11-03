@@ -5,7 +5,6 @@ FV3 driver tests.
 from pathlib import Path
 from unittest.mock import patch
 
-import iotaa
 import yaml
 from pytest import fixture, mark, raises
 
@@ -64,16 +63,6 @@ def cycle(utc):
 @fixture
 def driverobj(config, cycle):
     return FV3(config=config, cycle=cycle, batch=True)
-
-
-@fixture
-def truetask():
-    @iotaa.external
-    def true():
-        yield "true"
-        yield iotaa.asset(True, lambda: True)
-
-    return true
 
 
 # Tests
@@ -198,14 +187,8 @@ def test_FV3_provisioned_rundir(domain, driverobj, ready_task):
         namelist_file=ready_task,
         restart_directory=ready_task,
         runscript=ready_task,
-    ) as mocks:
-        driverobj.provisioned_rundir()
-    excluded = ["boundary_files"] if domain == "global" else []
-    for m in mocks:
-        if m in excluded:
-            mocks[m].assert_not_called()
-        else:
-            mocks[m].assert_called_once_with()
+    ):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_FV3_restart_directory(driverobj):

@@ -29,6 +29,33 @@ from uwtools.utils.file import writable
 
 
 @fixture
+def compose_anchor_alias_assets(tmp_path):
+    path_a, path_b, path_c, path_d = [tmp_path / f"{x}.yaml" for x in ("a", "b", "c", "d")]
+    yaml_a = """
+    a:
+      <<: *B
+      <<: *C
+      apple: green
+    """
+    yaml_b = """
+    b: &B
+      banana: yellow
+      <<: *D
+    """
+    yaml_c = """
+    c: &C
+      cherry: red
+    """
+    yaml_d = """
+    d: &D
+      date: brown
+    """
+    for path, text in [(path_a, yaml_a), (path_b, yaml_b), (path_c, yaml_c), (path_d, yaml_d)]:
+        path.write_text(dedent(text))
+    return path_a, path_b, path_c, path_d
+
+
+@fixture
 def compare_assets(tmp_path):
     d = {"foo": {"bar": 42}, "baz": {"qux": 43}}
     a = tmp_path / "a"
@@ -185,6 +212,20 @@ def test_config_tools_compare__bad_format(logged):
     assert logged(msg)
 
 
+def test_config_tools_compose__bad_duplicate_anchor(tmp_path):
+    config = tmp_path / "config.yaml"
+    text = """
+    a1: &A
+      foo: bar
+    a2: &A
+      baz: qux
+    """
+    config.write_text(dedent(text))
+    with raises(yaml.composer.ComposerError) as e:
+        tools.compose(configs=[config], realize=False, output_file=tmp_path / "out.yaml")
+    assert "found duplicate anchor 'A'" in str(e.value)
+
+
 @mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
 def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path):
     d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
@@ -196,7 +237,6 @@ def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path
     outpath = (tmp_path / "out").with_suffix(suffix)
     kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
     assert isinstance(tools.compose(**kwargs), Config)
-    assert logged(f"Reading {dpath} as base '{fmt}' config")
     assert logged(f"Composing '{fmt}' config from {upath}")
     constants = {"pi": 3.142, "e": 2.718}
     expected = {
@@ -219,14 +259,13 @@ def test_config_tools_compose__fmt_sh_2x(logged, tmp_path):
     outpath = tmp_path / "out.sh"
     kwargs: dict = {"configs": [dpath, upath], "realize": False, "output_file": outpath}
     assert isinstance(tools.compose(**kwargs), Config)
-    assert logged(f"Reading {dpath} as base 'sh' config")
     assert logged(f"Composing 'sh' config from {upath}")
     assert SHConfig(outpath) == SHConfig({"foo": "3", "bar": "2", "baz": "4"})
 
 
 @mark.parametrize("tofile", [False, True])
 @mark.parametrize("suffix", ["", ".yaml", ".foo"])
-def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, logged, suffix, tmp_path, tofile):
+def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, suffix, tmp_path, tofile):
     d1, _, d2, _, d3, _ = compose_assets_yaml
     dpath = (tmp_path / "d").with_suffix(suffix)
     for d in (d1, d2, d3):
@@ -240,7 +279,6 @@ def test_config_tools_compose__fmt_yaml_1x(compose_assets_yaml, logged, suffix, 
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
         assert isinstance(tools.compose(**kwargs), Config)
-        assert logged(f"Reading {dpath} as base 'yaml' config")
         if tofile:
             assert YAMLConfig(outpath) == d
             outpath.unlink()
@@ -264,7 +302,6 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
             outpath = (tmp_path / "out").with_suffix(suffix)
             kwargs["output_file"] = outpath
         assert isinstance(tools.compose(**kwargs), Config)
-        assert logged(f"Reading {dpath} as base 'yaml' config")
         assert logged(f"Composing 'yaml' config from {upath}")
         if tofile:
             expected = {
@@ -301,6 +338,23 @@ def test_config_tools_compose__realize(realize, tmp_path):
     )
     radius = YAMLConfig(outpath)["radius"]
     assert (radius == 6.284) if realize else (radius.tagged_string == "!float '{{ 2.0 * pi * r }}'")
+
+
+def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):
+    path_a, path_b, path_c, path_d = compose_anchor_alias_assets
+    outpath = path_a.parent / "out.yaml"
+    tools.compose(configs=[path_a, path_b, path_c, path_d], realize=False, output_file=outpath)
+    expected = {"apple": "green", "banana": "yellow", "cherry": "red", "date": "brown"}
+    assert yaml.safe_load(outpath.read_text())["a"] == expected
+
+
+def test_config_tools_compose__split_anchor_alias_bad_duplicate_anchor(compose_anchor_alias_assets):
+    path_a, path_b, path_c, path_d = compose_anchor_alias_assets
+    path_c.write_text(path_c.read_text().replace("&C", "&B"))  # duplicate &B anchor
+    outpath = path_a.parent / "out.yaml"
+    with raises(yaml.composer.ComposerError) as e:
+        tools.compose(configs=[path_a, path_b, path_c, path_d], realize=False, output_file=outpath)
+    assert "found duplicate anchor 'B'" in str(e.value)
 
 
 @mark.parametrize(
@@ -440,11 +494,11 @@ def test_config_tools_realize__field_table(tmp_path):
         output_file=outfile,
         output_format=FORMAT.fieldtable,
     )
-    f1_lines = fixture_path("field_table.FV3_GFS_v16").read_text().split("\n")
-    f2_lines = outfile.read_text().split("\n")
-    reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1_lines]
-    outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2_lines]
-    lines = zip(outlist, reflist)
+    f1_lines = fixture_path("field_table.FV3_GFS_v16").read_text().strip().split("\n")
+    f2_lines = outfile.read_text().strip().split("\n")
+    reflist = [line.replace("'", "") for line in f1_lines]
+    outlist = [line.replace("'", "") for line in f2_lines]
+    lines = zip(outlist, reflist, strict=True)
     for line1, line2 in lines:
         assert line1 in line2
 

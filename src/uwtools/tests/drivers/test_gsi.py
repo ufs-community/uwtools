@@ -141,28 +141,20 @@ def test_GSI_namelist_file__missing_base_file(driverobj, logged):
 
 
 @mark.parametrize("filelist", [[], ["a", "b"]])
-def test_GSI_provisioned_rundir(driverobj, filelist):
-    expected_mocks = dict.fromkeys(
-        [
-            "coupler_res",
-            "files_copied",
-            "files_hardlinked",
-            "files_linked",
-            "namelist_file",
-            "runscript",
-        ],
-        DEFAULT,
-    )
+def test_GSI_provisioned_rundir(driverobj, filelist, ready_task):
     if filelist:
         driverobj._config["filelist"] = filelist
-        expected_mocks["filelist"] = DEFAULT
-    with patch.multiple(driverobj, **expected_mocks) as mocks:
-        driverobj.provisioned_rundir()
-    for m in mocks:
-        if m == "filelist" and not filelist:
-            mocks[m].assert_not_called()
-        else:
-            mocks[m].assert_called_once_with()
+    with patch.multiple(
+        driverobj,
+        coupler_res=ready_task,
+        filelist=ready_task if filelist else DEFAULT
+        files_copied=ready_task,
+        files_hardlinked=ready_task,
+        files_linked=ready_task,
+        namelist_file=ready_task,
+        runscript=ready_task,
+    ):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_GSI__input_config_path(driverobj):

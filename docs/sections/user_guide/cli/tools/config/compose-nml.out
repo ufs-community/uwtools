@@ -1,0 +1,6 @@
+&values
+    pi = 3.142
+    color = 'blue'
+    flower = 'rose'
+    e = 2.718
+/

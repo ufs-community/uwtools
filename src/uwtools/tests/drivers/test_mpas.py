@@ -278,14 +278,8 @@ def test_MPAS_provisioned_rundir(domain, driverobj, ready_task):
         namelist_file=ready_task,
         runscript=ready_task,
         streams_file=ready_task,
-    ) as mocks:
-        driverobj.provisioned_rundir()
-    excluded = ["boundary_files"] if domain == "global" else []
-    for m in mocks:
-        if m in excluded:
-            mocks[m].assert_not_called()
-        else:
-            mocks[m].assert_called_once_with()
+    ):
+        assert driverobj.provisioned_rundir().ready
 
 
 def test_MPAS_streams_file(config, driverobj):

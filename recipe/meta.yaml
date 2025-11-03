@@ -1,5 +1,5 @@
 {% set info = load_file_data("uwtools/resources/info.json") %}
-{% set pymin = "3.9" %}
+{% set pymin = "3.10" %}
 
 package:
   name: uwtools
@@ -19,9 +19,9 @@ requirements:
     - f90nml >=1.4,<1.5
     - iotaa >=1.3,<2
     - jinja2 >=3.1,<3.2
-    - jsonschema >=4.18,<4.24
-    - lxml >=5.2,<5.5
-    - python >={{ pymin }},<3.14
+    - jsonschema >=4.18,<4.26
+    - lxml >=5.2,<6.1
+    - python >={{ pymin }},<3.15
     - python-dateutil >=2.9,<2.10
     - pyyaml >=6.0,<6.1
     - requests >=2.32,<2.33
@@ -30,11 +30,11 @@ test:
     - docformatter 1.7.*
     - jq 1.8.*
     - make 4.4.*
-    - mypy 1.17.*
+    - mypy 1.18.*
     - pytest 8.4.*
-    - pytest-cov 6.2.*
+    - pytest-cov 7.0.*
     - pytest-xdist 3.8.*
     - python {{ pymin }}
-    - ruff 0.12.*
+    - ruff 0.14.*
 about:
   license: LGPL
