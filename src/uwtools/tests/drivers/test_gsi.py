@@ -3,6 +3,7 @@ GSI driver tests.
 """
 
 from pathlib import Path
+from textwrap import dedent
 from unittest.mock import DEFAULT, patch
 
 import f90nml  # type: ignore[import-untyped]
@@ -81,10 +82,12 @@ def test_GSI_filelist(driverobj):
     assert not filelist.is_file()
     driverobj.filelist()
     assert filelist.is_file()
-    expected_content = """bar
-baz
-foo"""
-    assert filelist.read_text() == expected_content
+    expected_content = """
+    bar
+    baz
+    foo
+    """
+    assert filelist.read_text() == dedent(expected_content).strip()
 
 
 @mark.parametrize(
