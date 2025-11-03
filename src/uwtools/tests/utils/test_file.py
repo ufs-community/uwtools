@@ -7,21 +7,10 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, mark, raises
+from pytest import mark, raises
 
 from uwtools.strings import FORMAT
 from uwtools.utils import file
-
-
-@fixture
-def assets(tmp_path, utc):
-    rundir = tmp_path / "rundir"
-    rundir.mkdir()
-    assert rundir.is_dir()
-    now = utc(2023, 6, 29, 23, 48, 11)
-    renamed = rundir.parent / ("rundir_%s" % now.strftime("%Y%m%d_%H%M%S"))
-    assert not renamed.is_dir()
-    return now, renamed, rundir
 
 
 def test_StdinProxy():
