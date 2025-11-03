@@ -73,10 +73,24 @@ def test_config_base__characterize_values(config):
         5: [{"b": 43}],
         6: "string",
         7: "{% for n in range(3) %}{{ n }}{% endfor %}",
+        8: ["{{ 1 + 1 }}"],
+        9: [42],
     }
     complete, template = config._characterize_values(values=values, parent="p.")
-    assert complete == ["  p.1", "  p.2", "  p.4", "  p.4.a", "  p.b", "  p.5", "  p.6"]
-    assert template == ["  p.3: {{ n }}", "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}"]
+    assert complete == [
+        "  p.1",
+        "  p.2",
+        "  p.4",
+        "  p.4.a",
+        "  p.b",
+        "  p.5",
+        "  p.6",
+    ]
+    assert template == [
+        "  p.3: {{ n }}",
+        "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}",
+        "  p.8: ['{{ 1 + 1 }}']",
+    ]
 
 
 def test_config_base__characterize_values__tagged_convert(config):
