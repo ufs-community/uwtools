@@ -46,7 +46,7 @@ def compose(
     output_file: Path | str | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
-) -> bool:
+) -> Config:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
@@ -242,7 +242,7 @@ Recognized file extensions are: {extensions}.
 :param output_file: Output config destination (default: write to ``stdout``).
 :param input_format: Format of configs to compose (choices: {choices}, default: ``{default}``)
 :param output_format: Format of output config (choices: {choices}, default: ``{default}``)
-:return: ``True`` if no errors were encountered.
+:return: The composed config.
 """.format(
     default=_FORMAT.yaml,
     extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()]),

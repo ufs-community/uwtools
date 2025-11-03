@@ -77,6 +77,7 @@ class STR:
     cycle: str = "cycle"
     database: str = "database"
     dryrun: str = "dry_run"
+    enkf: str = "enkf"
     env: str = "env"
     envcmds: str = "envcmds"
     esggrid: str = "esg_grid"

@@ -50,7 +50,7 @@ def compose(
     output_file: Path | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
-) -> bool:
+) -> Config:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
@@ -118,11 +118,11 @@ def compose(
     config = reduce(cfgobj_update, configs[1:], cfgobj_get(configs[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
-    output_config = output_class(config)
+    output_config: Config = output_class(config)
     if realize:
         output_config.dereference()
     output_config.dump(output_file)
-    return True
+    return output_config
 
 
 def realize(
@@ -371,7 +371,7 @@ Recognized file extensions are: {extensions}
 :param output_file: Output config destination (default: write to stdout).
 :param input_format: Format of configs to compose (choices: {choices}, default: {default}).
 :param output_format: Format of output config (choices: {choices}, default: {default}).
-:return: True if no errors were encountered.
+:return: The composed config.
 """.format(
     default=FORMAT.yaml,
     extensions=", ".join(FORMAT.extensions()),

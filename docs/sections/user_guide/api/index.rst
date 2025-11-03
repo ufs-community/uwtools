@@ -8,6 +8,7 @@ API
    chgres_cube
    config
    driver
+   enkf
    esg_grid
    execute
    filter_topo

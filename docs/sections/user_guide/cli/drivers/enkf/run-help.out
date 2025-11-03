@@ -1,0 +1,32 @@
+usage: uw enkf run --cycle CYCLE [-h] [--version] [--config-file PATH]
+                   [--batch] [--dry-run] [--graph-file PATH]
+                   [--key-path KEY[.KEY...]] [--schema-file PATH] [--quiet]
+                   [--verbose]
+
+A run
+
+Required arguments:
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --batch
+      Submit job to batch scheduler
+  --dry-run
+      Only log info, making no changes
+  --graph-file PATH
+      Path to Graphviz DOT output [experimental]
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys to driver config block
+  --schema-file PATH
+      Path to schema file to use for validation
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
