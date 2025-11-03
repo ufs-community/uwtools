@@ -226,6 +226,12 @@ GSI
 | **CLI**: ``uw gsi -h``
 | **API**: ``import uwtools.api.gsi``
 
+EnKF
+""""
+
+| **CLI**: ``uw enkf -h``
+| **API**: ``import uwtools.api.enkf``
+
 IODA
 """"
 

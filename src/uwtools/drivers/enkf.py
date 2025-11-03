@@ -1,5 +1,5 @@
 """
-A driver for the GSI component.
+A driver for the EnKF component.
 """
 
 from __future__ import annotations
@@ -8,52 +8,48 @@ from pathlib import Path
 
 from iotaa import asset, task, tasks
 
-from uwtools.api.template import render
+from uwtools.api.config import get_yaml_config
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.stager import FileStager
 from uwtools.drivers.support import set_driver_docstring
+from uwtools.fs import Linker
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class GSI(DriverCycleBased, FileStager):
+class EnKF(DriverCycleBased, FileStager):
     """
-    A driver for GSI.
+    A driver for EnKF.
     """
 
     # Workflow tasks
 
-    @task
-    def coupler_res(self):
+    @tasks
+    def background_files(self):
         """
-        The coupler.res file.
+        The ensemble background files.
         """
-        fn = "coupler.res"
-        yield self.taskname(fn)
-        path = self.rundir / fn
-        yield asset(path, path.is_file)
-        template_file = Path(self.config[fn]["template_file"])
-        yield file(template_file)
-        render(
-            input_file=template_file,
-            output_file=path,
-            overrides={
-                **self.config[fn].get("template_values", {}),
-            },
-        )
-
-    @task
-    def filelist(self):
-        """
-        Optional filelist file for global ensemble background error.
-        """
-        path = self.rundir / "filelist03"
-        yield self.taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        files = self.config["filelist"]
-        path.write_text("\n".join(sorted(files)))
+        yield self.taskname("background files")
+        member_files = self.config["background_files"]["files"]
+        ensemble_size = self.config["background_files"]["ensemble_size"]
+        file_sets = []
+        for member in range(1, ensemble_size + 1):
+            file_set = get_yaml_config(member_files)
+            file_set.dereference(
+                context={
+                    "member": member,
+                    "cycle": self.cycle,
+                }
+            )
+            file_sets.append(file_set)
+        yield [
+            Linker(
+                config=files.as_dict(),
+                target_dir=self.rundir,
+            ).go()
+            for files in file_sets
+        ]
 
     @task
     def namelist_file(self):
@@ -71,10 +67,6 @@ class GSI(DriverCycleBased, FileStager):
             path=path,
             schema=self.namelist_schema(),
         )
-        if path.is_file():
-            obs_input = Path(self.config["obs_input_file"]).read_text()
-            with path.open(mode="a") as nml:
-                nml.write(obs_input)
 
     @tasks
     def provisioned_rundir(self):
@@ -83,15 +75,13 @@ class GSI(DriverCycleBased, FileStager):
         """
         yield self.taskname("provisioned run directory")
         task_list = [
-            self.coupler_res(),
+            self.background_files(),
             self.files_copied(),
             self.files_hardlinked(),
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),
         ]
-        if self.config.get("filelist"):
-            task_list.append(self.filelist())
         yield task_list
 
     @task
@@ -116,7 +106,7 @@ class GSI(DriverCycleBased, FileStager):
         """
         The name of this driver.
         """
-        return STR.gsi
+        return STR.enkf
 
     # Private helper methods
 
@@ -125,7 +115,7 @@ class GSI(DriverCycleBased, FileStager):
         """
         Path to the input config file.
         """
-        return self.rundir / "gsiparm.anl"
+        return self.rundir / "enkf.nml"
 
     @property
     def _runcmd(self) -> str:
@@ -142,4 +132,4 @@ class GSI(DriverCycleBased, FileStager):
         return " ".join(filter(None, components))
 
 
-set_driver_docstring(GSI)
+set_driver_docstring(EnKF)

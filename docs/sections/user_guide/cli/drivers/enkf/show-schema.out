@@ -1,0 +1,20 @@
+{
+  "properties": {
+    "enkf": {
+      "additionalProperties": false,
+      "properties": {
+        "background_files": {
+          "additionalProperties": false,
+          "properties": {
+            "ensemble_size": {
+              "minimum": 2,
+              "type": "integer"
+            },
+            "files": {
+              "additionalProperties": {
+                "type": "fs_src"
+              },
+              "minProperties": 1,
+              "type": "object"
+            }
+          },

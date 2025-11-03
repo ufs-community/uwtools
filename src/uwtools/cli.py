@@ -74,6 +74,7 @@ def main() -> None:
             for x in [
                 STR.cdeps,
                 STR.chgrescube,
+                STR.enkf,
                 STR.esggrid,
                 STR.filtertopo,
                 STR.fv3,
@@ -247,13 +248,14 @@ def _dispatch_config_compose(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.compose(
+    uwtools.api.config.compose(
         configs=args[STR.configs],
         output_file=args[STR.outfile],
         realize=args[STR.realize],
         input_format=args[STR.infmt],
         output_format=args[STR.outfmt],
     )
+    return True
 
 
 def _dispatch_config_realize(args: Args) -> bool:
@@ -1357,6 +1359,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             _add_subparser_for_driver, component, subparsers, with_batch=True, with_cycle=True
         )
         for component in [
+            STR.enkf,
             STR.fv3,
             STR.gsi,
             STR.ioda,

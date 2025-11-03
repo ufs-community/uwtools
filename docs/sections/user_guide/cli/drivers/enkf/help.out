@@ -1,6 +1,6 @@
-usage: uw gsi [-h] [--version] [--show-schema] TASK ...
+usage: uw enkf [-h] [--version] [--show-schema] TASK ...
 
-Execute gsi tasks
+Execute enkf tasks
 
 Optional arguments:
   -h, --help
@@ -12,10 +12,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
-    coupler_res
-      The coupler.res file
-    filelist
-      Optional filelist file for global ensemble background error
+    background_files
+      The ensemble background files
     files_copied
       Files copied for run
     files_hardlinked

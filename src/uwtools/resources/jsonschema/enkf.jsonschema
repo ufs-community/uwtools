@@ -1,33 +1,27 @@
 {
   "properties": {
-    "gsi": {
+    "enkf": {
       "additionalProperties": false,
       "properties": {
-        "coupler.res": {
+        "background_files": {
           "additionalProperties": false,
           "properties": {
-            "template_file": {
-              "type": "string"
+            "ensemble_size": {
+              "minimum": 2,
+              "type": "integer"
             },
-            "template_values": {
-              "minProperties": 1,
-              "type": "object"
+            "files": {
+              "$ref": "urn:uwtools:files-to-stage"
             }
           },
           "required": [
-            "template_file"
+            "ensemble_size",
+            "files"
           ],
           "type": "object"
         },
         "execution": {
           "$ref": "urn:uwtools:execution-parallel"
-        },
-        "filelist": {
-          "items": {
-            "type": "string"
-          },
-          "minItems": 1,
-          "type": "array"
         },
         "files_to_copy": {
           "$ref": "urn:uwtools:files-to-stage"
@@ -77,25 +71,21 @@
           },
           "type": "object"
         },
-        "obs_input_file": {
-          "type": "string"
-        },
         "rundir": {
           "type": "string"
         }
       },
       "required": [
-        "coupler.res",
+        "background_files",
         "execution",
         "namelist",
-        "obs_input_file",
         "rundir"
       ],
       "type": "object"
     }
   },
   "required": [
-    "gsi"
+    "enkf"
   ],
   "type": "object"
 }

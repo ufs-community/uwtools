@@ -19,6 +19,9 @@ gsi:
       mm: "{{ cycle.month }}"
       dd: "{{ cycle.day }}"
       hh: "{{ cycle.hour }}"
+  filelist:
+    - /path/to/ens_mem001.nc
+    - /path/to/ens_mem002.nc
   files_to_copy:
     anavinfo: "{{ platform.gsi_fixdir }}/anavinfo.rrfs_conv_dbz"
     berror_stats: "{{ platform.gsi_fixdir }}/rrfs_glb_berror.l127y770.f77"
