@@ -147,7 +147,7 @@ def test_GSI_provisioned_rundir(driverobj, filelist, ready_task):
     with patch.multiple(
         driverobj,
         coupler_res=ready_task,
-        filelist=ready_task if filelist else DEFAULT
+        filelist=ready_task if filelist else DEFAULT,
         files_copied=ready_task,
         files_hardlinked=ready_task,
         files_linked=ready_task,
