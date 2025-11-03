@@ -154,9 +154,9 @@ def _execute(
     driver_class: DriverT,
     task: str,
     config: Path | str | None = None,
-    cycle: dt.datetime | None = None,
-    leadtime: dt.timedelta | None = None,
-    batch: bool = False,
+    cycle: dt.datetime | None = None,  # noqa: ARG001
+    leadtime: dt.timedelta | None = None,  # noqa: ARG001
+    batch: bool = False,  # noqa: ARG001
     dry_run: bool = False,
     graph_file: Path | str | None = None,
     key_path: list[YAMLKey] | None = None,
@@ -188,9 +188,9 @@ def _execute(
         schema_file=schema_file,
     )
     accepted = set(getfullargspec(driver_class).args)
-    for arg in ["batch", "cycle", "leadtime"]:
-        if arg in accepted:
-            kwargs[arg] = locals()[arg]
+    kwargs.update(
+        {arg: locals().get(arg) for arg in ["batch", "cycle", "leadtime"] if arg in accepted}
+    )
     obj = driver_class(**kwargs)
     node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
