@@ -71,9 +71,10 @@ class GSI(DriverCycleBased, FileStager):
             path=path,
             schema=self.namelist_schema(),
         )
-        obs_input = Path(self.config["obs_input_file"]).read_text()
-        with path.open(mode="a") as nml:
-            nml.write(obs_input)
+        if path.is_file():
+            obs_input = Path(self.config["obs_input_file"]).read_text()
+            with path.open(mode="a") as nml:
+                nml.write(obs_input)
 
     @tasks
     def provisioned_rundir(self):
