@@ -5,7 +5,7 @@ Tests for uwtools.scheduler module.
 from typing import Any
 from unittest.mock import patch
 
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools import scheduler
 from uwtools.exceptions import UWConfigError
@@ -112,15 +112,17 @@ def test_JobScheduler_get_scheduler_pass(props):
     assert isinstance(ConcreteScheduler.get_scheduler(props=props), scheduler.Slurm)
 
 
-def test_JobScheduler_submit_job(schedulerobj, tmp_path):
+@mark.parametrize("supply_submit_file", [True, False])
+def test_JobScheduler_submit_job(schedulerobj, supply_submit_file, tmp_path):
     runscript = tmp_path / "runscript"
-    submit_file = tmp_path / "runscript.submit"
+    submit_file = tmp_path / "runscript.submit" if supply_submit_file else None
     with patch.object(scheduler, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (True, None)
         assert schedulerobj.submit_job(runscript=runscript, submit_file=submit_file) is True
-        run_shell_cmd.assert_called_once_with(
-            cmd=f"sub {runscript} 2>&1 | tee {submit_file}", cwd=str(tmp_path)
-        )
+        cmd = f"sub {runscript}"
+        if supply_submit_file:
+            cmd += f" 2>&1 | tee {submit_file}"
+        run_shell_cmd.assert_called_once_with(cmd=cmd, cwd=str(tmp_path))
 
 
 def test_JobScheduler__directive_separator(schedulerobj):

@@ -54,19 +54,21 @@ def test_execute_fail_stdin_not_ok(kwargs, utc):
     assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
 
 
+@mark.parametrize("graph", [True, False])
 @mark.parametrize("remove", [[], ["schema_file"]])
-def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
+def test_execute_pass(graph, kwargs, logged, remove, tmp_path, utc):
     for kwarg in remove:
         del kwargs[kwarg]
     kwargs["cycle"] = utc()
-    graph_file = tmp_path / "g.dot"
-    graph_code = "DOT code"
-    kwargs["graph_file"] = graph_file
+    if graph:
+        graph_file = tmp_path / "g.dot"
+        graph_code = "DOT code"
+        kwargs["graph_file"] = graph_file
     with (
         patch.object(execute, "_get_driver_class") as gdc,
         patch.object(execute, "getfullargspec") as gfa,
     ):
-        node = Mock(graph=graph_code)
+        node = Mock(graph=graph_code) if graph else Mock()
         node.ref = 42
         driverobj = Mock()
         driverobj.forty_two.return_value = node
@@ -76,7 +78,8 @@ def test_execute_pass(kwargs, logged, remove, tmp_path, utc):
         assert val
         assert val.ref == 42
     assert logged("Instantiated %s with" % kwargs["classname"])
-    assert graph_file.read_text().strip() == graph_code
+    if graph:
+        assert graph_file.read_text().strip() == graph_code
 
 
 def test_execute_fail_cannot_load_driver_class(kwargs):

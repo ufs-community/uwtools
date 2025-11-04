@@ -89,8 +89,9 @@ def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
+@mark.parametrize("supply_graph_file", [True, False])
 @mark.parametrize("hours", [0, 24, 168])
-def test__execute(execute_kwargs, hours, tmp_path, utc):
+def test__execute(execute_kwargs, hours, supply_graph_file, tmp_path, utc):
     graph_file = tmp_path / "g.dot"
     kwargs = {
         **execute_kwargs,
@@ -98,8 +99,9 @@ def test__execute(execute_kwargs, hours, tmp_path, utc):
         "config": {"concrete": {"some": "config"}},
         "cycle": utc(),
         "leadtime": dt.timedelta(hours=hours),
-        "graph_file": graph_file,
+        "graph_file": graph_file if supply_graph_file else None,
     }
     assert not graph_file.is_file()
     assert api._execute(**kwargs) is True
-    assert graph_file.is_file()
+    if supply_graph_file:
+        assert graph_file.is_file()

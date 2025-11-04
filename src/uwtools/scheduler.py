@@ -266,8 +266,6 @@ class PBS(JobScheduler):
         """
         exclusive = items.get(_DirectivesOptional.EXCLUSIVE)
         placement = items.get(_DirectivesOptional.PLACEMENT)
-        if not exclusive and not placement:
-            return items
         output = []
         if placement:
             output.append(str(placement))

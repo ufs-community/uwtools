@@ -1734,11 +1734,10 @@ def test_schema_mpas_streams_properties_required(mpas_streams):
     props = {"filename_template", "mutable", "type"}
     exercised = set()
     errors = schema_validator("mpas-streams")
-    for k, v in mpas_streams.items():
+    for k in mpas_streams:
         for prop in props:
-            if prop in v:
-                assert "is a required property" in errors(with_del(mpas_streams, k, prop))
-                exercised.add(prop)
+            assert "is a required property" in errors(with_del(mpas_streams, k, prop))
+            exercised.add(prop)
     assert exercised == props
 
 
@@ -2482,11 +2481,12 @@ def test_schema_shave_config_properties():
     for key in ("input_grid_file", "nx", "ny", "nhalo"):
         # All config keys are required:
         assert f"'{key}' is a required property" in errors({})
-        # A string value is ok for input_grid_file:
         if key == "input_grid_file":
+            # A string value is ok for input_grid_file:
             assert "not of type 'string'" in str(errors({key: 42}))
-        # nx, ny, and nhalo must be integers >= their respective minimum values:
-        elif key in (keyvals := {"nx": 1, "ny": 1, "nhalo": 0}):
+        else:
+            # nx, ny, and nhalo must be integers >= their respective minimum values:
+            keyvals = {"nx": 1, "ny": 1, "nhalo": 0}
             minval = keyvals[key]
             assert "not of type 'integer'" in str(errors({key: "/path/"}))
             assert f"{minval - 1} is less than the minimum of {minval}" in str(

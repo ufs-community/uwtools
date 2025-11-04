@@ -3,6 +3,7 @@ GSI driver tests.
 """
 
 from pathlib import Path
+from textwrap import dedent
 from unittest.mock import DEFAULT, patch
 
 import f90nml  # type: ignore[import-untyped]
@@ -81,10 +82,12 @@ def test_GSI_filelist(driverobj):
     assert not filelist.is_file()
     driverobj.filelist()
     assert filelist.is_file()
-    expected_content = """bar
-baz
-foo"""
-    assert filelist.read_text() == expected_content
+    expected_content = """
+    bar
+    baz
+    foo
+    """
+    assert filelist.read_text() == dedent(expected_content).strip()
 
 
 @mark.parametrize(
@@ -114,6 +117,7 @@ def test_GSI_namelist_file(driverobj, logged):
     dst = driverobj.rundir / "gsiparm.anl"
     assert not dst.is_file()
     path = Path(driverobj.namelist_file().ref)
+    assert path == dst
     assert dst.is_file()
     assert logged(f"Wrote config to {path}")
     nml = f90nml.read(dst)
@@ -121,6 +125,14 @@ def test_GSI_namelist_file(driverobj, logged):
     assert nml["a"]["start"] == 1
     content = dst.read_text().split("\n")
     assert content[-1] == "OBS_INPUT GOES HERE"
+
+
+def test_GSI_namelist_file__fail(driverobj, logged):
+    driverobj._config["namelist"] = {}
+    node = driverobj.namelist_file()
+    assert not node.ready
+    assert not node.ref.is_file()
+    assert logged("{} should be non-empty")
 
 
 def test_GSI_runscript(driverobj):

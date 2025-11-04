@@ -43,7 +43,8 @@ class JEDI(JEDIBase):
         """
         taskname = self.taskname("validate_only")
         yield taskname
-        a = asset(None, lambda: False)
+        ready = [False]
+        a = asset(None, lambda: ready[0])
         yield a
         executable = file(Path(self.config[STR.execution][STR.executable]))
         config = self.configuration_file()
@@ -51,10 +52,8 @@ class JEDI(JEDIBase):
         cmd = "time %s --validate-only %s 2>&1" % (executable.ref, config.ref)
         if envcmds := self.config[STR.execution].get(STR.envcmds):
             cmd = " && ".join([*envcmds, cmd])
-        success, _ = run_shell_cmd(cmd)
-        if success:
-            log.info("%s: Config is valid", taskname)
-            a.ready = lambda: True
+        ready[0], _ = run_shell_cmd(cmd)
+        log.info("%s: Config is %s", taskname, "valid" if ready[0] else "invalid")
 
     # Public helper methods
 

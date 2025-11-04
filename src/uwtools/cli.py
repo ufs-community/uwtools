@@ -1288,9 +1288,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         "schema_file": args[STR.schemafile],
         "stdin_ok": True,
     }
-    for k in [STR.batch, STR.cycle, STR.leadtime]:
-        if k in args:
-            kwargs[k] = args.get(k)
+    kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
     return execute(**kwargs)
 
 

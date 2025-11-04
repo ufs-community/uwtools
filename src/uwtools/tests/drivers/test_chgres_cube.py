@@ -7,8 +7,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import f90nml  # type: ignore[import-untyped]
-from pytest import fixture
+from pytest import fixture, mark
 
+from uwtools.api.config import get_nml_config
 from uwtools.drivers.chgres_cube import ChgresCube
 from uwtools.scheduler import Slurm
 
@@ -91,7 +92,19 @@ def test_ChgresCube_driver_name(driverobj):
     assert driverobj.driver_name() == ChgresCube.driver_name() == "chgres_cube"
 
 
-def test_ChgresCube_namelist_file(driverobj, logged):
+@mark.parametrize("omit_config_files", [True, False])
+@mark.parametrize("supply_update_values", [True, False])
+def test_ChgresCube_namelist_file(driverobj, logged, omit_config_files, supply_update_values):
+    if omit_config_files:
+        # Leave out config files to satisfy branch-coverage tests:
+        del driverobj._config["namelist"]["update_values"]["config"]["atm_core_files_input_grid"]
+        del driverobj._config["namelist"]["update_values"]["config"]["orog_files_input_grid"]
+    if not supply_update_values:
+        # Create and specify a base_file and remove update_values from config:
+        base_file = driverobj.rundir / "a.nml"
+        get_nml_config(driverobj.config["namelist"]["update_values"]).dump(base_file)
+        driverobj._config["namelist"]["base_file"] = str(base_file)
+        del driverobj._config["namelist"]["update_values"]
     dst = driverobj.rundir / "fort.41"
     assert not dst.is_file()
     path = Path(driverobj.namelist_file().ref)
