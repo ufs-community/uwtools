@@ -135,7 +135,7 @@ def test_GSI_namelist_file__fail(caplog, driverobj):
     assert any(
         x in caplog.text
         for x in [
-            "should be non-empty",  # jsonschema < 4.18.0
+            # "should be non-empty",  # jsonschema < 4.18.0
             "does not have enough properties",  # jsonschema >= 4.18.0
         ]
     )
