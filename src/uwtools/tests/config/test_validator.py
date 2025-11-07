@@ -293,14 +293,31 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-def test_config_validator__validation_errors__bad_enum_value(config, schema):
-    config["color"] = "yellow"
+@mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
+def test_config_validator__validation_errors__fail(config, key, schema, val):
+    config[key] = val
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test_config_validator__validation_errors__bad_number_value(config, schema):
-    config["number"] = "string"
-    assert len(validator._validation_errors(config, schema)) == 1
+@mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
+def test_config_validator__validation_errors__fail_oldstyle(config, key, schema, val):
+    exceptions = iter([TypeError("unexpected keyword argument 'registry'")])
+    real_extend = validator.validators.extend
+
+    def extend(*args, **kwargs):
+        real_uwvalidator = real_extend(*args, **kwargs)
+
+        def uwvalidator(*a, **k):
+            try:
+                raise next(exceptions)
+            except StopIteration:
+                return real_uwvalidator(*a, **k)
+
+        return uwvalidator
+
+    config[key] = val
+    with patch.object(validator.validators, "extend", extend):
+        assert len(validator._validation_errors(config, schema)) == 1
 
 
 def test_config_validator__validation_errors__pass(config, schema, utc):
