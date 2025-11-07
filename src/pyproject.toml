@@ -23,6 +23,11 @@ check_untyped_defs = true
 pretty = true
 warn_return_any = true
 
+[tool.pytest.ini_options]
+filterwarnings = [
+  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning"
+]
+
 [tool.ruff]
 line-length = 100
 
