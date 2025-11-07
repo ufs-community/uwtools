@@ -207,7 +207,7 @@ def _resolver(schema: dict) -> RefResolver:
         return cast(dict, json.loads(text))
 
     schemadir = resource_path("jsonschema")
-    return RefResolver(base_uri="%s/" % schemadir.as_uri(), referrer=schema, handlers={"urn": load})
+    return RefResolver.from_schema(schema, handlers={"urn": load})
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
