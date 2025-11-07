@@ -299,25 +299,29 @@ def test_config_validator__validation_errors__fail(config, key, schema, val):
     assert len(validator._validation_errors(config, schema)) == 1
 
 
+@mark.parametrize("msg", ["unexpected keyword argument 'registry'", "other"])
 @mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
-def test_config_validator__validation_errors__fail_oldstyle(config, key, schema, val):
-    exceptions = iter([TypeError("unexpected keyword argument 'registry'")])
-    real_extend = validator.validators.extend
-
+def test_config_validator__validation_errors__fail_oldstyle(config, key, msg, schema, val):
     def extend(*args, **kwargs):
-        real_uwvalidator = real_extend(*args, **kwargs)
-
         def uwvalidator(*a, **k):
             try:
                 raise next(exceptions)
             except StopIteration:
                 return real_uwvalidator(*a, **k)
 
+        real_uwvalidator = real_extend(*args, **kwargs)
         return uwvalidator
 
+    exceptions = iter([TypeError(msg)])
+    real_extend = validator.validators.extend
     config[key] = val
     with patch.object(validator.validators, "extend", extend):
-        assert len(validator._validation_errors(config, schema)) == 1
+        if msg == "other":
+            with raises(TypeError) as e:
+                validator._validation_errors(config, schema)
+            assert str(e.value) == "other"
+        else:
+            assert len(validator._validation_errors(config, schema)) == 1
 
 
 def test_config_validator__validation_errors__pass(config, schema, utc):
