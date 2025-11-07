@@ -200,15 +200,14 @@ def _registry() -> Registry:
 
 
 def _resolver(schema: dict) -> RefResolver:
-    return RefResolver(
-        base_uri="urn:uwtools",
-        referrer=schema,
-        handlers={
-            "urn": lambda uri: json.loads(
-                resource_path("jsonschema/%s.jsonschema" % uri.split(":")[-1]).read_text()
-            )
-        },
-    )
+    def load(uri: str) -> dict:
+        name = uri.split(":")[-1]
+        path = schemadir / f"{name}.jsonschema"
+        text = path.read_text()
+        return cast(dict, json.loads(text))
+
+    schemadir = resource_path("jsonschema")
+    return RefResolver(base_uri="%s/" % schemadir.as_uri(), referrer=schema, handlers={"urn": load})
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
