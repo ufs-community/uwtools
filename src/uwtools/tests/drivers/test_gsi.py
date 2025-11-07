@@ -127,12 +127,18 @@ def test_GSI_namelist_file(driverobj, logged):
     assert content[-1] == "OBS_INPUT GOES HERE"
 
 
-def test_GSI_namelist_file__fail(driverobj, logged):
+def test_GSI_namelist_file__fail(caplog, driverobj):
     driverobj._config["namelist"] = {}
     node = driverobj.namelist_file()
     assert not node.ready
     assert not node.ref.is_file()
-    assert logged("{} should be non-empty")
+    assert any(
+        x in caplog.text
+        for x in [
+            "should be non-empty",  # jsonschema < 4.18.0
+            "does not have enough properties",  # jsonschema >= 4.18.0
+        ]
+    )
 
 
 def test_GSI_runscript(driverobj):
