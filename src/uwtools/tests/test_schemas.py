@@ -1180,14 +1180,9 @@ def test_schema_gsi_filelist(gsi_prop):
     assert not errors(["a", "b"])
     assert "is not of type 'array'" in errors({"a": "foo", "b": "bar"})
     assert "is not of type 'string'" in errors([1, 2])
-    # Make sure it has entries:
-    assert any(
-        msg in errors([])
-        for msg in [
-            # "should be non-empty",  # jsonschema < 4.18.0
-            "is too short",  # jsonschema >= 4.18.0
-        ]
-    )
+    # Make sure it has entries (different versions of jsonschema emit different error messages for
+    # the same issue):
+    assert any(x in errors([]) for x in ["should be non-empty", "is too short"])
 
 
 def test_schema_gsi_namelist(gsi_prop):
