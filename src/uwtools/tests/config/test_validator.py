@@ -298,15 +298,15 @@ def test_config_validator__validation_errors__fail(config, key, schema, val):
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def extend(real_extend, msg, *args, **kwargs):
-    def uwvalidator(*a, **k):
+def extend(real_extend, msg, *args_outer, **kwargs_outer):
+    def uwvalidator(*args_inner, **kwargs_inner):
         try:
-            raise next(exceptions)
-        except StopIteration:
-            return real_uwvalidator(*a, **k)
+            raise exceptions.pop()
+        except IndexError:
+            uwvalidator = real_extend(*args_outer, **kwargs_outer)
+            return uwvalidator(*args_inner, **kwargs_inner)
 
-    exceptions = iter([TypeError(msg)])
-    real_uwvalidator = real_extend(*args, **kwargs)
+    exceptions = [TypeError(msg)]
     return uwvalidator
 
 
