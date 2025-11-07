@@ -329,17 +329,7 @@ def test_config_validator__validation_errors__pass(config, schema):
 
 
 def test_config_validator__validation_errors__pass_oldstyle(config, schema):
-    def extend(*args, **kwargs):
-        def uwvalidator(*a, **k):
-            try:
-                raise next(exceptions)
-            except StopIteration:
-                return real_uwvalidator(*a, **k)
-
-        real_uwvalidator = real_extend(*args, **kwargs)
-        return uwvalidator
-
-    exceptions = iter([TypeError("unexpected keyword argument 'registry'")])
     real_extend = validator.validators.extend
-    with patch.object(validator.validators, "extend", extend):
+    msg = "unexpected keyword argument 'registry'", "other"
+    with patch.object(validator.validators, "extend", partial(mock_extend, real_extend, msg)):
         assert not validator._validation_errors(config, schema)
