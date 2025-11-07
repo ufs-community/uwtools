@@ -85,6 +85,18 @@ def schema_file(schema, tmp_path) -> Path:
 # Helpers
 
 
+def mock_extend(real_extend, msg, *args_outer, **kwargs_outer):
+    def uwvalidator(*args_inner, **kwargs_inner):
+        try:
+            raise exceptions.pop()
+        except IndexError:
+            uwvalidator = real_extend(*args_outer, **kwargs_outer)
+            return uwvalidator(*args_inner, **kwargs_inner)
+
+    exceptions = [TypeError(msg)]
+    return uwvalidator
+
+
 def write_as_json(data: dict[str, Any], path: Path) -> Path:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     return path
@@ -298,24 +310,12 @@ def test_config_validator__validation_errors__fail(config, key, schema, val):
     assert len(validator._validation_errors(config, schema)) == 1
 
 
-def extend(real_extend, msg, *args_outer, **kwargs_outer):
-    def uwvalidator(*args_inner, **kwargs_inner):
-        try:
-            raise exceptions.pop()
-        except IndexError:
-            uwvalidator = real_extend(*args_outer, **kwargs_outer)
-            return uwvalidator(*args_inner, **kwargs_inner)
-
-    exceptions = [TypeError(msg)]
-    return uwvalidator
-
-
 @mark.parametrize("msg", ["unexpected keyword argument 'registry'", "other"])
 @mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
 def test_config_validator__validation_errors__fail_oldstyle(config, key, msg, schema, val):
     real_extend = validator.validators.extend
     config[key] = val
-    with patch.object(validator.validators, "extend", partial(extend, real_extend, msg)):
+    with patch.object(validator.validators, "extend", partial(mock_extend, real_extend, msg)):
         if msg == "other":
             with raises(TypeError) as e:
                 validator._validation_errors(config, schema)
