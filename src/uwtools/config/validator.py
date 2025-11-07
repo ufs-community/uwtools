@@ -193,7 +193,10 @@ def _registry() -> Registry:
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
     def retrieve(uri: str) -> Resource:
-        return Resource(contents=_load_schema(uri), specification=DRAFT202012)  # type: ignore[call-arg]
+        return Resource(
+            contents=_load_schema(uri),
+            specification=DRAFT202012,
+        )  # type: ignore[call-arg]
 
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
