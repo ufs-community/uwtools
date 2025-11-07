@@ -1,7 +1,7 @@
 {
   "$defs": {
     "compoundTimeString": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/$defs/compoundTimeStringElement"
         },
@@ -14,7 +14,7 @@
       ]
     },
     "compoundTimeStringElement": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/$defs/cycleString"
         },
@@ -285,7 +285,7 @@
       "type": "object"
     },
     "nonNegativeTime": {
-      "oneOf": [
+      "anyOf": [
         {
           "minimum": 0,
           "type": "integer"
@@ -454,7 +454,7 @@
       "type": "object"
     },
     "time": {
-      "oneOf": [
+      "anyOf": [
         {
           "type": "integer"
         },
@@ -539,7 +539,7 @@
                 "type": "object"
               },
               "spec": {
-                "oneOf": [
+                "anyOf": [
                   {
                     "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+$",
                     "type": "string"
