@@ -4,7 +4,6 @@ Tests for uwtools.config.validator module.
 
 import json
 import logging
-from datetime import timedelta
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -299,9 +298,37 @@ def test_config_validator__validation_errors__fail(config, key, schema, val):
     assert len(validator._validation_errors(config, schema)) == 1
 
 
+def extend(real_extend, msg, *args, **kwargs):
+    def uwvalidator(*a, **k):
+        try:
+            raise next(exceptions)
+        except StopIteration:
+            return real_uwvalidator(*a, **k)
+
+    exceptions = iter([TypeError(msg)])
+    real_uwvalidator = real_extend(*args, **kwargs)
+    return uwvalidator
+
+
 @mark.parametrize("msg", ["unexpected keyword argument 'registry'", "other"])
 @mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
 def test_config_validator__validation_errors__fail_oldstyle(config, key, msg, schema, val):
+    real_extend = validator.validators.extend
+    config[key] = val
+    with patch.object(validator.validators, "extend", partial(extend, real_extend, msg)):
+        if msg == "other":
+            with raises(TypeError) as e:
+                validator._validation_errors(config, schema)
+            assert str(e.value) == "other"
+        else:
+            assert len(validator._validation_errors(config, schema)) == 1
+
+
+def test_config_validator__validation_errors__pass(config, schema):
+    assert not validator._validation_errors(config, schema)
+
+
+def test_config_validator__validation_errors__pass_oldstyle(config, schema):
     def extend(*args, **kwargs):
         def uwvalidator(*a, **k):
             try:
@@ -312,19 +339,7 @@ def test_config_validator__validation_errors__fail_oldstyle(config, key, msg, sc
         real_uwvalidator = real_extend(*args, **kwargs)
         return uwvalidator
 
-    exceptions = iter([TypeError(msg)])
+    exceptions = iter([TypeError("unexpected keyword argument 'registry'")])
     real_extend = validator.validators.extend
-    config[key] = val
     with patch.object(validator.validators, "extend", extend):
-        if msg == "other":
-            with raises(TypeError) as e:
-                validator._validation_errors(config, schema)
-            assert str(e.value) == "other"
-        else:
-            assert len(validator._validation_errors(config, schema)) == 1
-
-
-def test_config_validator__validation_errors__pass(config, schema, utc):
-    config["cycle"] = utc(2025, 6, 3, 12)
-    config["leadtime"] = timedelta(hours=6)
-    assert not validator._validation_errors(config, schema)
+        assert not validator._validation_errors(config, schema)
