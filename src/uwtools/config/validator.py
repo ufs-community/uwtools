@@ -10,9 +10,7 @@ from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from jsonschema import Draft202012Validator, validators
-
-# from jsonschema import RefResolver
+from jsonschema import Draft202012Validator, RefResolver, validators
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -201,19 +199,16 @@ def _registry() -> Registry:
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
 
-# @cache
-# def _resolver(uri: str, schema: dict) -> RefResolver::
-#     return RefResolver(
-#         base_uri="urn:uwtools",
-#         referrer=schema,
-#         handlers={
-#             "urn": lambda uri: json.loads(
-#                 resource_path(
-#                     f"jsonschema/%s.jsonschema" % uri.split(":")[-1]
-#                 ).read_text()
-#             )
-#         },
-#     )
+def _resolver(schema: dict) -> RefResolver:
+    return RefResolver(
+        base_uri="urn:uwtools",
+        referrer=schema,
+        handlers={
+            "urn": lambda uri: json.loads(
+                resource_path("jsonschema/%s.jsonschema" % uri.split(":")[-1]).read_text()
+            )
+        },
+    )
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
@@ -236,9 +231,8 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     try:
         validator = uwvalidator(schema, registry=_registry())
     except TypeError as e:
-        print(e)
-        # if "unexpected keyword argument 'registry'" in str(e):
-        #     validator = uwvalidator(schema, resolver=_resolver)
-        # else:
-        #     raise
+        if "unexpected keyword argument 'registry'" in str(e):
+            validator = uwvalidator(schema, resolver=_resolver(schema))
+        else:
+            raise
     return list(validator.iter_errors(config))
