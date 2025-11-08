@@ -90,8 +90,8 @@ def mock_extend(real_extend, msg, *args_outer, **kwargs_outer):
     A mock to replace jsonschema.validators.extend.
 
     Returns a function that, when called the first time, raises a TypeError with the specified
-    message; and when called a second time makes the call that would have happened if no mocking had
-    been done.
+    message; and when called a second time makes the call that would have been made if no mock was
+    in place.
 
     :param real_extend: The actual, unmocked jsonschema.validators.extend.
     :param msg: The message to associate with the TypeError.
