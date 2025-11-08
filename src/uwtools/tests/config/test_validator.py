@@ -315,7 +315,7 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-@mark.parametrize("msg", [validator.PRE_4_18_JSONSCHEMA_MSG, "other"])
+@mark.parametrize("msg", [validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG, "other"])
 @mark.parametrize("pre_4_18_jsonschema", [True, False])
 def test_config_validator__validation_errors__fail(config, msg, pre_4_18_jsonschema, schema):
     config["color"] = "yellow"
@@ -342,7 +342,9 @@ def test_config_validator__validation_errors__pass(config, pre_4_18_jsonschema, 
         ref_schema = tmp_path / "ref.jsonschema"
         ref_schema.write_text(json.dumps({"type": "number"}))
         schema["properties"]["number"] = {"$ref": "urn:uwtools:ref"}
-        mock = partial(mock_extend, validator.validators.extend, validator.PRE_4_18_JSONSCHEMA_MSG)
+        mock = partial(
+            mock_extend, validator.validators.extend, validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG
+        )
         with (
             patch.object(validator, "resource_path", return_value=tmp_path),
             patch.object(validator.validators, "extend", mock),

@@ -11,8 +11,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from jsonschema import Draft202012Validator, RefResolver, validators
-from referencing import Registry, Resource
-from referencing.jsonschema import DRAFT202012
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import UWYAMLGlob
@@ -20,11 +18,18 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
+try:
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT202012
+except ModuleNotFoundError:  # pragma: no cover
+    ...
+
 if TYPE_CHECKING:
     from jsonschema.exceptions import ValidationError
 
 
-PRE_4_18_JSONSCHEMA_MSG = "unexpected keyword argument 'registry'"
+JSONSCHEMA_MSG_REGISTRY_NO_KWARG = "unexpected keyword argument 'registry'"
+JSONSCHEMA_MSG_REGISTRY_UNDEFINED = "name 'Registry' is not defined"
 
 # Types
 
@@ -234,10 +239,13 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     uwvalidator = validators.extend(base, type_checker=type_checker)
     try:
         validator = uwvalidator(schema, registry=_registry())
-    except TypeError as e:
-        if PRE_4_18_JSONSCHEMA_MSG in str(e):
-            # If the TypeError was raised because 'registry' is not a kwarg, which was the case for
-            # pre-4.18 jsonschema, instantate a validator using the older resolver mechanism.
+    except (NameError, TypeError) as e:
+        msgs = [JSONSCHEMA_MSG_REGISTRY_NO_KWARG, JSONSCHEMA_MSG_REGISTRY_UNDEFINED]
+        if any(msg in str(e) for msg in msgs):
+            # If TypeError was raised because 'registry' is not a kwarg (true for jsonschema < 4.18)
+            # or if NameError was raised because Registry was not imported (true if 'referencing' is
+            # not installed, and jsonschema < 4.18 does not require it), then instantate a validator
+            # using the older resolver mechanism.
             validator = uwvalidator(schema, resolver=_resolver(schema))
         else:
             # If the TypeError was raised for some other, unknown reason, re-raise it.
