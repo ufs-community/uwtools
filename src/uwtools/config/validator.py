@@ -181,12 +181,6 @@ def validate_external(
 # Private functions
 
 
-def _load_schema(uri: str) -> dict:
-    name = uri.split(":")[-1]
-    path = resource_path(f"jsonschema/{name}.jsonschema")
-    return cast(dict, json.loads(path.read_text()))
-
-
 @cache
 def _registry() -> Registry:
     """
@@ -196,10 +190,10 @@ def _registry() -> Registry:
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
     def retrieve(uri: str) -> Resource:
-        return Resource(
-            contents=_load_schema(uri),
-            specification=DRAFT202012,
-        )  # type: ignore[call-arg]
+        name = uri.split(":")[-1]
+        path = resource_path(f"jsonschema/{name}.jsonschema")
+        text = json.loads(path.read_text())
+        return Resource(contents=text, specification=DRAFT202012)  # type: ignore[call-arg]
 
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
@@ -211,14 +205,14 @@ def _resolver(schema: dict) -> RefResolver:
     :param schema: A schema potentially containing $ref keys.
     """
 
-    def load(uri: str) -> dict:
+    def retrieve(uri: str) -> dict:
         name = uri.split(":")[-1]
         path = schemadir / f"{name}.jsonschema"
         text = path.read_text()
         return cast(dict, json.loads(text))
 
     schemadir = resource_path("jsonschema")
-    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": load}))
+    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": retrieve}))
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
