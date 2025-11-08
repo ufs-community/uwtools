@@ -248,6 +248,6 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
             # using the older resolver mechanism.
             validator = uwvalidator(schema, resolver=_resolver(schema))
         else:
-            # If the TypeError was raised for some other, unknown reason, re-raise it.
+            # If an error was raised for some other reason, re-raise it.
             raise
     return list(validator.iter_errors(config))
