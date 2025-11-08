@@ -23,11 +23,16 @@ from uwtools.utils.file import resource_path
 if TYPE_CHECKING:
     from jsonschema.exceptions import ValidationError
 
-# Public functions
+
+OLD_JSONSCHEMA_MSG = "unexpected keyword argument 'registry'"
+
+# Types
 
 JSONValueT = bool | dict | float | int | list | str
 ConfigDataT = JSONValueT | YAMLConfig
 ConfigPathT = str | Path
+
+# Public functions
 
 
 def bundle(schema: dict, keys: list | None = None) -> dict:
@@ -230,7 +235,7 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     try:
         validator = uwvalidator(schema, registry=_registry())
     except TypeError as e:
-        if "unexpected keyword argument 'registry'" in str(e):
+        if OLD_JSONSCHEMA_MSG in str(e):
             validator = uwvalidator(schema, resolver=_resolver(schema))
         else:
             raise
