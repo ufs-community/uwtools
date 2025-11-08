@@ -205,6 +205,12 @@ def _registry() -> Registry:
 
 
 def _resolver(schema: dict) -> RefResolver:
+    """
+    Return a pre-4.18 jsonschema resolver that loads schema files given a URI.
+
+    :param schema: A schema potentially containing $ref keys.
+    """
+
     def load(uri: str) -> dict:
         name = uri.split(":")[-1]
         path = schemadir / f"{name}.jsonschema"
@@ -236,7 +242,10 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
         validator = uwvalidator(schema, registry=_registry())
     except TypeError as e:
         if PRE_4_18_JSONSCHEMA_MSG in str(e):
+            # If the TypeError was raised because 'registry' is not a kwarg, which was the case for
+            # pre-4.18 jsonschema, instantate a validator using the older resolver mechanism.
             validator = uwvalidator(schema, resolver=_resolver(schema))
         else:
+            # If the TypeError was raised for some other, unknown reason, re-raise it.
             raise
     return list(validator.iter_errors(config))

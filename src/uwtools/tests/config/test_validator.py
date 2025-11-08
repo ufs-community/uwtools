@@ -86,6 +86,17 @@ def schema_file(schema, tmp_path) -> Path:
 
 
 def mock_extend(real_extend, msg, *args_outer, **kwargs_outer):
+    """
+    A mock to replace jsonschema.validators.extend.
+
+    Returns a function that, when called the first time, raises a TypeError with the specified
+    message; and when called a second time makes the call that would have happened if no mocking had
+    been done.
+
+    :param real_extend: The actual, unmocked jsonschema.validators.extend.
+    :param msg: The message to associate with the TypeError.
+    """
+
     def uwvalidator(*args_inner, **kwargs_inner):
         try:
             raise exceptions.pop()
@@ -325,14 +336,16 @@ def test_config_validator__validation_errors__fail(config, msg, pre_4_18_jsonsch
 @mark.parametrize("pre_4_18_jsonschema", [True, False])
 def test_config_validator__validation_errors__pass(config, pre_4_18_jsonschema, schema, tmp_path):
     if pre_4_18_jsonschema:
+        # For an older jsonschema, ensure that the resolver mechanism gets exercised by this test by
+        # replacing a schema value with a $ref value and arranging for the validator code to load an
+        # appropriate schema file defined by this test.
         ref_schema = tmp_path / "ref.jsonschema"
         ref_schema.write_text(json.dumps({"type": "number"}))
         schema["properties"]["number"] = {"$ref": "urn:uwtools:ref"}
-        msg = validator.PRE_4_18_JSONSCHEMA_MSG
-        mock = partial(mock_extend, validator.validators.extend, msg)
+        mock = partial(mock_extend, validator.validators.extend, validator.PRE_4_18_JSONSCHEMA_MSG)
         with (
-            patch.object(validator.validators, "extend", mock),
             patch.object(validator, "resource_path", return_value=tmp_path),
+            patch.object(validator.validators, "extend", mock),
         ):
             assert not validator._validation_errors(config, schema)
     else:
