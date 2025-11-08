@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from jsonschema.exceptions import ValidationError
 
 
-OLD_JSONSCHEMA_MSG = "unexpected keyword argument 'registry'"
+PRE_4_18_JSONSCHEMA_MSG = "unexpected keyword argument 'registry'"
 
 # Types
 
@@ -235,7 +235,7 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
     try:
         validator = uwvalidator(schema, registry=_registry())
     except TypeError as e:
-        if OLD_JSONSCHEMA_MSG in str(e):
+        if PRE_4_18_JSONSCHEMA_MSG in str(e):
             validator = uwvalidator(schema, resolver=_resolver(schema))
         else:
             raise

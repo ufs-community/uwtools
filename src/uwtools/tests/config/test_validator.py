@@ -304,11 +304,11 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-@mark.parametrize("msg", [validator.OLD_JSONSCHEMA_MSG, "other"])
-@mark.parametrize("oldstyle", [True, False])
-def test_config_validator__validation_errors__fail(config, msg, oldstyle, schema):
+@mark.parametrize("msg", [validator.PRE_4_18_JSONSCHEMA_MSG, "other"])
+@mark.parametrize("pre_4_18_jsonschema", [True, False])
+def test_config_validator__validation_errors__fail(config, msg, pre_4_18_jsonschema, schema):
     config["color"] = "yellow"
-    if oldstyle:
+    if pre_4_18_jsonschema:
         mock = partial(mock_extend, validator.validators.extend, msg)
         with patch.object(validator.validators, "extend", mock):
             if msg == "other":
@@ -322,11 +322,18 @@ def test_config_validator__validation_errors__fail(config, msg, oldstyle, schema
     assert len(errors) == 1
 
 
-@mark.parametrize("oldstyle", [True, False])
-def test_config_validator__validation_errors__pass(config, oldstyle, schema):
-    if oldstyle:
-        mock = partial(mock_extend, validator.validators.extend, validator.OLD_JSONSCHEMA_MSG)
-        with patch.object(validator.validators, "extend", mock):
+@mark.parametrize("pre_4_18_jsonschema", [True, False])
+def test_config_validator__validation_errors__pass(config, pre_4_18_jsonschema, schema, tmp_path):
+    if pre_4_18_jsonschema:
+        ref_schema = tmp_path / "ref.jsonschema"
+        ref_schema.write_text(json.dumps({"type": "number"}))
+        schema["properties"]["number"] = {"$ref": "urn:uwtools:ref"}
+        msg = validator.PRE_4_18_JSONSCHEMA_MSG
+        mock = partial(mock_extend, validator.validators.extend, msg)
+        with (
+            patch.object(validator.validators, "extend", mock),
+            patch.object(validator, "resource_path", return_value=tmp_path),
+        ):
             assert not validator._validation_errors(config, schema)
     else:
         assert not validator._validation_errors(config, schema)
