@@ -304,32 +304,30 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-@mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
-def test_config_validator__validation_errors__fail(config, key, schema, val):
-    config[key] = val
-    assert len(validator._validation_errors(config, schema)) == 1
-
-
 @mark.parametrize("msg", ["unexpected keyword argument 'registry'", "other"])
-@mark.parametrize(("key", "val"), [("color", "yellow"), ("number", "string")])
-def test_config_validator__validation_errors__fail_oldstyle(config, key, msg, schema, val):
-    real_extend = validator.validators.extend
-    config[key] = val
-    with patch.object(validator.validators, "extend", partial(mock_extend, real_extend, msg)):
-        if msg == "other":
-            with raises(TypeError) as e:
-                validator._validation_errors(config, schema)
-            assert str(e.value) == "other"
-        else:
-            assert len(validator._validation_errors(config, schema)) == 1
+@mark.parametrize("oldstyle", [True, False])
+def test_config_validator__validation_errors__fail(config, msg, oldstyle, schema):
+    config["color"] = "yellow"
+    if oldstyle:
+        real_extend = validator.validators.extend
+        with patch.object(validator.validators, "extend", partial(mock_extend, real_extend, msg)):
+            if msg == "other":
+                with raises(TypeError) as e:
+                    validator._validation_errors(config, schema)
+                assert str(e.value) == "other"
+                return
+            else:
+                assert len(validator._validation_errors(config, schema)) == 1
+    else:
+        assert len(validator._validation_errors(config, schema)) == 1
 
 
-def test_config_validator__validation_errors__pass(config, schema):
-    assert not validator._validation_errors(config, schema)
-
-
-def test_config_validator__validation_errors__pass_oldstyle(config, schema):
-    real_extend = validator.validators.extend
-    msg = "unexpected keyword argument 'registry'", "other"
-    with patch.object(validator.validators, "extend", partial(mock_extend, real_extend, msg)):
+@mark.parametrize("oldstyle", [True, False])
+def test_config_validator__validation_errors__pass(config, oldstyle, schema):
+    if oldstyle:
+        real_extend = validator.validators.extend
+        msg = "unexpected keyword argument 'registry'", "other"
+        with patch.object(validator.validators, "extend", partial(mock_extend, real_extend, msg)):
+            assert not validator._validation_errors(config, schema)
+    else:
         assert not validator._validation_errors(config, schema)
