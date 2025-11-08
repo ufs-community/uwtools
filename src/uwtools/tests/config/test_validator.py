@@ -316,10 +316,10 @@ def test_config_validator__validation_errors__fail(config, msg, oldstyle, schema
                     validator._validation_errors(config, schema)
                 assert str(e.value) == "other"
                 return
-            else:
-                assert len(validator._validation_errors(config, schema)) == 1
+            errors = validator._validation_errors(config, schema)
     else:
-        assert len(validator._validation_errors(config, schema)) == 1
+        errors = validator._validation_errors(config, schema)
+    assert len(errors) == 1
 
 
 @mark.parametrize("oldstyle", [True, False])
