@@ -33,6 +33,7 @@ enkf:
     base_file: /path/to/a/run-ready/enkf.nml
   rundir: /path/to/run/dir
 platform: 
-  gsi_fixdir: /path/to/gsi/fix/files
   scheduler: slurm
   account: wrfruc
+user:
+  gsi_fixdir: /path/to/gsi/fix/files

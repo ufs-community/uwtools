@@ -1,5 +1,6 @@
 fv3:
-  diag_table: /path/to/diag_table_to_use
+  diag_table:
+    template_file: /path/to/diag_table_to_use
   domain: regional
   execution:
     batchargs:

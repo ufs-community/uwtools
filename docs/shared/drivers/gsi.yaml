@@ -73,10 +73,11 @@ gsi:
   obs_input_file: /path/to/OBS_INPUT/text_block/obs_input.txt"
   rundir: /path/to/run/dir
 platform: 
-  crtm_fixdir: /path/to/crtm/fix/files
-  gsi_fixdir: /path/to/gsi/fix/files
   scheduler: slurm
   account: wrfruc
 timevars:
   yyyymmddhh: '{{ cycle.strftime("%Y%m%d%H") }}'
   hh: '{{ cycle.strftime("%H") }}'
+user:
+  crtm_fixdir: /path/to/crtm/fix/files
+  gsi_fixdir: /path/to/gsi/fix/files

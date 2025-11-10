@@ -59,7 +59,7 @@ mpas:
       mutable: true
       output_interval: "6:00:00"
       precision: single
-      reference_time: "2024-06-06 00:00:00"
+      reference_time: "2024-06-06_00:00:00"
       type: output
 platform:
   account: me
