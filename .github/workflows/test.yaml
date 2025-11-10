@@ -17,11 +17,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Conda
         run: .github/scripts/install-conda.sh
+      - name: Validate Driver Configs
+        run: .github/scripts/validate-driver-configs.sh
       - name: Make Docs
         run: .github/scripts/make-docs.sh
       - name: Check Formatting
         run: .github/scripts/format-check.sh
-      - name: Validate Driver Configs
-        run: .github/scripts/validate-driver-configs.sh
       - name: Code-Quality Tests
         run: .github/scripts/test.sh
