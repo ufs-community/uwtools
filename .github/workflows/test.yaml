@@ -21,7 +21,7 @@ jobs:
         run: .github/scripts/make-docs.sh
       - name: Check Formatting
         run: .github/scripts/format-check.sh
-      - name: Validate YAML Configs
-        run: .github/scripts/validate-yaml-configs.sh
+      - name: Validate Driver Configs
+        run: .github/scripts/validate-driver-configs.sh
       - name: Code-Quality Tests
         run: .github/scripts/test.sh
