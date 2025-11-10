@@ -127,12 +127,13 @@ def test_GSI_namelist_file(driverobj, logged):
     assert content[-1] == "OBS_INPUT GOES HERE"
 
 
-def test_GSI_namelist_file__fail(driverobj, logged):
+def test_GSI_namelist_file__fail(caplog, driverobj):
     driverobj._config["namelist"] = {}
     node = driverobj.namelist_file()
     assert not node.ready
     assert not node.ref.is_file()
-    assert logged("{} should be non-empty")
+    # Different versions of jsonschema emit different error messages for the same issue:
+    assert any(x in caplog.text for x in ["should be non-empty", "does not have enough properties"])
 
 
 def test_GSI_runscript(driverobj):
