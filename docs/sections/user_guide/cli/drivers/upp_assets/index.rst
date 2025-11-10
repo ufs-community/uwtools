@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/upp_assets.yaml
+.. literalinclude:: /shared/drivers/upp_assets.yaml
 
 Its contents are described in depth in section :ref:`upp_assets_yaml`.
 

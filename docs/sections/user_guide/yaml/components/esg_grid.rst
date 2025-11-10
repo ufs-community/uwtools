@@ -8,7 +8,7 @@ Structured YAML to run :ufs-utils:`regional_esg_grid<regional-esg-grid>` is vali
 Here is a prototype UW YAML ``esg_grid:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/esg_grid.yaml
+.. literalinclude:: /shared/drivers/esg_grid.yaml
 
 UW YAML for the ``esg_grid:`` Block
 ------------------------------------

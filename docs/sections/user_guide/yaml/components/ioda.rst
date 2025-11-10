@@ -10,7 +10,7 @@ Structured YAML to run IODA is validated by JSON Schema and requires the ``ioda:
 Here is a prototype UW YAML ``ioda:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/ioda.yaml
+.. literalinclude:: /shared/drivers/ioda.yaml
 
 UW YAML for the ``ioda:`` Block
 -------------------------------

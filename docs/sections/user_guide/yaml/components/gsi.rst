@@ -10,7 +10,7 @@ Structured YAML to run GSI is validated by JSON Schema and requires the ``gsi:``
 Here is a prototype UW YAML ``gsi:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/gsi.yaml
+.. literalinclude:: /shared/drivers/gsi.yaml
 
 
 UW YAML for the ``gsi:`` Block

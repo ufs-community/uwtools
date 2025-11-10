@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/gsi.yaml
+.. literalinclude:: /shared/drivers/gsi.yaml
 
 Its contents are described in depth in section :ref:`gsi_yaml`.
 

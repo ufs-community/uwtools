@@ -11,7 +11,7 @@ Structured YAML to run the UPP post-processor is validated by JSON Schema and re
 Here is a prototype UW YAML ``upp:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/upp.yaml
+.. literalinclude:: /shared/drivers/upp.yaml
 
 UW YAML for the ``upp:`` Block
 ------------------------------

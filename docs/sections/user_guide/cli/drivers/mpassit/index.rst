@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/mpassit.yaml
+.. literalinclude:: /shared/drivers/mpassit.yaml
 
 Its contents are described in depth in section :ref:`mpassit_yaml`.
 

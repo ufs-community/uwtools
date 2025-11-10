@@ -10,7 +10,7 @@ Documentation for the UFS Utils ``make_solo_mosaic`` program is :ufs-utils:`here
 Here is a prototype UW YAML ``make_solo_mosaic:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/make_solo_mosaic.yaml
+.. literalinclude:: /shared/drivers/make_solo_mosaic.yaml
 
 UW YAML for the ``make_solo_mosaic:`` Block
 -------------------------------------------

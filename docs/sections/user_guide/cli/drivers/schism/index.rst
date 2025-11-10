@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with content similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/schism.yaml
+.. literalinclude:: /shared/drivers/schism.yaml
 
 Its contents are described in depth in section :ref:`schism_yaml`. A Python ``datetime`` object named ``cycle`` is available for use in Jinja2 variables/expressions in the config.
 

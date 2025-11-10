@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/shave.yaml
+.. literalinclude:: /shared/drivers/shave.yaml
 
 Its contents are described in section :ref:`shave_yaml`.
 

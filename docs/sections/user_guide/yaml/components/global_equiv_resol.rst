@@ -10,7 +10,7 @@ Documentation for the UFS Utils ``global_equiv_resol`` program is :ufs-utils:`he
 Here is a prototype UW YAML ``global_equiv_resol:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/global_equiv_resol.yaml
+.. literalinclude:: /shared/drivers/global_equiv_resol.yaml
 
 UW YAML for the ``global_equiv_resol:`` Block
 ---------------------------------------------

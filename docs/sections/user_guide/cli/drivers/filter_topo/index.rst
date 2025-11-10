@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/filter_topo.yaml
+.. literalinclude:: /shared/drivers/filter_topo.yaml
 
 Its contents are described in section :ref:`filter_topo_yaml`.
 

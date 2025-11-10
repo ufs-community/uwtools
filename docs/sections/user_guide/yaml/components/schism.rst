@@ -8,7 +8,7 @@ Structured YAML to configure :schism:`SCHISM<>` as part of a compiled coupled ex
 Here is a prototype UW YAML ``schism:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/schism.yaml
+.. literalinclude:: /shared/drivers/schism.yaml
 
 UW YAML for the ``schism:`` Block
 ---------------------------------

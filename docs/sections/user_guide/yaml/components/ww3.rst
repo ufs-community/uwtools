@@ -8,7 +8,7 @@ Structured YAML to configure WaveWatchIII as part of a compiled coupled executab
 Here is a prototype UW YAML ``ww3:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/ww3.yaml
+.. literalinclude:: ../../../../shared/drivers/ww3.yaml
 
 UW YAML for the ``ww3:`` Block
 ------------------------------

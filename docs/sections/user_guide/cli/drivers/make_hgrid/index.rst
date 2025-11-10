@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/make_hgrid.yaml
+.. literalinclude:: /shared/drivers/make_hgrid.yaml
 
 Its contents are described in section :ref:`make_hgrid_yaml`.
 

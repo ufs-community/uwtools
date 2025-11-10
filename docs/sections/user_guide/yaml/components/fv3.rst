@@ -10,7 +10,7 @@ Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:``
 Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/fv3.yaml
+.. literalinclude:: /shared/drivers/fv3.yaml
 
 UW YAML for the ``fv3:`` Block
 ------------------------------

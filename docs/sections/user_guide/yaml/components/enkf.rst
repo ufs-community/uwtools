@@ -10,7 +10,7 @@ Structured YAML to run EnKF is validated by JSON Schema and requires the ``enkf:
 Here is a prototype UW YAML ``enkf:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/enkf.yaml
+.. literalinclude:: /shared/drivers/enkf.yaml
 
 
 UW YAML for the ``enkf:`` Block

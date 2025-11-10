@@ -10,7 +10,7 @@ Structured YAML to run MPAS Init is validated by JSON Schema and requires the ``
 Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/mpas_init.yaml
+.. literalinclude:: /shared/drivers/mpas_init.yaml
 
 An MPAS build provides prototype versions of certain required runtime files. Here, an arbitrarily named ``user:`` block defines an ``mpas_app`` variable, pointing to the directory where MPAS was installed, to reduce duplication in references to those files.
 
