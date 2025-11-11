@@ -20,14 +20,14 @@ enkf:
       fv3sar_tile1_{{ '%03d' % member }}_sfcdata: "/path/to/previous/fv3_{{ '%03d' % member }}/RESTART/sfc_data.nc"
       fv3sar_tile1_{{ '%03d' % member }}_phyvar: "/path/to/previous/fv3_{{ '%03d' % member }}/RESTART/phy_data.nc"
   files_to_copy:
-    anavinfo: "{{ platform.gsi_fixdir }}/anavinfo.rrfs_conv_dbz"
-    satinfo: "{{ platform.gsi_fixdir }}/global_satinfo.txt"
-    convinfo: "{{ platform.gsi_fixdir }}/convinfo.rrfs"
-    ozinfo: "{{ platform.gsi_fixdir }}/global_ozinfo.txt"
+    anavinfo: "{{ user.gsi_fixdir }}/anavinfo.rrfs_conv_dbz"
+    satinfo: "{{ user.gsi_fixdir }}/global_satinfo.txt"
+    convinfo: "{{ user.gsi_fixdir }}/convinfo.rrfs"
+    ozinfo: "{{ user.gsi_fixdir }}/global_ozinfo.txt"
   files_to_link:
-    fv3_coupler.res: "{{ platform.gsi_fixdir }}/RRFS_CONUS_13km/fv3_coupler.res"
-    fv3_akbk: "{{ platform.gsi_fixdir }}/RRFS_CONUS_13km/fv3_akbk"
-    fv3_grid_spec: "{{ platform.gsi_fixdir }}/RRFS_CONUS_13km/fv3_grid_spec"
+    fv3_coupler.res: "{{ user.gsi_fixdir }}/RRFS_CONUS_13km/fv3_coupler.res"
+    fv3_akbk: "{{ user.gsi_fixdir }}/RRFS_CONUS_13km/fv3_akbk"
+    fv3_grid_spec: "{{ user.gsi_fixdir }}/RRFS_CONUS_13km/fv3_grid_spec"
     <diagfiles>: !glob "{{ observer.rundir }}/diag*"
   namelist:
     base_file: /path/to/a/run-ready/enkf.nml
