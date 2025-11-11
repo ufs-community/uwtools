@@ -1176,12 +1176,13 @@ def test_schema_gsi_coupler_res(gsi_prop):
 
 def test_schema_gsi_filelist(gsi_prop):
     errors = gsi_prop("filelist")
-    # Make sure it's a list of strings
+    # Make sure it's a list of strings:
     assert not errors(["a", "b"])
     assert "is not of type 'array'" in errors({"a": "foo", "b": "bar"})
     assert "is not of type 'string'" in errors([1, 2])
-    # Make sure it has entries
-    assert "should be non-empty" in errors([])
+    # Make sure it has entries (different versions of jsonschema emit different error messages for
+    # the same issue):
+    assert any(x in errors([]) for x in ["should be non-empty", "is too short"])
 
 
 def test_schema_gsi_namelist(gsi_prop):

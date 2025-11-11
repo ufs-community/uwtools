@@ -65,7 +65,7 @@ def schema_validator(schema_name: str, *args: Any) -> Callable:
     defs = schema.get("$defs", {})
     for arg in args:
         schema = schema[arg]
-    schema.update({"$defs": defs})
+    schema.update({"$defs": deepcopy(defs)})
     return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 

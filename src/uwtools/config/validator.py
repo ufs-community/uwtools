@@ -8,11 +8,9 @@ import json
 from datetime import datetime, timedelta
 from functools import cache
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from jsonschema import Draft202012Validator, validators
-from referencing import Registry, Resource
-from referencing.jsonschema import DRAFT202012
+from jsonschema import Draft202012Validator, RefResolver, validators
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import UWYAMLGlob
@@ -20,14 +18,26 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
+try:
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT202012
+except ModuleNotFoundError:  # pragma: no cover
+    ...
+
 if TYPE_CHECKING:
     from jsonschema.exceptions import ValidationError
 
-# Public functions
+
+JSONSCHEMA_MSG_REGISTRY_NO_KWARG = "unexpected keyword argument 'registry'"
+JSONSCHEMA_MSG_REGISTRY_UNDEFINED = "name 'Registry' is not defined"
+
+# Types
 
 JSONValueT = bool | dict | float | int | list | str
 ConfigDataT = JSONValueT | YAMLConfig
 ConfigPathT = str | Path
+
+# Public functions
 
 
 def bundle(schema: dict, keys: list | None = None) -> dict:
@@ -186,12 +196,27 @@ def _registry() -> Registry:
 
     def retrieve(uri: str) -> Resource:
         name = uri.split(":")[-1]
-        return Resource(
-            contents=json.loads(resource_path(f"jsonschema/{name}.jsonschema").read_text()),
-            specification=DRAFT202012,
-        )  # type: ignore[call-arg]
+        path = resource_path(f"jsonschema/{name}.jsonschema")
+        text = json.loads(path.read_text())
+        return Resource(contents=text, specification=DRAFT202012)  # type: ignore[call-arg]
 
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
+
+
+def _resolver(schema: dict) -> RefResolver:
+    """
+    Return a pre-4.18 jsonschema resolver that loads schema files given a URI.
+
+    :param schema: A schema potentially containing $ref keys.
+    """
+
+    def retrieve(uri: str) -> dict:
+        name = uri.split(":")[-1]
+        path = resource_path("jsonschema") / f"{name}.jsonschema"
+        text = path.read_text()
+        return cast(dict, json.loads(text))
+
+    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": retrieve}))
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
@@ -211,5 +236,17 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
         .redefine("timedelta", lambda _, x: isinstance(x, timedelta))
     )
     uwvalidator = validators.extend(base, type_checker=type_checker)
-    validator = uwvalidator(schema, registry=_registry())
+    try:
+        validator = uwvalidator(schema, registry=_registry())
+    except (NameError, TypeError) as e:
+        msgs = [JSONSCHEMA_MSG_REGISTRY_NO_KWARG, JSONSCHEMA_MSG_REGISTRY_UNDEFINED]
+        if any(msg in str(e) for msg in msgs):
+            # If TypeError was raised because 'registry' is not a kwarg (true for jsonschema < 4.18)
+            # or if NameError was raised because Registry was not imported (true if 'referencing' is
+            # not installed, and jsonschema < 4.18 does not require it), then instantate a validator
+            # using the older resolver mechanism.
+            validator = uwvalidator(schema, resolver=_resolver(schema))
+        else:
+            # If an error was raised for some other reason, re-raise it.
+            raise
     return list(validator.iter_errors(config))
