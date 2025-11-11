@@ -21,7 +21,7 @@ jobs:
         run: .github/scripts/validate-driver-configs.sh
       - name: Make Docs
         run: .github/scripts/make-docs.sh
-      - name: Check Formatting
+      - name: Format Check
         run: .github/scripts/format-check.sh
-      - name: Code-Quality Tests
+      - name: Test Code Quality
         run: .github/scripts/test.sh
