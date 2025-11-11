@@ -189,8 +189,11 @@ def _execute(
     )
     accepted = set(getfullargspec(driver_class).args)
     accepted_args = [arg for arg in ["batch", "cycle", "leadtime"] if arg in accepted]
-    func_locals = locals()  # locals() in a comprehension refers to comprehension's own locals.
-    kwargs.update({arg: func_locals.get(arg) for arg in accepted_args})
+    # Comprehensions, like the dict comprehension below, have their own scope, so calling locals()
+    # in the comprehension will not give access to the arguments passed to this function. Assign
+    # those to a variable to use within the comprehension.
+    function_scope_locals = locals()
+    kwargs.update({arg: function_scope_locals.get(arg) for arg in accepted_args})
     obj = driver_class(**kwargs)
     node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
