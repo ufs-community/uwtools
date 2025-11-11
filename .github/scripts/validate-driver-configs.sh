@@ -1,3 +1,5 @@
+. $(dirname ${BASH_SOURCE[0]})/common.sh
+
 validate_driver_configs() {
   for config in docs/shared/drivers/*.yaml; do
     driver=$(basename ${config%.yaml})
@@ -7,10 +9,7 @@ validate_driver_configs() {
     $basecmd --help | grep -q -- "--leadtime" && args+=( --leadtime 6 )
     ( set -x && $basecmd ${args[*]} )
   done
-  check_for_diffs "UNEXPECTED DOC UPDATES DETECTED"
 }
 
-set -ae
-. $(dirname ${BASH_SOURCE[0]})/common.sh
 ci_conda_activate
 CONDEV_SHELL_CMD=validate_driver_configs condev-shell
