@@ -9,7 +9,7 @@ from functools import reduce
 from pathlib import Path
 from tempfile import mkstemp
 from textwrap import indent
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from yaml.composer import ComposerError
@@ -22,6 +22,9 @@ from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_config_format
+
+if TYPE_CHECKING:
+    from datetime import datetime, timedelta
 
 # Public functions
 
@@ -50,6 +53,8 @@ def compose(
     output_file: Path | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
 ) -> Config:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
@@ -119,8 +124,15 @@ def compose(
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config: Config = output_class(config)
+    function_locals = locals()
     if realize:
-        output_config.dereference()
+        maybe = lambda x: {[k for k, v in function_locals.items() if v is x][0]: x} if x else {}
+        kwargs = (
+            {"context": {**output_config, **maybe(cycle), **maybe(leadtime)}}
+            if cycle or leadtime
+            else {}
+        )
+        output_config.dereference(**kwargs)
     output_config.dump(output_file)
     return output_config
 
@@ -371,6 +383,8 @@ Recognized file extensions are: {extensions}
 :param output_file: Output config destination (default: write to stdout).
 :param input_format: Format of configs to compose (choices: {choices}, default: {default}).
 :param output_format: Format of output config (choices: {choices}, default: {default}).
+:param cycle: A datetime object to make available for use in configs.
+:param leadtime: A timedelta object to make available for use in configs.
 :return: The composed config.
 """.format(
     default=FORMAT.yaml,

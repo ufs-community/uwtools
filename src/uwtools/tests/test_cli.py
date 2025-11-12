@@ -1,8 +1,8 @@
-import datetime as dt
 import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
+from datetime import timedelta
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, patch
@@ -52,7 +52,7 @@ def args_dispatch_fs(utc):
         "target_dir": "/target/dir",
         "config_file": "/config/file",
         "cycle": utc(),
-        "leadtime": dt.timedelta(hours=6),
+        "leadtime": timedelta(hours=6),
         "key_path": ["a", "b"],
         "dry_run": False,
         "report": True,
@@ -329,15 +329,19 @@ def test_cli__dispatch_config_compare():
     )
 
 
-def test_cli__dispatch_config_compose():
+def test_cli__dispatch_config_compose(utc):
     configs = ["/path/to/a", "/path/to/b"]
     outfile = "/path/to/output"
+    cycle = utc(2025, 11, 12, 6)
+    leadtime = timedelta(hours=6)
     args = {
         STR.configs: configs,
         STR.realize: True,
         STR.outfile: outfile,
         STR.infmt: FORMAT.yaml,
         STR.outfmt: FORMAT.yaml,
+        STR.cycle: cycle,
+        STR.leadtime: leadtime,
     }
     with patch.object(cli.uwtools.api.config, "compose") as compose:
         cli._dispatch_config_compose(args)
@@ -347,6 +351,8 @@ def test_cli__dispatch_config_compose():
         output_file=outfile,
         input_format=FORMAT.yaml,
         output_format=FORMAT.yaml,
+        cycle=cycle,
+        leadtime=leadtime,
     )
 
 
@@ -640,7 +646,7 @@ def test_cli__dispatch_template_translate_no_optional():
 @mark.parametrize("hours", [0, 24, 168])
 def test_cli__dispatch_to_driver(hours, utc):
     cycle = utc()
-    leadtime = dt.timedelta(hours=hours)
+    leadtime = timedelta(hours=hours)
     args: dict = {
         "action": "foo",
         "batch": True,

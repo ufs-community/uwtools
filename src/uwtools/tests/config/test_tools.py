@@ -3,6 +3,7 @@ Tests for uwtools.config.tools module.
 """
 
 import sys
+from datetime import timedelta
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
@@ -320,9 +321,10 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
 
 
 @mark.parametrize("realize", [False, True])
-def test_config_tools_compose__realize(realize, tmp_path):
+def test_config_tools_compose__realize(realize, tmp_path, utc):
     dyaml = """
     radius: !float '{{ 2.0 * pi * r }}'
+    validtime: !datetime '{{ cycle + leadtime }}'
     """
     dpath = tmp_path / "d.yaml"
     dpath.write_text(dedent(dyaml))
@@ -333,11 +335,25 @@ def test_config_tools_compose__realize(realize, tmp_path):
     upath = tmp_path / "u.yaml"
     upath.write_text(dedent(uyaml))
     outpath = tmp_path / "out.yaml"
+    cycle = utc(2025, 11, 12, 6)
+    leadtime = timedelta(hours=6)
     assert isinstance(
-        tools.compose(configs=[dpath, upath], realize=realize, output_file=outpath), Config
+        tools.compose(
+            configs=[dpath, upath],
+            realize=realize,
+            output_file=outpath,
+            cycle=cycle,
+            leadtime=leadtime,
+        ),
+        Config,
     )
-    radius = YAMLConfig(outpath)["radius"]
-    assert (radius == 6.284) if realize else (radius.tagged_string == "!float '{{ 2.0 * pi * r }}'")
+    config = YAMLConfig(outpath)
+    if realize:
+        assert config["radius"] == 6.284
+        assert config["validtime"] == cycle + leadtime
+    else:
+        assert config["radius"].tagged_string == "!float '{{ 2.0 * pi * r }}'"
+        assert config["validtime"].tagged_string == "!datetime '{{ cycle + leadtime }}'"
 
 
 def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):

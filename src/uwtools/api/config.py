@@ -26,6 +26,8 @@ from uwtools.utils.file import FORMAT as _FORMAT
 from uwtools.utils.file import str2path as _str2path
 
 if TYPE_CHECKING:
+    from datetime import datetime, timedelta
+
     from uwtools.config.support import YAMLKey
 
 # Public
@@ -46,6 +48,8 @@ def compose(
     output_file: Path | str | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
 ) -> Config:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
@@ -56,6 +60,8 @@ def compose(
         output_file=Path(output_file) if output_file else None,
         input_format=input_format,
         output_format=output_format,
+        cycle=cycle,
+        leadtime=leadtime,
     )
 
 
@@ -242,6 +248,8 @@ Recognized file extensions are: {extensions}.
 :param output_file: Output config destination (default: write to ``stdout``).
 :param input_format: Format of configs to compose (choices: {choices}, default: ``{default}``)
 :param output_format: Format of output config (choices: {choices}, default: ``{default}``)
+:param cycle: A datetime object to make available for use in configs.
+:param leadtime: A timedelta object to make available for use in configs.
 :return: The composed config.
 """.format(
     default=_FORMAT.yaml,

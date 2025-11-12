@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -29,26 +30,32 @@ def test_api_config_compare():
     )
 
 
-@mark.parametrize("output_file", [None, "/path/to/out.yaml"])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
 @mark.parametrize("input_format", [None, FORMAT.yaml, FORMAT.nml])
+@mark.parametrize("leadtime", [None, timedelta(hours=6)])
+@mark.parametrize("output_file", [None, "/path/to/out.yaml"])
 @mark.parametrize("output_format", [None, FORMAT.yaml, FORMAT.nml])
-def test_api_config_compose(output_file, input_format, output_format):
+def test_api_config_compose(cycle, input_format, leadtime, output_file, output_format):
     pathstrs = ["/path/to/c1.yaml", "/path/to/c2.yaml"]
     kwargs: dict = {
         "configs": pathstrs,
-        "realize": False,
-        "output_file": output_file,
+        "cycle": cycle,
         "input_format": input_format,
+        "leadtime": leadtime,
+        "output_file": output_file,
         "output_format": output_format,
+        "realize": False,
     }
     with patch.object(config, "_compose") as _compose:
         config.compose(**kwargs)
     _compose.assert_called_once_with(
         configs=list(map(Path, pathstrs)),
-        realize=False,
-        output_file=None if output_file is None else Path(output_file),
+        cycle=cycle,
         input_format=input_format,
+        leadtime=leadtime,
+        output_file=None if output_file is None else Path(output_file),
         output_format=output_format,
+        realize=False,
     )
 
 

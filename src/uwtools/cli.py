@@ -168,6 +168,8 @@ def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_format(optional, choices=FORMATS)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     checks = _add_args_verbosity(optional)
     parser.add_argument("configs", metavar="CONFIG", nargs="+", type=Path)
     return checks
@@ -254,6 +256,8 @@ def _dispatch_config_compose(args: Args) -> bool:
         realize=args[STR.realize],
         input_format=args[STR.infmt],
         output_format=args[STR.outfmt],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
     )
     return True
 
