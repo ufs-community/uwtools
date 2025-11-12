@@ -10,7 +10,7 @@ Structured YAML to run JEDI is validated by JSON Schema and requires the ``jedi:
 Here is a prototype UW YAML jedi: block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/jedi.yaml
+.. literalinclude:: /shared/drivers/jedi.yaml
 
 UW YAML for the ``jedi:`` Block
 -------------------------------

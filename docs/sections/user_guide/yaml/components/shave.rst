@@ -8,7 +8,7 @@ Structured YAML to run :ufs-utils:`shave<shave>` is validated by JSON Schema and
 Here is a prototype UW YAML ``shave:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/shave.yaml
+.. literalinclude:: /shared/drivers/shave.yaml
 
 UW YAML for the ``shave:`` Block
 --------------------------------

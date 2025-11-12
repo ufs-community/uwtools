@@ -8,7 +8,7 @@ Structured YAML to run :sfc-climo-gen:`sfc_climo_gen<>` is validated by JSON Sch
 Here is a prototype UW YAML ``sfc_climo_gen:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/sfc_climo_gen.yaml
+.. literalinclude:: /shared/drivers/sfc_climo_gen.yaml
 
 UW YAML for the ``sfc_climo_gen:`` Block
 ----------------------------------------

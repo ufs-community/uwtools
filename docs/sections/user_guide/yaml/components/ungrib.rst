@@ -10,7 +10,7 @@ Structured YAML to run the WRF preprocessing component ``ungrib`` (part of :wps:
 Here is a prototype UW YAML ``ungrib:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/ungrib.yaml
+.. literalinclude:: /shared/drivers/ungrib.yaml
 
 UW YAML for the ``ungrib:`` Block
 ---------------------------------

@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with content similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/chgres_cube.yaml
+.. literalinclude:: /shared/drivers/chgres_cube.yaml
 
 Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of the values in the ``chgres_cube`` YAML may contain Jinja2 variables/expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run.
 

@@ -10,7 +10,7 @@ Structured YAML to run MPASSIT is validated by JSON Schema and requires the ``mp
 Here is a prototype UW YAML ``mpassit:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/mpassit.yaml
+.. literalinclude:: /shared/drivers/mpassit.yaml
 
 
 UW YAML for the ``mpassit:`` Block

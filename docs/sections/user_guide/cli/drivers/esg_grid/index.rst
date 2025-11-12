@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/esg_grid.yaml
+.. literalinclude:: /shared/drivers/esg_grid.yaml
 
 Its contents are described in depth in section :ref:`esg_grid_yaml`.
 

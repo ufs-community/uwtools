@@ -8,7 +8,7 @@ chgres_cube:
   namelist:
     update_values:
       config:
-        atm_files_input_grid: atm.t{{cycle.strftime('%H') }}z.nc
+        atm_files_input_grid: atm.t{{ cycle.strftime('%H') }}z.nc
         convert_atm: true
         convert_nst: true
         convert_sfc: true

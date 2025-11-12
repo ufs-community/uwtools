@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with content similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/ww3.yaml
+.. literalinclude:: /shared/drivers/ww3.yaml
 
 Its contents are described in depth in section :ref:`ww3_yaml`. A Python ``datetime`` object named ``cycle`` is available for use in Jinja2 variables/expressions in the config.
 

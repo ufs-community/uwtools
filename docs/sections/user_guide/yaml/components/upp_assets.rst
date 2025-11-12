@@ -11,7 +11,7 @@ Structured YAML to configure the UPP post-processor is validated by JSON Schema 
 Here is a prototype UW YAML ``upp_assets:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/upp_assets.yaml
+.. literalinclude:: /shared/drivers/upp_assets.yaml
 
 UW YAML for the ``upp_assets:`` Block
 -------------------------------------

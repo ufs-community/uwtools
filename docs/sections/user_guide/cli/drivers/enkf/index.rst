@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/enkf.yaml
+.. literalinclude:: /shared/drivers/enkf.yaml
 
 Its contents are described in depth in section :ref:`enkf_yaml`.
 

@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/make_solo_mosaic.yaml
+.. literalinclude:: /shared/drivers/make_solo_mosaic.yaml
 
 Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 

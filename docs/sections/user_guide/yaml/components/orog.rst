@@ -10,7 +10,7 @@ Documentation for the UFS Utils ``orog`` program is :ufs-utils:`here <orog>`.
 Here is a prototype UW YAML ``orog:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/orog.yaml
+.. literalinclude:: /shared/drivers/orog.yaml
 
 UW YAML for the ``orog:`` Block
 -------------------------------

@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/ioda.yaml
+.. literalinclude:: /shared/drivers/ioda.yaml
 
 Its contents are described in section :ref:`ioda_yaml`.
 

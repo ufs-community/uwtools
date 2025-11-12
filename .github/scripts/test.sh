@@ -1,6 +1,4 @@
-set -ae
-
-SUPPORTED_PYTHON_VERSIONS=( 3.10 3.11 3.12 3.13 3.14 )
+. $(dirname ${BASH_SOURCE[0]})/common.sh
 
 run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
@@ -20,7 +18,8 @@ run_tests() {
   return $status
 }
 
-. $(dirname ${BASH_SOURCE[0]})/common.sh
+SUPPORTED_PYTHON_VERSIONS=( 3.10 3.11 3.12 3.13 3.14 )
+
 ci_conda_activate
 for version in ${SUPPORTED_PYTHON_VERSIONS[*]}; do
   PYTHON_VERSION=$version

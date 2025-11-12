@@ -10,7 +10,7 @@ Documentation for the UFS Utils ``orog_gsl`` program is :ufs-utils:`here <orog-g
 Here is a prototype UW YAML ``orog_gsl:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/orog_gsl.yaml
+.. literalinclude:: /shared/drivers/orog_gsl.yaml
 
 UW YAML for the ``orog_gsl:`` Block
 -----------------------------------

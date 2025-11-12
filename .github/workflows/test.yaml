@@ -15,11 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install conda
+      - name: Install Conda
         run: .github/scripts/install-conda.sh
+      - name: Validate Driver Configs
+        run: .github/scripts/validate-driver-configs.sh
       - name: Make Docs
         run: .github/scripts/make-docs.sh
       - name: Format Check
         run: .github/scripts/format-check.sh
-      - name: Test
+      - name: Test Code Quality
         run: .github/scripts/test.sh

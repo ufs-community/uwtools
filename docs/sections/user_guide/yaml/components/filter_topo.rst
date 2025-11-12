@@ -10,7 +10,7 @@ Documentation for the UFS Utils ``filter_topo`` program is :ufs-utils:`here <oro
 Here is a prototype UW YAML ``filter_topo:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/filter_topo.yaml
+.. literalinclude:: /shared/drivers/filter_topo.yaml
 
 UW YAML for the ``filter_topo:`` Block
 --------------------------------------

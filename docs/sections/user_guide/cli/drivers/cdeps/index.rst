@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with content similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/cdeps.yaml
+.. literalinclude:: /shared/drivers/cdeps.yaml
 
 Its contents are described in depth in section :ref:`cdeps_yaml`. Each of the values in the ``cdeps`` YAML may contain Jinja2 variables/expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run.
 

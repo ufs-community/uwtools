@@ -11,7 +11,7 @@ Structured YAML to run :ufs-utils:`make_hgrid<make-hgrid>` is validated by JSON 
 Here is a prototype UW YAML ``make_hgrid:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/make_hgrid.yaml
+.. literalinclude:: /shared/drivers/make_hgrid.yaml
 
 UW YAML for the ``make_hgrid:`` Block
 -------------------------------------

@@ -10,7 +10,7 @@ Structured YAML to run :cdeps:`CDEPS<index.html>` is validated by JSON Schema an
 Here is a prototype UW YAML ``cdeps:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/cdeps.yaml
+.. literalinclude:: /shared/drivers/cdeps.yaml
 
 UW YAML for the ``cdeps:`` Block
 --------------------------------

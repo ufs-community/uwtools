@@ -154,9 +154,9 @@ def _execute(
     driver_class: DriverT,
     task: str,
     config: Path | str | None = None,
-    cycle: dt.datetime | None = None,  # noqa: ARG001
-    leadtime: dt.timedelta | None = None,  # noqa: ARG001
-    batch: bool = False,  # noqa: ARG001
+    cycle: dt.datetime | None = None,
+    leadtime: dt.timedelta | None = None,
+    batch: bool = False,
     dry_run: bool = False,
     graph_file: Path | str | None = None,
     key_path: list[YAMLKey] | None = None,
@@ -188,9 +188,12 @@ def _execute(
         schema_file=schema_file,
     )
     accepted = set(getfullargspec(driver_class).args)
-    kwargs.update(
-        {arg: locals().get(arg) for arg in ["batch", "cycle", "leadtime"] if arg in accepted}
-    )
+    accepted_args = [arg for arg in ["batch", "cycle", "leadtime"] if arg in accepted]
+    # Comprehensions, like the dict comprehension below, have their own scope, so calling locals()
+    # in the comprehension will not give access to the arguments passed to this function. Assign
+    # those to a variable to use within the comprehension.
+    function_scope_locals = locals()
+    kwargs.update({arg: function_scope_locals.get(arg) for arg in accepted_args})
     obj = driver_class(**kwargs)
     node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:

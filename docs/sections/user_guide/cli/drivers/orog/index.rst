@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/orog.yaml
+.. literalinclude:: /shared/drivers/orog.yaml
 
 Its contents are described in section :ref:`orog_yaml`.
 

@@ -81,8 +81,7 @@ def execute(
         schema_file=schema_file or module_path.with_suffix(".jsonschema"),
     )
     required = non_optional & accepted
-    for arg in sorted([STR.batch, *required]):
-        kwargs.update({arg: args[arg] for arg in accepted})
+    kwargs.update({arg: args[arg] for arg in sorted([STR.batch, *required]) if arg in accepted})
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
     node: Node = getattr(driverobj, task)(dry_run=dry_run)

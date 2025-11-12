@@ -13,7 +13,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: /shared/jedi.yaml
+.. literalinclude:: /shared/drivers/jedi.yaml
 
 Its contents are described in section :ref:`jedi_yaml`.
 
