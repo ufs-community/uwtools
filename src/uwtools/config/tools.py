@@ -106,6 +106,19 @@ def compose(
                 del cfgobj[key]
             return cfgobj
 
+    def cfgobj_realize(config: Config, cycle: datetime | None, leadtime: timedelta | None) -> None:
+        """
+        Realize the given Config object.
+
+        :param config: The Config objet to update.
+        :param cycle: A datetime object to make available for use in the config.
+        :param leadtime: A timedelta object to make available for use in the config.
+        """
+        function_locals = locals()
+        maybe = lambda x: {[k for k, v in function_locals.items() if v is x][0]: x} if x else {}
+        kwargs = {"context": {**output_config, **maybe(cycle), **maybe(leadtime)}}
+        output_config.dereference(**kwargs)
+
     def cfgobj_update(config: Config, path: Path) -> Config:
         """
         Update the given Config object with config data from the given file.
@@ -124,15 +137,8 @@ def compose(
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config: Config = output_class(config)
-    function_locals = locals()
     if realize:
-        maybe = lambda x: {[k for k, v in function_locals.items() if v is x][0]: x} if x else {}
-        kwargs = (
-            {"context": {**output_config, **maybe(cycle), **maybe(leadtime)}}
-            if cycle or leadtime
-            else {}
-        )
-        output_config.dereference(**kwargs)
+        cfgobj_realize(output_config, cycle, leadtime)
     output_config.dump(output_file)
     return output_config
 
