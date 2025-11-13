@@ -74,6 +74,103 @@ def validate(template):
 # Tests
 
 
+class TestJ2Template:
+    """
+    Tests for class uwtools.config.jinja2.J2Template.
+    """
+
+    @fixture
+    def searchpath_assets(self, tmp_path):
+        def write(s, *args):
+            path = tmp_path.joinpath(*list(args))
+            path.parent.mkdir(exist_ok=True)
+            path.write_text(s)
+            return path
+
+        write("{% macro double(x) %}{{ x }}{{ x }}{% endmacro %}", "m1.jinja")
+        d1 = write("{% macro double(x) %}{{ x * 2 }}{% endmacro %}", "d1", "m1.jinja").parent
+        d2 = write("{% macro triple(x) %}{{ x * 3 }}{% endmacro %}", "d2", "m2.jinja").parent
+        s1 = """
+        {% import 'm1.jinja' as m1 -%}
+        {{ m1.double(1) }}
+        """
+        s1 = dedent(s1).strip()
+        s2 = """
+        {% import 'm1.jinja' as m1 -%}
+        {% import 'm2.jinja' as m2 -%}
+        {{ m1.double(1) }}{{ m2.triple(1) }}
+        """
+        s2 = dedent(s2).strip()
+        t1 = write(s1, "t1.jinja")
+        t2 = write(s2, "t2.jinja")
+        return ns(d1=d1, d2=d2, s1=s1, s2=s2, t1=t1, t2=t2)
+
+    @fixture
+    def testdata(self):
+        return ns(
+            config={"greeting": "Hello", "recipient": "the world"},
+            template="{{greeting}} to {{recipient}}",
+        )
+
+    def test_config_jinja2_J2Template_dump(self, testdata, tmp_path):
+        path = tmp_path / "rendered.txt"
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        obj.dump(output_path=path)
+        assert path.read_text().strip() == "Hello to the world"
+
+    def test_config_jinja2_J2Template_render_file(self, testdata, tmp_path):
+        path = tmp_path / "template.jinja2"
+        path.write_text(testdata.template)
+        validate(J2Template(values=testdata.config, template_source=path))
+
+    def test_config_jinja2_J2Template_render_string(self, testdata):
+        validate(J2Template(values=testdata.config, template_source=testdata.template))
+
+    def test_config_jinja2_J2Template_searchpath_file_default(self, searchpath_assets):
+        # By default, the template search path will be the directory containing the main template:
+        a = searchpath_assets
+        assert J2Template(values={}, template_source=a.t1).render() == "11"
+
+    def test_config_jinja2_J2Template_searchpath_file_one_path(self, searchpath_assets):
+        # If a search path is specified, it will suppress use of the default path:
+        a = searchpath_assets
+        assert J2Template(values={}, template_source=a.t1, searchpath=[a.d1]).render() == "2"
+
+    def test_config_jinja2_J2Template_searchpath_file_two_paths(self, searchpath_assets):
+        # Multiple search paths can be specified:
+        a = searchpath_assets
+        result = J2Template(values={}, template_source=a.t2, searchpath=[a.d1, a.d2]).render()
+        assert result == "23"
+
+    def test_config_jinja2_J2Template_searchpath_stdin_default(self, searchpath_assets):
+        # There is no default search path for reads from stdin:
+        a = searchpath_assets
+        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
+            readable.return_value.__enter__.return_value = sio
+            with raises(TemplateNotFound):
+                J2Template(values={}).render()
+
+    def test_config_jinja2_J2Template_searchpath_stdin_explicit(self, searchpath_assets):
+        # An explicit search path is honored when reading from stdin:
+        a = searchpath_assets
+        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
+            readable.return_value.__enter__.return_value = sio
+            assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
+
+    def test_config_jinja2_J2Template_undeclared_variables(self):
+        s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[42] }} {{ k|default(l) }}"
+        uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
+        assert J2Template(values={}, template_source=s).undeclared_variables == uvs
+
+    def test_config_jinja2_J2Template__template_str(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert obj._template_str == "{{greeting}} to {{recipient}}"
+
+    def test_config_jinja2_J2Template___repr__(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert str(obj) == "{{greeting}} to {{recipient}}"
+
+
 def test_config_jinja2_dereference__key_expression():
     assert jinja2.dereference(val={"{{ fruit }}": "red"}, context={"fruit": "apple"}) == {
         "apple": "red"
@@ -466,100 +563,3 @@ def test_config_jinja2__write_template__to_stdout(capsys):
     actual = capsys.readouterr().out
     expected = "roses are red, violets are blue"
     assert actual.strip() == expected
-
-
-class TestJ2Template:
-    """
-    Tests for class uwtools.config.jinja2.J2Template.
-    """
-
-    @fixture
-    def searchpath_assets(self, tmp_path):
-        def write(s, *args):
-            path = tmp_path.joinpath(*list(args))
-            path.parent.mkdir(exist_ok=True)
-            path.write_text(s)
-            return path
-
-        write("{% macro double(x) %}{{ x }}{{ x }}{% endmacro %}", "m1.jinja")
-        d1 = write("{% macro double(x) %}{{ x * 2 }}{% endmacro %}", "d1", "m1.jinja").parent
-        d2 = write("{% macro triple(x) %}{{ x * 3 }}{% endmacro %}", "d2", "m2.jinja").parent
-        s1 = """
-        {% import 'm1.jinja' as m1 -%}
-        {{ m1.double(1) }}
-        """
-        s1 = dedent(s1).strip()
-        s2 = """
-        {% import 'm1.jinja' as m1 -%}
-        {% import 'm2.jinja' as m2 -%}
-        {{ m1.double(1) }}{{ m2.triple(1) }}
-        """
-        s2 = dedent(s2).strip()
-        t1 = write(s1, "t1.jinja")
-        t2 = write(s2, "t2.jinja")
-        return ns(d1=d1, d2=d2, s1=s1, s2=s2, t1=t1, t2=t2)
-
-    @fixture
-    def testdata(self):
-        return ns(
-            config={"greeting": "Hello", "recipient": "the world"},
-            template="{{greeting}} to {{recipient}}",
-        )
-
-    def test_dump(self, testdata, tmp_path):
-        path = tmp_path / "rendered.txt"
-        obj = J2Template(values=testdata.config, template_source=testdata.template)
-        obj.dump(output_path=path)
-        assert path.read_text().strip() == "Hello to the world"
-
-    def test_render_file(self, testdata, tmp_path):
-        path = tmp_path / "template.jinja2"
-        path.write_text(testdata.template)
-        validate(J2Template(values=testdata.config, template_source=path))
-
-    def test_render_string(self, testdata):
-        validate(J2Template(values=testdata.config, template_source=testdata.template))
-
-    def test_searchpath_file_default(self, searchpath_assets):
-        # By default, the template search path will be the directory containing the main template:
-        a = searchpath_assets
-        assert J2Template(values={}, template_source=a.t1).render() == "11"
-
-    def test_searchpath_file_one_path(self, searchpath_assets):
-        # If a search path is specified, it will suppress use of the default path:
-        a = searchpath_assets
-        assert J2Template(values={}, template_source=a.t1, searchpath=[a.d1]).render() == "2"
-
-    def test_searchpath_file_two_paths(self, searchpath_assets):
-        # Multiple search paths can be specified:
-        a = searchpath_assets
-        result = J2Template(values={}, template_source=a.t2, searchpath=[a.d1, a.d2]).render()
-        assert result == "23"
-
-    def test_searchpath_stdin_default(self, searchpath_assets):
-        # There is no default search path for reads from stdin:
-        a = searchpath_assets
-        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
-            readable.return_value.__enter__.return_value = sio
-            with raises(TemplateNotFound):
-                J2Template(values={}).render()
-
-    def test_searchpath_stdin_explicit(self, searchpath_assets):
-        # An explicit search path is honored when reading from stdin:
-        a = searchpath_assets
-        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
-            readable.return_value.__enter__.return_value = sio
-            assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
-
-    def test_undeclared_variables(self):
-        s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[42] }} {{ k|default(l) }}"
-        uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
-        assert J2Template(values={}, template_source=s).undeclared_variables == uvs
-
-    def test__template_str(self, testdata):
-        obj = J2Template(values=testdata.config, template_source=testdata.template)
-        assert obj._template_str == "{{greeting}} to {{recipient}}"
-
-    def test___repr__(self, testdata):
-        obj = J2Template(values=testdata.config, template_source=testdata.template)
-        assert str(obj) == "{{greeting}} to {{recipient}}"
