@@ -237,10 +237,14 @@ def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta 
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
     """
-    func_locals = locals()
-    maybe = lambda x: {[k for k, v in func_locals.items() if v is x][0]: x} if x is not None else {}
-    kwargs = {"context": {**config, **maybe(cycle), **maybe(leadtime)}}
-    config.dereference(**kwargs)
+    # 1. Create a new dict object for context to avoid mutating the config object. A deep copy is
+    # not needed since cycle and leadtime keys will only be added at the top level. 2. A datetime
+    # object cannot be falsey, but a timedelta object can, so explicitly check against None for the
+    # latter.
+    context = {**config}
+    context.update({"cycle": cycle} if cycle else {})
+    context.update({"leadtime": leadtime} if leadtime is not None else {})
+    config.dereference(context=context)
 
 
 def _realize_input_setup(
