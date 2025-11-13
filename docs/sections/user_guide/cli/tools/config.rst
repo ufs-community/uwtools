@@ -258,7 +258,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/cycle-leadtime.yaml
      :language: yaml
 
-  can be rendered with
+  can be realized with
 
   .. literalinclude:: config/cycle-leadtime-yaml.cmd
      :language: text
