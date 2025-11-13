@@ -142,6 +142,8 @@ def realize(
     output_file: Path | str | None = None,
     output_format: str | None = None,
     key_path: list[YAMLKey] | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -160,6 +162,8 @@ def realize(
         output_file=_str2path(output_file),
         output_format=output_format,
         key_path=key_path,
+        cycle=cycle,
+        leadtime=leadtime,
         values_needed=values_needed,
         total=total,
         dry_run=dry_run,
@@ -289,6 +293,8 @@ Recognized file extensions are: {extensions}
 :param output_file: Output config file (``None`` => write to ``stdout``).
 :param output_format: Output config format (default: deduced from filename extension; ``yaml`` if that fails).
 :param key_path: Path of keys to the desired output block.
+:param cycle: A datetime object to make available for use in configs.
+:param leadtime: A timedelta object to make available for use in configs.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.

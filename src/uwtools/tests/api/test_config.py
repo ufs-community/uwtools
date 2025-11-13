@@ -76,7 +76,9 @@ def test_api_config__get_config(classname, f):
     constructor.assert_called_once_with(**kwargs)
 
 
-def test_api_config_realize():
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("leadtime", [None, timedelta(hours=6)])
+def test_api_config_realize(cycle, leadtime):
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
@@ -85,6 +87,8 @@ def test_api_config_realize():
         "output_file": "path3",
         "output_format": "fmt3",
         "key_path": None,
+        "cycle": cycle,
+        "leadtime": leadtime,
         "values_needed": True,
         "total": True,
         "dry_run": False,
@@ -120,6 +124,8 @@ def test_api_config_realize__update_config_none():
         output_file=output_file,
         output_format=None,
         key_path=None,
+        cycle=None,
+        leadtime=None,
         values_needed=False,
         total=False,
         dry_run=False,

@@ -31,7 +31,7 @@ def actions(parser: Parser) -> list[str]:
 
 
 @fixture
-def args_config_realize():
+def args_config_realize(utc):
     return {
         STR.infile: "in",
         STR.infmt: "yaml",
@@ -40,6 +40,8 @@ def args_config_realize():
         STR.outfile: "out",
         STR.outfmt: "yaml",
         STR.keypath: "foo.bar",
+        STR.cycle: utc(2025, 11, 12, 6),
+        STR.leadtime: timedelta(hours=6),
         STR.valsneeded: False,
         STR.total: False,
         STR.dryrun: False,
@@ -356,7 +358,7 @@ def test_cli__dispatch_config_compose(utc):
     )
 
 
-def test_cli__dispatch_config_realize(args_config_realize):
+def test_cli__dispatch_config_realize(args_config_realize, utc):
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args_config_realize)
     realize.assert_called_once_with(
@@ -367,6 +369,8 @@ def test_cli__dispatch_config_realize(args_config_realize):
         output_file="out",
         output_format="yaml",
         key_path="foo.bar",
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
         values_needed=False,
         total=False,
         dry_run=False,

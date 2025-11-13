@@ -106,19 +106,6 @@ def compose(
                 del cfgobj[key]
             return cfgobj
 
-    def cfgobj_realize(config: Config, cycle: datetime | None, leadtime: timedelta | None) -> None:
-        """
-        Realize the given Config object.
-
-        :param config: The Config objet to update.
-        :param cycle: A datetime object to make available for use in the config.
-        :param leadtime: A timedelta object to make available for use in the config.
-        """
-        function_locals = locals()
-        maybe = lambda x: {[k for k, v in function_locals.items() if v is x][0]: x} if x else {}
-        kwargs = {"context": {**output_config, **maybe(cycle), **maybe(leadtime)}}
-        output_config.dereference(**kwargs)
-
     def cfgobj_update(config: Config, path: Path) -> Config:
         """
         Update the given Config object with config data from the given file.
@@ -138,7 +125,7 @@ def compose(
     output_class = format_to_config(output_format)
     output_config: Config = output_class(config)
     if realize:
-        cfgobj_realize(output_config, cycle, leadtime)
+        _realize_cfgobj(output_config, cycle, leadtime)
     output_config.dump(output_file)
     return output_config
 
@@ -151,6 +138,8 @@ def realize(
     output_file: Path | None = None,
     output_format: str | None = None,
     key_path: list[YAMLKey] | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -160,7 +149,7 @@ def realize(
     """
     input_obj = _realize_input_setup(input_config, input_format)
     input_obj = _realize_update(input_obj, update_config, update_format)
-    input_obj.dereference()
+    _realize_cfgobj(input_obj, cycle, leadtime)
     output_data, output_format = _realize_output_setup(
         input_obj, output_file, output_format, key_path
     )
@@ -238,6 +227,20 @@ def _ensure_format(
     if isinstance(config, dict):
         return FORMAT.yaml
     return get_config_format(config, desc)
+
+
+def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta | None) -> None:
+    """
+    Realize the given Config object.
+
+    :param config: The Config objet to update.
+    :param cycle: A datetime object to make available for use in the config.
+    :param leadtime: A timedelta object to make available for use in the config.
+    """
+    function_locals = locals()
+    maybe = lambda x: {[k for k, v in function_locals.items() if v is x][0]: x} if x else {}
+    kwargs = {"context": {**config, **maybe(cycle), **maybe(leadtime)}}
+    config.dereference(**kwargs)
 
 
 def _realize_input_setup(

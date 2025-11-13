@@ -190,6 +190,8 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
@@ -277,6 +279,8 @@ def _dispatch_config_realize(args: Args) -> bool:
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
             key_path=args[STR.keypath],
+            cycle=args[STR.cycle],
+            leadtime=args[STR.leadtime],
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
