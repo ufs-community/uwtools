@@ -1,6 +1,7 @@
 usage: uw template render [-h] [--version] [--input-file PATH]
                           [--output-file PATH] [--values-file PATH]
-                          [--values-format {ini,nml,sh,yaml}] [--env]
+                          [--values-format {ini,nml,sh,yaml}] [--cycle CYCLE]
+                          [--leadtime LEADTIME] [--env]
                           [--search-path PATH[:PATH:...]] [--values-needed]
                           [--dry-run] [--quiet] [--verbose]
                           [KEY=VALUE ...]
@@ -20,6 +21,10 @@ Optional arguments:
       Path to file providing override or interpolation values
   --values-format {ini,nml,sh,yaml}
       Values format
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
+  --leadtime LEADTIME
+      The leadtime as hours[:minutes[:seconds]]
   --env
       Use environment variables
   --search-path PATH[:PATH:...]
