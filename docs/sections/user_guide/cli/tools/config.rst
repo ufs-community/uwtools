@@ -131,7 +131,7 @@ Examples
     * The ``--input-format`` and ``--output-format`` options can be used to specify the format of the input and output configs, respectively, for cases when ``uwtools`` cannot deduce the format of configs from their filename extensions. When the formats are neither explicitly specified or deduced, ``yaml`` is assumed.
     * The ``--output-file`` / ``-o`` option can be added to write the final config to a file instead of to ``stdout``.
 
-* The optional ``--realize`` switch can be used to render as many Jinja2 template expressions as possible in the final config, using the config itself as a source of values. For example:
+* The optional ``--realize`` switch can be used to render as many Jinja2 template expressions as possible in the final config, using the config itself as a source of values. These may be supplemented with the optional ``--cycle`` and/or ``--leadtime`` command-line arguments, which inject Python ``datetime`` and ``timedelta`` objects, respectively, as values for use in Jinja2 expressions. For example:
 
   .. literalinclude:: config/compose-template.yaml
      :caption: compose-template.yaml
@@ -148,7 +148,7 @@ Examples
   .. literalinclude:: config/compose-realize-no.out
      :language: yaml
 
-  And with ``--realize``:
+  And with ``--realize``, ``--cycle``, and ``--leadtime``:
 
   .. literalinclude:: config/compose-realize-yes.cmd
      :language: text
