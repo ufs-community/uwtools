@@ -267,14 +267,20 @@ def test_config_jinja2_render(values_file, template_file, tmp_path):
     assert outfile.read_text().strip() == expected
 
 
-def test_config_jinja2_render__cycle_and_leadtime(capsys, tmp_path, utc):
-    text = """
-    {{ cycle + leadtime }}
-    """
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("leadtime", [None, timedelta(hours=6)])
+def test_config_jinja2_render__cycle_and_or_leadtime(capsys, cycle, leadtime, logged, tmp_path):
     path = tmp_path / "template"
-    path.write_text(dedent(text).strip())
-    jinja2.render(input_file=path, cycle=utc(2025, 11, 12, 6), leadtime=timedelta(hours=6))
-    assert capsys.readouterr().out.strip() == "2025-11-12 12:00:00"
+    path.write_text(dedent("{{ cycle + leadtime }}").strip())
+    jinja2.render(input_file=path, cycle=cycle, leadtime=leadtime)
+    if cycle and leadtime:
+        assert capsys.readouterr().out.strip() == "2025-11-12 12:00:00+00:00"
+    else:
+        assert logged("Value(s) required to render template not provided:")
+        if not cycle:
+            assert logged("  cycle")
+        if not leadtime:
+            assert logged("  leadtime")
 
 
 def test_config_jinja2_render__calls__dry_run(template_file, tmp_path, values_file):
