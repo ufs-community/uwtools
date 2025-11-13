@@ -3,6 +3,7 @@ Tests for uwtools.config.tools module.
 """
 
 import sys
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
@@ -320,9 +321,10 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
 
 
 @mark.parametrize("realize", [False, True])
-def test_config_tools_compose__realize(realize, tmp_path):
+def test_config_tools_compose__realize(realize, tmp_path, utc):
     dyaml = """
     radius: !float '{{ 2.0 * pi * r }}'
+    validtime: !datetime '{{ cycle + leadtime }}'
     """
     dpath = tmp_path / "d.yaml"
     dpath.write_text(dedent(dyaml))
@@ -333,11 +335,25 @@ def test_config_tools_compose__realize(realize, tmp_path):
     upath = tmp_path / "u.yaml"
     upath.write_text(dedent(uyaml))
     outpath = tmp_path / "out.yaml"
+    cycle = utc(2025, 11, 12, 6)
+    leadtime = timedelta(hours=6)
     assert isinstance(
-        tools.compose(configs=[dpath, upath], realize=realize, output_file=outpath), Config
+        tools.compose(
+            configs=[dpath, upath],
+            realize=realize,
+            output_file=outpath,
+            cycle=cycle,
+            leadtime=leadtime,
+        ),
+        Config,
     )
-    radius = YAMLConfig(outpath)["radius"]
-    assert (radius == 6.284) if realize else (radius.tagged_string == "!float '{{ 2.0 * pi * r }}'")
+    config = YAMLConfig(outpath)
+    if realize:
+        assert config["radius"] == 6.284
+        assert config["validtime"] == cycle + leadtime
+    else:
+        assert config["radius"].tagged_string == "!float '{{ 2.0 * pi * r }}'"
+        assert config["validtime"].tagged_string == "!datetime '{{ cycle + leadtime }}'"
 
 
 def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):
@@ -394,6 +410,101 @@ def test_config_tools_realize__conversion_cfg_to_yaml(tmp_path):
     expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
     assert outfile.read_text()[-1] == "\n"
+
+
+def test_config_tools_realize__cycle_and_leadtime_int(capsys, utc, tmp_path):
+    path = tmp_path / "config.ini"
+    text = """
+    [config]
+    validtime = {{ cycle + leadtime }}
+    """
+    path.write_text(dedent(text))
+    tools.realize(
+        input_config=path,
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
+        output_format=FORMAT.ini,
+    )
+    expected = """
+    [config]
+    validtime = 2025-11-12 12:00:00
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_config_tools_realize__cycle_and_leadtime_nml(capsys, utc, tmp_path):
+    path = tmp_path / "config.nml"
+    text = """
+    &config validtime = '{{ cycle + leadtime }}' /
+    """
+    path.write_text(dedent(text))
+    tools.realize(
+        input_config=path,
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
+        output_format=FORMAT.nml,
+    )
+    expected = """
+    &config
+        validtime = '2025-11-12 12:00:00'
+    /
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("leadtime", [None, timedelta(hours=6)])
+def test_config_tools_realize__cycle_and_leadtime_yaml(capsys, cycle, leadtime, tmp_path):
+    path = tmp_path / "config.yaml"
+    unrendered_cycle = "'{{ cycle.strftime(\"%Y%m%d%H\") }}'"
+    unrendered_leadtime = "!int '{{ (leadtime.total_seconds() / 3600) | int }}'"
+    unrendered_validtime = "!datetime '{{ cycle + leadtime }}'"
+    text = f"""
+    cycle: {unrendered_cycle}
+    leadtime: {unrendered_leadtime}
+    validtime: {unrendered_validtime}
+    """
+    path.write_text(dedent(text))
+    tools.realize(input_config=path, cycle=cycle, leadtime=leadtime)
+    if cycle and leadtime:
+        expected = """
+        cycle: '2025111206'
+        leadtime: 6
+        validtime: 2025-11-12T12:00:00
+        """
+    elif cycle and not leadtime:
+        expected = f"""
+        cycle: '2025111206'
+        leadtime: {unrendered_leadtime}
+        validtime: {unrendered_validtime}
+        """
+    elif leadtime and not cycle:
+        expected = f"""
+        cycle: {unrendered_cycle}
+        leadtime: 6
+        validtime: {unrendered_validtime}
+        """
+    else:
+        expected = text
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_config_tools_realize__cycle_and_leadtime_sh(capsys, utc, tmp_path):
+    path = tmp_path / "config.sh"
+    text = """
+    validtime='{{ cycle + leadtime }}'
+    """
+    path.write_text(dedent(text))
+    tools.realize(
+        input_config=path,
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
+        output_format=FORMAT.sh,
+    )
+    expected = """
+    validtime='2025-11-12 12:00:00'
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
 def test_config_tools_realize__depth_mismatch_to_ini(realize_yaml_input):

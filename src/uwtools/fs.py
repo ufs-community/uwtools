@@ -57,7 +57,7 @@ class Stager(ABC):
         yaml_config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if leadtime else {}),
+                **({"leadtime": leadtime} if leadtime is not None else {}),
                 **yaml_config.data,
             }
         )

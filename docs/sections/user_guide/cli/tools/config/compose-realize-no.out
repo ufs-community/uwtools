@@ -1,3 +1,4 @@
 radius: !float '{{ 2.0 * pi * r }}'
+validtime: !datetime '{{ cycle + leadtime }}'
 pi: 3.142
 r: 1.0

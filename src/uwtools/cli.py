@@ -168,6 +168,8 @@ def _add_subparser_config_compose(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_format(optional, choices=FORMATS)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     checks = _add_args_verbosity(optional)
     parser.add_argument("configs", metavar="CONFIG", nargs="+", type=Path)
     return checks
@@ -188,6 +190,8 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
@@ -254,6 +258,8 @@ def _dispatch_config_compose(args: Args) -> bool:
         realize=args[STR.realize],
         input_format=args[STR.infmt],
         output_format=args[STR.outfmt],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
     )
     return True
 
@@ -273,6 +279,8 @@ def _dispatch_config_realize(args: Args) -> bool:
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
             key_path=args[STR.keypath],
+            cycle=args[STR.cycle],
+            leadtime=args[STR.leadtime],
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
@@ -680,6 +688,8 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
     _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
@@ -714,6 +724,8 @@ def _dispatch_template_render(args: Args) -> bool:
             values_format=args[STR.valsfmt],
             input_file=args[STR.infile],
             output_file=args[STR.outfile],
+            cycle=args[STR.cycle],
+            leadtime=args[STR.leadtime],
             overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
             env=args[STR.env],
             searchpath=args[STR.searchpath],

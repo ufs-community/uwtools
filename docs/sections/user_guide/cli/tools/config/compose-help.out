@@ -1,7 +1,7 @@
 usage: uw config compose [-h] [--version] [--realize] [--output-file PATH]
                          [--input-format {ini,nml,sh,yaml}]
-                         [--output-format {ini,nml,sh,yaml}] [--quiet]
-                         [--verbose]
+                         [--output-format {ini,nml,sh,yaml}] [--cycle CYCLE]
+                         [--leadtime LEADTIME] [--quiet] [--verbose]
                          CONFIG [CONFIG ...]
 
 Compose configs
@@ -22,6 +22,10 @@ Optional arguments:
       Input format (default: yaml)
   --output-format {ini,nml,sh,yaml}
       Output format (default: yaml)
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
+  --leadtime LEADTIME
+      The leadtime as hours[:minutes[:seconds]]
   --quiet, -q
       Print no logging messages
   --verbose, -v

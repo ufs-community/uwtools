@@ -1,2 +1,1 @@
-radius: !float '{{ 2.0 * pi * r }}'
 validtime: !datetime '{{ cycle + leadtime }}'

@@ -188,6 +188,8 @@ def render(
     values_format: str | None = None,
     input_file: Path | None = None,
     output_file: Path | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
     overrides: dict[str, str] | None = None,
     env: bool = False,
     searchpath: list[str] | None = None,
@@ -201,6 +203,8 @@ def render(
     :param values_format: Format of values when sourced from file.
     :param input_file: Path to read raw Jinja2 template from (None => read stdin).
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
+    :param cycle: A datetime object to make available for use in templates.
+    :param leadtime: A timedelta object to make available for use in templates.
     :param overrides: Supplemental override values.
     :param env: Supplement values with environment variables?
     :param searchpath: Paths to search for extra templates.
@@ -212,6 +216,8 @@ def render(
     values = _supplement_values(
         values_src=values_src, values_format=values_format, overrides=overrides, env=env
     )
+    values.update({"cycle": cycle} if cycle else {})
+    values.update({"leadtime": leadtime} if leadtime is not None else {})
     template = J2Template(values=values, template_source=input_file, searchpath=searchpath)
     undeclared_variables = template.undeclared_variables
 

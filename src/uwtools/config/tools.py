@@ -9,7 +9,7 @@ from functools import reduce
 from pathlib import Path
 from tempfile import mkstemp
 from textwrap import indent
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from yaml.composer import ComposerError
@@ -22,6 +22,9 @@ from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_config_format
+
+if TYPE_CHECKING:
+    from datetime import datetime, timedelta
 
 # Public functions
 
@@ -50,6 +53,8 @@ def compose(
     output_file: Path | None = None,
     input_format: str | None = None,
     output_format: str | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
 ) -> Config:
     """
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
@@ -120,7 +125,7 @@ def compose(
     output_class = format_to_config(output_format)
     output_config: Config = output_class(config)
     if realize:
-        output_config.dereference()
+        _realize_cfgobj(output_config, cycle, leadtime)
     output_config.dump(output_file)
     return output_config
 
@@ -133,6 +138,8 @@ def realize(
     output_file: Path | None = None,
     output_format: str | None = None,
     key_path: list[YAMLKey] | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -142,7 +149,7 @@ def realize(
     """
     input_obj = _realize_input_setup(input_config, input_format)
     input_obj = _realize_update(input_obj, update_config, update_format)
-    input_obj.dereference()
+    _realize_cfgobj(input_obj, cycle, leadtime)
     output_data, output_format = _realize_output_setup(
         input_obj, output_file, output_format, key_path
     )
@@ -220,6 +227,23 @@ def _ensure_format(
     if isinstance(config, dict):
         return FORMAT.yaml
     return get_config_format(config, desc)
+
+
+def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta | None) -> None:
+    """
+    Realize the given Config object.
+
+    :param config: The Config objet to update.
+    :param cycle: A datetime object to make available for use in the config.
+    :param leadtime: A timedelta object to make available for use in the config.
+    """
+    # 1. Do not mutate the config object; create a new dict for context. A deep copy is not needed
+    # since cycle and leadtime keys are only added at the top level. 2. A timedelta can be falsey
+    # (unlike a datetime), so explicitly check against None.
+    context = {**config}
+    context.update({"cycle": cycle} if cycle else {})
+    context.update({"leadtime": leadtime} if leadtime is not None else {})
+    config.dereference(context=context)
 
 
 def _realize_input_setup(
@@ -371,6 +395,8 @@ Recognized file extensions are: {extensions}
 :param output_file: Output config destination (default: write to stdout).
 :param input_format: Format of configs to compose (choices: {choices}, default: {default}).
 :param output_format: Format of output config (choices: {choices}, default: {default}).
+:param cycle: A datetime object to make available for use in configs.
+:param leadtime: A timedelta object to make available for use in configs.
 :return: The composed config.
 """.format(
     default=FORMAT.yaml,

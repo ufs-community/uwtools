@@ -1,0 +1,1 @@
+{{ (cycle + leadtime).strftime("%Y%m%d%H%M") }}

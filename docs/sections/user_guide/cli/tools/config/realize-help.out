@@ -4,7 +4,8 @@ usage: uw config realize [-h] [--version] [--input-file PATH]
                          [--update-format {ini,nml,sh,yaml}]
                          [--output-file PATH]
                          [--output-format {ini,nml,sh,yaml}]
-                         [--key-path KEY[.KEY...]] [--values-needed] [--total]
+                         [--key-path KEY[.KEY...]] [--cycle CYCLE]
+                         [--leadtime LEADTIME] [--values-needed] [--total]
                          [--dry-run] [--quiet] [--verbose]
 
 Realize config
@@ -28,6 +29,10 @@ Optional arguments:
       Output format (default: yaml)
   --key-path KEY[.KEY...]
       Dot-separated path of keys to the block to be output
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
+  --leadtime LEADTIME
+      The leadtime as hours[:minutes[:seconds]]
   --values-needed
       Print report of values needed to realize config
   --total

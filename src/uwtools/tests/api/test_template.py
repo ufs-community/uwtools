@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -30,7 +31,8 @@ def template_file(tmp_path):
     return path
 
 
-def test_render(kwargs):
+def test_render(kwargs, utc):
+    kwargs.update({"cycle": utc(2025, 11, 12, 6), "leadtime": timedelta(hours=6)})
     with patch.object(template, "_render") as _render:
         template.render(**kwargs)
     _render.assert_called_once_with(
@@ -43,19 +45,19 @@ def test_render(kwargs):
     )
 
 
-def test_render_fail(kwargs):
+def test_render__fail(kwargs):
     with patch.object(template, "_render", return_value=None), raises(UWTemplateRenderError):
         template.render(**kwargs)
 
 
-def test_render_to_str(kwargs):
+def test_render__to_str(kwargs):
     del kwargs["output_file"]
     with patch.object(template, "render") as render:
         template.render_to_str(**kwargs)
         render.assert_called_once_with(**{**kwargs, "output_file": Path(os.devnull)})
 
 
-def test_render_values_needed(logged, template_file):
+def test_render__values_needed(logged, template_file):
     template.render(input_file=template_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
         assert logged(f"  {var}")

@@ -1,8 +1,8 @@
-import datetime as dt
 import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
+from datetime import timedelta
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, patch
@@ -31,7 +31,7 @@ def actions(parser: Parser) -> list[str]:
 
 
 @fixture
-def args_config_realize():
+def args_config_realize(utc):
     return {
         STR.infile: "in",
         STR.infmt: "yaml",
@@ -40,6 +40,8 @@ def args_config_realize():
         STR.outfile: "out",
         STR.outfmt: "yaml",
         STR.keypath: "foo.bar",
+        STR.cycle: utc(2025, 11, 12, 6),
+        STR.leadtime: timedelta(hours=6),
         STR.valsneeded: False,
         STR.total: False,
         STR.dryrun: False,
@@ -52,7 +54,7 @@ def args_dispatch_fs(utc):
         "target_dir": "/target/dir",
         "config_file": "/config/file",
         "cycle": utc(),
-        "leadtime": dt.timedelta(hours=6),
+        "leadtime": timedelta(hours=6),
         "key_path": ["a", "b"],
         "dry_run": False,
         "report": True,
@@ -329,15 +331,19 @@ def test_cli__dispatch_config_compare():
     )
 
 
-def test_cli__dispatch_config_compose():
+def test_cli__dispatch_config_compose(utc):
     configs = ["/path/to/a", "/path/to/b"]
     outfile = "/path/to/output"
+    cycle = utc(2025, 11, 12, 6)
+    leadtime = timedelta(hours=6)
     args = {
         STR.configs: configs,
         STR.realize: True,
         STR.outfile: outfile,
         STR.infmt: FORMAT.yaml,
         STR.outfmt: FORMAT.yaml,
+        STR.cycle: cycle,
+        STR.leadtime: leadtime,
     }
     with patch.object(cli.uwtools.api.config, "compose") as compose:
         cli._dispatch_config_compose(args)
@@ -347,10 +353,12 @@ def test_cli__dispatch_config_compose():
         output_file=outfile,
         input_format=FORMAT.yaml,
         output_format=FORMAT.yaml,
+        cycle=cycle,
+        leadtime=leadtime,
     )
 
 
-def test_cli__dispatch_config_realize(args_config_realize):
+def test_cli__dispatch_config_realize(args_config_realize, utc):
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args_config_realize)
     realize.assert_called_once_with(
@@ -361,6 +369,8 @@ def test_cli__dispatch_config_realize(args_config_realize):
         output_file="out",
         output_format="yaml",
         key_path="foo.bar",
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
         values_needed=False,
         total=False,
         dry_run=False,
@@ -543,11 +553,13 @@ def test_cli__dispatch_template_render_fail(valsneeded):
         STR.outfile: 2,
         STR.valsfile: 3,
         STR.valsfmt: 4,
+        STR.cycle: 5,
+        STR.leadtime: 6,
         STR.keyvalpairs: ["foo=42", "bar=43"],
-        STR.env: 5,
-        STR.searchpath: 6,
+        STR.env: 7,
+        STR.searchpath: 8,
         STR.valsneeded: valsneeded,
-        STR.dryrun: 7,
+        STR.dryrun: 9,
     }
     with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
         assert cli._dispatch_template_render(args) is valsneeded
@@ -559,6 +571,8 @@ def test_cli__dispatch_template_render_no_optional():
         STR.outfile: None,
         STR.valsfile: None,
         STR.valsfmt: None,
+        STR.cycle: None,
+        STR.leadtime: None,
         STR.keyvalpairs: [],
         STR.env: False,
         STR.searchpath: None,
@@ -572,6 +586,8 @@ def test_cli__dispatch_template_render_no_optional():
         output_file=None,
         values_src=None,
         values_format=None,
+        cycle=None,
+        leadtime=None,
         overrides={},
         env=False,
         searchpath=None,
@@ -587,11 +603,13 @@ def test_cli__dispatch_template_render_yaml():
         STR.outfile: 2,
         STR.valsfile: 3,
         STR.valsfmt: 4,
+        STR.cycle: 5,
+        STR.leadtime: 6,
         STR.keyvalpairs: ["foo=42", "bar=43"],
-        STR.env: 5,
-        STR.searchpath: 6,
-        STR.valsneeded: 7,
-        STR.dryrun: 8,
+        STR.env: 7,
+        STR.searchpath: 8,
+        STR.valsneeded: 9,
+        STR.dryrun: 10,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
@@ -600,11 +618,13 @@ def test_cli__dispatch_template_render_yaml():
         output_file=2,
         values_src=3,
         values_format=4,
+        cycle=5,
+        leadtime=6,
         overrides={"foo": "42", "bar": "43"},
-        env=5,
-        searchpath=6,
-        values_needed=7,
-        dry_run=8,
+        env=7,
+        searchpath=8,
+        values_needed=9,
+        dry_run=10,
         stdin_ok=True,
     )
 
@@ -640,7 +660,7 @@ def test_cli__dispatch_template_translate_no_optional():
 @mark.parametrize("hours", [0, 24, 168])
 def test_cli__dispatch_to_driver(hours, utc):
     cycle = utc()
-    leadtime = dt.timedelta(hours=hours)
+    leadtime = timedelta(hours=hours)
     args: dict = {
         "action": "foo",
         "batch": True,
