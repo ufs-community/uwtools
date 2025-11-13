@@ -253,7 +253,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-update-file-outfile.out
      :language: text
 
-* The optional ``--cycle`` and ``--leadtime`` arguments may be used to inject Python ``datetime`` and ``timedelta`` objects, respecticely, into the config for use in Jinja2 expressions. For example, the YAML config
+* The optional ``--cycle`` and ``--leadtime`` arguments may be used to inject Python ``datetime`` and ``timedelta`` objects, respectively, into the config for use in Jinja2 expressions. For example, the YAML config
 
   .. literalinclude:: config/cycle-leadtime.yaml
      :language: yaml
