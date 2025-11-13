@@ -239,7 +239,7 @@ def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta 
     """
     # 1. Do not mutate the config object; create a new dict for context. A deep copy is not needed
     # since cycle and leadtime keys are only added at the top level. 2. A timedelta can be falsey
-    # (unlike a datetime object), so explicitly check against None.
+    # (unlike a datetime), so explicitly check against None.
     context = {**config}
     context.update({"cycle": cycle} if cycle else {})
     context.update({"leadtime": leadtime} if leadtime is not None else {})
