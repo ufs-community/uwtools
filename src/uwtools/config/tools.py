@@ -237,10 +237,9 @@ def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta 
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
     """
-    # 1. Create a new dict object for context to avoid mutating the config object. A deep copy is
-    # not needed since cycle and leadtime keys will only be added at the top level. 2. A datetime
-    # object cannot be falsey, but a timedelta object can, so explicitly check against None for the
-    # latter.
+    # 1. Do not mutate the config object; create a new dict for context. A deep copy is not needed
+    # since cycle and leadtime keys are only added at the top level. 2. A timedelta can be falsey
+    # (unlike a datetime object), so explicitly check against None.
     context = {**config}
     context.update({"cycle": cycle} if cycle else {})
     context.update({"leadtime": leadtime} if leadtime is not None else {})
