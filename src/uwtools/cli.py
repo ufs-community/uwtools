@@ -688,6 +688,8 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
     _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
@@ -722,6 +724,8 @@ def _dispatch_template_render(args: Args) -> bool:
             values_format=args[STR.valsfmt],
             input_file=args[STR.infile],
             output_file=args[STR.outfile],
+            cycle=args[STR.cycle],
+            leadtime=args[STR.leadtime],
             overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
             env=args[STR.env],
             searchpath=args[STR.searchpath],

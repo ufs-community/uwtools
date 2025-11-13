@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
@@ -13,12 +14,17 @@ from uwtools.exceptions import UWTemplateRenderError
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
 
+if TYPE_CHECKING:
+    from datetime import datetime, timedelta
+
 
 def render(
     values_src: dict | Path | str | None = None,
     values_format: str | None = None,
     input_file: Path | str | None = None,
     output_file: Path | str | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
     overrides: dict[str, str] | None = None,
     env: bool = False,
     searchpath: list[str] | None = None,
@@ -39,6 +45,8 @@ def render(
     :param values_format: Format of values when sourced from file.
     :param input_file: Raw input template file (``None`` => read ``stdin``).
     :param output_file: Rendered template output file (``None`` => write to ``stdout``).
+    :param cycle: A datetime object to make available for use in templates.
+    :param leadtime: A timedelta object to make available for use in templates.
     :param overrides: Supplemental override values.
     :param env: Supplement values with environment variables?
     :param searchpath: Paths to search for extra templates.
@@ -53,6 +61,8 @@ def render(
         values_format=values_format,
         input_file=_ensure_data_source(_str2path(input_file), stdin_ok),
         output_file=_str2path(output_file),
+        cycle=cycle,
+        leadtime=leadtime,
         overrides=overrides,
         env=env,
         searchpath=searchpath,

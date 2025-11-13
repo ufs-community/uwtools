@@ -237,8 +237,8 @@ def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta 
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
     """
-    function_locals = locals()
-    maybe = lambda x: {[k for k, v in function_locals.items() if v is x][0]: x} if x else {}
+    func_locals = locals()
+    maybe = lambda x: {[k for k, v in func_locals.items() if v is x][0]: x} if x is not None else {}
     kwargs = {"context": {**config, **maybe(cycle), **maybe(leadtime)}}
     config.dereference(**kwargs)
 
