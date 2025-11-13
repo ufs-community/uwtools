@@ -106,7 +106,7 @@ and a YAML file called ``values.yaml`` with contents:
 
   Note that ``uw`` logs to ``stderr``. Use shell redirection as needed.
 
-* The optional ``--cycle`` and ``--leadtime`` arguments may be used to inject Python ``datetime`` and ``timedelta`` objects, respecticely, into the template for use in Jinja2 expressions. For example, the template
+* The optional ``--cycle`` and ``--leadtime`` arguments may be used to inject Python ``datetime`` and ``timedelta`` objects, respectively, into the template for use in Jinja2 expressions. For example, the template
 
   .. literalinclude:: template/template-cycle-leadtime
      :language: text
