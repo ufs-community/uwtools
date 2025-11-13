@@ -126,11 +126,6 @@ class TestJ2Template:
         obj.dump(output_path=path)
         assert path.read_text().strip() == "Hello to the world"
 
-    def test_config_jinja2_J2Template_render__file(self, testdata, tmp_path):
-        path = tmp_path / "template.jinja2"
-        path.write_text(testdata.template)
-        validate(J2Template(values=testdata.config, template_source=path))
-
     def test_config_jinja2_J2Template_render__searchpath_file_default(self, searchpath_assets):
         # By default, the template search path will be the directory containing the main template:
         a = searchpath_assets
@@ -162,7 +157,12 @@ class TestJ2Template:
             readable.return_value.__enter__.return_value = sio
             assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
 
-    def test_config_jinja2_J2Template_render__string(self, testdata):
+    def test_config_jinja2_J2Template_render__to_file(self, testdata, tmp_path):
+        path = tmp_path / "template.jinja2"
+        path.write_text(testdata.template)
+        validate(J2Template(values=testdata.config, template_source=path))
+
+    def test_config_jinja2_J2Template_render__to_string(self, testdata):
         validate(J2Template(values=testdata.config, template_source=testdata.template))
 
     def test_config_jinja2_J2Template_undeclared_variables(self):
