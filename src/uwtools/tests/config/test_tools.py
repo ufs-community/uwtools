@@ -3,7 +3,7 @@ Tests for uwtools.config.tools module.
 """
 
 import sys
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
@@ -452,16 +452,40 @@ def test_config_tools_realize__cycle_and_leadtime_nml(capsys, utc, tmp_path):
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
-def test_config_tools_realize__cycle_and_leadtime_yaml(capsys, utc, tmp_path):
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("leadtime", [None, timedelta(hours=6)])
+def test_config_tools_realize__cycle_and_leadtime_yaml(capsys, cycle, leadtime, tmp_path):
     path = tmp_path / "config.yaml"
-    text = """
-    validtime: !datetime '{{ cycle + leadtime }}'
+    unrendered_cycle = "'{{ cycle.strftime(\"%Y%m%d%H\") }}'"
+    unrendered_leadtime = "!int '{{ (leadtime.total_seconds() / 3600) | int }}'"
+    unrendered_validtime = "!datetime '{{ cycle + leadtime }}'"
+    text = f"""
+    cycle: {unrendered_cycle}
+    leadtime: {unrendered_leadtime}
+    validtime: {unrendered_validtime}
     """
     path.write_text(dedent(text))
-    tools.realize(input_config=path, cycle=utc(2025, 11, 12, 6), leadtime=timedelta(hours=6))
-    expected = """
-    validtime: 2025-11-12T12:00:00
-    """
+    tools.realize(input_config=path, cycle=cycle, leadtime=leadtime)
+    if cycle and leadtime:
+        expected = """
+        cycle: '2025111206'
+        leadtime: 6
+        validtime: 2025-11-12T12:00:00
+        """
+    elif cycle and not leadtime:
+        expected = f"""
+        cycle: '2025111206'
+        leadtime: {unrendered_leadtime}
+        validtime: {unrendered_validtime}
+        """
+    elif leadtime and not cycle:
+        expected = f"""
+        cycle: {unrendered_cycle}
+        leadtime: 6
+        validtime: {unrendered_validtime}
+        """
+    else:
+        expected = text
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
