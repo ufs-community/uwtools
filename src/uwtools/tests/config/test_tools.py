@@ -412,6 +412,77 @@ def test_config_tools_realize__conversion_cfg_to_yaml(tmp_path):
     assert outfile.read_text()[-1] == "\n"
 
 
+def test_config_tools_realize__cycle_and_leadtime_int(capsys, utc, tmp_path):
+    path = tmp_path / "config.ini"
+    text = """
+    [config]
+    validtime = {{ cycle + leadtime }}
+    """
+    path.write_text(dedent(text))
+    tools.realize(
+        input_config=path,
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
+        output_format=FORMAT.ini,
+    )
+    expected = """
+    [config]
+    validtime = 2025-11-12 12:00:00
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_config_tools_realize__cycle_and_leadtime_nml(capsys, utc, tmp_path):
+    path = tmp_path / "config.nml"
+    text = """
+    &config validtime = '{{ cycle + leadtime }}' /
+    """
+    path.write_text(dedent(text))
+    tools.realize(
+        input_config=path,
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
+        output_format=FORMAT.nml,
+    )
+    expected = """
+    &config
+        validtime = '2025-11-12 12:00:00'
+    /
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_config_tools_realize__cycle_and_leadtime_yaml(capsys, utc, tmp_path):
+    path = tmp_path / "config.yaml"
+    text = """
+    validtime: !datetime '{{ cycle + leadtime }}'
+    """
+    path.write_text(dedent(text))
+    tools.realize(input_config=path, cycle=utc(2025, 11, 12, 6), leadtime=timedelta(hours=6))
+    expected = """
+    validtime: 2025-11-12T12:00:00
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_config_tools_realize__cycle_and_leadtime_sh(capsys, utc, tmp_path):
+    path = tmp_path / "config.sh"
+    text = """
+    validtime='{{ cycle + leadtime }}'
+    """
+    path.write_text(dedent(text))
+    tools.realize(
+        input_config=path,
+        cycle=utc(2025, 11, 12, 6),
+        leadtime=timedelta(hours=6),
+        output_format=FORMAT.sh,
+    )
+    expected = """
+    validtime='2025-11-12 12:00:00'
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
 def test_config_tools_realize__depth_mismatch_to_ini(realize_yaml_input):
     with raises(UWConfigError):
         tools.realize(
