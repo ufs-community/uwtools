@@ -3,7 +3,7 @@ Tests for uwtools.config.jinja2 module.
 """
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from textwrap import dedent
 from types import SimpleNamespace as ns
@@ -267,8 +267,18 @@ def test_config_jinja2_render(values_file, template_file, tmp_path):
     assert outfile.read_text().strip() == expected
 
 
+def test_config_jinja2_render__cycle_and_leadtime(capsys, tmp_path, utc):
+    text = """
+    {{ cycle + leadtime }}
+    """
+    path = tmp_path / "template"
+    path.write_text(dedent(text).strip())
+    jinja2.render(input_file=path, cycle=utc(2025, 11, 12, 6), leadtime=timedelta(hours=6))
+    assert capsys.readouterr().out.strip() == "2025-11-12 12:00:00"
+
+
 def test_config_jinja2_render__calls__dry_run(template_file, tmp_path, values_file):
-    outfile = str(tmp_path / "out.txt")
+    outfile = tmp_path / "out.txt"
     with patch.object(jinja2, "_dry_run_template") as dr:
         render_helper(
             input_file=template_file, values_file=values_file, output_file=outfile, dry_run=True
@@ -277,7 +287,7 @@ def test_config_jinja2_render__calls__dry_run(template_file, tmp_path, values_fi
 
 
 def test_config_jinja2_render__calls__log_missing(template_file, tmp_path, values_file):
-    outfile = str(tmp_path / "out.txt")
+    outfile = tmp_path / "out.txt"
     cfgobj = yaml.safe_load(values_file.read_text())
     del cfgobj["roses_color"]
     values_file.write_text(yaml.dump(cfgobj))
@@ -287,7 +297,7 @@ def test_config_jinja2_render__calls__log_missing(template_file, tmp_path, value
 
 
 def test_config_jinja2_render__calls__values_needed(template_file, tmp_path, values_file):
-    outfile = str(tmp_path / "out.txt")
+    outfile = tmp_path / "out.txt"
     with patch.object(jinja2, "_values_needed") as vn:
         render_helper(
             input_file=template_file,
@@ -299,7 +309,7 @@ def test_config_jinja2_render__calls__values_needed(template_file, tmp_path, val
 
 
 def test_config_jinja2_render__calls__write_template(template_file, tmp_path, values_file):
-    outfile = str(tmp_path / "out.txt")
+    outfile = tmp_path / "out.txt"
     with patch.object(jinja2, "_write_template") as write:
         render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
         write.assert_called_once_with(outfile, "roses are red, violets are blue")
