@@ -253,6 +253,21 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-update-file-outfile.out
      :language: text
 
+* The optional ``--cycle`` and ``--leadtime`` arguments may be used to inject Python ``datetime`` and ``timedelta`` objects, respecticely, into the config for use in Jinja2 expressions. For example, the YAML config
+
+  .. literalinclude:: config/cycle-leadtime.yaml
+     :language: yaml
+
+  can be rendered with
+
+  .. literalinclude:: config/cycle-leadtime-yaml.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/cycle-leadtime-yaml.out
+     :language: text
+
+  The ``cycle`` and ``leadtime`` values can also be used with Fortran namelist, INI, and shell key-value pair configs.
+
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
   .. literalinclude:: config/realize-dry-run.cmd
