@@ -217,7 +217,7 @@ def render(
         values_src=values_src, values_format=values_format, overrides=overrides, env=env
     )
     values.update({"cycle": cycle} if cycle else {})
-    values.update({"leadtime": leadtime} if cycle is not None else {})
+    values.update({"leadtime": leadtime} if leadtime is not None else {})
     template = J2Template(values=values, template_source=input_file, searchpath=searchpath)
     undeclared_variables = template.undeclared_variables
 
