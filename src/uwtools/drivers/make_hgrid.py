@@ -4,7 +4,7 @@ A driver for make_hgrid.
 
 from pathlib import Path
 
-from iotaa import tasks
+from iotaa import collection
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
@@ -18,7 +18,7 @@ class MakeHgrid(DriverTimeInvariant):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

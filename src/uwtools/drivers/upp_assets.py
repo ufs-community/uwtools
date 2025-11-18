@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from iotaa import task, tasks
+from iotaa import collection, task
 
 from uwtools.drivers import upp_common
 from uwtools.drivers.driver import AssetsCycleLeadtimeBased
@@ -25,7 +25,7 @@ class UPPAssets(AssetsCycleLeadtimeBased, FileStager):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def control_file(self):
         """
         The GRIB control file.
@@ -39,7 +39,7 @@ class UPPAssets(AssetsCycleLeadtimeBased, FileStager):
         """
         yield from upp_common.namelist_file(self)
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

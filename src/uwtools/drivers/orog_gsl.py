@@ -4,7 +4,7 @@ A driver for orog_gsl.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
@@ -27,7 +27,7 @@ class OrogGSL(DriverTimeInvariant):
         """
         path = self._input_config_path
         yield self.taskname(str(path))
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         inputs = [str(self.config["config"][k]) for k in ("tile", "resolution", "halo")]
         with writable(path) as f:
@@ -44,10 +44,10 @@ class OrogGSL(DriverTimeInvariant):
         src = Path(self.config["config"]["input_grid_file"])
         dst = self.rundir / fn
         yield self.taskname("Input grid")
-        yield asset(dst, dst.is_file)
+        yield Asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -70,7 +70,7 @@ class OrogGSL(DriverTimeInvariant):
         src = Path(self.config["config"]["topo_data_2p5m"])
         dst = self.rundir / fn
         yield self.taskname("Topo data 2.5-min")
-        yield asset(dst, dst.is_file)
+        yield Asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
     @task
@@ -82,7 +82,7 @@ class OrogGSL(DriverTimeInvariant):
         src = Path(self.config["config"]["topo_data_30s"])
         dst = self.rundir / fn
         yield self.taskname("Topo data 30-sec")
-        yield asset(dst, dst.is_file)
+        yield Asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
     # Public helper methods

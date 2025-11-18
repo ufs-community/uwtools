@@ -4,7 +4,7 @@ A driver for esg_grid.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverTimeInvariant
@@ -28,7 +28,7 @@ class ESGGrid(DriverTimeInvariant):
         fn = "regional_grid.nml"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
@@ -38,7 +38,7 @@ class ESGGrid(DriverTimeInvariant):
             schema=self.namelist_schema(schema_keys=["$defs", "namelist_content"]),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

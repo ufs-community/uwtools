@@ -4,7 +4,7 @@ A driver for the global_equiv_resol component.
 
 from pathlib import Path
 
-from iotaa import asset, external, tasks
+from iotaa import Asset, collection, external
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
@@ -25,9 +25,9 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         path = Path(self.config["input_grid_file"])
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

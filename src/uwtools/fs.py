@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
-from iotaa import tasks
+from iotaa import collection
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import UWYAMLGlob, YAMLKey
@@ -229,7 +229,7 @@ class Copier(FileStager):
     Stage files by copying.
     """
 
-    @tasks
+    @collection
     def go(self):
         """
         Copy files.
@@ -285,7 +285,7 @@ class Linker(FileStager):
         self.hardlink = hardlink
         self.fallback = fallback
 
-    @tasks
+    @collection
     def go(self):
         """
         Create links to filesystem items.
@@ -322,7 +322,7 @@ class MakeDirs(Stager):
     Make directories.
     """
 
-    @tasks
+    @collection
     def go(self):
         """
         Make directories.

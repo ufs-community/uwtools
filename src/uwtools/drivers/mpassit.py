@@ -7,7 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.api.config import get_nml_config
 from uwtools.config.formats.nml import NMLConfig
@@ -31,7 +31,7 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
         """
         path = self._input_config_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
@@ -41,7 +41,7 @@ class MPASSIT(DriverCycleLeadtimeBased, FileStager):
             schema=self.namelist_schema(),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

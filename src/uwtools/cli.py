@@ -338,7 +338,7 @@ def _dispatch_execute(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    assets = uwtools.api.execute.execute(
+    node = uwtools.api.execute.execute(
         classname=args[STR.classname],
         module=args[STR.module],
         task=args[STR.task],
@@ -352,7 +352,7 @@ def _dispatch_execute(args: Args) -> bool:
         batch=args[STR.batch],
         stdin_ok=True,
     )
-    return bool(assets)
+    return bool(node)
 
 
 # Mode fs

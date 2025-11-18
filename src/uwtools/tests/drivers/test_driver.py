@@ -29,7 +29,7 @@ class Common:
     @iotaa.task
     def atask(self):
         yield "atask"
-        yield iotaa.asset("atask", lambda: True)
+        yield iotaa.Asset("atask", lambda: True)
         yield None
 
     @classmethod

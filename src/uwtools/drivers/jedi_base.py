@@ -5,7 +5,7 @@ A base class for JEDI-based drivers.
 from abc import abstractmethod
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import DriverCycleBased
@@ -29,7 +29,7 @@ class JEDIBase(DriverCycleBased, FileStager):
         fn = self._config_fn
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config["configuration_file"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
@@ -38,7 +38,7 @@ class JEDIBase(DriverCycleBased, FileStager):
             path=path,
         )
 
-    @tasks
+    @collection
     @abstractmethod
     def provisioned_rundir(self):
         """

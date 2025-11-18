@@ -14,7 +14,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any
 
-from iotaa import asset, external, task, tasks
+from iotaa import Asset, collection, external, task
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
@@ -202,7 +202,7 @@ class Assets(ABC):
         Validate the UW driver config.
         """
         yield self.taskname("valid schema")
-        yield asset(None, lambda: True)
+        yield Asset(None, lambda: True)
 
     # Private helper methods
 
@@ -360,14 +360,14 @@ class Driver(Assets):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     @abstractmethod
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """
 
-    @tasks
+    @collection
     def run(self):
         """
         A run.
@@ -382,7 +382,7 @@ class Driver(Assets):
         """
         path = self._runscript_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         self._write_runscript(path)
 
@@ -401,7 +401,7 @@ class Driver(Assets):
             print(json.dumps(self.output, cls=Encoder, indent=2, sort_keys=True))
         except UWConfigError as e:
             log.error(e)
-        yield asset(None, lambda: True)
+        yield Asset(None, lambda: True)
 
     @task
     def _run_via_batch_submission(self):
@@ -410,7 +410,7 @@ class Driver(Assets):
         """
         yield self.taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield self.provisioned_rundir()
         self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
 
@@ -421,7 +421,7 @@ class Driver(Assets):
         """
         yield self.taskname("run via local execution")
         path = self.rundir / self._runscript_done_file
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)

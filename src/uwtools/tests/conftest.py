@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import datetime, timezone
 
-from iotaa import asset, external
+from iotaa import Asset, external
 from pytest import fixture
 
 from uwtools.logging import log
@@ -29,7 +29,7 @@ def ready_task():
     @external
     def ready(*_args, **_kwargs):
         yield "ready"
-        yield asset(None, lambda: True)
+        yield Asset(None, lambda: True)
 
     return ready
 

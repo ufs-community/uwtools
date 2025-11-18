@@ -2,7 +2,7 @@
 A mixin class providing tasks that stage files.
 """
 
-from iotaa import tasks
+from iotaa import collection
 
 from uwtools.fs import Copier, Linker
 from uwtools.strings import STR
@@ -13,7 +13,7 @@ class FileStager:
     A base class for tasks that stage files.
     """
 
-    @tasks
+    @collection
     def files_copied(self):
         """
         Files copied for run.
@@ -23,7 +23,7 @@ class FileStager:
         files = config.get("files_to_copy", {})
         yield Copier(config=files, target_dir=rundir).go() if files else None
 
-    @tasks
+    @collection
     def files_hardlinked(self):
         """
         Files hardlinked for run.
@@ -42,7 +42,7 @@ class FileStager:
             else None
         )
 
-    @tasks
+    @collection
     def files_linked(self):
         """
         Files linked for run.

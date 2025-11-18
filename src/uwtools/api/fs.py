@@ -45,7 +45,7 @@ def copy(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, stager.go(dry_run=dry_run).assets)
+    assets = cast(list, stager.go(dry_run=dry_run).asset)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
@@ -88,7 +88,7 @@ def link(
         key_path=key_path,
         fallback=fallback,
     )
-    assets = cast(list, stager.go(dry_run=dry_run).assets)
+    assets = cast(list, stager.go(dry_run=dry_run).asset)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
@@ -121,7 +121,7 @@ def makedirs(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, stager.go(dry_run=dry_run).assets)
+    assets = cast(list, stager.go(dry_run=dry_run).asset)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 

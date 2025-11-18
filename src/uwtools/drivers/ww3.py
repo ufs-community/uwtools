@@ -4,7 +4,7 @@ An assets driver for ww3.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.api.template import render
 from uwtools.drivers.driver import AssetsCycleBased
@@ -28,7 +28,7 @@ class WaveWatchIII(AssetsCycleBased):
         fn = "ww3_shel.nml"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         template_file = Path(self.config[STR.namelist]["template_file"])
         yield file(template_file)
         render(
@@ -37,7 +37,7 @@ class WaveWatchIII(AssetsCycleBased):
             overrides=self.config[STR.namelist].get("template_values", {}),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -55,7 +55,7 @@ class WaveWatchIII(AssetsCycleBased):
         """
         yield self.taskname("restart directory")
         path = self.rundir / "restart_wave"
-        yield asset(path, path.is_dir)
+        yield Asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)
 

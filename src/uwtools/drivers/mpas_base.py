@@ -12,7 +12,7 @@ from itertools import islice
 from typing import TYPE_CHECKING, cast
 
 from dateutil.relativedelta import relativedelta
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 from lxml import etree
 from lxml.etree import Element, SubElement
 
@@ -30,7 +30,7 @@ class MPASBase(DriverCycleBased, FileStager):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     @abstractmethod
     def boundary_files(self):
         """
@@ -43,7 +43,7 @@ class MPASBase(DriverCycleBased, FileStager):
         The namelist file.
         """
 
-    @tasks
+    @collection
     @abstractmethod
     def provisioned_rundir(self):
         """
@@ -58,7 +58,7 @@ class MPASBase(DriverCycleBased, FileStager):
         fn = self._streams_fn
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         streams = Element("streams")
         for k, v in self.config["streams"].items():

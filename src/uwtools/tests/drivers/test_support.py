@@ -51,9 +51,9 @@ def test_tasks():
         def t2(self):
             """@task t2."""
 
-        @iotaa.tasks
+        @iotaa.collection
         def t3(self):
-            """@tasks t3."""
+            """@collection t3."""
 
         @property
         def _resources(self): ...
@@ -66,6 +66,6 @@ def test_tasks():
         "show_output": "Show the output to be created by this component.",
         "t1": "@external t1.",
         "t2": "@task t2.",
-        "t3": "@tasks t3.",
+        "t3": "@collection t3.",
         "validate": "Validate the UW driver config.",
     }

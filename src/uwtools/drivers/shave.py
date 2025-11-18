@@ -4,7 +4,7 @@ A driver for shave.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
@@ -27,7 +27,7 @@ class Shave(DriverTimeInvariant):
         """
         path = self._input_config_path
         yield self.taskname(str(path))
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         config = self.config["config"]
         input_file = Path(config["input_grid_file"])
         yield file(path=input_file)
@@ -38,7 +38,7 @@ class Shave(DriverTimeInvariant):
         with writable(path) as f:
             print(content, file=f)
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

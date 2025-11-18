@@ -14,7 +14,7 @@ from typing import NoReturn
 from urllib.parse import unquote, urlparse
 
 import requests
-from iotaa import Node, asset, external, task
+from iotaa import Asset, Node, external, task
 
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
@@ -37,7 +37,7 @@ def directory(path: Path):
     :param path: Path to the directory.
     """
     yield "Directory %s" % path
-    yield asset(path, path.is_dir)
+    yield Asset(path, path.is_dir)
     yield None
     try:
         path.mkdir(parents=True, exist_ok=True)
@@ -53,7 +53,7 @@ def executable(program: Path | str):
     :param program: Name of or path to the program.
     """
     yield "Executable program '%s' on PATH" % program
-    yield asset(program, lambda: bool(which(program)))
+    yield Asset(program, lambda: bool(which(program)))
 
 
 @task
@@ -66,7 +66,7 @@ def existing_hpss(path: Path | str):
     taskname = "HPSS file %s" % path
     yield taskname
     val = [False]
-    yield asset(path, lambda: val[0])
+    yield Asset(path, lambda: val[0])
     yield executable(STR.hsi)
     available, _ = run_shell_cmd(f"{STR.hsi} -q ls -1 '{path!s}'", taskname=taskname)
     val[0] = available
@@ -80,7 +80,7 @@ def existing_http(url: str):
     :param url: URL of the HTTP resource.
     """
     yield "Remote HTTP resource %s" % url
-    yield asset(
+    yield Asset(
         url,
         lambda: requests.head(url, allow_redirects=True, timeout=3).status_code == HTTPStatus.OK,
     )
@@ -97,7 +97,7 @@ def file(path: Path | str, context: str = ""):
     path = _local_path(path)
     suffix = f" ({context})" if context else ""
     yield "File %s%s" % (path, suffix)
-    yield asset(path, path.is_file)
+    yield Asset(path, path.is_file)
 
 
 def filecopy(src: Path | str, dst: Path | str, check: bool = True) -> Node:
@@ -135,7 +135,7 @@ def filecopy_hsi(src: str, dst: Path, check: bool = True):
     """
     taskname = "HSI %s -> %s" % (src, dst)
     yield taskname
-    yield asset(Path(dst), Path(dst).is_file)
+    yield Asset(Path(dst), Path(dst).is_file)
     yield existing_hpss(src) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = f"{STR.hsi} -q get '{dst}' : '{src}'"
@@ -156,7 +156,7 @@ def filecopy_htar(src_archive: str, src_file: str, dst: Path, check: bool = True
     """
     taskname = "HTAR %s:%s -> %s" % (src_archive, src_file, dst)
     yield taskname
-    yield asset(Path(dst), Path(dst).is_file)
+    yield Asset(Path(dst), Path(dst).is_file)
     yield existing_hpss(src_archive) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = f"{STR.htar} -qxf '{src_archive}' '{src_file}'"
@@ -179,7 +179,7 @@ def filecopy_http(url: str, dst: Path, check: bool = True):
     :param check: Check existence of source before trying to copy.
     """
     yield "HTTP %s -> %s" % (url, dst)
-    yield asset(dst, dst.is_file)
+    yield Asset(dst, dst.is_file)
     yield existing_http(url) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(url, allow_redirects=True, stream=True, timeout=3)
@@ -201,7 +201,7 @@ def filecopy_local(src: Path, dst: Path, check: bool = True):
     :param check: Check existence of source before trying to copy.
     """
     yield "Local %s -> %s" % (src, dst)
-    yield asset(Path(dst), Path(dst).is_file)
+    yield Asset(Path(dst), Path(dst).is_file)
     yield file(src) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
     copy(src, dst)
@@ -221,7 +221,7 @@ def hardlink(
     """
     target, linkname = map(_local_path, [target, linkname])
     yield "Hardlink %s -> %s" % (linkname, target)
-    yield asset(linkname, linkname.exists)
+    yield Asset(linkname, linkname.exists)
     yield link_target(target) if check else None
     linkname.parent.mkdir(parents=True, exist_ok=True)
     src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
@@ -252,7 +252,7 @@ def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     """
     target, linkname = map(_local_path, [target, linkname])
     yield "Symlink %s -> %s" % (linkname, target)
-    yield asset(linkname, linkname.exists)
+    yield Asset(linkname, linkname.exists)
     yield link_target(target) if check else None
     linkname.parent.mkdir(parents=True, exist_ok=True)
     src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
@@ -270,7 +270,7 @@ def link_target(path: Path | str):
     """
     path = _local_path(path)
     yield "Target %s" % path
-    yield asset(path, path.exists)
+    yield Asset(path, path.exists)
 
 
 # Private helpers

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from unittest.mock import ANY, Mock, patch
 
-from iotaa import asset, external
+from iotaa import Asset, external
 from pytest import mark, raises
 
 from uwtools.exceptions import UWConfigError
@@ -17,7 +17,7 @@ from uwtools.utils import tasks
 @external
 def exists(x):
     yield x
-    yield asset(x, lambda: True)
+    yield Asset(x, lambda: True)
 
 
 # Tests

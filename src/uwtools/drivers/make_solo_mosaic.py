@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from iotaa import tasks
+from iotaa import collection
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
@@ -23,7 +23,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
