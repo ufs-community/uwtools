@@ -2,7 +2,7 @@
 A driver for the ioda component.
 """
 
-from iotaa import tasks
+from iotaa import collection
 
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.drivers.support import set_driver_docstring
@@ -16,7 +16,7 @@ class IODA(JEDIBase):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

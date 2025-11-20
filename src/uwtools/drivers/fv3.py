@@ -4,7 +4,7 @@ A driver for the FV3 model.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
@@ -23,7 +23,7 @@ class FV3(DriverCycleBased, FileStager):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def boundary_files(self):
         """
         Lateral boundary-condition files.
@@ -51,7 +51,7 @@ class FV3(DriverCycleBased, FileStager):
         fn = "diag_table"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         template_file = Path(self.config[fn]["template_file"])
         yield file(template_file)
         render(
@@ -71,7 +71,7 @@ class FV3(DriverCycleBased, FileStager):
         fn = "field_table"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield filecopy(src=Path(self.config["field_table"][STR.basefile]), dst=path)
 
     @task
@@ -82,7 +82,7 @@ class FV3(DriverCycleBased, FileStager):
         fn = "model_configure"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config["model_configure"].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
@@ -99,7 +99,7 @@ class FV3(DriverCycleBased, FileStager):
         fn = "input.nml"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
@@ -109,7 +109,7 @@ class FV3(DriverCycleBased, FileStager):
             schema=self.namelist_schema(),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -137,7 +137,7 @@ class FV3(DriverCycleBased, FileStager):
         """
         yield self.taskname("RESTART directory")
         path = self.rundir / "RESTART"
-        yield asset(path, path.is_dir)
+        yield Asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)
 
@@ -148,7 +148,7 @@ class FV3(DriverCycleBased, FileStager):
         """
         path = self._runscript_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         envvars = {
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",

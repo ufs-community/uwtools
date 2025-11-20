@@ -1,4 +1,4 @@
-from iotaa import asset, task
+from iotaa import Asset, task
 
 from uwtools.api.driver import AssetsTimeInvariant
 from uwtools.api.logging import use_uwtools_logger
@@ -15,7 +15,7 @@ class Answer(AssetsTimeInvariant):
         """
         path = self.rundir / "answer.txt"
         yield self.taskname("Answer file")
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True)
         with open(path, "w", encoding="utf-8") as f:

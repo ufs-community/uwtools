@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
@@ -32,7 +32,7 @@ class GSI(DriverCycleBased, FileStager):
         fn = "coupler.res"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         template_file = Path(self.config[fn]["template_file"])
         yield file(template_file)
         render(
@@ -50,7 +50,7 @@ class GSI(DriverCycleBased, FileStager):
         """
         path = self.rundir / "filelist03"
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         files = self.config["filelist"]
         path.write_text("\n".join(sorted(files)))
@@ -62,7 +62,7 @@ class GSI(DriverCycleBased, FileStager):
         """
         path = self._input_config_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
@@ -76,7 +76,7 @@ class GSI(DriverCycleBased, FileStager):
             with path.open(mode="a") as nml:
                 nml.write(obs_input)
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -101,7 +101,7 @@ class GSI(DriverCycleBased, FileStager):
         """
         path = self._runscript_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         envvars = {
             "OMP_NUM_THREADS": self.config.get(STR.execution, {}).get(STR.threads, 1),

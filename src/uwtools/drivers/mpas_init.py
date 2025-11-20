@@ -5,7 +5,7 @@ A driver for the MPAS Init component.
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
@@ -21,7 +21,7 @@ class MPASInit(MPASBase):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def boundary_files(self):
         """
         Boundary files.
@@ -49,7 +49,7 @@ class MPASInit(MPASBase):
         fn = "namelist.init_atmosphere"
         yield self.taskname(fn)
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         base_file = self.config[STR.namelist].get(STR.basefile)
         yield file(Path(base_file)) if base_file else None
         initial_ts, final_ts = self._initial_and_final_ts
@@ -69,7 +69,7 @@ class MPASInit(MPASBase):
             schema=self.namelist_schema(),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

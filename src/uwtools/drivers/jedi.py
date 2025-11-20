@@ -4,7 +4,7 @@ A driver for the jedi component.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.drivers.support import set_driver_docstring
@@ -21,7 +21,7 @@ class JEDI(JEDIBase):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -44,7 +44,7 @@ class JEDI(JEDIBase):
         taskname = self.taskname("validate_only")
         yield taskname
         ready = [False]
-        a = asset(None, lambda: ready[0])
+        a = Asset(None, lambda: ready[0])
         yield a
         executable = file(Path(self.config[STR.execution][STR.executable]))
         config = self.configuration_file()

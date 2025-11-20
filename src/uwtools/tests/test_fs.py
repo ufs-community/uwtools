@@ -1,4 +1,3 @@
-from logging import getLogger
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, patch
@@ -67,9 +66,7 @@ def test_fs_Copier_go(src_func, dst_func, tgt_func):
     obj = Mock(_simple=fs.Copier._simple, _target_dir=tgt)
     obj._expand_glob.return_value = [(dst, src, False)]
     with patch.object(fs, "filecopy") as filecopy:
-        filecopy.return_value = iotaa.NodeExternal(
-            taskname="test", threads=0, logger=getLogger(), assets_=None
-        )
+        filecopy.return_value = iotaa.iotaa.NodeExternal(taskname="test", threads=0, assets=None)
         fs.Copier.go(obj)
     filecopy.assert_called_once_with(src=src, dst=Path("/dst/file"), check=False)
 

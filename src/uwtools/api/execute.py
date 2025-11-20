@@ -58,7 +58,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here.
     :param key_path: Path of keys to config block to use.
     :param stdin_ok: OK to read from stdin?
-    :return: The assets yielded by the task, if it completes without raising an exception.
+    :return: The task-graph Node yielded by the task, if it completes without raising an exception.
     """
     class_, module_path = _get_driver_class(module, classname)
     if not class_:

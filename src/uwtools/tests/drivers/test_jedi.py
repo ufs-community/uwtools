@@ -129,7 +129,7 @@ def test_JEDI_validate_only(driverobj, logged, supply_envcmds):
     @iotaa.external
     def file(path: Path):
         yield "Mocked file task for %s" % path
-        yield iotaa.asset(path, lambda: True)
+        yield iotaa.Asset(path, lambda: True)
 
     with patch.object(jedi, "file", file), patch.object(jedi, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (True, None)

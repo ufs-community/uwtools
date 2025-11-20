@@ -32,7 +32,7 @@ def driverobj(tmp_path, utc):
 @iotaa.external
 def ok():
     yield "ok"
-    yield iotaa.asset(None, lambda: True)
+    yield iotaa.Asset(None, lambda: True)
 
 
 # Tests

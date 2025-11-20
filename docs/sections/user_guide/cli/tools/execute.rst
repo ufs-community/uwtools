@@ -13,7 +13,7 @@ For the three required arguments:
 
 * ``--module`` specifies the name of the module providing the driver. The name may be an absolute path (e.g. ``/path/to/driver.py``); a path relative to the current directory (e.g. ``driver.py``, ``../driver.py``, ``sub/dir/driver.py``); or a name appropriate to the Python ``import`` statement (e.g. ``driver``, ``my.package.driver``), provided the directory containing the module is on ``PYTHONPATH`` / ``sys.path``.
 * ``--class`` specifies the name of a class in the above module that implements the driver, which should use one of the classes exported by ``uwtools.api.driver`` as its base class.
-* ``--task`` specifies the name of a method in the above class that implements a :iotaa-readme:`task<tasks>`, decorated with :iotaa-readme:`@task<task>`, :iotaa-readme:`@tasks<tasks-1>`, or :iotaa-readme:`@external<external>`.
+* ``--task`` specifies the name of a method in the above class that implements a :iotaa-readme:`task<tasks>`, decorated with :iotaa-readme:`@task<task>`, :iotaa-readme:`@collection<collection>`, or :iotaa-readme:`@external<external>`.
 
 .. _cli_execute_examples:
               

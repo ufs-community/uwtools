@@ -8,7 +8,7 @@ from datetime import timedelta
 from functools import cached_property
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleBased
@@ -29,7 +29,7 @@ class Ungrib(DriverCycleBased):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def gribfiles(self):
         """
         Symlinks to all the GRIB files.
@@ -63,7 +63,7 @@ class Ungrib(DriverCycleBased):
         }
         path = self.rundir / "namelist.wps"
         yield self.taskname(str(path))
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         self.create_user_updated_config(
             config_class=NMLConfig,
@@ -71,7 +71,7 @@ class Ungrib(DriverCycleBased):
             path=path,
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -91,7 +91,7 @@ class Ungrib(DriverCycleBased):
         """
         path = self.rundir / "Vtable"
         yield self.taskname(str(path))
-        yield asset(path, path.is_symlink)
+        yield Asset(path, path.is_symlink)
         infile = Path(self.config["vtable"])
         yield file(path=infile)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -103,7 +103,7 @@ class Ungrib(DriverCycleBased):
         A run executed directly on the local system.
         """
         yield self.taskname("run via local execution")
-        yield [asset(path, path.is_file) for path in self.output["paths"]]
+        yield [Asset(path, path.is_file) for path in self.output["paths"]]
         yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
@@ -146,7 +146,7 @@ class Ungrib(DriverCycleBased):
         :param infile: File to link.
         """
         yield self.taskname(str(link))
-        yield asset(link, link.is_symlink)
+        yield Asset(link, link.is_symlink)
         yield file(path=infile)
         link.parent.mkdir(parents=True, exist_ok=True)
         link.symlink_to(infile)

@@ -7,7 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from iotaa import asset
+from iotaa import Asset
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.upp_assets import UPPAssets
@@ -35,7 +35,7 @@ def control_file(obj: UPP | UPPAssets):
 def namelist_file(obj: UPP | UPPAssets):
     path = namelist_path(obj)
     yield obj.taskname(str(path))
-    yield asset(path, path.is_file)
+    yield Asset(path, path.is_file)
     base_file = obj.config[STR.namelist].get(STR.basefile)
     yield file(Path(base_file)) if base_file else None
     obj.create_user_updated_config(

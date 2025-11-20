@@ -4,7 +4,7 @@ A driver for filter_topo.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverTimeInvariant
@@ -28,7 +28,7 @@ class FilterTopo(DriverTimeInvariant):
         src = Path(self.config["config"]["input_grid_file"])
         dst = Path(self.config[STR.rundir], src.name)
         yield self.taskname(f"Input grid {src!s}")
-        yield asset(dst, dst.is_file)
+        yield Asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
     @task
@@ -39,7 +39,7 @@ class FilterTopo(DriverTimeInvariant):
         src = Path(self.config["config"]["input_raw_orog"])
         dst = self.output["path"]
         yield self.taskname(f"Raw orog input {dst!s}")
-        yield asset(dst, dst.is_file)
+        yield Asset(dst, dst.is_file)
         yield filecopy(src=src, dst=dst)
 
     @task
@@ -50,7 +50,7 @@ class FilterTopo(DriverTimeInvariant):
         fn = "input.nml"
         path = self.rundir / fn
         yield self.taskname(f"namelist file {fn}")
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         self.create_user_updated_config(
             config_class=NMLConfig,
@@ -59,7 +59,7 @@ class FilterTopo(DriverTimeInvariant):
             schema=self.namelist_schema(),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.

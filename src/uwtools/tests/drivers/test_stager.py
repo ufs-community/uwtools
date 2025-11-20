@@ -84,5 +84,5 @@ def test_files_to_link(driver, tmp_path):
 def test_files_to_stage_missing(driver, section, stage_task):
     del driver.config[section]
     task = driver.__getattribute__(stage_task)()
-    assert not task.requirements
+    assert not task.req
     assert task.ready

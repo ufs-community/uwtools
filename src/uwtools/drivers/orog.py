@@ -4,7 +4,7 @@ A driver for UFS_UTILS's orog.
 
 from pathlib import Path
 
-from iotaa import asset, external, task, tasks
+from iotaa import Asset, collection, external, task
 
 from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.stager import FileStager
@@ -27,7 +27,7 @@ class Orog(DriverTimeInvariant, FileStager):
         """
         grid_file = Path(self.config["grid_file"])
         yield self.taskname(f"Input grid file {grid_file}")
-        yield asset(grid_file, grid_file.is_file) if str(grid_file) != "none" else None
+        yield Asset(grid_file, grid_file.is_file) if str(grid_file) != "none" else None
 
     @task
     def input_config_file(self):
@@ -36,7 +36,7 @@ class Orog(DriverTimeInvariant, FileStager):
         """
         path = self._input_config_path
         yield self.taskname(str(path))
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield self.grid_file()
         if inputs := self.config.get("old_line1_items"):
             ordered_entries = [
@@ -60,7 +60,7 @@ class Orog(DriverTimeInvariant, FileStager):
         with writable(path) as f:
             print("\n".join(content), file=f)
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -81,7 +81,7 @@ class Orog(DriverTimeInvariant, FileStager):
         """
         path = self._runscript_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         envvars = {
             "KMP_AFFINITY": "disabled",

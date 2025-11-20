@@ -4,7 +4,7 @@ A driver for the CDEPS data models.
 
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.api.template import _render
 from uwtools.config.formats.nml import NMLConfig
@@ -21,7 +21,7 @@ class CDEPS(AssetsCycleBased):
 
     # Workflow tasks
 
-    @tasks
+    @collection
     def atm(self):
         """
         The data atmosphere configuration with all required content.
@@ -40,7 +40,7 @@ class CDEPS(AssetsCycleBased):
         fn = "datm_in"
         yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         self._model_namelist_file("atm_in", path)
 
@@ -52,12 +52,12 @@ class CDEPS(AssetsCycleBased):
         fn = "datm.streams"
         yield self.taskname(f"stream file {fn}")
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         template_file = self.config["atm_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("atm_streams", path, template_file)
 
-    @tasks
+    @collection
     def ocn(self):
         """
         The data ocean configuration with all required content.
@@ -76,7 +76,7 @@ class CDEPS(AssetsCycleBased):
         fn = "docn_in"
         yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         self._model_namelist_file("ocn_in", path)
 
@@ -88,7 +88,7 @@ class CDEPS(AssetsCycleBased):
         fn = "docn.streams"
         yield self.taskname(f"stream file {fn}")
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         template_file = self.config["ocn_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)

@@ -5,7 +5,7 @@ A driver for chgres_cube.
 from pathlib import Path
 from typing import Any
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverCycleLeadtimeBased
@@ -40,7 +40,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
         fn = "fort.41"
         yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         input_files = []
         namelist = self.config[STR.namelist]
         if base_file := namelist.get(STR.basefile):
@@ -77,7 +77,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
             schema=self.namelist_schema(),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
@@ -95,7 +95,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
         """
         path = self._runscript_path
         yield self.taskname(path.name)
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         yield None
         envvars = {
             "KMP_AFFINITY": "scatter",

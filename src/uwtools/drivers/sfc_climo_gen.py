@@ -5,7 +5,7 @@ A driver for sfc_climo_gen.
 import re
 from pathlib import Path
 
-from iotaa import asset, task, tasks
+from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import DriverTimeInvariant
@@ -29,7 +29,7 @@ class SfcClimoGen(DriverTimeInvariant):
         fn = "fort.41"
         yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
-        yield asset(path, path.is_file)
+        yield Asset(path, path.is_file)
         vals = self.config[STR.namelist][STR.updatevalues]["config"]
         input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
         input_paths += [Path(vals["mosaic_file_mdl"])]
@@ -42,7 +42,7 @@ class SfcClimoGen(DriverTimeInvariant):
             schema=self.namelist_schema(),
         )
 
-    @tasks
+    @collection
     def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
