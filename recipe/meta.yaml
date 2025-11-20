@@ -17,7 +17,7 @@ requirements:
     - setuptools
   run:
     - f90nml >=1.4,<1.5
-    - iotaa >=1.4,<1.5
+    - iotaa >=1.4.1,<1.5
     - jinja2 >=3.1,<3.2
     - jsonschema >=4.17,<4.26
     - lxml >=5.2,<6.1
