@@ -2,9 +2,8 @@
 make_solo_mosaic driver tests.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-import iotaa
 from pytest import fixture
 
 from uwtools.drivers.make_solo_mosaic import MakeSoloMosaic
@@ -54,8 +53,7 @@ def test_MakeSoloMosaic_output(driverobj):
     assert driverobj.output["path"] == driverobj.rundir / "foo.nc"
 
 
-def test_MakeSoloMosaic_provisioned_rundir(driverobj):
-    node = Mock(spec=iotaa.Node)
+def test_MakeSoloMosaic_provisioned_rundir(driverobj, node):
     with patch.object(driverobj, "runscript", return_value=node) as runscript:
         driverobj.provisioned_rundir()
         runscript.assert_called_once_with()
