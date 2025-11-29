@@ -1,8 +1,9 @@
 import logging
 import re
 from datetime import datetime, timezone
+from unittest.mock import Mock
 
-from iotaa import Asset, external
+from iotaa import Asset, Node, external
 from pytest import fixture
 
 from uwtools.logging import log
@@ -22,6 +23,11 @@ def logged(caplog):
         return any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
 
     return logged_
+
+
+@fixture
+def node():
+    return Mock(spec=Node)
 
 
 @fixture
