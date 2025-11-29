@@ -5,9 +5,10 @@ Ungrib driver tests.
 import re
 from datetime import timedelta
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import f90nml  # type: ignore[import-untyped]
+import iotaa
 from pytest import fixture, mark, raises
 
 from uwtools.drivers import ungrib
@@ -144,8 +145,9 @@ def test_Ungrib__run_via_local_execution(driverobj):
         for path in driverobj.output["paths"]:
             path.touch()
 
+    node = Mock(spec=iotaa.Node)
     with (
-        patch.object(driverobj, "provisioned_rundir") as provisioned_rundir,
+        patch.object(driverobj, "provisioned_rundir", return_value=node) as provisioned_rundir,
         patch.object(ungrib, "run_shell_cmd", side_effect=make_output) as run_shell_cmd,
     ):
         val = driverobj._run_via_local_execution()

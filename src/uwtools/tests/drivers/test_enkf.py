@@ -3,8 +3,9 @@ EnKF driver tests.
 """
 
 from pathlib import Path
-from unittest.mock import call, patch
+from unittest.mock import Mock, call, patch
 
+import iotaa
 import yaml
 from pytest import fixture, mark
 
@@ -62,7 +63,8 @@ def driverobj(config, cycle):
 
 
 def test_EnKF_background_files(driverobj, tmp_path):
-    with patch.object(enkf, "Linker") as linker:
+    node = Mock(spec=iotaa.Node)
+    with patch.object(enkf, "Linker", return_value=Mock(go=Mock(return_value=node))) as linker:
         driverobj.background_files()
     expected_calls = [
         call(config={"mem1": "/path/to/mem001.nc"}, target_dir=tmp_path),
