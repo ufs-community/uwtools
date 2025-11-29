@@ -441,11 +441,10 @@ def test_Driver_output_not_implemented(cls, config, utc):
 
 
 @mark.parametrize("batch", [True, False])
-def test_Driver_run(batch, driverobj):
+def test_Driver_run(batch, driverobj, node):
     driverobj._batch = batch
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
-    node = Mock(spec=iotaa.Node)
     with patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs:
         with patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle:
             driverobj.run()
@@ -489,11 +488,10 @@ def test_driver_show_output_fail(config, logged):
     assert logged("FAIL")
 
 
-def test_Driver__run_via_batch_submission(driverobj):
+def test_Driver__run_via_batch_submission(driverobj, node):
     runscript = driverobj._runscript_path
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
-    node = Mock(spec=iotaa.Node)
     with patch.object(driverobj, "provisioned_rundir", return_value=node) as prd:
         with patch.object(
             ConcreteDriverTimeInvariant, "_scheduler", new_callable=PropertyMock
@@ -505,8 +503,7 @@ def test_Driver__run_via_batch_submission(driverobj):
         prd.assert_called_once_with()
 
 
-def test_Driver__run_via_local_execution(driverobj):
-    node = Mock(spec=iotaa.Node)
+def test_Driver__run_via_local_execution(driverobj, node):
     with (
         patch.object(driverobj, "provisioned_rundir", return_value=node) as prd,
         patch.object(driver, "run_shell_cmd") as run_shell_cmd,
