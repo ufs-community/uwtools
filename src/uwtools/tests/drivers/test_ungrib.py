@@ -139,7 +139,7 @@ def test_Ungrib__gribfile(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib__run_via_local_execution(driverobj):
+def test_Ungrib__run_via_local_execution(driverobj, node):
     def make_output(*_args, **_kwargs):
         for path in driverobj.output["paths"]:
             path.touch()
