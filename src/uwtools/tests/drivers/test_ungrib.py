@@ -139,13 +139,13 @@ def test_Ungrib__gribfile(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib__run_via_local_execution(driverobj):
+def test_Ungrib__run_via_local_execution(driverobj, node):
     def make_output(*_args, **_kwargs):
         for path in driverobj.output["paths"]:
             path.touch()
 
     with (
-        patch.object(driverobj, "provisioned_rundir") as provisioned_rundir,
+        patch.object(driverobj, "provisioned_rundir", return_value=node) as provisioned_rundir,
         patch.object(ungrib, "run_shell_cmd", side_effect=make_output) as run_shell_cmd,
     ):
         val = driverobj._run_via_local_execution()

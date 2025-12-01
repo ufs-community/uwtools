@@ -53,8 +53,8 @@ def test_MakeSoloMosaic_output(driverobj):
     assert driverobj.output["path"] == driverobj.rundir / "foo.nc"
 
 
-def test_MakeSoloMosaic_provisioned_rundir(driverobj):
-    with patch.object(driverobj, "runscript") as runscript:
+def test_MakeSoloMosaic_provisioned_rundir(driverobj, node):
+    with patch.object(driverobj, "runscript", return_value=node) as runscript:
         driverobj.provisioned_rundir()
         runscript.assert_called_once_with()
 
