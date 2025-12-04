@@ -44,7 +44,6 @@ ignore = [
   "ANN401",  # any-type
   "B010",    # set-attr-with-constant
   "C408",    # unnecessary-collection-call
-  "C901",    # complex-structure
   "COM812",  # missing-trailing-comma
   "D100",    # undocumented-public-module
   "D101",    # undocumented-public-class
@@ -73,7 +72,6 @@ ignore = [
   "PTH207",  # glob
   "RUF015",  # unnecessary-iterable-allocation-for-first-element
   "S101",    # assert
-  "S103",    # bad-file-permissions
   "S506",    # unsafe-yaml-load
   "S602",    # subprocess-popen-with-shell-equals-true
   "S701",    # jinja2-autoescape-false
