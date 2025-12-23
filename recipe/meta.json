@@ -1,6 +1,6 @@
 {
-  "build": "py_2",
-  "buildnum": 2,
+  "build": "py_0",
+  "buildnum": 0,
   "name": "uwtools",
   "packages": {
     "dev": [
@@ -36,5 +36,5 @@
       "requests >=2.32,<2.33"
     ]
   },
-  "version": "2.12.0"
+  "version": "2.12.1"
 }
