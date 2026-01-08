@@ -69,7 +69,7 @@ def execute(
     if bad_task := task and task not in tasknames(class_):
         log.error("%s driver has no task '%s'", class_.__name__, task)
     if bad_task or task is None:
-        _list_available_tasks(class_)
+        _list_available_tasks(module, classname)
         return None
     args = dict(locals())
     accepted = set(getfullargspec(class_).args)
@@ -165,10 +165,11 @@ def _get_driver_module_implicit(module: str) -> ModuleType | None:
         return None
 
 
-def _list_available_tasks(class_: type) -> None:
+def _list_available_tasks(module: Path | str, classname: str) -> None:
     log.error("Available tasks:")
-    for taskname in tasknames(class_):
-        log.error(f"  {taskname}")
+    for taskname, description in tasks(module, classname).items():
+        log.error("  %s" % taskname)
+        log.error("    %s" % description or "<no description available>")
 
 
 __all__ = ["execute", "tasks"]
