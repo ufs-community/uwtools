@@ -11,6 +11,8 @@ from pathlib import Path
 from traceback import format_exc
 from typing import TYPE_CHECKING
 
+from iotaa import tasknames
+
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.logging import log
 from uwtools.strings import STR
@@ -28,7 +30,7 @@ if TYPE_CHECKING:
 def execute(
     module: Path | str,
     classname: str,
-    task: str,
+    task: str | None = None,
     schema_file: str | None = None,
     config: Path | str | None = None,
     cycle: datetime | None = None,
@@ -48,7 +50,7 @@ def execute(
 
     :param module: Path to driver module or name of module on sys.path.
     :param classname: Name of driver class to instantiate.
-    :param task: Name of driver task to execute.
+    :param task: Name of driver task to execute. If omitted, a list of available tasks is displayed.
     :param schema_file: The JSON Schema file to use for validation.
     :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
@@ -60,10 +62,21 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: The task-graph Node yielded by the task, if it completes without raising an exception.
     """
+    def list_available_tasks():
+        log.error("Available tasks:")
+        for taskname in tasknames(class_):
+            log.error(f"  {taskname}")
+        return None
+        
     class_, module_path = _get_driver_class(module, classname)
     if not class_:
         return None
     assert module_path is not None
+    if not task:
+        return list_available_tasks()
+    if task not in tasknames(class_):
+        log.error("%s driver has no such task '%s'", class_.__name__, task)
+        return list_available_tasks()
     args = dict(locals())
     accepted = set(getfullargspec(class_).args)
     non_optional = {STR.cycle, STR.leadtime}

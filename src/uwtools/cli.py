@@ -319,8 +319,8 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_module(required)
     _add_arg_classname(required)
-    _add_arg_task(required)
     optional = _basic_setup(parser)
+    _add_arg_task(optional, required=False)
     _add_arg_config_file(optional)
     _add_arg_schema_file(optional)
     _add_arg_cycle(optional)
@@ -1017,11 +1017,11 @@ def _add_arg_target_dir(group: Group, required: bool = False, helpmsg: str | Non
     )
 
 
-def _add_arg_task(group: Group) -> None:
+def _add_arg_task(group: Group, required: bool = True) -> None:
     group.add_argument(
         _switch(STR.task),
         help="Task to execute",
-        required=True,
+        required=required,
         type=str,
     )
 
