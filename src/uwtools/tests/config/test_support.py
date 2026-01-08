@@ -182,6 +182,17 @@ class TestUWYAMLConvert:
         assert ts.converted == [1, 2, 3]
         self.comp(ts, "!list '[1,2,3,]'")
 
+    def test_UWYAMLConvert__timedelta_no(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!timedelta", value="null"))
+        with raises(ValueError, match="could not convert string to float"):
+            assert ts.converted
+
+    @mark.parametrize("value", ["49", "49:00", "49:00:00"])
+    def test_UWYAMLConvert__timedelta_ok(self, loader, value):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!timedelta", value=value))
+        assert ts.converted == timedelta(hours=49)
+        self.comp(ts, f"!timedelta '{value}'")
+
     def test_UWYAMLConvert_tagged_string(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="{{ foo }}"))
         assert ts.tagged_string == "!list '{{ foo }}'"
