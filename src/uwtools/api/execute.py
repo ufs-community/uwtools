@@ -62,21 +62,15 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: The task-graph Node yielded by the task, if it completes without raising an exception.
     """
-    def list_available_tasks():
-        log.error("Available tasks:")
-        for taskname in tasknames(class_):
-            log.error(f"  {taskname}")
-        return None
-        
     class_, module_path = _get_driver_class(module, classname)
     if not class_:
         return None
     assert module_path is not None
-    if not task:
-        return list_available_tasks()
-    if task not in tasknames(class_):
+    if notask := task and task not in tasknames(class_):
         log.error("%s driver has no such task '%s'", class_.__name__, task)
-        return list_available_tasks()
+    if notask or task is None:
+        _list_available_tasks(class_)
+        return None
     args = dict(locals())
     accepted = set(getfullargspec(class_).args)
     non_optional = {STR.cycle, STR.leadtime}
@@ -169,6 +163,12 @@ def _get_driver_module_implicit(module: str) -> ModuleType | None:
         return import_module(module)
     except Exception:  # noqa: BLE001
         return None
+
+
+def _list_available_tasks(class_: type) -> None:
+    log.error("Available tasks:")
+    for taskname in tasknames(class_):
+        log.error(f"  {taskname}")
 
 
 __all__ = ["execute", "tasks"]
