@@ -51,6 +51,16 @@ def add_yaml_representers() -> None:
     """
     Add representers to the YAML dumper for custom types.
     """
+
+    def timedelta2str(dumper: yaml.dumper.Dumper, data: timedelta) -> yaml.ScalarNode:
+        seconds = int(data.total_seconds())
+        hours = seconds // 3600
+        seconds %= 3600
+        minutes = seconds // 60
+        seconds %= 60
+        s = f"{hours}:{minutes:02d}:{seconds:02d}"
+        return dumper.represent_scalar("!timedelta", s)
+
     yaml.add_representer(Namelist, _represent_namelist)
     yaml.add_representer(OrderedDict, _represent_ordereddict)
     yaml.add_representer(
@@ -59,10 +69,7 @@ def add_yaml_representers() -> None:
             "tag:yaml.org,2002:timestamp", to_iso8601(data)
         ),
     )
-    yaml.add_representer(
-        timedelta,
-        lambda dumper, data: dumper.represent_scalar("!timedelta", str(data)),
-    )
+    yaml.add_representer(timedelta, timedelta2str)
     for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
         yaml.add_representer(tag_class, tag_class.represent)
 
