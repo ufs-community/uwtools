@@ -66,9 +66,9 @@ def execute(
     if not class_:
         return None
     assert module_path is not None
-    if notask := task and task not in tasknames(class_):
-        log.error("%s driver has no such task '%s'", class_.__name__, task)
-    if notask or task is None:
+    if bad_task := task and task not in tasknames(class_):
+        log.error("%s driver has no task '%s'", class_.__name__, task)
+    if bad_task or task is None:
         _list_available_tasks(class_)
         return None
     args = dict(locals())
