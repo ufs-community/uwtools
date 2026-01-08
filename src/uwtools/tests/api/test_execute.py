@@ -67,12 +67,15 @@ def test_execute_pass(graph, kwargs, logged, remove, tmp_path, utc):
     with (
         patch.object(execute, "_get_driver_class") as gdc,
         patch.object(execute, "getfullargspec") as gfa,
+        patch.object(execute, "tasknames", return_value=["forty_two"]),
     ):
         node = Mock(graph=graph_code) if graph else Mock()
         node.ref = 42
         driverobj = Mock()
         driverobj.forty_two.return_value = node
-        gdc.return_value = (Mock(return_value=driverobj), kwargs["module"])
+        class_ = Mock(return_value=driverobj)
+        setattr(class_, "__name__", "test")
+        gdc.return_value = (class_, kwargs["module"])
         gfa().args = {"batch", "cycle"}
         val = execute.execute(**kwargs)
         assert val
