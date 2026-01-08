@@ -45,6 +45,12 @@ def test_execute__fail_bad_args(key, kwargs, logged, utc, val):
     assert logged(f"TestDriver does not accept argument '{key}'")
 
 
+def test_execute__fail_bad_task(kwargs, logged, utc):
+    kwargs.update({"cycle": utc(), "task": "foo"})
+    assert execute.execute(**kwargs) is None
+    assert logged("TestDriver driver has no task 'foo'")
+
+
 def test_execute__fail_cannot_load_driver_class(kwargs):
     kwargs["module"] = "bad_module_name"
     assert execute.execute(**kwargs) is None
