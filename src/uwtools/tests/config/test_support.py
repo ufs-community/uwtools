@@ -4,6 +4,7 @@ Tests for uwtools.config.jinja2 module.
 
 from collections import OrderedDict
 from datetime import datetime, timedelta
+from textwrap import dedent
 
 import f90nml  # type: ignore[import-untyped]
 import yaml
@@ -52,6 +53,22 @@ def test_config_support_add_yaml_representers__represent_ordereddict():
     ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
     expected = "{example: {key: value}}"
     assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected
+
+
+def test_config_support_add_yaml_representers__represent_timedelta(tmp_path):
+    support.add_yaml_representers()
+    s = """
+    start: !datetime 2025-01-01T00
+    stop: !datetime 2025-01-03T03
+    raw: !timedelta '{{ ((stop - start) * 0.8).total_seconds() / 3600 }}'
+    """
+    path = tmp_path / "config.yaml"
+    path.write_text(dedent(s))
+    config = YAMLConfig(config=path)
+    config.dereference()
+    assert config["raw"] == timedelta(days=1, seconds=60480)
+    config.dump(path)
+    assert path.read_text().strip().split("\n")[-1] == "raw: !timedelta '40:48:00'"
 
 
 @mark.parametrize(
@@ -181,6 +198,17 @@ class TestUWYAMLConvert:
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="[1,2,3,]"))
         assert ts.converted == [1, 2, 3]
         self.comp(ts, "!list '[1,2,3,]'")
+
+    def test_UWYAMLConvert__timedelta_no(self, loader):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!timedelta", value="null"))
+        with raises(ValueError, match="could not convert string to float"):
+            assert ts.converted
+
+    @mark.parametrize("value", ["49", "49:00", "49:00:00"])
+    def test_UWYAMLConvert__timedelta_ok(self, loader, value):
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!timedelta", value=value))
+        assert ts.converted == timedelta(hours=49)
+        self.comp(ts, f"!timedelta '{value}'")
 
     def test_UWYAMLConvert_tagged_string(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!list", value="{{ foo }}"))
