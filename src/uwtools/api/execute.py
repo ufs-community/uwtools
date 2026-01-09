@@ -169,7 +169,7 @@ def _list_available_tasks(module: Path | str, classname: str) -> None:
     log.error("Available tasks:")
     for taskname, description in tasks(module, classname).items():
         log.error("  %s" % taskname)
-        log.error("    %s" % description or "<no description available>")
+        log.error("    %s" % (description or "No description available."))
 
 
 __all__ = ["execute", "tasks"]
