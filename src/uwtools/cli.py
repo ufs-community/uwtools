@@ -466,6 +466,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
         leadtime=args[STR.leadtime],
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
+        threads=args[STR.threads],
         stdin_ok=True,
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
@@ -485,6 +486,7 @@ def _dispatch_fs_hardlink(args: Args) -> bool:
         leadtime=args[STR.leadtime],
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
+        threads=args[STR.threads],
         stdin_ok=True,
         fallback=args[STR.fallback],
     )
@@ -504,6 +506,7 @@ def _dispatch_fs_link(args: Args) -> bool:
         leadtime=args[STR.leadtime],
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
+        threads=args[STR.threads],
         stdin_ok=True,
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
@@ -522,6 +525,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
         leadtime=args[STR.leadtime],
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
+        threads=args[STR.threads],
         stdin_ok=True,
     )
     return _dispatch_fs_report(report=report if args[STR.report] else None)
