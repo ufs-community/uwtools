@@ -387,6 +387,7 @@ def _add_subparser_fs_common(parser: Parser) -> tuple[ActionChecks, Group]:
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
+    _add_arg_threads(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
     _add_arg_report(optional)
     return _add_args_verbosity(optional), optional
@@ -1023,6 +1024,19 @@ def _add_arg_task(group: Group, required: bool = True) -> None:
         help="Task to execute",
         required=required,
         type=str,
+    )
+
+
+def _add_arg_threads(group: Group) -> None:
+    default = 1
+    group.add_argument(
+        _switch(STR.threads),
+        "-n",
+        default=default,
+        help="Number of concurrent threads to use (default: %s)" % default,
+        metavar="NUM",
+        required=False,
+        type=int,
     )
 
 
