@@ -57,6 +57,7 @@ def args_dispatch_fs(utc):
         "leadtime": timedelta(hours=6),
         "key_path": ["a", "b"],
         "dry_run": False,
+        "threads": 3,
         "report": True,
         "stdin_ok": True,
     }
@@ -426,6 +427,7 @@ def test_cli__dispatch_fs_action(action, args_dispatch_fs):
         "leadtime": args_actual["leadtime"],
         "key_path": args_actual["key_path"],
         "dry_run": args_actual["dry_run"],
+        "threads": args_actual["threads"],
         "stdin_ok": args_actual["stdin_ok"],
     }
     if action == "hardlink":
