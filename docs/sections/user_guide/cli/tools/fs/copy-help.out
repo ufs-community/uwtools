@@ -1,6 +1,7 @@
 usage: uw fs copy [-h] [--version] [--config-file PATH] [--target-dir PATH]
                   [--cycle CYCLE] [--leadtime LEADTIME] [--dry-run]
-                  [--key-path KEY[.KEY...]] [--report] [--quiet] [--verbose]
+                  [--threads NUM] [--key-path KEY[.KEY...]] [--report]
+                  [--quiet] [--verbose]
 
 Copy files
 
@@ -19,6 +20,8 @@ Optional arguments:
       The leadtime as hours[:minutes[:seconds]]
   --dry-run
       Only log info, making no changes
+  --threads NUM, -n NUM
+      Number of concurrent threads to use (default: 1)
   --key-path KEY[.KEY...]
       Dot-separated path of keys to config block to use
   --report
