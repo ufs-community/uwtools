@@ -36,7 +36,7 @@ def copy(
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not copy files.
-    :param threads: Concurrent threads to use.
+    :param threads: Number of concurrent threads to use.
     :param stdin_ok: OK to read from ``stdin``?
     :return: A report on files copied / not copied.
     """
@@ -78,7 +78,7 @@ def link(
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
-    :param threads: Concurrent threads to use.
+    :param threads: Number of concurrent threads to use.
     :param stdin_ok: OK to read from ``stdin``?
     :param fallback: Alternative if hardlink fails (choices: ``copy``, ``symlink``).
     :return: A report on files linked / not linked.
@@ -116,7 +116,7 @@ def makedirs(
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not create directories.
-    :param threads: Concurrent threads to use.
+    :param threads: Number of concurrent threads to use.
     :param stdin_ok: OK to read from ``stdin``?
     :return: A report on directories created / not created.
     """
