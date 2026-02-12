@@ -24,6 +24,7 @@ def copy(
     leadtime: dt.timedelta | None = None,
     key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
+    threads: int = 1,
     stdin_ok: bool = False,
 ) -> dict[str, list[str]]:
     """
@@ -35,6 +36,7 @@ def copy(
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not copy files.
+    :param threads: Number of concurrent threads to use.
     :param stdin_ok: OK to read from ``stdin``?
     :return: A report on files copied / not copied.
     """
@@ -45,7 +47,7 @@ def copy(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, stager.go(dry_run=dry_run).asset)
+    assets = cast(list, stager.go(dry_run=dry_run, threads=threads).asset)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
@@ -58,6 +60,7 @@ def link(
     leadtime: dt.timedelta | None = None,
     key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
+    threads: int = 1,
     stdin_ok: bool = False,
     fallback: str | None = None,
 ) -> dict[str, list[str]]:
@@ -75,6 +78,7 @@ def link(
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not link files.
+    :param threads: Number of concurrent threads to use.
     :param stdin_ok: OK to read from ``stdin``?
     :param fallback: Alternative if hardlink fails (choices: ``copy``, ``symlink``).
     :return: A report on files linked / not linked.
@@ -88,7 +92,7 @@ def link(
         key_path=key_path,
         fallback=fallback,
     )
-    assets = cast(list, stager.go(dry_run=dry_run).asset)
+    assets = cast(list, stager.go(dry_run=dry_run, threads=threads).asset)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
@@ -100,6 +104,7 @@ def makedirs(
     leadtime: dt.timedelta | None = None,
     key_path: list[YAMLKey] | None = None,
     dry_run: bool = False,
+    threads: int = 1,
     stdin_ok: bool = False,
 ) -> dict[str, list[str]]:
     """
@@ -111,6 +116,7 @@ def makedirs(
     :param leadtime: A timedelta object to make available for use in the config.
     :param key_path: Path of keys to config block to use.
     :param dry_run: Do not create directories.
+    :param threads: Number of concurrent threads to use.
     :param stdin_ok: OK to read from ``stdin``?
     :return: A report on directories created / not created.
     """
@@ -121,7 +127,7 @@ def makedirs(
         leadtime=leadtime,
         key_path=key_path,
     )
-    assets = cast(list, stager.go(dry_run=dry_run).asset)
+    assets = cast(list, stager.go(dry_run=dry_run, threads=threads).asset)
     ready = lambda state: [str(asset.ref) for asset in assets if asset.ready() is state]
     return {STR.ready: ready(True), STR.notready: ready(False)}
 
