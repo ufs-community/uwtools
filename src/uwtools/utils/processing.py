@@ -33,7 +33,7 @@ def run_shell_cmd(
     :return: A result object providing combined stder/stdout output and success values.
     """
     pre = f"{taskname}: " if taskname else ""
-    msg = f"%sRunning"
+    msg = "%sRunning"
     if cwd:
         msg += f" in {cwd}"
     if env:
