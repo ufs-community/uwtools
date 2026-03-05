@@ -15,7 +15,8 @@ def test_utils_processing_run_shell_cmd__failure(logged):
     success, output = processing.run_shell_cmd(cmd=cmd)
     assert "division by zero" in output
     assert success is False
-    assert logged("Running: %s" % cmd)
+    assert logged("Running:")
+    assert logged("  %s" % cmd)
     assert logged("Failed with status: 2")
     assert logged("Output:")
     assert logged("  expr: division by zero")
@@ -34,6 +35,7 @@ def test_utils_processing_run_shell_cmd__success(caplog, logged, log_output, qui
     if quiet:
         assert not caplog.messages
     elif log_output:
-        assert logged(f"Running: {cmd} in {tmp_path} with environment variables FOO=bar")
+        assert logged("Running in %s with environment variables FOO=bar:" % tmp_path)
+        assert logged("  %s" % cmd)
         assert logged("Output:")
         assert logged("  hello bar")
