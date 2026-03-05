@@ -33,14 +33,16 @@ def run_shell_cmd(
     :return: A result object providing combined stder/stdout output and success values.
     """
     pre = f"{taskname}: " if taskname else ""
-    msg = f"%sRunning: {cmd}"
+    msg = "%sRunning"
     if cwd:
         msg += f" in {cwd}"
     if env:
         kvpairs = " ".join(f"{k}={v}" for k, v in env.items())
         msg += f" with environment variables {kvpairs}"
+    msg += ":"
     logfunc = log.debug if quiet else log.info
     logfunc(msg, pre)
+    logfunc("%s  %s", pre, cmd)
     try:
         output = check_output(
             cmd, cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True

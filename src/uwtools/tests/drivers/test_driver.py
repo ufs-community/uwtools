@@ -488,7 +488,13 @@ def test_driver_show_output_fail(config, logged):
     assert logged("FAIL")
 
 
-def test_Driver__run_via_batch_submission(driverobj, node):
+@mark.parametrize("success", [True, False])
+def test_Driver__run_via_batch_submission(driverobj, node, success: bool):
+    def f(runscript: Path, submit_file: Path) -> bool:
+        assert runscript
+        submit_file.touch()
+        return success
+
     runscript = driverobj._runscript_path
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
@@ -496,10 +502,18 @@ def test_Driver__run_via_batch_submission(driverobj, node):
         with patch.object(
             ConcreteDriverTimeInvariant, "_scheduler", new_callable=PropertyMock
         ) as scheduler:
+            submit_job = scheduler().submit_job
+            submit_job.side_effect = f
             driverobj._run_via_batch_submission()
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
+            submit_file = Path(f"{runscript}.submit")
+            submit_job.assert_called_once_with(runscript=runscript, submit_file=submit_file)
+            error_file = submit_file.with_suffix(".submit.error")
+            if success:
+                assert submit_file.exists()
+                assert not error_file.exists()
+            else:
+                assert not submit_file.exists()
+                assert error_file.exists()
         prd.assert_called_once_with()
 
 
