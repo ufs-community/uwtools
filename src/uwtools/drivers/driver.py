@@ -409,12 +409,13 @@ class Driver(Assets):
         A run executed via the batch system.
         """
         yield self.taskname("run via batch submission")
-        path = Path("%s.submit" % self._runscript_path)
+        suffix = ".submit"
+        path = Path("%s%s" % (self._runscript_path, suffix))
         yield Asset(path, path.is_file)
         yield self.provisioned_rundir()
         success = self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
         if not success:
-            path.unlink()
+            path.rename(path.with_suffix("%s.error" % suffix))
 
     @task
     def _run_via_local_execution(self):
