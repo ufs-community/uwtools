@@ -42,7 +42,7 @@ def run_shell_cmd(
     msg += ":"
     logfunc = log.debug if quiet else log.info
     logfunc(msg, pre)
-    logfunc(f"  {cmd}")
+    logfunc("%s  %s", pre, cmd)
     try:
         output = check_output(
             cmd, cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True
