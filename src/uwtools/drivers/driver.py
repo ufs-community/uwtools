@@ -412,7 +412,9 @@ class Driver(Assets):
         path = Path("%s.submit" % self._runscript_path)
         yield Asset(path, path.is_file)
         yield self.provisioned_rundir()
-        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+        success = self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+        if not success:
+            path.unlink()
 
     @task
     def _run_via_local_execution(self):
