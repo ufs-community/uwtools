@@ -119,9 +119,11 @@ def test_JobScheduler_submit_job(schedulerobj, supply_submit_file, tmp_path):
     with patch.object(scheduler, "run_shell_cmd") as run_shell_cmd:
         run_shell_cmd.return_value = (True, None)
         assert schedulerobj.submit_job(runscript=runscript, submit_file=submit_file) is True
-        cmd = f"sub {runscript}"
         if supply_submit_file:
-            cmd += f" 2>&1 | tee {submit_file}"
+            assert submit_file
+            cmd = f"set -o pipefail && sub {runscript.name} 2>&1 | tee {submit_file.name}"
+        else:
+            cmd = f"sub {runscript.name}"
         run_shell_cmd.assert_called_once_with(cmd=cmd, cwd=str(tmp_path))
 
 
