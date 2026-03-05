@@ -87,9 +87,9 @@ class JobScheduler(ABC):
         :param submit_file: Path to file to write output of submit command to.
         :return: Did the run exit with a success status?
         """
-        cmd = f"{self._submit_cmd} {runscript}"
+        cmd = f"{self._submit_cmd} {runscript.name}"
         if submit_file:
-            cmd += " 2>&1 | tee %s" % submit_file
+            cmd = "set -o pipefail && %s 2>&1 | tee %s" % (cmd, submit_file.name)
         success, _ = run_shell_cmd(cmd=cmd, cwd=f"{runscript.parent}")
         return success
 
