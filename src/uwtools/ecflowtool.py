@@ -30,6 +30,7 @@ class _ecFlowDef:
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
+        self.refs = {}
         self._config = cfgobj.data
         self._add_workflow(self._config)
 
@@ -66,12 +67,18 @@ class _ecFlowDef:
                     self._add_repeater("suite", d, subconfig, name)
 
     def _add_extern(
-        self, parent: NodeContainer, config: dict, name: str, refs: dict | None = None
+        self,
+        parent: NodeContainer,
+        config: dict,
+        name: str,
     ) -> None:
         pass
 
     def _add_family(
-        self, parent: NodeContainer, config: dict, name: str, refs: dict | None = None
+        self,
+        parent: NodeContainer,
+        config: dict,
+        name: str,
     ) -> None:
         """
         Add a family to a suite.
@@ -79,30 +86,34 @@ class _ecFlowDef:
         :param parent: The parent object to add this suite to.
         :param config: Configuration data for these components.
         :param name: Name of this suite.
-        :param refs: Optional references used in repeated ContainerNodes.
         """
-        refs = {} if refs is None else refs
         fam = Family(name)
         parent.add_family(fam)
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
                 case "family":
-                    self._add_family(fam, subconfig, name, refs)
+                    self._add_family(fam, subconfig, name)
                 case "families":
-                    self._add_repeater("family", fam, subconfig, name, refs)
+                    self._add_repeater("family", fam, subconfig, name)
                 case "task":
-                    self._add_task(fam, subconfig, name, refs)
+                    self._add_task(fam, subconfig, name)
                 case "tasks":
-                    self._add_repeater("task", fam, subconfig, name, refs)
+                    self._add_repeater("task", fam, subconfig, name)
 
     def _add_vars(
-        self, parent: NodeContainer, config: dict, name: str, refs: dict | None = None
+        self,
+        parent: NodeContainer,
+        config: dict,
+        name: str,
     ) -> None:
         pass
 
     def _add_suite(
-        self, parent: NodeContainer, config: dict, name: str, refs: dict | None = None
+        self,
+        parent: NodeContainer,
+        config: dict,
+        name: str,
     ) -> None:
         """
         Add a suite to the suite definition.
@@ -110,7 +121,6 @@ class _ecFlowDef:
         :param parent: The parent object to add this suite to.
         :param config: Configuration data for these components.
         :param name: Name of this suite.
-        :param refs: Optional references used in repeated suites.
         """
         suite = Suite(name)
         parent.add_suite(suite)
@@ -122,14 +132,18 @@ class _ecFlowDef:
                 case "family":
                     self._add_family(suite, subconfig, name)
                 case "families":
-                    self._add_repeater("family", suite, subconfig, name, refs)
+                    self._add_repeater("family", suite, subconfig, name)
                 case "task":
-                    self._add_task(suite, subconfig, name, refs)
+                    self._add_task(suite, subconfig, name)
                 case "tasks":
-                    self._add_repeater("task", suite, subconfig, name, refs)
+                    self._add_repeater("task", suite, subconfig, name)
 
     def _add_repeater(
-            self, nodetype: str, parent: NodeContainer, config: dict, name: str, refs: dict | None = None
+        self,
+        nodetype: str,
+        parent: NodeContainer,
+        config: dict,
+        name: str,
     ) -> None:
         """
         Add a set of suites to the suite definition.
@@ -140,8 +154,6 @@ class _ecFlowDef:
         """
         repeat = config["repeat"]
         primary_variable = list(repeat.keys())[0]
-        if refs is None:
-            refs = {}
         # Check to make sure all lists are the same length.
         try:
             for _i in zip(*repeat.values(), strict=True):
@@ -150,29 +162,15 @@ class _ecFlowDef:
             log.error("All repeat variables under %s must be the same length" % (parent.name()))
             raise
 
-        # Build up the items list
-        items = [
-            (name.replace(f"#{primary_variable}#", str(value)), {primary_variable: value})
-            for value in repeat[primary_variable]
-        ]
-        other_variables = {k: v for k, v in repeat.items() if k != primary_variable}
-
-        # Fill in any references from subsequent variables.
-        for var, values in other_variables.items():
-            for i, value in enumerate(values):
-                items[i] = [
-                    items[i][0].replace(f"#{var}#", value),
-                    items[i][1].update({var: value}),
-                ]
-
-
-        for item, local_refs in items:
-            refs.update(local_refs)
+        # Build up the new blocks in the suite definition
+        for i in range(len(repeat[primary_variable])):
+            self.refs.update({k: v[i] for k, v in repeat.items()})
+            new_block = YAMLConfig({name: config}).dereference(context={"ec": self.refs})
+            new_name = list(new_block.keys())[0]
             args = {
                 "parent": parent,
-                "config": config,
-                "name": item,
-                "refs": refs,
+                "config": new_block[new_name],
+                "name": new_name,
             }
             match nodetype:
                 case "suite":
@@ -183,7 +181,10 @@ class _ecFlowDef:
                     self._add_task(**args)
 
     def _add_task(
-        self, parent: NodeContainer, config: dict, name: str, refs: dict | None = None
+        self,
+        parent: NodeContainer,
+        config: dict,
+        name: str,
     ) -> None:
         """
         Add a task to a family.
@@ -191,9 +192,7 @@ class _ecFlowDef:
         :param parent: The parent object to add this task to.
         :param config: Configuration data for these components.
         :param name: Name of this task.
-        :param refs: Optional references used in repeated ContainerNodes.
         """
-        refs = {} if refs is None else refs
         task = Task(name)
         parent.add_task(task)
         for key, subconfig in config.items():
@@ -208,8 +207,7 @@ class _ecFlowDef:
                 case "limit":
                     pass
                 case "vars":
-                    pass
-
+                    task.add_variable(subconfig)
 
     def _tag_name(self, key: str) -> tuple[str, str]:
         """
