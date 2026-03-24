@@ -524,7 +524,7 @@ def test_Driver__run_via_local_execution(driverobj, node):
     ):
         driverobj._run_via_local_execution()
         run_shell_cmd.assert_called_once_with(
-            cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+            cmd="./{x} >{x}.out 2>&1".format(x=driverobj._runscript_path.name),
             cwd=driverobj.rundir,
             log_output=True,
         )
