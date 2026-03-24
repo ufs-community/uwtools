@@ -426,7 +426,7 @@ class Driver(Assets):
         path = self.rundir / self._runscript_done_file
         yield Asset(path, path.is_file)
         yield self.provisioned_rundir()
-        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path.name)
+        cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path.name)
         run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Public methods
