@@ -1,26 +1,34 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from pathlib import Path
+from textwrap import dedent
 
 from ecflow import Defs, Family, Suite, Task
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.tools import walk_key_path
 from uwtools.logging import log
+from uwtools.scheduler import JobScheduler
+from uwtools.strings import STR
 
 if TYPE_CHECKING:
     from ecflow import NodeContainer
     from libpath import Path
 
+class _ecConstant:
+    def __init__(self, value):
+        self.val = value
 
-@dataclass(frozen=True)
-class STR:
-    """
-    A lookup map for ecFlow-related strings.
-    """
+    def __getattr__(self, name):
+        def method(*args, **kwargs):
+            return self.val
+        return method
 
-    workflow: str = "workflow"
-
+    def __deepcopy__(self, memo):
+        return self
 
 class _ecFlowDef:
     """
@@ -29,10 +37,13 @@ class _ecFlowDef:
 
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
-        cfgobj.dereference()
+        cfgobj = cfgobj.dereference(context={
+            "cycle": _ecConstant("%CYCLE%"),
+            "timevars": {"fff": "%FHR%"},
+            })
         self.refs = {}
         self._config = cfgobj.data
-        self._add_workflow(self._config)
+        self._add_workflow(self._config.get(STR.ecflow, self._config))
 
     def __str__(self):
         return self.d.__str__()
@@ -43,7 +54,7 @@ class _ecFlowDef:
 
         :param config: Configuration data for this object.
         """
-        config, self.d = config[STR.workflow], Defs()
+        self.d = Defs()
         self._add_workflow_components(self.d, config)
 
     def _add_workflow_components(self, d: Defs, config: dict) -> None:
@@ -164,6 +175,8 @@ class _ecFlowDef:
 
         # Build up the new blocks in the suite definition
         for i in range(len(repeat[primary_variable])):
+            # This is not going to work. Need to pass refs down for each repeated item to get the
+            # right value.
             self.refs.update({k: v[i] for k, v in repeat.items()})
             new_block = YAMLConfig({name: config}).dereference(context={"ec": self.refs})
             new_name = list(new_block.keys())[0]
@@ -208,6 +221,103 @@ class _ecFlowDef:
                     pass
                 case "vars":
                     task.add_variable(subconfig)
+                case "key-path":
+                    self._create_ecf_script(task, subconfig)
+
+    def _create_ecf_script(self, task: Task, key_path: str) -> None:
+        """
+        Write the ecf script for the task to disk.
+        """
+        parent, subsection = key_path.rsplit(".", 1)
+        ecf_config, _ = walk_key_path(self._config, parent.split("."))
+        scheduler = self._scheduler(ecf_config, subsection)
+
+        execution = ecf_config[subsection][STR.execution]
+        cmd = execution.get("jobcmd")
+        es = self._ecflowscript(
+            envcmds=execution.get("envcmds", []),
+            execution=[cmd],
+            scheduler=scheduler,
+            manual=ecf_config[subsection].get("manual", f"Script to run {subsection}"),
+        )
+        # Placeholders until the output path for scripts and workflow defs are resolved.
+        path = Path(".", Path(task.get_abs_node_path()).parent, f"{task.name().split('_')[-1]}.ecf").resolve()
+        print(f"Will write to {path}")
+        print(es)
+    
+    def _ecflowscript(
+                    self,
+        execution: list[str],
+        manual: str,
+        envcmds: list[str] | None = None,
+        envvars: dict[str, str] | None = None,
+        scheduler: JobScheduler | None = None,
+    ) -> str:
+        """
+        Return a driver ecFlow script.
+
+        :param execution: Statements to execute.
+        :param envcmds: Shell commands to set up runtime environment.
+        :param envvars: Environment variables to set in runtime environment.
+        :param scheduler: A job-scheduler object.
+        """
+        template = """
+        {directives}
+
+        model=%MODEL%
+
+        %include <head.h>
+        %include <envir-p1.h>
+
+        {envcmds}
+
+        {envvars}
+
+        {execution}
+        if [[ $? -ne 0 ]]; then
+           ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
+           ecflow_client --abort
+           exit 1
+        fi
+
+        %include <tail.h>
+
+        %manual
+        {manual}
+        %end
+        """
+        directives = scheduler.directives if scheduler else ""
+        initcmds = scheduler.initcmds if scheduler else []
+        rs = dedent(template).format(
+            directives="\n".join(directives),
+            envcmds="\n".join(envcmds or []),
+            envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
+            execution="\n".join([*initcmds, *execution]),
+            manual=manual,
+            ECF_NAME="ECF_NAME",
+        )
+        return re.sub(r"\n\n\n+", "\n\n", rs.strip())
+
+    def _scheduler(self, config: dict, subsection: str) -> JobScheduler:
+        """
+        Use the execution and platform blocks to build a JobScheduler object.
+        """
+        execution = config[subsection][STR.execution]
+        if not (platform := config.get(STR.platform)):
+            msg = f"Required '{STR.platform}' block missing in config."
+            raise UWConfigError(msg)
+        threads = execution.get(STR.threads)
+        rundir = config[subsection][STR.rundir]
+        resources = {
+            STR.account: platform[STR.account],
+            STR.rundir: rundir,
+            STR.scheduler: platform[STR.scheduler],
+            STR.stdout: "%s.out" % Path(rundir, subsection),
+            **({STR.threads: threads} if threads else {}),
+            **execution.get(STR.batchargs, {}),
+                }
+        return JobScheduler.get_scheduler(resources)
+
 
     def _tag_name(self, key: str) -> tuple[str, str]:
         """
