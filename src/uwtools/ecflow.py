@@ -1,46 +1,50 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
 from pathlib import Path
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 from ecflow import Defs, Family, Suite, Task
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 
 if TYPE_CHECKING:
     from ecflow import NodeContainer
-    from libpath import Path
 
-class _ecConstant:
-    def __init__(self, value):
+
+class _ECConstant:
+    def __init__(self, value: str):
         self.val = value
 
-    def __getattr__(self, name):
-        def method(*args, **kwargs):
+    def __getattr__(self, name: str):
+        def method(*args, **kwargs):  # noqa: ARG001
             return self.val
+
         return method
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: str):
         return self
 
-class _ecFlowDef:
+
+class _ECFlowDef:
     """
     Generate an ecFlow definition file from a YAML config.
     """
 
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
-        cfgobj = cfgobj.dereference(context={
-            "cycle": _ecConstant("%CYCLE%"),
-            "timevars": {"fff": "%FHR%"},
-            })
+        cfgobj = cfgobj.dereference(
+            context={
+                "cycle": _ECConstant("%CYCLE%"),
+                "timevars": {"fff": "%FHR%"},
+            }
+        )
         self.refs = {}
         self._config = cfgobj.data
         self._add_workflow(self._config.get(STR.ecflow, self._config))
@@ -241,12 +245,14 @@ class _ecFlowDef:
             manual=ecf_config[subsection].get("manual", f"Script to run {subsection}"),
         )
         # Placeholders until the output path for scripts and workflow defs are resolved.
-        path = Path(".", Path(task.get_abs_node_path()).parent, f"{task.name().split('_')[-1]}.ecf").resolve()
+        path = Path(
+            ".", Path(task.get_abs_node_path()).parent, f"{task.name().split('_')[-1]}.ecf"
+        ).resolve()
         print(f"Will write to {path}")
         print(es)
-    
+
     def _ecflowscript(
-                    self,
+        self,
         execution: list[str],
         manual: str,
         envcmds: list[str] | None = None,
@@ -315,9 +321,8 @@ class _ecFlowDef:
             STR.stdout: "%s.out" % Path(rundir, subsection),
             **({STR.threads: threads} if threads else {}),
             **execution.get(STR.batchargs, {}),
-                }
+        }
         return JobScheduler.get_scheduler(resources)
-
 
     def _tag_name(self, key: str) -> tuple[str, str]:
         """
