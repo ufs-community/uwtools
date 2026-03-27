@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING
 
+import ecflow as ec
 from ecflow import Defs, Family, Suite, Task
+
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.tools import walk_key_path
@@ -45,7 +48,6 @@ class _ECFlowDef:
                 "timevars": {"fff": "%FHR%"},
             }
         )
-        self.refs = {}
         self._config = cfgobj.data
         self._add_workflow(self._config.get(STR.ecflow, self._config))
 
@@ -63,170 +65,156 @@ class _ECFlowDef:
 
     def _add_workflow_components(self, d: Defs, config: dict) -> None:
         """
-        Add suites, families, and tasks to the suite definition.
+        Add suite(s) and other attributes to the suite definition.
 
         :param d: The root of the definition tree.
         :param config: Configuration data for these components.
         """
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
-            # Options: extern, vars, suite_*, suites_*
             match tag:
                 case "extern":
-                    self._add_extern(d, subconfig, name)
+                    for ext in subconfig:
+                        d.add_extern(ext)
                 case "vars":
-                    self._add_vars(d, subconfig, name)
+                    d.add_variable(subconfig)
                 case "suite":
-                    self._add_suite(d, subconfig, name)
+                    self._add_node(Suite(name), d, subconfig)
                 case "suites":
-                    self._add_repeater("suite", d, subconfig, name)
+                    self._expand_block(Suite, d, subconfig, name)
 
-    def _add_extern(
+    def _expand_block(
         self,
+        nodetype: Node,
         parent: NodeContainer,
         config: dict,
         name: str,
-    ) -> None:
-        pass
-
-    def _add_family(
-        self,
-        parent: NodeContainer,
-        config: dict,
-        name: str,
+        refs: dict | None = None,
     ) -> None:
         """
-        Add a family to a suite.
+        Expand a YAML block over a set of named Nodes.
 
-        :param parent: The parent object to add this suite to.
+        :param parent: The parent object to add this set of Nodes to.
         :param config: Configuration data for these components.
         :param name: Name of this suite.
         """
-        fam = Family(name)
-        parent.add_family(fam)
-        for key, subconfig in config.items():
-            tag, name = self._tag_name(key)
-            match tag:
-                case "family":
-                    self._add_family(fam, subconfig, name)
-                case "families":
-                    self._add_repeater("family", fam, subconfig, name)
-                case "task":
-                    self._add_task(fam, subconfig, name)
-                case "tasks":
-                    self._add_repeater("task", fam, subconfig, name)
+        refs = refs if refs is not None else {}
+        expand = config["expand"]
 
-    def _add_vars(
-        self,
-        parent: NodeContainer,
-        config: dict,
-        name: str,
-    ) -> None:
-        pass
-
-    def _add_suite(
-        self,
-        parent: NodeContainer,
-        config: dict,
-        name: str,
-    ) -> None:
-        """
-        Add a suite to the suite definition.
-
-        :param parent: The parent object to add this suite to.
-        :param config: Configuration data for these components.
-        :param name: Name of this suite.
-        """
-        suite = Suite(name)
-        parent.add_suite(suite)
-        for key, subconfig in config.items():
-            tag, name = self._tag_name(key)
-            match tag:
-                case "vars":
-                    self._add_vars(suite, subconfig, name)
-                case "family":
-                    self._add_family(suite, subconfig, name)
-                case "families":
-                    self._add_repeater("family", suite, subconfig, name)
-                case "task":
-                    self._add_task(suite, subconfig, name)
-                case "tasks":
-                    self._add_repeater("task", suite, subconfig, name)
-
-    def _add_repeater(
-        self,
-        nodetype: str,
-        parent: NodeContainer,
-        config: dict,
-        name: str,
-    ) -> None:
-        """
-        Add a set of suites to the suite definition.
-
-        :param parent: The parent object to add this suite to.
-        :param config: Configuration data for these components.
-        :param name: Name of this suite.
-        """
-        repeat = config["repeat"]
-        primary_variable = list(repeat.keys())[0]
+        primary_variable = list(expand.keys())[0]
         # Check to make sure all lists are the same length.
         try:
-            for _i in zip(*repeat.values(), strict=True):
+            for _i in zip(*expand.values(), strict=True):
                 pass
         except ValueError:
-            log.error("All repeat variables under %s must be the same length" % (parent.name()))
+            log.error("All expand variables under %s must be the same length" % (parent.name()))
             raise
 
         # Build up the new blocks in the suite definition
-        for i in range(len(repeat[primary_variable])):
-            # This is not going to work. Need to pass refs down for each repeated item to get the
-            # right value.
-            self.refs.update({k: v[i] for k, v in repeat.items()})
-            new_block = YAMLConfig({name: config}).dereference(context={"ec": self.refs})
+        for i in range(len(expand[primary_variable])):
+            new_ref = deepcopy(refs)
+            new_ref.update({k: v[i] for k, v in expand.items()})
+            new_block = YAMLConfig({name: config}).dereference(context={"ec": new_ref})
             new_name = list(new_block.keys())[0]
             args = {
+                "node": nodetype(new_name),
                 "parent": parent,
                 "config": new_block[new_name],
-                "name": new_name,
+                "refs": new_ref,
             }
-            match nodetype:
-                case "suite":
-                    self._add_suite(**args)
-                case "family":
-                    self._add_family(**args)
-                case "task":
-                    self._add_task(**args)
+            self._add_node(**args)
 
-    def _add_task(
+    def _add_node(
         self,
+        node: Node,
         parent: NodeContainer,
         config: dict,
-        name: str,
+        refs: dict | None = None,
     ) -> None:
         """
-        Add a task to a family.
+        Add a suite|family|task (node) to a suite|family (parent).
 
-        :param parent: The parent object to add this task to.
+        :param node: The node to add to the parent.
+        :param parent: The parent object to add this node to.
         :param config: Configuration data for these components.
-        :param name: Name of this task.
+        :param refs: Optional references from expanded nodes from higher in the tree.
         """
-        task = Task(name)
-        parent.add_task(task)
+        parent.add(node)
+        add_items = lambda m, cfg: (node.m(*args) for args in cfg)
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
-                case "event":
-                    pass
-                case "meter":
-                    pass
-                case "label":
-                    pass
-                case "limit":
-                    pass
-                case "vars":
-                    task.add_variable(subconfig)
+                case "family":
+                    self._add_node(Family(name), node, subconfig, refs)
+                case "families":
+                    self._expand_block(Family, node, subconfig, name, refs)
+                case "task":
+                    self._add_node(Task(name), node, subconfig, refs)
+                case "tasks":
+                    self._expand_block(Task, node, subconfig, name, refs)
+                case "defstatus":
+                    node.add_defstatus(subconfig)
+                case "events":
+                    for event in subconfig:
+                        node.add_event(event)
+                case "inlimits":
+                    add_items(add_inlimit, subconfig)
+                case "meters":
+                    add_items(add_meter, subconfig)
+                case "labels":
+                    add_items(add_label, subconfig)
+                case "late":
+                    node.add_late(subconfig)
+                case "limits":
+                    add_items(add_limit, subconfig)
+                case "repeat": # Only one repeat is allowed per node
+                    self._add_repeat(name, node, subconfig)
+                case "trigger": # Only one trigger is allowed per node
+                    node.add_trigger(subconfig)
+                case "vars": # add_variable accepts a dict
+                    node.add_variable(subconfig)
                 case "key-path":
-                    self._create_ecf_script(task, subconfig)
+                    self._create_ecf_script(node, subconfig)
+
+    def _add_repeat(self, name: str, node: Node, config: dict) -> None:
+        """
+        Adds a repeat to a node.
+
+        :param node: The node to add the repeat to.
+        :param config: Configuration for the repeat.
+        """
+        """
+        YAML:
+
+        repeat:
+          variable: myvar
+
+          WITH
+
+          start:
+          end:
+          step: (optional)
+
+          OR
+
+          step:
+
+          OR
+
+          list:
+        """
+        match name:
+            case "date":
+                config["delta"] = config.pop("step", None)
+                node.add_repeat(RepeatDate(**config))
+            case "datetime":
+                node.add_repeat(RepeatDateTime(**config))
+            case "int":
+                node.add_repeat(RepeatInteger(**config))
+            case "day":
+                node.add_repeat(RepeatDay(**config))
+            case "datelist|enumerated|string":
+                node.add_repeat(RepeatEnumerated(**config))
 
     def _create_ecf_script(self, task: Task, key_path: str) -> None:
         """
