@@ -20,7 +20,7 @@ def config(tmp_path):
         "ioda": {
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "cores": 1,
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",

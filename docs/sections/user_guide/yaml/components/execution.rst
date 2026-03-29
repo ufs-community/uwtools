@@ -14,7 +14,7 @@ Example block:
        cores: 40
        debug: True
        exclusive: True
-       export: NONE
+       export: false
        jobname: my-job
        memory: 4GB
        nodes: 1

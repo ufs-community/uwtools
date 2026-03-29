@@ -84,7 +84,7 @@ def config(tmp_path):
             "base_file": str(write(tmp_path / "base.yaml", {"a": 11, "b": 22})),
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "nodes": 1,
                     "stdout": "{{ concrete.rundir }}/out",
                     "walltime": "00:05:00",

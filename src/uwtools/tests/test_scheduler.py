@@ -289,7 +289,8 @@ def test_Slurm__managed_directives(slurm):
     assert mds["debug"](False) is None
     assert mds["exclusive"](True) == "--exclusive"
     assert mds["exclusive"](False) is None
-    assert mds["export"] == "--export"
+    assert mds["export"](False) == "--export=NONE"
+    assert mds["export"](True) == "--export=ALL"
     assert mds["jobname"] == "--job-name"
     assert mds["memory"] == "--mem"
     assert mds["nodes"] == "--nodes"
