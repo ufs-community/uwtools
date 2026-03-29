@@ -226,6 +226,7 @@ def test_PBS__managed_directives(pbs):
     mds = pbs._managed_directives
     assert mds["account"] == "-A"
     assert mds["debug"](True) == "-l debug=true"
+    assert mds["export"] == "-V"
     assert mds["jobname"] == "-N"
     assert mds["memory"] == "mem"
     assert mds["nodes"](2) == "-l select=2"
