@@ -44,9 +44,86 @@ These entries map to job-scheduler directives sent to e.g. Slurm when a batch jo
 
 Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Recognized names for each scheduler are:
 
-* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
-* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
-* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``walltime``
+.. list-table::
+   :widths: 10 30 30 30
+   :header-rows: 1
+
+   * - Shorthand
+     - Slurm
+     - PBS
+     - LSF
+   * - ``account``
+     - ``--account``
+     - ``-A``
+     - ``-P``
+   * - ``clusters``
+     - ``--clusters``
+     -
+     -
+   * - ``cores``
+     - ``--ntasks``
+     -
+     -
+   * - ``debug``
+     - ``verbose``
+     - ``-l debug``
+     -
+   * - ``exclusive``
+     - ``--exclusive``
+     -
+     -
+   * - ``export``
+     - ``--export``
+     - ``-V``
+     -
+   * - ``jobname``
+     - ``--job-name``
+     - ``-N``
+     - ``-J``
+   * - ``memory``
+     - ``--mem``
+     - ``mem``
+     - ``-R rusage[mem=]``
+   * - ``nodes``
+     - ``--nodes``
+     - ``-l select``
+     - ``-n``
+   * - ``partition``
+     - ``--partition``
+     -
+     -
+   * - ``queue``
+     - ``--qos``
+     - ``-q``
+     - ``-q``
+   * - ``rundir``
+     - ``--chdir``
+     -
+     -
+   * - ``shell``
+     -
+     - ``-S``
+     - ``-L``
+   * - ``stderr``
+     - ``--error``
+     -
+     -
+   * - ``stdout``
+     - ``--output``
+     - ``-o``
+     - ``-o``
+   * - ``tasks_per_node``
+     - ``--ntasks-per-node``
+     - ``mpiprocs``
+     - ``-R span[ptile=]``
+   * - ``threads``
+     -
+     -
+     - ``-R affinity[core()]``
+   * - ``walltime``
+     - ``--time``
+     - ``-l walltime``
+     - ``-W``
 
 **NB** To enable threading when running components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` item (see below). Then ``uwtools`` will set the appropriate scheduler flag when making a batch request, and will set the ``OMP_NUM_THREADS`` environment variable in the execution environment.
 
