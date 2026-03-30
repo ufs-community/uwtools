@@ -401,6 +401,8 @@ def test_schema_batchargs():
         assert "is not of type 'integer'\n" in errors({key: None})
     # Some keys require string values:
     for key in [
+        "account",
+        "clusters",
         "jobname",
         "memory",
         "partition",
