@@ -12,9 +12,9 @@
             "batchargs": {
               "additionalProperties": true,
               "properties": {
-                "cores": {
-                  "type": "integer"
+                "account": {
+                  "type": "string"
                 },
-                "debug": {
-                  "type": "boolean"
+                "clusters": {
+                  "type": "string"
                 },

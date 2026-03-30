@@ -20,7 +20,7 @@ def config(tmp_path):
         "sfc_climo_gen": {
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "nodes": 1,
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",

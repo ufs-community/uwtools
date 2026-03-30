@@ -1,6 +1,12 @@
 {
   "additionalProperties": true,
   "properties": {
+    "account": {
+      "type": "string"
+    },
+    "clusters": {
+      "type": "string"
+    },
     "cores": {
       "type": "integer"
     },
@@ -11,7 +17,7 @@
       "type": "boolean"
     },
     "export": {
-      "type": "string"
+      "type": "boolean"
     },
     "jobname": {
       "type": "string"
