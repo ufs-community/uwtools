@@ -247,6 +247,7 @@ class PBS(JobScheduler):
         """
         return {
             _DirectivesOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
+            _DirectivesOptional.EXPORT: "-V",
             _DirectivesOptional.JOB_NAME: "-N",
             _DirectivesOptional.MEMORY: "mem",
             _DirectivesOptional.NODES: lambda x: f"-l select={x}",
@@ -348,9 +349,9 @@ class Slurm(JobScheduler):
         return {
             _DirectivesOptional.CLUSTERS: "--clusters",
             _DirectivesOptional.CORES: "--ntasks",
-            _DirectivesOptional.DEBUG: lambda b: "--verbose" if b else None,
-            _DirectivesOptional.EXCLUSIVE: lambda b: "--exclusive" if b else None,
-            _DirectivesOptional.EXPORT: "--export",
+            _DirectivesOptional.DEBUG: lambda x: "--verbose" if x else None,
+            _DirectivesOptional.EXCLUSIVE: lambda x: "--exclusive" if x else None,
+            _DirectivesOptional.EXPORT: lambda x: "--export=%s" % ("ALL" if x else "NONE"),
             _DirectivesOptional.JOB_NAME: "--job-name",
             _DirectivesOptional.MEMORY: "--mem",
             _DirectivesOptional.NODES: "--nodes",

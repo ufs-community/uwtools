@@ -14,7 +14,7 @@ Example block:
        cores: 40
        debug: True
        exclusive: True
-       export: NONE
+       export: false
        jobname: my-job
        memory: 4GB
        nodes: 1
@@ -42,13 +42,93 @@ batchargs:
 
 These entries map to job-scheduler directives sent to e.g. Slurm when a batch job is submitted via the ``--batch`` CLI switch or the ``batch=True`` API argument. The only **required** entry is ``walltime``.
 
-Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Recognized names for each scheduler are:
+Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Except where noted below, values provided for shorthand names should be strings. Supported shorthand names for each scheduler are:
 
-* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
-* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
-* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``walltime``
+.. list-table::
+   :widths: 10 30 30 30
+   :header-rows: 1
 
-**NB** To enable threading when running components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` item (see below). Then ``uwtools`` will set the appropriate scheduler flag when making a batch request, and will set the ``OMP_NUM_THREADS`` environment variable in the execution environment.
+   * - Shorthand
+     - Slurm
+     - PBS
+     - LSF
+   * - ``account``
+     - ``--account``
+     - ``-A``
+     - ``-P``
+   * - ``clusters``
+     - ``--clusters``
+     -
+     -
+   * - ``cores``
+     - ``--ntasks``
+     -
+     -
+   * - ``debug``
+     - ``--verbose``
+     - ``-l debug``
+     -
+   * - ``exclusive``
+     - ``--exclusive``
+     -
+     -
+   * - ``export``
+     - ``--export``
+     - ``-V``
+     -
+   * - ``jobname``
+     - ``--job-name``
+     - ``-N``
+     - ``-J``
+   * - ``memory``
+     - ``--mem``
+     - ``-l mem``
+     - ``-R rusage[mem]``
+   * - ``nodes``
+     - ``--nodes``
+     - ``-l select``
+     - ``-n``
+   * - ``partition``
+     - ``--partition``
+     -
+     -
+   * - ``queue``
+     - ``--qos``
+     - ``-q``
+     - ``-q``
+   * - ``rundir``
+     - ``--chdir``
+     -
+     -
+   * - ``shell``
+     -
+     - ``-S``
+     - ``-L``
+   * - ``stderr``
+     - ``--error``
+     -
+     -
+   * - ``stdout``
+     - ``--output``
+     - ``-o``
+     - ``-o``
+   * - ``tasks_per_node``
+     - ``--ntasks-per-node``
+     - ``mpiprocs``
+     - ``-R span[ptile]``
+   * - ``threads``
+     -
+     -
+     - ``-R affinity[core()]``
+   * - ``walltime``
+     - ``--time``
+     - ``-l walltime``
+     - ``-W``
+
+* ``export``: Values should be YAML booleans. A ``true`` value means that all environment variables from the head-node shell will be propagated to the batch environment; ``false`` means that none will.
+* ``memory``: Values should be strings in a form acceptable by the underlying scheduler (consult your scheduler's documentation).
+* ``tasks_per_node``: Values should be integers.
+* ``walltime``: Values should be strings in ``hours:minutes:seconds`` form, e.g. ``01:30:00`` for one and a half hours.
 
 Other, arbitrary directive key-value pairs can be provided exactly as they should appear in the batch runscript. For example
 
@@ -63,6 +143,8 @@ could be specified to have the Slurm directive
    #SBATCH --nice=100
 
 included in the batch runscript.
+
+**NB** To enable threading when running components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` item (see below). Then ``uwtools`` will set the appropriate scheduler flag when making a batch request, and will set the ``OMP_NUM_THREADS`` environment variable in the execution environment.
 
 envcmds:
 """"""""

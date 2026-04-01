@@ -1,7 +1,7 @@
 sfc_climo_gen:
   execution:
     batchargs:
-      export: NONE
+      export: false
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "00:02:00"

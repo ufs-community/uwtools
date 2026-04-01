@@ -29,7 +29,7 @@ def config(tmp_path):
         "chgres_cube": {
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "nodes": 1,
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",
