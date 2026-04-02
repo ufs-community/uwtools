@@ -39,6 +39,7 @@ class _ECFlowDef:
     """
 
     def __init__(self, config: dict | Config | Path | None = None) -> None:
+        self.scripts: dict[Path, str] = {}
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
         self._config = cfgobj.data.get(STR.ecflow, cfgobj.data)
@@ -48,6 +49,27 @@ class _ECFlowDef:
 
     def __str__(self):
         return self.d.__str__()
+
+    def write_ecf_scripts(self, path: Path | str) -> None:
+        """
+        The ecf scripts for this workflow.
+
+        :param path: Where to write the ecFlow scripts.
+        """
+        for subpath, content in self.scripts.items():
+            outpath = path / subpath
+            outpath.parent.mkdir(parents=True, exist_ok=True)
+            outpath.write_text(content)
+
+    def write_suite_definition(self, path: Path | str) -> None:
+        """
+        The suite definition artifact.
+
+        :param path: Where to write the suite definition.
+        """
+        path = Path(path, "suite.def")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(self.d.__str__())
 
     def _add_workflow_components(self) -> None:
         """
@@ -84,7 +106,6 @@ class _ECFlowDef:
         :param refs: Variable/value pairs used in higher-level expand blocks.
         """
 
-        assert isinstance(nodetype, (Suite, Family, Task))
         refs = refs if refs is not None else {}
         expand = config["expand"]
 
@@ -161,7 +182,7 @@ class _ECFlowDef:
                 case "vars":  # add_variable accepts a dict
                     node.add_variable(subconfig)
                 case "script":
-                    self._create_ecf_script(node, subconfig)
+                    self._create_ecf_script(subconfig, node)
 
     def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
@@ -231,12 +252,12 @@ class _ECFlowDef:
             post_includes=config.get("post_includes", []),
             scheduler=scheduler,
         )
-        # Placeholders until the output path for scripts and workflow defs are resolved.
+
         path = Path(
-            ".", Path(task.get_abs_node_path()).parent, f"{task.name().split('_', 1)[-1]}.ecf"
-        ).resolve()
-        print(f"Will write to {path}")
-        print(es)
+            Path(task.get_abs_node_path().lstrip("/")).parent,
+            f"{task.name().split('_', 1)[-1]}.ecf",
+        )
+        self.scripts[path] = es
 
     def _ecflowscript(
         self,
