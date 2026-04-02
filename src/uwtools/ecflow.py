@@ -10,12 +10,21 @@ from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING
 
-import ecflow as ec
-from ecflow import Defs, Family, Suite, Task
+from ecflow import (  # type: ignore[import-untyped]
+    Defs,
+    Family,
+    Node,
+    RepeatDate,
+    RepeatDateTime,
+    RepeatDay,
+    RepeatEnumerated,
+    RepeatInteger,
+    Suite,
+    Task,
+)
 
+from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.tools import walk_key_path
-from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
@@ -29,8 +38,8 @@ class _ECFlowDef:
     Generate an ecFlow definition file from a YAML config.
     """
 
-    def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
-        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+    def __init__(self, config: dict | Config | Path | None = None) -> None:
+        cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
         self._config = cfgobj.data.get(STR.ecflow, cfgobj.data)
         self.scheduler = self._config.get("scheduler")
@@ -44,7 +53,7 @@ class _ECFlowDef:
         """
         Add suite(s) and other attributes to the suite definition.
         """
-        for key, subconfig in self.config.items():
+        for key, subconfig in self._config.items():
             tag, name = self._tag_name(key)
             match tag:
                 case "extern":
@@ -102,7 +111,7 @@ class _ECFlowDef:
             }
             self._add_node(**args)
 
-    def _add_node(
+    def _add_node(  # noqa: C901,PLR0912
         self,
         config: dict,
         node: Node,
@@ -118,7 +127,7 @@ class _ECFlowDef:
         :param refs: Optional references from expanded nodes from higher in the tree.
         """
         parent.add(node)
-        add_items = lambda m, cfg: (node.m(*args) for args in cfg)
+        add_items = lambda n, cfg: (n(*args) for args in cfg)
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
@@ -136,15 +145,15 @@ class _ECFlowDef:
                     for event in subconfig:
                         node.add_event(event)
                 case "inlimits":
-                    add_items(add_inlimit, subconfig)
+                    add_items(node.add_inlimit, subconfig)
                 case "meters":
-                    add_items(add_meter, subconfig)
+                    add_items(node.add_meter, subconfig)
                 case "labels":
-                    add_items(add_label, subconfig)
+                    add_items(node.add_label, subconfig)
                 case "late":
                     node.add_late(subconfig)
                 case "limits":
-                    add_items(add_limit, subconfig)
+                    add_items(node.add_limit, subconfig)
                 case "repeat":  # Only one repeat is allowed per node
                     self._add_repeat(subconfig, name, node)
                 case "trigger":  # Only one trigger is allowed per node
@@ -154,7 +163,7 @@ class _ECFlowDef:
                 case "script":
                     self._create_ecf_script(node, subconfig)
 
-    def _add_repeat(self, config:dict, name: str, node: Node) -> None:
+    def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
         Adds a repeat to a node.
 
@@ -205,9 +214,9 @@ class _ECFlowDef:
         """
         scheduler = (
             self._scheduler(
-                account=config.get("account"),
-                execution=config.get("execution"),
-                rundir=config.get("rundir"),
+                account=config.get("account", ""),
+                execution=config.get("execution", ""),
+                rundir=config.get("rundir", ""),
             )
             if self.scheduler
             else None
@@ -274,6 +283,8 @@ class _ECFlowDef:
         {manual}
         %end
         """
+        pre_includes = [] if pre_includes is None else pre_includes
+        post_includes = [] if post_includes is None else post_includes
         directives = scheduler.directives if scheduler else ""
         initcmds = scheduler.initcmds if scheduler else []
         rs = dedent(template).format(
@@ -288,7 +299,7 @@ class _ECFlowDef:
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
-    def _scheduler(self, account: str, execution: dict, rundir: Path) -> JobScheduler:
+    def _scheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """
         Use the execution block to build a JobScheduler object.
 
