@@ -5,6 +5,7 @@
   "packages": {
     "dev": [
       "docformatter ==1.7.*",
+      "ecflow ==5.15.*",
       "f90nml >=1.4,<1.5",
       "iotaa ==1.6.*",
       "jinja2 >=3.1,<3.2",
@@ -31,6 +32,7 @@
       "types-setuptools"
     ],
     "run": [
+      "ecflow ==5.15.*",
       "f90nml >=1.4,<1.5",
       "iotaa ==1.6.*",
       "jinja2 >=3.1,<3.2",
