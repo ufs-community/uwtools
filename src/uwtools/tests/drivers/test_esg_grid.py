@@ -19,7 +19,7 @@ def config(tmp_path):
         "esg_grid": {
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "nodes": 1,
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",

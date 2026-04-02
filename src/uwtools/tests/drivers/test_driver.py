@@ -84,7 +84,7 @@ def config(tmp_path):
             "base_file": str(write(tmp_path / "base.yaml", {"a": 11, "b": 22})),
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "nodes": 1,
                     "stdout": "{{ concrete.rundir }}/out",
                     "walltime": "00:05:00",
@@ -524,7 +524,7 @@ def test_Driver__run_via_local_execution(driverobj, node):
     ):
         driverobj._run_via_local_execution()
         run_shell_cmd.assert_called_once_with(
-            cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+            cmd="./{x} >{x}.out 2>&1".format(x=driverobj._runscript_path.name),
             cwd=driverobj.rundir,
             log_output=True,
         )

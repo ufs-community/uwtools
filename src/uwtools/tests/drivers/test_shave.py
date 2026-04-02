@@ -18,7 +18,7 @@ def config(tmp_path):
         "shave": {
             "execution": {
                 "batchargs": {
-                    "export": "NONE",
+                    "export": False,
                     "nodes": 1,
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",

@@ -394,14 +394,15 @@ def test_schema_batchargs():
     # The "threads" argument is not allowed: It will be propagated, if set, from execution.threads.
     assert "should not be valid" in errors({"threads": 4, "walltime": "00:05:00"})
     # Some keys require boolean values:
-    for key in ["debug", "exclusive"]:
+    for key in ["debug", "exclusive", "export"]:
         assert "is not of type 'boolean'\n" in errors({key: None})
     # Some keys require integer values:
     for key in ["cores", "nodes"]:
         assert "is not of type 'integer'\n" in errors({key: None})
     # Some keys require string values:
     for key in [
-        "export",
+        "account",
+        "clusters",
         "jobname",
         "memory",
         "partition",
