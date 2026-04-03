@@ -33,14 +33,15 @@ test:
     - make 4.4.*
     - mypy 1.19.*
     - pytest 9.0.*
-    - pytest-cov 7.0.*
+    - pytest-cov 7.1.*
+    - pytest-randomly 3.15.*
     - pytest-xdist 3.8.*
     - python {{ pymin }}
-    - ruff 0.14.*
+    - ruff 0.15.*
     - types-PyYAML
     - types-jsonschema
     - types-python-dateutil
     - types-requests
     - types-setuptools
 about:
-  license: LGPL
+  license: APACHE
