@@ -148,6 +148,7 @@ def test_yaml_constructor_error_not_dict_from_file(tmp_path):
 
 def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
+    _stdinproxy.cache_clear()
     with (
         StringIO("42") as sio,
         patch.object(sys, "stdin", new=sio),
