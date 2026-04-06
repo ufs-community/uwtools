@@ -223,7 +223,7 @@ class _ECFlowDef:
                 repeat = RepeatInteger
             case "day":
                 repeat = RepeatDay
-            case "datelist|enumerated|string":
+            case "datelist" | "enumerated" | "string":
                 repeat = RepeatEnumerated
         node.add_repeat(repeat(**config))
 
