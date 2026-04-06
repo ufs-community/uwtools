@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 from ecflow import (  # type: ignore[import-untyped]
     Defs,
     Family,
+    Late,
     Node,
     RepeatDate,
     RepeatDateTime,
@@ -167,14 +168,14 @@ class _ECFlowDef:
                         node.add_event(event)
                 case "inlimits":
                     add_items(node.add_inlimit, subconfig)
-                case "meters":
-                    add_items(node.add_meter, subconfig)
                 case "labels":
                     add_items(node.add_label, subconfig)
                 case "late":
-                    node.add_late(subconfig)
+                    node.add_late(Late(**subconfig))
                 case "limits":
                     add_items(node.add_limit, subconfig)
+                case "meters":
+                    add_items(node.add_meter, subconfig)
                 case "repeat":  # Only one repeat is allowed per node
                     self._add_repeat(subconfig, name, node)
                 case "trigger":  # Only one trigger is allowed per node
@@ -224,7 +225,7 @@ class _ECFlowDef:
                 repeat = RepeatDay
             case "datelist|enumerated|string":
                 repeat = RepeatEnumerated
-        node.add_repeate(repeat(**config))
+        node.add_repeat(repeat(**config))
 
     def _create_ecf_script(self, config: dict, task: Task) -> None:
         """
