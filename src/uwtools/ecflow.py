@@ -118,18 +118,18 @@ class _ECFlowDef:
             log.error("All expand variables under %s must be the same length" % (parent.name()))
             raise
 
-        # Build up the new blocks in the suite definition
+        # Build up the new blocks in the suite definition.
         primary_variable = list(expand.keys())[0]
         for i in range(len(expand[primary_variable])):
-            new_ref = deepcopy(refs)
-            new_ref.update({k: v[i] for k, v in expand.items()})
-            new_block = YAMLConfig({name: config}).dereference(context={"ec": new_ref})
+            new_refs = deepcopy(refs)
+            new_refs.update({k: v[i] for k, v in expand.items()})
+            new_block = YAMLConfig({name: config}).dereference(context={"ec": new_refs})
             new_name = list(new_block.keys())[0]
             args = {
                 "config": new_block[new_name],
                 "node": nodetype(new_name),
                 "parent": parent,
-                "refs": new_ref,
+                "refs": new_refs,
             }
             self._add_node(**args)
 
@@ -254,10 +254,7 @@ class _ECFlowDef:
             scheduler=scheduler,
         )
 
-        path = Path(
-            Path(task.get_abs_node_path().lstrip("/")).parent,
-            f"{task.name().split('_', 1)[-1]}.ecf",
-        )
+        path = Path(task.get_abs_node_path().lstrip("/")).parent /  f"{task.name().split('_', 1)[-1]}.ecf"
         self.scripts[path] = es
 
     def _ecflowscript(
@@ -305,8 +302,8 @@ class _ECFlowDef:
         {manual}
         %end
         """
-        pre_includes = [] if pre_includes is None else pre_includes
-        post_includes = [] if post_includes is None else post_includes
+        pre_includes = pre_includes or []
+        post_includes = post_includes or []
         directives = scheduler.directives if scheduler else ""
         initcmds = scheduler.initcmds if scheduler else []
         rs = dedent(template).format(
@@ -326,7 +323,7 @@ class _ECFlowDef:
         Use the execution block to build a JobScheduler object.
 
         :param account: The user account for the batch system.
-        :param execution: The standard UWYAML execution block.
+        :param execution: The standard UW YAML execution block.
         :param rundir: The directory where the task will run.
         """
         threads = execution.get(STR.threads)
