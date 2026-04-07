@@ -8,7 +8,6 @@ from uwtools.ecflow import _ECFlowDef
 
 
 class Test_ECFlowDef:
-
     @mark.parametrize(
         ("key", "expected"),
         [
