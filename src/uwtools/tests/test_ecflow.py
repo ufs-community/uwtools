@@ -7,7 +7,7 @@ from pytest import mark
 from uwtools.ecflow import _ECFlowDef
 
 
-class Test_ECFlowDef:
+class TestECFlowDef:
     @mark.parametrize(
         ("key", "expected"),
         [
@@ -18,6 +18,6 @@ class Test_ECFlowDef:
         ],
     )
     def test__tag_name(self, key, expected):
-        # _tag_name is called on self, so we need a minimal instance
+        # _tag_name is called on self, so we need a minimal instance.
         ecf = _ECFlowDef(config={"ecflow": {}})
         assert ecf._tag_name(key) == expected
