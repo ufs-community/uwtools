@@ -26,6 +26,7 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
@@ -40,16 +41,16 @@ class _ECFlowDef:
     """
 
     def __init__(self, config: dict | Config | Path | None = None) -> None:
-        self.scripts: dict[Path, str] = {}
+        self._scripts: dict[Path, str] = {}
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
-        self._config = cfgobj.data.get(STR.ecflow, cfgobj.data)
-        self.scheduler = self._config.get("scheduler")
-        self.d = Defs()
+        self._config = cfgobj.data[STR.ecflow]
+        self._scheduler = self._config.get("scheduler")
+        self._d = Defs()
         self._add_workflow_components()
 
     def __str__(self):
-        return self.d.__str__()
+        return self._d.__str__()
 
     def write_ecf_scripts(self, path: Path | str) -> None:
         """
@@ -57,7 +58,12 @@ class _ECFlowDef:
 
         :param path: Where to write the ecFlow scripts.
         """
-        for subpath, content in self.scripts.items():
+
+        if not self._scripts:
+            log.warning("No scripts are configured for this workflow.")
+            return
+
+        for subpath, content in self._scripts.items():
             outpath = path / subpath
             outpath.parent.mkdir(parents=True, exist_ok=True)
             outpath.write_text(content)
@@ -68,9 +74,10 @@ class _ECFlowDef:
 
         :param path: Where to write the suite definition.
         """
-        path = Path(path, "suite.def")
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(self.d.__str__())
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
+        suite = path / "suite.def"
+        suite.write_text(self._d.__str__())
 
     def _add_workflow_components(self) -> None:
         """
@@ -81,13 +88,13 @@ class _ECFlowDef:
             match tag:
                 case "extern":
                     for ext in subconfig:
-                        self.d.add_extern(ext)
+                        self._d.add_extern(ext)
                 case "vars":
-                    self.d.add_variable(subconfig)
+                    self._d.add_variable(subconfig)
                 case "suite":
-                    self._add_node(subconfig, Suite(name), self.d)
+                    self._add_node(subconfig, Suite(name), self._d)
                 case "suites":
-                    self._expand_block(subconfig, name, Suite, self.d)
+                    self._expand_block(subconfig, name, Suite, self._d)
 
     def _expand_block(
         self,
@@ -112,11 +119,10 @@ class _ECFlowDef:
 
         # Check to make sure all lists are the same length.
         try:
-            for _i in zip(*expand.values(), strict=True):
-                pass
-        except ValueError:
-            log.error("All expand variables under %s must be the same length" % (parent.name()))
-            raise
+            assert list(zip(*expand.values(), strict=True))
+        except ValueError as e:
+            msg = "All expand variables under %s must be the same length" % (parent.name())
+            raise UWConfigError(msg) from e
 
         # Build up the new blocks in the suite definition.
         primary_variable = list(expand.keys())[0]
@@ -153,6 +159,8 @@ class _ECFlowDef:
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
+                # Tree buiding cases
+
                 case "family":
                     self._add_node(subconfig, Family(name), node, refs)
                 case "families":
@@ -161,6 +169,9 @@ class _ECFlowDef:
                     self._add_node(subconfig, Task(name), node, refs)
                 case "tasks":
                     self._expand_block(subconfig, name, Task, node, refs)
+
+                # Node attribute cases
+
                 case "defstatus":
                     node.add_defstatus(subconfig)
                 case "events":
@@ -193,38 +204,18 @@ class _ECFlowDef:
         :param name: The name of the repeat.
         :param node: The node to add the repeat to.
         """
-        """
-        YAML:
-
-        repeat:
-          variable: myvar
-
-          WITH
-
-          start:
-          end:
-          step: (optional)
-
-          OR
-
-          step:
-
-          OR
-
-          list:
-        """
         match name:
             case "date":
                 config["delta"] = config.pop("step", None)
                 repeat = RepeatDate
-            case "datetime":
-                repeat = RepeatDateTime
-            case "int":
-                repeat = RepeatInteger
-            case "day":
-                repeat = RepeatDay
             case "datelist" | "enumerated" | "string":
                 repeat = RepeatEnumerated
+            case "datetime":
+                repeat = RepeatDateTime
+            case "day":
+                repeat = RepeatDay
+            case "int":
+                repeat = RepeatInteger
         node.add_repeat(repeat(**config))
 
     def _create_ecf_script(self, config: dict, task: Task) -> None:
@@ -235,12 +226,12 @@ class _ECFlowDef:
         :param task: The task node.
         """
         scheduler = (
-            self._scheduler(
+            self._jobscheduler(
                 account=config.get("account", ""),
                 execution=config.get("execution", ""),
                 rundir=config.get("rundir", ""),
             )
-            if self.scheduler
+            if self._scheduler
             else None
         )
         execution = config[STR.execution]
@@ -254,8 +245,11 @@ class _ECFlowDef:
             scheduler=scheduler,
         )
 
-        path = Path(task.get_abs_node_path().lstrip("/")).parent /  f"{task.name().split('_', 1)[-1]}.ecf"
-        self.scripts[path] = es
+        path = (
+            Path(task.get_abs_node_path().lstrip("/")).parent
+            / f"{task.name().split('_', 1)[-1]}.ecf"
+        )
+        self._scripts[path] = es
 
     def _ecflowscript(
         self,
@@ -318,7 +312,7 @@ class _ECFlowDef:
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
-    def _scheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
+    def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """
         Use the execution block to build a JobScheduler object.
 
@@ -330,7 +324,7 @@ class _ECFlowDef:
         resources = {
             STR.account: account,
             STR.rundir: rundir,
-            STR.scheduler: self.scheduler,
+            STR.scheduler: self._scheduler,
             STR.stdout: "%s.out" % Path(rundir),
             **({STR.threads: threads} if threads else {}),
             **execution.get(STR.batchargs, {}),
