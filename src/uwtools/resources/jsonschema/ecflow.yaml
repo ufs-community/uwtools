@@ -82,8 +82,20 @@ $defs:
                 type: integer
               minItems: 4
               maxItems: 4
-      repeat:
-        type: object
+      repeat_date:
+        "$ref": "#/$defs/repeat"
+      repeat_datelist:
+        "$ref": "#/$defs/repeat"
+      repeat_datetime:
+        "$ref": "#/$defs/repeat"
+      repeat_day:
+        "$ref": "#/$defs/repeat"
+      repeat_enumerated:
+        "$ref": "#/$defs/repeat"
+      repeat_int:
+        "$ref": "#/$defs/repeat"
+      repeat_string:
+        "$ref": "#/$defs/repeat"
       trigger:
         type: string
       vars:
@@ -146,6 +158,44 @@ $defs:
       "^tasks_.+$":
         "$ref": "#/$defs/expander"
     type: object
+  repeat:
+    allOf:
+      - additionalProperties: false
+        properties:
+          variable:
+            type: string
+        type: object
+      - oneOf:
+        - additionalProperties: false
+          properties:
+            start:
+              type: ["number", "string"]
+            end:
+              type: ["number", "string"]
+            step:
+              type: ["number", "string"]
+          type: object
+          required:
+            - start
+            - end
+        - additionalProperties: false
+          properties:
+            step:
+              type: ["number", "string"]
+          required:
+            - step
+          type: object
+        - additionalProperties: false
+          properties:
+            list:
+              items:
+                type:
+                  - number
+                  - string
+              type: array
+          required:
+            - list
+          type: object
   task:
     additionalProperties: false
     allOf:
