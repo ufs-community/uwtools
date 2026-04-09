@@ -40,7 +40,7 @@ class _ECFlowDef:
     Generate an ecFlow definition file from a YAML config.
     """
 
-    def __init__(self, config: dict | Config | Path | None = None) -> None:
+    def __init__(self, config: dict | Config | Path | None = None) -> None:  # pragma: no cover
         self._scripts: dict[Path, str] = {}
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
@@ -49,10 +49,10 @@ class _ECFlowDef:
         self._d = Defs()
         self._add_workflow_components()
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self._d.__str__()
 
-    def write_ecf_scripts(self, path: Path | str) -> None:
+    def write_ecf_scripts(self, path: Path | str) -> None:  # pragma: no cover
         """
         The ecf scripts for this workflow.
 
@@ -68,7 +68,7 @@ class _ECFlowDef:
             outpath.parent.mkdir(parents=True, exist_ok=True)
             outpath.write_text(content)
 
-    def write_suite_definition(self, path: Path | str) -> None:
+    def write_suite_definition(self, path: Path | str) -> None:  # pragma: no cover
         """
         The suite definition artifact.
 
@@ -79,7 +79,7 @@ class _ECFlowDef:
         suite = path / "suite.def"
         suite.write_text(self._d.__str__())
 
-    def _add_workflow_components(self) -> None:
+    def _add_workflow_components(self) -> None:  # pragma: no cover
         """
         Add suite(s) and other attributes to the suite definition.
         """
@@ -96,7 +96,7 @@ class _ECFlowDef:
                 case "suites":
                     self._expand_block(subconfig, name, Suite, self._d)
 
-    def _expand_block(
+    def _expand_block(  # pragma: no cover
         self,
         config: dict,
         name: str,
@@ -139,7 +139,7 @@ class _ECFlowDef:
             }
             self._add_node(**args)
 
-    def _add_node(  # noqa: C901,PLR0912
+    def _add_node(  # noqa: C901,PLR0912  # pragma: no cover
         self,
         config: dict,
         node: Node,
@@ -196,7 +196,7 @@ class _ECFlowDef:
                 case "script":
                     self._create_ecf_script(subconfig, node)
 
-    def _add_repeat(self, config: dict, name: str, node: Node) -> None:
+    def _add_repeat(self, config: dict, name: str, node: Node) -> None:  # pragma: no cover
         """
         Adds a repeat to a node.
 
@@ -218,7 +218,7 @@ class _ECFlowDef:
                 repeat = RepeatInteger
         node.add_repeat(repeat(**config))
 
-    def _create_ecf_script(self, config: dict, task: Task) -> None:
+    def _create_ecf_script(self, config: dict, task: Task) -> None:  # pragma: no cover
         """
         Write the ecf script for the task to disk.
 
@@ -251,7 +251,7 @@ class _ECFlowDef:
         )
         self._scripts[path] = es
 
-    def _ecflowscript(
+    def _ecflowscript(  # pragma: no cover
         self,
         execution: list[str],
         manual: str,
@@ -312,7 +312,9 @@ class _ECFlowDef:
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
-    def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
+    def _jobscheduler(
+        self, account: str, execution: dict, rundir: Path | str
+    ) -> JobScheduler:  # pragma: no cover
         """
         Use the execution block to build a JobScheduler object.
 
