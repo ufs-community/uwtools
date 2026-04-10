@@ -669,6 +669,58 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
         assert "is not of type 'string'\n" in errors(with_set(config, [1, 2, 3], key))
         assert not errors(with_set(config, ["foo", "bar", "baz"], key))
 
+# ecflow
+
+def test_schema_ecflow_addons_defstatus():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"defstatus": "foo"})
+
+def test_schema_ecflow_addons_events():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"events": [[1, "foo"]]})
+    # Can't be a mixed list
+    assert "'foo' is not of type 'integer'" in errors({"events": [["foo", 2]]})
+
+def test_schema_ecflow_addons_inlimits():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Supports one of four categories
+    assert not errors({"inlimits": [["foo"]]})
+    assert not errors({"inlimits": [["foo", "bar"]]})
+    assert not errors({"inlimits": [["foo", "bar", 2], ["baz", "qux"]]})
+    assert not errors({"inlimits": [["foo", "bar", 2, True]]})
+    # Exactly one is required
+    assert "['foo', 2] is not valid under any of the given schemas" in errors({"inlimits": [["foo", 2]]})
+    assert "{} is not of type 'array'" in errors({"inlimits": {}})
+    assert "[] should be non-empty" in errors({"inlimits": []})
+
+def test_schema_ecflow_addons_labels():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Allows for a list of 2-lists
+    assert not errors({"labels": [["foo", "bar"], ["baz", "qux"]]})
+    # List must contain 2-item lists
+    assert "'foo' is not of type 'array'" in errors({"labels": ["foo", "bar"]})
+    assert "['foo'] is too short" in errors({"labels": [["foo"]]})
+    assert "[] should be non-empty" in errors({"labels": []})
+
+
+def test_schema_ecflow_addons_late():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"late": {"active": "00:15", "complete": "+02:00", "submitted": "20:00"}})
+
+
+def test_schema_ecflow_addons_limits():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"limits": [["foo", 1], ["bar", 2]]})
+    # It's a list of lists
+    assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
+    assert "[] should be non-empty" in errors({"limits": []})
+
+
+
 
 # enkf
 

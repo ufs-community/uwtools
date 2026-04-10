@@ -176,7 +176,7 @@ class _ECFlowDef:
                     node.add_defstatus(subconfig)
                 case "events":
                     for event in subconfig:
-                        node.add_event(event)
+                        node.add_event(*event)
                 case "inlimits":
                     add_items(node.add_inlimit, subconfig)
                 case "labels":
