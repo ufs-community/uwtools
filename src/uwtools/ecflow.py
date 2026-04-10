@@ -195,8 +195,10 @@ class _ECFlowDef:
                     node.add_trigger(subconfig)
                 case "vars":  # add_variable accepts a dict.
                     node.add_variable(subconfig)
+                case "expand":  # Already processed by _expand_block.
+                    pass
                 case _:
-                    pass  # Ignore unrecognized tags.
+                    assert False, f"Unrecognized tag: {tag}"
 
     def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
@@ -314,9 +316,7 @@ class _ECFlowDef:
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
-    def _jobscheduler(
-        self, account: str, execution: dict, rundir: Path | str
-    ) -> JobScheduler:
+    def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """
         Use the execution block to build a JobScheduler object.
 

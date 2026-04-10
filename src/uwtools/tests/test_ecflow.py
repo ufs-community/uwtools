@@ -13,13 +13,14 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.ecflow import _ECFlowDef
 from uwtools.exceptions import UWConfigError
 
-
 # Fixtures
 
 
 @fixture
 def instance():
-    """Create an _ECFlowDef instance without calling __init__."""
+    """
+    Create an _ECFlowDef instance without calling __init__.
+    """
     obj = object.__new__(_ECFlowDef)
     obj._scripts = {}
     obj._scheduler = None
@@ -30,7 +31,9 @@ def instance():
 
 @fixture
 def instance_with_scheduler():
-    """Create an _ECFlowDef instance with a scheduler configured."""
+    """
+    Create an _ECFlowDef instance with a scheduler configured.
+    """
     obj = object.__new__(_ECFlowDef)
     obj._scripts = {}
     obj._scheduler = "slurm"
@@ -41,27 +44,19 @@ def instance_with_scheduler():
 
 @fixture
 def minimal_config():
-    """Minimal config for instantiation."""
+    """
+    Minimal config for instantiation.
+    """
     return {"ecflow": {}}
-
-
-@fixture
-def suite_config():
-    """Config with a simple suite."""
-    return {
-        "ecflow": {
-            "suite_test": {
-                "task_hello": {}
-            }
-        }
-    }
 
 
 # Tests
 
 
 class TestECFlowDef:
-    """Tests for class uwtools.ecflow._ECFlowDef."""
+    """
+    Tests for class uwtools.ecflow._ECFlowDef.
+    """
 
     # _tag_name tests
 
@@ -197,7 +192,9 @@ class TestECFlowDef:
 
     @mark.parametrize("repeat_type", ["datelist", "string"])
     def test__add_repeat__enumerated_variants(self, instance, repeat_type):
-        """Test that datelist and string repeat types also use RepeatEnumerated."""
+        """
+        Test that datelist and string repeat types also use RepeatEnumerated.
+        """
         node = Mock()
         config = {"name": "VAR", "values": ["a", "b"]}
         with patch.object(ecflow, "RepeatEnumerated") as mock_repeat:
@@ -320,10 +317,7 @@ class TestECFlowDef:
     # _expand_block tests
 
     def test__expand_block__basic(self, instance):
-        config = {
-            "expand": {"MEMBER": ["m01", "m02"]},
-            "task_run": {}
-        }
+        config = {"expand": {"MEMBER": ["m01", "m02"]}, "task_run": {}}
         suite = Suite("test")
         instance._d.add(suite)
         with patch.object(instance, "_add_node") as mock_add_node:
@@ -380,18 +374,14 @@ class TestECFlowDef:
         assert logged("No scripts are configured for this workflow")
 
     def test_write_ecf_scripts__with_scripts(self, instance, tmp_path):
-        instance._scripts = {
-            Path("test/hello.ecf"): "#!/bin/bash\necho hello"
-        }
+        instance._scripts = {Path("test/hello.ecf"): "#!/bin/bash\necho hello"}
         instance.write_ecf_scripts(tmp_path)
         outfile = tmp_path / "test" / "hello.ecf"
         assert outfile.exists()
         assert "echo hello" in outfile.read_text()
 
     def test_write_ecf_scripts__with_string_path(self, instance, tmp_path):
-        instance._scripts = {
-            Path("suite/task.ecf"): "#!/bin/bash\necho test"
-        }
+        instance._scripts = {Path("suite/task.ecf"): "#!/bin/bash\necho test"}
         instance.write_ecf_scripts(str(tmp_path))
         outfile = tmp_path / "suite" / "task.ecf"
         assert outfile.exists()
@@ -492,7 +482,9 @@ class TestECFlowDef:
         mock_repeat.assert_called_once()
 
     def test__add_node__with_script_then_continue(self, instance):
-        """Test that loop continues after processing script case (covers branch 196->159)."""
+        """
+        Test that loop continues after processing script case (covers branch 196->159).
+        """
         suite = Suite("test")
         task = Task("t1")
         # Place script FIRST so loop must continue to process trigger afterward.
@@ -504,7 +496,9 @@ class TestECFlowDef:
         assert task.get_trigger() is not None
 
     def test__add_node__with_script_last(self, instance):
-        """Test that loop exits after processing script as the last item."""
+        """
+        Test that loop exits after processing script as the last item.
+        """
         suite = Suite("test")
         task = Task("t1")
         # Place script LAST so loop exits after processing it.
@@ -516,26 +510,34 @@ class TestECFlowDef:
         assert len(instance._scripts) == 1
 
     def test__add_node__unrecognized_tag(self, instance):
-        """Test that unrecognized tags are silently ignored."""
+        """
+        Test that unrecognized tags raise AssertionError.
+        """
         suite = Suite("test")
         task = Task("t1")
-        config = {"unknown_tag": "value", "trigger": "1==1"}
-        instance._add_node(config, task, suite)
-        # Trigger should still be processed despite unrecognized tag.
-        assert task.get_trigger() is not None
+        config = {"unknown_tag": "value"}
+        with raises(AssertionError, match="Unrecognized tag: unknown"):
+            instance._add_node(config, task, suite)
 
-    def test__add_node__unrecognized_tag_last(self, instance):
-        """Test that unrecognized tag as last item exits loop correctly."""
+    def test__add_node__with_expand_tag(self, instance):
+        """
+        Test that expand tag is silently skipped (already processed by _expand_block).
+        """
         suite = Suite("test")
         task = Task("t1")
-        config = {"trigger": "1==1", "unknown_tag": "value"}
+        config = {"expand": {"VAR": ["a", "b"]}, "trigger": "1==1"}
         instance._add_node(config, task, suite)
-        # Trigger should be processed, unknown tag ignored.
+        # Expand tag should be skipped, trigger should be processed.
         assert task.get_trigger() is not None
 
     def test__add_repeat__datetime(self, instance):
         node = Mock()
-        config = {"name": "DT", "start": "20240101T000000", "end": "20240101T120000", "delta": "01:00:00"}
+        config = {
+            "name": "DT",
+            "start": "20240101T000000",
+            "end": "20240101T120000",
+            "delta": "01:00:00",
+        }
         with patch.object(ecflow, "RepeatDateTime") as mock_repeat:
             instance._add_repeat(config.copy(), "datetime", node)
         mock_repeat.assert_called_once()
@@ -550,7 +552,9 @@ class TestECFlowDef:
     # Integration tests
 
     def test_integration__full_workflow(self, tmp_path):
-        """Test creating a complete workflow from config, writing outputs."""
+        """
+        Test creating a complete workflow from config, writing outputs.
+        """
         config = {
             "ecflow": {
                 "suite_test": {
@@ -584,7 +588,9 @@ class TestECFlowDef:
         assert len(list(tmp_path.rglob("*.ecf"))) == 1
 
     def test_integration__with_expand(self, tmp_path):
-        """Test workflow with expand blocks for parameterized tasks."""
+        """
+        Test workflow with expand blocks for parameterized tasks.
+        """
         config = {
             "ecflow": {
                 "suite_ensemble": {
