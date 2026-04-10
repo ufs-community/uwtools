@@ -9,7 +9,7 @@ $defs:
           type: str
         type: array
       inlimits:
-        type: array:
+        type: array
         items:
           oneOf:
             - type: array
@@ -83,19 +83,107 @@ $defs:
               minItems: 4
               maxItems: 4
       repeat_date:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          variable:
+            type: string
+          start:
+            type: integer
+            minimum: 10000000
+            maximum: 99999999
+          end:
+            type: integer
+            minimum: 10000000
+            maximum: 99999999
+          step:
+            type: integer
+        required:
+          - variable
+          - start
+          - end
+        type: object
       repeat_datelist:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          variable:
+            type: string
+          list:
+            type: array
+            items:
+              type: integer
+              minimum: 10000000
+              maximum: 99999999
+        required:
+          - variable
+          - list
       repeat_datetime:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          variable:
+            type: string
+          start:
+            type: string
+            pattern: "^[0-9]{8}T[0-9]{6}$"
+          end:
+            type: string
+            pattern: "^[0-9]{8}T[0-9]{6}$"
+          step:
+            type: string
+            pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+        required:
+          - variable
+          - start
+          - end
+        type: object
       repeat_day:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          step:
+            type: integer
+        required:
+          - step
+        type: object
       repeat_enumerated:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          variable:
+            type: string
+          list:
+            type: array
+            items:
+              type: string
+        required:
+          - variable
+          - list
+        type: object
       repeat_int:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          variable:
+            type: integer
+          start:
+            type: integer
+          end:
+            type: integer
+          step:
+            type: integer
+        required:
+          - variable
+          - start
+          - end
       repeat_string:
-        "$ref": "#/$defs/repeat"
+        additionalProperties: false
+        properties:
+          variable:
+            type: string
+          list:
+            type: array
+            items:
+              type: string
+        required:
+          - variable
+          - list
+        type: object
       trigger:
         type: string
       vars:
@@ -158,44 +246,6 @@ $defs:
       "^tasks_.+$":
         "$ref": "#/$defs/expander"
     type: object
-  repeat:
-    allOf:
-      - additionalProperties: false
-        properties:
-          variable:
-            type: string
-        type: object
-      - oneOf:
-        - additionalProperties: false
-          properties:
-            start:
-              type: ["number", "string"]
-            end:
-              type: ["number", "string"]
-            step:
-              type: ["number", "string"]
-          type: object
-          required:
-            - start
-            - end
-        - additionalProperties: false
-          properties:
-            step:
-              type: ["number", "string"]
-          required:
-            - step
-          type: object
-        - additionalProperties: false
-          properties:
-            list:
-              items:
-                type:
-                  - number
-                  - string
-              type: array
-          required:
-            - list
-          type: object
   task:
     additionalProperties: false
     allOf:
@@ -254,11 +304,9 @@ properties:
     anyOf:
       - patternProperties:
           "^suite_.+$": {}
-        properties: {}
         minProperties: 1
       - patternProperties:
           "^suites_.+$": {}
-        properties: {}
         minProperties: 1
     type: object
 required:
