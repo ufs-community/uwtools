@@ -1,14 +1,13 @@
 {
   "$defs": {
     "addons": {
-      "additionalProperties": false,
       "properties": {
         "defstatus": {
           "type": "string"
         },
         "events": {
           "items": {
-            "type": "str"
+            "type": "string"
           },
           "type": "array"
         },
@@ -274,37 +273,6 @@
       }
     },
     "expander": {
-      "additionalProperties": false,
-      "anyOf": [
-        {
-          "minProperties": 1,
-          "patternProperties": {
-            "^families_.+$": {}
-          },
-          "properties": {}
-        },
-        {
-          "minProperties": 1,
-          "patternProperties": {
-            "^family_.+$": {}
-          },
-          "properties": {}
-        },
-        {
-          "minProperties": 1,
-          "patternProperties": {
-            "^task_.+$": {}
-          },
-          "properties": {}
-        },
-        {
-          "minProperties": 1,
-          "patternProperties": {
-            "^tasks_.+$": {}
-          },
-          "properties": {}
-        }
-      ],
       "minProperties": 2,
       "patternProperties": {
         "^families_.+$": {
@@ -338,7 +306,6 @@
       "type": "object"
     },
     "family": {
-      "additionalProperties": false,
       "allOf": [
         {
           "$ref": "#/$defs/nodeContainer"
@@ -346,10 +313,10 @@
         {
           "$ref": "#/$defs/addons"
         }
-      ]
+      ],
+      "type": "object"
     },
     "nodeContainer": {
-      "additionalProperties": false,
       "patternProperties": {
         "^families_.+$": {
           "$ref": "#/$defs/expander"
@@ -367,7 +334,6 @@
       "type": "object"
     },
     "task": {
-      "additionalProperties": false,
       "allOf": [
         {
           "$ref": "#/$defs/addons"
@@ -381,14 +347,6 @@
                   "type": "string"
                 },
                 "execution": {
-                  "anyOf": [
-                    {
-                      "$ref": "urn:uwtools:execution-serial"
-                    },
-                    {
-                      "$ref": "urn:uwtools:execution-parallel"
-                    }
-                  ],
                   "type": "object"
                 },
                 "manual": {
