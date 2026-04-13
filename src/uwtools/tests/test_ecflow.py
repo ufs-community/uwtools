@@ -5,7 +5,7 @@ Tests for uwtools.ecflow module.
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from ecflow import Defs, Family, Suite, Task
+from ecflow import Defs, Suite, Task
 from pytest import fixture, mark, raises
 
 from uwtools import ecflow
@@ -369,8 +369,8 @@ class TestECFlowDef:
 
     # write_ecf_scripts tests
 
-    def test_write_ecf_scripts__no_scripts(self, instance, logged):
-        instance.write_ecf_scripts(Path("/tmp"))
+    def test_write_ecf_scripts__no_scripts(self, instance, logged, tmp_path):
+        instance.write_ecf_scripts(tmp_path)
         assert logged("No scripts are configured for this workflow")
 
     def test_write_ecf_scripts__with_scripts(self, instance, tmp_path):
@@ -452,9 +452,8 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         config = {"late": {"submitted": "+00:15", "active": "+01:00"}}
-        with patch.object(ecflow, "Late") as mock_late:
-            with patch.object(task, "add_late") as mock_add_late:
-                instance._add_node(config, task, suite)
+        with patch.object(ecflow, "Late") as mock_late, patch.object(task, "add_late"):
+            instance._add_node(config, task, suite)
         mock_late.assert_called_once()
 
     def test__add_node__with_limits(self, instance):
@@ -587,7 +586,7 @@ class TestECFlowDef:
         ecf.write_ecf_scripts(tmp_path)
         assert len(list(tmp_path.rglob("*.ecf"))) == 1
 
-    def test_integration__with_expand(self, tmp_path):
+    def test_integration__with_expand(self):
         """
         Test workflow with expand blocks for parameterized tasks.
         """

@@ -198,7 +198,7 @@ class _ECFlowDef:
                 case "expand":  # Already processed by _expand_block.
                     pass
                 case _:
-                    assert False, f"Unrecognized tag: {tag}"
+                    raise AssertionError(f"Unrecognized tag: {tag}")
 
     def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
