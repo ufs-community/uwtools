@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "ecflow": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "ecflow"
+  ],
+  "type": "object"
+}
