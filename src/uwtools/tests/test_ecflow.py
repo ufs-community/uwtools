@@ -5,7 +5,7 @@ Tests for uwtools.ecflow module.
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from ecflow import Defs, Suite, Task
+from ecflow import Defs, Suite, Task  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
 from uwtools import ecflow
@@ -146,7 +146,7 @@ class TestECFlowDef:
         assert call_args["queue"] == "batch"
 
     def test__jobscheduler__no_threads(self, instance_with_scheduler):
-        execution = {}
+        execution: dict = {}
         with patch.object(ecflow.JobScheduler, "get_scheduler") as mock_get:
             instance_with_scheduler._jobscheduler(
                 account="myaccount",
@@ -235,7 +235,7 @@ class TestECFlowDef:
         assert isinstance(ecf._d, Defs)
 
     def test__init__missing_ecflow_key(self):
-        config = {"not_ecflow": {}}
+        config: dict = {"not_ecflow": {}}
         with raises(KeyError):
             _ECFlowDef(config=config)
 
@@ -264,13 +264,13 @@ class TestECFlowDef:
 
     def test__add_node__basic(self, instance):
         suite = Suite("test")
-        config = {}
+        config: dict = {}
         instance._add_node(config, suite, instance._d)
         assert "test" in str(instance._d)
 
     def test__add_node__with_task(self, instance):
         suite = Suite("test")
-        config = {"task_hello": {}}
+        config: dict = {"task_hello": {}}
         with patch.object(instance, "_add_node", wraps=instance._add_node) as mock:
             instance._add_node(config, suite, instance._d)
         # Called twice: once for suite, once for task
@@ -278,7 +278,7 @@ class TestECFlowDef:
 
     def test__add_node__with_family(self, instance):
         suite = Suite("test")
-        config = {"family_myfam": {"task_t1": {}}}
+        config: dict = {"family_myfam": {"task_t1": {}}}
         with patch.object(instance, "_add_node", wraps=instance._add_node) as mock:
             instance._add_node(config, suite, instance._d)
         # Called for suite, family, and task
