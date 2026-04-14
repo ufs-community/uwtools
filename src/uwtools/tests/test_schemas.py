@@ -719,6 +719,61 @@ def test_schema_ecflow_addons_limits():
     assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
     assert "[] should be non-empty" in errors({"limits": []})
 
+def test_schema_ecflow_addons_meters():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"meters": [["foo", 1, 2], ["bar", 2, 8]]})
+    # It's a list of lists
+    assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
+    assert "[] should be non-empty" in errors({"limits": []})
+
+@mark.parametrize("top_level", ["repeat_date", "repeat_int"])
+def test_schema_ecflow_addons_repeat_ints(top_level):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"variable": "foo", "start": 20260101, "end": 20260102}
+    assert not errors({top_level: config})
+    with_step = {**config, "step": 2}
+    assert not errors({top_level: with_step})
+    for key in ("end", "start", "variable"):
+        assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({top_level: {**config, "foo":
+                                                                              "bar"}})
+
+@mark.parametrize("top_level", ["repeat_datelist", "repeat_enumerated", "repeat_string"])
+def test_schema_ecflow_addons_repeat_lists(top_level):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    type_ = int if top_level == "repeat_datelist" else str
+    # Basic spec:
+    config = {"variable": "foo", "list": [type_(i) for i in (20270104, 20270204)]}
+    assert not errors({top_level: config})
+    for key in ("variable", "list"):
+        assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({top_level: {**config, "foo":"bar"}})
+
+
+def test_schema_ecflow_addons_repeat_datetime():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"variable": "foo", "start": "20260101T120000", "end": "20260102T123000"}
+    assert not errors({"repeat_datetime": config})
+    with_step = {**config, "step": "02:00:00"}
+    assert not errors({"repeat_datetime": with_step})
+    for key in ("end", "start", "variable"):
+        assert f"'{key}' is a required property" in errors({"repeat_datetime": with_del(config, key)})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({"repeat_datetime": {**config, "foo":
+                                                                              "bar"}})
+
+def test_schema_ecflow_addons_repeat_day():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"step": 2}
+    assert not errors({"repeat_day": config})
+    assert f"'step' is a required property" in errors({"repeat_day": with_del(config, "step")})
+    assert "Additional properties are not allowed" in errors({"repeat_day": {**config, "foo": "bar"}})
 
 
 
