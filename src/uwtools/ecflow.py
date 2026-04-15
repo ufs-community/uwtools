@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from ecflow import (  # type: ignore[import-untyped]
     Defs,
+    DState,
     Family,
     Late,
     Node,
@@ -32,6 +33,8 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Sequence
+
     from ecflow import NodeContainer
 
 
@@ -155,7 +158,13 @@ class _ECFlowDef:
         :param refs: Optional references from expanded nodes from higher in the tree.
         """
         parent.add(node)
-        add_items = lambda n, cfg: (n(*args) for args in cfg)
+
+        def add_items(
+            method: Callable[..., object], cfg: Iterable[Sequence[object]]
+        ) -> None:
+            for args in cfg:
+                method(*args)
+
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
@@ -173,7 +182,7 @@ class _ECFlowDef:
                 # Node attribute cases
 
                 case "defstatus":
-                    node.add_defstatus(subconfig)
+                    node.add_defstatus(getattr(DState, subconfig))
                 case "events":
                     for event in subconfig:
                         node.add_event(event)

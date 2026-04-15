@@ -3,9 +3,9 @@ Tests for uwtools.ecflow module.
 """
 
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
-from ecflow import Defs, Suite, Task  # type: ignore[import-untyped]
+from ecflow import Defs, DState, Suite, Task  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
 from uwtools import ecflow
@@ -17,29 +17,20 @@ from uwtools.exceptions import UWConfigError
 
 
 @fixture
-def instance():
+def instance(minimal_config):
     """
-    Create an _ECFlowDef instance without calling __init__.
+    Create a minimal _ECFlowDef instance.
     """
-    obj = object.__new__(_ECFlowDef)
-    obj._scripts = {}
-    obj._scheduler = None
-    obj._d = Defs()
-    obj._config = {}
-    return obj
+    return _ECFlowDef(minimal_config)
 
 
 @fixture
-def instance_with_scheduler():
+def instance_with_scheduler(instance):
     """
     Create an _ECFlowDef instance with a scheduler configured.
     """
-    obj = object.__new__(_ECFlowDef)
-    obj._scripts = {}
-    obj._scheduler = "slurm"
-    obj._d = Defs()
-    obj._config = {}
-    return obj
+    instance._scheduler = "slurm"
+    return instance
 
 
 @fixture
@@ -48,6 +39,22 @@ def minimal_config():
     Minimal config for instantiation.
     """
     return {"ecflow": {}}
+
+
+def assert_line_in(result: str, line: str) -> None:
+    """
+    Assert that a line exists in result, ignoring surrounding whitespace.
+    """
+    assert line in (x.strip() for x in result.splitlines())
+
+
+def assert_lines_in_order(result: str, expected: list[str]) -> None:
+    """
+    Assert that expected lines are present in result in the same relative order.
+    """
+    lines = [x.strip() for x in result.splitlines()]
+    actual = [line for line in lines if line in expected]
+    assert actual == expected
 
 
 # Tests
@@ -80,11 +87,11 @@ class TestECFlowDef:
             execution=["echo hello"],
             manual="Test script",
         )
-        assert "echo hello" in result
-        assert "Test script" in result
-        assert "%manual" in result
-        assert "%end" in result
-        assert "model=%MODEL%" in result
+        assert_line_in(result, "echo hello")
+        assert_line_in(result, "Test script")
+        assert_line_in(result, "%manual")
+        assert_line_in(result, "%end")
+        assert_line_in(result, "model=%MODEL%")
 
     def test__ecflowscript__with_envcmds(self, instance):
         result = instance._ecflowscript(
@@ -92,8 +99,8 @@ class TestECFlowDef:
             manual="Test script",
             envcmds=["module load foo", "export BAR=baz"],
         )
-        assert "module load foo" in result
-        assert "export BAR=baz" in result
+        assert_line_in(result, "module load foo")
+        assert_line_in(result, "export BAR=baz")
 
     def test__ecflowscript__with_envvars(self, instance):
         result = instance._ecflowscript(
@@ -101,8 +108,8 @@ class TestECFlowDef:
             manual="Test script",
             envvars={"FOO": "bar", "BAZ": "qux"},
         )
-        assert "export FOO=bar" in result
-        assert "export BAZ=qux" in result
+        assert_line_in(result, "export FOO=bar")
+        assert_line_in(result, "export BAZ=qux")
 
     def test__ecflowscript__with_includes(self, instance):
         result = instance._ecflowscript(
@@ -111,9 +118,10 @@ class TestECFlowDef:
             pre_includes=["head.h", "setup.h"],
             post_includes=["tail.h"],
         )
-        assert "%include <head.h>" in result
-        assert "%include <setup.h>" in result
-        assert "%include <tail.h>" in result
+        assert_lines_in_order(
+            result,
+            ["%include <head.h>", "%include <setup.h>", "%include <tail.h>"],
+        )
 
     def test__ecflowscript__with_scheduler(self, instance):
         mock_scheduler = Mock()
@@ -124,71 +132,80 @@ class TestECFlowDef:
             manual="Test script",
             scheduler=mock_scheduler,
         )
-        assert "#SBATCH --account=foo" in result
-        assert "srun --export=ALL" in result
+        assert_line_in(result, "#SBATCH --account=foo")
+        assert_line_in(result, "srun --export=ALL")
 
     # _jobscheduler tests
 
     def test__jobscheduler(self, instance_with_scheduler):
         execution = {"threads": 4, "batchargs": {"queue": "batch"}}
-        with patch.object(ecflow.JobScheduler, "get_scheduler") as mock_get:
+        with patch.object(ecflow.JobScheduler, "get_scheduler") as get_scheduler:
             instance_with_scheduler._jobscheduler(
                 account="myaccount",
                 execution=execution,
                 rundir="/path/to/run",
             )
-        mock_get.assert_called_once()
-        call_args = mock_get.call_args[0][0]
-        assert call_args["account"] == "myaccount"
-        assert call_args["rundir"] == "/path/to/run"
-        assert call_args["scheduler"] == "slurm"
-        assert call_args["threads"] == 4
-        assert call_args["queue"] == "batch"
+        get_scheduler.assert_called_once_with(
+            {
+                "account": "myaccount",
+                "rundir": "/path/to/run",
+                "scheduler": "slurm",
+                "stdout": "/path/to/run.out",
+                "threads": 4,
+                "queue": "batch",
+            }
+        )
 
     def test__jobscheduler__no_threads(self, instance_with_scheduler):
         execution: dict = {}
-        with patch.object(ecflow.JobScheduler, "get_scheduler") as mock_get:
+        with patch.object(ecflow.JobScheduler, "get_scheduler") as get_scheduler:
             instance_with_scheduler._jobscheduler(
                 account="myaccount",
                 execution=execution,
                 rundir="/path/to/run",
             )
-        call_args = mock_get.call_args[0][0]
-        assert "threads" not in call_args
+        get_scheduler.assert_called_once_with(
+            {
+                "account": "myaccount",
+                "rundir": "/path/to/run",
+                "scheduler": "slurm",
+                "stdout": "/path/to/run.out",
+            }
+        )
 
     # _add_repeat tests
 
     def test__add_repeat__date(self, instance):
         node = Mock()
-        config = {"name": "YMD", "start": 20240101, "end": 20240131, "step": 1}
-        with patch.object(ecflow, "RepeatDate") as mock_repeat:
-            instance._add_repeat(config.copy(), "date", node)
-        mock_repeat.assert_called_once()
-        node.add_repeat.assert_called_once()
+        common = {"name": "YMD", "start": 20240101, "end": 20240131}
+        with patch.object(ecflow, "RepeatDate") as repeat_date:
+            instance._add_repeat({**common, "step": 1}, "date", node)
+        repeat_date.assert_called_once_with(**{**common, "delta": 1})
+        node.add_repeat.assert_called_once_with(repeat_date.return_value)
 
     def test__add_repeat__int(self, instance):
         node = Mock()
         config = {"name": "STEP", "start": 0, "end": 10, "step": 1}
-        with patch.object(ecflow, "RepeatInteger") as mock_repeat:
+        with patch.object(ecflow, "RepeatInteger") as repeat_integer:
             instance._add_repeat(config.copy(), "int", node)
-        mock_repeat.assert_called_once()
-        node.add_repeat.assert_called_once()
+        repeat_integer.assert_called_once_with(**config)
+        node.add_repeat.assert_called_once_with(repeat_integer.return_value)
 
     def test__add_repeat__day(self, instance):
         node = Mock()
         config = {"step": 1}
-        with patch.object(ecflow, "RepeatDay") as mock_repeat:
+        with patch.object(ecflow, "RepeatDay") as repeat_day:
             instance._add_repeat(config.copy(), "day", node)
-        mock_repeat.assert_called_once()
-        node.add_repeat.assert_called_once()
+        repeat_day.assert_called_once_with(**config)
+        node.add_repeat.assert_called_once_with(repeat_day.return_value)
 
     def test__add_repeat__enumerated(self, instance):
         node = Mock()
         config = {"name": "MEMBER", "values": ["m01", "m02", "m03"]}
-        with patch.object(ecflow, "RepeatEnumerated") as mock_repeat:
+        with patch.object(ecflow, "RepeatEnumerated") as repeat_enumerated:
             instance._add_repeat(config.copy(), "enumerated", node)
-        mock_repeat.assert_called_once()
-        node.add_repeat.assert_called_once()
+        repeat_enumerated.assert_called_once_with(**config)
+        node.add_repeat.assert_called_once_with(repeat_enumerated.return_value)
 
     @mark.parametrize("repeat_type", ["datelist", "string"])
     def test__add_repeat__enumerated_variants(self, instance, repeat_type):
@@ -197,10 +214,10 @@ class TestECFlowDef:
         """
         node = Mock()
         config = {"name": "VAR", "values": ["a", "b"]}
-        with patch.object(ecflow, "RepeatEnumerated") as mock_repeat:
+        with patch.object(ecflow, "RepeatEnumerated") as repeat_enumerated:
             instance._add_repeat(config.copy(), repeat_type, node)
-        mock_repeat.assert_called_once()
-        node.add_repeat.assert_called_once()
+        repeat_enumerated.assert_called_once_with(**config)
+        node.add_repeat.assert_called_once_with(repeat_enumerated.return_value)
 
     # __str__ tests
 
@@ -305,25 +322,27 @@ class TestECFlowDef:
         config = {"events": ["event1", "event2"]}
         task = Task("t1")
         instance._add_node(config, task, suite)
-        # Events are added to the task
+        assert task.find_event("event1") is not None
+        assert task.find_event("event2") is not None
+        assert [event.name() for event in task.events] == ["event1", "event2"]
 
     def test__add_node__with_defstatus(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"defstatus": "complete"}
-        with patch.object(task, "add_defstatus") as mock_defstatus:
-            instance._add_node(config, task, suite)
-        mock_defstatus.assert_called_once_with("complete")
+        instance._add_node(config, task, suite)
+        assert task.get_defstatus() == DState.complete
 
     # _expand_block tests
 
     def test__expand_block__basic(self, instance):
-        config = {"expand": {"MEMBER": ["m01", "m02"]}, "task_run": {}}
+        config = {"expand": {"MEMBER": ["m01", "m02"]}, "task_{{ ec.MEMBER }}": {}}
         suite = Suite("test")
         instance._d.add(suite)
         with patch.object(instance, "_add_node") as mock_add_node:
-            instance._expand_block(config, "suite", Suite, instance._d)
+            instance._expand_block(config, "{{ ec.MEMBER }}", Task, suite)
         assert mock_add_node.call_count == 2
+        assert [x.kwargs["node"].name() for x in mock_add_node.call_args_list] == ["m01", "m02"]
 
     def test__expand_block__mismatched_lengths(self, instance):
         config = {
@@ -378,14 +397,14 @@ class TestECFlowDef:
         instance._scripts = {Path("test/hello.ecf"): "#!/bin/bash\necho hello"}
         instance.write_ecf_scripts(tmp_path)
         outfile = tmp_path / "test" / "hello.ecf"
-        assert outfile.exists()
+        assert outfile.is_file()
         assert "echo hello" in outfile.read_text()
 
     def test_write_ecf_scripts__with_string_path(self, instance, tmp_path):
         instance._scripts = {Path("suite/task.ecf"): "#!/bin/bash\necho test"}
         instance.write_ecf_scripts(str(tmp_path))
         outfile = tmp_path / "suite" / "task.ecf"
-        assert outfile.exists()
+        assert outfile.is_file()
 
     # write_suite_definition tests
 
@@ -394,7 +413,7 @@ class TestECFlowDef:
         instance._d.add(suite)
         instance.write_suite_definition(tmp_path)
         suite_file = tmp_path / "suite.def"
-        assert suite_file.exists()
+        assert suite_file.is_file()
         assert "test" in suite_file.read_text()
 
     def test_write_suite_definition__creates_directory(self, instance, tmp_path):
@@ -402,13 +421,13 @@ class TestECFlowDef:
         instance._d.add(suite)
         nested_path = tmp_path / "nested" / "output"
         instance.write_suite_definition(nested_path)
-        assert (nested_path / "suite.def").exists()
+        assert (nested_path / "suite.def").is_file()
 
     def test_write_suite_definition__with_string_path(self, instance, tmp_path):
         suite = Suite("test")
         instance._d.add(suite)
         instance.write_suite_definition(str(tmp_path))
-        assert (tmp_path / "suite.def").exists()
+        assert (tmp_path / "suite.def").is_file()
 
     # Additional tests for missing coverage
 
@@ -436,15 +455,23 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         config = {"inlimits": [["limit1", "/path"], ["limit2", "/path2"]]}
-        instance._add_node(config, task, suite)
-        # Note: add_items returns unconsumed generator in ecflow.py
+        with patch.object(task, "add_inlimit") as add_inlimit:
+            instance._add_node(config, task, suite)
+        assert add_inlimit.call_args_list == [
+            call("limit1", "/path"),
+            call("limit2", "/path2"),
+        ]
 
     def test__add_node__with_labels(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"labels": [["label1", "value1"], ["label2", "value2"]]}
-        instance._add_node(config, task, suite)
-        # Note: add_items returns unconsumed generator in ecflow.py
+        with patch.object(task, "add_label") as add_label:
+            instance._add_node(config, task, suite)
+        assert add_label.call_args_list == [
+            call("label1", "value1"),
+            call("label2", "value2"),
+        ]
 
     def test__add_node__with_late(self, instance):
         suite = Suite("test")
@@ -458,15 +485,22 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         config = {"limits": [["limit1", 5], ["limit2", 10]]}
-        instance._add_node(config, task, suite)
-        # Note: add_items returns unconsumed generator in ecflow.py
+        with patch.object(task, "add_limit") as add_limit:
+            instance._add_node(config, task, suite)
+        assert add_limit.call_args_list == [
+            call("limit1", 5),
+            call("limit2", 10),
+        ]
 
     def test__add_node__with_meters(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"meters": [["meter1", 0, 100, 50]]}
-        instance._add_node(config, task, suite)
-        # Note: add_items returns unconsumed generator in ecflow.py
+        with patch.object(task, "add_meter") as add_meter:
+            instance._add_node(config, task, suite)
+        assert add_meter.call_args_list == [
+            call("meter1", 0, 100, 50),
+        ]
 
     def test__add_node__with_repeat(self, instance):
         suite = Suite("test")
@@ -533,10 +567,10 @@ class TestECFlowDef:
             "end": "20240101T120000",
             "delta": "01:00:00",
         }
-        with patch.object(ecflow, "RepeatDateTime") as mock_repeat:
+        with patch.object(ecflow, "RepeatDateTime") as repeat_datetime:
             instance._add_repeat(config.copy(), "datetime", node)
-        mock_repeat.assert_called_once()
-        node.add_repeat.assert_called_once()
+        repeat_datetime.assert_called_once_with(**config)
+        node.add_repeat.assert_called_once_with(repeat_datetime.return_value)
 
     def test__add_repeat__unknown_type(self, instance):
         node = Mock()
@@ -577,10 +611,10 @@ class TestECFlowDef:
         assert "task run" in suite_def
         # Write suite definition.
         ecf.write_suite_definition(tmp_path)
-        assert (tmp_path / "suite.def").exists()
-        # Write ecf scripts.
+        assert (tmp_path / "suite.def").is_file()
+        # Write ecf script.
         ecf.write_ecf_scripts(tmp_path)
-        assert len(list(tmp_path.rglob("*.ecf"))) == 1
+        assert (tmp_path / "test" / "run.ecf").is_file()
 
     def test_integration__with_expand(self):
         """
