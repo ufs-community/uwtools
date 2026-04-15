@@ -7,11 +7,25 @@
         },
         "events": {
           "items": {
-              "prefixItems": [
-                {"type": "integer"},
-                {"type": "string"}
-              ],
-              "type": "array"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "type": "array"
+              }
+            ]
           },
           "minItems": 1,
           "type": "array"
@@ -23,7 +37,9 @@
                 "maxItems": 1,
                 "minItems": 1,
                 "prefixItems": [
-                  {"type": "string"}
+                  {
+                    "type": "string"
+                  }
                 ],
                 "type": "array"
               },
@@ -31,8 +47,12 @@
                 "maxItems": 2,
                 "minItems": 2,
                 "prefixItems": [
-                   {"type": "string"},
-                   {"type": "string"}
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
                 ],
                 "type": "array"
               },
@@ -40,9 +60,15 @@
                 "maxItems": 3,
                 "minItems": 3,
                 "prefixItems": [
-                   {"type": "string"},
-                   {"type": "string"},
-                   {"type": "integer"}
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
                 ],
                 "type": "array"
               },
@@ -50,10 +76,18 @@
                 "maxItems": 4,
                 "minItems": 4,
                 "prefixItems": [
-                   {"type": "string"},
-                   {"type": "string"},
-                   {"type": "integer"},
-                   {"type": "boolean"}
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "boolean"
+                  }
                 ],
                 "type": "array"
               }
@@ -94,8 +128,12 @@
             "maxItems": 2,
             "minItems": 2,
             "prefixItems": [
-              {"type": "string"},
-              {"type": "integer"}
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
             ],
             "type": "array"
           },
@@ -109,9 +147,15 @@
                 "maxItems": 3,
                 "minItems": 3,
                 "prefixItems": [
-                  {"type": "string"},
-                  {"type": "integer"},
-                  {"type": "integer"}
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
                 ],
                 "type": "array"
               },
@@ -119,10 +163,18 @@
                 "maxItems": 4,
                 "minItems": 4,
                 "prefixItems": [
-                  {"type": "string"},
-                  {"type": "integer"},
-                  {"type": "integer"},
-                  {"type": "integer"}
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
                 ],
                 "type": "array"
               }
@@ -282,7 +334,8 @@
         "vars": {
           "type": "object"
         }
-      }
+      },
+      "type": "object"
     },
     "expander": {
       "minProperties": 2,
@@ -291,10 +344,10 @@
           "$ref": "#/$defs/expander"
         },
         "^family_.+$": {
-          "$ref": "#/$defs/family"
+          "$ref": "#/$defs/familycontainer"
         },
         "^task_.+$": {
-          "$ref": "#/$defs/task"
+          "$ref": "#/$defs/taskcontainer"
         },
         "^tasks_.+$": {
           "$ref": "#/$defs/expander"
@@ -318,9 +371,13 @@
       "type": "object"
     },
     "family": {
+      "$ref": "#/$defs/familycontainer",
+      "unevaluatedProperties": false
+    },
+    "familycontainer": {
       "allOf": [
         {
-          "$ref": "#/$defs/nodeContainer"
+          "$ref": "#/$defs/nodecontainer"
         },
         {
           "$ref": "#/$defs/addons"
@@ -328,16 +385,16 @@
       ],
       "type": "object"
     },
-    "nodeContainer": {
+    "nodecontainer": {
       "patternProperties": {
         "^families_.+$": {
           "$ref": "#/$defs/expander"
         },
         "^family_.+$": {
-          "$ref": "#/$defs/family"
+          "$ref": "#/$defs/familycontainer"
         },
         "^task_.+$": {
-          "$ref": "#/$defs/task"
+          "$ref": "#/$defs/taskcontainer"
         },
         "^tasks_.+$": {
           "$ref": "#/$defs/expander"
@@ -346,6 +403,10 @@
       "type": "object"
     },
     "task": {
+      "$ref": "#/$defs/taskcontainer",
+      "unevaluatedProperties": false
+    },
+    "taskcontainer": {
       "allOf": [
         {
           "$ref": "#/$defs/addons"
@@ -359,7 +420,14 @@
                   "type": "string"
                 },
                 "execution": {
-                  "type": "object"
+                  "anyOf": [
+                    {
+                      "$ref": "urn:uwtools:execution-parallel"
+                    },
+                    {
+                      "$ref": "urn:uwtools:execution-serial"
+                    }
+                  ]
                 },
                 "manual": {
                   "type": "string"
@@ -399,15 +467,13 @@
       "additionalProperties": false,
       "anyOf": [
         {
-          "minProperties": 1,
-          "patternProperties": {
-            "^suite_.+$": {}
+          "propertyNames": {
+            "pattern": "^suite_.+$"
           }
         },
         {
-          "minProperties": 1,
-          "patternProperties": {
-            "^suites_.+$": {}
+          "propertyNames": {
+            "pattern": "^suites_.+$"
           }
         }
       ],
@@ -415,7 +481,7 @@
         "^suite_.+$": {
           "allOf": [
             {
-              "$ref": "#/$defs/nodeContainer"
+              "$ref": "#/$defs/nodecontainer"
             },
             {
               "$ref": "#/$defs/addons"
@@ -424,7 +490,8 @@
         },
         "^suites_.+$": {
           "$ref": "#/$defs/expander"
-        }
+        },
+        "unevaluatedProperties": false
       },
       "properties": {
         "extern": {
