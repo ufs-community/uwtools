@@ -159,9 +159,7 @@ class _ECFlowDef:
         """
         parent.add(node)
 
-        def add_items(
-            method: Callable[..., object], cfg: Iterable[Sequence[object]]
-        ) -> None:
+        def add_items(method: Callable[..., object], cfg: Iterable[Sequence[object]]) -> None:
             for args in cfg:
                 method(*args)
 
