@@ -690,7 +690,7 @@ def test_schema_ecflow():
         },
     }
     assert not errors(config)
-    # At least one suite is required
+    # At least one suite is required:
     assert "is not valid under any of the given schemas" in errors(
         {"ecflow": {"vars": {}, "extern": []}}
     )
@@ -711,7 +711,7 @@ def test_schema_ecflow_nested_family():
         }
     }
     assert not errors(config)
-    # Ensure that the requried "expand" and node entries are present
+    # Ensure that the requried "expand" and node entries are present:
     assert "does not have enough properties" in errors(
         with_del(config, "ecflow", "suites_a", "expand")
     )
@@ -733,18 +733,18 @@ def test_schema_ecflow_refs_addons_events():
     assert not errors({"events": [1, "foo"]})
     assert not errors({"events": [1, 2, 3]})
     assert not errors({"events": ["foo", "bar", "baz"]})
-    # Must be one of the specified patterns
+    # Must be one of the specified patterns:
     assert "is not valid under any of the given schemas" in errors({"events": [["foo", 2]]})
 
 
 def test_schema_ecflow_refs_addons_inlimits():
     errors = schema_validator("ecflow", "$defs", "addons")
-    # Supports one of four categories
+    # Supports one of four categories:
     assert not errors({"inlimits": [["foo"]]})
     assert not errors({"inlimits": [["foo", "bar"]]})
     assert not errors({"inlimits": [["foo", "bar", 2], ["baz", "qux"]]})
     assert not errors({"inlimits": [["foo", "bar", 2, True]]})
-    # Exactly one is required
+    # Exactly one is required:
     assert "['foo', 2] is not valid under any of the given schemas" in errors(
         {"inlimits": [["foo", 2]]}
     )
@@ -754,9 +754,9 @@ def test_schema_ecflow_refs_addons_inlimits():
 
 def test_schema_ecflow_refs_addons_labels():
     errors = schema_validator("ecflow", "$defs", "addons")
-    # Allows for a list of 2-lists
+    # Allows for a list of 2-lists:
     assert not errors({"labels": [["foo", "bar"], ["baz", "qux"]]})
-    # List must contain 2-item lists
+    # List must contain 2-item lists:
     assert "'foo' is not of type 'array'" in errors({"labels": ["foo", "bar"]})
     assert "['foo'] is too short" in errors({"labels": [["foo"]]})
     assert "[] should be non-empty" in errors({"labels": []})
@@ -772,7 +772,7 @@ def test_schema_ecflow_refs_addons_limits():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"limits": [["foo", 1], ["bar", 2]]})
-    # It's a list of lists
+    # It's a list of lists:
     assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
     assert "[] should be non-empty" in errors({"limits": []})
 
@@ -781,7 +781,7 @@ def test_schema_ecflow_refs_addons_meters():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"meters": [["foo", 1, 2], ["bar", 2, 8]]})
-    # It's a list of lists
+    # It's a list of lists:
     assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
     assert "[] should be non-empty" in errors({"limits": []})
 
