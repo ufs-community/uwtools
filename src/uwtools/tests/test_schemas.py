@@ -711,7 +711,7 @@ def test_schema_ecflow_nested_family():
         }
     }
     assert not errors(config)
-    # Ensure that the requried "expand" and node entries are present:
+    # Ensure that the required "expand" and node entries are present:
     assert "does not have enough properties" in errors(
         with_del(config, "ecflow", "suites_a", "expand")
     )
