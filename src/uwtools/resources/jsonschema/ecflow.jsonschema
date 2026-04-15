@@ -7,12 +7,12 @@
         },
         "events": {
           "items": {
-            "oneOf": [
+            "anyOf": [
               {
-                "type": "string"
-              },
-              {
-                "type": "integer"
+                "type": [
+                  "integer",
+                  "string"
+                ]
               },
               {
                 "prefixItems": [
@@ -32,10 +32,9 @@
         },
         "inlimits": {
           "items": {
-            "oneOf": [
+            "anyOf": [
               {
-                "maxItems": 1,
-                "minItems": 1,
+                "items": false,
                 "prefixItems": [
                   {
                     "type": "string"
@@ -44,8 +43,7 @@
                 "type": "array"
               },
               {
-                "maxItems": 2,
-                "minItems": 2,
+                "items": false,
                 "prefixItems": [
                   {
                     "type": "string"
@@ -57,8 +55,7 @@
                 "type": "array"
               },
               {
-                "maxItems": 3,
-                "minItems": 3,
+                "items": false,
                 "prefixItems": [
                   {
                     "type": "string"
@@ -73,8 +70,7 @@
                 "type": "array"
               },
               {
-                "maxItems": 4,
-                "minItems": 4,
+                "items": false,
                 "prefixItems": [
                   {
                     "type": "string"
