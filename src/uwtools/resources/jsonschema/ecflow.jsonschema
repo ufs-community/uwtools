@@ -140,8 +140,7 @@
           "items": {
             "anyOf": [
               {
-                "maxItems": 3,
-                "minItems": 3,
+                "items": false,
                 "prefixItems": [
                   {
                     "type": "string"
@@ -156,8 +155,7 @@
                 "type": "array"
               },
               {
-                "maxItems": 4,
-                "minItems": 4,
+                "items": false,
                 "prefixItems": [
                   {
                     "type": "string"

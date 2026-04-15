@@ -782,8 +782,8 @@ def test_schema_ecflow_refs_addons_meters():
     # Basic spec:
     assert not errors({"meters": [["foo", 1, 2], ["bar", 2, 8]]})
     # It's a list of lists:
-    assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
-    assert "[] should be non-empty" in errors({"limits": []})
+    assert "'foo' is not valid under any of the given schemas" in errors({"meters": ["foo"]})
+    assert "[] should be non-empty" in errors({"meters": []})
 
 
 @mark.parametrize("top_level", ["repeat_date", "repeat_int"])
