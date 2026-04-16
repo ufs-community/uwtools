@@ -687,13 +687,10 @@ def test_schema_ecflow():
                     "family_three": {},
                 },
             },
+            "scheduler": "pbs",
         },
     }
     assert not errors(config)
-    # At least one suite is required:
-    assert "is not valid under any of the given schemas" in errors(
-        {"ecflow": {"vars": {}, "extern": []}}
-    )
 
 
 def test_schema_ecflow_nested_family():
@@ -723,7 +720,8 @@ def test_schema_ecflow_nested_family():
 def test_schema_ecflow_refs_addons_defstatus():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    assert not errors({"defstatus": "foo"})
+    assert not errors({"defstatus": "suspended"})
+    assert "'foo' is not one of" in errors({"defstatus": "foo"})
 
 
 def test_schema_ecflow_refs_addons_events():

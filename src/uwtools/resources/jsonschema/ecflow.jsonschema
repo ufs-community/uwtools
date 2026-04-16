@@ -3,6 +3,15 @@
     "addons": {
       "properties": {
         "defstatus": {
+          "enum": [
+            "complete",
+            "suspended",
+            "aborted",
+            "queued",
+            "submitted",
+            "active",
+            "unknown"
+          ],
           "type": "string"
         },
         "events": {
@@ -222,7 +231,8 @@
           "required": [
             "variable",
             "list"
-          ]
+          ],
+          "type": "object"
         },
         "repeat_datetime": {
           "additionalProperties": false,
@@ -301,7 +311,8 @@
             "variable",
             "start",
             "end"
-          ]
+          ],
+          "type": "object"
         },
         "repeat_string": {
           "additionalProperties": false,
@@ -459,18 +470,6 @@
   "properties": {
     "ecflow": {
       "additionalProperties": false,
-      "anyOf": [
-        {
-          "propertyNames": {
-            "pattern": "^suite_.+$"
-          }
-        },
-        {
-          "propertyNames": {
-            "pattern": "^suites_.+$"
-          }
-        }
-      ],
       "patternProperties": {
         "^suite_.+$": {
           "allOf": [
