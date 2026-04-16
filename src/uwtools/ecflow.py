@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from ecflow import (  # type: ignore[import-untyped]
     Defs,
+    DState,
     Family,
     Late,
     Node,
@@ -32,6 +33,8 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Sequence
+
     from ecflow import NodeContainer
 
 
@@ -40,7 +43,7 @@ class _ECFlowDef:
     Generate an ecFlow definition file from a YAML config.
     """
 
-    def __init__(self, config: dict | Config | Path | None = None) -> None:  # pragma: no cover
+    def __init__(self, config: dict | Config | Path | None = None) -> None:
         self._scripts: dict[Path, str] = {}
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
@@ -49,10 +52,10 @@ class _ECFlowDef:
         self._d = Defs()
         self._add_workflow_components()
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self):
         return self._d.__str__()
 
-    def write_ecf_scripts(self, path: Path | str) -> None:  # pragma: no cover
+    def write_ecf_scripts(self, path: Path | str) -> None:
         """
         The ecf scripts for this workflow.
 
@@ -68,7 +71,7 @@ class _ECFlowDef:
             outpath.parent.mkdir(parents=True, exist_ok=True)
             outpath.write_text(content)
 
-    def write_suite_definition(self, path: Path | str) -> None:  # pragma: no cover
+    def write_suite_definition(self, path: Path | str) -> None:
         """
         The suite definition artifact.
 
@@ -79,7 +82,7 @@ class _ECFlowDef:
         suite = path / "suite.def"
         suite.write_text(self._d.__str__())
 
-    def _add_workflow_components(self) -> None:  # pragma: no cover
+    def _add_workflow_components(self) -> None:
         """
         Add suite(s) and other attributes to the suite definition.
         """
@@ -96,7 +99,7 @@ class _ECFlowDef:
                 case "suites":
                     self._expand_block(subconfig, name, Suite, self._d)
 
-    def _expand_block(  # pragma: no cover
+    def _expand_block(
         self,
         config: dict,
         name: str,
@@ -139,7 +142,7 @@ class _ECFlowDef:
             }
             self._add_node(**args)
 
-    def _add_node(  # noqa: C901,PLR0912  # pragma: no cover
+    def _add_node(  # noqa: C901,PLR0912
         self,
         config: dict,
         node: Node,
@@ -155,7 +158,11 @@ class _ECFlowDef:
         :param refs: Optional references from expanded nodes from higher in the tree.
         """
         parent.add(node)
-        add_items = lambda n, cfg: (n(*args) for args in cfg)
+
+        def add_items(method: Callable[..., object], cfg: Iterable[Sequence[object]]) -> None:
+            for args in cfg:
+                method(*args)
+
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
@@ -173,7 +180,7 @@ class _ECFlowDef:
                 # Node attribute cases
 
                 case "defstatus":
-                    node.add_defstatus(subconfig)
+                    node.add_defstatus(getattr(DState, subconfig))
                 case "events":
                     for event in subconfig:
                         node.add_event(event)
@@ -187,16 +194,21 @@ class _ECFlowDef:
                     add_items(node.add_limit, subconfig)
                 case "meters":
                     add_items(node.add_meter, subconfig)
-                case "repeat":  # Only one repeat is allowed per node
+                case "repeat":  # Only one repeat is allowed per node.
                     self._add_repeat(subconfig, name, node)
-                case "trigger":  # Only one trigger is allowed per node
-                    node.add_trigger(subconfig)
-                case "vars":  # add_variable accepts a dict
-                    node.add_variable(subconfig)
                 case "script":
                     self._create_ecf_script(subconfig, node)
+                case "trigger":  # Only one trigger is allowed per node.
+                    node.add_trigger(subconfig)
+                case "vars":  # add_variable accepts a dict.
+                    node.add_variable(subconfig)
+                case "expand":  # Already processed by _expand_block.
+                    pass
+                case _:
+                    msg = f"Unrecognized tag: {tag}"
+                    raise AssertionError(msg)
 
-    def _add_repeat(self, config: dict, name: str, node: Node) -> None:  # pragma: no cover
+    def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
         Adds a repeat to a node.
 
@@ -218,7 +230,7 @@ class _ECFlowDef:
                 repeat = RepeatInteger
         node.add_repeat(repeat(**config))
 
-    def _create_ecf_script(self, config: dict, task: Task) -> None:  # pragma: no cover
+    def _create_ecf_script(self, config: dict, task: Task) -> None:
         """
         Write the ecf script for the task to disk.
 
@@ -251,7 +263,7 @@ class _ECFlowDef:
         )
         self._scripts[path] = es
 
-    def _ecflowscript(  # pragma: no cover
+    def _ecflowscript(
         self,
         execution: list[str],
         manual: str,
@@ -312,9 +324,7 @@ class _ECFlowDef:
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
-    def _jobscheduler(
-        self, account: str, execution: dict, rundir: Path | str
-    ) -> JobScheduler:  # pragma: no cover
+    def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """
         Use the execution block to build a JobScheduler object.
 
