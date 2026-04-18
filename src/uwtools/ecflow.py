@@ -134,10 +134,10 @@ class _ECFlowDef:
             new_block = YAMLConfig({name: config}).dereference(context={"ec": new_refs})
             new_name = list(new_block.keys())[0]
             args = {
-                "config": new_block[new_name],
-                "node": nodetype(new_name),
-                "parent": parent,
-                "refs": new_refs,
+                EC.config: new_block[new_name],
+                EC.node: nodetype(new_name),
+                EC.parent: parent,
+                EC.refs: new_refs,
             }
             self._add_node(**args)
 
