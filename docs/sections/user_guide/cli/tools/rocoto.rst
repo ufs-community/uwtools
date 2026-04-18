@@ -118,15 +118,15 @@ The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
      :language: xml
 
-.. _cli_rocoto_validate_examples:
+.. _cli_rocoto_validate_xml_examples:
 
-``validate``
-------------
+``validate-xml``
+----------------
 
-.. literalinclude:: rocoto/validate-help.cmd
+.. literalinclude:: rocoto/validate-xml-help.cmd
    :language: text
    :emphasize-lines: 1
-.. literalinclude:: rocoto/validate-help.out
+.. literalinclude:: rocoto/validate-xml-help.out
    :language: text
 
 Examples
@@ -139,28 +139,28 @@ The examples in this section use a Rocoto XML file ``rocoto-good.xml`` with cont
 
 * To validate XML from ``stdin``:
 
-  .. literalinclude:: rocoto/validate-good-stdin.cmd
+  .. literalinclude:: rocoto/validate-xml-good-stdin.cmd
      :language: text
      :emphasize-lines: 1
-  .. literalinclude:: rocoto/validate-good-stdin.out
+  .. literalinclude:: rocoto/validate-xml-good-stdin.out
      :language: text
 
 * To validate XML from file ``rocoto-good.xml``:
 
-  .. literalinclude:: rocoto/validate-good-file.cmd
+  .. literalinclude:: rocoto/validate-xml-good-file.cmd
      :language: text
      :emphasize-lines: 1
-  .. literalinclude:: rocoto/validate-good-file.out
+  .. literalinclude:: rocoto/validate-xml-good-file.out
      :language: text
 
 * When the XML is invalid:
 
   In this example, the ``<command>`` line was removed from ``rocoto-good.xml`` to create ``rocoto-bad.xml``.
 
-  .. literalinclude:: rocoto/validate-bad-file.cmd
+  .. literalinclude:: rocoto/validate-xml-bad-file.cmd
      :language: text
      :emphasize-lines: 1
-  .. literalinclude:: rocoto/validate-bad-file.out
+  .. literalinclude:: rocoto/validate-xml-bad-file.out
      :language: text
 
   To decode the three ``ERROR:RELAXNGV`` messages, it is easiest to read from the bottom up. They say:

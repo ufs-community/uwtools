@@ -14,5 +14,5 @@ Positional arguments:
       Iterate a Rocoto workflow
     realize
       Realize a Rocoto XML workflow document
-    validate
+    validate-xml
       Validate Rocoto XML

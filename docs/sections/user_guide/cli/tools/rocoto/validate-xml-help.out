@@ -1,5 +1,5 @@
-usage: uw rocoto validate [-h] [--version] [--input-file PATH] [--quiet]
-                          [--verbose]
+usage: uw rocoto validate-xml [-h] [--version] [--input-file PATH] [--quiet]
+                              [--verbose]
 
 Validate Rocoto XML
 
