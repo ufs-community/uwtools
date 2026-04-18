@@ -153,11 +153,11 @@ class FileStager(Stager):
             else:
                 assert isinstance(src, UWYAMLGlob)
                 parts = urlparse(src.value)
-                if parts.scheme == STR.hsi:
+                if parts.scheme == STR.url_scheme_hsi:
                     srcs.extend(self._expand_glob_hsi(parts.path, dst))
-                if parts.scheme == STR.htar:
+                if parts.scheme == STR.url_scheme_htar:
                     srcs.extend(self._expand_glob_htar(parts.path, parts.query, dst))
-                elif parts.scheme in ["", STR.file]:
+                elif parts.scheme in ["", STR.url_scheme_file]:
                     srcs.extend(self._expand_glob_local(parts.path, dst))
                 else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
