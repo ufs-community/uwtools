@@ -30,7 +30,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
-from uwtools.strings import STR
+from uwtools.strings import EC, STR
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -48,7 +48,7 @@ class _ECFlowDef:
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
         self._config = cfgobj.data[STR.ecflow]
-        self._scheduler = self._config.get("scheduler")
+        self._scheduler = self._config.get(EC.scheduler)
         self._d = Defs()
         self._add_workflow_components()
 
@@ -89,14 +89,14 @@ class _ECFlowDef:
         for key, subconfig in self._config.items():
             tag, name = self._tag_name(key)
             match tag:
-                case "extern":
+                case EC.extern:
                     for ext in subconfig:
                         self._d.add_extern(ext)
-                case "vars":
+                case EC.vars:
                     self._d.add_variable(subconfig)
-                case "suite":
+                case EC.suite:
                     self._add_node(subconfig, Suite(name), self._d)
-                case "suites":
+                case EC.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
 
     def _expand_block(
@@ -116,9 +116,8 @@ class _ECFlowDef:
         :param parent: The parent object to add this set of Nodes to.
         :param refs: Variable/value pairs used in higher-level expand blocks.
         """
-
         refs = refs if refs is not None else {}
-        expand = config["expand"]
+        expand = config[EC.expand]
 
         # Check to make sure all lists are the same length.
         try:
@@ -168,41 +167,41 @@ class _ECFlowDef:
             match tag:
                 # Tree buiding cases
 
-                case "family":
+                case EC.family:
                     self._add_node(subconfig, Family(name), node, refs)
-                case "families":
+                case EC.families:
                     self._expand_block(subconfig, name, Family, node, refs)
-                case "task":
+                case EC.task:
                     self._add_node(subconfig, Task(name), node, refs)
-                case "tasks":
+                case EC.tasks:
                     self._expand_block(subconfig, name, Task, node, refs)
 
                 # Node attribute cases
 
-                case "defstatus":
+                case EC.defstatus:
                     node.add_defstatus(getattr(DState, subconfig))
-                case "events":
+                case EC.events:
                     for event in subconfig:
                         node.add_event(event)
-                case "inlimits":
+                case EC.inlimits:
                     add_items(node.add_inlimit, subconfig)
-                case "labels":
+                case EC.labels:
                     add_items(node.add_label, subconfig)
-                case "late":
+                case EC.late:
                     node.add_late(Late(**subconfig))
-                case "limits":
+                case EC.limits:
                     add_items(node.add_limit, subconfig)
-                case "meters":
+                case EC.meters:
                     add_items(node.add_meter, subconfig)
-                case "repeat":  # Only one repeat is allowed per node.
+                case EC.repeat:  # Only one repeat is allowed per node.
                     self._add_repeat(subconfig, name, node)
-                case "script":
+                case EC.script:
                     self._create_ecf_script(subconfig, node)
-                case "trigger":  # Only one trigger is allowed per node.
+                case EC.trigger:  # Only one trigger is allowed per node.
                     node.add_trigger(subconfig)
-                case "vars":  # add_variable accepts a dict.
+                case EC.vars:  # add_variable accepts a dict.
                     node.add_variable(subconfig)
-                case "expand":  # Already processed by _expand_block.
+                case EC.expand:  # Already processed by _expand_block.
                     pass
                 case _:
                     msg = f"Unrecognized tag: {tag}"
@@ -217,16 +216,16 @@ class _ECFlowDef:
         :param node: The node to add the repeat to.
         """
         match name:
-            case "date":
+            case EC.date:
                 config["delta"] = config.pop("step", None)
                 repeat = RepeatDate
-            case "datelist" | "enumerated" | "string":
+            case EC.datelist | EC.enumerated | EC.string:
                 repeat = RepeatEnumerated
-            case "datetime":
+            case EC.datetime:
                 repeat = RepeatDateTime
-            case "day":
+            case EC.day:
                 repeat = RepeatDay
-            case "int":
+            case EC.int:
                 repeat = RepeatInteger
         node.add_repeat(repeat(**config))
 
@@ -239,21 +238,21 @@ class _ECFlowDef:
         """
         scheduler = (
             self._jobscheduler(
-                account=config.get("account", ""),
-                execution=config.get("execution", ""),
-                rundir=config.get("rundir", ""),
+                account=config.get(EC.account, ""),
+                execution=config.get(EC.execution, ""),
+                rundir=config.get(EC.rundir, ""),
             )
             if self._scheduler
             else None
         )
         execution = config[STR.execution]
-        cmd = execution.get("jobcmd")
+        cmd = execution.get(EC.jobcmd)
         es = self._ecflowscript(
             execution=[cmd],
-            manual=config.get("manual", f"Script to run {task.name()}"),
-            envcmds=execution.get("envcmds", []),
-            pre_includes=config.get("pre_includes", []),
-            post_includes=config.get("post_includes", []),
+            manual=config.get(EC.manual, f"Script to run {task.name()}"),
+            envcmds=execution.get(EC.envcmds, []),
+            pre_includes=config.get(EC.pre_includes, []),
+            post_includes=config.get(EC.post_includes, []),
             scheduler=scheduler,
         )
 
@@ -336,7 +335,7 @@ class _ECFlowDef:
         resources = {
             STR.account: account,
             STR.rundir: rundir,
-            STR.scheduler: self._scheduler,
+            EC.scheduler: self._scheduler,
             STR.stdout: "%s.out" % Path(rundir),
             **({STR.threads: threads} if threads else {}),
             **execution.get(STR.batchargs, {}),

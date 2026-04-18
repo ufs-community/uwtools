@@ -174,3 +174,55 @@ class STR:
     version: str = "version"
     workflow: str = "workflow"
     ww3: str = "ww3"
+
+
+@dataclass(frozen=True)
+class EC:
+    """
+    EC-specific string constants.
+    """
+
+    # Node types and tags
+    extern: str = "extern"
+    vars: str = "vars"
+    suite: str = "suite"
+    suites: str = "suites"
+    expand: str = "expand"
+    family: str = "family"
+    families: str = "families"
+    task: str = "task"
+    tasks: str = "tasks"
+
+    # Node attributes
+    defstatus: str = "defstatus"
+    events: str = "events"
+    inlimits: str = "inlimits"
+    labels: str = "labels"
+    late: str = "late"
+    limits: str = "limits"
+    meters: str = "meters"
+    repeat: str = "repeat"
+    script: str = "script"
+    trigger: str = "trigger"
+
+    # Repeat types
+    date: str = "date"
+    datelist: str = "datelist"
+    enumerated: str = "enumerated"
+    string: str = "string"
+    datetime: str = "datetime"
+    day: str = "day"
+    int: str = "int"
+
+    # Script fields
+    jobcmd: str = "jobcmd"
+    manual: str = "manual"
+    envcmds: str = "envcmds"
+    pre_includes: str = "pre_includes"
+    post_includes: str = "post_includes"
+
+    # Scheduler fields
+    scheduler: str = "scheduler"
+    account: str = "account"
+    execution: str = "execution"
+    rundir: str = "rundir"
