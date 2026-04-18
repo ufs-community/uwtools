@@ -90,7 +90,7 @@ def main() -> None:
                 STR.orog,
                 STR.orog_gsl,
                 STR.schism,
-                STR.sfcclimogen,
+                STR.sfc_climo_gen,
                 STR.shave,
                 STR.ungrib,
                 STR.upp,
@@ -274,21 +274,21 @@ def _dispatch_config_realize(args: Args) -> bool:
         uwtools.api.config.realize(
             input_config=args[STR.input_file],
             input_format=args[STR.input_format],
-            update_config=args[STR.updatefile],
-            update_format=args[STR.updatefmt],
+            update_config=args[STR.update_file],
+            update_format=args[STR.update_format],
             output_file=args[STR.output_file],
             output_format=args[STR.output_format],
             key_path=args[STR.key_path],
             cycle=args[STR.cycle],
             leadtime=args[STR.leadtime],
-            values_needed=args[STR.valsneeded],
+            values_needed=args[STR.values_needed],
             total=args[STR.total],
             dry_run=args[STR.dry_run],
             stdin_ok=True,
         )
     except UWConfigRealizeError:
         msg = "Config could not be realized. Try with %s for details."
-        log.error(msg, _switch(STR.valsneeded))
+        log.error(msg, _switch(STR.values_needed))
         return False
     return True
 
@@ -460,7 +460,7 @@ def _dispatch_fs_copy(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.copy(
-        target_dir=args[STR.targetdir],
+        target_dir=args[STR.target_dir],
         config=args[STR.config_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
@@ -479,7 +479,7 @@ def _dispatch_fs_hardlink(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.link(
-        target_dir=args[STR.targetdir],
+        target_dir=args[STR.target_dir],
         config=args[STR.config_file],
         cycle=args[STR.cycle],
         hardlink=True,
@@ -500,7 +500,7 @@ def _dispatch_fs_link(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.link(
-        target_dir=args[STR.targetdir],
+        target_dir=args[STR.target_dir],
         config=args[STR.config_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
@@ -519,7 +519,7 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.makedirs(
-        target_dir=args[STR.targetdir],
+        target_dir=args[STR.target_dir],
         config=args[STR.config_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
@@ -725,8 +725,8 @@ def _dispatch_template_render(args: Args) -> bool:
     """
     try:
         uwtools.api.template.render(
-            values_src=args[STR.valsfile],
-            values_format=args[STR.valsfmt],
+            values_src=args[STR.values_file],
+            values_format=args[STR.values_format],
             input_file=args[STR.input_file],
             output_file=args[STR.output_file],
             cycle=args[STR.cycle],
@@ -734,12 +734,12 @@ def _dispatch_template_render(args: Args) -> bool:
             overrides=_dict_from_key_eq_val_strings(args[STR.key_eq_val_pairs]),
             env=args[STR.env],
             searchpath=args[STR.search_path],
-            values_needed=args[STR.valsneeded],
+            values_needed=args[STR.values_needed],
             dry_run=args[STR.dry_run],
             stdin_ok=True,
         )
     except UWTemplateRenderError:
-        if args[STR.valsneeded]:
+        if args[STR.values_needed]:
             return True
         log.error("Template could not be rendered")
         return False
@@ -1006,7 +1006,7 @@ def _add_arg_search_path(group: Group) -> None:
 
 def _add_arg_show_schema(group: Group) -> None:
     group.add_argument(
-        _switch(STR.showschema),
+        _switch(STR.show_schema),
         action="store_true",
         help="Show driver schema and exit",
     )
@@ -1014,7 +1014,7 @@ def _add_arg_show_schema(group: Group) -> None:
 
 def _add_arg_target_dir(group: Group, required: bool = False, helpmsg: str | None = None) -> None:
     group.add_argument(
-        _switch(STR.targetdir),
+        _switch(STR.target_dir),
         help=helpmsg or "Path to target directory",
         metavar="PATH",
         required=required,
@@ -1054,7 +1054,7 @@ def _add_arg_total(group: Group) -> None:
 
 def _add_arg_update_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.updatefile),
+        _switch(STR.update_file),
         "-u",
         help="Path to update file (default: read from stdin)",
         metavar="PATH",
@@ -1065,7 +1065,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_update_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.updatefmt),
+        _switch(STR.update_format),
         choices=choices,
         help="Update format",
         required=required,
@@ -1075,7 +1075,7 @@ def _add_arg_update_format(group: Group, choices: list[str], required: bool = Fa
 
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.valsfile),
+        _switch(STR.values_file),
         help="Path to file providing override or interpolation values",
         metavar="PATH",
         required=required,
@@ -1085,7 +1085,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_values_format(group: Group, choices: list[str]) -> None:
     group.add_argument(
-        _switch(STR.valsfmt),
+        _switch(STR.values_format),
         choices=choices,
         help="Values format",
         required=False,
@@ -1095,7 +1095,7 @@ def _add_arg_values_format(group: Group, choices: list[str]) -> None:
 
 def _add_arg_values_needed(group: Group, helpmsg: str) -> None:
     group.add_argument(
-        _switch(STR.valsneeded),
+        _switch(STR.values_needed),
         action="store_true",
         help=helpmsg,
     )
@@ -1268,14 +1268,14 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # will be taken from the environment or from key=value command-line pairs by default. But if a
     # values file IS specified, its format must either be explicitly specified, or deduced from its
     # extension.
-    if args.get(STR.valsfile) is not None and args.get(STR.valsfmt) is None:
-        args[STR.valsfmt] = get_config_format(args[STR.valsfile])
+    if args.get(STR.values_file) is not None and args.get(STR.values_format) is None:
+        args[STR.values_format] = get_config_format(args[STR.values_file])
     return args
 
 
 def _check_update(args: Args) -> Args:
-    if args.get(STR.updatefile) is not None and args.get(STR.updatefmt) is None:
-        args[STR.updatefmt] = get_config_format(args[STR.updatefile])
+    if args.get(STR.update_file) is not None and args.get(STR.update_format) is None:
+        args[STR.update_format] = get_config_format(args[STR.update_file])
     return args
 
 
@@ -1303,7 +1303,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     module = import_module("uwtools.api.%s" % name)
-    if args.get(STR.showschema):
+    if args.get(STR.show_schema):
         print(json.dumps(module.schema(), sort_keys=True, indent=2))
         return True
     if not args.get(STR.action):
@@ -1378,7 +1378,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.make_solo_mosaic,
             STR.orog,
             STR.orog_gsl,
-            STR.sfcclimogen,
+            STR.sfc_climo_gen,
             STR.shave,
         ]
     }

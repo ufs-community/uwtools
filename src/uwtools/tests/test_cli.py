@@ -35,14 +35,14 @@ def args_config_realize(utc):
     return {
         STR.input_file: "in",
         STR.input_format: "yaml",
-        STR.updatefile: "update",
-        STR.updatefmt: "yaml",
+        STR.update_file: "update",
+        STR.update_format: "yaml",
         STR.output_file: "out",
         STR.output_format: "yaml",
         STR.key_path: "foo.bar",
         STR.cycle: utc(2025, 11, 12, 6),
         STR.leadtime: timedelta(hours=6),
-        STR.valsneeded: False,
+        STR.values_needed: False,
         STR.total: False,
         STR.dry_run: False,
     }
@@ -211,7 +211,7 @@ def test_cli__dispatch_execute(utc):
         (STR.path2, STR.format2),
         (STR.input_file, STR.input_format),
         (STR.output_file, STR.output_format),
-        (STR.valsfile, STR.valsfmt),
+        (STR.values_file, STR.values_format),
     ],
 )
 def test_cli__check_file_vs_format_fail(file_arg, format_arg):
@@ -247,27 +247,27 @@ def test_cli__check_file_vs_format_pass_implicit(fmt):
 
 def test_cli__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
-    args = {STR.valsfile: "a.jpg"}
+    args = {STR.values_file: "a.jpg"}
     expected = {"values_file": "a.jpg", "values_format": FORMAT.yaml}
     assert cli._check_template_render_vals_args(args) == expected
 
 
 def test_cli__check_template_render_vals_args_implicit_pass():
     # The values-file format is deduced from the filename.
-    args = {STR.valsfile: "a.yaml"}
+    args = {STR.values_file: "a.yaml"}
     checked = cli._check_template_render_vals_args(args)
-    assert checked[STR.valsfmt] == FORMAT.yaml
+    assert checked[STR.values_format] == FORMAT.yaml
 
 
 def test_cli__check_template_render_vals_args_noop_no_valsfile():
     # No values file is provided, so format is irrelevant.
-    args = {STR.valsfile: None}
+    args = {STR.values_file: None}
     assert cli._check_template_render_vals_args(args) == args
 
 
 def test_cli__check_template_render_vals_args_noop_explicit_valsfmt():
     # An explicit values format is honored, valid or not.
-    args = {STR.valsfile: "a.txt", STR.valsfmt: "jpg"}
+    args = {STR.values_file: "a.txt", STR.values_format: "jpg"}
     assert cli._check_template_render_vals_args(args) == args
 
 
@@ -283,8 +283,8 @@ def test_cli__check_template_render_vals_args_noop_explicit_valsfmt():
     ],
 )
 def test_cli__check_update(expected, fmt, fn):
-    args = {STR.updatefile: fn, STR.updatefmt: fmt}
-    assert cli._check_update(args) == {STR.updatefile: fn, STR.updatefmt: expected}
+    args = {STR.update_file: fn, STR.update_format: fmt}
+    assert cli._check_update(args) == {STR.update_file: fn, STR.update_format: expected}
 
 
 def test_cli__check_verbosity_fail(capsys):
@@ -555,14 +555,14 @@ def test_cli__dispatch_template_render_fail(valsneeded):
     args = {
         STR.input_file: 1,
         STR.output_file: 2,
-        STR.valsfile: 3,
-        STR.valsfmt: 4,
+        STR.values_file: 3,
+        STR.values_format: 4,
         STR.cycle: 5,
         STR.leadtime: 6,
         STR.key_eq_val_pairs: ["foo=42", "bar=43"],
         STR.env: 7,
         STR.search_path: 8,
-        STR.valsneeded: valsneeded,
+        STR.values_needed: valsneeded,
         STR.dry_run: 9,
     }
     with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
@@ -573,14 +573,14 @@ def test_cli__dispatch_template_render_no_optional():
     args: dict = {
         STR.input_file: None,
         STR.output_file: None,
-        STR.valsfile: None,
-        STR.valsfmt: None,
+        STR.values_file: None,
+        STR.values_format: None,
         STR.cycle: None,
         STR.leadtime: None,
         STR.key_eq_val_pairs: [],
         STR.env: False,
         STR.search_path: None,
-        STR.valsneeded: False,
+        STR.values_needed: False,
         STR.dry_run: False,
     }
     with patch.object(uwtools.api.template, "render") as render:
@@ -605,14 +605,14 @@ def test_cli__dispatch_template_render_yaml():
     args = {
         STR.input_file: 1,
         STR.output_file: 2,
-        STR.valsfile: 3,
-        STR.valsfmt: 4,
+        STR.values_file: 3,
+        STR.values_format: 4,
         STR.cycle: 5,
         STR.leadtime: 6,
         STR.key_eq_val_pairs: ["foo=42", "bar=43"],
         STR.env: 7,
         STR.search_path: 8,
-        STR.valsneeded: 9,
+        STR.values_needed: 9,
         STR.dry_run: 10,
     }
     with patch.object(uwtools.api.template, "render") as render:

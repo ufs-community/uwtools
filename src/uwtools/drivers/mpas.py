@@ -55,14 +55,14 @@ class MPAS(MPASBase):
         )
         str_duration = "%s%s" % (f"{duration.days:03}_" if duration.days else "", hhmmss)
         namelist = self.config[STR.namelist]
-        update_values = namelist.get(STR.updatevalues, {})
+        update_values = namelist.get(STR.update_values, {})
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
                 "config_run_duration": str_duration,
             }
         )
-        namelist[STR.updatevalues] = update_values
+        namelist[STR.update_values] = update_values
         self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
