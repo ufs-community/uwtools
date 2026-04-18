@@ -164,7 +164,6 @@ class _STR(_ValsMatchKeys):
     makehgrid: str = "make_hgrid"
     makesolomosaic: str = "make_solo_mosaic"
     mode: str = _
-    model: str = _
     module: str = _
     mpas: str = _
     mpasinit: str = "mpas_init"
