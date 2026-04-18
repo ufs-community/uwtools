@@ -518,22 +518,22 @@ def test_cli__dispatch_rocoto_realize_no_optional():
 
 def test_cli__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
-    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
         cli._dispatch_rocoto_validate(args)
-    _validate.assert_called_once_with(xml_file=1)
+    _validate_xml_file.assert_called_once_with(xml_file=1)
 
 
 def test_cli__dispatch_rocoto_validate_xml_invalid():
     args = {STR.infile: 1, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file", return_value=False):
         assert cli._dispatch_rocoto_validate(args) is False
 
 
 def test_cli__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate") as validate:
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
         cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(xml_file=None)
+    _validate_xml_file.assert_called_once_with(xml_file=None)
 
 
 @mark.parametrize(

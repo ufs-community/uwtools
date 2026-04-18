@@ -57,32 +57,32 @@ def test_rocoto_iterate(rocoto_iterator_args):
 def test_rocoto_realize__cfg_to_file(assets):
     cfgfile, outfile = assets
     rocoto.realize(config=YAMLConfig(cfgfile), output_file=outfile)
-    assert rocoto.validate_file(xml_file=outfile)
+    assert rocoto.validate_xml_file(xml_file=outfile)
 
 
 def test_rocoto_realize__cfg_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize(config=YAMLConfig(cfgfile))
     outfile.write_text(capsys.readouterr().out)
-    assert rocoto.validate_file(xml_file=outfile)
+    assert rocoto.validate_xml_file(xml_file=outfile)
 
 
 def test_rocoto_realize__file_to_file(assets):
     cfgfile, outfile = assets
     rocoto.realize(config=cfgfile, output_file=outfile)
-    assert rocoto.validate_file(xml_file=outfile)
+    assert rocoto.validate_xml_file(xml_file=outfile)
 
 
 def test_rocoto_realize__file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     rocoto.realize(config=cfgfile)
     outfile.write_text(capsys.readouterr().out)
-    assert rocoto.validate_file(xml_file=outfile)
+    assert rocoto.validate_xml_file(xml_file=outfile)
 
 
 def test_rocoto_realize__invalid_xml(assets):
     cfgfile, outfile = assets
-    with patch.object(rocoto, "validate_string") as vrxs:
+    with patch.object(rocoto, "validate_xml_string") as vrxs:
         vrxs.return_value = False
         with raises(UWError):
             rocoto.realize(config=cfgfile, output_file=outfile)
@@ -101,24 +101,24 @@ def test_rocoto_realize__unrendered_xml(assets, logged):
     assert logged("world")
 
 
-def test_rocoto_validate__file_fail(validation_assets):
+def test_rocoto_validate_xml_file__fail(validation_assets):
     xml_file_bad, _, _, _ = validation_assets
-    assert rocoto.validate_file(xml_file=xml_file_bad) is False
+    assert rocoto.validate_xml_file(xml_file=xml_file_bad) is False
 
 
-def test_rocoto_validate__file_pass(validation_assets):
+def test_rocoto_validate_xml_fail__pass(validation_assets):
     _, xml_file_good, _, _ = validation_assets
-    assert rocoto.validate_file(xml_file=xml_file_good) is True
+    assert rocoto.validate_xml_file(xml_file=xml_file_good) is True
 
 
-def test_rocoto_validate__string_fail(validation_assets):
+def test_rocoto_validate_xml_string__fail(validation_assets):
     _, _, xml_string_bad, _ = validation_assets
-    assert rocoto.validate_string(xml=xml_string_bad) is False
+    assert rocoto.validate_xml_string(xml_string=xml_string_bad) is False
 
 
-def test_rocoto_validate__string_pass(validation_assets):
+def test_rocoto_validate_xml_string__pass(validation_assets):
     _, _, _, xml_string_good = validation_assets
-    assert rocoto.validate_string(xml=xml_string_good) is True
+    assert rocoto.validate_xml_string(xml_string=xml_string_good) is True
 
 
 class TestRocotoIterator:
@@ -301,7 +301,7 @@ class TestRocotoXML:
     def test_rocoto__RocotoXML_dump(self, instance, tmp_path):
         path = tmp_path / "out.xml"
         instance.dump(path=path)
-        assert rocoto.validate_file(path)
+        assert rocoto.validate_xml_file(path)
 
     @mark.parametrize("config", ["bar", 42])
     def test_rocoto__RocotoXML__add_compound_time_string__basic(self, config, instance, root):

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from uwtools.rocoto import DEFAULT_ITERATION_RATE
 from uwtools.rocoto import iterate as _iterate
 from uwtools.rocoto import realize as _realize
-from uwtools.rocoto import validate_file as _validate
+from uwtools.rocoto import validate_xml_file as _validate_xml_file
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
 
@@ -79,4 +79,4 @@ def validate(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the XML conforms to the schema, ``False`` otherwise.
     """
-    return _validate(xml_file=_ensure_data_source(_str2path(xml_file), stdin_ok))
+    return _validate_xml_file(xml_file=_ensure_data_source(_str2path(xml_file), stdin_ok))
