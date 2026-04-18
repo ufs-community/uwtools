@@ -47,8 +47,8 @@ class _ECFlowDef:
         self._scripts: dict[Path, str] = {}
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
-        self._config = cfgobj.data[STR.ecflow]
-        self._scheduler = self._config.get(EC.scheduler)
+        self._config = cfgobj.data[EC.ecflow]
+        self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
         self._add_workflow_components()
 
@@ -335,7 +335,7 @@ class _ECFlowDef:
         resources = {
             STR.account: account,
             STR.rundir: rundir,
-            EC.scheduler: self._scheduler,
+            STR.scheduler: self._scheduler,
             STR.stdout: "%s.out" % Path(rundir),
             **({STR.threads: threads} if threads else {}),
             **execution.get(STR.batchargs, {}),
