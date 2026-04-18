@@ -50,7 +50,7 @@ class MPASInit(MPASBase):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        base_file = self.config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         initial_ts, final_ts = self._initial_and_final_ts
         namelist = self.config[STR.namelist]
@@ -92,7 +92,7 @@ class MPASInit(MPASBase):
         """
         The name of this driver.
         """
-        return STR.mpasinit
+        return STR.mpas_init
 
     # Private helper methods
 

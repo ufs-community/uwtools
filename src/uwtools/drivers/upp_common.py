@@ -36,7 +36,7 @@ def namelist_file(obj: UPP | UPPAssets):
     path = namelist_path(obj)
     yield obj.taskname(str(path))
     yield Asset(path, path.is_file)
-    base_file = obj.config[STR.namelist].get(STR.basefile)
+    base_file = obj.config[STR.namelist].get(STR.base_file)
     yield file(Path(base_file)) if base_file else None
     obj.create_user_updated_config(
         config_class=NMLConfig,

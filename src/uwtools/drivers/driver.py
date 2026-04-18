@@ -113,7 +113,7 @@ class Assets(ABC):
         :param schema: Schema to validate final config against.
         """
         user_values = config_values.get(STR.updatevalues, {})
-        if base_file := config_values.get(STR.basefile):
+        if base_file := config_values.get(STR.base_file):
             cfgobj = config_class(base_file)
             cfgobj.update_from(user_values)
             cfgobj.dereference()
