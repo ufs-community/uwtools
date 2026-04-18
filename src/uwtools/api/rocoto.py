@@ -68,7 +68,7 @@ def iterate(
     )
 
 
-def validate(
+def validate_xml(
     xml_file: Path | str | None = None,
     stdin_ok: bool = False,
 ) -> bool:
