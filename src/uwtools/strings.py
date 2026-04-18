@@ -26,7 +26,7 @@ class _ValsMatchKeys:
 @dataclass(frozen=True)
 class _EC(_ValsMatchKeys):
     """
-    ecFlow-specific strings.
+    EcFlow-specific strings.
     """
 
     account: str = _
