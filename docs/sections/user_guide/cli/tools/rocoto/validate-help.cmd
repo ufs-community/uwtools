@@ -1,1 +1,0 @@
-uw rocoto validate --help

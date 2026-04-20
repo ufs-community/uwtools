@@ -63,7 +63,7 @@ class GSI(DriverCycleBased, FileStager):
         path = self._input_config_path
         yield self.taskname(path.name)
         yield Asset(path, path.is_file)
-        base_file = self.config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
             config_class=NMLConfig,

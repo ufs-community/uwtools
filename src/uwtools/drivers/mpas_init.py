@@ -50,18 +50,18 @@ class MPASInit(MPASBase):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        base_file = self.config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         initial_ts, final_ts = self._initial_and_final_ts
         namelist = self.config[STR.namelist]
-        update_values = namelist.get(STR.updatevalues, {})
+        update_values = namelist.get(STR.update_values, {})
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": initial_ts.strftime("%Y-%m-%d_%H:00:00"),
                 "config_stop_time": final_ts.strftime("%Y-%m-%d_%H:00:00"),
             }
         )
-        namelist[STR.updatevalues] = update_values
+        namelist[STR.update_values] = update_values
         self.create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
@@ -92,7 +92,7 @@ class MPASInit(MPASBase):
         """
         The name of this driver.
         """
-        return STR.mpasinit
+        return STR.mpas_init
 
     # Private helper methods
 

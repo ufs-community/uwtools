@@ -33,18 +33,18 @@ def actions(parser: Parser) -> list[str]:
 @fixture
 def args_config_realize(utc):
     return {
-        STR.infile: "in",
-        STR.infmt: "yaml",
-        STR.updatefile: "update",
-        STR.updatefmt: "yaml",
-        STR.outfile: "out",
-        STR.outfmt: "yaml",
-        STR.keypath: "foo.bar",
+        STR.input_file: "in",
+        STR.input_format: "yaml",
+        STR.update_file: "update",
+        STR.update_format: "yaml",
+        STR.output_file: "out",
+        STR.output_format: "yaml",
+        STR.key_path: "foo.bar",
         STR.cycle: utc(2025, 11, 12, 6),
         STR.leadtime: timedelta(hours=6),
-        STR.valsneeded: False,
+        STR.values_needed: False,
         STR.total: False,
-        STR.dryrun: False,
+        STR.dry_run: False,
     }
 
 
@@ -150,9 +150,9 @@ def test_cli__add_subparser_rocoto_realize(subparsers):
     assert subparsers.choices[STR.realize]
 
 
-def test_cli__add_subparser_rocoto_validate(subparsers):
-    cli._add_subparser_rocoto_validate(subparsers)
-    assert subparsers.choices[STR.validate]
+def test_cli__add_subparser_rocoto_validate_xml(subparsers):
+    cli._add_subparser_rocoto_validate_xml(subparsers)
+    assert subparsers.choices[STR.validatexml]
 
 
 def test_cli__add_subparser_template(subparsers):
@@ -207,11 +207,11 @@ def test_cli__dispatch_execute(utc):
 @mark.parametrize(
     ("file_arg", "format_arg"),
     [
-        (STR.path1, STR.fmt1),
-        (STR.path2, STR.fmt2),
-        (STR.infile, STR.infmt),
-        (STR.outfile, STR.outfmt),
-        (STR.valsfile, STR.valsfmt),
+        (STR.path1, STR.format1),
+        (STR.path2, STR.format2),
+        (STR.input_file, STR.input_format),
+        (STR.output_file, STR.output_format),
+        (STR.values_file, STR.values_format),
     ],
 )
 def test_cli__check_file_vs_format_fail(file_arg, format_arg):
@@ -226,46 +226,48 @@ def test_cli__check_file_vs_format_fail(file_arg, format_arg):
 def test_cli__check_file_vs_format_pass_explicit():
     # Accept explicitly-specified format, whatever it is.
     fmt = "jpg"
-    args = {STR.infile: "/path/to/input.txt", STR.infmt: fmt}
+    args = {STR.input_file: "/path/to/input.txt", STR.input_format: fmt}
     args = cli._check_file_vs_format(
-        file_arg=STR.infile,
-        format_arg=STR.infmt,
+        file_arg=STR.input_file,
+        format_arg=STR.input_format,
         args=args,
     )
-    assert args[STR.infmt] == fmt
+    assert args[STR.input_format] == fmt
 
 
 @mark.parametrize("fmt", FORMAT.formats())
 def test_cli__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
-    args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
-    args = cli._check_file_vs_format(file_arg=STR.infile, format_arg=STR.infmt, args=args)
-    assert args[STR.infmt] == vars(FORMAT)[fmt]
+    args = {STR.input_file: f"/path/to/input.{fmt}", STR.input_format: None}
+    args = cli._check_file_vs_format(
+        file_arg=STR.input_file, format_arg=STR.input_format, args=args
+    )
+    assert args[STR.input_format] == vars(FORMAT)[fmt]
 
 
 def test_cli__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
-    args = {STR.valsfile: "a.jpg"}
+    args = {STR.values_file: "a.jpg"}
     expected = {"values_file": "a.jpg", "values_format": FORMAT.yaml}
     assert cli._check_template_render_vals_args(args) == expected
 
 
 def test_cli__check_template_render_vals_args_implicit_pass():
     # The values-file format is deduced from the filename.
-    args = {STR.valsfile: "a.yaml"}
+    args = {STR.values_file: "a.yaml"}
     checked = cli._check_template_render_vals_args(args)
-    assert checked[STR.valsfmt] == FORMAT.yaml
+    assert checked[STR.values_format] == FORMAT.yaml
 
 
 def test_cli__check_template_render_vals_args_noop_no_valsfile():
     # No values file is provided, so format is irrelevant.
-    args = {STR.valsfile: None}
+    args = {STR.values_file: None}
     assert cli._check_template_render_vals_args(args) == args
 
 
 def test_cli__check_template_render_vals_args_noop_explicit_valsfmt():
     # An explicit values format is honored, valid or not.
-    args = {STR.valsfile: "a.txt", STR.valsfmt: "jpg"}
+    args = {STR.values_file: "a.txt", STR.values_format: "jpg"}
     assert cli._check_template_render_vals_args(args) == args
 
 
@@ -281,8 +283,8 @@ def test_cli__check_template_render_vals_args_noop_explicit_valsfmt():
     ],
 )
 def test_cli__check_update(expected, fmt, fn):
-    args = {STR.updatefile: fn, STR.updatefmt: fmt}
-    assert cli._check_update(args) == {STR.updatefile: fn, STR.updatefmt: expected}
+    args = {STR.update_file: fn, STR.update_format: fmt}
+    assert cli._check_update(args) == {STR.update_file: fn, STR.update_format: expected}
 
 
 def test_cli__check_verbosity_fail(capsys):
@@ -321,14 +323,14 @@ def test_cli__dispatch_config(params):
 
 
 def test_cli__dispatch_config_compare():
-    args = {STR.path1: 1, STR.fmt1: 2, STR.path2: 3, STR.fmt2: 4}
+    args = {STR.path1: 1, STR.format1: 2, STR.path2: 3, STR.format2: 4}
     with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
     compare.assert_called_once_with(
         path1=args[STR.path1],
-        format1=args[STR.fmt1],
+        format1=args[STR.format1],
         path2=args[STR.path2],
-        format2=args[STR.fmt2],
+        format2=args[STR.format2],
     )
 
 
@@ -340,9 +342,9 @@ def test_cli__dispatch_config_compose(utc):
     args = {
         STR.configs: configs,
         STR.realize: True,
-        STR.outfile: outfile,
-        STR.infmt: FORMAT.yaml,
-        STR.outfmt: FORMAT.yaml,
+        STR.output_file: outfile,
+        STR.input_format: FORMAT.yaml,
+        STR.output_format: FORMAT.yaml,
         STR.cycle: cycle,
         STR.leadtime: leadtime,
     }
@@ -387,15 +389,15 @@ def test_cli__dispatch_config_realize_fail(args_config_realize, logged):
 
 def test_cli__dispatch_config_validate_config_obj():
     _dispatch_config_validate_args = {
-        STR.schemafile: Path("/path/to/a.jsonschema"),
-        STR.infile: Path("/path/to/config.yaml"),
+        STR.schema_file: Path("/path/to/a.jsonschema"),
+        STR.input_file: Path("/path/to/config.yaml"),
     }
     with patch.object(uwtools.api.config, "_validate_external") as _validate_external:
         cli._dispatch_config_validate(_dispatch_config_validate_args)
     _validate_external_args = {
-        STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
+        STR.schema_file: _dispatch_config_validate_args[STR.schema_file],
         "config_data": None,
-        "config_path": _dispatch_config_validate_args[STR.infile],
+        "config_path": _dispatch_config_validate_args[STR.input_file],
     }
     _validate_external.assert_called_once_with(**_validate_external_args, desc="config")
 
@@ -473,7 +475,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
-        (STR.validate, "_dispatch_rocoto_validate"),
+        (STR.validatexml, "_dispatch_rocoto_validate_xml"),
     ],
 )
 def test_cli__dispatch_rocoto(params):
@@ -503,37 +505,37 @@ def test_cli_dispatch_rocoto_iterate(utc):
 
 
 def test_cli__dispatch_rocoto_realize():
-    args = {STR.cfgfile: 1, STR.outfile: 2}
+    args = {STR.config_file: 1, STR.output_file: 2}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
     _realize.assert_called_once_with(config=1, output_file=2)
 
 
 def test_cli__dispatch_rocoto_realize_no_optional():
-    args = {STR.cfgfile: None, STR.outfile: None}
+    args = {STR.config_file: None, STR.output_file: None}
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
     func.assert_called_once_with(config=None, output_file=None)
 
 
 def test_cli__dispatch_rocoto_validate_xml():
-    args = {STR.infile: 1}
-    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
-        cli._dispatch_rocoto_validate(args)
-    _validate.assert_called_once_with(xml_file=1)
+    args = {STR.input_file: 1}
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
+        cli._dispatch_rocoto_validate_xml(args)
+    _validate_xml_file.assert_called_once_with(xml_file=1)
 
 
 def test_cli__dispatch_rocoto_validate_xml_invalid():
-    args = {STR.infile: 1, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
-        assert cli._dispatch_rocoto_validate(args) is False
+    args = {STR.input_file: 1, STR.verbose: False}
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file", return_value=False):
+        assert cli._dispatch_rocoto_validate_xml(args) is False
 
 
 def test_cli__dispatch_rocoto_validate_xml_no_optional():
-    args = {STR.infile: None, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate") as validate:
-        cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(xml_file=None)
+    args = {STR.input_file: None, STR.verbose: False}
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
+        cli._dispatch_rocoto_validate_xml(args)
+    _validate_xml_file.assert_called_once_with(xml_file=None)
 
 
 @mark.parametrize(
@@ -551,17 +553,17 @@ def test_cli__dispatch_template(params):
 @mark.parametrize("valsneeded", [False, True])
 def test_cli__dispatch_template_render_fail(valsneeded):
     args = {
-        STR.infile: 1,
-        STR.outfile: 2,
-        STR.valsfile: 3,
-        STR.valsfmt: 4,
+        STR.input_file: 1,
+        STR.output_file: 2,
+        STR.values_file: 3,
+        STR.values_format: 4,
         STR.cycle: 5,
         STR.leadtime: 6,
-        STR.keyvalpairs: ["foo=42", "bar=43"],
+        STR.key_eq_val_pairs: ["foo=42", "bar=43"],
         STR.env: 7,
-        STR.searchpath: 8,
-        STR.valsneeded: valsneeded,
-        STR.dryrun: 9,
+        STR.search_path: 8,
+        STR.values_needed: valsneeded,
+        STR.dry_run: 9,
     }
     with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
         assert cli._dispatch_template_render(args) is valsneeded
@@ -569,17 +571,17 @@ def test_cli__dispatch_template_render_fail(valsneeded):
 
 def test_cli__dispatch_template_render_no_optional():
     args: dict = {
-        STR.infile: None,
-        STR.outfile: None,
-        STR.valsfile: None,
-        STR.valsfmt: None,
+        STR.input_file: None,
+        STR.output_file: None,
+        STR.values_file: None,
+        STR.values_format: None,
         STR.cycle: None,
         STR.leadtime: None,
-        STR.keyvalpairs: [],
+        STR.key_eq_val_pairs: [],
         STR.env: False,
-        STR.searchpath: None,
-        STR.valsneeded: False,
-        STR.dryrun: False,
+        STR.search_path: None,
+        STR.values_needed: False,
+        STR.dry_run: False,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
@@ -601,17 +603,17 @@ def test_cli__dispatch_template_render_no_optional():
 
 def test_cli__dispatch_template_render_yaml():
     args = {
-        STR.infile: 1,
-        STR.outfile: 2,
-        STR.valsfile: 3,
-        STR.valsfmt: 4,
+        STR.input_file: 1,
+        STR.output_file: 2,
+        STR.values_file: 3,
+        STR.values_format: 4,
         STR.cycle: 5,
         STR.leadtime: 6,
-        STR.keyvalpairs: ["foo=42", "bar=43"],
+        STR.key_eq_val_pairs: ["foo=42", "bar=43"],
         STR.env: 7,
-        STR.searchpath: 8,
-        STR.valsneeded: 9,
-        STR.dryrun: 10,
+        STR.search_path: 8,
+        STR.values_needed: 9,
+        STR.dry_run: 10,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
@@ -633,9 +635,9 @@ def test_cli__dispatch_template_render_yaml():
 
 def test_cli__dispatch_template_translate():
     args = {
-        STR.infile: 1,
-        STR.outfile: 2,
-        STR.dryrun: 3,
+        STR.input_file: 1,
+        STR.output_file: 2,
+        STR.dry_run: 3,
     }
     with patch.object(
         uwtools.api.template, "_convert_atparse_to_jinja2"
@@ -646,9 +648,9 @@ def test_cli__dispatch_template_translate():
 
 def test_cli__dispatch_template_translate_no_optional():
     args = {
-        STR.dryrun: False,
-        STR.infile: None,
-        STR.outfile: None,
+        STR.dry_run: False,
+        STR.input_file: None,
+        STR.output_file: None,
     }
     with patch.object(
         uwtools.api.template, "_convert_atparse_to_jinja2"

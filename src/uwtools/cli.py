@@ -73,24 +73,24 @@ def main() -> None:
             x: partial(_dispatch_to_driver, x)
             for x in [
                 STR.cdeps,
-                STR.chgrescube,
+                STR.chgres_cube,
                 STR.enkf,
-                STR.esggrid,
-                STR.filtertopo,
+                STR.esg_grid,
+                STR.filter_topo,
                 STR.fv3,
-                STR.globalequivresol,
+                STR.global_equiv_resol,
                 STR.gsi,
                 STR.ioda,
                 STR.jedi,
-                STR.makehgrid,
-                STR.makesolomosaic,
+                STR.make_hgrid,
+                STR.make_solo_mosaic,
                 STR.mpas,
-                STR.mpasinit,
+                STR.mpas_init,
                 STR.mpassit,
                 STR.orog,
-                STR.oroggsl,
+                STR.orog_gsl,
                 STR.schism,
-                STR.sfcclimogen,
+                STR.sfc_climo_gen,
                 STR.shave,
                 STR.ungrib,
                 STR.upp,
@@ -139,20 +139,20 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_file_format(
         optional,
-        switch=_switch(STR.fmt1),
+        switch=_switch(STR.format1),
         helpmsg="Format of file 1",
         choices=FORMATS,
     )
     _add_arg_file_format(
         optional,
-        switch=_switch(STR.fmt2),
+        switch=_switch(STR.format2),
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
     return [
         *_add_args_verbosity(optional),
-        partial(_check_file_vs_format, STR.path1, STR.fmt1),
-        partial(_check_file_vs_format, STR.path2, STR.fmt2),
+        partial(_check_file_vs_format, STR.path1, STR.format1),
+        partial(_check_file_vs_format, STR.path2, STR.format2),
     ]
 
 
@@ -197,8 +197,8 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_dry_run(optional)
     return [
         *_add_args_verbosity(optional),
-        partial(_check_file_vs_format, STR.infile, STR.infmt),
-        partial(_check_file_vs_format, STR.outfile, STR.outfmt),
+        partial(_check_file_vs_format, STR.input_file, STR.input_format),
+        partial(_check_file_vs_format, STR.output_file, STR.output_format),
         _check_update,
     ]
 
@@ -240,9 +240,9 @@ def _dispatch_config_compare(args: Args) -> bool:
     """
     return uwtools.api.config.compare(
         path1=args[STR.path1],
-        format1=args[STR.fmt1],
+        format1=args[STR.format1],
         path2=args[STR.path2],
-        format2=args[STR.fmt2],
+        format2=args[STR.format2],
     )
 
 
@@ -254,10 +254,10 @@ def _dispatch_config_compose(args: Args) -> bool:
     """
     uwtools.api.config.compose(
         configs=args[STR.configs],
-        output_file=args[STR.outfile],
+        output_file=args[STR.output_file],
         realize=args[STR.realize],
-        input_format=args[STR.infmt],
-        output_format=args[STR.outfmt],
+        input_format=args[STR.input_format],
+        output_format=args[STR.output_format],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
     )
@@ -272,23 +272,23 @@ def _dispatch_config_realize(args: Args) -> bool:
     """
     try:
         uwtools.api.config.realize(
-            input_config=args[STR.infile],
-            input_format=args[STR.infmt],
-            update_config=args[STR.updatefile],
-            update_format=args[STR.updatefmt],
-            output_file=args[STR.outfile],
-            output_format=args[STR.outfmt],
-            key_path=args[STR.keypath],
+            input_config=args[STR.input_file],
+            input_format=args[STR.input_format],
+            update_config=args[STR.update_file],
+            update_format=args[STR.update_format],
+            output_file=args[STR.output_file],
+            output_format=args[STR.output_format],
+            key_path=args[STR.key_path],
             cycle=args[STR.cycle],
             leadtime=args[STR.leadtime],
-            values_needed=args[STR.valsneeded],
+            values_needed=args[STR.values_needed],
             total=args[STR.total],
-            dry_run=args[STR.dryrun],
+            dry_run=args[STR.dry_run],
             stdin_ok=True,
         )
     except UWConfigRealizeError:
         msg = "Config could not be realized. Try with %s for details."
-        log.error(msg, _switch(STR.valsneeded))
+        log.error(msg, _switch(STR.values_needed))
         return False
     return True
 
@@ -300,8 +300,8 @@ def _dispatch_config_validate(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.validate(
-        schema_file=args[STR.schemafile],
-        config_path=args[STR.infile],
+        schema_file=args[STR.schema_file],
+        config_path=args[STR.input_file],
         stdin_ok=True,
     )
 
@@ -342,11 +342,11 @@ def _dispatch_execute(args: Args) -> bool:
         classname=args[STR.classname],
         module=args[STR.module],
         task=args[STR.task],
-        schema_file=args[STR.schemafile],
-        key_path=args[STR.keypath],
-        dry_run=args[STR.dryrun],
-        config=args[STR.cfgfile],
-        graph_file=args[STR.graphfile],
+        schema_file=args[STR.schema_file],
+        key_path=args[STR.key_path],
+        dry_run=args[STR.dry_run],
+        config=args[STR.config_file],
+        graph_file=args[STR.graph_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
         batch=args[STR.batch],
@@ -460,12 +460,12 @@ def _dispatch_fs_copy(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.copy(
-        target_dir=args[STR.targetdir],
-        config=args[STR.cfgfile],
+        target_dir=args[STR.target_dir],
+        config=args[STR.config_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        key_path=args[STR.keypath],
-        dry_run=args[STR.dryrun],
+        key_path=args[STR.key_path],
+        dry_run=args[STR.dry_run],
         threads=args[STR.threads],
         stdin_ok=True,
     )
@@ -479,13 +479,13 @@ def _dispatch_fs_hardlink(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.link(
-        target_dir=args[STR.targetdir],
-        config=args[STR.cfgfile],
+        target_dir=args[STR.target_dir],
+        config=args[STR.config_file],
         cycle=args[STR.cycle],
         hardlink=True,
         leadtime=args[STR.leadtime],
-        key_path=args[STR.keypath],
-        dry_run=args[STR.dryrun],
+        key_path=args[STR.key_path],
+        dry_run=args[STR.dry_run],
         threads=args[STR.threads],
         stdin_ok=True,
         fallback=args[STR.fallback],
@@ -500,12 +500,12 @@ def _dispatch_fs_link(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.link(
-        target_dir=args[STR.targetdir],
-        config=args[STR.cfgfile],
+        target_dir=args[STR.target_dir],
+        config=args[STR.config_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        key_path=args[STR.keypath],
-        dry_run=args[STR.dryrun],
+        key_path=args[STR.key_path],
+        dry_run=args[STR.dry_run],
         threads=args[STR.threads],
         stdin_ok=True,
     )
@@ -519,12 +519,12 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     report = uwtools.api.fs.makedirs(
-        target_dir=args[STR.targetdir],
-        config=args[STR.cfgfile],
+        target_dir=args[STR.target_dir],
+        config=args[STR.config_file],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
-        key_path=args[STR.keypath],
-        dry_run=args[STR.dryrun],
+        key_path=args[STR.key_path],
+        dry_run=args[STR.dry_run],
         threads=args[STR.threads],
         stdin_ok=True,
     )
@@ -552,7 +552,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     return {
         STR.iterate: _add_subparser_rocoto_iterate(subparsers),
         STR.realize: _add_subparser_rocoto_realize(subparsers),
-        STR.validate: _add_subparser_rocoto_validate(subparsers),
+        STR.validatexml: _add_subparser_rocoto_validate_xml(subparsers),
     }
 
 
@@ -586,13 +586,13 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     return _add_args_verbosity(optional)
 
 
-def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_rocoto_validate_xml(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: rocoto validate.
+    Add subparser for mode: rocoto validate-xml.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.validate, "Validate Rocoto XML")
+    parser = _add_subparser(subparsers, STR.validatexml, "Validate Rocoto XML")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     return _add_args_verbosity(optional)
@@ -607,7 +607,7 @@ def _dispatch_rocoto(args: Args) -> bool:
     actions = {
         STR.iterate: _dispatch_rocoto_iterate,
         STR.realize: _dispatch_rocoto_realize,
-        STR.validate: _dispatch_rocoto_validate,
+        STR.validatexml: _dispatch_rocoto_validate_xml,
     }
     return actions[args[STR.action]](args)
 
@@ -634,19 +634,19 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.rocoto.realize(
-        config=args[STR.cfgfile],
-        output_file=args[STR.outfile],
+        config=args[STR.config_file],
+        output_file=args[STR.output_file],
         stdin_ok=True,
     )
 
 
-def _dispatch_rocoto_validate(args: Args) -> bool:
+def _dispatch_rocoto_validate_xml(args: Args) -> bool:
     """
-    Define dispatch logic for rocoto validate action.
+    Define dispatch logic for rocoto validate-xml action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.validate(xml_file=args[STR.infile], stdin_ok=True)
+    return uwtools.api.rocoto.validate_xml(xml_file=args[STR.input_file], stdin_ok=True)
 
 
 # Mode template
@@ -725,21 +725,21 @@ def _dispatch_template_render(args: Args) -> bool:
     """
     try:
         uwtools.api.template.render(
-            values_src=args[STR.valsfile],
-            values_format=args[STR.valsfmt],
-            input_file=args[STR.infile],
-            output_file=args[STR.outfile],
+            values_src=args[STR.values_file],
+            values_format=args[STR.values_format],
+            input_file=args[STR.input_file],
+            output_file=args[STR.output_file],
             cycle=args[STR.cycle],
             leadtime=args[STR.leadtime],
-            overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
+            overrides=_dict_from_key_eq_val_strings(args[STR.key_eq_val_pairs]),
             env=args[STR.env],
-            searchpath=args[STR.searchpath],
-            values_needed=args[STR.valsneeded],
-            dry_run=args[STR.dryrun],
+            searchpath=args[STR.search_path],
+            values_needed=args[STR.values_needed],
+            dry_run=args[STR.dry_run],
             stdin_ok=True,
         )
     except UWTemplateRenderError:
-        if args[STR.valsneeded]:
+        if args[STR.values_needed]:
             return True
         log.error("Template could not be rendered")
         return False
@@ -753,9 +753,9 @@ def _dispatch_template_translate(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.template.translate(
-        input_file=args[STR.infile],
-        output_file=args[STR.outfile],
-        dry_run=args[STR.dryrun],
+        input_file=args[STR.input_file],
+        output_file=args[STR.output_file],
+        dry_run=args[STR.dry_run],
         stdin_ok=True,
     )
 
@@ -783,7 +783,7 @@ def _add_arg_classname(group: Group) -> None:
 def _add_arg_config_file(group: Group, required: bool = False) -> None:
     msg = "Path to UW YAML config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
-        _switch(STR.cfgfile),
+        _switch(STR.config_file),
         "-c",
         help=msg,
         metavar="PATH",
@@ -813,7 +813,7 @@ def _add_arg_database(group: Group) -> None:
 
 def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
-        _switch(STR.dryrun),
+        _switch(STR.dry_run),
         action="store_true",
         help="Only log info, making no changes",
     )
@@ -851,7 +851,7 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
 
 def _add_arg_graph_file(group: Group) -> None:
     group.add_argument(
-        _switch(STR.graphfile),
+        _switch(STR.graph_file),
         help="Path to Graphviz DOT output [experimental]",
         metavar="PATH",
         type=Path,
@@ -860,7 +860,7 @@ def _add_arg_graph_file(group: Group) -> None:
 
 def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.infile),
+        _switch(STR.input_file),
         "-i",
         help="Path to input file (default: read from stdin)",
         metavar="PATH",
@@ -871,7 +871,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_input_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.infmt),
+        _switch(STR.input_format),
         choices=choices,
         help=f"Input format (default: {FORMAT.yaml})",
         required=required,
@@ -881,7 +881,7 @@ def _add_arg_input_format(group: Group, choices: list[str], required: bool = Fal
 
 def _add_arg_key_eq_val_pairs(group: Group) -> None:
     group.add_argument(
-        STR.keyvalpairs,
+        STR.key_eq_val_pairs,
         help="A key=value pair to override/supplement config",
         metavar="KEY=VALUE",
         nargs="*",
@@ -890,7 +890,7 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
 
 def _add_arg_key_path(group: Group, helpmsg: str) -> None:
     group.add_argument(
-        _switch(STR.keypath),
+        _switch(STR.key_path),
         help=helpmsg,
         metavar="KEY[.KEY...]",
         required=False,
@@ -918,7 +918,7 @@ def _add_arg_module(group: Group) -> None:
 
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.outfile),
+        _switch(STR.output_file),
         "-o",
         help="Path to output file (default: write to stdout)",
         metavar="PATH",
@@ -929,7 +929,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_output_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.outfmt),
+        _switch(STR.output_format),
         choices=choices,
         help=f"Output format (default: {FORMAT.yaml})",
         required=required,
@@ -986,7 +986,7 @@ def _add_arg_fallback(group: Group) -> None:
 
 def _add_arg_schema_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.schemafile),
+        _switch(STR.schema_file),
         help="Path to schema file to use for validation",
         metavar="PATH",
         required=required,
@@ -996,7 +996,7 @@ def _add_arg_schema_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_search_path(group: Group) -> None:
     group.add_argument(
-        _switch(STR.searchpath),
+        _switch(STR.search_path),
         help="Colon-separated paths to search for extra templates",
         metavar="PATH[:PATH:...]",
         required=False,
@@ -1006,7 +1006,7 @@ def _add_arg_search_path(group: Group) -> None:
 
 def _add_arg_show_schema(group: Group) -> None:
     group.add_argument(
-        _switch(STR.showschema),
+        _switch(STR.show_schema),
         action="store_true",
         help="Show driver schema and exit",
     )
@@ -1014,7 +1014,7 @@ def _add_arg_show_schema(group: Group) -> None:
 
 def _add_arg_target_dir(group: Group, required: bool = False, helpmsg: str | None = None) -> None:
     group.add_argument(
-        _switch(STR.targetdir),
+        _switch(STR.target_dir),
         help=helpmsg or "Path to target directory",
         metavar="PATH",
         required=required,
@@ -1054,7 +1054,7 @@ def _add_arg_total(group: Group) -> None:
 
 def _add_arg_update_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.updatefile),
+        _switch(STR.update_file),
         "-u",
         help="Path to update file (default: read from stdin)",
         metavar="PATH",
@@ -1065,7 +1065,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_update_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.updatefmt),
+        _switch(STR.update_format),
         choices=choices,
         help="Update format",
         required=required,
@@ -1075,7 +1075,7 @@ def _add_arg_update_format(group: Group, choices: list[str], required: bool = Fa
 
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.valsfile),
+        _switch(STR.values_file),
         help="Path to file providing override or interpolation values",
         metavar="PATH",
         required=required,
@@ -1085,7 +1085,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_values_format(group: Group, choices: list[str]) -> None:
     group.add_argument(
-        _switch(STR.valsfmt),
+        _switch(STR.values_format),
         choices=choices,
         help="Values format",
         required=False,
@@ -1095,7 +1095,7 @@ def _add_arg_values_format(group: Group, choices: list[str]) -> None:
 
 def _add_arg_values_needed(group: Group, helpmsg: str) -> None:
     group.add_argument(
-        _switch(STR.valsneeded),
+        _switch(STR.values_needed),
         action="store_true",
         help=helpmsg,
     )
@@ -1268,14 +1268,14 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # will be taken from the environment or from key=value command-line pairs by default. But if a
     # values file IS specified, its format must either be explicitly specified, or deduced from its
     # extension.
-    if args.get(STR.valsfile) is not None and args.get(STR.valsfmt) is None:
-        args[STR.valsfmt] = get_config_format(args[STR.valsfile])
+    if args.get(STR.values_file) is not None and args.get(STR.values_format) is None:
+        args[STR.values_format] = get_config_format(args[STR.values_file])
     return args
 
 
 def _check_update(args: Args) -> Args:
-    if args.get(STR.updatefile) is not None and args.get(STR.updatefmt) is None:
-        args[STR.updatefmt] = get_config_format(args[STR.updatefile])
+    if args.get(STR.update_file) is not None and args.get(STR.update_format) is None:
+        args[STR.update_format] = get_config_format(args[STR.update_file])
     return args
 
 
@@ -1303,7 +1303,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     module = import_module("uwtools.api.%s" % name)
-    if args.get(STR.showschema):
+    if args.get(STR.show_schema):
         print(json.dumps(module.schema(), sort_keys=True, indent=2))
         return True
     if not args.get(STR.action):
@@ -1311,11 +1311,11 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     execute: Callable[..., bool] = module.execute
     kwargs = {
         "task": args[STR.action],
-        "config": args[STR.cfgfile],
-        "dry_run": args[STR.dryrun],
-        "graph_file": args[STR.graphfile],
-        "key_path": args[STR.keypath],
-        "schema_file": args[STR.schemafile],
+        "config": args[STR.config_file],
+        "dry_run": args[STR.dry_run],
+        "graph_file": args[STR.graph_file],
+        "key_path": args[STR.key_path],
+        "schema_file": args[STR.schema_file],
         "stdin_ok": True,
     }
     kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
@@ -1371,14 +1371,14 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     drivers = {
         component: partial(_add_subparser_for_driver, component, subparsers, with_batch=True)
         for component in [
-            STR.esggrid,
-            STR.filtertopo,
-            STR.globalequivresol,
-            STR.makehgrid,
-            STR.makesolomosaic,
+            STR.esg_grid,
+            STR.filter_topo,
+            STR.global_equiv_resol,
+            STR.make_hgrid,
+            STR.make_solo_mosaic,
             STR.orog,
-            STR.oroggsl,
-            STR.sfcclimogen,
+            STR.orog_gsl,
+            STR.sfc_climo_gen,
             STR.shave,
         ]
     }
@@ -1393,7 +1393,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.ioda,
             STR.jedi,
             STR.mpas,
-            STR.mpasinit,
+            STR.mpas_init,
             STR.ungrib,
         ]
     }
@@ -1407,7 +1407,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             with_leadtime=True,
         )
         for component in [
-            STR.chgrescube,
+            STR.chgres_cube,
             STR.mpassit,
             STR.upp,
         ]

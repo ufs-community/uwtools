@@ -33,7 +33,7 @@ class MakeHgrid(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.makehgrid
+        return STR.make_hgrid
 
     @property
     def output(self) -> dict[str, Path]:
