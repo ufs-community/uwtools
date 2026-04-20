@@ -2,38 +2,90 @@
 Canonical strings used throughout uwtools.
 """
 
+# This module provides containers for string literals used throughout the codebase, organized by
+# the source of their definition. Most values are dynamically set to match the key, but explicit
+# values can also be provided when the key and value should not be the same. This mechanism reduces
+# the risk of typos in string literals, and exposes references to the type checker for validation.
+
 from dataclasses import dataclass, fields
+
+# Private
+
+_ = ""  # default value, to be replaced by key
+
+
+class _ValsMatchKeys:
+    def __post_init__(self):
+        attr = "__dataclass_fields__"
+        fields = getattr(self, attr).values()
+        for field in fields:
+            if not getattr(self, field.name):
+                object.__setattr__(self, field.name, field.name)
 
 
 @dataclass(frozen=True)
-class FORMAT:
+class _EC(_ValsMatchKeys):
     """
-    A mapping from config format names to literal strings.
+    EcFlow-specific strings.
     """
 
-    # Canonical strings:
+    account: str = _
+    config: str = _
+    date: str = _
+    datelist: str = _
+    datetime: str = _
+    day: str = _
+    defstatus: str = _
+    ecflow: str = _
+    enumerated: str = _
+    envcmds: str = _
+    events: str = _
+    execution: str = _
+    expand: str = _
+    extern: str = _
+    families: str = _
+    family: str = _
+    inlimits: str = _
+    int: str = _
+    jobcmd: str = _
+    labels: str = _
+    late: str = _
+    limits: str = _
+    manual: str = _
+    meters: str = _
+    node: str = _
+    parent: str = _
+    post_includes: str = _
+    pre_includes: str = _
+    refs: str = _
+    repeat: str = _
+    rundir: str = _
+    script: str = _
+    string: str = _
+    suite: str = _
+    suites: str = _
+    task: str = _
+    tasks: str = _
+    trigger: str = _
+    vars: str = _
 
-    _atparse: str = "atparse"
-    _fieldtable: str = "fieldtable"
-    _ini: str = "ini"
-    _jinja2: str = "jinja2"
-    _nml: str = "nml"
-    _sh: str = "sh"
-    _xml: str = "xml"
-    _yaml: str = "yaml"
 
-    # Variants:
+@dataclass(frozen=True)
+class _FORMAT(_ValsMatchKeys):
+    """
+    Format names.
+    """
 
-    atparse: str = _atparse
-    bash: str = _sh
-    cfg: str = _ini
-    fieldtable: str = _fieldtable
-    ini: str = _ini
-    jinja2: str = _jinja2
-    nml: str = _nml
-    sh: str = _sh
-    yaml: str = _yaml
-    yml: str = _yaml
+    atparse: str = _
+    bash: str = "sh"
+    cfg: str = "ini"
+    fieldtable: str = _
+    ini: str = _
+    jinja2: str = _
+    nml: str = _
+    sh: str = _
+    yaml: str = _
+    yml: str = "yaml"
 
     @staticmethod
     def extensions() -> list[str]:
@@ -55,123 +107,128 @@ class FORMAT:
 
 
 @dataclass(frozen=True)
-class STR:
+class _STR(_ValsMatchKeys):
     """
-    String lookup map.
+    General strings.
     """
 
-    account: str = "account"
-    action: str = "action"
-    basefile: str = "base_file"
-    batch: str = "batch"
-    batchargs: str = "batchargs"
-    cdeps: str = "cdeps"
-    cfgfile: str = "config_file"
-    chgrescube: str = "chgres_cube"
-    classname: str = "classname"
-    compare: str = "compare"
-    compose: str = "compose"
-    config: str = "config"
-    configs: str = "configs"
-    copy: str = "copy"
-    cycle: str = "cycle"
-    database: str = "database"
-    dryrun: str = "dry_run"
-    ecflow: str = "ecflow"
-    enkf: str = "enkf"
-    env: str = "env"
-    envcmds: str = "envcmds"
-    esggrid: str = "esg_grid"
-    executable: str = "executable"
-    execute: str = "execute"
-    execution: str = "execution"
-    fallback: str = "fallback"
-    file: str = "file"
-    filtertopo: str = "filter_topo"
-    fmt1: str = "format1"
-    fmt2: str = "format2"
-    fs: str = "fs"
-    fv3: str = "fv3"
-    globalequivresol: str = "global_equiv_resol"
-    graphfile: str = "graph_file"
-    gsi: str = "gsi"
-    hardlink: str = "hardlink"
-    help: str = "help"
-    hsi: str = "hsi"
-    htar: str = "htar"
-    infile: str = "input_file"
-    infmt: str = "input_format"
-    ioda: str = "ioda"
-    iterate: str = "iterate"
-    jedi: str = "jedi"
-    keypath: str = "key_path"
-    keyvalpairs: str = "key_eq_val_pairs"
-    leadtime: str = "leadtime"
-    link: str = "link"
-    makedirs: str = "makedirs"
-    makehgrid: str = "make_hgrid"
-    makesolomosaic: str = "make_solo_mosaic"
-    mode: str = "mode"
-    model: str = "model"
-    module: str = "module"
-    mpas: str = "mpas"
-    mpasinit: str = "mpas_init"
-    mpassit: str = "mpassit"
-    mpiargs: str = "mpiargs"
-    mpicmd: str = "mpicmd"
-    namelist: str = "namelist"
+    account: str = _
+    action: str = _
+    base_file: str = _
+    batch: str = _
+    batchargs: str = _
+    cdeps: str = _
+    chgres_cube: str = _
+    classname: str = _
+    compare: str = _
+    compose: str = _
+    config: str = _
+    config_file: str = _
+    configs: str = _
+    copy: str = _
+    cycle: str = _
+    database: str = _
+    dry_run: str = _
+    enkf: str = _
+    env: str = _
+    envcmds: str = _
+    esg_grid: str = _
+    executable: str = _
+    execute: str = _
+    execution: str = _
+    fallback: str = _
+    file: str = _
+    filter_topo: str = _
+    format1: str = _
+    format2: str = _
+    fs: str = _
+    fv3: str = _
+    global_equiv_resol: str = _
+    graph_file: str = _
+    gsi: str = _
+    hardlink: str = _
+    help: str = _
+    hsi: str = _
+    htar: str = _
+    input_file: str = _
+    input_format: str = _
+    ioda: str = _
+    iterate: str = _
+    jedi: str = _
+    key_eq_val_pairs: str = _
+    key_path: str = _
+    leadtime: str = _
+    link: str = _
+    make_hgrid: str = _
+    make_solo_mosaic: str = _
+    makedirs: str = _
+    mode: str = _
+    module: str = _
+    mpas: str = _
+    mpas_init: str = _
+    mpassit: str = _
+    mpiargs: str = _
+    mpicmd: str = _
+    namelist: str = _
     notready: str = "not-ready"
-    orog: str = "orog"
-    oroggsl: str = "orog_gsl"
-    outfile: str = "output_file"
-    outfmt: str = "output_format"
-    path1: str = "path1"
-    path2: str = "path2"
-    platform: str = "platform"
-    properties: str = "properties"
-    quiet: str = "quiet"
-    rate: str = "rate"
-    ready: str = "ready"
-    realize: str = "realize"
-    render: str = "render"
-    report: str = "report"
-    rocoto: str = "rocoto"
-    run: str = "run"
-    rundir: str = "rundir"
-    scheduler: str = "scheduler"
-    schemafile: str = "schema_file"
-    schism: str = "schism"
-    searchpath: str = "search_path"
-    sfcclimogen: str = "sfc_climo_gen"
-    shave: str = "shave"
-    showschema: str = "show_schema"
-    stacksize: str = "stacksize"
-    stdout: str = "stdout"
-    symlink: str = "symlink"
-    targetdir: str = "target_dir"
-    task: str = "task"
-    tasks: str = "tasks"
-    template: str = "template"
-    threads: str = "threads"
-    total: str = "total"
-    translate: str = "translate"
-    ungrib: str = "ungrib"
-    updatefile: str = "update_file"
-    updatefmt: str = "update_format"
-    updatevalues: str = "update_values"
-    upp: str = "upp"
-    upp_assets: str = "upp_assets"
+    orog: str = _
+    orog_gsl: str = _
+    output_file: str = _
+    output_format: str = _
+    path1: str = _
+    path2: str = _
+    platform: str = _
+    properties: str = _
+    quiet: str = _
+    rate: str = _
+    ready: str = _
+    realize: str = _
+    render: str = _
+    report: str = _
+    rocoto: str = _
+    run: str = _
+    rundir: str = _
+    scheduler: str = _
+    schema_file: str = _
+    schism: str = _
+    search_path: str = _
+    sfc_climo_gen: str = _
+    shave: str = _
+    show_schema: str = _
+    stacksize: str = _
+    stdout: str = _
+    symlink: str = _
+    target_dir: str = _
+    task: str = _
+    tasks: str = _
+    template: str = _
+    threads: str = _
+    total: str = _
+    translate: str = _
+    ungrib: str = _
+    update_file: str = _
+    update_format: str = _
+    update_values: str = _
+    upp: str = _
+    upp_assets: str = _
     url_scheme_file: str = "file"
     url_scheme_hsi: str = "hsi"
     url_scheme_htar: str = "htar"
     url_scheme_http: str = "http"
     url_scheme_https: str = "https"
-    validate: str = "validate"
+    validate: str = _
     validatexml: str = "validate-xml"
-    valsfile: str = "values_file"
-    valsfmt: str = "values_format"
-    valsneeded: str = "values_needed"
-    verbose: str = "verbose"
-    version: str = "version"
-    workflow: str = "workflow"
-    ww3: str = "ww3"
+    values_file: str = _
+    values_format: str = _
+    values_needed: str = _
+    verbose: str = _
+    version: str = _
+    workflow: str = _
+    ww3: str = _
+
+
+# Public
+
+EC = _EC()
+FORMAT = _FORMAT()
+STR = _STR()

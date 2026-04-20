@@ -79,7 +79,7 @@ class FilterTopo(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.filtertopo
+        return STR.filter_topo
 
     @property
     def output(self) -> dict[str, Path]:

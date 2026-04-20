@@ -72,7 +72,7 @@ class FV3(DriverCycleBased, FileStager):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        yield filecopy(src=Path(self.config["field_table"][STR.basefile]), dst=path)
+        yield filecopy(src=Path(self.config["field_table"][STR.base_file]), dst=path)
 
     @task
     def model_configure(self):
@@ -83,7 +83,7 @@ class FV3(DriverCycleBased, FileStager):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        base_file = self.config["model_configure"].get(STR.basefile)
+        base_file = self.config["model_configure"].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
             config_class=YAMLConfig,
@@ -100,7 +100,7 @@ class FV3(DriverCycleBased, FileStager):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        base_file = self.config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
             config_class=NMLConfig,
