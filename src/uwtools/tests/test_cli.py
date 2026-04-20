@@ -150,9 +150,9 @@ def test_cli__add_subparser_rocoto_realize(subparsers):
     assert subparsers.choices[STR.realize]
 
 
-def test_cli__add_subparser_rocoto_validate(subparsers):
-    cli._add_subparser_rocoto_validate(subparsers)
-    assert subparsers.choices[STR.validate]
+def test_cli__add_subparser_rocoto_validate_xml(subparsers):
+    cli._add_subparser_rocoto_validate_xml(subparsers)
+    assert subparsers.choices[STR.validatexml]
 
 
 def test_cli__add_subparser_template(subparsers):
@@ -473,7 +473,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
-        (STR.validate, "_dispatch_rocoto_validate"),
+        (STR.validatexml, "_dispatch_rocoto_validate_xml"),
     ],
 )
 def test_cli__dispatch_rocoto(params):
@@ -518,22 +518,22 @@ def test_cli__dispatch_rocoto_realize_no_optional():
 
 def test_cli__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
-    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
-        cli._dispatch_rocoto_validate(args)
-    _validate.assert_called_once_with(xml_file=1)
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
+        cli._dispatch_rocoto_validate_xml(args)
+    _validate_xml_file.assert_called_once_with(xml_file=1)
 
 
 def test_cli__dispatch_rocoto_validate_xml_invalid():
     args = {STR.infile: 1, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
-        assert cli._dispatch_rocoto_validate(args) is False
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file", return_value=False):
+        assert cli._dispatch_rocoto_validate_xml(args) is False
 
 
 def test_cli__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate") as validate:
-        cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(xml_file=None)
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
+        cli._dispatch_rocoto_validate_xml(args)
+    _validate_xml_file.assert_called_once_with(xml_file=None)
 
 
 @mark.parametrize(
