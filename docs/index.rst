@@ -119,9 +119,9 @@ This is where you put in your structured YAML that defines your workflow of choi
 Validate Action
 """""""""""""""
 
-Do you already have a Rocoto XML but don't want to run Rocoto to make sure it works? Use ``rocoto validate`` to check to see if Rocoto will be happy.
+Do you already have a Rocoto XML but don't want to run Rocoto to make sure it works? Use ``rocoto validate-xml`` to check to see if Rocoto will be happy.
 
-| :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
+| :any:`CLI documentation with examples<cli_rocoto_validate_xml_examples>`
 
 The Drivers
 -----------

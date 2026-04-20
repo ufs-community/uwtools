@@ -167,6 +167,7 @@ class STR:
     url_scheme_http: str = "http"
     url_scheme_https: str = "https"
     validate: str = "validate"
+    validatexml: str = "validate-xml"
     valsfile: str = "values_file"
     valsfmt: str = "values_format"
     valsneeded: str = "values_needed"
