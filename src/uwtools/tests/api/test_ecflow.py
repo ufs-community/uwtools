@@ -11,7 +11,7 @@ def test_api_ecflow_realize():
     _realize.assert_called_once_with(config=path1, output_path=path2, scripts_path=None)
 
 
-def test_api_ecflow_realize_with_scripts():
+def test_api_ecflow_realize__with_scripts():
     path1, path2, path3 = Path("foo"), Path("bar"), Path("baz")
     with patch.object(ecflow, "_realize") as _realize:
         ecflow.realize(config=path1, output_path=path2, scripts_path=path3)

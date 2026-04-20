@@ -27,8 +27,8 @@ def realize(
     Realize the ecFlow workflow defined in the given YAML as a Suite Definition and ecf scripts.
 
     If no input file is specified, ``stdin`` is read. A ``YAMLConfig`` object may also be provided
-    as input. If no output file is specified, the Suite Definition is written to``stdout``. The ecf
-    scripts are not produced if scripts_path is not provided.
+    as input. If no output file is specified, the Suite Definition is written to ``stdout``. The ecf
+    scripts are not produced if ``scripts_path`` is not provided.
 
     :param config: YAML input file or ``YAMLConfig`` object (``None`` => read ``stdin``).
     :param output_path: Suite Definition output path (``None`` => write to ``stdout``).
