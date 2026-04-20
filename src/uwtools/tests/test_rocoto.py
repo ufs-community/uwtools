@@ -106,7 +106,7 @@ def test_rocoto_validate_xml_file__fail(validation_assets):
     assert rocoto.validate_xml_file(xml_file=xml_file_bad) is False
 
 
-def test_rocoto_validate_xml_fail__pass(validation_assets):
+def test_rocoto_validate_xml_file__pass(validation_assets):
     _, xml_file_good, _, _ = validation_assets
     assert rocoto.validate_xml_file(xml_file=xml_file_good) is True
 
