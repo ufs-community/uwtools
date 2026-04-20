@@ -55,7 +55,7 @@ def test_rocoto_building_workflows(load, tb):
     assert tb.cell_output_text(37) == load(base / "meta-nested-workflow.yaml")
 
 
-def test_rocoto_validate(tb):
+def test_rocoto_validate_xml(tb):
     simple_xml = (base / "simple-workflow.xml").read_text().rstrip()
     err_xml = (base / "err-workflow.xml").read_text().rstrip()
     assert tb.cell_output_text(41) == simple_xml

@@ -27,8 +27,8 @@ def test_api_rocoto_realize():
     _realize.assert_called_once_with(config=path1, output_file=path2)
 
 
-def test_api_rocoto_validate():
+def test_api_rocoto_validate_xml():
     path = Path("foo")
-    with patch.object(rocoto, "_validate") as _validate:
-        rocoto.validate(xml_file=path)
-    _validate.assert_called_once_with(xml_file=path)
+    with patch.object(rocoto, "_validate_xml_file") as _validate_xml_file:
+        rocoto.validate_xml(xml_file=path)
+    _validate_xml_file.assert_called_once_with(xml_file=path)
