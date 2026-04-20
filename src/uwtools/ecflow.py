@@ -371,7 +371,8 @@ def realize(
     scripts (if ``scripts_path`` is provided).
 
     :param config: Path to YAML input file (None => read ``stdin``), or YAMLConfig object.
-    :param output_path: Path to write the rendered Suite Definition file (None => write to ``stdout``).
+    :param output_path: Path to write the rendered Suite Definition file (None => write to
+        ``stdout``).
     :param scripts_path: Path to write the rendered ecf scripts (None => do not write scripts).
     :return: Suite Definition as a string.
     """
