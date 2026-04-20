@@ -13,6 +13,9 @@
     "executable": {
       "type": "string"
     },
+    "jobcmd": {
+      "type": "string"
+    },
     "mpiargs": {
       "items": {
         "type": "string"

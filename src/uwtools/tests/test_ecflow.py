@@ -326,6 +326,15 @@ class TestECFlowDef:
         assert task.find_event("event2") is not None
         assert [event.name() for event in task.events] == ["event1", "event2"]
 
+    def test__add_node__with_events_multiarg(self, instance):
+        suite = Suite("test")
+        config = {"events": [[1, "event1"], [2, "event2"]]}
+        task = Task("t1")
+        instance._add_node(config, task, suite)
+        assert task.find_event("event1") is not None
+        assert task.find_event("event2") is not None
+        assert [event.name() for event in task.events] == ["event1", "event2"]
+
     def test__add_node__with_defstatus(self, instance):
         suite = Suite("test")
         task = Task("t1")

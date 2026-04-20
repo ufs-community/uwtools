@@ -183,7 +183,10 @@ class _ECFlowDef:
                     node.add_defstatus(getattr(DState, subconfig))
                 case "events":
                     for event in subconfig:
-                        node.add_event(event)
+                        if isinstance(event, list):
+                            node.add_event(*event)
+                        else:
+                            node.add_event(event)
                 case "inlimits":
                     add_items(node.add_inlimit, subconfig)
                 case "labels":

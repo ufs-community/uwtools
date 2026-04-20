@@ -1,6 +1,510 @@
 {
+  "$defs": {
+    "addons": {
+      "properties": {
+        "defstatus": {
+          "enum": [
+            "complete",
+            "suspended",
+            "aborted",
+            "queued",
+            "submitted",
+            "active",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "events": {
+          "items": {
+            "anyOf": [
+              {
+                "type": [
+                  "integer",
+                  "string"
+                ]
+              },
+              {
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "type": "array"
+              }
+            ]
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "inlimits": {
+          "items": {
+            "anyOf": [
+              {
+                "items": false,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "items": false,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "items": false,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "items": false,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ],
+                "type": "array"
+              }
+            ]
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "labels": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "late": {
+          "additionalProperties": false,
+          "properties": {
+            "active": {
+              "type": "string"
+            },
+            "complete": {
+              "type": "string"
+            },
+            "submitted": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "limits": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "meters": {
+          "items": {
+            "anyOf": [
+              {
+                "items": false,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "items": false,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              }
+            ]
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "repeat_date": {
+          "additionalProperties": false,
+          "properties": {
+            "end": {
+              "maximum": 99999999,
+              "minimum": 10000000,
+              "type": "integer"
+            },
+            "start": {
+              "maximum": 99999999,
+              "minimum": 10000000,
+              "type": "integer"
+            },
+            "step": {
+              "type": "integer"
+            },
+            "variable": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "variable",
+            "start",
+            "end"
+          ],
+          "type": "object"
+        },
+        "repeat_datelist": {
+          "additionalProperties": false,
+          "properties": {
+            "list": {
+              "items": {
+                "maximum": 99999999,
+                "minimum": 10000000,
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "variable": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "variable",
+            "list"
+          ],
+          "type": "object"
+        },
+        "repeat_datetime": {
+          "additionalProperties": false,
+          "properties": {
+            "end": {
+              "pattern": "^[0-9]{8}T[0-9]{6}$",
+              "type": "string"
+            },
+            "start": {
+              "pattern": "^[0-9]{8}T[0-9]{6}$",
+              "type": "string"
+            },
+            "step": {
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$",
+              "type": "string"
+            },
+            "variable": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "variable",
+            "start",
+            "end"
+          ],
+          "type": "object"
+        },
+        "repeat_day": {
+          "additionalProperties": false,
+          "properties": {
+            "step": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "step"
+          ],
+          "type": "object"
+        },
+        "repeat_enumerated": {
+          "additionalProperties": false,
+          "properties": {
+            "list": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "variable": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "variable",
+            "list"
+          ],
+          "type": "object"
+        },
+        "repeat_int": {
+          "additionalProperties": false,
+          "properties": {
+            "end": {
+              "type": "integer"
+            },
+            "start": {
+              "type": "integer"
+            },
+            "step": {
+              "type": "integer"
+            },
+            "variable": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "variable",
+            "start",
+            "end"
+          ],
+          "type": "object"
+        },
+        "repeat_string": {
+          "additionalProperties": false,
+          "properties": {
+            "list": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "variable": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "variable",
+            "list"
+          ],
+          "type": "object"
+        },
+        "trigger": {
+          "type": "string"
+        },
+        "vars": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "expander": {
+      "minProperties": 2,
+      "patternProperties": {
+        "^families_.+$": {
+          "$ref": "#/$defs/expander"
+        },
+        "^family_.+$": {
+          "$ref": "#/$defs/familycontainer"
+        },
+        "^task_.+$": {
+          "$ref": "#/$defs/taskcontainer"
+        },
+        "^tasks_.+$": {
+          "$ref": "#/$defs/expander"
+        }
+      },
+      "properties": {
+        "expand": {
+          "additionalProperties": false,
+          "minProperties": 1,
+          "patternProperties": {
+            "^.+$": {
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "expand"
+      ],
+      "type": "object"
+    },
+    "family": {
+      "$ref": "#/$defs/familycontainer",
+      "unevaluatedProperties": false
+    },
+    "familycontainer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/nodecontainer"
+        },
+        {
+          "$ref": "#/$defs/addons"
+        }
+      ],
+      "type": "object"
+    },
+    "nodecontainer": {
+      "patternProperties": {
+        "^families_.+$": {
+          "$ref": "#/$defs/expander"
+        },
+        "^family_.+$": {
+          "$ref": "#/$defs/familycontainer"
+        },
+        "^task_.+$": {
+          "$ref": "#/$defs/taskcontainer"
+        },
+        "^tasks_.+$": {
+          "$ref": "#/$defs/expander"
+        }
+      },
+      "type": "object"
+    },
+    "task": {
+      "$ref": "#/$defs/taskcontainer",
+      "unevaluatedProperties": false
+    },
+    "taskcontainer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/addons"
+        },
+        {
+          "properties": {
+            "script": {
+              "additionalProperties": false,
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "execution": {
+                  "anyOf": [
+                    {
+                      "$ref": "urn:uwtools:execution-parallel"
+                    },
+                    {
+                      "$ref": "urn:uwtools:execution-serial"
+                    }
+                  ]
+                },
+                "manual": {
+                  "type": "string"
+                },
+                "post_includes": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "pre_includes": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "rundir": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "execution"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "script"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
   "properties": {
     "ecflow": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^suite_.+$": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/nodecontainer"
+            },
+            {
+              "$ref": "#/$defs/addons"
+            }
+          ]
+        },
+        "^suites_.+$": {
+          "$ref": "#/$defs/expander"
+        },
+        "unevaluatedProperties": false
+      },
+      "properties": {
+        "extern": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scheduler": {
+          "enum": [
+            "lsf",
+            "pbs",
+            "slurm"
+          ],
+          "type": "string"
+        },
+        "vars": {
+          "type": "object"
+        }
+      },
       "type": "object"
     }
   },
