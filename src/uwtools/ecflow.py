@@ -31,6 +31,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
+from uwtools.utils.file import writable
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -71,16 +72,17 @@ class _ECFlowDef:
             outpath.parent.mkdir(parents=True, exist_ok=True)
             outpath.write_text(content)
 
-    def write_suite_definition(self, path: Path | str) -> None:
+    def write_suite_definition(self, path: Path | None) -> None:
         """
         The suite definition artifact.
 
         :param path: Where to write the suite definition.
         """
-        path = Path(path)
-        path.mkdir(parents=True, exist_ok=True)
-        suite = path / "suite.def"
-        suite.write_text(self._d.__str__())
+        if path:
+            path.mkdir(parents=True, exist_ok=True)
+            path = path / "suite.def"
+        with writable(path) as f:
+            print(self, file=f)
 
     def _add_workflow_components(self) -> None:
         """
@@ -358,3 +360,28 @@ class _ECFlowDef:
         tag = parts[0]
         name = "_".join(parts[1:]) if parts[1:] else ""
         return tag, name
+
+
+def realize(
+    config: YAMLConfig | Path | None,
+    output_path: Path | None = None,
+    scripts_path: Path | None = None,
+) -> str:
+    """
+    Realize the ecFlow suite defined in a given YAML as a Suite Definition and corresponding ecf
+    scripts (if scripts_path is provided).
+
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_path: Path to write the rendered Suite Definition file (None => write to stdout).
+    :param scripts_path: Path to write the rendered ecf scripts (None => do not write scripts).
+    :return: Suite Definition as a string.
+    """
+    suite = _ECFlowDef(config)
+    suite.write_suite_definition(output_path)
+    if scripts_path:
+        suite.write_ecf_scripts(scripts_path)
+    return str(suite)
+
+
+def validate_file(yaml_file: Path | None = None) -> bool:  # noqa: ARG001
+    return True
