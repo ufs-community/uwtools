@@ -17,6 +17,16 @@ from uwtools.exceptions import UWConfigError
 
 
 @fixture
+def assets(tmp_path, minimal_config):
+    yaml_file = tmp_path / "config.yaml"
+    YAMLConfig(minimal_config).dump(yaml_file)
+    script_path = tmp_path / "scripts"
+    script_path.mkdir(exist_ok=True, parents=True)
+    expected = "#5.15.2\n# enddef\n\n"
+    return yaml_file, script_path, expected
+
+
+@fixture
 def instance(minimal_config):
     """
     Create a minimal _ECFlowDef instance.
@@ -432,12 +442,6 @@ class TestECFlowDef:
         instance.write_suite_definition(nested_path)
         assert (nested_path / "suite.def").is_file()
 
-    def test_write_suite_definition__with_string_path(self, instance, tmp_path):
-        suite = Suite("test")
-        instance._d.add(suite)
-        instance.write_suite_definition(str(tmp_path))
-        assert (tmp_path / "suite.def").is_file()
-
     # Additional tests for missing coverage
 
     def test__add_workflow_components__suites(self, instance):
@@ -644,3 +648,46 @@ class TestECFlowDef:
         assert "task member_01" in suite_def
         assert "task member_02" in suite_def
         assert "task member_03" in suite_def
+
+
+def test_ecflow_realize__cfg_to_file(tmp_path, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
+    output = (tmp_path / "suite.def").read_text()
+    assert output == expected
+
+
+def test_ecflow_realize__cfg_to_stdout(capsys, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=YAMLConfig(cfgfile))
+    assert capsys.readouterr().out == expected
+
+
+def test_ecflow_realize__file_to_file(tmp_path, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=cfgfile, output_path=tmp_path)
+    output = (tmp_path / "suite.def").read_text()
+    assert output == expected
+
+
+def test_ecflow_realize__file_to_stdout(capsys, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=cfgfile)
+    assert capsys.readouterr().out == expected
+
+
+def test_ecflow_realize__write_scripts(capsys, assets):
+    cfgfile, script_path, expected = assets
+    with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
+        ecflow.realize(config=cfgfile, scripts_path=script_path)
+        write_scripts.assert_called_once_with(script_path)
+    assert capsys.readouterr().out == expected
+
+
+def test_ecflow_validate__file(assets):
+    cfgfile, _, _ = assets
+    assert ecflow.validate_file(cfgfile)
+
+
+def test_ecflow_validate__stdin():
+    assert ecflow.validate_file()
