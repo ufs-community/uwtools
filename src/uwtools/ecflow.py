@@ -57,20 +57,6 @@ class _ECFlowDef:
     def __str__(self):
         return self._d.__str__()
 
-    def validate(self) -> bool:
-        """
-        Validate the ecFlow config against the internal ecFlow schema.
-
-        :return: ``True`` if the config conforms to the schema.
-        :raises: UWConfigError if validation fails.
-        """
-        validate_internal(
-            schema_name=EC.ecflow,
-            desc="ecflow config",
-            config_data={EC.ecflow: self._config},
-        )
-        return True
-
     def write_ecf_scripts(self, path: Path | str) -> None:
         """
         The ecf scripts for this workflow.
@@ -383,13 +369,19 @@ def schema() -> dict:
     return bundle(json.loads(path.read_text()))
 
 
-def validate_file(yaml_file: Path | None = None) -> bool:
+def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     """
-    Validate an ecFlow YAML config against the internal ecFlow schema.
+    Validate an ecFlow config against the internal ecFlow schema.
 
-    :param yaml_file: Path to YAML file (``None`` => read ``stdin``).
+    :param config: A ``dict``, a ``YAMLConfig``, a path to a YAML file, or ``None``
+        (``None`` => read ``stdin``).
     :return: ``True`` if the config conforms to the schema.
     :raises: UWConfigError if validation fails.
     """
-    validate_internal(schema_name=EC.ecflow, desc="ecflow config", config_path=yaml_file)
+    kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecflow config"}
+    if isinstance(config, (dict, YAMLConfig)):
+        kwargs["config_data"] = config
+    else:
+        kwargs["config_path"] = config
+    validate_internal(**kwargs)
     return True
