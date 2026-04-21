@@ -2,6 +2,7 @@
 Tests for uwtools.ecflow module.
 """
 
+import json
 from pathlib import Path
 from unittest.mock import Mock, call, patch
 
@@ -255,6 +256,24 @@ class TestECFlowDef:
         config: dict = {"not_ecflow": {}}
         with raises(KeyError):
             _ECFlowDef(config=config)
+
+    def test_validate(self, instance):
+        assert instance.validate() is True
+
+    def test_validate__wraps_inner_config(self, instance):
+        with patch.object(ecflow, "validate_internal") as validate_internal:
+            assert instance.validate() is True
+        validate_internal.assert_called_once_with(
+            schema_name="ecflow",
+            desc="ecflow config",
+            config_data={"ecflow": instance._config},
+        )
+
+    def test_validate__invalid(self):
+        config = {"ecflow": {"scheduler": "bogus"}}
+        ecf = _ECFlowDef(config=config)
+        with raises(UWConfigError, match="YAML validation errors"):
+            ecf.validate()
 
     # _add_workflow_components tests
 
@@ -644,3 +663,39 @@ class TestECFlowDef:
         assert "task member_01" in suite_def
         assert "task member_02" in suite_def
         assert "task member_03" in suite_def
+
+
+def test_schema(tmp_path):
+    schema_file = tmp_path / "ecflow.jsonschema"
+    expected = {"type": "object"}
+    schema_file.write_text(json.dumps(expected))
+    with (
+        patch.object(ecflow, "internal_schema_file", return_value=schema_file),
+        patch.object(ecflow, "bundle", side_effect=lambda schema: schema) as bundle,
+    ):
+        actual = ecflow.schema()
+    assert actual == expected
+    bundle.assert_called_once_with(expected)
+
+
+def test_validate_file__path(tmp_path):
+    yaml_file = tmp_path / "ecflow.yaml"
+    yaml_file.write_text("ecflow: {}\n")
+    assert ecflow.validate_file(yaml_file)
+
+
+def test_validate_file__stdin():
+    with patch.object(ecflow, "validate_internal") as validate_internal:
+        assert ecflow.validate_file()
+    validate_internal.assert_called_once_with(
+        schema_name="ecflow",
+        desc="ecflow config",
+        config_path=None,
+    )
+
+
+def test_validate_file__invalid(tmp_path):
+    yaml_file = tmp_path / "ecflow.yaml"
+    yaml_file.write_text("not_ecflow: {}\n")
+    with raises(UWConfigError, match="YAML validation errors"):
+        ecflow.validate_file(yaml_file)

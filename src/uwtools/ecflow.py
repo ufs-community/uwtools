@@ -4,6 +4,7 @@ Support for creating ecFlow suite definitions and ecf scripts.
 
 from __future__ import annotations
 
+import json
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -27,6 +28,7 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.validator import bundle, internal_schema_file, validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -54,6 +56,20 @@ class _ECFlowDef:
 
     def __str__(self):
         return self._d.__str__()
+
+    def validate(self) -> bool:
+        """
+        Validate the ecFlow config against the internal ecFlow schema.
+
+        :return: ``True`` if the config conforms to the schema.
+        :raises: UWConfigError if validation fails.
+        """
+        validate_internal(
+            schema_name=EC.ecflow,
+            desc="ecflow config",
+            config_data={EC.ecflow: self._config},
+        )
+        return True
 
     def write_ecf_scripts(self, path: Path | str) -> None:
         """
@@ -357,3 +373,23 @@ class _ECFlowDef:
         tag = parts[0]
         name = "_".join(parts[1:]) if parts[1:] else ""
         return tag, name
+
+
+def schema() -> dict:
+    """
+    Return the ecFlow module's internal schema.
+    """
+    path = internal_schema_file(schema_name=EC.ecflow)
+    return bundle(json.loads(path.read_text()))
+
+
+def validate_file(yaml_file: Path | None = None) -> bool:
+    """
+    Validate an ecFlow YAML config against the internal ecFlow schema.
+
+    :param yaml_file: Path to YAML file (``None`` => read ``stdin``).
+    :return: ``True`` if the config conforms to the schema.
+    :raises: UWConfigError if validation fails.
+    """
+    validate_internal(schema_name=EC.ecflow, desc="ecflow config", config_path=yaml_file)
+    return True
