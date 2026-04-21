@@ -54,6 +54,6 @@ def validate(
     :param yaml_file: Path to YAML file (``None`` or unspecified => read ``stdin``).
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the YAML conforms to the schema.
-    :raises: UWConfigError if validation fails.
+    :raises: ``UWConfigError`` if validation fails.
     """
     return _validate(config=_ensure_data_source(_str2path(yaml_file), stdin_ok))

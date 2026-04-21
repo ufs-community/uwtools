@@ -2,10 +2,12 @@
 Tests for uwtools.ecflow module.
 """
 
-import json
+import sys
+from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock, call, patch
 
+import yaml
 from ecflow import Defs, DState, Suite, Task  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
@@ -13,6 +15,7 @@ from uwtools import ecflow
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.ecflow import _ECFlowDef
 from uwtools.exceptions import UWConfigError
+from uwtools.utils.file import _stdinproxy
 
 # Fixtures
 
@@ -685,58 +688,29 @@ def test_ecflow_realize__write_scripts(capsys, assets):
     assert capsys.readouterr().out == expected
 
 
-def test_schema(tmp_path):
-    schema_file = tmp_path / "ecflow.jsonschema"
-    expected = {"type": "object"}
-    schema_file.write_text(json.dumps(expected))
-    with (
-        patch.object(ecflow, "internal_schema_file", return_value=schema_file),
-        patch.object(ecflow, "bundle", side_effect=lambda schema: schema) as bundle,
-    ):
-        actual = ecflow.schema()
-    assert actual == expected
-    bundle.assert_called_once_with(expected)
-
-
-def test_validate__path(tmp_path):
-    yaml_file = tmp_path / "ecflow.yaml"
-    yaml_file.write_text("ecflow: {}\n")
-    assert ecflow.validate(yaml_file)
+def test_validate__path(tmp_path, minimal_config):
+    path = tmp_path / "config.yaml"
+    YAMLConfig(minimal_config).dump(path)
+    assert ecflow.validate(path)
 
 
 def test_validate__dict(minimal_config):
-    with patch.object(ecflow, "validate_internal") as validate_internal:
-        assert ecflow.validate(minimal_config)
-    validate_internal.assert_called_once_with(
-        schema_name="ecflow",
-        desc="ecflow config",
-        config_data=minimal_config,
-    )
+    assert ecflow.validate(minimal_config)
 
 
 def test_validate__yamlconfig(minimal_config):
-    cfg = YAMLConfig(minimal_config)
-    with patch.object(ecflow, "validate_internal") as validate_internal:
-        assert ecflow.validate(cfg)
-    validate_internal.assert_called_once_with(
-        schema_name="ecflow",
-        desc="ecflow config",
-        config_data=cfg,
-    )
+    assert ecflow.validate(YAMLConfig(minimal_config))
 
 
-def test_validate__stdin():
-    with patch.object(ecflow, "validate_internal") as validate_internal:
+def test_validate__stdin(minimal_config):
+    _stdinproxy.cache_clear()
+    with StringIO(yaml.safe_dump(minimal_config)) as sio, patch.object(sys, "stdin", new=sio):
         assert ecflow.validate()
-    validate_internal.assert_called_once_with(
-        schema_name="ecflow",
-        desc="ecflow config",
-        config_path=None,
-    )
 
 
 def test_validate__invalid(tmp_path):
     yaml_file = tmp_path / "ecflow.yaml"
     yaml_file.write_text("not_ecflow: {}\n")
-    with raises(UWConfigError, match="YAML validation errors"):
+    with raises(UWConfigError) as e:
         ecflow.validate(yaml_file)
+    assert "YAML validation errors" in str(e.value)

@@ -4,7 +4,6 @@ Support for creating ecFlow suite definitions and ecf scripts.
 
 from __future__ import annotations
 
-import json
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -28,7 +27,7 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import bundle, internal_schema_file, validate_internal
+from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -385,14 +384,6 @@ def realize(
     return str(suite)
 
 
-def schema() -> dict:
-    """
-    Return the ecFlow module's internal schema.
-    """
-    path = internal_schema_file(schema_name=EC.ecflow)
-    return bundle(json.loads(path.read_text()))
-
-
 def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     """
     Validate an ecFlow config against the internal ecFlow schema.
@@ -400,9 +391,9 @@ def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     :param config: A ``dict``, a ``YAMLConfig``, a path to a YAML file, or ``None``
         (``None`` => read ``stdin``).
     :return: ``True`` if the config conforms to the schema.
-    :raises: UWConfigError if validation fails.
+    :raises: ``UWConfigError`` if validation fails.
     """
-    kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecflow config"}
+    kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecFlow config"}
     if isinstance(config, (dict, YAMLConfig)):
         kwargs["config_data"] = config
     else:
