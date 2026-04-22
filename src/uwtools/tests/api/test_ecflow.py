@@ -21,5 +21,5 @@ def test_api_ecflow_realize__with_scripts():
 def test_api_ecflow_validate():
     path = Path("foo")
     with patch.object(ecflow, "_validate") as _validate:
-        ecflow.validate(yaml_file=path)
+        ecflow.validate(config=path)
     _validate.assert_called_once_with(config=path)

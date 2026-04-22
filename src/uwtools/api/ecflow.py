@@ -45,15 +45,16 @@ def realize(
 
 
 def validate(
-    yaml_file: Path | str | None = None,
+    config: _YAMLConfig | dict | Path | str | None = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
-    Validate the input YAML against its schema.
+    Validate an ecFlow config against its schema.
 
-    :param yaml_file: Path to YAML file (``None`` or unspecified => read ``stdin``).
+    :param config: An ecFlow config as a ``dict``, a ``YAMLConfig``, a path to a YAML file
+        (``Path`` or ``str``), or ``None`` (read ``stdin``).
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if the YAML conforms to the schema.
+    :return: ``True`` if the config conforms to the schema.
     :raises: ``UWConfigError`` if validation fails.
     """
-    return _validate(config=_ensure_data_source(_str2path(yaml_file), stdin_ok))
+    return _validate(config=_ensure_data_source(_str2path(config), stdin_ok))
