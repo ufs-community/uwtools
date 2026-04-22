@@ -266,6 +266,7 @@ i: 2024-10-10 00:19:00
 j: !dict "{ b0: 0, b1: 1, b2: 2,}"
 k: !list "[ a0, a1, a2, ]"
 l: "22"
+m: !int "22.0"
 
 """.strip()
     path = tmp_path / "config.yaml"
@@ -301,6 +302,7 @@ l: "22"
     assert config["j"] == {"b0": 0, "b1": 1, "b2": 2}
     assert config["k"] == ["a0", "a1", "a2"]
     assert config["l"] == "22"
+    assert config["m"] == 22
 
 
 @mark.parametrize("self_as_context", [False, True])

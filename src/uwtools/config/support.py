@@ -225,8 +225,8 @@ class UWYAMLConvert(UWYAMLTaggedStr):
             partial(load_as, bool),  # !bool
             to_datetime,  # !datetime
             partial(load_as, dict),  # !dict
-            float,  # !float
-            int,  # !int
+            partial(load_as, float),  # !float
+            partial(load_as, int),  # !int
             partial(load_as, list),  # !list
             to_timedelta,  # !timedelta
         ]
