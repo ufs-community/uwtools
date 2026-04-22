@@ -2,9 +2,12 @@
 Tests for uwtools.ecflow module.
 """
 
+import sys
+from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock, call, patch
 
+import yaml
 from ecflow import Defs, DState, Suite, Task  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
 
@@ -12,6 +15,7 @@ from uwtools import ecflow
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.ecflow import _ECFlowDef
 from uwtools.exceptions import UWConfigError
+from uwtools.utils.file import _stdinproxy
 
 # Fixtures
 
@@ -684,10 +688,29 @@ def test_ecflow_realize__write_scripts(capsys, assets):
     assert capsys.readouterr().out == expected
 
 
-def test_ecflow_validate__file(assets):
-    cfgfile, _, _ = assets
-    assert ecflow.validate_file(cfgfile)
+def test_validate__path(tmp_path, minimal_config):
+    path = tmp_path / "config.yaml"
+    YAMLConfig(minimal_config).dump(path)
+    assert ecflow.validate(path)
 
 
-def test_ecflow_validate__stdin():
-    assert ecflow.validate_file()
+def test_validate__dict(minimal_config):
+    assert ecflow.validate(minimal_config)
+
+
+def test_validate__yamlconfig(minimal_config):
+    assert ecflow.validate(YAMLConfig(minimal_config))
+
+
+def test_validate__stdin(minimal_config):
+    _stdinproxy.cache_clear()
+    with StringIO(yaml.safe_dump(minimal_config)) as sio, patch.object(sys, "stdin", new=sio):
+        assert ecflow.validate()
+
+
+def test_validate__invalid(tmp_path):
+    yaml_file = tmp_path / "ecflow.yaml"
+    yaml_file.write_text("not_ecflow: {}\n")
+    with raises(UWConfigError) as e:
+        ecflow.validate(yaml_file)
+    assert "YAML validation errors" in str(e.value)

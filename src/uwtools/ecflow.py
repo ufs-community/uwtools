@@ -27,6 +27,7 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -383,5 +384,19 @@ def realize(
     return str(suite)
 
 
-def validate_file(yaml_file: Path | None = None) -> bool:  # noqa: ARG001
+def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
+    """
+    Validate an ecFlow config against the internal ecFlow schema.
+
+    :param config: A ``dict``, a ``YAMLConfig``, a path to a YAML file, or ``None``
+        (``None`` => read ``stdin``).
+    :return: ``True`` if the config conforms to the schema.
+    :raises: ``UWConfigError`` if validation fails.
+    """
+    kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecFlow config"}
+    if isinstance(config, (dict, YAMLConfig)):
+        kwargs["config_data"] = config
+    else:
+        kwargs["config_path"] = config
+    validate_internal(**kwargs)
     return True

@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from uwtools.ecflow import realize as _realize
-from uwtools.ecflow import validate_file as _validate
+from uwtools.ecflow import validate as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
 
@@ -45,14 +45,16 @@ def realize(
 
 
 def validate(
-    yaml_file: Path | str | None = None,
+    config: _YAMLConfig | dict | Path | str | None = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
-    Validate the input YAML against its schema.
+    Validate an ecFlow config against its schema.
 
-    :param yaml_file: Path to YAML file (``None`` or unspecified => read ``stdin``).
+    :param config: An ecFlow config as a ``dict``, a ``YAMLConfig``, a path to a YAML file
+        (``Path`` or ``str``), or ``None`` (read ``stdin``).
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if the YAML conforms to the schema, ``False`` otherwise.
+    :return: ``True`` if the config conforms to the schema.
+    :raises: ``UWConfigError`` if validation fails.
     """
-    return _validate(yaml_file=_ensure_data_source(_str2path(yaml_file), stdin_ok))
+    return _validate(config=_ensure_data_source(_str2path(config), stdin_ok))
