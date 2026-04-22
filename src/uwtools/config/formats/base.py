@@ -68,7 +68,7 @@ class Config(ABC, UserDict):
         def jinja2val(val: Any) -> str | None:
             try:
                 s = str(val)
-            except ValueError:
+            except (yaml.constructor.ConstructorError, ValueError):
                 assert isinstance(val, UWYAMLConvert)
                 s = val.tagged_string
             return s if "{{" in s or "{%" in s else None
