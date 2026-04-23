@@ -153,16 +153,17 @@ def realize(
     output_data, output_format = _realize_output_setup(
         input_obj, output_file, output_format, key_path
     )
+    if values_needed:
+        _realize_values_needed(input_obj)
+    if total and unrendered(str(input_obj)):
+        msg = "Config could not be totally realized"
+        raise UWConfigRealizeError(msg)
+    if values_needed:
+        return {}
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
         return {}
-    if values_needed:
-        _realize_values_needed(input_obj)
-        return {}
-    if total and unrendered(str(input_obj)):
-        msg = "Config could not be totally realized"
-        raise UWConfigRealizeError(msg)
     output_class = cast(Config, format_to_config(output_format))
     output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
@@ -325,13 +326,14 @@ def _realize_update(
     return input_obj
 
 
-def _realize_values_needed(input_obj: Config) -> None:
+def _realize_values_needed(input_obj: Config) -> dict[str, list[str]]:
     """
-    Print a report characterizing input values as complete, empty, or template placeholders.
+    Report values as fully-rendered (complete) or as template placeholders (incomplete).
 
-    :param input_obj: The config to update.
+    :param input_obj: The config whose values to report on.
+    :return: A dict of complete and incomplete keys.
     """
-    complete, template = input_obj._characterize_values(  # noqa: SLF001
+    complete, incomplete = input_obj._characterize_values(  # noqa: SLF001
         input_obj.data, parent=""
     )
     if complete:
@@ -341,12 +343,13 @@ def _realize_values_needed(input_obj: Config) -> None:
     else:
         log.info("No keys are complete.")
     log.info("")
-    if template:
+    if incomplete:
         log.info("Keys with unrendered Jinja2 variables/expressions:")
-        for var in template:
+        for var in incomplete:
             log.info(var)
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
+    return {"complete": complete, "incomplete": incomplete}
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:

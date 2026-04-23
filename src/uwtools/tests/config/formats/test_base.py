@@ -75,29 +75,32 @@ def test_config_base__characterize_values(config):
         7: "{% for n in range(3) %}{{ n }}{% endfor %}",
         8: ["{{ 1 + 1 }}"],
         9: [42],
+        10: {"c": "{{ n }}"},
     }
-    complete, template = config._characterize_values(values=values, parent="p.")
+    complete, incomplete = config._characterize_values(values=values, parent="p.")
     assert complete == [
         "  p.1",
         "  p.2",
         "  p.4",
         "  p.4.a",
-        "  p.b",
         "  p.5",
+        "  p.b",
         "  p.6",
+        "  p.9",
     ]
-    assert template == [
+    assert incomplete == [
         "  p.3: {{ n }}",
         "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}",
         "  p.8: ['{{ 1 + 1 }}']",
+        "  p.10.c: {{ n }}",
     ]
 
 
 def test_config_base__characterize_values__tagged_convert(config):
     d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
-    complete, template = config._characterize_values(values=d, parent="p.")
+    complete, incomplete = config._characterize_values(values=d, parent="p.")
     assert complete == []
-    assert template == ["  p.1: !int '{{ foo }}'"]
+    assert incomplete == ["  p.1: !int '{{ foo }}'"]
 
 
 def test_config_base__depth(config):

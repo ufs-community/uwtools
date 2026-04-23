@@ -379,10 +379,14 @@ def test_cli__dispatch_config_realize(args_config_realize, utc):
     )
 
 
-def test_cli__dispatch_config_realize_fail(args_config_realize, logged):
+@mark.parametrize("values_needed_requested", [True, False])
+def test_cli__dispatch_config_realize_fail(args_config_realize, caplog, values_needed_requested):
+    args_config_realize[STR.valsneeded] = values_needed_requested
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
-    assert logged("Config could not be realized")
+    assert "Config could not be realized." in caplog.text
+    present = f"Try with {cli._switch(STR.valsneeded)} for details." in caplog.text
+    assert not present if values_needed_requested else present
 
 
 def test_cli__dispatch_config_validate_config_obj():

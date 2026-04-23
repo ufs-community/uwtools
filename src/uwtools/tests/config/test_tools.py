@@ -838,14 +838,12 @@ def test_config_tools_realize__values_needed_ini(logged):
     )
     expected = """
     Keys that are complete:
-      salad
       salad.base
       salad.fruit
       salad.vegetable
       salad.dressing
       salad.toppings
       salad.meat
-      dessert
       dessert.type
       dessert.side
       dessert.servings
@@ -870,11 +868,7 @@ def test_config_tools_realize__values_needed_yaml(logged):
     )
     expected = """
     Keys that are complete:
-      FV3GFS
-      FV3GFS.nomads
       FV3GFS.nomads.protocol
-      FV3GFS.nomads.file_names
-      FV3GFS.nomads.file_names.grib2
       FV3GFS.nomads.file_names.nemsio
       FV3GFS.nomads.file_names.testfalse
       FV3GFS.nomads.file_names.testzero
