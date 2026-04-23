@@ -192,7 +192,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
-    _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
+    _add_arg_values_needed(optional, helpmsg="Report values needed to realize config, then exit")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
     return [
@@ -697,7 +697,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_leadtime(optional)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
-    _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
+    _add_arg_values_needed(optional, helpmsg="Report values needed to render template, then exit")
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
