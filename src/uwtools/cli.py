@@ -287,8 +287,10 @@ def _dispatch_config_realize(args: Args) -> bool:
             stdin_ok=True,
         )
     except UWConfigRealizeError:
-        msg = "Config could not be realized. Try with %s for details."
-        log.error(msg, _switch(STR.valsneeded))
+        msg = "Config could not be realized."
+        if not args[STR.valsneeded]:
+            msg += " Try with %s for details." % _switch(STR.valsneeded)
+        log.error(msg)
         return False
     return True
 
