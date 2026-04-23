@@ -330,7 +330,7 @@ def _realize_values_needed(input_obj: Config) -> dict[str, list[str]]:
     """
     Report values as fully-rendered (complete) or as template placeholders (incomplete).
 
-    :param input_obj: The config whose values to report on..
+    :param input_obj: The config whose values to report on.
     :return: A dict of complete and incomplete keys.
     """
     complete, incomplete = input_obj._characterize_values(  # noqa: SLF001
