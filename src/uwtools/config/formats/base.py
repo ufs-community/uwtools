@@ -56,7 +56,7 @@ class Config(ABC, UserDict):
 
     # Private methods
 
-    def _characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
+    def _characterize_values(self, values: dict, parent: str) -> tuple[list[str], list[str]]:
         """
         Characterize values as complete or as template placeholders.
 
