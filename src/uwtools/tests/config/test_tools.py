@@ -849,11 +849,9 @@ def test_config_tools_realize__values_needed_ini(logged):
       dessert.servings
 
     Keys with unrendered Jinja2 variables/expressions:
-      salad: {'base': 'kale', 'fruit': 'banana', 'vegetable': 'tomato', 'how_many': '{{ amount }}', 'dressing': 'balsamic', 'toppings': '', 'meat': ''}
       salad.how_many: {{ amount }}
-      dessert: {'type': 'pie', 'flavor': '{{ flavor }}', 'side': 'False', 'servings': '0'}
       dessert.flavor: {{ flavor }}
-    """  # noqa: E501
+    """
     assert logged(dedent(expected), multiline=True)
 
 
@@ -877,11 +875,7 @@ def test_config_tools_realize__values_needed_yaml(logged):
       FV3GFS.nomads.testempty
 
     Keys with unrendered Jinja2 variables/expressions:
-      FV3GFS: {'nomads': {'protocol': 'download', 'url': 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos', 'file_names': {'grib2': {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}, 'nemsio': None, 'testfalse': False, 'testzero': 0}, 'testempty': None}}
-      FV3GFS.nomads: {'protocol': 'download', 'url': 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos', 'file_names': {'grib2': {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}, 'nemsio': None, 'testfalse': False, 'testzero': 0}, 'testempty': None}
       FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
-      FV3GFS.nomads.file_names: {'grib2': {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}, 'nemsio': None, 'testfalse': False, 'testzero': 0}
-      FV3GFS.nomads.file_names.grib2: {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
     """  # noqa: E501
