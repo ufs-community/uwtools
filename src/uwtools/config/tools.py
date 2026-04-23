@@ -154,12 +154,12 @@ def realize(
         input_obj, output_file, output_format, key_path
     )
     if values_needed:
-        values_status = _realize_values_needed(input_obj)
+        _realize_values_needed(input_obj)
     if total and unrendered(str(input_obj)):
         msg = "Config could not be totally realized"
         raise UWConfigRealizeError(msg)
     if values_needed:
-        return values_status
+        return {}
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
