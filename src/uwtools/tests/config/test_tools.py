@@ -838,22 +838,22 @@ def test_config_tools_realize__values_needed_ini(logged):
     )
     expected = """
     Keys that are complete:
-      salad
       salad.base
       salad.fruit
       salad.vegetable
       salad.dressing
       salad.toppings
       salad.meat
-      dessert
       dessert.type
       dessert.side
       dessert.servings
 
     Keys with unrendered Jinja2 variables/expressions:
+      salad: {'base': 'kale', 'fruit': 'banana', 'vegetable': 'tomato', 'how_many': '{{ amount }}', 'dressing': 'balsamic', 'toppings': '', 'meat': ''}
       salad.how_many: {{ amount }}
+      dessert: {'type': 'pie', 'flavor': '{{ flavor }}', 'side': 'False', 'servings': '0'}
       dessert.flavor: {{ flavor }}
-    """
+    """  # noqa: E501
     assert logged(dedent(expected), multiline=True)
 
 
@@ -870,18 +870,18 @@ def test_config_tools_realize__values_needed_yaml(logged):
     )
     expected = """
     Keys that are complete:
-      FV3GFS
-      FV3GFS.nomads
       FV3GFS.nomads.protocol
-      FV3GFS.nomads.file_names
-      FV3GFS.nomads.file_names.grib2
       FV3GFS.nomads.file_names.nemsio
       FV3GFS.nomads.file_names.testfalse
       FV3GFS.nomads.file_names.testzero
       FV3GFS.nomads.testempty
 
     Keys with unrendered Jinja2 variables/expressions:
+      FV3GFS: {'nomads': {'protocol': 'download', 'url': 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos', 'file_names': {'grib2': {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}, 'nemsio': None, 'testfalse': False, 'testzero': 0}, 'testempty': None}}
+      FV3GFS.nomads: {'protocol': 'download', 'url': 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos', 'file_names': {'grib2': {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}, 'nemsio': None, 'testfalse': False, 'testzero': 0}, 'testempty': None}
       FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
+      FV3GFS.nomads.file_names: {'grib2': {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}, 'nemsio': None, 'testfalse': False, 'testzero': 0}
+      FV3GFS.nomads.file_names.grib2: {'anl': ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio'], 'fcst': ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']}
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
     """  # noqa: E501
@@ -1145,9 +1145,12 @@ def test_config_tools__realize_values_needed(logged, tmp_path):
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
     c = YAMLConfig(config=path)
-    tools._realize_values_needed(input_obj=c)
+    result = tools._realize_values_needed(input_obj=c)
     assert logged("Keys that are complete:\n  1", multiline=True)
     assert logged("Keys with unrendered Jinja2 variables/expressions:\n  2", multiline=True)
+    # assert result["complete"] == ["1"]
+    # assert result["incomplete"] == ["2"]
+    assert result
 
 
 def test_config_tools__realize_values_needed__negative_results(logged, tmp_path):

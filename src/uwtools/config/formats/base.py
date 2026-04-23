@@ -77,14 +77,17 @@ class Config(ABC, UserDict):
         incomplete: list[str] = []
         for key, val in values.items():
             if isinstance(val, dict):
-                complete.append(f"{INDENT}{parent}{key}")
-                c, t = self._characterize_values(val, f"{parent}{key}.")
-                complete, incomplete = complete + c, incomplete + t
+                c, i = self._characterize_values(val, f"{parent}{key}.")
+                if i:
+                    incomplete.append(f"{INDENT}{parent}{key}: {val}")
+                else:
+                    complete.append(f"{INDENT}{parent}{key}")
+                complete, incomplete = complete + c, incomplete + i
             elif isinstance(val, list):
                 for item in val:
                     if isinstance(item, dict):
-                        c, t = self._characterize_values(item, parent)
-                        complete, incomplete = complete + c, incomplete + t
+                        c, i = self._characterize_values(item, parent)
+                        complete, incomplete = complete + c, incomplete + i
                         complete.append(f"{INDENT}{parent}{key}")
                     elif val := jinja2val(val):
                         incomplete.append(f"{INDENT}{parent}{key}: {val}")
