@@ -58,11 +58,11 @@ class Config(ABC, UserDict):
 
     def _characterize_values(self, values: dict, parent: str) -> tuple[list[str], list[str]]:
         """
-        Characterize values as complete or as template placeholders.
+        Characterize values as either complete or as incomplete template placeholders.
 
         :param values: The dictionary to examine.
         :param parent: Parent key.
-        :return: Lists of of complete and template-placeholder values.
+        :return: Lists of complete and incomplete-template-placeholder values.
         """
 
         def jinja2val(val: Any) -> str | None:
@@ -74,26 +74,26 @@ class Config(ABC, UserDict):
             return s if "{{" in s or "{%" in s else None
 
         complete: list[str] = []
-        template: list[str] = []
+        incomplete: list[str] = []
         for key, val in values.items():
             if isinstance(val, dict):
                 complete.append(f"{INDENT}{parent}{key}")
                 c, t = self._characterize_values(val, f"{parent}{key}.")
-                complete, template = complete + c, template + t
+                complete, incomplete = complete + c, incomplete + t
             elif isinstance(val, list):
                 for item in val:
                     if isinstance(item, dict):
                         c, t = self._characterize_values(item, parent)
-                        complete, template = complete + c, template + t
+                        complete, incomplete = complete + c, incomplete + t
                         complete.append(f"{INDENT}{parent}{key}")
                     elif val := jinja2val(val):
-                        template.append(f"{INDENT}{parent}{key}: {val}")
+                        incomplete.append(f"{INDENT}{parent}{key}: {val}")
                         break
             elif val := jinja2val(val):
-                template.append(f"{INDENT}{parent}{key}: {val}")
+                incomplete.append(f"{INDENT}{parent}{key}: {val}")
             else:
                 complete.append(f"{INDENT}{parent}{key}")
-        return complete, template
+        return complete, incomplete
 
     @staticmethod
     def _compare_config_get_lines(d: dict) -> list[str]:
