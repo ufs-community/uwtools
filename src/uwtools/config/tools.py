@@ -153,16 +153,17 @@ def realize(
     output_data, output_format = _realize_output_setup(
         input_obj, output_file, output_format, key_path
     )
+    if values_needed:
+        values_status = _realize_values_needed(input_obj)
+    if total and unrendered(str(input_obj)):
+        msg = "Config could not be totally realized"
+        raise UWConfigRealizeError(msg)
+    if values_needed:
+        return values_status
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
         return {}
-    if values_needed:
-        _realize_values_needed(input_obj)
-        return {}
-    if total and unrendered(str(input_obj)):
-        msg = "Config could not be totally realized"
-        raise UWConfigRealizeError(msg)
     output_class = cast(Config, format_to_config(output_format))
     output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
@@ -325,7 +326,7 @@ def _realize_update(
     return input_obj
 
 
-def _realize_values_needed(input_obj: Config) -> None:
+def _realize_values_needed(input_obj: Config) -> dict:
     """
     Print a report characterizing input values as complete, empty, or template placeholders.
 
@@ -347,6 +348,7 @@ def _realize_values_needed(input_obj: Config) -> None:
             log.info(var)
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
+    return {}
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:
