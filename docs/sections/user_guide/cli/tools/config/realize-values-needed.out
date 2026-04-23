@@ -6,5 +6,4 @@
 [2025-01-02T03:04:05]     INFO   values.repeat
 [2025-01-02T03:04:05]     INFO 
 [2025-01-02T03:04:05]     INFO Keys with unrendered Jinja2 variables/expressions:
-[2025-01-02T03:04:05]     INFO   values: {'date': '{{ yyyymmdd }}', 'empty': None, 'greeting': 'Hello', 'message': 'Hello World', 'recipient': 'World', 'repeat': 1}
 [2025-01-02T03:04:05]     INFO   values.date: {{ yyyymmdd }}
