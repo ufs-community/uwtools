@@ -30,7 +30,7 @@ Optional arguments:
   --search-path PATH[:PATH:...]
       Colon-separated paths to search for extra templates
   --values-needed
-      Print report of values needed to render template
+      Report values needed to render template, then exit
   --dry-run
       Only log info, making no changes
   --quiet, -q
