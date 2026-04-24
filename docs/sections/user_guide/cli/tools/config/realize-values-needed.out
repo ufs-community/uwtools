@@ -1,9 +1,4 @@
-[2025-01-02T03:04:05]     INFO Keys that are complete:
-[2025-01-02T03:04:05]     INFO   values.empty
-[2025-01-02T03:04:05]     INFO   values.greeting
-[2025-01-02T03:04:05]     INFO   values.message
-[2025-01-02T03:04:05]     INFO   values.recipient
-[2025-01-02T03:04:05]     INFO   values.repeat
+[2025-01-02T03:04:05]     INFO No keys have unrendered content.
 [2025-01-02T03:04:05]     INFO 
-[2025-01-02T03:04:05]     INFO Keys with unrendered Jinja2 variables/expressions:
+[2025-01-02T03:04:05]     INFO Values with unrendered content:
 [2025-01-02T03:04:05]     INFO   values.date: {{ yyyymmdd }}
