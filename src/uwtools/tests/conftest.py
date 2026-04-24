@@ -49,3 +49,10 @@ def utc():
         return dt.replace(tzinfo=None)
 
     return utc
+
+
+@fixture
+def uwcaplog(caplog):
+    caplog.handler.setFormatter(logging.Formatter("%(message)s"))
+    caplog.set_level(logging.DEBUG)
+    return caplog
