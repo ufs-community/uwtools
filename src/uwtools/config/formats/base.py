@@ -56,36 +56,6 @@ class Config(ABC, UserDict):
         """
         return self._dict_to_str(self.data)
 
-    def incomplete(
-        self,
-        data: Any = NIL,
-        keypath: list | None = None,
-        keys: list | None = None,
-        vals: list | None = None,
-    ) -> tuple[list[list], list[list]]:
-
-        def unrendered(x: Any) -> bool:
-            try:
-                s = str(x)
-            except (yaml.constructor.ConstructorError, ValueError):
-                assert isinstance(x, UWYAMLConvert)
-                s = x.tagged_string
-            return "{{" in s or "{%" in s
-
-        data = self.data if data is NIL else data
-        keypath, keys, vals = [[] if x is None else x for x in (keypath, keys, vals)]
-        if isinstance(data, dict):
-            for k, v in data.items():
-                if unrendered(k):
-                    keys.append([*keypath, k])
-                self.incomplete(v, [*keypath, k], keys, vals)
-        elif isinstance(data, list):
-            for i, v in enumerate(data):
-                self.incomplete(v, [*keypath, i], keys, vals)
-        elif unrendered(data):
-            vals.append(keypath)
-        return keys, vals
-
     # Private methods
 
     @staticmethod
@@ -260,6 +230,44 @@ class Config(ABC, UserDict):
             self.data = new
         logstate("final")
         return self
+
+    def incomplete(
+        self,
+        data: Any = NIL,
+        keypath: list | None = None,
+        keys: list | None = None,
+        vals: list | None = None,
+    ) -> tuple[list[list], list[list]]:
+        """
+        Return lists of keys leading to keys and values with unrendered content.
+
+        :param data: The data object to inspect for unrendered keys/values.
+        :param keypath: A list of keys/indexes leading to the current data object.
+        :param keys: A list of keypaths leading to keys with unrendered content.
+        :param vals: A list of keypaths leading to values with unrendered content.
+        """
+
+        def unrendered(x: Any) -> bool:
+            try:
+                s = str(x)
+            except (yaml.constructor.ConstructorError, ValueError):
+                assert isinstance(x, UWYAMLConvert)
+                s = x.tagged_string
+            return "{{" in s or "{%" in s
+
+        data = self.data if data is NIL else data
+        keypath, keys, vals = [[] if x is None else x for x in (keypath, keys, vals)]
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if unrendered(k):
+                    keys.append([*keypath, k])
+                self.incomplete(v, [*keypath, k], keys, vals)
+        elif isinstance(data, list):
+            for i, v in enumerate(data):
+                self.incomplete(v, [*keypath, i], keys, vals)
+        elif unrendered(data):
+            vals.append(keypath)
+        return keys, vals
 
     @abstractmethod
     def dump(self, path: Path | None) -> None:
