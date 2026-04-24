@@ -89,6 +89,7 @@ def test_config_base_incomplete__tagged_convert():
     keys, vals = c.incomplete()
     assert keys == []
     assert vals == [[1]]
+    assert str(c[1]) == repr(c[1]) == "!int '{{ foo }}'"
 
 
 def test_config_base__depth(config):

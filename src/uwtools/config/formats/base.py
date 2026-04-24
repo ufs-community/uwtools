@@ -12,13 +12,7 @@ from typing import Any, cast
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import (
-    INCLUDE_TAG,
-    UWYAMLConvert,
-    depth,
-    dict_to_yaml_str,
-    log_and_error,
-)
+from uwtools.config.support import INCLUDE_TAG, depth, dict_to_yaml_str, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
@@ -246,15 +240,7 @@ class Config(ABC, UserDict):
         :param keys: A list of keypaths leading to keys with unrendered content.
         :param vals: A list of keypaths leading to values with unrendered content.
         """
-
-        def unrendered(x: Any) -> bool:
-            try:
-                s = str(x)
-            except (yaml.constructor.ConstructorError, ValueError):
-                assert isinstance(x, UWYAMLConvert)
-                s = x.tagged_string
-            return "{{" in s or "{%" in s
-
+        unrendered = lambda x: "{{" in str(x) or "{%" in str(x)
         data = self.data if data is NIL else data
         keypath, keys, vals = [[] if x is None else x for x in (keypath, keys, vals)]
         if isinstance(data, dict):
