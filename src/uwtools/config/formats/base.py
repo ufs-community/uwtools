@@ -23,6 +23,8 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
 
+NIL = object()
+
 
 class Config(ABC, UserDict):
     """
@@ -56,7 +58,7 @@ class Config(ABC, UserDict):
 
     def incomplete(
         self,
-        data: Any = None,
+        data: Any = NIL,
         keypath: list | None = None,
         keys: list | None = None,
         vals: list | None = None,
@@ -70,21 +72,18 @@ class Config(ABC, UserDict):
                 s = x.tagged_string
             return "{{" in s or "{%" in s
 
-        init = lambda x, default: default if x is None else x
-        data = init(data, self.data)
-        keypath, keys, vals = [init(x, []) for x in (keypath, keys, vals)]
-        if unrendered(data):
-            if isinstance(data, dict):
-                for k, v in data.items():
-                    if unrendered(k):
-                        keys.append([*keypath, k])
-                    if unrendered(v):
-                        self.incomplete(v, [*keypath, k], keys, vals)
-            elif isinstance(data, list):
-                for i, v in enumerate(data):
-                    self.incomplete(v, [*keypath, i], keys, vals)
-            else:
-                vals.append(keypath)
+        data = self.data if data is NIL else data
+        keypath, keys, vals = [[] if x is None else x for x in (keypath, keys, vals)]
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if unrendered(k):
+                    keys.append([*keypath, k])
+                self.incomplete(v, [*keypath, k], keys, vals)
+        elif isinstance(data, list):
+            for i, v in enumerate(data):
+                self.incomplete(v, [*keypath, i], keys, vals)
+        elif unrendered(data):
+            vals.append(keypath)
         return keys, vals
 
     # Private methods
