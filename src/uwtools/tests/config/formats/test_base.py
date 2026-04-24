@@ -15,7 +15,7 @@ from pytest import fixture, mark, raises
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import depth  # uw_yaml_loader
+from uwtools.config.support import depth, uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, readable
@@ -83,12 +83,12 @@ def test_config_base_incomplete():
     assert vals == [["c"], ["g"], ["h", 0], ["j", "c"]]
 
 
-# def test_config_base_incomplete__tagged_convert():
-#     d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
-#     c = YAMLConfig(d)
-#     keys, vals = c.incomplete()
-#     assert keys == []
-#     # assert incomplete == ["  p.1: !int '{{ foo }}'"]
+def test_config_base_incomplete__tagged_convert():
+    d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
+    c = YAMLConfig(d)
+    keys, vals = c.incomplete()
+    assert keys == []
+    assert vals == [[1]]
 
 
 def test_config_base__depth(config):
