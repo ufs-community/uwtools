@@ -1139,7 +1139,8 @@ def test_config_tools__realize_values_needed(logged, tmp_path):
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
     c = YAMLConfig(config=path)
-    tools._realize_values_needed(input_obj=c)
+    incomplete = tools._realize_values_needed(config=c)
+    assert incomplete  # PM FIXME
     assert logged("Keys that are complete:\n  1", multiline=True)
     assert logged("Keys with unrendered Jinja2 variables/expressions:\n  2", multiline=True)
 
@@ -1149,7 +1150,8 @@ def test_config_tools__realize_values_needed__negative_results(logged, tmp_path)
     with writable(path) as f:
         yaml.dump({}, f)
     c = YAMLConfig(config=path)
-    tools._realize_values_needed(input_obj=c)
+    incomplete = tools._realize_values_needed(config=c)
+    assert incomplete  # PM FIXME
     assert logged("No keys are complete.")
     assert logged("No keys have unrendered Jinja2 variables/expressions.")
 

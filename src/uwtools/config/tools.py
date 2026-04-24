@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 from functools import reduce
+from operator import getitem
 from pathlib import Path
 from tempfile import mkstemp
 from textwrap import indent
@@ -326,30 +327,31 @@ def _realize_update(
     return input_obj
 
 
-def _realize_values_needed(input_obj: Config) -> tuple[list[list], list[list]]:
+def _realize_values_needed(config: Config) -> dict[str, list[list]]:
     """
-    Report values as fully-rendered (complete) or as template placeholders (incomplete).
+    Report keypaths of keys and values with incompletely rendered content.
 
-    :param input_obj: The config whose values to report on.
-    :return: A dict of complete and incomplete keys.
+    :param config: The config to inspect.
+    :return: A tuple of lists of keypaths to incomplete keys and values.
     """
-    keys, values = input_obj.incomplete()
-    print("@@@", keys, values)
-    return keys, values
-    # if complete:
-    #     log.info("Keys that are complete:")
-    #     for var in complete:
-    #         log.info(var)
-    # else:
-    #     log.info("No keys are complete.")
-    # log.info("")
-    # if incomplete:
-    #     log.info("Keys with unrendered Jinja2 variables/expressions:")
-    #     for var in incomplete:
-    #         log.info(var)
-    # else:
-    #     log.info("No keys have unrendered Jinja2 variables/expressions.")
-    # return {"complete": complete, "incomplete": incomplete}
+    dotted = lambda keypath: ".".join(map(str, keypath))
+    some = "%s with unrendered Jinja2 content:"
+    no = "No %s have unrendered Jinja2 content."
+    paths_keys, paths_vals = config.incomplete()
+    if paths_keys:
+        log.info(some % "Keys")
+        for keypath in paths_keys:
+            log.info(dotted(keypath))
+    else:
+        log.info(no % "keys")
+    log.info("")
+    if paths_vals:
+        log.info(some % "Values")
+        for keypath in paths_vals:
+            log.info("%s: %s", dotted(keypath), reduce(getitem, keypath, config))
+    else:
+        log.info(no % "values")
+    return {"keys": paths_keys, "values": paths_vals}
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:
