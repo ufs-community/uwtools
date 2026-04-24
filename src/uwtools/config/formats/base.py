@@ -58,9 +58,10 @@ class Config(ABC, UserDict):
         self,
         data: Any = None,
         keypath: list | None = None,
-        paths_keys: list | None = None,
-        paths_vals: list | None = None,
+        keys: list | None = None,
+        vals: list | None = None,
     ) -> tuple[list[list], list[list]]:
+
         def unrendered(x: Any) -> bool:
             try:
                 s = str(x)
@@ -71,20 +72,20 @@ class Config(ABC, UserDict):
 
         init = lambda x, default: default if x is None else x
         data = init(data, self.data)
-        keypath, paths_keys, paths_vals = [init(x, []) for x in (keypath, paths_keys, paths_vals)]
+        keypath, keys, vals = [init(x, []) for x in (keypath, keys, vals)]
         if unrendered(data):
             if isinstance(data, dict):
                 for k, v in data.items():
                     if unrendered(k):
-                        paths_keys.append([*keypath, k])
+                        keys.append([*keypath, k])
                     if unrendered(v):
-                        self.incomplete(v, [*keypath, k], paths_keys, paths_vals)
+                        self.incomplete(v, [*keypath, k], keys, vals)
             elif isinstance(data, list):
                 for i, v in enumerate(data):
-                    self.incomplete(v, [*keypath, i], paths_keys, paths_vals)
+                    self.incomplete(v, [*keypath, i], keys, vals)
             else:
-                paths_vals.append(keypath)
-        return paths_keys, paths_vals
+                vals.append(keypath)
+        return keys, vals
 
     # Private methods
 

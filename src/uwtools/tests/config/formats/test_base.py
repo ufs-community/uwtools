@@ -15,7 +15,7 @@ from pytest import fixture, mark, raises
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import depth, uw_yaml_loader
+from uwtools.config.support import depth  # uw_yaml_loader
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT, readable
@@ -64,43 +64,31 @@ class ConcreteConfig(Config):
 # Tests on module functions.
 
 
-def test_config_base__characterize_values(config):
-    values = {
-        1: "",
-        2: None,
-        3: "{{ n }}",
-        4: {"a": 42},
-        5: [{"b": 43}],
-        6: "string",
-        7: "{% for n in range(3) %}{{ n }}{% endfor %}",
-        8: ["{{ 1 + 1 }}"],
-        9: [42],
-        10: {"c": "{{ n }}"},
+def test_config_base_incomplete():
+    d = {
+        "{{ a }}": "ok",
+        "b": None,
+        "c": "{{ n }}",
+        "d": {"a": 42},
+        "e": [{"b": 43}],
+        "f": "string",
+        "g": "{% for n in range(3) %}{{ n }}{% endfor %}",
+        "h": ["{{ 1 + 1 }}"],
+        "i": [42],
+        "j": {"c": "{{ n }}"},
     }
-    complete, incomplete = config._characterize_values(values=values, parent="p.")
-    assert complete == [
-        "  p.1",
-        "  p.2",
-        "  p.4",
-        "  p.4.a",
-        "  p.5",
-        "  p.b",
-        "  p.6",
-        "  p.9",
-    ]
-    assert incomplete == [
-        "  p.3: {{ n }}",
-        "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}",
-        "  p.8: ['{{ 1 + 1 }}']",
-        "  p.10.c: {{ n }}",
-    ]
+    c = YAMLConfig(config=d)
+    keys, vals = c.incomplete()
+    assert keys == [["{{ a }}"]]
+    assert vals == [["c"], ["g"], ["h", 0], ["j", "c"]]
 
 
-def test_config_base__characterize_values__tagged_convert(config):
-    d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
-    complete, incomplete = config._characterize_values(values=d, parent="p.")
-    assert complete == []
-    assert incomplete == ["  p.1: !int '{{ foo }}'"]
+# def test_config_base_incomplete__tagged_convert():
+#     d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
+#     c = YAMLConfig(d)
+#     keys, vals = c.incomplete()
+#     assert keys == []
+#     # assert incomplete == ["  p.1: !int '{{ foo }}'"]
 
 
 def test_config_base__depth(config):

@@ -155,12 +155,12 @@ def realize(
         input_obj, output_file, output_format, key_path
     )
     if values_needed:
-        _realize_values_needed(input_obj)
+        incomplete = _realize_values_needed(input_obj)
     if total and unrendered(str(input_obj)):
         msg = "Config could not be totally realized"
         raise UWConfigRealizeError(msg)
     if values_needed:
-        return {}
+        return incomplete
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
@@ -335,23 +335,23 @@ def _realize_values_needed(config: Config) -> dict[str, list[list]]:
     :return: A tuple of lists of keypaths to incomplete keys and values.
     """
     dotted = lambda keypath: ".".join(map(str, keypath))
-    some = "%s with unrendered Jinja2 content:"
-    no = "No %s have unrendered Jinja2 content."
-    paths_keys, paths_vals = config.incomplete()
-    if paths_keys:
+    some = "%s with unrendered content:"
+    no = "No %s have unrendered content."
+    keys, vals = config.incomplete()
+    if keys:
         log.info(some % "Keys")
-        for keypath in paths_keys:
-            log.info(dotted(keypath))
+        for keypath in keys:
+            log.info("  %s" % dotted(keypath))
     else:
         log.info(no % "keys")
     log.info("")
-    if paths_vals:
+    if vals:
         log.info(some % "Values")
-        for keypath in paths_vals:
-            log.info("%s: %s", dotted(keypath), reduce(getitem, keypath, config))
+        for keypath in vals:
+            log.info("  %s: %s", dotted(keypath), reduce(getitem, keypath, config))
     else:
         log.info(no % "values")
-    return {"keys": paths_keys, "values": paths_vals}
+    return {"keys": keys, "vals": vals}
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:

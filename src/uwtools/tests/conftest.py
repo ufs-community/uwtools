@@ -13,7 +13,7 @@ from uwtools.logging import log
 def logged(caplog):
     log.setLevel(logging.DEBUG)
 
-    def logged_(s: str, full: bool = False, multiline: bool = False, regex: bool = False):
+    def f(s: str, full: bool = False, multiline: bool = False, regex: bool = False):
         assert len([x for x in (full, multiline, regex) if x]) < 2
         if full:
             return "\n".join(caplog.messages).strip() == s.strip()
@@ -22,7 +22,7 @@ def logged(caplog):
         s = s if regex else re.escape(s)
         return any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
 
-    return logged_
+    return f
 
 
 @fixture
@@ -49,3 +49,10 @@ def utc():
         return dt.replace(tzinfo=None)
 
     return utc
+
+
+@fixture
+def uwcaplog(caplog):
+    caplog.handler.setFormatter(logging.Formatter("%(message)s"))
+    caplog.set_level(logging.DEBUG)
+    return caplog

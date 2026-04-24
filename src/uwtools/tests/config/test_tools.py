@@ -830,56 +830,47 @@ def test_config_tools_realize__values_needed_ini(logged):
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
     """
-    tools.realize(
+    incomplete = tools.realize(
         input_config=fixture_path("simple3.ini"),
         input_format=FORMAT.ini,
         output_format=FORMAT.ini,
         values_needed=True,
     )
+    assert len(incomplete["keys"]) == 0
+    assert len(incomplete["vals"]) == 2
     expected = """
-    Keys that are complete:
-      salad.base
-      salad.fruit
-      salad.vegetable
-      salad.dressing
-      salad.toppings
-      salad.meat
-      dessert.type
-      dessert.side
-      dessert.servings
+    No keys have unrendered content.
 
-    Keys with unrendered Jinja2 variables/expressions:
+    Values with unrendered content:
       salad.how_many: {{ amount }}
       dessert.flavor: {{ flavor }}
     """
     assert logged(dedent(expected), multiline=True)
 
 
-def test_config_tools_realize__values_needed_yaml(logged):
+def test_config_tools_realize__values_needed_yaml(uwcaplog):
     """
     Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
     variables/expressions.
     """
-    tools.realize(
+    incomplete = tools.realize(
         input_config=fixture_path("srw_example.yaml"),
         input_format=FORMAT.yaml,
         output_format=FORMAT.yaml,
         values_needed=True,
     )
+    assert len(incomplete["keys"]) == 0
+    assert len(incomplete["vals"]) == 4
     expected = """
-    Keys that are complete:
-      FV3GFS.nomads.protocol
-      FV3GFS.nomads.file_names.nemsio
-      FV3GFS.nomads.file_names.testfalse
-      FV3GFS.nomads.file_names.testzero
-      FV3GFS.nomads.testempty
+    No keys have unrendered content.
 
-    Keys with unrendered Jinja2 variables/expressions:
+    Values with unrendered content:
       FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
-      FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
-      FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
+      FV3GFS.nomads.file_names.grib2.anl.0: gfs.t{{ hh }}z.atmanl.nemsio
+      FV3GFS.nomads.file_names.grib2.anl.1: gfs.t{{ hh }}z.sfcanl.nemsio
+      FV3GFS.nomads.file_names.grib2.fcst.0: gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}
     """  # noqa: E501
-    assert logged(dedent(expected), multiline=True)
+    assert dedent(expected).strip() in uwcaplog.text.strip()
 
 
 @mark.parametrize(
@@ -1134,26 +1125,35 @@ def test_config_tools__realize_update__file(realize_testobj, tmp_path):
     assert o[1][2][3] == 43
 
 
-def test_config_tools__realize_values_needed(logged, tmp_path):
-    path = tmp_path / "a.yaml"
-    with writable(path) as f:
-        yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
-    c = YAMLConfig(config=path)
+def test_config_tools__realize_values_needed(uwcaplog):
+    d = {"{{ x }}": 42, "b": "{{ y }}", "c": ["d", "{% for n in range(3) %}hi{% endfor %}"]}
+    c = YAMLConfig(config=d)
     incomplete = tools._realize_values_needed(config=c)
-    assert incomplete  # PM FIXME
-    assert logged("Keys that are complete:\n  1", multiline=True)
-    assert logged("Keys with unrendered Jinja2 variables/expressions:\n  2", multiline=True)
+    assert incomplete["keys"] == [["{{ x }}"]]
+    assert incomplete["vals"] == [["b"], ["c", 1]]
+    expected = """
+    Keys with unrendered content:
+      {{ x }}
+
+    Values with unrendered content:
+      b: {{ y }}
+      c.1: {% for n in range(3) %}hi{% endfor %}
+    """
+    assert dedent(expected).strip() == uwcaplog.text.strip()
 
 
-def test_config_tools__realize_values_needed__negative_results(logged, tmp_path):
-    path = tmp_path / "a.yaml"
-    with writable(path) as f:
-        yaml.dump({}, f)
-    c = YAMLConfig(config=path)
+def test_config_tools__realize_values_needed__negative_results(uwcaplog):
+    d = {"a": 42, "b": "foo", "c": ["d", "e"]}
+    c = YAMLConfig(config=d)
     incomplete = tools._realize_values_needed(config=c)
-    assert incomplete  # PM FIXME
-    assert logged("No keys are complete.")
-    assert logged("No keys have unrendered Jinja2 variables/expressions.")
+    assert incomplete["keys"] == []
+    assert incomplete["vals"] == []
+    expected = """
+    No keys have unrendered content.
+
+    No values have unrendered content.
+    """
+    assert dedent(expected).strip() == uwcaplog.text.strip()
 
 
 @mark.parametrize("input_fmt", FORMAT.extensions())
