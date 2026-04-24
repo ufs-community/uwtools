@@ -252,7 +252,7 @@ class _ECFlowDef:
             else None
         )
         execution = config[STR.execution]
-        cmd = execution.get(EC.jobcmd)
+        cmd = execution.get("executable")
         es = self._ecflowscript(
             execution=[cmd],
             manual=config.get(EC.manual, f"Script to run {task.name()}"),

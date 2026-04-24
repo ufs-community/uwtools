@@ -384,7 +384,7 @@ class TestECFlowDef:
         suite.add(task)
         instance._d.add(suite)
         config = {
-            "execution": {"jobcmd": "echo hello"},
+            "execution": {"executable": "echo hello"},
             "manual": "Test task",
         }
         instance._create_ecf_script(config, task)
@@ -398,7 +398,7 @@ class TestECFlowDef:
         suite.add(task)
         instance_with_scheduler._d.add(suite)
         config = {
-            "execution": {"jobcmd": "echo hello"},
+            "execution": {"executable": "echo hello"},
             "account": "myaccount",
             "rundir": "/path/to/run",
         }
@@ -534,7 +534,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script FIRST so loop must continue to process trigger afterward.
-        script_config = {"execution": {"jobcmd": "echo hi"}}
+        script_config = {"execution": {"executable": "echo hi"}}
         config = {"script": script_config, "trigger": "1==1"}
         instance._add_node(config, task, suite)
         # Verify script was created and loop continued to process trigger.
@@ -548,7 +548,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script LAST so loop exits after processing it.
-        script_config = {"execution": {"jobcmd": "echo hi"}}
+        script_config = {"execution": {"executable": "echo hi"}}
         config = {"trigger": "1==1", "script": script_config}
         instance._add_node(config, task, suite)
         # Verify both trigger and script were processed.
@@ -613,7 +613,7 @@ class TestECFlowDef:
                     "task_run": {
                         "trigger": "/test/prep/setup == complete",
                         "script": {
-                            "execution": {"jobcmd": "echo running"},
+                            "execution": {"executable": "echo running"},
                         },
                     },
                 }
