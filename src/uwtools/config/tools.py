@@ -326,30 +326,30 @@ def _realize_update(
     return input_obj
 
 
-def _realize_values_needed(input_obj: Config) -> dict[str, list[str]]:
+def _realize_values_needed(input_obj: Config) -> tuple[list[list], list[list]]:
     """
     Report values as fully-rendered (complete) or as template placeholders (incomplete).
 
     :param input_obj: The config whose values to report on.
     :return: A dict of complete and incomplete keys.
     """
-    complete, incomplete = input_obj._characterize_values(  # noqa: SLF001
-        input_obj.data, parent=""
-    )
-    if complete:
-        log.info("Keys that are complete:")
-        for var in complete:
-            log.info(var)
-    else:
-        log.info("No keys are complete.")
-    log.info("")
-    if incomplete:
-        log.info("Keys with unrendered Jinja2 variables/expressions:")
-        for var in incomplete:
-            log.info(var)
-    else:
-        log.info("No keys have unrendered Jinja2 variables/expressions.")
-    return {"complete": complete, "incomplete": incomplete}
+    keys, values = input_obj.incomplete()
+    print("@@@", keys, values)
+    return keys, values
+    # if complete:
+    #     log.info("Keys that are complete:")
+    #     for var in complete:
+    #         log.info(var)
+    # else:
+    #     log.info("No keys are complete.")
+    # log.info("")
+    # if incomplete:
+    #     log.info("Keys with unrendered Jinja2 variables/expressions:")
+    #     for var in incomplete:
+    #         log.info(var)
+    # else:
+    #     log.info("No keys have unrendered Jinja2 variables/expressions.")
+    # return {"complete": complete, "incomplete": incomplete}
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:

@@ -54,48 +54,39 @@ class Config(ABC, UserDict):
         """
         return self._dict_to_str(self.data)
 
-    # Private methods
-
-    def _characterize_values(self, values: dict, parent: str) -> tuple[list[str], list[str]]:
-        """
-        Characterize values as either complete or as incomplete template placeholders.
-
-        :param values: The dictionary to examine.
-        :param parent: Parent key.
-        :return: Lists of complete and incomplete-template-placeholder values.
-        """
-
-        def jinja2val(val: Any) -> str | None:
+    def incomplete(
+        self,
+        data: Any = None,
+        keypath: list | None = None,
+        keys: list | None = None,
+        vals: list | None = None,
+    ) -> tuple[list[list], list[list]]:
+        def unrendered(x: Any) -> bool:
             try:
-                s = str(val)
+                s = str(x)
             except (yaml.constructor.ConstructorError, ValueError):
-                assert isinstance(val, UWYAMLConvert)
-                s = val.tagged_string
-            return s if "{{" in s or "{%" in s else None
+                assert isinstance(x, UWYAMLConvert)
+                s = x.tagged_string
+            return "{{" in s or "{%" in s
 
-        complete: list[str] = []
-        incomplete: list[str] = []
-        for key, val in values.items():
-            if isinstance(val, dict):
-                c, i = self._characterize_values(val, f"{parent}{key}.")
-                if not i:
-                    complete.append(f"{INDENT}{parent}{key}")
-                complete, incomplete = complete + c, incomplete + i
-            elif isinstance(val, list):
-                if not jinja2val(val):
-                    complete.append(f"{INDENT}{parent}{key}")
-                for _, item in enumerate(val):
-                    if isinstance(item, dict):
-                        c, i = self._characterize_values(item, parent)
-                        complete, incomplete = complete + c, incomplete + i
-                    elif val := jinja2val(val):
-                        incomplete.append(f"{INDENT}{parent}{key}: {val}")
-                        break
-            elif val := jinja2val(val):
-                incomplete.append(f"{INDENT}{parent}{key}: {val}")
+        init = lambda x, default: default if x is None else x
+        data = init(data, self.data)
+        keypath, keys, vals = [init(x, []) for x in (keypath, keys, vals)]
+        if unrendered(data):
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    if unrendered(k):
+                        keys.append([*keypath, k])
+                    if unrendered(v):
+                        self.incomplete(v, [*keypath, k], keys, vals)
+            elif isinstance(data, list):
+                for i, v in enumerate(data):
+                    self.incomplete(v, [*keypath, i], keys, vals)
             else:
-                complete.append(f"{INDENT}{parent}{key}")
-        return complete, incomplete
+                vals.append(keypath)
+        return keys, vals
+
+    # Private methods
 
     @staticmethod
     def _compare_config_get_lines(d: dict) -> list[str]:
