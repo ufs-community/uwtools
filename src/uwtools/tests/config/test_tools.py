@@ -840,7 +840,6 @@ def test_config_tools_realize__values_needed_ini(logged):
     assert len(incomplete["vals"]) == 2
     expected = """
     No keys have unrendered content.
-
     Values with unrendered content:
       salad.how_many: {{ amount }}
       dessert.flavor: {{ flavor }}
@@ -863,7 +862,6 @@ def test_config_tools_realize__values_needed_yaml(uwcaplog):
     assert len(incomplete["vals"]) == 4
     expected = """
     No keys have unrendered content.
-
     Values with unrendered content:
       FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
       FV3GFS.nomads.file_names.grib2.anl.0: gfs.t{{ hh }}z.atmanl.nemsio
@@ -1134,7 +1132,6 @@ def test_config_tools__realize_values_needed(uwcaplog):
     expected = """
     Keys with unrendered content:
       {{ x }}
-
     Values with unrendered content:
       b: {{ y }}
       c.1: {% for n in range(3) %}hi{% endfor %}
@@ -1150,7 +1147,6 @@ def test_config_tools__realize_values_needed__negative_results(uwcaplog):
     assert incomplete["vals"] == []
     expected = """
     No keys have unrendered content.
-
     No values have unrendered content.
     """
     assert dedent(expected).strip() == uwcaplog.text.strip()
