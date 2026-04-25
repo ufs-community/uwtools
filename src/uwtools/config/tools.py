@@ -344,7 +344,6 @@ def _realize_values_needed(config: Config) -> dict[str, list[list]]:
             log.info("  %s" % dotted(keypath))
     else:
         log.info(no % "keys")
-    log.info("")
     if vals:
         log.info(some % "Values")
         for keypath in vals:
