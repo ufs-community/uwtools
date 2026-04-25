@@ -119,7 +119,7 @@ class STR:
     mpiargs: str = "mpiargs"
     mpicmd: str = "mpicmd"
     namelist: str = "namelist"
-    notready: str = "not-ready"
+    notready: str = "notready"
     orog: str = "orog"
     oroggsl: str = "orog_gsl"
     outfile: str = "output_file"

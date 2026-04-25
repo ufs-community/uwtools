@@ -462,7 +462,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     cli._dispatch_fs_report(report=report)
     expected = """
     {
-      "not-ready": [
+      "notready": [
         "/missing"
       ],
       "ready": [
