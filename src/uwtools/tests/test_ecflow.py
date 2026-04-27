@@ -410,6 +410,19 @@ class TestECFlowDef:
             instance_with_scheduler._create_ecf_script(config, task)
         mock_js.assert_called_once()
 
+    def test__create_ecf_script__without_jobcmd(self, instance):
+        task = Task("hello")
+        suite = Suite("test")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {
+            "execution": {},
+            "manual": "Test task",
+        }
+
+        with raises(AssertionError, match="must include 'jobcmd'"):
+            instance._create_ecf_script(config, task)
+
     # write_ecf_scripts tests
 
     def test_write_ecf_scripts__no_scripts(self, instance, logged, tmp_path):
