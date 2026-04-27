@@ -616,7 +616,7 @@ class TestECFlowDef:
                     "task_run": {
                         "trigger": "/test/prep/setup == complete",
                         "script": {
-                            "execution": {"jobcmd": "echo running", "executable": "run.exe"},
+                            "execution": {"executable": "run.exe", "jobcmd": "echo running"},
                         },
                     },
                 }
