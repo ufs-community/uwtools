@@ -25,7 +25,6 @@ from ecflow import (  # type: ignore[import-untyped]
     Task,
 )
 
-from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
@@ -45,10 +44,11 @@ class _ECFlowDef:
     Generate an ecFlow definition file from a YAML config.
     """
 
-    def __init__(self, config: dict | Config | Path | None = None) -> None:
+    def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         self._scripts: dict[Path, str] = {}
-        cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
-        cfgobj = cfgobj.dereference()
+        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        cfgobj.dereference()
+        validate(config)
         self._config = cfgobj.data[EC.ecflow]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
@@ -252,7 +252,7 @@ class _ECFlowDef:
             else None
         )
         execution = config[STR.execution]
-        cmd = execution.get(EC.jobcmd)
+        cmd = execution.get(EC.jobcmd, "")
         es = self._ecflowscript(
             execution=[cmd],
             manual=config.get(EC.manual, f"Script to run {task.name()}"),
@@ -316,7 +316,7 @@ class _ECFlowDef:
         pre_includes = pre_includes or []
         post_includes = post_includes or []
         directives = scheduler.directives if scheduler else ""
-        initcmds = scheduler.initcmds if scheduler else []
+        initcmds = scheduler.initcmds if scheduler else [""]
         rs = dedent(template).format(
             directives="\n".join(directives),
             envcmds="\n".join(envcmds or []),

@@ -267,7 +267,7 @@ class TestECFlowDef:
 
     def test__init__missing_ecflow_key(self):
         config: dict = {"not_ecflow": {}}
-        with raises(KeyError):
+        with raises(UWConfigError):
             _ECFlowDef(config=config)
 
     # _add_workflow_components tests
@@ -608,12 +608,15 @@ class TestECFlowDef:
                     "family_prep": {
                         "task_setup": {
                             "trigger": "1==1",
-                        }
+                            "script": {
+                                "execution": {"executable": "prep.exe", "jobcmd": "echo running"},
+                            },
+                        },
                     },
                     "task_run": {
                         "trigger": "/test/prep/setup == complete",
                         "script": {
-                            "execution": {"jobcmd": "echo running"},
+                            "execution": {"jobcmd": "echo running", "executable": "run.exe"},
                         },
                     },
                 }
@@ -642,6 +645,7 @@ class TestECFlowDef:
                 "suite_ensemble": {
                     "tasks_member_{{ ec.MEM }}": {
                         "expand": {"MEM": ["01", "02", "03"]},
+                        "script": {"execution": {"executable": "run me", "jobcmd": "hello"}},
                     }
                 }
             }
