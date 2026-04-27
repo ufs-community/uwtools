@@ -48,7 +48,7 @@ class _ECFlowDef:
         self._scripts: dict[Path, str] = {}
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
-        validate(config)
+        validate(cfgobj)
         self._config = cfgobj.data[EC.ecflow]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
