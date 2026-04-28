@@ -68,6 +68,7 @@ def test_rocoto_realize__cfg_to_stdout(capsys, assets):
 
 
 def test_rocoto_realize__cfg_to_stdout_key_path(capsys, assets):
+    # Test that workflow: block not at the root of the config can be accessed via key_path.
     cfgfile, outfile = assets
     config = YAMLConfig(cfgfile)
     config["path"] = {"to": {"workflow": config["workflow"]}}
