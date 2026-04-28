@@ -172,7 +172,7 @@ def validate_external(
     if config_data is None:
         config = YAMLConfig(config_path).dereference().data
     elif isinstance(config_data, YAMLConfig):
-        config = config_data.data
+        config = config_data.dereference().data
     else:
         config = config_data
     if not str(schema_file).startswith(str(resource_path())):

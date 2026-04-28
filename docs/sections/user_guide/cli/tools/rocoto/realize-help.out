@@ -1,5 +1,6 @@
 usage: uw rocoto realize [-h] [--version] [--config-file PATH]
-                         [--output-file PATH] [--quiet] [--verbose]
+                         [--output-file PATH] [--key-path KEY[.KEY...]]
+                         [--quiet] [--verbose]
 
 Realize a Rocoto XML workflow document
 
@@ -12,6 +13,8 @@ Optional arguments:
       Path to UW YAML config file (default: read from stdin)
   --output-file PATH, -o PATH
       Path to output file (default: write to stdout)
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys to Rocoto config block
   --quiet, -q
       Print no logging messages
   --verbose, -v

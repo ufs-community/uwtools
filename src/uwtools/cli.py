@@ -585,6 +585,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_file(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to Rocoto config block")
     return _add_args_verbosity(optional)
 
 
@@ -638,6 +639,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     return uwtools.api.rocoto.realize(
         config=args[STR.cfgfile],
         output_file=args[STR.outfile],
+        key_path=args[STR.keypath],
         stdin_ok=True,
     )
 
