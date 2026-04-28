@@ -507,17 +507,17 @@ def test_cli_dispatch_rocoto_iterate(utc):
 
 
 def test_cli__dispatch_rocoto_realize():
-    args = {STR.cfgfile: 1, STR.outfile: 2}
+    args = {STR.cfgfile: 1, STR.outfile: 2, STR.keypath: None}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    _realize.assert_called_once_with(config=1, output_file=2)
+    _realize.assert_called_once_with(config=1, output_file=2, key_path=None)
 
 
 def test_cli__dispatch_rocoto_realize_no_optional():
-    args = {STR.cfgfile: None, STR.outfile: None}
+    args: dict = {STR.cfgfile: None, STR.outfile: None, STR.keypath: None}
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
-    func.assert_called_once_with(config=None, output_file=None)
+    func.assert_called_once_with(config=None, output_file=None, key_path=None)
 
 
 def test_cli__dispatch_rocoto_validate_xml():

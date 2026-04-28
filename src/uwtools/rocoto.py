@@ -8,8 +8,10 @@ import re
 import sqlite3
 from dataclasses import dataclass
 from datetime import timezone
+from functools import reduce
 from itertools import chain
 from math import log10
+from operator import getitem
 from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Any
@@ -30,6 +32,8 @@ from uwtools.utils.processing import run_shell_cmd
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from uwtools.config.support import YAMLKey
+
 
 DEFAULT_ITERATION_RATE = 10  # seconds
 
@@ -38,16 +42,21 @@ def iterate(cycle: datetime, database: Path, rate: int, task: str, workflow: Pat
     return _RocotoIterator(cycle, database, rate, task, workflow).iterate()
 
 
-def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
+def realize(
+    config: YAMLConfig | Path | None,
+    output_file: Path | None = None,
+    key_path: list[YAMLKey] | None = None,
+) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
     XML output.
 
     :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
     :param output_file: Path to write rendered XML file (None => write to stdout).
+    :param key_path: Path of keys to the Rocoto config block.
     :return: An XML string.
     """
-    rxml = _RocotoXML(config)
+    rxml = _RocotoXML(config, key_path)
     xml_string = str(rxml).strip()
     if unrendered(xml_string):
         log.error(xml_string)
@@ -199,11 +208,16 @@ class _RocotoXML:
     Generate a Rocoto XML document from a YAML config.
     """
 
-    def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
-        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
-        cfgobj.dereference()
-        self._config_validate(config)
-        self._config = cfgobj.data
+    def __init__(
+        self,
+        config: dict | YAMLConfig | Path | None = None,
+        key_path: list[YAMLKey] | None = None,
+    ) -> None:
+        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        config.dereference()
+        config_rocoto = reduce(getitem, key_path or [], config)
+        self._config_validate(config_rocoto)
+        self._config = config_rocoto.data
         self._add_workflow(self._config)
 
     def __str__(self) -> str:
