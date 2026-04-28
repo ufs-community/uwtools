@@ -67,6 +67,16 @@ def test_rocoto_realize__cfg_to_stdout(capsys, assets):
     assert rocoto.validate_xml_file(xml_file=outfile)
 
 
+def test_rocoto_realize__cfg_to_stdout_key_path(capsys, assets):
+    cfgfile, outfile = assets
+    config = YAMLConfig(cfgfile)
+    config["path"] = {"to": {"workflow": config["workflow"]}}
+    del config["workflow"]
+    rocoto.realize(config=config, key_path=["path", "to"])
+    outfile.write_text(capsys.readouterr().out)
+    assert rocoto.validate_xml_file(xml_file=outfile)
+
+
 def test_rocoto_realize__file_to_file(assets):
     cfgfile, outfile = assets
     rocoto.realize(config=cfgfile, output_file=outfile)

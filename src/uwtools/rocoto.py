@@ -213,11 +213,11 @@ class _RocotoXML:
         config: dict | YAMLConfig | Path | None = None,
         key_path: list[YAMLKey] | None = None,
     ) -> None:
-        config = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        config = YAMLConfig(config)
         config.dereference()
-        config_rocoto = reduce(getitem, key_path or [], config)
-        self._config_validate(config_rocoto)
-        self._config = config_rocoto.data
+        config.data = reduce(getitem, key_path or [], config.data)
+        self._config_validate(config)
+        self._config = config.data
         self._add_workflow(self._config)
 
     def __str__(self) -> str:
