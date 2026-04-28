@@ -420,7 +420,7 @@ class TestECFlowDef:
             "manual": "Test task",
         }
 
-        with raises(AssertionError, match="must include 'jobcmd'"):
+        with raises(UWConfigError, match="must include 'jobcmd'"):
             instance._create_ecf_script(config, task)
 
     # write_ecf_scripts tests

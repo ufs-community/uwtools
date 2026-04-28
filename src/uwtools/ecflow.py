@@ -252,8 +252,11 @@ class _ECFlowDef:
             else None
         )
         execution = config[STR.execution]
-        assert "jobcmd" in execution, f"execution block for {task.name()} must include 'jobcmd'"
-        cmd = execution[EC.jobcmd]
+        try:
+            cmd = execution[EC.jobcmd]
+        except KeyError as e:
+            msg = "The execution block for %s must include 'jobcmd'" % task.name()
+            raise UWConfigError(msg) from e
         es = self._ecflowscript(
             execution=[cmd],
             manual=config.get(EC.manual, f"Script to run {task.name()}"),
