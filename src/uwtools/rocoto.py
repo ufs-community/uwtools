@@ -215,9 +215,8 @@ class _RocotoXML:
     ) -> None:
         config = YAMLConfig(config)
         config.dereference()
-        config.data = reduce(getitem, key_path or [], config.data)
-        self._config_validate(config)
-        self._config = config.data
+        self._config = reduce(getitem, key_path or [], config.data)
+        self._config_validate(self._config)
         self._add_workflow(self._config)
 
     def __str__(self) -> str:
