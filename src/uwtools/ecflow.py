@@ -46,18 +46,23 @@ class _ECFlowDef:
     """
 
     def __init__(self, config: dict | Config | Path | None = None) -> None:
+        from uwtools.logging import log
         self._scripts: dict[Path, str] = {}
+        log.debug("Initializing _ECFlowDef with config: %s", config)
         cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
         cfgobj = cfgobj.dereference()
         self._config = cfgobj.data[EC.ecflow]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
+        log.debug("Adding workflow components to suite definition.")
         self._add_workflow_components()
+        log.debug("Workflow components added. Scripts: %s", list(self._scripts.keys()))
 
     def __str__(self):
         return self._d.__str__()
 
     def write_ecf_scripts(self, path: Path | str) -> None:
+        from uwtools.logging import log
         """
         The ecf scripts for this workflow.
 
@@ -68,20 +73,27 @@ class _ECFlowDef:
             log.warning("No scripts are configured for this workflow.")
             return
 
+        log.debug("Writing ecf scripts to %s", path)
         for subpath, content in self._scripts.items():
-            outpath = path / subpath
+            outpath = Path(path) / subpath
             outpath.parent.mkdir(parents=True, exist_ok=True)
+            log.debug("Writing script: %s", outpath)
             outpath.write_text(content)
 
     def write_suite_definition(self, path: Path | None) -> None:
+        from uwtools.logging import log
         """
         The suite definition artifact.
 
         :param path: Where to write the suite definition.
         """
         if path:
+            log.debug("Creating output directory for suite definition: %s", path)
             path.mkdir(parents=True, exist_ok=True)
             path = path / "suite.def"
+            log.debug("Writing suite definition to: %s", path)
+        else:
+            log.debug("No output path provided, writing suite definition to stdout.")
         with writable(path) as f:
             print(self, file=f)
 

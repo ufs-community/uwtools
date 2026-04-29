@@ -11,6 +11,7 @@ from pytest import fixture, mark, raises
 
 import uwtools.api
 import uwtools.api.config
+import uwtools.api.ecflow
 import uwtools.api.rocoto
 import uwtools.api.template
 from uwtools import cli
@@ -107,6 +108,21 @@ def test_cli__add_subparser_config_realize(subparsers):
 
 def test_cli__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
+    assert subparsers.choices[STR.validate]
+
+
+def test_cli__add_subparser_ecflow(subparsers):
+    cli._add_subparser_ecflow(subparsers)
+    assert actions(subparsers.choices[STR.ecflow]) == [STR.realize, STR.validate]
+
+
+def test_cli__add_subparser_ecflow_realize(subparsers):
+    cli._add_subparser_ecflow_realize(subparsers)
+    assert subparsers.choices[STR.realize]
+
+
+def test_cli__add_subparser_ecflow_validate(subparsers):
+    cli._add_subparser_ecflow_validate(subparsers)
     assert subparsers.choices[STR.validate]
 
 
@@ -469,6 +485,71 @@ def test_cli__dispatch_fs_report_yes(capsys):
     }
     """
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+@mark.parametrize(
+    "params",
+    [
+        (STR.realize, "_dispatch_ecflow_realize"),
+        (STR.validate, "_dispatch_ecflow_validate"),
+    ],
+)
+def test_cli__dispatch_ecflow(params):
+    action, funcname = params
+    args = {STR.action: action}
+    with patch.object(cli, funcname) as func:
+        cli._dispatch_ecflow(args)
+    func.assert_called_once_with(args)
+
+
+def test_cli__dispatch_ecflow_realize():
+    args = {STR.config_file: Path("/path/to/config.yaml"), STR.output_dir: Path("/path/to/output")}
+    with patch.object(uwtools.api.ecflow, "realize") as realize:
+        cli._dispatch_ecflow_realize(args)
+    realize.assert_called_once_with(
+        config=args[STR.config_file],
+        output_path=args[STR.output_dir],
+        scripts_path=args[STR.output_dir],
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_validate():
+    args = {STR.config_file: Path("/path/to/config.yaml")}
+    with patch.object(uwtools.api.ecflow, "validate") as validate:
+        cli._dispatch_ecflow_validate(args)
+    validate.assert_called_once_with(
+        config=args[STR.config_file],
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_realize_no_optional():
+    args = {STR.config_file: None, STR.output_dir: None}
+    with patch.object(uwtools.api.ecflow, "realize") as realize:
+        cli._dispatch_ecflow_realize(args)
+    realize.assert_called_once_with(
+        config=None,
+        output_path=None,
+        scripts_path=None,
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_validate_invalid():
+    args = {STR.config_file: Path("/path/to/config.yaml")}
+    with patch.object(uwtools.api.ecflow, "validate", return_value=False):
+        assert cli._dispatch_ecflow_validate(args) is False
+
+
+def test_cli__dispatch_ecflow_validate_no_optional():
+    args = {STR.config_file: None}
+    with patch.object(uwtools.api.ecflow, "validate") as validate:
+        cli._dispatch_ecflow_validate(args)
+    validate.assert_called_once_with(
+        config=None,
+        stdin_ok=True,
+    )
 
 
 @mark.parametrize(

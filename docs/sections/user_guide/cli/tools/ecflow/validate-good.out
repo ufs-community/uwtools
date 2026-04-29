@@ -1,0 +1,21 @@
+3 schema-validation errors found in ecFlow config
+Error at ecflow.suite_workflow.family_data_prep.task_fetch.script.execution:
+  {'jobcmd': 'echo Fetching data...'} is not valid under any of the given schemas
+  Candidate rules are:
+    'executable' is a required property
+    'executable' is a required property
+  At least one must match.
+Error at ecflow.suite_workflow.family_data_prep.task_process.script.execution:
+  {'jobcmd': 'echo Processing data...'} is not valid under any of the given schemas
+  Candidate rules are:
+    'executable' is a required property
+    'executable' is a required property
+  At least one must match.
+Error at ecflow.suite_workflow.task_run_model.script.execution:
+  {'jobcmd': 'echo Running model...'} is not valid under any of the given schemas
+  Candidate rules are:
+    'executable' is a required property
+    'executable' is a required property
+  At least one must match.
+YAML validation errors
+Exit status: 1

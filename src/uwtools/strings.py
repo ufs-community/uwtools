@@ -129,6 +129,7 @@ class _STR(_ValsMatchKeys):
     cycle: str = _
     database: str = _
     dry_run: str = _
+    ecflow: str = _
     enkf: str = _
     env: str = _
     envcmds: str = _
@@ -173,6 +174,7 @@ class _STR(_ValsMatchKeys):
     notready: str = "not-ready"
     orog: str = _
     orog_gsl: str = _
+    output_dir: str = _
     output_file: str = _
     output_format: str = _
     path1: str = _
