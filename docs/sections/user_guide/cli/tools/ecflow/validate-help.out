@@ -1,0 +1,16 @@
+usage: uw ecflow validate [-h] [--version] [--config-file PATH] [--quiet]
+                          [--verbose]
+
+Validate an ecFlow config
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
