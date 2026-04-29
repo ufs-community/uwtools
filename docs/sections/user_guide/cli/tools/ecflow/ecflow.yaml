@@ -5,13 +5,13 @@ ecflow:
         trigger: "1==1"
         script:
           execution:
-            executable: /path/to/get_obs.sh
+            executable: uw fs copy -c get_obs.yaml
             jobcmd: /path/to/get_obs.sh
           manual: Retrieve observation data
     task_run_model:
       trigger: /forecast/prep/get_obs == complete
       script:
         execution:
-          executable: /path/to/run_model.sh
+          executable: model.exe
           jobcmd: /path/to/run_model.sh
         manual: Run the forecast model

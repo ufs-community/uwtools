@@ -3,7 +3,7 @@
 ecFlow Workflows
 ================
 
-:ecflow:`ecFlow<>` is a workflow manager widely used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (``suite.def``) to describe the workflow, and ecf scripts (``*.ecf``) to carry out individual tasks.
+:ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (``suite.def``) to describe the workflow, and ecf scripts (``*.ecf``) to carry out individual tasks.
 
 The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translates it into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ecf scripts.
 
@@ -59,14 +59,14 @@ Suites, families, and tasks are defined as nested YAML blocks. Keys are prefixed
            trigger: "1==1"
            script:
              execution:
-               executable: /path/to/get_obs.sh
-               jobcmd: /path/to/get_obs.sh
+               executable: uw fs get_obs.yaml
+               jobcmd: /path/to/run_get_obs.sh
              manual: Retrieve observation data
        task_run_model:
          trigger: /forecast/prep/get_obs == complete
          script:
            execution:
-             executable: /path/to/run_model.sh
+             executable: model.exe
              jobcmd: /path/to/run_model.sh
            manual: Run the forecast model
 
@@ -198,7 +198,7 @@ Task Script Block
 
 Tasks are required to have a ``script:`` block that defines the ecf script to generate. The ``script:`` block has the following keys:
 
-``execution:`` -- **Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` for full details. The ``executable:`` key is required by the schema. The ``jobcmd:`` key specifies the command run inside the ecf script body.
+``execution:`` -- **Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` documentation for full details. The ``executable:`` key is required by the schema. The ``jobcmd:`` key specifies the command to run inside the ecf script body, and is required by the code.
 
 .. code-block:: yaml
 
@@ -270,4 +270,4 @@ Generated Artifacts
 
 ``suite.def`` -- The ecFlow suite definition file, written to ``<output-path>/suite.def``. If no ``--output-path`` is given, the suite definition is written to ``stdout``.
 
-``*.ecf`` scripts -- One ecf script per task, written under ``<scripts-path>/``. Each script is placed at ``<scripts-path>/<suite>/<family_path>/<scriptname>.ecf``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
+``*.ecf`` scripts -- One ecf script per task, written under ``<scripts-path>/``. Each script is nested under the ``<scripts-path>`` in the same manner as it is in the suite definition. The example above will output a script at ``<scripts-path>/forecast/prep/get_obs.ecf`` and at ``<scripts-path>/forecast/run_model``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
