@@ -74,7 +74,7 @@ The ``--target-dir`` option need not be specified when all destination paths are
 .. literalinclude:: fs/copy-no-target-dir-err.out
    :language: text
 
-When the ``--report`` option is specified, a report of files not copied ("not-ready") and copied ("ready") will be printed to ``stdout`` as machine-readable JSON. For example, using a config specifying both available and unavailable source files:
+When the ``--report`` option is specified, a report of files not copied ("notready") and copied ("ready") will be printed to ``stdout`` as machine-readable JSON. For example, using a config specifying both available and unavailable source files:
 
 .. literalinclude:: fs/copy-report.yaml
    :language: yaml

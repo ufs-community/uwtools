@@ -8,8 +8,10 @@ import re
 import sqlite3
 from dataclasses import dataclass
 from datetime import timezone
+from functools import reduce
 from itertools import chain
 from math import log10
+from operator import getitem
 from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Any
@@ -30,6 +32,8 @@ from uwtools.utils.processing import run_shell_cmd
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from uwtools.config.support import YAMLKey
+
 
 DEFAULT_ITERATION_RATE = 10  # seconds
 
@@ -38,7 +42,40 @@ def iterate(cycle: datetime, database: Path, rate: int, task: str, workflow: Pat
     return _RocotoIterator(cycle, database, rate, task, workflow).iterate()
 
 
-def validate_file(xml_file: Path | None) -> bool:
+def realize(
+    config: YAMLConfig | Path | None,
+    output_file: Path | None = None,
+    key_path: list[YAMLKey] | None = None,
+) -> str:
+    """
+    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
+    XML output.
+
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_file: Path to write rendered XML file (None => write to stdout).
+    :param key_path: Path of keys to the Rocoto config block.
+    :return: An XML string.
+    """
+    rxml = _RocotoXML(config, key_path)
+    xml_string = str(rxml).strip()
+    if unrendered(xml_string):
+        log.error(xml_string)
+        log.error("Value(s) needed to render this XML are:")
+        for var in meta.find_undeclared_variables(
+            Environment(undefined=StrictUndefined).parse(xml_string)
+        ):
+            log.error("%s%s", INDENT, var)
+        msg = "Rocoto XML could not be totally realized"
+        raise UWConfigRealizeError(msg)
+    if not validate_xml_string(xml_string):
+        msg = "Internal error: Invalid Rocoto XML"
+        raise UWError(msg)
+    with writable(output_file) as f:
+        print(xml_string, file=f)
+    return xml_string
+
+
+def validate_xml_file(xml_file: Path | None) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
@@ -46,45 +83,17 @@ def validate_file(xml_file: Path | None) -> bool:
     :return: Did the XML conform to the schema?
     """
     with readable(xml_file) as f:
-        return validate_string(xml=f.read())
+        return validate_xml_string(xml_string=f.read())
 
 
-def realize(config: YAMLConfig | Path | None, output_file: Path | None = None) -> str:
-    """
-    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
-    XML output.
-
-    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
-    :param output_file: Path to write rendered XML file (None => write to stdout).
-    :return: An XML string.
-    """
-    rxml = _RocotoXML(config)
-    xml = str(rxml).strip()
-    if unrendered(xml):
-        log.error(xml)
-        log.error("Value(s) needed to render this XML are:")
-        for var in meta.find_undeclared_variables(
-            Environment(undefined=StrictUndefined).parse(xml)
-        ):
-            log.error("%s%s", INDENT, var)
-        msg = "Rocoto XML could not be totally realized"
-        raise UWConfigRealizeError(msg)
-    if not validate_string(xml):
-        msg = "Internal error: Invalid Rocoto XML"
-        raise UWError(msg)
-    with writable(output_file) as f:
-        print(xml, file=f)
-    return xml
-
-
-def validate_string(xml: str) -> bool:
+def validate_xml_string(xml_string: str) -> bool:
     """
     Validate purported Rocoto XML against its schema.
 
-    :param xml: XML to validate.
+    :param xml_string: XML to validate.
     :return: Did the XML conform to the schema?
     """
-    tree = etree.fromstring(xml.encode("utf-8"))
+    tree = etree.fromstring(xml_string.encode("utf-8"))
     path = resource_path("rocoto/schema_with_metatasks.rng")
     schema = etree.RelaxNG(etree.fromstring(path.read_text()))
     valid: bool = schema.validate(tree)
@@ -96,7 +105,7 @@ def validate_string(xml: str) -> bool:
         for err in list(schema.error_log):
             log.error(err)
         log.error("Invalid Rocoto XML:")
-        lines = xml.strip().split("\n")
+        lines = xml_string.strip().split("\n")
         fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
         for n, line in enumerate(lines):
             log.error(fmtstr, n + 1, line)
@@ -199,11 +208,15 @@ class _RocotoXML:
     Generate a Rocoto XML document from a YAML config.
     """
 
-    def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
-        self._config_validate(config)
-        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
-        cfgobj.dereference()
-        self._config = cfgobj.data
+    def __init__(
+        self,
+        config: dict | YAMLConfig | Path | None = None,
+        key_path: list[YAMLKey] | None = None,
+    ) -> None:
+        config = YAMLConfig(config)
+        config.dereference()
+        self._config = reduce(getitem, key_path or [], config.data)
+        self._config_validate(self._config)
         self._add_workflow(self._config)
 
     def __str__(self) -> str:

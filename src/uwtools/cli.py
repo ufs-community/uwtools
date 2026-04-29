@@ -192,7 +192,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
-    _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
+    _add_arg_values_needed(optional, helpmsg="Report values needed to realize config, then exit")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
     return [
@@ -287,8 +287,10 @@ def _dispatch_config_realize(args: Args) -> bool:
             stdin_ok=True,
         )
     except UWConfigRealizeError:
-        msg = "Config could not be realized. Try with %s for details."
-        log.error(msg, _switch(STR.valsneeded))
+        msg = "Config could not be realized."
+        if not args[STR.valsneeded]:
+            msg += " Try with %s for details." % _switch(STR.valsneeded)
+        log.error(msg)
         return False
     return True
 
@@ -552,7 +554,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     return {
         STR.iterate: _add_subparser_rocoto_iterate(subparsers),
         STR.realize: _add_subparser_rocoto_realize(subparsers),
-        STR.validate: _add_subparser_rocoto_validate(subparsers),
+        STR.validatexml: _add_subparser_rocoto_validate_xml(subparsers),
     }
 
 
@@ -583,16 +585,17 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_file(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to Rocoto config block")
     return _add_args_verbosity(optional)
 
 
-def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_rocoto_validate_xml(subparsers: Subparsers) -> ActionChecks:
     """
-    Add subparser for mode: rocoto validate.
+    Add subparser for mode: rocoto validate-xml.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.validate, "Validate Rocoto XML")
+    parser = _add_subparser(subparsers, STR.validatexml, "Validate Rocoto XML")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     return _add_args_verbosity(optional)
@@ -607,7 +610,7 @@ def _dispatch_rocoto(args: Args) -> bool:
     actions = {
         STR.iterate: _dispatch_rocoto_iterate,
         STR.realize: _dispatch_rocoto_realize,
-        STR.validate: _dispatch_rocoto_validate,
+        STR.validatexml: _dispatch_rocoto_validate_xml,
     }
     return actions[args[STR.action]](args)
 
@@ -636,17 +639,18 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     return uwtools.api.rocoto.realize(
         config=args[STR.cfgfile],
         output_file=args[STR.outfile],
+        key_path=args[STR.keypath],
         stdin_ok=True,
     )
 
 
-def _dispatch_rocoto_validate(args: Args) -> bool:
+def _dispatch_rocoto_validate_xml(args: Args) -> bool:
     """
-    Define dispatch logic for rocoto validate action.
+    Define dispatch logic for rocoto validate-xml action.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.validate(xml_file=args[STR.infile], stdin_ok=True)
+    return uwtools.api.rocoto.validate_xml(xml_file=args[STR.infile], stdin_ok=True)
 
 
 # Mode template
@@ -697,7 +701,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_leadtime(optional)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
-    _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
+    _add_arg_values_needed(optional, helpmsg="Report values needed to render template, then exit")
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)

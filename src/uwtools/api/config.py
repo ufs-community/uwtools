@@ -278,11 +278,17 @@ no update will be performed.
 The output destination may be specified as a filesystem path. When it is not, it will be written to
 ``stdout``.
 
-If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
-``dry_run`` mode, output is written to ``stderr``.
+If ``values_needed=True``, a report of keys and values with incomplete Jinja2 expressions,
+indicating values needed to fully realize the config, is logged. Additionally, the return will be a
+``dict`` object whose ``keys`` item provides a list of keypaths leading to incomplete keys and whose
+``vals`` item provides a list of keypaths leading to incomplete values. If ``total=False`` (see
+below), the function will return after logging the values-needed report.
 
-If ``total`` is ``True``, an exception will be raised if any Jinja2 variables/expressions cannot be
-rendered. Otherwise, such variables/expressions will be passed through unchanged in the output.
+If ``total=True``, an exception will be raised if any Jinja2 content cannot be rendered. Otherwise,
+such content will be passed through unchanged in the output, unless ``values_needed=True``, in which
+case the function will return.
+
+In ``dry_run`` mode, output is written to ``stderr``.
 
 Recognized file extensions are: {extensions}
 

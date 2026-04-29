@@ -49,7 +49,7 @@ def _replace(atline: str) -> str:
     while re.search(r"\@\[.*?\]", atline):
         # Set maxsplits to 1 so only first @[ is captured.
         before_atparse = atline.split("@[", 1)[0]
-        within_atparse = atline.split("@[")[1].split("]")[0]
+        within_atparse = atline.split("@[")[1].split("]", maxsplit=1)[0]
         # Set maxsplits to 1 so only first ] is captured, which should be the bracket closing @[.
         after_atparse = atline.split("@[", 1)[1].split("]", 1)[1]
         atline = "".join([before_atparse, "{{ ", within_atparse, " }}", after_atparse])
