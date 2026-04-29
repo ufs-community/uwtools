@@ -208,10 +208,16 @@ class UWYAMLConvert(UWYAMLTaggedStr):
     TaggedValT = bool | datetime | dict | float | int | list | timedelta
 
     def __repr__(self) -> str:
-        return "%s %s" % (self.tag, self.converted)
+        try:
+            return "%s %s" % (self.tag, self.converted)
+        except yaml.constructor.ConstructorError:
+            return self.tagged_string
 
     def __str__(self) -> str:
-        return str(self.converted)
+        try:
+            return str(self.converted)
+        except yaml.constructor.ConstructorError:
+            return self.tagged_string
 
     @property
     def converted(self) -> UWYAMLConvert.TaggedValT:
@@ -225,8 +231,8 @@ class UWYAMLConvert(UWYAMLTaggedStr):
             partial(load_as, bool),  # !bool
             to_datetime,  # !datetime
             partial(load_as, dict),  # !dict
-            float,  # !float
-            int,  # !int
+            partial(load_as, float),  # !float
+            partial(load_as, int),  # !int
             partial(load_as, list),  # !list
             to_timedelta,  # !timedelta
         ]

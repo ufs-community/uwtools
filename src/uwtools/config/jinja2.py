@@ -59,15 +59,8 @@ class J2Template:
         self._template_source = template_source
         self._j2env = Environment(
             loader=FileSystemLoader(
-                searchpath=(
-                    searchpath
-                    if searchpath
-                    else (
-                        self._template_source.parent
-                        if isinstance(self._template_source, Path)
-                        else []
-                    )
-                )
+                searchpath=searchpath
+                or (self._template_source.parent if isinstance(self._template_source, Path) else [])
             ),
             undefined=StrictUndefined,
         )

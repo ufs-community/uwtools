@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 from functools import reduce
+from operator import getitem
 from pathlib import Path
 from tempfile import mkstemp
 from textwrap import indent
@@ -153,16 +154,17 @@ def realize(
     output_data, output_format = _realize_output_setup(
         input_obj, output_file, output_format, key_path
     )
+    if values_needed:
+        incomplete = _realize_values_needed(input_obj)
+    if total and unrendered(str(input_obj)):
+        msg = "Config could not be totally realized"
+        raise UWConfigRealizeError(msg)
+    if values_needed:
+        return incomplete
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
         return {}
-    if values_needed:
-        _realize_values_needed(input_obj)
-        return {}
-    if total and unrendered(str(input_obj)):
-        msg = "Config could not be totally realized"
-        raise UWConfigRealizeError(msg)
     output_class = cast(Config, format_to_config(output_format))
     output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
@@ -325,28 +327,30 @@ def _realize_update(
     return input_obj
 
 
-def _realize_values_needed(input_obj: Config) -> None:
+def _realize_values_needed(config: Config) -> dict[str, list[list]]:
     """
-    Print a report characterizing input values as complete, empty, or template placeholders.
+    Report keypaths of keys and values with incompletely rendered content.
 
-    :param input_obj: The config to update.
+    :param config: The config to inspect.
+    :return: A tuple of lists of keypaths to incomplete keys and values.
     """
-    complete, template = input_obj._characterize_values(  # noqa: SLF001
-        input_obj.data, parent=""
-    )
-    if complete:
-        log.info("Keys that are complete:")
-        for var in complete:
-            log.info(var)
+    dotted = lambda keypath: ".".join(map(str, keypath))
+    some = "%s with unrendered content:"
+    no = "No %s have unrendered content."
+    keys, vals = config.incomplete()
+    if keys:
+        log.info(some % "Keys")
+        for keypath in keys:
+            log.info("  %s" % dotted(keypath))
     else:
-        log.info("No keys are complete.")
-    log.info("")
-    if template:
-        log.info("Keys with unrendered Jinja2 variables/expressions:")
-        for var in template:
-            log.info(var)
+        log.info(no % "keys")
+    if vals:
+        log.info(some % "Values")
+        for keypath in vals:
+            log.info("  %s: %s", dotted(keypath), reduce(getitem, keypath, config))
     else:
-        log.info("No keys have unrendered Jinja2 variables/expressions.")
+        log.info(no % "values")
+    return {"keys": keys, "vals": vals}
 
 
 def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:

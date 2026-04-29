@@ -64,40 +64,32 @@ class ConcreteConfig(Config):
 # Tests on module functions.
 
 
-def test_config_base__characterize_values(config):
-    values = {
-        1: "",
-        2: None,
-        3: "{{ n }}",
-        4: {"a": 42},
-        5: [{"b": 43}],
-        6: "string",
-        7: "{% for n in range(3) %}{{ n }}{% endfor %}",
-        8: ["{{ 1 + 1 }}"],
-        9: [42],
+def test_config_base_incomplete():
+    d = {
+        "{{ a }}": "ok",
+        "b": None,
+        "c": "{{ n }}",
+        "d": {"a": 42},
+        "e": [{"b": 43}],
+        "f": "string",
+        "g": "{% for n in range(3) %}{{ n }}{% endfor %}",
+        "h": ["{{ 1 + 1 }}"],
+        "i": [42],
+        "j": {"c": "{{ n }}"},
     }
-    complete, template = config._characterize_values(values=values, parent="p.")
-    assert complete == [
-        "  p.1",
-        "  p.2",
-        "  p.4",
-        "  p.4.a",
-        "  p.b",
-        "  p.5",
-        "  p.6",
-    ]
-    assert template == [
-        "  p.3: {{ n }}",
-        "  p.7: {% for n in range(3) %}{{ n }}{% endfor %}",
-        "  p.8: ['{{ 1 + 1 }}']",
-    ]
+    c = YAMLConfig(config=d)
+    keys, vals = c.incomplete()
+    assert keys == [["{{ a }}"]]
+    assert vals == [["c"], ["g"], ["h", 0], ["j", "c"]]
 
 
-def test_config_base__characterize_values__tagged_convert(config):
+def test_config_base_incomplete__tagged_convert():
     d = yaml.load("1: !int '{{ foo }}'", uw_yaml_loader())
-    complete, template = config._characterize_values(values=d, parent="p.")
-    assert complete == []
-    assert template == ["  p.1: !int '{{ foo }}'"]
+    c = YAMLConfig(d)
+    keys, vals = c.incomplete()
+    assert keys == []
+    assert vals == [[1]]
+    assert str(c[1]) == repr(c[1]) == "!int '{{ foo }}'"
 
 
 def test_config_base__depth(config):
@@ -266,6 +258,7 @@ i: 2024-10-10 00:19:00
 j: !dict "{ b0: 0, b1: 1, b2: 2,}"
 k: !list "[ a0, a1, a2, ]"
 l: "22"
+m: !int "22.0"
 
 """.strip()
     path = tmp_path / "config.yaml"
@@ -301,6 +294,7 @@ l: "22"
     assert config["j"] == {"b0": 0, "b1": 1, "b2": 2}
     assert config["k"] == ["a0", "a1", "a2"]
     assert config["l"] == "22"
+    assert config["m"] == 22
 
 
 @mark.parametrize("self_as_context", [False, True])

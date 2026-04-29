@@ -150,9 +150,9 @@ def test_cli__add_subparser_rocoto_realize(subparsers):
     assert subparsers.choices[STR.realize]
 
 
-def test_cli__add_subparser_rocoto_validate(subparsers):
-    cli._add_subparser_rocoto_validate(subparsers)
-    assert subparsers.choices[STR.validate]
+def test_cli__add_subparser_rocoto_validate_xml(subparsers):
+    cli._add_subparser_rocoto_validate_xml(subparsers)
+    assert subparsers.choices[STR.validatexml]
 
 
 def test_cli__add_subparser_template(subparsers):
@@ -379,10 +379,14 @@ def test_cli__dispatch_config_realize(args_config_realize, utc):
     )
 
 
-def test_cli__dispatch_config_realize_fail(args_config_realize, logged):
+@mark.parametrize("values_needed_requested", [True, False])
+def test_cli__dispatch_config_realize_fail(args_config_realize, caplog, values_needed_requested):
+    args_config_realize[STR.valsneeded] = values_needed_requested
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
-    assert logged("Config could not be realized")
+    assert "Config could not be realized." in caplog.text
+    present = f"Try with {cli._switch(STR.valsneeded)} for details." in caplog.text
+    assert not present if values_needed_requested else present
 
 
 def test_cli__dispatch_config_validate_config_obj():
@@ -458,7 +462,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     cli._dispatch_fs_report(report=report)
     expected = """
     {
-      "not-ready": [
+      "notready": [
         "/missing"
       ],
       "ready": [
@@ -473,7 +477,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
-        (STR.validate, "_dispatch_rocoto_validate"),
+        (STR.validatexml, "_dispatch_rocoto_validate_xml"),
     ],
 )
 def test_cli__dispatch_rocoto(params):
@@ -503,37 +507,37 @@ def test_cli_dispatch_rocoto_iterate(utc):
 
 
 def test_cli__dispatch_rocoto_realize():
-    args = {STR.cfgfile: 1, STR.outfile: 2}
+    args = {STR.cfgfile: 1, STR.outfile: 2, STR.keypath: None}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    _realize.assert_called_once_with(config=1, output_file=2)
+    _realize.assert_called_once_with(config=1, output_file=2, key_path=None)
 
 
 def test_cli__dispatch_rocoto_realize_no_optional():
-    args = {STR.cfgfile: None, STR.outfile: None}
+    args: dict = {STR.cfgfile: None, STR.outfile: None, STR.keypath: None}
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
-    func.assert_called_once_with(config=None, output_file=None)
+    func.assert_called_once_with(config=None, output_file=None, key_path=None)
 
 
 def test_cli__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
-    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
-        cli._dispatch_rocoto_validate(args)
-    _validate.assert_called_once_with(xml_file=1)
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
+        cli._dispatch_rocoto_validate_xml(args)
+    _validate_xml_file.assert_called_once_with(xml_file=1)
 
 
 def test_cli__dispatch_rocoto_validate_xml_invalid():
     args = {STR.infile: 1, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
-        assert cli._dispatch_rocoto_validate(args) is False
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file", return_value=False):
+        assert cli._dispatch_rocoto_validate_xml(args) is False
 
 
 def test_cli__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
-    with patch.object(uwtools.api.rocoto, "_validate") as validate:
-        cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(xml_file=None)
+    with patch.object(uwtools.api.rocoto, "_validate_xml_file") as _validate_xml_file:
+        cli._dispatch_rocoto_validate_xml(args)
+    _validate_xml_file.assert_called_once_with(xml_file=None)
 
 
 @mark.parametrize(

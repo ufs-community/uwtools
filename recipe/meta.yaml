@@ -16,15 +16,15 @@ requirements:
     - python {{ pymin }}
     - setuptools
   run:
-    - f90nml >=1.4,<1.5
+    - f90nml >=1.4,<1.6
     - iotaa 1.6.*
     - jinja2 >=3.1,<3.2
-    - jsonschema >=4.17,<4.26
+    - jsonschema >=4.17,<4.27
     - lxml >=5.2,<6.1
     - python >={{ pymin }},<3.15
     - python-dateutil >=2.9,<2.10
     - pyyaml >=6.0,<6.1
-    - requests >=2.32,<2.33
+    - requests >=2.32,<2.34
 test:
   requires:
     - docformatter 1.7.*
@@ -33,14 +33,15 @@ test:
     - make 4.4.*
     - mypy 1.19.*
     - pytest 9.0.*
-    - pytest-cov 7.0.*
+    - pytest-cov 7.1.*
+    - pytest-randomly 3.15.*
     - pytest-xdist 3.8.*
     - python {{ pymin }}
-    - ruff 0.14.*
+    - ruff 0.15.*
     - types-PyYAML
     - types-jsonschema
     - types-python-dateutil
     - types-requests
     - types-setuptools
 about:
-  license: LGPL
+  license: APACHE

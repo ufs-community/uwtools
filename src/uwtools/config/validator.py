@@ -172,7 +172,7 @@ def validate_external(
     if config_data is None:
         config = YAMLConfig(config_path).dereference().data
     elif isinstance(config_data, YAMLConfig):
-        config = config_data.data
+        config = config_data.dereference().data
     else:
         config = config_data
     if not str(schema_file).startswith(str(resource_path())):
@@ -195,7 +195,7 @@ def _registry() -> Registry:
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
     def retrieve(uri: str) -> Resource:
-        name = uri.split(":")[-1]
+        name = uri.rsplit(":", maxsplit=1)[-1]
         path = resource_path(f"jsonschema/{name}.jsonschema")
         text = json.loads(path.read_text())
         return Resource(contents=text, specification=DRAFT202012)  # type: ignore[call-arg]
@@ -211,7 +211,7 @@ def _resolver(schema: dict) -> RefResolver:
     """
 
     def retrieve(uri: str) -> dict:
-        name = uri.split(":")[-1]
+        name = uri.rsplit(":", maxsplit=1)[-1]
         path = resource_path("jsonschema") / f"{name}.jsonschema"
         text = path.read_text()
         return cast(dict, json.loads(text))
