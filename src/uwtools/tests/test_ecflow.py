@@ -410,6 +410,38 @@ class TestECFlowDef:
             instance_with_scheduler._create_ecf_script(config, task)
         mock_js.assert_called_once()
 
+    def test__create_ecf_script__with_executable(self, instance):
+        """Test that executable field works when jobcmd is not provided."""
+        task = Task("hello")
+        suite = Suite("test")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {
+            "execution": {"executable": "/path/to/program"},
+            "manual": "Test task",
+        }
+        instance._create_ecf_script(config, task)
+        assert len(instance._scripts) == 1
+        script_content = list(instance._scripts.values())[0]
+        assert "/path/to/program" in script_content
+
+    def test__create_ecf_script__with_both_jobcmd_and_executable(self, instance):
+        """Test that jobcmd takes precedence when both jobcmd and executable are provided."""
+        task = Task("hello")
+        suite = Suite("test")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {
+            "execution": {"jobcmd": "echo hello from jobcmd", "executable": "/path/to/program"},
+            "manual": "Test task",
+        }
+        instance._create_ecf_script(config, task)
+        assert len(instance._scripts) == 1
+        script_content = list(instance._scripts.values())[0]
+        # jobcmd should be used, not executable
+        assert "echo hello from jobcmd" in script_content
+        assert "/path/to/program" not in script_content
+
     # write_ecf_scripts tests
 
     def test_write_ecf_scripts__no_scripts(self, instance, logged, tmp_path):
@@ -632,6 +664,43 @@ class TestECFlowDef:
         # Write ecf script.
         ecf.write_ecf_scripts(tmp_path)
         assert (tmp_path / "test" / "run.ecf").is_file()
+
+    def test_integration__full_workflow_with_executable(self, tmp_path):
+        """
+        Test creating a complete workflow using executable field instead of jobcmd.
+        """
+        config = {
+            "ecflow": {
+                "suite_test": {
+                    "vars": {"SUITE_VAR": "value"},
+                    "family_prep": {
+                        "task_setup": {
+                            "trigger": "1==1",
+                        }
+                    },
+                    "task_run": {
+                        "trigger": "/test/prep/setup == complete",
+                        "script": {
+                            "execution": {"executable": "/path/to/my/program"},
+                        },
+                    },
+                }
+            }
+        }
+        ecf = _ECFlowDef(config=config)
+        # Verify suite definition was created.
+        suite_def = str(ecf)
+        assert "suite test" in suite_def
+        assert "family prep" in suite_def
+        assert "task setup" in suite_def
+        assert "task run" in suite_def
+        # Write suite definition.
+        ecf.write_suite_definition(tmp_path)
+        assert (tmp_path / "suite.def").is_file()
+        # Write ecf script.
+        ecf.write_ecf_scripts(tmp_path)
+        script_content = (tmp_path / "test" / "run.ecf").read_text()
+        assert "/path/to/my/program" in script_content
 
     def test_integration__with_expand(self):
         """

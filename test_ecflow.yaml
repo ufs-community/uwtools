@@ -7,14 +7,14 @@ ecflow:
         task_inner:
           script:
             execution:
-              jobcmd: "echo hello from inner family"
+              executable: "echo hello from inner family"
       task_setup:
         trigger: "1==1"
         script:
           execution:
-            jobcmd: "echo hello from ecFlow"
+            executable: "echo hello from ecFlow"
     task_run:
       trigger: "/test/prep/setup == complete"
       script:
         execution:
-          jobcmd: "echo running main task"
+          executable: "echo running main task"
