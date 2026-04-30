@@ -74,9 +74,15 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
   * ``scripts/forecast/prep/get_obs.ecf`` (for ``task_get_obs`` under ``family_prep``)
   * ``scripts/forecast/run_model.ecf`` (for ``task_run_model`` directly under the suite)
 
-  .. note::
+  .. important::
 
-     The ``.ecf`` script name is derived from the portion of the task name after the first underscore. For example, ``task_get_obs`` produces the script ``get_obs.ecf``, and ``task_run_model`` produces ``run_model.ecf``.
+    **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated, the ``<name>`` portion becomes the script filename with a ``.ecf`` extension. See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
+
+     Examples:
+
+     - ``task_get_obs`` → ``get_obs.ecf``
+     - ``task_run_model`` → ``run_model.ecf``
+     - ``task_process_output_files`` → ``process_output_files.ecf``
 
 .. _cli_ecflow_validate_examples:
 
