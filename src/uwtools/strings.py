@@ -217,7 +217,7 @@ class _STR(_ValsMatchKeys):
     url_scheme_http: str = "http"
     url_scheme_https: str = "https"
     validate: str = _
-    validatexml: str = _
+    validate_xml: str = _
     values_file: str = _
     values_format: str = _
     values_needed: str = _

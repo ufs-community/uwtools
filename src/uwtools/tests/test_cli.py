@@ -152,7 +152,7 @@ def test_cli__add_subparser_rocoto_realize(subparsers):
 
 def test_cli__add_subparser_rocoto_validate_xml(subparsers):
     cli._add_subparser_rocoto_validate_xml(subparsers)
-    assert subparsers.choices[STR.validatexml]
+    assert subparsers.choices[STR.validate_xml]
 
 
 def test_cli__add_subparser_template(subparsers):
@@ -479,7 +479,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
-        (STR.validatexml, "_dispatch_rocoto_validate_xml"),
+        (STR.validate_xml, "_dispatch_rocoto_validate_xml"),
     ],
 )
 def test_cli__dispatch_rocoto(params):
