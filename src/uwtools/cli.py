@@ -192,7 +192,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
-    _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
+    _add_arg_values_needed(optional, helpmsg="Report values needed to realize config, then exit")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
     return [
@@ -287,8 +287,10 @@ def _dispatch_config_realize(args: Args) -> bool:
             stdin_ok=True,
         )
     except UWConfigRealizeError:
-        msg = "Config could not be realized. Try with %s for details."
-        log.error(msg, _switch(STR.values_needed))
+        msg = "Config could not be realized."
+        if not args[STR.values_needed]:
+            msg += " Try with %s for details." % _switch(STR.values_needed)
+        log.error(msg)
         return False
     return True
 
@@ -583,6 +585,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_file(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to Rocoto config block")
     return _add_args_verbosity(optional)
 
 
@@ -636,6 +639,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     return uwtools.api.rocoto.realize(
         config=args[STR.config_file],
         output_file=args[STR.output_file],
+        key_path=args[STR.key_path],
         stdin_ok=True,
     )
 
@@ -697,7 +701,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_leadtime(optional)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
-    _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
+    _add_arg_values_needed(optional, helpmsg="Report values needed to render template, then exit")
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)

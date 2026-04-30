@@ -28,7 +28,7 @@ requirements:
     - requests >=2.32,<2.34
 test:
   requires:
-    - docformatter 1.7.*
+    - docformatter 1.7.7
     - jq 1.8.*
     - lxml-stubs
     - make 4.4.*

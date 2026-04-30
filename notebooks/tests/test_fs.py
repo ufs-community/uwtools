@@ -32,10 +32,10 @@ def test_fs_copy(load, tb):
         "{'ready': ['tmp/copy-target/file1-copy.nml',"
         "\n  'tmp/copy-target/data/file2-copy.txt',"
         "\n  'tmp/copy-target/data/file3-copy.csv'],"
-        "\n 'not-ready': []}" in tb.cell_output_text(7)
+        "\n 'notready': []}" in tb.cell_output_text(7)
     )
     assert (
-        "{'ready': [], 'not-ready': ['tmp/copy-target/missing-copy.nml']}"
+        "{'ready': [], 'notready': ['tmp/copy-target/missing-copy.nml']}"
         in tb.cell_output_text(11)
     )
     assert tb.cell_output_text(13) == tb.cell_output_text(9)
@@ -44,7 +44,7 @@ def test_fs_copy(load, tb):
         "{'ready': ['tmp/copy-keys-target/file1-copy.nml',"
         "\n  'tmp/copy-keys-target/data/file2-copy.txt',"
         "\n  'tmp/copy-keys-target/data/file3-copy.csv'],"
-        "\n 'not-ready': []}" in tb.cell_output_text(17)
+        "\n 'notready': []}" in tb.cell_output_text(17)
     )
 
 
@@ -72,10 +72,10 @@ def test_fs_link(load, tb):
         "{'ready': ['tmp/link-target/file1-link.nml',"
         "\n  'tmp/link-target/file2-link.txt',"
         "\n  'tmp/link-target/data/file3-link.csv'],"
-        "\n 'not-ready': []}"
+        "\n 'notready': []}"
     ) in tb.cell_output_text(31)
     assert (
-        "{'ready': [], 'not-ready': ['tmp/link-target/missing-link.nml']}"
+        "{'ready': [], 'notready': ['tmp/link-target/missing-link.nml']}"
         in tb.cell_output_text(35)
     )
     assert tb.cell_output_text(37) == tb.cell_output_text(33)
@@ -84,7 +84,7 @@ def test_fs_link(load, tb):
         "{'ready': ['tmp/link-keys-target/file1-link.nml',"
         "\n  'tmp/link-keys-target/file2-link.txt',"
         "\n  'tmp/link-keys-target/data/file3-link.csv'],"
-        "\n 'not-ready': []}"
+        "\n 'notready': []}"
     ) in tb.cell_output_text(41)
 
 
@@ -101,12 +101,12 @@ def test_fs_makedirs(load, tb):
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(53) == config_str
     assert (
-        "{'ready': ['tmp/dir-target/foo', 'tmp/dir-target/bar/baz'], 'not-ready': []}"
+        "{'ready': ['tmp/dir-target/foo', 'tmp/dir-target/bar/baz'], 'notready': []}"
         in tb.cell_output_text(55)
     )
     assert tb.cell_output_text(59) == config_keys_str
     assert (
-        "{'ready': ['tmp/dir-keys-target/foo/bar', 'tmp/dir-keys-target/baz'],\n 'not-ready': []}"
+        "{'ready': ['tmp/dir-keys-target/foo/bar', 'tmp/dir-keys-target/baz'],\n 'notready': []}"
     ) in tb.cell_output_text(61)
 
 
@@ -119,7 +119,7 @@ def test_fs_glob_copy_basic(load, report, tb):
     assert tb.cell_output_text(73) == load(base / "glob-copy.yaml")
     r = report(74)
     assert {*r["ready"]} == set(map(str, expected))
-    assert not r["not-ready"]
+    assert not r["notready"]
 
 
 def test_fs_glob_copy_recursive(load, report, tb):
@@ -131,7 +131,7 @@ def test_fs_glob_copy_recursive(load, report, tb):
     assert tb.cell_output_text(78) == load(base / "glob-copy-recursive.yaml")
     r = report(79)
     assert {*r["ready"]} == set(map(str, expected))
-    assert not r["not-ready"]
+    assert not r["notready"]
 
 
 def test_fs_glob_copy_ignore_dirs(load, report, tb):
@@ -140,7 +140,7 @@ def test_fs_glob_copy_ignore_dirs(load, report, tb):
     assert tb.cell_output_text(83) == load(base / "glob-copy-ignore-dirs.yaml")
     r = report(84)
     assert not r["ready"]
-    assert not r["not-ready"]
+    assert not r["notready"]
 
 
 def test_fs_glob_link_recursive(load, report, tb):
@@ -152,7 +152,7 @@ def test_fs_glob_link_recursive(load, report, tb):
     assert tb.cell_output_text(86) == load(base / "glob-link-recursive.yaml")
     r = report(87)
     assert {*r["ready"]} == set(map(str, expected))
-    assert not r["not-ready"]
+    assert not r["notready"]
 
 
 def test_fs_glob_link_link_dirs(load, report, tb):
@@ -164,7 +164,7 @@ def test_fs_glob_link_link_dirs(load, report, tb):
     assert tb.cell_output_text(90) == load(base / "glob-link-dirs.yaml")
     r = report(91)
     assert {*r["ready"]} == set(map(str, expected))
-    assert not r["not-ready"]
+    assert not r["notready"]
 
 
 def test_fs_copy_http(load, report, tb):
@@ -175,7 +175,7 @@ def test_fs_copy_http(load, report, tb):
     assert tb.cell_output_text(94) == load(base / "copy-http.yaml")
     r = report(95)
     assert r["ready"] == [str(expected)]
-    assert not r["not-ready"]
+    assert not r["notready"]
 
 
 # Helpers

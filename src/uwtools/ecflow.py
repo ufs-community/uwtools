@@ -144,7 +144,7 @@ class _ECFlowDef:
             }
             self._add_node(**args)
 
-    def _add_node(  # noqa: C901,PLR0912
+    def _add_node(  # noqa: PLR0912
         self,
         config: dict,
         node: Node,

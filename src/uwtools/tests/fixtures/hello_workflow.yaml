@@ -1,7 +1,8 @@
+scheduler: slurm
 workflow:
   attrs:
     realtime: false
-    scheduler: slurm
+    scheduler: '{{ scheduler }}'
   cycledef:
     - attrs:
         activation_offset: -06:00
