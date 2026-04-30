@@ -34,7 +34,7 @@ Optional arguments:
   --leadtime LEADTIME
       The leadtime as hours[:minutes[:seconds]]
   --values-needed
-      Print report of values needed to realize config
+      Report values needed to realize config, then exit
   --total
       Require rendering of all Jinja2 variables/expressions
   --dry-run

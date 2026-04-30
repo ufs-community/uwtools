@@ -160,13 +160,15 @@ Converts the tagged node to a Python ``int`` value. For example, given ``input.y
    f1: 3
    f2: 11
    f3: !int "{{ (f1 + f2) * 10 }}"
+   f4: !int '{{ leadtime.total_seconds() / 3600 }}'
 
 .. code-block:: text
 
-   $ uw config realize -i input.yaml --output-format yaml
+   $ uw config realize -i input.yaml --leadtime 6
    f1: 3
    f2: 11
-   f2: 140
+   f3: 140
+   f4: 6
 
 ``!list``
 ^^^^^^^^^
