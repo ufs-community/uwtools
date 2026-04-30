@@ -52,7 +52,8 @@ def validate(
     """
     Validate an ecFlow config against its schema.
 
-    :param config: YAML input file or ``YAMLConfig`` object to validate (``None`` => read ``stdin``).
+    :param config: YAML input file or ``YAMLConfig`` object to validate (``None`` => read
+    ``stdin``).
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the config conforms to the schema.
     :raises: ``UWConfigError`` if validation fails.
