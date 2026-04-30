@@ -61,7 +61,7 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdin-stdout.out
      :language: text
 
-* To also generate ecf scripts in a ``scripts/`` directory:
+* To also generate ``.ecf`` scripts in a ``scripts/`` directory:
 
   .. literalinclude:: ecflow/realize-exec-scripts.cmd
      :language: text
@@ -69,14 +69,14 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-scripts.out
      :language: text
 
-  The ``--scripts-path`` option specifies the directory under which ecf scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite defintion. For the example above, the generated scripts would be:
+  The ``--scripts-path`` option specifies the directory under which ``.ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite defintion. For the example above, the generated scripts would be:
 
   * ``scripts/forecast/prep/get_obs.ecf`` (for ``task_get_obs`` under ``family_prep``)
   * ``scripts/forecast/run_model.ecf`` (for ``task_run_model`` directly under the suite)
 
   .. note::
 
-     The ecf script name is derived from the portion of the task name after the first underscore. For example, ``task_get_obs`` produces the script ``get_obs.ecf``, and ``task_run_model`` produces ``run_model.ecf``.
+     The ``.ecf`` script name is derived from the portion of the task name after the first underscore. For example, ``task_get_obs`` produces the script ``get_obs.ecf``, and ``task_run_model`` produces ``run_model.ecf``.
 
 .. _cli_ecflow_validate_examples:
 
