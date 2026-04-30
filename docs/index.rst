@@ -100,7 +100,7 @@ ecFlow Support
 | **CLI**: ``uw ecflow -h``
 | **API**: ``import uwtools.api.ecflow``
 
-This tool provides a configurable interface to the :ecflow:`ecFlow<>` workflow manager. The ``uwtools`` package defines a structured YAML language for describing ecFlow suites, families, and tasks that is translated into an ecFlow suite definition file (``suite.def``) and, optionally, ecf scripts. Paired with the uw config tool suite, the YAML is easy to parameterize and manage without ever writing ecFlow-specific syntax by hand.
+This tool provides a configurable interface to the :ecflow:`ecFlow<>` workflow manager. The ``uwtools`` package defines a structured YAML language for describing ecFlow suites, families, and tasks that is translated into an ecFlow suite definition file (``suite.def``) and, optionally, ecf scripts. Paired with the ``uw config`` tool suite, the YAML is easy to parameterize and manage without ever writing ecFlow-specific syntax by hand.
 
 Realize Action
 """"""""""""""

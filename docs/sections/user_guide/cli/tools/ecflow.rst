@@ -19,7 +19,7 @@ The ``uw`` mode for realizing and validating ecFlow suite definitions.
 ``realize``
 -----------
 
-In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw ecflow``, that means transforming a structured UW YAML file into an :ecflow:`ecFlow<>` suite definition file (``suite.def``) and, optionally, a set of ecf scripts. The structured YAML language required by UW closely follows the concepts defined by ecFlow.
+In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw ecflow``, that means transforming a structured UW YAML file into an :ecflow:`ecFlow<>` suite definition file (``suite.def``) and, optionally, a set of ``.ecf`` scripts. The structured YAML language required by UW closely follows the concepts defined by ecFlow.
 
 See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
 

@@ -5,7 +5,7 @@ ecFlow Workflows
 
 :ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (``suite.def``) to describe the workflow, and ecf scripts (``*.ecf``) to carry out individual tasks.
 
-The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translates it into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ecf scripts.
+The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translated into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ecf scripts.
 
 Top-Level Structure
 -------------------
