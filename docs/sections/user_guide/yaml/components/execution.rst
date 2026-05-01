@@ -160,8 +160,7 @@ The name of or path to the component's executable.
 incantation
 """""""""""
 
-The set of commands used to run the driver as a component in a larger workflow. Depending on the
-requirements of a particular application building a workflow, users may choose to use bash expressions, Rocoto strings, or ecFlow expressions as values.
+The set of commands used to run the driver as a component in a larger workflow. Depending on the requirements of a particular application building a workflow, users may choose to use bash expressions, Rocoto strings, or ecFlow expressions as values.
 
 mpiargs:
 """"""""
