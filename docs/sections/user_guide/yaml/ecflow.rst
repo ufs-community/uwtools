@@ -60,14 +60,14 @@ Suites, families, and tasks are defined as nested YAML blocks. Keys are prefixed
            script:
              execution:
                executable: uw fs get_obs.yaml
-               jobcmd: /path/to/run_get_obs.sh
+               incantation: /path/to/run_get_obs.sh
              manual: Retrieve observation data
        task_run_model:
          trigger: /forecast/prep/get_obs == complete
          script:
            execution:
              executable: model.exe
-             jobcmd: /path/to/run_model.sh
+             incantation: /path/to/run_model.sh
            manual: Run the forecast model
 
 This example defines a suite ``forecast`` containing a family ``prep`` with task ``get_obs``, and a top-level task ``run_model``.
@@ -207,14 +207,14 @@ Task Script Block
 
 Tasks are required to have a ``script:`` block that defines the ``.ecf`` script to generate. The ``script:`` block has the following keys:
 
-``execution:`` -- **Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` documentation for full details. The ``executable:`` key is required by the schema. The ``jobcmd:`` key specifies the command to run inside the ``.ecf`` script body, and is required by the code.
+``execution:`` -- **Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` documentation for full details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``.ecf`` script body, and is required by the code.
 
 .. code-block:: yaml
 
    script:
      execution:
        executable: /path/to/run_model.sh
-       jobcmd: /path/to/run_model.sh
+       incantation: /path/to/run_model.sh
 
 ``manual:`` -- Optional. A brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
 
@@ -238,7 +238,7 @@ Tasks are required to have a ``script:`` block that defines the ``.ecf`` script 
          - tail.h
        execution:
          executable: /path/to/run_model.sh
-         jobcmd: /path/to/run_model.sh
+         incantation: /path/to/run_model.sh
          batchargs:
            walltime: "01:00:00"
        manual: Run the forecast model
@@ -260,7 +260,7 @@ The ``expand:`` key under a node block defines the variable(s) and their lists o
          script:
            execution:
              executable: /path/to/run.sh
-             jobcmd: /path/to/run.sh
+             incantation: /path/to/run.sh
            manual: Run ensemble member {{ ec.MEM }}
 
 This expands to three tasks named ``member_01``, ``member_02``, and ``member_03``.

@@ -253,9 +253,9 @@ class _ECFlowDef:
         )
         execution = config[STR.execution]
         try:
-            cmd = execution[EC.jobcmd]
+            cmd = execution[EC.incantation]
         except KeyError as e:
-            msg = "The execution block for %s must include 'jobcmd'" % task.name()
+            msg = "The execution block for %s must include 'incantation'" % task.name()
             raise UWConfigError(msg) from e
         es = self._ecflowscript(
             execution=[cmd],

@@ -15,6 +15,7 @@ Example block:
        debug: True
        exclusive: True
        export: false
+       incantation: source wflow_env.sh && /path/to/run_sfc_climo_gen.py
        jobname: my-job
        memory: 4GB
        nodes: 1
@@ -155,6 +156,12 @@ executable:
 """""""""""
 
 The name of or path to the component's executable.
+
+incantation
+"""""""""""
+
+The set of commands used to run the driver as a component in a larger workflow. Depending on the
+requirements of a particular application building a workflow, users may choose to use bash expressions, Rocoto strings, or ecFlow expressions as values.
 
 mpiargs:
 """"""""

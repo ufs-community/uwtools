@@ -6,12 +6,12 @@ ecflow:
         script:
           execution:
             executable: uw fs copy -c get_obs.yaml
-            jobcmd: /path/to/get_obs.sh
+            incantation: /path/to/get_obs.sh
           manual: Retrieve observation data
     task_run_model:
       trigger: /forecast/prep/get_obs == complete
       script:
         execution:
           executable: model.exe
-          jobcmd: /path/to/run_model.sh
+          incantation: /path/to/run_model.sh
         manual: Run the forecast model
