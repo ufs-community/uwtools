@@ -622,7 +622,10 @@ class TestECFlowDef:
                         "task_setup": {
                             "trigger": "1==1",
                             "script": {
-                                "execution": {"executable": "prep.exe", "incantation": "echo running"},
+                                "execution": {
+                                    "executable": "prep.exe",
+                                    "incantation": "echo running",
+                                },
                             },
                         },
                     },
