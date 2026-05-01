@@ -77,4 +77,4 @@ Examples
   .. literalinclude:: ecflow/validate-good.out
      :language: text
 
-  In this example, the configuration uses ``jobcmd`` (an ecFlow-specific execution format) instead of the standard UW ``executable`` format, resulting in schema validation errors. The configuration will still realize successfully, but validation flags these format inconsistencies.
+  The ecFlow execution configuration accepts either ``executable`` (the standard UW format) or ``jobcmd`` (an ecFlow-specific format). Both are valid and will pass schema validation. When both are provided, ``jobcmd`` takes precedence.
