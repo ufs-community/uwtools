@@ -8,6 +8,7 @@ API
    chgres_cube
    config
    driver
+   ecflow
    enkf
    esg_grid
    execute

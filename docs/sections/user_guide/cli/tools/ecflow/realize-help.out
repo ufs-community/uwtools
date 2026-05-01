@@ -1,0 +1,21 @@
+usage: uw ecflow realize [-h] [--version] [--config-file PATH]
+                         [--output-path PATH] [--scripts-path PATH]
+                         [--quiet] [--verbose]
+
+Realize an ecFlow suite definition
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --output-path PATH, -o PATH
+      Path to output directory for suite definition (default: write to stdout)
+  --scripts-path PATH
+      Path to output directory for ecf scripts (default: no scripts generated)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

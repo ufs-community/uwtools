@@ -1,0 +1,5 @@
+[2025-01-02T03:04:05]     INFO Validating config against internal schema: ecflow
+[2025-01-02T03:04:05]    ERROR 1 schema-validation error found in ecFlow config
+[2025-01-02T03:04:05]    ERROR Error at top level:
+[2025-01-02T03:04:05]    ERROR   'ecflow' is a required property
+[2025-01-02T03:04:05]    ERROR YAML validation errors

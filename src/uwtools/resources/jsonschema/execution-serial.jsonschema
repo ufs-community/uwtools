@@ -13,7 +13,7 @@
     "executable": {
       "type": "string"
     },
-    "jobcmd": {
+    "incantation": {
       "type": "string"
     }
   },
