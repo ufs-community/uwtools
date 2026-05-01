@@ -901,11 +901,19 @@ def test_schema_ecflow_refs_taskcontainer():
 
 def test_schema_ecflow_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
-    # Basic spec:
-    config = {"script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}}
-    assert not errors(config)
-    assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
-    assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
+    # Basic spec with executable:
+    config_with_executable = {"script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}}
+    assert not errors(config_with_executable)
+    # Basic spec with jobcmd:
+    config_with_jobcmd = {"script": {"execution": {"jobcmd": "echo hi"}, "post_includes": ["tail.h"]}}
+    assert not errors(config_with_jobcmd)
+    # Both executable and jobcmd together:
+    config_with_both = {"script": {"execution": {"executable": "/bin/echo", "jobcmd": "echo hi"}, "post_includes": ["tail.h"]}}
+    assert not errors(config_with_both)
+    # Execution is required:
+    assert "'execution' is a required property" in errors(with_del(config_with_executable, "script", "execution"))
+    # Additional properties not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config_with_executable, 2, "script", "extra"))
 
 
 # enkf
@@ -1024,24 +1032,33 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
 
 
 def test_schema_parallel_execution():
-    config = {"executable": "fv3"}
+    config_with_executable = {"executable": "fv3"}
+    config_with_jobcmd = {"jobcmd": "echo hello"}
+    config_with_both = {"executable": "fv3", "jobcmd": "echo hello"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
     errors = schema_validator("execution-parallel")
-    # Basic correctness:
-    assert not errors(config)
+    # Basic correctness with executable:
+    assert not errors(config_with_executable)
+    # Basic correctness with jobcmd:
+    assert not errors(config_with_jobcmd)
+    # Both executable and jobcmd together is ok:
+    assert not errors(config_with_both)
+    # Neither executable nor jobcmd is not ok:
+    assert errors({})
     # batchargs may optionally be specified:
-    assert not errors({**config, **batchargs})
+    assert not errors({**config_with_executable, **batchargs})
+    assert not errors({**config_with_jobcmd, **batchargs})
     # mpiargs may be optionally specified:
-    assert not errors({**config, **mpiargs})
+    assert not errors({**config_with_executable, **mpiargs})
     # threads may optionally be specified:
-    assert not errors({**config, **threads})
+    assert not errors({**config_with_executable, **threads})
     # All properties are ok:
-    assert not errors({**config, **batchargs, **mpiargs, **threads})
+    assert not errors({**config_with_executable, **batchargs, **mpiargs, **threads})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors(
-        {**config, **mpiargs, **threads, "foo": "bar"}
+        {**config_with_executable, **mpiargs, **threads, "foo": "bar"}
     )
 
 
@@ -1076,17 +1093,26 @@ def test_schema_parallel_execution_threads():
 
 
 def test_schema_execution_serial():
-    config = {"executable": "fv3"}
+    config_with_executable = {"executable": "fv3"}
+    config_with_jobcmd = {"jobcmd": "echo hello"}
+    config_with_both = {"executable": "fv3", "jobcmd": "echo hello"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     errors = schema_validator("execution-serial")
-    # Basic correctness:
-    assert not errors(config)
+    # Basic correctness with executable:
+    assert not errors(config_with_executable)
+    # Basic correctness with jobcmd:
+    assert not errors(config_with_jobcmd)
+    # Both executable and jobcmd together is ok:
+    assert not errors(config_with_both)
+    # Neither executable nor jobcmd is not ok:
+    assert errors({})
     # batchargs may optionally be specified:
-    assert not errors({**config, **batchargs})
+    assert not errors({**config_with_executable, **batchargs})
+    assert not errors({**config_with_jobcmd, **batchargs})
     # All properties are ok:
-    assert not errors({**config, **batchargs})
+    assert not errors({**config_with_executable, **batchargs})
     # Additional properties are not allowed:
-    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**config_with_executable, "foo": "bar"})
 
 
 # files-to-stage

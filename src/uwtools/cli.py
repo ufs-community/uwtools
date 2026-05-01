@@ -1,8 +1,9 @@
+
+from __future__ import annotations
+
 """
 Modal CLI.
 """
-
-from __future__ import annotations
 
 import datetime as dt
 import json
@@ -21,6 +22,7 @@ from typing import Any, NoReturn
 import uwtools.api
 import uwtools.api.config
 import uwtools.api.driver
+import uwtools.api.ecflow
 import uwtools.api.execute
 import uwtools.api.fs
 import uwtools.api.rocoto
@@ -32,6 +34,7 @@ from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
 
+
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
@@ -41,69 +44,142 @@ ActionChecks = list[Callable[[Args], Args]]
 ModeChecks = dict[str, ActionChecks]
 Checks = dict[str, ModeChecks]
 
-
 def main() -> None:
     """
     Main entry point.
     """
-
-    # Silence logging initially, then process the command-line arguments by parsing them. Run all
-    # defined checks for the appropriate [sub]mode. Reconfigure logging after quiet/verbose choices
-    # are known, then dispatch to the [sub]mode handler.
-
     try:
-        setup_logging(quiet=True)
+        # setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
         args[STR.action] = args.get(STR.action, args[STR.mode])
         for check in checks[args[STR.mode]].get(args[STR.action], []):
             check(args)
-        setup_logging(quiet=args.get(STR.quiet, False), verbose=args.get(STR.verbose, False))
+        # setup_logging(quiet=args.get(STR.quiet, False), verbose=args.get(STR.verbose, False))
     except UWError as e:
         _abort(str(e))
     try:
-        log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        # log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         tools: dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
             STR.execute: _dispatch_execute,
             STR.fs: _dispatch_fs,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
+            STR.ecflow: _dispatch_ecflow,
         }
         drivers: dict[str, Callable[..., bool]] = {
-            x: partial(_dispatch_to_driver, x)
-            for x in [
-                STR.cdeps,
-                STR.chgres_cube,
-                STR.enkf,
-                STR.esg_grid,
-                STR.filter_topo,
-                STR.fv3,
-                STR.global_equiv_resol,
-                STR.gsi,
-                STR.ioda,
-                STR.jedi,
-                STR.make_hgrid,
-                STR.make_solo_mosaic,
-                STR.mpas,
-                STR.mpas_init,
-                STR.mpassit,
-                STR.orog,
-                STR.orog_gsl,
-                STR.schism,
-                STR.sfc_climo_gen,
-                STR.shave,
-                STR.ungrib,
-                STR.upp,
-                STR.upp_assets,
-                STR.ww3,
-            ]
+            STR.cdeps: partial(_dispatch_to_driver, STR.cdeps),
+            STR.chgres_cube: partial(_dispatch_to_driver, STR.chgres_cube),
+            STR.enkf: partial(_dispatch_to_driver, STR.enkf),
+            STR.esg_grid: partial(_dispatch_to_driver, STR.esg_grid),
+            STR.filter_topo: partial(_dispatch_to_driver, STR.filter_topo),
+            STR.fv3: partial(_dispatch_to_driver, STR.fv3),
+            STR.global_equiv_resol: partial(_dispatch_to_driver, STR.global_equiv_resol),
+            STR.gsi: partial(_dispatch_to_driver, STR.gsi),
+            STR.ioda: partial(_dispatch_to_driver, STR.ioda),
+            STR.jedi: partial(_dispatch_to_driver, STR.jedi),
+            STR.make_hgrid: partial(_dispatch_to_driver, STR.make_hgrid),
+            STR.make_solo_mosaic: partial(_dispatch_to_driver, STR.make_solo_mosaic),
+            STR.mpas: partial(_dispatch_to_driver, STR.mpas),
+            STR.mpas_init: partial(_dispatch_to_driver, STR.mpas_init),
+            STR.mpassit: partial(_dispatch_to_driver, STR.mpassit),
+            STR.orog: partial(_dispatch_to_driver, STR.orog),
+            STR.orog_gsl: partial(_dispatch_to_driver, STR.orog_gsl),
+            STR.schism: partial(_dispatch_to_driver, STR.schism),
+            STR.sfc_climo_gen: partial(_dispatch_to_driver, STR.sfc_climo_gen),
+            STR.shave: partial(_dispatch_to_driver, STR.shave),
+            STR.ungrib: partial(_dispatch_to_driver, STR.ungrib),
+            STR.upp: partial(_dispatch_to_driver, STR.upp),
+            STR.upp_assets: partial(_dispatch_to_driver, STR.upp_assets),
+            STR.ww3: partial(_dispatch_to_driver, STR.ww3),
         }
         modes = {**tools, **drivers}
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         for line in str(e).split("\n"):
-            log.error(line)
+            # log.error(line)
+            print(line)
         sys.exit(1)
+# --- workaround for logging.py shadowing stdlib logging ---
+import sys
+import builtins
+
+# Remove 'uwtools.logging' from sys.modules if present
+if 'uwtools.logging' in sys.modules:
+    del sys.modules['uwtools.logging']
+
+# Force import of stdlib logging before anything else
+import logging
+builtins.std_logging = logging
+
+# Dynamically import log from uwtools.logging
+log = getattr(__import__('uwtools.logging', fromlist=['log']), 'log')
+
+
+def _add_subparser_ecflow_realize(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: ecflow realize.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.realize, "Realize an ecFlow suite definition")
+    optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
+    _add_arg_output_dir(optional)
+    return _add_args_verbosity(optional)
+
+
+def _add_subparser_ecflow(subparsers: Subparsers) -> dict[str, ActionChecks]:
+    """
+    Add subparser for mode: ecflow.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.ecflow, "Handle ecflow suite definitions")
+    _basic_setup(parser)
+    ecflow_subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
+    return {
+        STR.realize: _add_subparser_ecflow_realize(ecflow_subparsers),
+        STR.validate: _add_subparser_ecflow_validate(ecflow_subparsers),
+    }
+
+
+def _add_subparser_ecflow_validate(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: ecflow validate.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.validate, "Validate an ecFlow YAML config")
+    optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
+    return _add_args_verbosity(optional)
+
+
+def _dispatch_ecflow_realize(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow realize action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ecflow.realize(
+        config=args[STR.config_file],
+        output_path=args.get(STR.output_dir),
+        scripts_path=args.get(STR.output_dir),
+        stdin_ok=True,
+    )
+
+
+def _dispatch_ecflow_validate(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow validate action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ecflow.validate(
+        config=args[STR.config_file],
+        stdin_ok=True,
+    )
 
 
 # Mode config
@@ -217,21 +293,6 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     return _add_args_verbosity(optional)
 
 
-def _dispatch_config(args: Args) -> bool:
-    """
-    Define dispatch logic for config mode.
-
-    :param args: Parsed command-line args.
-    """
-    actions = {
-        STR.compare: _dispatch_config_compare,
-        STR.compose: _dispatch_config_compose,
-        STR.realize: _dispatch_config_realize,
-        STR.validate: _dispatch_config_validate,
-    }
-    return actions[args[STR.action]](args)
-
-
 def _dispatch_config_compare(args: Args) -> bool:
     """
     Define dispatch logic for config compare action.
@@ -254,14 +315,53 @@ def _dispatch_config_compose(args: Args) -> bool:
     """
     uwtools.api.config.compose(
         configs=args[STR.configs],
-        output_file=args[STR.output_file],
         realize=args[STR.realize],
+        output_file=args[STR.output_file],
         input_format=args[STR.input_format],
         output_format=args[STR.output_format],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
     )
     return True
+
+
+def _dispatch_ecflow(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow mode.
+
+    :param args: Parsed command-line args.
+    """
+    actions = {
+        STR.realize: _dispatch_ecflow_realize,
+        STR.validate: _dispatch_ecflow_validate,
+    }
+    return actions[args[STR.action]](args)
+
+
+def _dispatch_ecflow_realize(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow realize action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ecflow.realize(
+        config=args[STR.config_file],
+        output_path=args.get(STR.output_dir),
+        scripts_path=args.get(STR.output_dir),
+        stdin_ok=True,
+    )
+
+
+def _dispatch_ecflow_validate(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow validate action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ecflow.validate(
+        config=args[STR.config_file],
+        stdin_ok=True,
+    )
 
 
 def _dispatch_config_realize(args: Args) -> bool:
@@ -306,6 +406,21 @@ def _dispatch_config_validate(args: Args) -> bool:
         config_path=args[STR.input_file],
         stdin_ok=True,
     )
+
+
+def _dispatch_config(args: Args) -> bool:
+    """
+    Define dispatch logic for config mode.
+
+    :param args: Parsed command-line args.
+    """
+    actions = {
+        STR.compare: _dispatch_config_compare,
+        STR.compose: _dispatch_config_compose,
+        STR.realize: _dispatch_config_realize,
+        STR.validate: _dispatch_config_validate,
+    }
+    return actions[args[STR.action]](args)
 
 
 # Mode execute
@@ -534,6 +649,11 @@ def _dispatch_fs_makedirs(args: Args) -> bool:
 
 
 def _dispatch_fs_report(report: dict[str, list[str]] | None) -> bool:
+    """
+    Handle reporting for fs operations.
+
+    :param report: Report of fs operation results (ready/not-ready files).
+    """
     if report:
         print(json.dumps(report, indent=2, sort_keys=True))
     return True
@@ -548,13 +668,13 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML documents")
+    parser = _add_subparser(subparsers, STR.rocoto, "Handle Rocoto workflows")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
+    rocoto_subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
-        STR.iterate: _add_subparser_rocoto_iterate(subparsers),
-        STR.realize: _add_subparser_rocoto_realize(subparsers),
-        STR.validatexml: _add_subparser_rocoto_validate_xml(subparsers),
+        STR.iterate: _add_subparser_rocoto_iterate(rocoto_subparsers),
+        STR.realize: _add_subparser_rocoto_realize(rocoto_subparsers),
+        STR.validatexml: _add_subparser_rocoto_validate_xml(rocoto_subparsers),
     }
 
 
@@ -566,7 +686,7 @@ def _add_subparser_rocoto_iterate(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.iterate, "Iterate a Rocoto workflow")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
+    _add_arg_cycle(required, required=True)
     _add_arg_database(required)
     _add_arg_task(required)
     _add_arg_workflow(required)
@@ -938,6 +1058,23 @@ def _add_arg_output_format(group: Group, choices: list[str], required: bool = Fa
         help=f"Output format (default: {FORMAT.yaml})",
         required=required,
         type=str,
+    )
+
+
+def _add_arg_output_dir(group: Group, required: bool = False) -> None:
+    """
+    Add --output-dir argument.
+    
+    :param group: The argparse group to add the argument to.
+    :param required: Whether the argument is required.
+    """
+    group.add_argument(
+        _switch(STR.output_dir),
+        "-o",
+        help="Path to output directory",
+        metavar="PATH",
+        required=required,
+        type=Path,
     )
 
 
@@ -1352,6 +1489,8 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         STR.fs: partial(_add_subparser_fs, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
         STR.template: partial(_add_subparser_template, subparsers),
+        STR.ecflow: partial(_add_subparser_ecflow, subparsers),
+        STR.ecflow: partial(_add_subparser_ecflow, subparsers),
     }
     no_components: list[str] = []
     assets = {
@@ -1459,3 +1598,7 @@ def _version() -> str:
     """
     info = json.loads(resource_path("info.json").read_text())
     return "version %s build %s" % (info["version"], info["buildnum"])
+
+
+if __name__ == "__main__":
+    main()

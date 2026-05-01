@@ -1,0 +1,18 @@
+usage: cli.py ecflow realize [-h] [--version] [--config-file PATH]
+                             [--output-dir PATH] [--quiet] [--verbose]
+
+Realize an ecFlow suite definition
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --output-dir PATH, -o PATH
+      Path to output directory
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

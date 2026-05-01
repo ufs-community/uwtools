@@ -1,5 +1,17 @@
 {
   "additionalProperties": false,
+  "anyOf": [
+    {
+      "required": [
+        "executable"
+      ]
+    },
+    {
+      "required": [
+        "jobcmd"
+      ]
+    }
+  ],
   "properties": {
     "batchargs": {
       "$ref": "urn:uwtools:batchargs"
@@ -33,8 +45,5 @@
       "type": "integer"
     }
   },
-  "required": [
-    "executable"
-  ],
   "type": "object"
 }
