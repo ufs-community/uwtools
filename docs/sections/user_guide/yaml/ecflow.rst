@@ -72,6 +72,15 @@ Suites, families, and tasks are defined as nested YAML blocks. Keys are prefixed
 
 This example defines a suite ``forecast`` containing a family ``prep`` with task ``get_obs``, and a top-level task ``run_model``.
 
+.. important::
+   **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated (via ``--scripts-path``), only the ``<name>`` portion becomes the script filename.
+
+   Examples:
+
+   - ``task_get_obs`` → ``get_obs.ecf``
+   - ``task_run_model`` → ``run_model.ecf``
+   - ``task_process_output_files`` → ``process_output_files.ecf``
+
 Node Attributes
 ^^^^^^^^^^^^^^^
 
