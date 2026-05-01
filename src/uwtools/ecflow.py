@@ -25,7 +25,6 @@ from ecflow import (  # type: ignore[import-untyped]
     Task,
 )
 
-from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
@@ -45,12 +44,13 @@ class _ECFlowDef:
     Generate an ecFlow definition file from a YAML config.
     """
 
-    def __init__(self, config: dict | Config | Path | None = None) -> None:
+    def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         from uwtools.logging import log
         self._scripts: dict[Path, str] = {}
         log.debug("Initializing _ECFlowDef with config: %s", config)
-        cfgobj = config if isinstance(config, Config) else YAMLConfig(config)
-        cfgobj = cfgobj.dereference()
+        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        cfgobj.dereference()
+        validate(cfgobj)
         self._config = cfgobj.data[EC.ecflow]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
@@ -156,7 +156,7 @@ class _ECFlowDef:
             }
             self._add_node(**args)
 
-    def _add_node(  # noqa: C901,PLR0912
+    def _add_node(  # noqa: PLR0912
         self,
         config: dict,
         node: Node,
@@ -265,6 +265,9 @@ class _ECFlowDef:
         )
         execution = config[STR.execution]
         cmd = execution.get(EC.jobcmd) or execution.get(STR.executable)
+        if not cmd:
+            msg = "The execution block for %s must include 'jobcmd' or 'executable'" % task.name()
+            raise UWConfigError(msg)
         es = self._ecflowscript(
             execution=[cmd],
             manual=config.get(EC.manual, f"Script to run {task.name()}"),
@@ -328,7 +331,7 @@ class _ECFlowDef:
         pre_includes = pre_includes or []
         post_includes = post_includes or []
         directives = scheduler.directives if scheduler else ""
-        initcmds = scheduler.initcmds if scheduler else []
+        initcmds = scheduler.initcmds if scheduler else [""]
         rs = dedent(template).format(
             directives="\n".join(directives),
             envcmds="\n".join(envcmds or []),

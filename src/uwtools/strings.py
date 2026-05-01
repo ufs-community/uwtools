@@ -171,7 +171,7 @@ class _STR(_ValsMatchKeys):
     mpiargs: str = _
     mpicmd: str = _
     namelist: str = _
-    notready: str = "not-ready"
+    notready: str = _
     orog: str = _
     orog_gsl: str = _
     output_dir: str = _
@@ -219,7 +219,7 @@ class _STR(_ValsMatchKeys):
     url_scheme_http: str = "http"
     url_scheme_https: str = "https"
     validate: str = _
-    validatexml: str = "validate-xml"
+    validatexml: str = _
     values_file: str = _
     values_format: str = _
     values_needed: str = _

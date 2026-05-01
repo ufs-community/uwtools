@@ -18,29 +18,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
-
-
-def realize(
-    config: _YAMLConfig | Path | str | None,
-    output_file: Path | str | None = None,
-    stdin_ok: bool = False,
-) -> bool:
-    """
-    Realize the Rocoto workflow defined in the given YAML as XML.
-
-    If no input file is specified, ``stdin`` is read. A ``YAMLConfig`` object may also be provided
-    as input. If no output file is specified, ``stdout`` is written to. Both the input config and
-    output Rocoto XML will be validated against appropriate schemas.
-
-    :param config: YAML input file or ``YAMLConfig`` object (``None`` => read ``stdin``).
-    :param output_file: XML output file path (``None`` => write to ``stdout``).
-    :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True``.
-    """
-    _realize(
-        config=_ensure_data_source(_str2path(config), stdin_ok), output_file=_str2path(output_file)
-    )
-    return True
+    from uwtools.config.support import YAMLKey
 
 
 def iterate(
@@ -66,6 +44,33 @@ def iterate(
         task=task,
         workflow=_ensure_data_source(_str2path(workflow), stdin_ok=False),
     )
+
+
+def realize(
+    config: _YAMLConfig | Path | str | None,
+    output_file: Path | str | None = None,
+    key_path: list[YAMLKey] | None = None,
+    stdin_ok: bool = False,
+) -> bool:
+    """
+    Realize the Rocoto workflow defined in the given YAML as XML.
+
+    If no input file is specified, ``stdin`` is read. A ``YAMLConfig`` object may also be provided
+    as input. If no output file is specified, ``stdout`` is written to. Both the input config and
+    output Rocoto XML will be validated against appropriate schemas.
+
+    :param config: YAML input file or ``YAMLConfig`` object (``None`` => read ``stdin``).
+    :param output_file: XML output file path (``None`` => write to ``stdout``).
+    :param key_path: Path of keys to the Rocoto config block.
+    :param stdin_ok: OK to read from ``stdin``?
+    :return: ``True``.
+    """
+    _realize(
+        config=_ensure_data_source(_str2path(config), stdin_ok),
+        output_file=_str2path(output_file),
+        key_path=key_path,
+    )
+    return True
 
 
 def validate_xml(

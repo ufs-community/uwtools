@@ -12,16 +12,12 @@ from typing import Any, cast
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import (
-    INCLUDE_TAG,
-    UWYAMLConvert,
-    depth,
-    dict_to_yaml_str,
-    log_and_error,
-)
+from uwtools.config.support import INCLUDE_TAG, depth, dict_to_yaml_str, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
+
+NIL = object()
 
 
 class Config(ABC, UserDict):
@@ -55,45 +51,6 @@ class Config(ABC, UserDict):
         return self._dict_to_str(self.data)
 
     # Private methods
-
-    def _characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
-        """
-        Characterize values as complete or as template placeholders.
-
-        :param values: The dictionary to examine.
-        :param parent: Parent key.
-        :return: Lists of of complete and template-placeholder values.
-        """
-
-        def jinja2val(val: Any) -> str | None:
-            try:
-                s = str(val)
-            except ValueError:
-                assert isinstance(val, UWYAMLConvert)
-                s = val.tagged_string
-            return s if "{{" in s or "{%" in s else None
-
-        complete: list[str] = []
-        template: list[str] = []
-        for key, val in values.items():
-            if isinstance(val, dict):
-                complete.append(f"{INDENT}{parent}{key}")
-                c, t = self._characterize_values(val, f"{parent}{key}.")
-                complete, template = complete + c, template + t
-            elif isinstance(val, list):
-                for item in val:
-                    if isinstance(item, dict):
-                        c, t = self._characterize_values(item, parent)
-                        complete, template = complete + c, template + t
-                        complete.append(f"{INDENT}{parent}{key}")
-                    elif val := jinja2val(val):
-                        template.append(f"{INDENT}{parent}{key}: {val}")
-                        break
-            elif val := jinja2val(val):
-                template.append(f"{INDENT}{parent}{key}: {val}")
-            else:
-                complete.append(f"{INDENT}{parent}{key}")
-        return complete, template
 
     @staticmethod
     def _compare_config_get_lines(d: dict) -> list[str]:
@@ -267,6 +224,36 @@ class Config(ABC, UserDict):
             self.data = new
         logstate("final")
         return self
+
+    def incomplete(
+        self,
+        data: Any = NIL,
+        keypath: list | None = None,
+        keys: list | None = None,
+        vals: list | None = None,
+    ) -> tuple[list[list], list[list]]:
+        """
+        Return lists of keys leading to keys and values with unrendered content.
+
+        :param data: The data object to inspect for unrendered keys/values.
+        :param keypath: A list of keys/indexes leading to the current data object.
+        :param keys: A list of keypaths leading to keys with unrendered content.
+        :param vals: A list of keypaths leading to values with unrendered content.
+        """
+        unrendered = lambda x: "{{" in str(x) or "{%" in str(x)
+        data = self.data if data is NIL else data
+        keypath, keys, vals = [[] if x is None else x for x in (keypath, keys, vals)]
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if unrendered(k):
+                    keys.append([*keypath, k])
+                self.incomplete(v, [*keypath, k], keys, vals)
+        elif isinstance(data, list):
+            for i, v in enumerate(data):
+                self.incomplete(v, [*keypath, i], keys, vals)
+        elif unrendered(data):
+            vals.append(keypath)
+        return keys, vals
 
     @abstractmethod
     def dump(self, path: Path | None) -> None:

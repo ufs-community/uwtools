@@ -11,7 +11,7 @@
 [2025-01-02T03:04:05]  WARNING File copies: ✔ Local src/foo -> dst/copy-report/foo
 [2025-01-02T03:04:05]  WARNING File copies: ✖ Local src/qux -> dst/copy-report/qux
 {
-  "not-ready": [
+  "notready": [
     "dst/copy-report/qux"
   ],
   "ready": [

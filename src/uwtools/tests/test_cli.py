@@ -397,10 +397,14 @@ def test_cli__dispatch_config_realize(args_config_realize, utc):
     )
 
 
-def test_cli__dispatch_config_realize_fail(args_config_realize, logged):
+@mark.parametrize("values_needed_requested", [True, False])
+def test_cli__dispatch_config_realize_fail(args_config_realize, caplog, values_needed_requested):
+    args_config_realize[STR.values_needed] = values_needed_requested
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
-    assert logged("Config could not be realized")
+    assert "Config could not be realized." in caplog.text
+    present = f"Try with {cli._switch(STR.values_needed)} for details." in caplog.text
+    assert not present if values_needed_requested else present
 
 
 def test_cli__dispatch_config_validate_config_obj():
@@ -476,7 +480,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     cli._dispatch_fs_report(report=report)
     expected = """
     {
-      "not-ready": [
+      "notready": [
         "/missing"
       ],
       "ready": [
@@ -586,17 +590,17 @@ def test_cli_dispatch_rocoto_iterate(utc):
 
 
 def test_cli__dispatch_rocoto_realize():
-    args = {STR.config_file: 1, STR.output_file: 2}
+    args = {STR.config_file: 1, STR.output_file: 2, STR.key_path: None}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    _realize.assert_called_once_with(config=1, output_file=2)
+    _realize.assert_called_once_with(config=1, output_file=2, key_path=None)
 
 
 def test_cli__dispatch_rocoto_realize_no_optional():
-    args = {STR.config_file: None, STR.output_file: None}
+    args = {STR.config_file: None, STR.output_file: None, STR.key_path: None}
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
-    func.assert_called_once_with(config=None, output_file=None)
+    func.assert_called_once_with(config=None, output_file=None, key_path=None)
 
 
 def test_cli__dispatch_rocoto_validate_xml():
