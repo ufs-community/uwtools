@@ -28,7 +28,6 @@ from ecflow import (  # type: ignore[import-untyped]
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import EC, STR
 from uwtools.utils.file import writable
@@ -38,6 +37,9 @@ if TYPE_CHECKING:
 
     from ecflow import NodeContainer
 
+# Import log after ensuring stdlib logging is properly set up
+from uwtools.logging import log
+
 
 class _ECFlowDef:
     """
@@ -45,7 +47,6 @@ class _ECFlowDef:
     """
 
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
-        from uwtools.logging import log
         self._scripts: dict[Path, str] = {}
         log.debug("Initializing _ECFlowDef with config: %s", config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
@@ -62,7 +63,6 @@ class _ECFlowDef:
         return self._d.__str__()
 
     def write_ecf_scripts(self, path: Path | str) -> None:
-        from uwtools.logging import log
         """
         The ecf scripts for this workflow.
 
@@ -81,7 +81,6 @@ class _ECFlowDef:
             outpath.write_text(content)
 
     def write_suite_definition(self, path: Path | None) -> None:
-        from uwtools.logging import log
         """
         The suite definition artifact.
 

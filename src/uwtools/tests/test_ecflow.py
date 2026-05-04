@@ -693,6 +693,9 @@ class TestECFlowDef:
                     "family_prep": {
                         "task_setup": {
                             "trigger": "1==1",
+                            "script": {
+                                "execution": {"executable": "/bin/true"},
+                            },
                         }
                     },
                     "task_run": {

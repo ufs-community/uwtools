@@ -902,18 +902,31 @@ def test_schema_ecflow_refs_taskcontainer():
 def test_schema_ecflow_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec with executable:
-    config_with_executable = {"script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}}
+    config_with_executable = {
+        "script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}
+    }
     assert not errors(config_with_executable)
     # Basic spec with jobcmd:
-    config_with_jobcmd = {"script": {"execution": {"jobcmd": "echo hi"}, "post_includes": ["tail.h"]}}
+    config_with_jobcmd = {
+        "script": {"execution": {"jobcmd": "echo hi"}, "post_includes": ["tail.h"]}
+    }
     assert not errors(config_with_jobcmd)
     # Both executable and jobcmd together:
-    config_with_both = {"script": {"execution": {"executable": "/bin/echo", "jobcmd": "echo hi"}, "post_includes": ["tail.h"]}}
+    config_with_both = {
+        "script": {
+            "execution": {"executable": "/bin/echo", "jobcmd": "echo hi"},
+            "post_includes": ["tail.h"],
+        }
+    }
     assert not errors(config_with_both)
     # Execution is required:
-    assert "'execution' is a required property" in errors(with_del(config_with_executable, "script", "execution"))
+    assert "'execution' is a required property" in errors(
+        with_del(config_with_executable, "script", "execution")
+    )
     # Additional properties not allowed:
-    assert "Additional properties are not allowed" in errors(with_set(config_with_executable, 2, "script", "extra"))
+    assert "Additional properties are not allowed" in errors(
+        with_set(config_with_executable, 2, "script", "extra")
+    )
 
 
 # enkf
@@ -1112,7 +1125,9 @@ def test_schema_execution_serial():
     # All properties are ok:
     assert not errors({**config_with_executable, **batchargs})
     # Additional properties are not allowed:
-    assert "Additional properties are not allowed" in errors({**config_with_executable, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors(
+        {**config_with_executable, "foo": "bar"}
+    )
 
 
 # files-to-stage

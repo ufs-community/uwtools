@@ -1,12 +1,10 @@
 
 from __future__ import annotations
 
-"""
-Modal CLI.
-"""
-
+import builtins
 import datetime as dt
 import json
+import logging
 import re
 import sys
 from argparse import ArgumentParser as Parser
@@ -30,9 +28,24 @@ import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
-from uwtools.logging import log, setup_logging
+from uwtools.logging import setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
+
+"""
+Modal CLI.
+"""
+
+# --- workaround for logging.py shadowing stdlib logging ---
+# Remove "uwtools.logging" from sys.modules if present
+if "uwtools.logging" in sys.modules:  # pragma: no cover
+    del sys.modules["uwtools.logging"]
+
+# Force import of stdlib logging before anything else
+builtins.std_logging = logging  # type: ignore[attr-defined]
+
+# Dynamically import log from uwtools.logging
+log = __import__("uwtools.logging", fromlist=["log"]).log
 
 
 FORMATS = FORMAT.extensions()
@@ -49,16 +62,16 @@ def main() -> None:
     Main entry point.
     """
     try:
-        # setup_logging(quiet=True)
+        setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
         args[STR.action] = args.get(STR.action, args[STR.mode])
         for check in checks[args[STR.mode]].get(args[STR.action], []):
             check(args)
-        # setup_logging(quiet=args.get(STR.quiet, False), verbose=args.get(STR.verbose, False))
+        setup_logging(quiet=args.get(STR.quiet, False), verbose=args.get(STR.verbose, False))
     except UWError as e:
         _abort(str(e))
     try:
-        # log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         tools: dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
             STR.execute: _dispatch_execute,
@@ -97,23 +110,8 @@ def main() -> None:
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         for line in str(e).split("\n"):
-            # log.error(line)
-            print(line)
+            log.error(line)  # noqa: TRY400
         sys.exit(1)
-# --- workaround for logging.py shadowing stdlib logging ---
-import sys
-import builtins
-
-# Remove 'uwtools.logging' from sys.modules if present
-if 'uwtools.logging' in sys.modules:
-    del sys.modules['uwtools.logging']
-
-# Force import of stdlib logging before anything else
-import logging
-builtins.std_logging = logging
-
-# Dynamically import log from uwtools.logging
-log = getattr(__import__('uwtools.logging', fromlist=['log']), 'log')
 
 
 def _add_subparser_ecflow_realize(subparsers: Subparsers) -> ActionChecks:
@@ -338,32 +336,6 @@ def _dispatch_ecflow(args: Args) -> bool:
     return actions[args[STR.action]](args)
 
 
-def _dispatch_ecflow_realize(args: Args) -> bool:
-    """
-    Define dispatch logic for ecflow realize action.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.ecflow.realize(
-        config=args[STR.config_file],
-        output_path=args.get(STR.output_dir),
-        scripts_path=args.get(STR.output_dir),
-        stdin_ok=True,
-    )
-
-
-def _dispatch_ecflow_validate(args: Args) -> bool:
-    """
-    Define dispatch logic for ecflow validate action.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.ecflow.validate(
-        config=args[STR.config_file],
-        stdin_ok=True,
-    )
-
-
 def _dispatch_config_realize(args: Args) -> bool:
     """
     Define dispatch logic for config realize action.
@@ -390,7 +362,7 @@ def _dispatch_config_realize(args: Args) -> bool:
         msg = "Config could not be realized."
         if not args[STR.values_needed]:
             msg += " Try with %s for details." % _switch(STR.values_needed)
-        log.error(msg)
+        log.error(msg)  # noqa: TRY400
         return False
     return True
 
@@ -865,7 +837,7 @@ def _dispatch_template_render(args: Args) -> bool:
     except UWTemplateRenderError:
         if args[STR.values_needed]:
             return True
-        log.error("Template could not be rendered")
+        log.error("Template could not be rendered")  # noqa: TRY400
         return False
     return True
 
@@ -1064,7 +1036,7 @@ def _add_arg_output_format(group: Group, choices: list[str], required: bool = Fa
 def _add_arg_output_dir(group: Group, required: bool = False) -> None:
     """
     Add --output-dir argument.
-    
+
     :param group: The argparse group to add the argument to.
     :param required: Whether the argument is required.
     """
@@ -1600,5 +1572,5 @@ def _version() -> str:
     return "version %s build %s" % (info["version"], info["buildnum"])
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
