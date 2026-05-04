@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import builtins
@@ -56,6 +55,7 @@ Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
 ModeChecks = dict[str, ActionChecks]
 Checks = dict[str, ModeChecks]
+
 
 def main() -> None:
     """

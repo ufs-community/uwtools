@@ -411,7 +411,9 @@ class TestECFlowDef:
         mock_js.assert_called_once()
 
     def test__create_ecf_script__without_incantation_or_executable(self, instance):
-        """Test that an error is raised when neither incantation nor executable is provided."""
+        """
+        Test that an error is raised when neither incantation nor executable is provided.
+        """
         task = Task("hello")
         suite = Suite("test")
         suite.add(task)
@@ -425,7 +427,9 @@ class TestECFlowDef:
             instance._create_ecf_script(config, task)
 
     def test__create_ecf_script__with_executable(self, instance):
-        """Test that executable field works when incantation is not provided."""
+        """
+        Test that executable field works when incantation is not provided.
+        """
         task = Task("hello")
         suite = Suite("test")
         suite.add(task)
