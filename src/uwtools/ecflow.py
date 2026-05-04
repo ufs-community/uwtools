@@ -227,9 +227,13 @@ class _ECFlowDef:
                 repeat = RepeatDay
             case EC.int:
                 repeat = RepeatInteger
+
+        # The schema-checked config blocks for each of these will be the variable and either the
+        # start/end/[step] keys or the list key. Since they must be passed as positional arguments,
+        # ensure their order is either (argument, start, end, [step]) or (argument, list).
         args = [
             config.get(k)
-            for k in ("variable", "start", "end", "step", "values")
+            for k in (EC.variable, EC.start, EC.end, EC.step, EC.list)
             if config.get(k) is not None
         ]
         node.add_repeat(repeat(*args))

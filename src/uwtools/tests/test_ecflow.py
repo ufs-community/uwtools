@@ -218,7 +218,7 @@ class TestECFlowDef:
 
     def test__add_repeat__enumerated(self, instance):
         node = Task("t1")
-        config = {"variable": "MEMBER", "values": ["m01", "m02", "m03"]}
+        config = {"variable": "MEMBER", "list": ["m01", "m02", "m03"]}
         instance._add_repeat(config.copy(), "enumerated", node)
         assert 'repeat enumerated MEMBER "m01" "m02" "m03"' in node.get_repeat().__str__()
 
@@ -228,7 +228,7 @@ class TestECFlowDef:
         Test that datelist and string repeat types also use RepeatEnumerated.
         """
         node = Task("t1")
-        config = {"variable": "VAR", "values": ["a", "b"]}
+        config = {"variable": "VAR", "list": ["a", "b"]}
         instance._add_repeat(config.copy(), repeat_type, node)
         assert 'VAR "a" "b"' in node.get_repeat().__str__()
 
