@@ -34,6 +34,7 @@ def realize(
     :param output_path: Suite Definition output path (``None`` => write to ``stdout``).
     :param scripts_path: ecf scripts top-level path (``None`` => no scripts are generated).
     :param stdin_ok: OK to read from ``stdin``?
+    :raises: ``UWConfigError`` if validation fails.
     :return: ``True``.
     """
     _realize(
@@ -51,8 +52,8 @@ def validate(
     """
     Validate an ecFlow config against its schema.
 
-    :param config: An ecFlow config as a ``dict``, a ``YAMLConfig``, a path to a YAML file
-        (``Path`` or ``str``), or ``None`` (read ``stdin``).
+    :param config: YAML input file or ``YAMLConfig`` object to validate (``None`` => read
+        ``stdin``).
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the config conforms to the schema.
     :raises: ``UWConfigError`` if validation fails.

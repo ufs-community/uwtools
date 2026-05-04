@@ -94,6 +94,28 @@ There is a video demonstration of the use of the ``uw fs`` tool (formerly ``uw f
 
    <iframe src="https://www.youtube.com/embed/b2HXOlt-Ulw" allowfullscreen frameborder="0" height="315" width="560"></iframe>
 
+ecFlow Support
+^^^^^^^^^^^^^^
+
+| **CLI**: ``uw ecflow -h``
+| **API**: ``import uwtools.api.ecflow``
+
+This tool provides a configurable interface to the :ecflow:`ecFlow<>` workflow manager. The ``uwtools`` package defines a structured YAML language for describing ecFlow suites, families, and tasks that is translated into an ecFlow suite definition file (``suite.def``) and, optionally, ecf scripts. Paired with the ``uw config`` tool suite, the YAML is easy to parameterize and manage without ever writing ecFlow-specific syntax by hand.
+
+Realize Action
+""""""""""""""
+
+Provide a structured UW YAML file describing your ecFlow workflow and get back a ready-to-use suite definition and ecf scripts.
+
+| :any:`CLI documentation with examples<cli_ecflow_realize_examples>`
+
+Validate Action
+"""""""""""""""
+
+Validate a UW YAML ecFlow config against its schema to catch structural errors before running the workflow.
+
+| :any:`CLI documentation with examples<cli_ecflow_validate_examples>`
+
 Rocoto Support
 ^^^^^^^^^^^^^^
 
