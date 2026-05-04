@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime as dt
 import json
-import logging
 import re
 import sys
 from argparse import ArgumentParser as Parser
@@ -97,7 +96,7 @@ def main() -> None:
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         for line in str(e).split("\n"):
-            log.error(line)  # noqa: TRY400
+            log.error(line)
         sys.exit(1)
 
 
@@ -317,12 +316,11 @@ def _dispatch_ecflow(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     try:
-        import uwtools.api.ecflow  # noqa: F401
+        import uwtools.api.ecflow  # noqa: F401, PLC0415
     except ImportError as e:
         if "ecflow" in str(e):
-            raise UWError(
-                "ecflow is not installed. Install it with: pip install ecflow"
-            ) from e
+            msg = "ecflow is not installed. Install it with: pip install ecflow"
+            raise UWError(msg) from e
         raise
     actions = {
         STR.realize: _dispatch_ecflow_realize,
@@ -357,7 +355,7 @@ def _dispatch_config_realize(args: Args) -> bool:
         msg = "Config could not be realized."
         if not args[STR.values_needed]:
             msg += " Try with %s for details." % _switch(STR.values_needed)
-        log.error(msg)  # noqa: TRY400
+        log.error(msg)
         return False
     return True
 
@@ -832,7 +830,7 @@ def _dispatch_template_render(args: Args) -> bool:
     except UWTemplateRenderError:
         if args[STR.values_needed]:
             return True
-        log.error("Template could not be rendered")  # noqa: TRY400
+        log.error("Template could not be rendered")
         return False
     return True
 
