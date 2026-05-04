@@ -384,7 +384,7 @@ class TestECFlowDef:
         suite.add(task)
         instance._d.add(suite)
         config = {
-            "execution": {"jobcmd": "echo hello"},
+            "execution": {"incantation": "echo hello"},
             "manual": "Test task",
         }
         instance._create_ecf_script(config, task)
@@ -398,7 +398,7 @@ class TestECFlowDef:
         suite.add(task)
         instance_with_scheduler._d.add(suite)
         config = {
-            "execution": {"jobcmd": "echo hello"},
+            "execution": {"incantation": "echo hello"},
             "account": "myaccount",
             "rundir": "/path/to/run",
         }
@@ -423,12 +423,6 @@ class TestECFlowDef:
 
         with raises(UWConfigError, match="must include 'jobcmd' or 'executable'"):
             instance._create_ecf_script(config, task)
-
-    def test__create_ecf_script__with_executable(self, instance):
-        """Test that executable field works when jobcmd is not provided."""
-        task = Task("hello")
-        suite = Suite("test")
-        suite.add(task)
         instance._d.add(suite)
         config = {
             "execution": {"executable": "/path/to/program"},
@@ -580,7 +574,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script FIRST so loop must continue to process trigger afterward.
-        script_config = {"execution": {"jobcmd": "echo hi"}}
+        script_config = {"execution": {"incantation": "echo hi"}}
         config = {"script": script_config, "trigger": "1==1"}
         instance._add_node(config, task, suite)
         # Verify script was created and loop continued to process trigger.
@@ -594,7 +588,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script LAST so loop exits after processing it.
-        script_config = {"execution": {"jobcmd": "echo hi"}}
+        script_config = {"execution": {"incantation": "echo hi"}}
         config = {"trigger": "1==1", "script": script_config}
         instance._add_node(config, task, suite)
         # Verify both trigger and script were processed.
@@ -655,14 +649,17 @@ class TestECFlowDef:
                         "task_setup": {
                             "trigger": "1==1",
                             "script": {
-                                "execution": {"executable": "prep.exe", "jobcmd": "echo running"},
+                                "execution": {
+                                    "executable": "prep.exe",
+                                    "incantation": "echo running",
+                                },
                             },
                         },
                     },
                     "task_run": {
                         "trigger": "/test/prep/setup == complete",
                         "script": {
-                            "execution": {"executable": "run.exe", "jobcmd": "echo running"},
+                            "execution": {"executable": "run.exe", "incantation": "echo running"},
                         },
                     },
                 }
@@ -731,7 +728,7 @@ class TestECFlowDef:
                 "suite_ensemble": {
                     "tasks_member_{{ ec.MEM }}": {
                         "expand": {"MEM": ["01", "02", "03"]},
-                        "script": {"execution": {"executable": "run me", "jobcmd": "hello"}},
+                        "script": {"execution": {"executable": "run me", "incantation": "hello"}},
                     }
                 }
             }

@@ -1,20 +1,17 @@
 ecflow:
-  suite_workflow:
-    vars:
-      WORKFLOW_VAR: "production"
-    family_data_prep:
-      task_fetch:
+  suite_forecast:
+    family_prep:
+      task_get_obs:
         trigger: "1==1"
         script:
           execution:
-            jobcmd: "echo Fetching data..."
-      task_process:
-        trigger: "/workflow/data_prep/fetch == complete"
-        script:
-          execution:
-            jobcmd: "echo Processing data..."
+            executable: uw fs copy -c get_obs.yaml
+            incantation: /path/to/get_obs.sh
+          manual: Retrieve observation data
     task_run_model:
-      trigger: "/workflow/data_prep == complete"
+      trigger: /forecast/prep/get_obs == complete
       script:
         execution:
-          jobcmd: "echo Running model..."
+          executable: model.exe
+          incantation: /path/to/run_model.sh
+        manual: Run the forecast model

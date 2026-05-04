@@ -1,7 +1,7 @@
-usage: cli.py ecflow validate [-h] [--version] [--config-file PATH] [--quiet]
-                              [--verbose]
+usage: uw ecflow validate [-h] [--version] [--config-file PATH] [--quiet]
+                          [--verbose]
 
-Validate an ecFlow YAML config
+Validate an ecFlow config
 
 Optional arguments:
   -h, --help

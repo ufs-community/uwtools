@@ -1,6 +1,6 @@
-usage: cli.py ecflow [-h] [--version] ACTION ...
+usage: uw ecflow [-h] [--version] ACTION ...
 
-Handle ecflow suite definitions
+Realize and validate ecFlow suite definitions
 
 Optional arguments:
   -h, --help
@@ -13,4 +13,4 @@ Positional arguments:
     realize
       Realize an ecFlow suite definition
     validate
-      Validate an ecFlow YAML config
+      Validate an ecFlow config
