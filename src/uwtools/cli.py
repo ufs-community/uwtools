@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import builtins
 import datetime as dt
 import json
 import logging
@@ -19,7 +18,6 @@ from typing import Any, NoReturn
 import uwtools.api
 import uwtools.api.config
 import uwtools.api.driver
-import uwtools.api.ecflow
 import uwtools.api.execute
 import uwtools.api.fs
 import uwtools.api.rocoto
@@ -27,24 +25,13 @@ import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
-from uwtools.logging import setup_logging
+from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
 
 """
 Modal CLI.
 """
-
-# --- workaround for logging.py shadowing stdlib logging ---
-# Remove "uwtools.logging" from sys.modules if present
-if "uwtools.logging" in sys.modules:  # pragma: no cover
-    del sys.modules["uwtools.logging"]
-
-# Force import of stdlib logging before anything else
-builtins.std_logging = logging  # type: ignore[attr-defined]
-
-# Dynamically import log from uwtools.logging
-log = __import__("uwtools.logging", fromlist=["log"]).log
 
 
 FORMATS = FORMAT.extensions()
@@ -329,6 +316,14 @@ def _dispatch_ecflow(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
+    try:
+        import uwtools.api.ecflow  # noqa: F401
+    except ImportError as e:
+        if "ecflow" in str(e):
+            raise UWError(
+                "ecflow is not installed. Install it with: pip install ecflow"
+            ) from e
+        raise
     actions = {
         STR.realize: _dispatch_ecflow_realize,
         STR.validate: _dispatch_ecflow_validate,
@@ -1461,7 +1456,6 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
         STR.fs: partial(_add_subparser_fs, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
         STR.template: partial(_add_subparser_template, subparsers),
-        STR.ecflow: partial(_add_subparser_ecflow, subparsers),
         STR.ecflow: partial(_add_subparser_ecflow, subparsers),
     }
     no_components: list[str] = []
