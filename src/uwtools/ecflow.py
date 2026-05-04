@@ -34,8 +34,6 @@ from uwtools.strings import EC, STR
 from uwtools.utils.file import writable
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Sequence
-
     from ecflow import NodeContainer
 
 
@@ -161,10 +159,7 @@ class _ECFlowDef:
         """
         parent.add(node)
 
-        def add_items(method: Callable[..., object], cfg: Iterable[Sequence[object]]) -> None:
-            for args in cfg:
-                method(*args)
-
+        add_items = lambda method, cfg: [method(*args) for args in cfg]
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
             match tag:
@@ -223,7 +218,6 @@ class _ECFlowDef:
         """
         match name:
             case EC.date:
-                config["delta"] = config.pop("step", None)
                 repeat = RepeatDate
             case EC.datelist | EC.enumerated | EC.string:
                 repeat = RepeatEnumerated
@@ -233,7 +227,12 @@ class _ECFlowDef:
                 repeat = RepeatDay
             case EC.int:
                 repeat = RepeatInteger
-        node.add_repeat(repeat(**config))
+        args = [
+            config.get(k)
+            for k in ("variable", "start", "end", "step", "values")
+            if config.get(k) is not None
+        ]
+        node.add_repeat(repeat(*args))
 
     def _create_ecf_script(self, config: dict, task: Task) -> None:
         """
@@ -257,7 +256,7 @@ class _ECFlowDef:
         except KeyError as e:
             msg = "The execution block for %s must include 'incantation'" % task.name()
             raise UWConfigError(msg) from e
-        es = self._ecflowscript(
+        script_contents = self._ecflowscript(
             execution=[cmd],
             manual=config.get(EC.manual, f"Script to run {task.name()}"),
             envcmds=execution.get(EC.envcmds, []),
@@ -270,7 +269,7 @@ class _ECFlowDef:
             Path(task.get_abs_node_path().lstrip("/")).parent
             / f"{task.name().split('_', 1)[-1]}.ecf"
         )
-        self._scripts[path] = es
+        self._scripts[path] = script_contents
 
     def _ecflowscript(
         self,
