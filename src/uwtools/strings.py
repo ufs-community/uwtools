@@ -48,7 +48,6 @@ class _EC(_ValsMatchKeys):
     inlimits: str = _
     int: str = _
     incantation: str = _
-    jobcmd: str = _
     labels: str = _
     late: str = _
     limits: str = _

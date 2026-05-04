@@ -263,9 +263,12 @@ class _ECFlowDef:
             else None
         )
         execution = config[STR.execution]
-        cmd = execution.get(EC.jobcmd) or execution.get(STR.executable)
+        cmd = execution.get(EC.incantation) or execution.get(STR.executable)
         if not cmd:
-            msg = "The execution block for %s must include 'jobcmd' or 'executable'" % task.name()
+            msg = (
+                "The execution block for %s must include 'incantation' or 'executable'"
+                % task.name()
+            )
             raise UWConfigError(msg)
         es = self._ecflowscript(
             execution=[cmd],

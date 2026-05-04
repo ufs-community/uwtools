@@ -8,7 +8,7 @@
     },
     {
       "required": [
-        "jobcmd"
+        "incantation"
       ]
     }
   ],
@@ -25,7 +25,7 @@
     "executable": {
       "type": "string"
     },
-    "jobcmd": {
+    "incantation": {
       "type": "string"
     }
   },

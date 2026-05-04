@@ -410,8 +410,8 @@ class TestECFlowDef:
             instance_with_scheduler._create_ecf_script(config, task)
         mock_js.assert_called_once()
 
-    def test__create_ecf_script__without_jobcmd_or_executable(self, instance):
-        """Test that an error is raised when neither jobcmd nor executable is provided."""
+    def test__create_ecf_script__without_incantation_or_executable(self, instance):
+        """Test that an error is raised when neither incantation nor executable is provided."""
         task = Task("hello")
         suite = Suite("test")
         suite.add(task)
@@ -421,8 +421,14 @@ class TestECFlowDef:
             "manual": "Test task",
         }
 
-        with raises(UWConfigError, match="must include 'jobcmd' or 'executable'"):
+        with raises(UWConfigError, match="must include 'incantation' or 'executable'"):
             instance._create_ecf_script(config, task)
+
+    def test__create_ecf_script__with_executable(self, instance):
+        """Test that executable field works when incantation is not provided."""
+        task = Task("hello")
+        suite = Suite("test")
+        suite.add(task)
         instance._d.add(suite)
         config = {
             "execution": {"executable": "/path/to/program"},
@@ -433,21 +439,26 @@ class TestECFlowDef:
         script_content = list(instance._scripts.values())[0]
         assert "/path/to/program" in script_content
 
-    def test__create_ecf_script__with_both_jobcmd_and_executable(self, instance):
-        """Test that jobcmd takes precedence when both jobcmd and executable are provided."""
+    def test__create_ecf_script__with_both_incantation_and_executable(self, instance):
+        """
+        Test that incantation takes precedence when both incantation and executable are provided.
+        """
         task = Task("hello")
         suite = Suite("test")
         suite.add(task)
         instance._d.add(suite)
         config = {
-            "execution": {"jobcmd": "echo hello from jobcmd", "executable": "/path/to/program"},
+            "execution": {
+                "incantation": "echo hello from incantation",
+                "executable": "/path/to/program",
+            },
             "manual": "Test task",
         }
         instance._create_ecf_script(config, task)
         assert len(instance._scripts) == 1
         script_content = list(instance._scripts.values())[0]
-        # jobcmd should be used, not executable
-        assert "echo hello from jobcmd" in script_content
+        # incantation should be used, not executable
+        assert "echo hello from incantation" in script_content
         assert "/path/to/program" not in script_content
 
     # write_ecf_scripts tests
@@ -728,7 +739,7 @@ class TestECFlowDef:
                 "suite_ensemble": {
                     "tasks_member_{{ ec.MEM }}": {
                         "expand": {"MEM": ["01", "02", "03"]},
-                        "script": {"execution": {"executable": "run me", "incantation": "hello"}},
+                        "script": {"execution": {"incantation": "hello"}},
                     }
                 }
             }
