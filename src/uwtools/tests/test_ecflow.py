@@ -26,7 +26,7 @@ def assets(tmp_path, minimal_config):
     YAMLConfig(minimal_config).dump(yaml_file)
     script_path = tmp_path / "scripts"
     script_path.mkdir(exist_ok=True, parents=True)
-    expected = "#5.15.2\n# enddef\n\n"
+    expected = "#5.15.2\n# enddef\n"
     return yaml_file, script_path, expected
 
 
@@ -410,10 +410,7 @@ class TestECFlowDef:
             instance_with_scheduler._create_ecf_script(config, task)
         mock_js.assert_called_once()
 
-    def test__create_ecf_script__without_incantation_or_executable(self, instance):
-        """
-        Test that an error is raised when neither incantation nor executable is provided.
-        """
+    def test__create_ecf_script__without_incantation(self, instance):
         task = Task("hello")
         suite = Suite("test")
         suite.add(task)
@@ -423,47 +420,8 @@ class TestECFlowDef:
             "manual": "Test task",
         }
 
-        with raises(UWConfigError, match="must include 'incantation' or 'executable'"):
+        with raises(UWConfigError, match="must include 'incantation'"):
             instance._create_ecf_script(config, task)
-
-    def test__create_ecf_script__with_executable(self, instance):
-        """
-        Test that executable field works when incantation is not provided.
-        """
-        task = Task("hello")
-        suite = Suite("test")
-        suite.add(task)
-        instance._d.add(suite)
-        config = {
-            "execution": {"executable": "/path/to/program"},
-            "manual": "Test task",
-        }
-        instance._create_ecf_script(config, task)
-        assert len(instance._scripts) == 1
-        script_content = list(instance._scripts.values())[0]
-        assert "/path/to/program" in script_content
-
-    def test__create_ecf_script__with_both_incantation_and_executable(self, instance):
-        """
-        Test that incantation takes precedence when both incantation and executable are provided.
-        """
-        task = Task("hello")
-        suite = Suite("test")
-        suite.add(task)
-        instance._d.add(suite)
-        config = {
-            "execution": {
-                "incantation": "echo hello from incantation",
-                "executable": "/path/to/program",
-            },
-            "manual": "Test task",
-        }
-        instance._create_ecf_script(config, task)
-        assert len(instance._scripts) == 1
-        script_content = list(instance._scripts.values())[0]
-        # incantation should be used, not executable
-        assert "echo hello from incantation" in script_content
-        assert "/path/to/program" not in script_content
 
     # write_ecf_scripts tests
 
@@ -693,46 +651,6 @@ class TestECFlowDef:
         # Write ecf script.
         ecf.write_ecf_scripts(tmp_path)
         assert (tmp_path / "test" / "run.ecf").is_file()
-
-    def test_integration__full_workflow_with_executable(self, tmp_path):
-        """
-        Test creating a complete workflow using executable field instead of jobcmd.
-        """
-        config = {
-            "ecflow": {
-                "suite_test": {
-                    "vars": {"SUITE_VAR": "value"},
-                    "family_prep": {
-                        "task_setup": {
-                            "trigger": "1==1",
-                            "script": {
-                                "execution": {"executable": "/bin/true"},
-                            },
-                        }
-                    },
-                    "task_run": {
-                        "trigger": "/test/prep/setup == complete",
-                        "script": {
-                            "execution": {"executable": "/path/to/my/program"},
-                        },
-                    },
-                }
-            }
-        }
-        ecf = _ECFlowDef(config=config)
-        # Verify suite definition was created.
-        suite_def = str(ecf)
-        assert "suite test" in suite_def
-        assert "family prep" in suite_def
-        assert "task setup" in suite_def
-        assert "task run" in suite_def
-        # Write suite definition.
-        ecf.write_suite_definition(tmp_path)
-        assert (tmp_path / "suite.def").is_file()
-        # Write ecf script.
-        ecf.write_ecf_scripts(tmp_path)
-        script_content = (tmp_path / "test" / "run.ecf").read_text()
-        assert "/path/to/my/program" in script_content
 
     def test_integration__with_expand(self):
         """

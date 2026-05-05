@@ -28,6 +28,7 @@ from ecflow import (  # type: ignore[import-untyped]
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import EC, STR
 from uwtools.utils.file import writable
@@ -37,9 +38,6 @@ if TYPE_CHECKING:
 
     from ecflow import NodeContainer
 
-# Import log after ensuring stdlib logging is properly set up
-from uwtools.logging import log
-
 
 class _ECFlowDef:
     """
@@ -48,7 +46,7 @@ class _ECFlowDef:
 
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         self._scripts: dict[Path, str] = {}
-        log.debug("Initializing _ECFlowDef with config: %s", config)
+        log.debug("Creating ecFlow definition from %s", config or "stdin")
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
         validate(cfgobj)
@@ -92,9 +90,9 @@ class _ECFlowDef:
             path = path / "suite.def"
             log.debug("Writing suite definition to: %s", path)
         else:
-            log.debug("No output path provided, writing suite definition to stdout.")
+            log.debug("No output path provided, writing the suite definition to stdout.")
         with writable(path) as f:
-            print(self, file=f)
+            print(str(self).rstrip("\n"), file=f)
 
     def _add_workflow_components(self) -> None:
         """
@@ -263,13 +261,11 @@ class _ECFlowDef:
             else None
         )
         execution = config[STR.execution]
-        cmd = execution.get(EC.incantation) or execution.get(STR.executable)
-        if not cmd:
-            msg = (
-                "The execution block for %s must include 'incantation' or 'executable'"
-                % task.name()
-            )
-            raise UWConfigError(msg)
+        try:
+            cmd = execution[EC.incantation]
+        except KeyError as e:
+            msg = "The execution block for %s must include 'incantation'" % task.name()
+            raise UWConfigError(msg) from e
         es = self._ecflowscript(
             execution=[cmd],
             manual=config.get(EC.manual, f"Script to run {task.name()}"),
@@ -344,7 +340,7 @@ class _ECFlowDef:
             post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
             ECF_NAME="ECF_NAME",
         )
-        return re.sub(r"\n\n\n+", "\n\n", rs.strip())
+        return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
 
     def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """

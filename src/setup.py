@@ -42,7 +42,7 @@ if not os.environ.get("CONDEV_SHELL"):
     kwargs["install_requires"] = [
         pkg.replace(" ==", "==")
         for pkg in meta["packages"]["run"]
-        if not re.match(r"^python .*$", pkg) and not pkg.strip().startswith("ecflow")
+        if not re.match(r"^python .*$", pkg)
     ]
 
 # Install.

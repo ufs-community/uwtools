@@ -1,17 +1,5 @@
 {
   "additionalProperties": false,
-  "anyOf": [
-    {
-      "required": [
-        "executable"
-      ]
-    },
-    {
-      "required": [
-        "incantation"
-      ]
-    }
-  ],
   "properties": {
     "batchargs": {
       "$ref": "urn:uwtools:batchargs"
@@ -29,5 +17,8 @@
       "type": "string"
     }
   },
+  "required": [
+    "executable"
+  ],
   "type": "object"
 }

@@ -556,30 +556,6 @@ def test_cli__dispatch_ecflow_validate_no_optional():
     )
 
 
-def test_cli__dispatch_ecflow_missing_ecflow():
-    """
-    Test that _dispatch_ecflow raises UWError when ecflow is not installed.
-    """
-    args = {STR.action: STR.realize}
-    with (
-        patch("builtins.__import__", side_effect=ImportError("No module named 'ecflow'")),
-        raises(UWError, match=r"ecflow is not installed\. Install it with: pip install ecflow"),
-    ):
-        cli._dispatch_ecflow(args)
-
-
-def test_cli__dispatch_ecflow_other_import_error():
-    """
-    Test that _dispatch_ecflow re-raises non-ecflow ImportErrors.
-    """
-    args = {STR.action: STR.realize}
-    with (
-        patch("builtins.__import__", side_effect=ImportError("No module named 'something_else'")),
-        raises(ImportError, match="No module named 'something_else'"),
-    ):
-        cli._dispatch_ecflow(args)
-
-
 @mark.parametrize(
     "params",
     [

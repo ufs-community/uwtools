@@ -901,32 +901,11 @@ def test_schema_ecflow_refs_taskcontainer():
 
 def test_schema_ecflow_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
-    # Basic spec with executable:
-    config_with_executable = {
-        "script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}
-    }
-    assert not errors(config_with_executable)
-    # Basic spec with incantation:
-    config_with_incantation = {
-        "script": {"execution": {"incantation": "echo hi"}, "post_includes": ["tail.h"]}
-    }
-    assert not errors(config_with_incantation)
-    # Both executable and incantation together:
-    config_with_both = {
-        "script": {
-            "execution": {"executable": "/bin/echo", "incantation": "echo hi"},
-            "post_includes": ["tail.h"],
-        }
-    }
-    assert not errors(config_with_both)
-    # Execution is required:
-    assert "'execution' is a required property" in errors(
-        with_del(config_with_executable, "script", "execution")
-    )
-    # Additional properties not allowed:
-    assert "Additional properties are not allowed" in errors(
-        with_set(config_with_executable, 2, "script", "extra")
-    )
+    # Basic spec:
+    config = {"script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}}
+    assert not errors(config)
+    assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
+    assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
 
 
 # enkf
@@ -1045,33 +1024,24 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
 
 
 def test_schema_parallel_execution():
-    config_with_executable = {"executable": "fv3"}
-    config_with_incantation = {"incantation": "echo hello"}
-    config_with_both = {"executable": "fv3", "incantation": "echo hello"}
+    config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
     errors = schema_validator("execution-parallel")
-    # Basic correctness with executable:
-    assert not errors(config_with_executable)
-    # Basic correctness with incantation:
-    assert not errors(config_with_incantation)
-    # Both executable and incantation together is ok:
-    assert not errors(config_with_both)
-    # Neither executable nor incantation is not ok:
-    assert errors({})
+    # Basic correctness:
+    assert not errors(config)
     # batchargs may optionally be specified:
-    assert not errors({**config_with_executable, **batchargs})
-    assert not errors({**config_with_incantation, **batchargs})
+    assert not errors({**config, **batchargs})
     # mpiargs may be optionally specified:
-    assert not errors({**config_with_executable, **mpiargs})
+    assert not errors({**config, **mpiargs})
     # threads may optionally be specified:
-    assert not errors({**config_with_executable, **threads})
+    assert not errors({**config, **threads})
     # All properties are ok:
-    assert not errors({**config_with_executable, **batchargs, **mpiargs, **threads})
+    assert not errors({**config, **batchargs, **mpiargs, **threads})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors(
-        {**config_with_executable, **mpiargs, **threads, "foo": "bar"}
+        {**config, **mpiargs, **threads, "foo": "bar"}
     )
 
 
@@ -1106,28 +1076,17 @@ def test_schema_parallel_execution_threads():
 
 
 def test_schema_execution_serial():
-    config_with_executable = {"executable": "fv3"}
-    config_with_incantation = {"incantation": "echo hello"}
-    config_with_both = {"executable": "fv3", "incantation": "echo hello"}
+    config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     errors = schema_validator("execution-serial")
-    # Basic correctness with executable:
-    assert not errors(config_with_executable)
-    # Basic correctness with incantation:
-    assert not errors(config_with_incantation)
-    # Both executable and incantation together is ok:
-    assert not errors(config_with_both)
-    # Neither executable nor incantation is not ok:
-    assert errors({})
+    # Basic correctness:
+    assert not errors(config)
     # batchargs may optionally be specified:
-    assert not errors({**config_with_executable, **batchargs})
-    assert not errors({**config_with_incantation, **batchargs})
+    assert not errors({**config, **batchargs})
     # All properties are ok:
-    assert not errors({**config_with_executable, **batchargs})
+    assert not errors({**config, **batchargs})
     # Additional properties are not allowed:
-    assert "Additional properties are not allowed" in errors(
-        {**config_with_executable, "foo": "bar"}
-    )
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
 # files-to-stage
