@@ -37,6 +37,7 @@ class _EC(_ValsMatchKeys):
     day: str = _
     defstatus: str = _
     ecflow: str = _
+    end: str = _
     enumerated: str = _
     envcmds: str = _
     events: str = _
@@ -51,6 +52,7 @@ class _EC(_ValsMatchKeys):
     labels: str = _
     late: str = _
     limits: str = _
+    list: str = _
     manual: str = _
     meters: str = _
     node: str = _
@@ -61,12 +63,15 @@ class _EC(_ValsMatchKeys):
     repeat: str = _
     rundir: str = _
     script: str = _
+    start: str = _
+    step: str = _
     string: str = _
     suite: str = _
     suites: str = _
     task: str = _
     tasks: str = _
     trigger: str = _
+    variable: str = _
     vars: str = _
 
 

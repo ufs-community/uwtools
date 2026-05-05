@@ -3,9 +3,10 @@ Tests for uwtools.ecflow module.
 """
 
 import sys
+from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 import yaml
 from ecflow import Defs, DState, Suite, Task  # type: ignore[import-untyped]
@@ -190,48 +191,46 @@ class TestECFlowDef:
     # _add_repeat tests
 
     def test__add_repeat__date(self, instance):
-        node = Mock()
-        common = {"name": "YMD", "start": 20240101, "end": 20240131}
-        with patch.object(ecflow, "RepeatDate") as repeat_date:
-            instance._add_repeat({**common, "step": 1}, "date", node)
-        repeat_date.assert_called_once_with(**{**common, "delta": 1})
-        node.add_repeat.assert_called_once_with(repeat_date.return_value)
+        node = Task("t1")
+        config = {"variable": "YMD", "step": 4, "start": 20240101, "end": 20240131}
+        start_config = deepcopy(config)
+        instance._add_repeat(config, "date", node)
+        assert config == start_config
+        expected = ["YMD", 20240101, 20240131, 4]
+        repeat = node.get_repeat()
+        actual = [repeat.__getattribute__(a)() for a in ("name", "start", "end", "step")]
+        assert actual == expected
 
     def test__add_repeat__int(self, instance):
-        node = Mock()
-        config = {"name": "STEP", "start": 0, "end": 10, "step": 1}
-        with patch.object(ecflow, "RepeatInteger") as repeat_integer:
-            instance._add_repeat(config.copy(), "int", node)
-        repeat_integer.assert_called_once_with(**config)
-        node.add_repeat.assert_called_once_with(repeat_integer.return_value)
+        node = Task("t1")
+        config = {"variable": "STEP", "start": 0, "end": 10, "step": 5}
+        instance._add_repeat(config.copy(), "int", node)
+        expected = ["STEP", 0, 10, 5]
+        repeat = node.get_repeat()
+        actual = [repeat.__getattribute__(a)() for a in ("name", "start", "end", "step")]
+        assert actual == expected
 
     def test__add_repeat__day(self, instance):
-        node = Mock()
+        node = Task("t1")
         config = {"step": 1}
-        with patch.object(ecflow, "RepeatDay") as repeat_day:
-            instance._add_repeat(config.copy(), "day", node)
-        repeat_day.assert_called_once_with(**config)
-        node.add_repeat.assert_called_once_with(repeat_day.return_value)
+        instance._add_repeat(config.copy(), "day", node)
+        assert node.get_repeat().step() == 1
 
     def test__add_repeat__enumerated(self, instance):
-        node = Mock()
-        config = {"name": "MEMBER", "values": ["m01", "m02", "m03"]}
-        with patch.object(ecflow, "RepeatEnumerated") as repeat_enumerated:
-            instance._add_repeat(config.copy(), "enumerated", node)
-        repeat_enumerated.assert_called_once_with(**config)
-        node.add_repeat.assert_called_once_with(repeat_enumerated.return_value)
+        node = Task("t1")
+        config = {"variable": "MEMBER", "list": ["m01", "m02", "m03"]}
+        instance._add_repeat(config.copy(), "enumerated", node)
+        assert 'repeat enumerated MEMBER "m01" "m02" "m03"' in node.get_repeat().__str__()
 
     @mark.parametrize("repeat_type", ["datelist", "string"])
     def test__add_repeat__enumerated_variants(self, instance, repeat_type):
         """
         Test that datelist and string repeat types also use RepeatEnumerated.
         """
-        node = Mock()
-        config = {"name": "VAR", "values": ["a", "b"]}
-        with patch.object(ecflow, "RepeatEnumerated") as repeat_enumerated:
-            instance._add_repeat(config.copy(), repeat_type, node)
-        repeat_enumerated.assert_called_once_with(**config)
-        node.add_repeat.assert_called_once_with(repeat_enumerated.return_value)
+        node = Task("t1")
+        config = {"variable": "VAR", "list": ["a", "b"]}
+        instance._add_repeat(config.copy(), repeat_type, node)
+        assert 'VAR "a" "b"' in node.get_repeat().__str__()
 
     # __str__ tests
 
@@ -485,60 +484,44 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         config = {"inlimits": [["limit1", "/path"], ["limit2", "/path2"]]}
-        with patch.object(task, "add_inlimit") as add_inlimit:
-            instance._add_node(config, task, suite)
-        assert add_inlimit.call_args_list == [
-            call("limit1", "/path"),
-            call("limit2", "/path2"),
-        ]
+        instance._add_node(config, task, suite)
+        assert list(task.inlimits)
 
     def test__add_node__with_labels(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"labels": [["label1", "value1"], ["label2", "value2"]]}
-        with patch.object(task, "add_label") as add_label:
-            instance._add_node(config, task, suite)
-        assert add_label.call_args_list == [
-            call("label1", "value1"),
-            call("label2", "value2"),
-        ]
+        instance._add_node(config, task, suite)
+        assert [n.name() for n in suite.find_task("t1").labels] == ["label1", "label2"]
 
     def test__add_node__with_late(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"late": {"submitted": "+00:15", "active": "+01:00"}}
-        with patch.object(ecflow, "Late") as mock_late, patch.object(task, "add_late"):
-            instance._add_node(config, task, suite)
-        mock_late.assert_called_once()
+        instance._add_node(config, task, suite)
+        assert suite.find_task("t1").get_late().submitted().minute() == 15
+        assert suite.find_task("t1").get_late().active().hour() == 1
 
     def test__add_node__with_limits(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"limits": [["limit1", 5], ["limit2", 10]]}
-        with patch.object(task, "add_limit") as add_limit:
-            instance._add_node(config, task, suite)
-        assert add_limit.call_args_list == [
-            call("limit1", 5),
-            call("limit2", 10),
-        ]
+        instance._add_node(config, task, suite)
+        assert list(task.limits)
 
     def test__add_node__with_meters(self, instance):
         suite = Suite("test")
         task = Task("t1")
         config = {"meters": [["meter1", 0, 100, 50]]}
-        with patch.object(task, "add_meter") as add_meter:
-            instance._add_node(config, task, suite)
-        assert add_meter.call_args_list == [
-            call("meter1", 0, 100, 50),
-        ]
+        instance._add_node(config, task, suite)
+        assert task.find_meter("meter1") is not None
 
     def test__add_node__with_repeat(self, instance):
         suite = Suite("test")
         task = Task("t1")
-        config = {"repeat_int": {"name": "STEP", "start": 0, "end": 10}}
-        with patch.object(instance, "_add_repeat") as mock_repeat:
-            instance._add_node(config, task, suite)
-        mock_repeat.assert_called_once()
+        config = {"repeat_int": {"variable": "STEP", "start": 0, "end": 10}}
+        instance._add_node(config, task, suite)
+        assert task.get_repeat().name() == "STEP"
 
     def test__add_node__with_script_then_continue(self, instance):
         """
@@ -590,17 +573,15 @@ class TestECFlowDef:
         assert task.get_trigger() is not None
 
     def test__add_repeat__datetime(self, instance):
-        node = Mock()
+        task = Task("t1")
         config = {
-            "name": "DT",
+            "variable": "DT",
             "start": "20240101T000000",
             "end": "20240101T120000",
-            "delta": "01:00:00",
+            "step": "01:00:00",
         }
-        with patch.object(ecflow, "RepeatDateTime") as repeat_datetime:
-            instance._add_repeat(config.copy(), "datetime", node)
-        repeat_datetime.assert_called_once_with(**config)
-        node.add_repeat.assert_called_once_with(repeat_datetime.return_value)
+        instance._add_repeat(config.copy(), "datetime", task)
+        assert task.get_repeat().name() == "DT"
 
     def test__add_repeat__unknown_type(self, instance):
         node = Mock()
