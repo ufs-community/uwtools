@@ -27,7 +27,7 @@ def assets(tmp_path, minimal_config):
     YAMLConfig(minimal_config).dump(yaml_file)
     script_path = tmp_path / "scripts"
     script_path.mkdir(exist_ok=True, parents=True)
-    expected = "#5.15.2\n# enddef\n"
+    expected = str(_ECFlowDef(minimal_config)) + "\n"
     return yaml_file, script_path, expected
 
 
@@ -53,7 +53,7 @@ def minimal_config():
     """
     Minimal config for instantiation.
     """
-    return {"ecflow": {}}
+    return {"ecflow": {"suite_minimal": {}}}
 
 
 def assert_line_in(result: str, line: str) -> None:
@@ -242,18 +242,18 @@ class TestECFlowDef:
 
     def test__init__with_dict(self, minimal_config):
         ecf = _ECFlowDef(config=minimal_config)
-        assert ecf._config == {}
+        assert ecf._config == {"suite_minimal": {}}
         assert ecf._scheduler is None
         assert isinstance(ecf._d, Defs)
 
     def test__init__with_scheduler(self):
-        config = {"ecflow": {"scheduler": "slurm"}}
+        config = {"ecflow": {"scheduler": "slurm", "suite_test": {}}}
         ecf = _ECFlowDef(config=config)
         assert ecf._scheduler == "slurm"
 
     def test__init__with_path(self, tmp_path):
         config_file = tmp_path / "config.yaml"
-        config_file.write_text("ecflow:\n  scheduler: pbs\n")
+        config_file.write_text("ecflow:\n  scheduler: pbs\n  suite_test: {}\n")
         ecf = _ECFlowDef(config=config_file)
         assert ecf._scheduler == "pbs"
         assert isinstance(ecf._d, Defs)
@@ -261,7 +261,7 @@ class TestECFlowDef:
     def test__init__with_config_object(self, minimal_config):
         cfg = YAMLConfig(minimal_config)
         ecf = _ECFlowDef(config=cfg)
-        assert ecf._config == {}
+        assert ecf._config == {"suite_minimal": {}}
         assert isinstance(ecf._d, Defs)
 
     def test__init__missing_ecflow_key(self):
@@ -715,3 +715,43 @@ def test_validate__invalid(tmp_path):
     with raises(UWConfigError) as e:
         ecflow.validate(yaml_file)
     assert "YAML validation errors" in str(e.value)
+
+
+def test_validate__suite_only():
+    """
+    A config with only a suite should pass validation.
+    """
+    config: dict = {"ecflow": {"suite_mysuite": {}}}
+    assert ecflow.validate(config)
+
+
+def test_validate__suite_with_properties():
+    """
+    A config with a suite plus optional properties should pass validation.
+    """
+    config = {
+        "ecflow": {
+            "scheduler": "slurm",
+            "vars": {"FOO": "bar"},
+            "suite_mysuite": {},
+        }
+    }
+    assert ecflow.validate(config)
+
+
+def test_validate__empty_ecflow_fails():
+    """
+    An empty ecflow block should not pass validation.
+    """
+    config: dict = {"ecflow": {}}
+    with raises(UWConfigError):
+        ecflow.validate(config)
+
+
+def test_validate__properties_only_fails():
+    """
+    An ecflow block with only optional properties (no suite) should not pass validation.
+    """
+    config = {"ecflow": {"scheduler": "slurm", "vars": {"FOO": "bar"}}}
+    with raises(UWConfigError):
+        ecflow.validate(config)
