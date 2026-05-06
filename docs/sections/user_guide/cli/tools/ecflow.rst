@@ -61,7 +61,10 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdin-stdout.out
      :language: text
 
-* To also generate ``.ecf`` scripts in a ``scripts/`` directory:
+* To also generate ``.ecf`` scripts, using a UW YAML file ``ecflow-workflow.yaml`` with contents:
+
+  .. literalinclude:: ecflow/ecflow-workflow.yaml
+     :language: yaml
 
   .. literalinclude:: ecflow/realize-exec-scripts.cmd
      :language: text
@@ -69,10 +72,22 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-scripts.out
      :language: text
 
-  The ``--scripts-path`` option specifies the directory under which ``.ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite defintion. For the example above, the generated scripts would be:
+  The ``--scripts-path`` option specifies the directory under which ``.ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite definition. For the example above, the generated scripts are:
 
-  * ``scripts/forecast/prep/get_obs.ecf`` (for ``task_get_obs`` under ``family_prep``)
-  * ``scripts/forecast/run_model.ecf`` (for ``task_run_model`` directly under the suite)
+  * ``workflow_output/workflow/data_prep/fetch.ecf``:
+
+    .. literalinclude:: ecflow/workflow_output/workflow/data_prep/fetch.ecf
+       :language: bash
+
+  * ``workflow_output/workflow/data_prep/process.ecf``:
+
+    .. literalinclude:: ecflow/workflow_output/workflow/data_prep/process.ecf
+       :language: bash
+
+  * ``workflow_output/workflow/model.ecf``:
+
+    .. literalinclude:: ecflow/workflow_output/workflow/model.ecf
+       :language: bash
 
   .. important::
 
@@ -80,8 +95,8 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
 
      Examples:
 
-     - ``task_get_obs`` → ``get_obs.ecf``
-     - ``task_run_model`` → ``run_model.ecf``
+     - ``task_fetch`` → ``fetch.ecf``
+     - ``task_run_model`` → ``model.ecf``
      - ``task_process_output_files`` → ``process_output_files.ecf``
 
 .. _cli_ecflow_validate_examples:

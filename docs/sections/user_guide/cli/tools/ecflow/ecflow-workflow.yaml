@@ -1,0 +1,20 @@
+ecflow:
+  suite_workflow:
+    vars:
+      WORKFLOW_VAR: production
+    family_data_prep:
+      task_fetch:
+        trigger: "1==1"
+        script:
+          execution:
+            incantation: echo Fetching data...
+      task_process:
+        trigger: /workflow/data_prep/fetch == complete
+        script:
+          execution:
+            incantation: echo Processing data...
+    task_run_model:
+      trigger: /workflow/data_prep == complete
+      script:
+        execution:
+          incantation: echo Running model...
