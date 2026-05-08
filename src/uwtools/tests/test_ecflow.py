@@ -27,7 +27,7 @@ def assets(tmp_path, minimal_config):
     YAMLConfig(minimal_config).dump(yaml_file)
     script_path = tmp_path / "scripts"
     script_path.mkdir(exist_ok=True, parents=True)
-    expected = "#5.15.2\n# enddef\n\n"
+    expected = "#5.15.2\n# enddef\n"
     return yaml_file, script_path, expected
 
 
@@ -642,7 +642,7 @@ class TestECFlowDef:
                 "suite_ensemble": {
                     "tasks_member_{{ ec.MEM }}": {
                         "expand": {"MEM": ["01", "02", "03"]},
-                        "script": {"execution": {"executable": "run me", "incantation": "hello"}},
+                        "script": {"execution": {"incantation": "hello"}},
                     }
                 }
             }

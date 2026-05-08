@@ -1,0 +1,13 @@
+#5.16.0
+suite workflow
+  edit WORKFLOW_VAR 'production'
+  family data_prep
+    task fetch
+      trigger 1==1
+    task process
+      trigger /workflow/data_prep/fetch == complete
+  endfamily
+  task run_model
+    trigger /workflow/data_prep == complete
+endsuite
+# enddef

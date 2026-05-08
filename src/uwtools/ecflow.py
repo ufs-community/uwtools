@@ -44,13 +44,16 @@ class _ECFlowDef:
 
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         self._scripts: dict[Path, str] = {}
+        log.debug("Creating ecFlow definition from %s", config or "stdin")
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
         validate(cfgobj)
         self._config = cfgobj.data[EC.ecflow]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
+        log.debug("Adding workflow components to suite definition.")
         self._add_workflow_components()
+        log.debug("Workflow components added. Scripts: %s", list(self._scripts.keys()))
 
     def __str__(self):
         return self._d.__str__()
@@ -66,9 +69,11 @@ class _ECFlowDef:
             log.warning("No scripts are configured for this workflow.")
             return
 
+        log.debug("Writing ecf scripts to %s", path)
         for subpath, content in self._scripts.items():
-            outpath = path / subpath
+            outpath = Path(path) / subpath
             outpath.parent.mkdir(parents=True, exist_ok=True)
+            log.debug("Writing script: %s", outpath)
             outpath.write_text(content)
 
     def write_suite_definition(self, path: Path | None) -> None:
@@ -78,10 +83,14 @@ class _ECFlowDef:
         :param path: Where to write the suite definition.
         """
         if path:
+            log.debug("Creating output directory for suite definition: %s", path)
             path.mkdir(parents=True, exist_ok=True)
             path = path / "suite.def"
+            log.debug("Writing suite definition to: %s", path)
+        else:
+            log.debug("No output path provided, writing the suite definition to stdout.")
         with writable(path) as f:
-            print(self, file=f)
+            print(str(self).rstrip("\n"), file=f)
 
     def _add_workflow_components(self) -> None:
         """
@@ -334,7 +343,7 @@ class _ECFlowDef:
             post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
             ECF_NAME="ECF_NAME",
         )
-        return re.sub(r"\n\n\n+", "\n\n", rs.strip())
+        return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
 
     def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """
