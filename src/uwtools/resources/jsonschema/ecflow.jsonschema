@@ -470,15 +470,6 @@
   "properties": {
     "ecflow": {
       "additionalProperties": false,
-      "not": {
-        "propertyNames": {
-          "enum": [
-            "extern",
-            "scheduler",
-            "vars"
-          ]
-        }
-      },
       "patternProperties": {
         "^suite_.+$": {
           "allOf": [

@@ -908,36 +908,23 @@ def test_schema_ecflow_refs_taskcontainer_script():
     assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
 
 
-def test_schema_ecflow_suite_required():
-    errors = schema_validator("ecflow")
-    # An empty ecflow block (no suite) is invalid:
-    assert errors({"ecflow": {}})
-    # Optional properties only (no suite) is invalid:
-    assert errors({"ecflow": {"scheduler": "slurm"}})
-    assert errors({"ecflow": {"scheduler": "slurm", "vars": {"FOO": "bar"}}})
-    # An empty suite is valid (ecFlow itself accepts this):
-    assert not errors({"ecflow": {"suite_minimal": {}}})
-    # Suite alongside optional properties is valid:
-    assert not errors({"ecflow": {"suite_one": {}, "scheduler": "pbs", "vars": {"X": "y"}}})
-
-
 def test_schema_ecflow_scheduler():
     errors = schema_validator("ecflow", "properties", "ecflow")
     # Valid schedulers:
     for sched in ("lsf", "pbs", "slurm"):
-        assert not errors({"suite_a": {}, "scheduler": sched})
+        assert not errors({"scheduler": sched})
     # Unknown scheduler fails:
-    assert "'torque' is not one of" in errors({"suite_a": {}, "scheduler": "torque"})
+    assert "'torque' is not one of" in errors({"scheduler": "torque"})
 
 
 def test_schema_ecflow_extern():
     errors = schema_validator("ecflow", "properties", "ecflow")
     # extern is a list of strings:
-    assert not errors({"suite_a": {}, "extern": ["/other/suite/task"]})
+    assert not errors({"extern": ["/other/suite/task"]})
     # Non-string items fail:
-    assert "is not of type 'string'" in errors({"suite_a": {}, "extern": [123]})
+    assert "is not of type 'string'" in errors({"extern": [123]})
     # Must be a list (not a scalar):
-    assert "is not of type 'array'" in errors({"suite_a": {}, "extern": "/other/suite/task"})
+    assert "is not of type 'array'" in errors({"extern": "/other/suite/task"})
 
 
 def test_schema_ecflow_refs_taskcontainer_script_incantation():
