@@ -8,6 +8,7 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import ecflow as ecflowlib  # type: ignore[import-untyped]
 import yaml
 from ecflow import Defs, DState, Suite, Task  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
@@ -27,7 +28,8 @@ def assets(tmp_path, minimal_config):
     YAMLConfig(minimal_config).dump(yaml_file)
     script_path = tmp_path / "scripts"
     script_path.mkdir(exist_ok=True, parents=True)
-    return yaml_file, script_path
+    expected = f"#{ecflowlib.__version__}\n# enddef\n"
+    return yaml_file, script_path, expected
 
 
 @fixture
@@ -674,40 +676,40 @@ class TestECFlowDef:
 
 
 def test_ecflow_realize__cfg_to_file(tmp_path, assets):
-    cfgfile, _ = assets
+    cfgfile, _, expected = assets
     ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
     output = (tmp_path / "suite.def").read_text()
-    assert output == str(Defs())
+    assert output == expected
 
 
 def test_ecflow_realize__cfg_to_stdout(capsys, assets):
-    cfgfile, _ = assets
+    cfgfile, _, expected = assets
     ecflow.realize(config=YAMLConfig(cfgfile))
     output = capsys.readouterr().out
-    assert output == str(Defs())
+    assert output == expected
 
 
 def test_ecflow_realize__file_to_file(tmp_path, assets):
-    cfgfile, _ = assets
+    cfgfile, _, expected = assets
     ecflow.realize(config=cfgfile, output_path=tmp_path)
     output = (tmp_path / "suite.def").read_text()
-    assert output == str(Defs())
+    assert output == expected
 
 
 def test_ecflow_realize__file_to_stdout(capsys, assets):
-    cfgfile, _ = assets
+    cfgfile, _, expected = assets
     ecflow.realize(config=cfgfile)
     output = capsys.readouterr().out
-    assert output == str(Defs())
+    assert output == expected
 
 
 def test_ecflow_realize__write_scripts(capsys, assets):
-    cfgfile, script_path = assets
+    cfgfile, script_path, expected = assets
     with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
         ecflow.realize(config=cfgfile, scripts_path=script_path)
         write_scripts.assert_called_once_with(script_path)
     output = capsys.readouterr().out
-    assert output == str(Defs())
+    assert output == expected
 
 
 def test_validate__path(tmp_path, minimal_config):
