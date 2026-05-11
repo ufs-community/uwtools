@@ -513,7 +513,7 @@ def test_cli__dispatch_ecflow_realize():
     realize.assert_called_once_with(
         config=args[STR.config_file],
         output_path=args[STR.output_dir],
-        scripts_path=args[STR.output_dir],
+        scripts_path=None,
         stdin_ok=True,
     )
 

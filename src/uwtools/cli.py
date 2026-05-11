@@ -136,6 +136,7 @@ def _add_subparser_ecflow_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_dir(optional)
+    _add_arg_scripts_dir(optional)
     return _add_args_verbosity(optional)
 
 
@@ -173,7 +174,7 @@ def _dispatch_ecflow_realize(args: Args) -> bool:
     return uwtools.api.ecflow.realize(
         config=args[STR.config_file],
         output_path=args.get(STR.output_dir),
-        scripts_path=args.get(STR.output_dir),
+        scripts_path=args.get(STR.scripts_dir),
         stdin_ok=True,
     )
 
@@ -1039,7 +1040,7 @@ def _add_arg_output_dir(group: Group, required: bool = False) -> None:
     """
     group.add_argument(
         _switch(STR.output_dir),
-        help="Path to output directory",
+        help="Path to output directory for suite definition (default: write to stdout)",
         metavar="PATH",
         required=required,
         type=Path,
@@ -1099,6 +1100,20 @@ def _add_arg_schema_file(group: Group, required: bool = False) -> None:
         help="Path to schema file to use for validation",
         metavar="PATH",
         required=required,
+        type=Path,
+    )
+
+
+def _add_arg_scripts_dir(group: Group) -> None:
+    """
+    Add --script-dir argument.
+
+    :param group: The argparse group to add the argument to.
+    """
+    group.add_argument(
+        _switch(STR.scripts_dir),
+        help="Path to output directory for ecf scripts (default: no scripts are generated)",
+        metavar="PATH",
         type=Path,
     )
 

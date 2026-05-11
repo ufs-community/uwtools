@@ -1,6 +1,6 @@
 usage: uw ecflow [-h] [--version] ACTION ...
 
-Realize and validate ecFlow suite definitions
+Handle ecflow suite definitions
 
 Optional arguments:
   -h, --help
@@ -13,4 +13,4 @@ Positional arguments:
     realize
       Realize an ecFlow suite definition
     validate
-      Validate an ecFlow config
+      Validate an ecFlow YAML config

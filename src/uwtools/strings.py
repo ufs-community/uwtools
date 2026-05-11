@@ -198,6 +198,7 @@ class _STR(_ValsMatchKeys):
     scheduler: str = _
     schema_file: str = _
     schism: str = _
+    scripts_dir: str = _
     search_path: str = _
     sfc_climo_gen: str = _
     shave: str = _

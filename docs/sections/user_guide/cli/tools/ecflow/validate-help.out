@@ -1,7 +1,7 @@
 usage: uw ecflow validate [-h] [--version] [--config-file PATH] [--quiet]
                           [--verbose]
 
-Validate an ecFlow config
+Validate an ecFlow YAML config
 
 Optional arguments:
   -h, --help

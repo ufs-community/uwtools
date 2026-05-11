@@ -8,13 +8,16 @@ ecflow:
         script:
           execution:
             incantation: echo Fetching data...
+            executable: uw fs copy -c files.yaml
       task_process:
         trigger: /workflow/data_prep/fetch == complete
         script:
           execution:
             incantation: echo Processing data...
+            executable: prep.exe
     task_run_model:
       trigger: /workflow/data_prep == complete
       script:
         execution:
           incantation: echo Running model...
+          executable: model.exe
