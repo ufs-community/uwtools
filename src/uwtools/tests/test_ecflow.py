@@ -284,9 +284,8 @@ class TestECFlowDef:
                 }
             }
         }
-        with raises(UWConfigError) as e:
+        with raises(AssertionError):
             _ECFlowDef(config=config)
-        assert "ecFlow definition check failed" in str(e.value)
 
     # _add_workflow_components tests
 
@@ -678,28 +677,28 @@ def test_ecflow_realize__cfg_to_file(tmp_path, assets):
     cfgfile, _ = assets
     ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
     output = (tmp_path / "suite.def").read_text()
-    assert "# enddef" in output
+    assert output == str(Defs())
 
 
 def test_ecflow_realize__cfg_to_stdout(capsys, assets):
     cfgfile, _ = assets
     ecflow.realize(config=YAMLConfig(cfgfile))
     output = capsys.readouterr().out
-    assert "# enddef" in output
+    assert output == str(Defs())
 
 
 def test_ecflow_realize__file_to_file(tmp_path, assets):
     cfgfile, _ = assets
     ecflow.realize(config=cfgfile, output_path=tmp_path)
     output = (tmp_path / "suite.def").read_text()
-    assert "# enddef" in output
+    assert output == str(Defs())
 
 
 def test_ecflow_realize__file_to_stdout(capsys, assets):
     cfgfile, _ = assets
     ecflow.realize(config=cfgfile)
     output = capsys.readouterr().out
-    assert "# enddef" in output
+    assert output == str(Defs())
 
 
 def test_ecflow_realize__write_scripts(capsys, assets):
@@ -708,7 +707,7 @@ def test_ecflow_realize__write_scripts(capsys, assets):
         ecflow.realize(config=cfgfile, scripts_path=script_path)
         write_scripts.assert_called_once_with(script_path)
     output = capsys.readouterr().out
-    assert "# enddef" in output
+    assert output == str(Defs())
 
 
 def test_validate__path(tmp_path, minimal_config):

@@ -54,9 +54,8 @@ class _ECFlowDef:
         log.debug("Adding workflow components to suite definition.")
         self._add_workflow_components()
         log.debug("Workflow components added. Scripts: %s", list(self._scripts.keys()))
-        if check_errors := self._d.check():
-            msg = f"ecFlow definition check failed:\n{check_errors}"
-            raise UWConfigError(msg)
+        check_errors = self._d.check()
+        assert not check_errors, check_errors
 
     def __str__(self):
         return self._d.__str__()
