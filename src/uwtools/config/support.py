@@ -21,6 +21,10 @@ if TYPE_CHECKING:
 INCLUDE_TAG = "!include"
 YAMLKey = bool | float | int | str
 
+
+class _UWYAMLLoader(yaml.SafeLoader): ...
+
+
 # Public functions
 
 
@@ -145,9 +149,6 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     """
     add_yaml_representers()
     return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
-
-
-class _UWYAMLLoader(yaml.SafeLoader): ...
 
 
 class UWYAMLTag:
