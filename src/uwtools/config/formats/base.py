@@ -299,11 +299,11 @@ class Config(ABC, UserDict):
                     case (dict(), dict()):
                         update(new, old, keys)
                     case (UWYAMLExtend(), list()):
-                        if not isinstance(new.node, yaml.SequenceNode):
+                        if isinstance(new.node, yaml.SequenceNode):
+                            old.extend(uw_yaml_loader()("").construct_sequence(new.node))
+                        else:
                             nodeid = new.node.id  # type: ignore[attr-defined]
                             error(f"!extend must tag a sequence, not a {nodeid}", keys)
-                        assert isinstance(new.node, yaml.SequenceNode)
-                        old.extend(uw_yaml_loader()("").construct_sequence(new.node))
                     case (UWYAMLExtend(), None):
                         error("found no list to extend", keys)
                     case _:
