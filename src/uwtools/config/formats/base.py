@@ -302,7 +302,8 @@ class Config(ABC, UserDict):
                         if isinstance(new.node, yaml.SequenceNode):
                             old.extend(uw_yaml_loader()("").construct_sequence(new.node))
                         else:
-                            nodeid = new.node.id  # type: ignore[attr-defined]
+                            nodeid = getattr(new.node, "id", None)
+                            assert nodeid in ("mapping", "scalar")
                             error(f"!extend must tag a sequence, not a {nodeid}", keys)
                     case (UWYAMLExtend(), None):
                         error("found no list to extend", keys)
