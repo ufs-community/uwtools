@@ -12,7 +12,13 @@ from typing import Any, cast
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import INCLUDE_TAG, depth, dict_to_yaml_str, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLExtend,
+    depth,
+    dict_to_yaml_str,
+    log_and_error,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
@@ -280,13 +286,20 @@ class Config(ABC, UserDict):
         :param src: The dictionary with new data to use.
         """
 
-        def update_dict(src: dict, dst: dict) -> None:
+        def update(src: dict, dst: dict) -> None:
             for key, new in src.items():
                 old = dst.get(key)
                 match (new, old):
                     case (dict(), dict()):
-                        update_dict(new, old)
+                        update(new, old)
+                    case (UWYAMLExtend(), list()):
+                        if not isinstance(new.node, yaml.SequenceNode):
+                            msg = "PM DEAL WITH THIS PROPERLY"
+                            raise UWConfigError(msg)
+                        # loader = uw_yaml_loader("")
+                        # breakpoint()
+                        # pass
                     case _:
                         dst[key] = new
 
-        update_dict(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)
+        update(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)

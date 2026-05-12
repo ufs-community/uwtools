@@ -21,7 +21,6 @@ from uwtools.config.support import (
     format_to_config,
     uw_yaml_loader,
 )
-from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_config_format, readable, writable
 
@@ -143,11 +142,7 @@ def dereference(
         keys = keys or []
         rendered = {}
         for k, v in val.items():
-            if isinstance(v, UWYAMLExtend):
-                if not isinstance(v.value, list) or isinstance(v.value[0], tuple):
-                    msg = "PM DEAL WITH THIS PROPERLY"
-                    raise UWConfigError(msg)
-            elif isinstance(v, UWYAMLRemove):
+            if isinstance(v, UWYAMLRemove):
                 deref_debug("Removing value at", ".".join([*keys, k]))
             else:
                 kd, vd = [dereference(x, context, val, [*keys, k]) for x in (k, v)]

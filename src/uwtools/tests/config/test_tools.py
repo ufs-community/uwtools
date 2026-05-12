@@ -597,6 +597,8 @@ def test_config_tools_realize__dry_run(logged):
 def test_config_tools_realize__extend(tmp_path):
     input_config = YAMLConfig({"a": [1, 2, 3]})
     s = "a: !extend [4, 5, 6]"
+    # s = "a: !extend {a: b, c: d}"
+    # s = "a: !extend 42"
     update_config = tmp_path / "update.yaml"
     update_config.write_text(dedent(s).strip())
     assert tools.realize(
