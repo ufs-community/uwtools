@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from functools import partial
+from functools import cache, partial
 from importlib import import_module
 from typing import TYPE_CHECKING
 
@@ -124,6 +124,7 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
+@cache
 def uw_yaml_loader() -> type[yaml.SafeLoader]:
     """
     A loader with basic UW constructors added.
