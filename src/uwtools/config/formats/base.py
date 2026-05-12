@@ -305,8 +305,8 @@ class Config(ABC, UserDict):
                             nodeid = getattr(new.node, "id", None)
                             assert nodeid in ("mapping", "scalar")
                             error(f"!extend must tag a sequence, not a {nodeid}", nextkeys)
-                    case (UWYAMLExtend(), None):
-                        error("found no list to extend", nextkeys)
+                    case (UWYAMLExtend(), object()):
+                        error("found no sequence to extend", nextkeys)
                     case _:
                         dst[key] = new
 
