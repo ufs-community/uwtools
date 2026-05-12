@@ -8,6 +8,7 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import ecflow as ecflowlib  # type: ignore[import-untyped]
 import yaml
 from ecflow import Defs, DState, Suite, Task  # type: ignore[import-untyped]
 from pytest import fixture, mark, raises
@@ -27,7 +28,7 @@ def assets(tmp_path, minimal_config):
     YAMLConfig(minimal_config).dump(yaml_file)
     script_path = tmp_path / "scripts"
     script_path.mkdir(exist_ok=True, parents=True)
-    expected = "#5.15.2\n# enddef\n"
+    expected = f"#{ecflowlib.__version__}\n# enddef\n"
     return yaml_file, script_path, expected
 
 
@@ -267,6 +268,25 @@ class TestECFlowDef:
     def test__init__missing_ecflow_key(self):
         config: dict = {"not_ecflow": {}}
         with raises(UWConfigError):
+            _ECFlowDef(config=config)
+
+    def test__init__defs_check_bad_trigger(self):
+        config = {
+            "ecflow": {
+                "suite_test": {
+                    "task_a": {
+                        "script": {
+                            "execution": {
+                                "executable": "run.exe",
+                                "incantation": "echo hello",
+                            }
+                        },
+                        "trigger": "nonexistent_task == complete",
+                    }
+                }
+            }
+        }
+        with raises(AssertionError):
             _ECFlowDef(config=config)
 
     # _add_workflow_components tests
@@ -665,7 +685,8 @@ def test_ecflow_realize__cfg_to_file(tmp_path, assets):
 def test_ecflow_realize__cfg_to_stdout(capsys, assets):
     cfgfile, _, expected = assets
     ecflow.realize(config=YAMLConfig(cfgfile))
-    assert capsys.readouterr().out == expected
+    output = capsys.readouterr().out
+    assert output == expected
 
 
 def test_ecflow_realize__file_to_file(tmp_path, assets):
@@ -678,7 +699,8 @@ def test_ecflow_realize__file_to_file(tmp_path, assets):
 def test_ecflow_realize__file_to_stdout(capsys, assets):
     cfgfile, _, expected = assets
     ecflow.realize(config=cfgfile)
-    assert capsys.readouterr().out == expected
+    output = capsys.readouterr().out
+    assert output == expected
 
 
 def test_ecflow_realize__write_scripts(capsys, assets):
@@ -686,7 +708,8 @@ def test_ecflow_realize__write_scripts(capsys, assets):
     with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
         ecflow.realize(config=cfgfile, scripts_path=script_path)
         write_scripts.assert_called_once_with(script_path)
-    assert capsys.readouterr().out == expected
+    output = capsys.readouterr().out
+    assert output == expected
 
 
 def test_validate__path(tmp_path, minimal_config):
@@ -715,3 +738,25 @@ def test_validate__invalid(tmp_path):
     with raises(UWConfigError) as e:
         ecflow.validate(yaml_file)
     assert "YAML validation errors" in str(e.value)
+
+
+def test_validate__suite_only():
+    """
+    A config with only a suite should pass validation.
+    """
+    config: dict = {"ecflow": {"suite_mysuite": {}}}
+    assert ecflow.validate(config)
+
+
+def test_validate__suite_with_properties():
+    """
+    A config with a suite plus optional properties should pass validation.
+    """
+    config = {
+        "ecflow": {
+            "scheduler": "slurm",
+            "vars": {"FOO": "bar"},
+            "suite_mysuite": {},
+        }
+    }
+    assert ecflow.validate(config)
