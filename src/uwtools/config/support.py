@@ -267,7 +267,7 @@ class UWYAMLGlob(UWYAMLTaggedStr):
 
 class UWYAMLRemove(UWYAMLTag):
     """
-    Support for a YAML tag that removes a key/value pair or sequence element.
+    Support for a YAML tag that removes a key/value pair.
     """
 
     TAGS = ("!remove",)
