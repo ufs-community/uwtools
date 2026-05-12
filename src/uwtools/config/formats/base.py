@@ -297,8 +297,9 @@ class Config(ABC, UserDict):
                     case (UWYAMLExtend(), list()):
                         if not isinstance(new.node, yaml.SequenceNode):
                             keypath = ".".join(keys)
-                            msg = "At %s, !extend must tag a SequenceNode, not %s"
-                            raise UWConfigError(msg % (keypath, new.node))
+                            nodeid = new.node.id  # type: ignore[attr-defined]
+                            msg = "At %s, !extend must tag a sequence, not a %s"
+                            raise UWConfigError(msg % (keypath, nodeid))
                         old.extend(uw_yaml_loader()("").construct_sequence(new.node))
                     case _:
                         dst[key] = new

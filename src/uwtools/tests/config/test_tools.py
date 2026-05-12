@@ -604,13 +604,13 @@ def test_config_tools_realize__extend(tmp_path):
 
 
 @mark.parametrize(
-    ("classname", "config", "keypath", "update"),
+    ("config", "keypath", "name", "update"),
     [
-        ("ScalarNode", {"a": [1, 2, 3]}, "a", "a: !extend 42"),
-        ("MappingNode", {"a": {"b": [1, 2, 3]}}, "a.b", "a: {b: !extend {foo: bar}}"),
+        ({"a": [1, 2, 3]}, "a", "scalar", "a: !extend 42"),
+        ({"a": {"b": [1, 2, 3]}}, "a.b", "mapping", "a: {b: !extend {foo: bar}}"),
     ],
 )
-def test_config_tools_realize__extend_error(classname, config, keypath, tmp_path, update):
+def test_config_tools_realize__extend_error(config, keypath, name, tmp_path, update):
     update_config = tmp_path / "update.yaml"
     update_config.write_text(update)
     with raises(UWConfigError) as e:
@@ -619,9 +619,7 @@ def test_config_tools_realize__extend_error(classname, config, keypath, tmp_path
             update_config=update_config,
             output_format=FORMAT.yaml,
         )
-    assert str(e.value).startswith(
-        f"At {keypath}, !extend must tag a SequenceNode, not {classname}"
-    )
+    assert str(e.value).startswith(f"At {keypath}, !extend must tag a sequence, not a {name}")
 
 
 def test_config_tools_realize__field_table(tmp_path):
