@@ -297,7 +297,7 @@ class Config(ABC, UserDict):
                         if not isinstance(new.node, yaml.SequenceNode):
                             msg = "PM DEAL WITH THIS PROPERLY"
                             raise UWConfigError(msg)
-                        dst[key] = old + uw_yaml_loader()("").construct_sequence(new.node)
+                        old.extend(uw_yaml_loader()("").construct_sequence(new.node))
                     case _:
                         dst[key] = new
 
