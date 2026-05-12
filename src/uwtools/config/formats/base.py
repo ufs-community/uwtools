@@ -287,6 +287,13 @@ class Config(ABC, UserDict):
         :param src: The dictionary with new data to use.
         """
 
+        def check_extend(node: yaml.Node, keys: list) -> None:
+            if not isinstance(node, yaml.SequenceNode):
+                keypath = ".".join(keys)
+                nodeid = node.id  # type: ignore[attr-defined]
+                msg = "At %s, !extend must tag a sequence, not a %s"
+                raise UWConfigError(msg % (keypath, nodeid))
+
         def update(src: dict, dst: dict, keys: list | None = None) -> None:
             for key, new in src.items():
                 keys = [*(keys or []), key]
@@ -295,12 +302,10 @@ class Config(ABC, UserDict):
                     case (dict(), dict()):
                         update(new, old, keys)
                     case (UWYAMLExtend(), list()):
-                        if not isinstance(new.node, yaml.SequenceNode):
-                            keypath = ".".join(keys)
-                            nodeid = new.node.id  # type: ignore[attr-defined]
-                            msg = "At %s, !extend must tag a sequence, not a %s"
-                            raise UWConfigError(msg % (keypath, nodeid))
-                        old.extend(uw_yaml_loader()("").construct_sequence(new.node))
+                        node = new.node
+                        check_extend(node, keys)
+                        assert isinstance(node, yaml.SequenceNode)
+                        old.extend(uw_yaml_loader()("").construct_sequence(node))
                     case _:
                         dst[key] = new
 
