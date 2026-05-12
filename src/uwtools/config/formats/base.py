@@ -295,7 +295,7 @@ class Config(ABC, UserDict):
                         update(new, old)
                     case (UWYAMLExtend(), list()):
                         if not isinstance(new.node, yaml.SequenceNode):
-                            msg = "PM DEAL WITH THIS PROPERLY"
+                            msg = "Expected !extend to tag a SequenceNode, not %s" % new.node
                             raise UWConfigError(msg)
                         old.extend(uw_yaml_loader()("").construct_sequence(new.node))
                     case _:

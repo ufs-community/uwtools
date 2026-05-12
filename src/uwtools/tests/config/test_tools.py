@@ -593,19 +593,27 @@ def test_config_tools_realize__dry_run(logged):
     assert logged(str(yaml_config), multiline=True)
 
 
-# @mark.skip
 def test_config_tools_realize__extend(tmp_path):
-    input_config = YAMLConfig({"a": [1, 2, 3]})
-    s = "a: !extend [4, 5, 6]"
-    # s = "a: !extend {a: b, c: d}"
-    # s = "a: !extend 42"
     update_config = tmp_path / "update.yaml"
-    update_config.write_text(dedent(s).strip())
+    update_config.write_text("a: !extend [4, 5, 6]")
     assert tools.realize(
-        input_config=input_config,
+        input_config=YAMLConfig({"a": [1, 2, 3]}),
         update_config=update_config,
         output_format=FORMAT.yaml,
     ) == {"a": [1, 2, 3, 4, 5, 6]}
+
+
+@mark.parametrize(("val", "classname"), [("42", "ScalarNode"), ("{foo: bar}", "MappingNode")])
+def test_config_tools_realize__extend_error(classname, tmp_path, val):
+    update_config = tmp_path / "update.yaml"
+    update_config.write_text(f"a: !extend {val}")
+    with raises(UWConfigError) as e:
+        assert tools.realize(
+            input_config=YAMLConfig({"a": [1, 2, 3]}),
+            update_config=update_config,
+            output_format=FORMAT.yaml,
+        )
+    assert str(e.value).startswith(f"Expected !extend to tag a SequenceNode, not {classname}")
 
 
 def test_config_tools_realize__field_table(tmp_path):
