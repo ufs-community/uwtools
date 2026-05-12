@@ -113,7 +113,7 @@ and ``update.yaml``:
    - 5
    - 6
 
-The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key at the same key path.
+The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key, with a sequence value, at the same key path.
 
 ``!float``
 ^^^^^^^^^^
