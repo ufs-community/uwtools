@@ -280,14 +280,13 @@ class Config(ABC, UserDict):
         :param src: The dictionary with new data to use.
         """
 
-        def update(src: dict, dst: dict) -> None:
-            for key, val in src.items():
-                if isinstance(val, dict):
-                    if isinstance(dst.get(key), dict):
-                        update(val, dst[key])
-                    else:
-                        dst[key] = val
-                else:
-                    dst[key] = val
+        def update_dict(src: dict, dst: dict) -> None:
+            for key, new in src.items():
+                old = dst.get(key)
+                match (new, old):
+                    case (dict(), dict()):
+                        update_dict(new, old)
+                    case _:
+                        dst[key] = new
 
-        update(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)
+        update_dict(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)

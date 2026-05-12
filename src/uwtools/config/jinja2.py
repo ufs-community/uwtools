@@ -144,7 +144,7 @@ def dereference(
         rendered = {}
         for k, v in val.items():
             if isinstance(v, UWYAMLExtend):
-                if not isinstance(v.value, list):
+                if not isinstance(v.value, list) or isinstance(v.value[0], tuple):
                     msg = "PM DEAL WITH THIS PROPERLY"
                     raise UWConfigError(msg)
             elif isinstance(v, UWYAMLRemove):
