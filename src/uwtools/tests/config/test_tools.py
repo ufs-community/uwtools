@@ -624,7 +624,7 @@ def test_config_tools_realize__extend_bad_tagged_node(config, keypath, name, tmp
 
 def test_config_tools_realize__extend_nothing_to_extend(tmp_path):
     update_config = tmp_path / "update.yaml"
-    update_config.write_text("x: !extend [4, 5, 6]")
+    update_config.write_text("foo: bar\nx: !extend [4, 5, 6]")
     with raises(UWConfigError) as e:
         assert tools.realize(
             input_config=YAMLConfig({"a": [1, 2, 3]}),

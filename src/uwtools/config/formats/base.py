@@ -293,20 +293,20 @@ class Config(ABC, UserDict):
 
         def update(src: dict, dst: dict, keys: list | None = None) -> None:
             for key, new in src.items():
-                keys = [*(keys or []), key]
+                nextkeys = [*(keys or []), key]
                 old = dst.get(key)
                 match (new, old):
                     case (dict(), dict()):
-                        update(new, old, keys)
+                        update(new, old, nextkeys)
                     case (UWYAMLExtend(), list()):
                         if isinstance(new.node, yaml.SequenceNode):
                             old.extend(uw_yaml_loader()("").construct_sequence(new.node))
                         else:
                             nodeid = getattr(new.node, "id", None)
                             assert nodeid in ("mapping", "scalar")
-                            error(f"!extend must tag a sequence, not a {nodeid}", keys)
+                            error(f"!extend must tag a sequence, not a {nodeid}", nextkeys)
                     case (UWYAMLExtend(), None):
-                        error("found no list to extend", keys)
+                        error("found no list to extend", nextkeys)
                     case _:
                         dst[key] = new
 
