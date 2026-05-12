@@ -593,7 +593,7 @@ def test_config_tools_realize__dry_run(logged):
     assert logged(str(yaml_config), multiline=True)
 
 
-@mark.skip
+# @mark.skip
 def test_config_tools_realize__extend(tmp_path):
     input_config = YAMLConfig({"a": [1, 2, 3]})
     s = "a: !extend [4, 5, 6]"

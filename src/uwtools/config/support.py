@@ -128,7 +128,7 @@ def uw_yaml_loader() -> type[yaml.SafeLoader]:
     """
     A loader with basic UW constructors added.
     """
-    loader = yaml.SafeLoader
+    loader = _UWYAMLLoader
     for tag_class in (UWYAMLConvert, UWYAMLExtend, UWYAMLGlob, UWYAMLRemove):
         for tag in tag_class.TAGS:
             loader.add_constructor(tag, tag_class)
@@ -144,6 +144,9 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     """
     add_yaml_representers()
     return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
+
+
+class _UWYAMLLoader(yaml.SafeLoader): ...
 
 
 class UWYAMLTag:

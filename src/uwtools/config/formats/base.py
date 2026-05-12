@@ -18,6 +18,7 @@ from uwtools.config.support import (
     depth,
     dict_to_yaml_str,
     log_and_error,
+    uw_yaml_loader,
 )
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
@@ -296,9 +297,7 @@ class Config(ABC, UserDict):
                         if not isinstance(new.node, yaml.SequenceNode):
                             msg = "PM DEAL WITH THIS PROPERLY"
                             raise UWConfigError(msg)
-                        # loader = uw_yaml_loader("")
-                        # breakpoint()
-                        # pass
+                        dst[key] = old + uw_yaml_loader()("").construct_sequence(new.node)
                     case _:
                         dst[key] = new
 
