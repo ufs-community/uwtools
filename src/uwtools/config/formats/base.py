@@ -288,16 +288,15 @@ class Config(ABC, UserDict):
         """
 
         def update(src: dict, dst: dict, keys: list | None = None) -> None:
-            keys = keys or []
             for key, new in src.items():
-                keysnext = [*keys, key]
+                keys = [*(keys or []), key]
                 old = dst.get(key)
                 match (new, old):
                     case (dict(), dict()):
-                        update(new, old, keysnext)
+                        update(new, old, keys)
                     case (UWYAMLExtend(), list()):
                         if not isinstance(new.node, yaml.SequenceNode):
-                            keypath = ".".join(keysnext)
+                            keypath = ".".join(keys)
                             msg = "At %s, !extend must tag a SequenceNode, not %s"
                             raise UWConfigError(msg % (keypath, new.node))
                         old.extend(uw_yaml_loader()("").construct_sequence(new.node))
