@@ -593,6 +593,19 @@ def test_config_tools_realize__dry_run(logged):
     assert logged(str(yaml_config), multiline=True)
 
 
+@mark.skip
+def test_config_tools_realize__extend(tmp_path):
+    input_config = YAMLConfig({"a": [1, 2, 3]})
+    s = "a: !extend [4, 5, 6]"
+    update_config = tmp_path / "update.yaml"
+    update_config.write_text(dedent(s).strip())
+    assert tools.realize(
+        input_config=input_config,
+        update_config=update_config,
+        output_format=FORMAT.yaml,
+    ) == {"a": [1, 2, 3, 4, 5, 6]}
+
+
 def test_config_tools_realize__field_table(tmp_path):
     """
     Test reading a YAML config object and generating a field file table.
