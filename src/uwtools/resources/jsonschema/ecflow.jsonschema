@@ -357,7 +357,8 @@
       },
       "required": [
         "expand"
-      ]
+      ],
+      "type": "object"
     },
     "family": {
       "$ref": "#/$defs/familycontainer",
@@ -432,7 +433,8 @@
       },
       "required": [
         "expand"
-      ]
+      ],
+      "type": "object"
     },
     "task_expander": {
       "$ref": "#/$defs/task_expander_base",
