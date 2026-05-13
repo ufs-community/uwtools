@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from functools import partial
+from functools import cache, partial
 from importlib import import_module
 from typing import TYPE_CHECKING
 
@@ -20,6 +20,11 @@ if TYPE_CHECKING:
 
 INCLUDE_TAG = "!include"
 YAMLKey = bool | float | int | str
+
+
+class _UWYAMLLoader(yaml.SafeLoader):
+    pass
+
 
 # Public functions
 
@@ -70,7 +75,7 @@ def add_yaml_representers() -> None:
         ),
     )
     yaml.add_representer(timedelta, timedelta2str)
-    for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
+    for tag_class in [UWYAMLConvert, UWYAMLExtend, UWYAMLGlob, UWYAMLRemove]:
         yaml.add_representer(tag_class, tag_class.represent)
 
 
@@ -124,12 +129,13 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
+@cache
 def uw_yaml_loader() -> type[yaml.SafeLoader]:
     """
     A loader with basic UW constructors added.
     """
-    loader = yaml.SafeLoader
-    for tag_class in (UWYAMLConvert, UWYAMLGlob, UWYAMLRemove):
+    loader = _UWYAMLLoader
+    for tag_class in (UWYAMLConvert, UWYAMLExtend, UWYAMLGlob, UWYAMLRemove):
         for tag in tag_class.TAGS:
             loader.add_constructor(tag, tag_class)
     return loader
@@ -244,6 +250,14 @@ class UWYAMLConvert(UWYAMLTaggedStr):
         Return the string representation of the value, with tag.
         """
         return f"{self.tag} '{self.value}'"
+
+
+class UWYAMLExtend(UWYAMLTag):
+    """
+    Support for a YAML tag that extends a sequence.
+    """
+
+    TAGS = ("!extend",)
 
 
 class UWYAMLGlob(UWYAMLTaggedStr):

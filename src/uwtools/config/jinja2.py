@@ -15,6 +15,7 @@ from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import (
     UWYAMLConvert,
+    UWYAMLExtend,
     UWYAMLGlob,
     UWYAMLRemove,
     format_to_config,
@@ -33,6 +34,7 @@ _ConfigVal = (
     | str
     | timedelta
     | UWYAMLConvert
+    | UWYAMLExtend
     | UWYAMLGlob
     | UWYAMLRemove
 )
