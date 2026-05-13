@@ -680,7 +680,6 @@ def test_schema_ecflow():
         "ecflow": {
             "suite_one": {
                 "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
-
                 "families_two": {
                     "expand": {
                         "myvar": ["foo", "bar"],
@@ -903,7 +902,9 @@ def test_schema_ecflow_refs_taskcontainer():
 def test_schema_ecflow_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
-    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}, "post_includes": ["tail.h"]}}
+    config = {
+        "script": {"execution": {"incantation": "/path/to/run.sh"}, "post_includes": ["tail.h"]}
+    }
     assert not errors(config)
     assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
     assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
