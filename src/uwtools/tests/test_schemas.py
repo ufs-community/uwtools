@@ -843,19 +843,43 @@ def test_schema_ecflow_refs_addons_repeat_day():
     )
 
 
-def test_schema_ecflow_refs_expander():
-    errors = schema_validator("ecflow", "$defs", "expander")
+def test_schema_ecflow_refs_family_expander():
+    errors = schema_validator("ecflow", "$defs", "family_expander")
     # Basic spec:
-    config = {"expand": {"foo": [1, 2]}, "family_one": {}}
+    config = {"expand": {"MEM": ["01", "02"]}, "family_member": {}}
     assert not errors(config)
-    # Note: expected to allow additional properties since it's used to compose higher-level refs.
     # expand is a required top-level key:
     assert "'expand' is a required property" in errors(with_del(config, "expand"))
-    # expand requires at least one variable/list pair
-    config.update({"expand": {"foo": 2}})  # type: ignore [dict-item]
-    assert "2 is not of type 'array'" in errors(config)
-    config.update({"expand": {}})
-    assert "{} should be non-empty" in errors(config)
+    # expand requires at least one variable/list pair:
+    assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
+    assert "{} should be non-empty" in errors({**config, "expand": {}})
+    # Arbitrary sibling properties are not allowed:
+    assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_val"})
+    # script is not valid for a family expander:
+    assert "Unevaluated properties are not allowed" in errors(
+        {**config, "script": {"execution": {"incantation": "echo hi"}}}
+    )
+    # addon properties (e.g., trigger) are valid siblings:
+    assert not errors({**config, "trigger": "task_setup == complete"})
+
+
+def test_schema_ecflow_refs_task_expander():
+    errors = schema_validator("ecflow", "$defs", "task_expander")
+    # Basic spec (script content is not validated here; that is issue #893):
+    config = {
+        "expand": {"MEM": ["01", "02"]},
+        "script": {"execution": {"incantation": "echo hi"}},
+    }
+    assert not errors(config)
+    # expand is a required top-level key:
+    assert "'expand' is a required property" in errors(with_del(config, "expand"))
+    # expand requires at least one variable/list pair:
+    assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
+    assert "{} should be non-empty" in errors({**config, "expand": {}})
+    # Arbitrary sibling properties are not allowed:
+    assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_val"})
+    # addon properties (e.g., trigger) are valid siblings:
+    assert not errors({**config, "trigger": "task_setup == complete"})
 
 
 def test_schema_ecflow_refs_family():
