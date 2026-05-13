@@ -22,7 +22,8 @@ INCLUDE_TAG = "!include"
 YAMLKey = bool | float | int | str
 
 
-class _UWYAMLLoader(yaml.SafeLoader): ...
+class _UWYAMLLoader(yaml.SafeLoader):
+    pass
 
 
 # Public functions
