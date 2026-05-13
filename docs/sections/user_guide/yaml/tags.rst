@@ -89,18 +89,16 @@ Extends an existing list in a base config with additional items. For example, gi
 .. code-block:: yaml
 
    values:
-     - 1
-     - 2
-     - 3
+   - 1
+   - 2
 
 and ``update.yaml``:
 
 .. code-block:: yaml
 
    values: !extend
-     - 4
-     - 5
-     - 6
+   - 3
+   - 4
 
 .. code-block:: text
 
@@ -110,8 +108,6 @@ and ``update.yaml``:
    - 2
    - 3
    - 4
-   - 5
-   - 6
 
 The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key, with a sequence value, at the same key path.
 
