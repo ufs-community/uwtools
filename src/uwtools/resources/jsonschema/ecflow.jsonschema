@@ -365,10 +365,6 @@
       "unevaluatedProperties": false
     },
     "family_expander": {
-      "$ref": "#/$defs/family_expander_base",
-      "unevaluatedProperties": false
-    },
-    "family_expander_base": {
       "allOf": [
         {
           "$ref": "#/$defs/addons"
@@ -381,7 +377,8 @@
         }
       ],
       "minProperties": 2,
-      "type": "object"
+      "type": "object",
+      "unevaluatedProperties": false
     },
     "familycontainer": {
       "allOf": [
@@ -437,10 +434,6 @@
       "type": "object"
     },
     "task_expander": {
-      "$ref": "#/$defs/task_expander_base",
-      "unevaluatedProperties": false
-    },
-    "task_expander_base": {
       "allOf": [
         {
           "$ref": "#/$defs/addons"
@@ -453,7 +446,8 @@
         }
       ],
       "minProperties": 2,
-      "type": "object"
+      "type": "object",
+      "unevaluatedProperties": false
     },
     "taskcontainer": {
       "allOf": [
