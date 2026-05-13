@@ -864,7 +864,7 @@ def test_schema_ecflow_refs_family_expander():
 
 
 def test_schema_ecflow_refs_task_expander():
-    errors = schema_validator("ecflow", "$defs", "task_expander")
+    errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^tasks_.+$")
     # Basic spec (script content is not validated here; that is issue #893):
     config = {
         "expand": {"MEM": ["01", "02"]},

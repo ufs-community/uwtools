@@ -403,7 +403,20 @@
           "$ref": "#/$defs/taskcontainer"
         },
         "^tasks_.+$": {
-          "$ref": "#/$defs/task_expander"
+          "allOf": [
+            {
+              "$ref": "#/$defs/addons"
+            },
+            {
+              "$ref": "#/$defs/nodecontainer"
+            },
+            {
+              "$ref": "#/$defs/task_expand_block"
+            }
+          ],
+          "minProperties": 2,
+          "type": "object",
+          "unevaluatedProperties": false
         }
       },
       "type": "object"
@@ -432,22 +445,6 @@
         "expand"
       ],
       "type": "object"
-    },
-    "task_expander": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/addons"
-        },
-        {
-          "$ref": "#/$defs/nodecontainer"
-        },
-        {
-          "$ref": "#/$defs/task_expand_block"
-        }
-      ],
-      "minProperties": 2,
-      "type": "object",
-      "unevaluatedProperties": false
     },
     "taskcontainer": {
       "allOf": [
