@@ -679,7 +679,8 @@ def test_schema_ecflow():
     config = {
         "ecflow": {
             "suite_one": {
-                "task_two": {"script": {"execution": {"executable": "echo hi"}}},
+                "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
+
                 "families_two": {
                     "expand": {
                         "myvar": ["foo", "bar"],
@@ -885,7 +886,7 @@ def test_schema_ecflow_refs_nodecontainer():
 def test_schema_ecflow_refs_task():
     errors = schema_validator("ecflow", "$defs", "task")
     # Basic spec:
-    config = {"script": {"execution": {"executable": "echo hi"}}, "vars": {"foo": 1, "bar": 2}}
+    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}, "vars": {"key": 1}}
     assert not errors(config)
     assert "'script' is a required property" in errors({"defstatus": "complete"})
     assert "Unevaluated properties are not allowed" in errors({**config, "extra": 2})
@@ -894,7 +895,7 @@ def test_schema_ecflow_refs_task():
 def test_schema_ecflow_refs_taskcontainer():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
-    config = {"script": {"execution": {"executable": "echo hi"}}, "vars": {"foo": 1, "bar": 2}}
+    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}, "vars": {"key": 1}}
     assert not errors(config)
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
@@ -902,7 +903,7 @@ def test_schema_ecflow_refs_taskcontainer():
 def test_schema_ecflow_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
-    config = {"script": {"execution": {"executable": "echo hi"}, "post_includes": ["tail.h"]}}
+    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}, "post_includes": ["tail.h"]}}
     assert not errors(config)
     assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
     assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
@@ -927,16 +928,31 @@ def test_schema_ecflow_extern():
     assert "is not of type 'array'" in errors({"extern": "/other/suite/task"})
 
 
-def test_schema_ecflow_refs_taskcontainer_script_incantation():
-    errors = schema_validator("ecflow", "$defs", "taskcontainer")
-    # incantation alongside executable is valid per schema:
+def test_schema_ecflow_execution():
+    errors = schema_validator("ecflow-execution")
+    # Basic spec:
+    assert not errors({"incantation": "/path/to/run.sh"})
+    # incantation is required:
+    assert "'incantation' is a required property" in errors({})
+    # executable is not a valid key:
+    assert "Additional properties are not allowed" in errors(
+        {"incantation": "/path/to/run.sh", "executable": "run.exe"}
+    )
+    # mpiargs and mpicmd are not valid keys:
+    assert "Additional properties are not allowed" in errors(
+        {"incantation": "/path/to/run.sh", "mpicmd": "srun"}
+    )
+    # Optional keys are valid:
     assert not errors(
-        {"script": {"execution": {"executable": "run.exe", "incantation": "/path/to/run.sh"}}}
+        {
+            "incantation": "/path/to/run.sh",
+            "batchargs": {"walltime": "00:30:00"},
+            "envcmds": ["module load python"],
+            "threads": 4,
+        }
     )
-    # incantation alone is invalid per schema (executable is required by execution-serial/parallel):
-    assert "is not valid under any of the given schemas" in errors(
-        {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
-    )
+    # threads must be a positive integer:
+    assert "is less than the minimum" in errors({"incantation": "/path/to/run.sh", "threads": 0})
 
 
 # enkf

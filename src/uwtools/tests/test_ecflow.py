@@ -277,8 +277,7 @@ class TestECFlowDef:
                     "task_a": {
                         "script": {
                             "execution": {
-                                "executable": "run.exe",
-                                "incantation": "echo hello",
+                                "incantation": "/path/to/run.sh",
                             }
                         },
                         "trigger": "nonexistent_task == complete",
@@ -624,8 +623,7 @@ class TestECFlowDef:
                             "trigger": "1==1",
                             "script": {
                                 "execution": {
-                                    "executable": "prep.exe",
-                                    "incantation": "echo running",
+                                    "incantation": "/path/to/prep.sh",
                                 },
                             },
                         },
@@ -633,7 +631,7 @@ class TestECFlowDef:
                     "task_run": {
                         "trigger": "/test/prep/setup == complete",
                         "script": {
-                            "execution": {"executable": "run.exe", "incantation": "echo running"},
+                            "execution": {"incantation": "/path/to/run.sh"},
                         },
                     },
                 }

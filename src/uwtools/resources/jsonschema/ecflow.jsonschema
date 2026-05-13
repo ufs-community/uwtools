@@ -425,14 +425,7 @@
                   "type": "string"
                 },
                 "execution": {
-                  "anyOf": [
-                    {
-                      "$ref": "urn:uwtools:execution-parallel"
-                    },
-                    {
-                      "$ref": "urn:uwtools:execution-serial"
-                    }
-                  ]
+                  "$ref": "urn:uwtools:ecflow-execution"
                 },
                 "manual": {
                   "type": "string"
