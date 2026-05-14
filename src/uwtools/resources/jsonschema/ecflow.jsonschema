@@ -342,7 +342,7 @@
       },
       "type": "object"
     },
-    "expand_block": {
+    "expander": {
       "properties": {
         "expand": {
           "additionalProperties": false,
@@ -364,22 +364,6 @@
       "$ref": "#/$defs/familycontainer",
       "unevaluatedProperties": false
     },
-    "family_expander": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/addons"
-        },
-        {
-          "$ref": "#/$defs/nodecontainer"
-        },
-        {
-          "$ref": "#/$defs/expand_block"
-        }
-      ],
-      "minProperties": 2,
-      "type": "object",
-      "unevaluatedProperties": false
-    },
     "familycontainer": {
       "allOf": [
         {
@@ -394,7 +378,14 @@
     "nodecontainer": {
       "patternProperties": {
         "^families_.+$": {
-          "$ref": "#/$defs/family_expander"
+          "allOf": [
+            {
+              "$ref": "#/$defs/expander"
+            },
+            {
+              "$ref": "#/$defs/familycontainer"
+            }
+          ]
         },
         "^family_.+$": {
           "$ref": "#/$defs/familycontainer"
@@ -405,18 +396,12 @@
         "^tasks_.+$": {
           "allOf": [
             {
-              "$ref": "#/$defs/addons"
+              "$ref": "#/$defs/expander"
             },
             {
-              "$ref": "#/$defs/nodecontainer"
-            },
-            {
-              "$ref": "#/$defs/task_expand_block"
+              "$ref": "#/$defs/taskcontainer"
             }
-          ],
-          "minProperties": 2,
-          "type": "object",
-          "unevaluatedProperties": false
+          ]
         }
       },
       "type": "object"
@@ -424,27 +409,6 @@
     "task": {
       "$ref": "#/$defs/taskcontainer",
       "unevaluatedProperties": false
-    },
-    "task_expand_block": {
-      "properties": {
-        "expand": {
-          "additionalProperties": false,
-          "minProperties": 1,
-          "patternProperties": {
-            "^.+$": {
-              "type": "array"
-            }
-          },
-          "type": "object"
-        },
-        "script": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "expand"
-      ],
-      "type": "object"
     },
     "taskcontainer": {
       "allOf": [
@@ -532,7 +496,14 @@
           ]
         },
         "^suites_.+$": {
-          "$ref": "#/$defs/family_expander"
+          "allOf": [
+            {
+              "$ref": "#/$defs/expander"
+            },
+            {
+              "$ref": "#/$defs/familycontainer"
+            }
+          ]
         },
         "unevaluatedProperties": false
       },
