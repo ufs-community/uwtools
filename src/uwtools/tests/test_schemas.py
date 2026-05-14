@@ -930,7 +930,17 @@ def test_schema_ecflow_extern():
 
 
 def test_schema_ecflow_execution():
-    errors = schema_validator("ecflow-execution")
+    errors = schema_validator(
+        "ecflow",
+        "$defs",
+        "taskcontainer",
+        "allOf",
+        1,
+        "properties",
+        "script",
+        "properties",
+        "execution",
+    )
     # Basic spec:
     assert not errors({"incantation": "/path/to/run.sh"})
     # incantation is required:
