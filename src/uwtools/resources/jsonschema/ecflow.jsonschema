@@ -345,13 +345,10 @@
     "expander": {
       "properties": {
         "expand": {
-          "additionalProperties": false,
-          "minProperties": 1,
-          "patternProperties": {
-            "^.+$": {
-              "type": "array"
-            }
+          "additionalProperties": {
+            "type": "array"
           },
+          "minProperties": 1,
           "type": "object"
         }
       },
@@ -385,13 +382,16 @@
             {
               "$ref": "#/$defs/familycontainer"
             }
-          ]
+          ],
+          "unevaluatedProperties": false
         },
         "^family_.+$": {
-          "$ref": "#/$defs/familycontainer"
+          "$ref": "#/$defs/familycontainer",
+          "unevaluatedProperties": false
         },
         "^task_.+$": {
-          "$ref": "#/$defs/taskcontainer"
+          "$ref": "#/$defs/taskcontainer",
+          "unevaluatedProperties": false
         },
         "^tasks_.+$": {
           "allOf": [
@@ -401,7 +401,8 @@
             {
               "$ref": "#/$defs/taskcontainer"
             }
-          ]
+          ],
+          "unevaluatedProperties": false
         }
       },
       "type": "object"
@@ -493,7 +494,8 @@
             {
               "$ref": "#/$defs/addons"
             }
-          ]
+          ],
+          "unevaluatedProperties": false
         },
         "^suites_.+$": {
           "allOf": [
@@ -503,9 +505,9 @@
             {
               "$ref": "#/$defs/familycontainer"
             }
-          ]
-        },
-        "unevaluatedProperties": false
+          ],
+          "unevaluatedProperties": false
+        }
       },
       "properties": {
         "extern": {
