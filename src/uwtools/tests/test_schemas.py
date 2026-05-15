@@ -682,7 +682,7 @@ def test_schema_ecflow():
                 "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
                 "families_two": {
                     "expand": {
-                        "myvar": ["foo", "bar"],
+                        "MEM": ["00", "06"],
                     },
                     "family_three": {},
                 },
@@ -698,22 +698,17 @@ def test_schema_ecflow_nested_family():
     config = {
         "ecflow": {
             "suites_a": {
-                "family_a": {
-                    "families_a{{ ec.var }}": {"family_b": {}, "expand": {"myvar": [1, 2]}}
-                },
+                "family_a": {"families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}},
                 "expand": {
-                    "avar": ["foo", "bar"],
+                    "MEMBER": ["00", "06"],
                 },
             }
         }
     }
     assert not errors(config)
-    # Ensure that the required "expand" and node entries are present:
-    assert "does not have enough properties" in errors(
+    # Ensure that the required "expand" key is present:
+    assert "'expand' is a required property" in errors(
         with_del(config, "ecflow", "suites_a", "expand")
-    )
-    assert "does not have enough properties" in errors(
-        with_del(config, "ecflow", "suites_a", "family_a")
     )
 
 
@@ -721,30 +716,34 @@ def test_schema_ecflow_refs_addons_defstatus():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"defstatus": "suspended"})
-    assert "'foo' is not one of" in errors({"defstatus": "foo"})
+    assert "'halted' is not one of" in errors({"defstatus": "halted"})
 
 
 def test_schema_ecflow_refs_addons_events():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    assert not errors({"events": [[1, "foo"]]})
-    assert not errors({"events": [1, "foo"]})
+    assert not errors({"events": [[1, "sim_complete"]]})
+    assert not errors({"events": [1, "sim_complete"]})
     assert not errors({"events": [1, 2, 3]})
-    assert not errors({"events": ["foo", "bar", "baz"]})
+    assert not errors({"events": ["sim_complete", "post_done", "arch_done"]})
     # Must be one of the specified patterns:
-    assert "is not valid under any of the given schemas" in errors({"events": [["foo", 2]]})
+    assert "is not valid under any of the given schemas" in errors(
+        {"events": [["sim_complete", 2]]}
+    )
 
 
 def test_schema_ecflow_refs_addons_inlimits():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Supports one of four categories:
-    assert not errors({"inlimits": [["foo"]]})
-    assert not errors({"inlimits": [["foo", "bar"]]})
-    assert not errors({"inlimits": [["foo", "bar", 2], ["baz", "qux"]]})
-    assert not errors({"inlimits": [["foo", "bar", 2, True]]})
+    assert not errors({"inlimits": [["max_members"]]})
+    assert not errors({"inlimits": [["max_members", "/suite/limit"]]})
+    assert not errors(
+        {"inlimits": [["max_members", "/suite/limit", 10], ["max_procs", "/other/limit"]]}
+    )
+    assert not errors({"inlimits": [["max_members", "/suite/limit", 10, True]]})
     # Exactly one is required:
-    assert "['foo', 2] is not valid under any of the given schemas" in errors(
-        {"inlimits": [["foo", 2]]}
+    assert "['max_members', 2] is not valid under any of the given schemas" in errors(
+        {"inlimits": [["max_members", 2]]}
     )
     assert "{} is not of type 'array'" in errors({"inlimits": {}})
     assert "[] should be non-empty" in errors({"inlimits": []})
@@ -753,10 +752,10 @@ def test_schema_ecflow_refs_addons_inlimits():
 def test_schema_ecflow_refs_addons_labels():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Allows for a list of 2-lists:
-    assert not errors({"labels": [["foo", "bar"], ["baz", "qux"]]})
+    assert not errors({"labels": [["info", "running"], ["progress", "75%"]]})
     # List must contain 2-item lists:
-    assert "'foo' is not of type 'array'" in errors({"labels": ["foo", "bar"]})
-    assert "['foo'] is too short" in errors({"labels": [["foo"]]})
+    assert "'info' is not of type 'array'" in errors({"labels": ["info", "running"]})
+    assert "['info'] is too short" in errors({"labels": [["info"]]})
     assert "[] should be non-empty" in errors({"labels": []})
 
 
@@ -769,18 +768,20 @@ def test_schema_ecflow_refs_addons_late():
 def test_schema_ecflow_refs_addons_limits():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    assert not errors({"limits": [["foo", 1], ["bar", 2]]})
+    assert not errors({"limits": [["max_tasks", 10], ["max_procs", 8]]})
     # It's a list of lists:
-    assert "'foo' is not of type 'array'" in errors({"limits": ["foo"]})
+    assert "'max_tasks' is not of type 'array'" in errors({"limits": ["max_tasks"]})
     assert "[] should be non-empty" in errors({"limits": []})
 
 
 def test_schema_ecflow_refs_addons_meters():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    assert not errors({"meters": [["foo", 1, 2], ["bar", 2, 8]]})
+    assert not errors({"meters": [["progress", 0, 100], ["step", 0, 10]]})
     # It's a list of lists:
-    assert "'foo' is not valid under any of the given schemas" in errors({"meters": ["foo"]})
+    assert "'progress' is not valid under any of the given schemas" in errors(
+        {"meters": ["progress"]}
+    )
     assert "[] should be non-empty" in errors({"meters": []})
 
 
@@ -788,7 +789,7 @@ def test_schema_ecflow_refs_addons_meters():
 def test_schema_ecflow_refs_addons_repeat_ints(top_level):
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    config = {"variable": "foo", "start": 20260101, "end": 20260102}
+    config = {"variable": "MEMBER", "start": 20260101, "end": 20260102}
     assert not errors({top_level: config})
     with_step = {**config, "step": 2}
     assert not errors({top_level: with_step})
@@ -796,7 +797,9 @@ def test_schema_ecflow_refs_addons_repeat_ints(top_level):
     for key in ("end", "start", "variable"):
         assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({top_level: {**config, "foo": "bar"}})
+    assert "Additional properties are not allowed" in errors(
+        {top_level: {**config, "bad_key": "bad_value"}}
+    )
 
 
 @mark.parametrize("top_level", ["repeat_datelist", "repeat_enumerated", "repeat_string"])
@@ -804,19 +807,21 @@ def test_schema_ecflow_refs_addons_repeat_lists(top_level):
     errors = schema_validator("ecflow", "$defs", "addons")
     type_ = int if top_level == "repeat_datelist" else str
     # Basic spec:
-    config = {"variable": "foo", "list": [type_(i) for i in (20270104, 20270204)]}
+    config = {"variable": "CYCLE", "list": [type_(i) for i in (20270104, 20270204)]}
     assert not errors({top_level: config})
     # All top-level keys are required:
     for key in ("variable", "list"):
         assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({top_level: {**config, "foo": "bar"}})
+    assert "Additional properties are not allowed" in errors(
+        {top_level: {**config, "bad_key": "bad_value"}}
+    )
 
 
 def test_schema_ecflow_refs_addons_repeat_datetime():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    config = {"variable": "foo", "start": "20260101T120000", "end": "20260102T123000"}
+    config = {"variable": "CYCLE", "start": "20260101T120000", "end": "20260102T123000"}
     assert not errors({"repeat_datetime": config})
     with_step = {**config, "step": "02:00:00"}
     assert not errors({"repeat_datetime": with_step})
@@ -827,7 +832,7 @@ def test_schema_ecflow_refs_addons_repeat_datetime():
         )
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors(
-        {"repeat_datetime": {**config, "foo": "bar"}}
+        {"repeat_datetime": {**config, "bad_key": "bad_value"}}
     )
 
 
@@ -839,37 +844,91 @@ def test_schema_ecflow_refs_addons_repeat_day():
     # step is a required top-level key:
     assert "'step' is a required property" in errors({"repeat_day": with_del(config, "step")})
     assert "Additional properties are not allowed" in errors(
-        {"repeat_day": {**config, "foo": "bar"}}
+        {"repeat_day": {**config, "bad_key": "bad_value"}}
     )
 
 
-def test_schema_ecflow_refs_expander():
-    errors = schema_validator("ecflow", "$defs", "expander")
+def test_schema_ecflow_refs_families_expander():
+    errors = schema_validator(
+        "ecflow", "$defs", "nodecontainer", "patternProperties", "^families_.+$"
+    )
     # Basic spec:
-    config = {"expand": {"foo": [1, 2]}, "family_one": {}}
+    config = {"expand": {"MEM": ["01", "02"]}, "family_member": {}}
     assert not errors(config)
-    # Note: expected to allow additional properties since it's used to compose higher-level refs.
     # expand is a required top-level key:
     assert "'expand' is a required property" in errors(with_del(config, "expand"))
-    # expand requires at least one variable/list pair
-    config.update({"expand": {"foo": 2}})  # type: ignore [dict-item]
-    assert "2 is not of type 'array'" in errors(config)
-    config.update({"expand": {}})
-    assert "{} should be non-empty" in errors(config)
+    # expand requires at least one variable/list pair:
+    assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
+    assert "{} should be non-empty" in errors({**config, "expand": {}})
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties (e.g., trigger) are valid siblings:
+    assert not errors({**config, "trigger": "task_setup == complete"})
+
+
+def test_schema_ecflow_refs_task_expander():
+    errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^tasks_.+$")
+    # Basic spec:
+    config = {
+        "expand": {"MEM": ["01", "02"]},
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+    }
+    assert not errors(config)
+    # expand is a required top-level key:
+    assert "'expand' is a required property" in errors(with_del(config, "expand"))
+    # expand requires at least one variable/list pair:
+    assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
+    assert "{} should be non-empty" in errors({**config, "expand": {}})
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties (e.g., trigger) are valid siblings:
+    assert not errors({**config, "trigger": "task_setup == complete"})
+
+
+def test_schema_ecflow_refs_nodecontainer_family():
+    errors = schema_validator(
+        "ecflow", "$defs", "nodecontainer", "patternProperties", "^family_.+$"
+    )
+    # Basic spec:
+    config = {"task_one": {"script": {"execution": {"incantation": "/path/to/run.sh"}}}}
+    assert not errors(config)
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties are valid siblings:
+    assert not errors({**config, "defstatus": "suspended"})
+
+
+def test_schema_ecflow_refs_nodecontainer_task():
+    errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^task_.+$")
+    # Basic spec:
+    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
+    assert not errors(config)
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties are valid siblings:
+    assert not errors({**config, "defstatus": "suspended"})
 
 
 def test_schema_ecflow_refs_family():
     errors = schema_validator("ecflow", "$defs", "family")
     # Basic spec:
-    config = {"family_one": {}, "vars": {"foo": 1, "bar": 2}}
+    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
     assert not errors(config)
-    assert "Unevaluated properties are not allowed" in errors({**config, "extra": 2})
+    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
 def test_schema_ecflow_refs_familycontainer():
     errors = schema_validator("ecflow", "$defs", "familycontainer")
     # Basic spec:
-    config = {"family_one": {}, "vars": {"foo": 1, "bar": 2}}
+    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
     assert not errors(config)
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
@@ -877,7 +936,7 @@ def test_schema_ecflow_refs_familycontainer():
 def test_schema_ecflow_refs_nodecontainer():
     errors = schema_validator("ecflow", "$defs", "nodecontainer")
     # Basic spec:
-    config = {"family_one": {}, "vars": {"foo": 1, "bar": 2}}
+    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
     assert not errors(config)
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
@@ -885,16 +944,22 @@ def test_schema_ecflow_refs_nodecontainer():
 def test_schema_ecflow_refs_task():
     errors = schema_validator("ecflow", "$defs", "task")
     # Basic spec:
-    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}, "vars": {"key": 1}}
+    config = {
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "vars": {"MEMBER": "00", "LEAD": "006"},
+    }
     assert not errors(config)
     assert "'script' is a required property" in errors({"defstatus": "complete"})
-    assert "Unevaluated properties are not allowed" in errors({**config, "extra": 2})
+    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
 def test_schema_ecflow_refs_taskcontainer():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
-    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}, "vars": {"key": 1}}
+    config = {
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "vars": {"MEMBER": "00", "LEAD": "006"},
+    }
     assert not errors(config)
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
