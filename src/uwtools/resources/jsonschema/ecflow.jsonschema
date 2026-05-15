@@ -1,5 +1,25 @@
 {
   "$defs": {
+    "addon_property_names": {
+      "enum": [
+        "defstatus",
+        "events",
+        "inlimits",
+        "labels",
+        "late",
+        "limits",
+        "meters",
+        "repeat_date",
+        "repeat_datelist",
+        "repeat_datetime",
+        "repeat_day",
+        "repeat_enumerated",
+        "repeat_int",
+        "repeat_string",
+        "trigger",
+        "vars"
+      ]
+    },
     "addons": {
       "properties": {
         "defstatus": {
@@ -539,26 +559,6 @@
           ],
           "type": "object"
         }
-      ]
-    },
-    "addon_property_names": {
-      "enum": [
-        "defstatus",
-        "events",
-        "inlimits",
-        "labels",
-        "late",
-        "limits",
-        "meters",
-        "repeat_date",
-        "repeat_datelist",
-        "repeat_datetime",
-        "repeat_day",
-        "repeat_enumerated",
-        "repeat_int",
-        "repeat_string",
-        "trigger",
-        "vars"
       ]
     }
   },

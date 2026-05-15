@@ -882,7 +882,9 @@ def test_schema_ecflow_refs_task_expander():
     assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
     assert "{} should be non-empty" in errors({**config, "expand": {}})
     # Extra properties are not allowed:
-    assert "is not valid under any of the given schemas" in errors({**config, "bad_key": "bad_value"})
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
     # addon properties (e.g., trigger) are valid siblings:
     assert not errors({**config, "trigger": "task_setup == complete"})
 
@@ -908,7 +910,9 @@ def test_schema_ecflow_refs_nodecontainer_task():
     config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
     assert not errors(config)
     # Extra properties are not allowed:
-    assert "is not valid under any of the given schemas" in errors({**config, "bad_key": "bad_value"})
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
     # addon properties are valid siblings:
     assert not errors({**config, "defstatus": "suspended"})
 
