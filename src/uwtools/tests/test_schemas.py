@@ -871,7 +871,7 @@ def test_schema_ecflow_refs_task_expander():
     # Basic spec:
     config = {
         "expand": {"MEM": ["01", "02"]},
-        "script": {"execution": {"executable": "forecast.exe"}},
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
     }
     assert not errors(config)
     # expand is a required top-level key:
@@ -890,7 +890,7 @@ def test_schema_ecflow_refs_nodecontainer_family():
         "ecflow", "$defs", "nodecontainer", "patternProperties", "^family_.+$"
     )
     # Basic spec:
-    config = {"task_one": {"script": {"execution": {"executable": "run.exe"}}}}
+    config = {"task_one": {"script": {"execution": {"incantation": "/path/to/run.sh"}}}}
     assert not errors(config)
     # Extra properties are not allowed:
     assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_value"})
@@ -901,7 +901,7 @@ def test_schema_ecflow_refs_nodecontainer_family():
 def test_schema_ecflow_refs_nodecontainer_task():
     errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^task_.+$")
     # Basic spec:
-    config = {"script": {"execution": {"executable": "run.exe"}}}
+    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
     assert not errors(config)
     # Extra properties are not allowed:
     assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_value"})
@@ -937,7 +937,7 @@ def test_schema_ecflow_refs_task():
     errors = schema_validator("ecflow", "$defs", "task")
     # Basic spec:
     config = {
-        "script": {"execution": {"executable": "echo hi"}},
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
         "vars": {"MEMBER": "00", "LEAD": "006"},
     }
     assert not errors(config)
@@ -949,7 +949,7 @@ def test_schema_ecflow_refs_taskcontainer():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
     config = {
-        "script": {"execution": {"executable": "echo hi"}},
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
         "vars": {"MEMBER": "00", "LEAD": "006"},
     }
     assert not errors(config)

@@ -661,7 +661,7 @@ class TestECFlowDef:
                     "tasks_member_{{ ec.MEM }}": {
                         "expand": {"MEM": ["01", "02", "03"]},
                         "script": {
-                            "execution": {"executable": "hello.exe", "incantation": "hello"}
+                            "execution": {"incantation": "hello.exe"}
                         },
                     }
                 }
