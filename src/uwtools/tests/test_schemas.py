@@ -861,7 +861,9 @@ def test_schema_ecflow_refs_families_expander():
     assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
     assert "{} should be non-empty" in errors({**config, "expand": {}})
     # Extra properties are not allowed:
-    assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_value"})
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
     # addon properties (e.g., trigger) are valid siblings:
     assert not errors({**config, "trigger": "task_setup == complete"})
 
@@ -880,7 +882,7 @@ def test_schema_ecflow_refs_task_expander():
     assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
     assert "{} should be non-empty" in errors({**config, "expand": {}})
     # Extra properties are not allowed:
-    assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_value"})
+    assert "is not valid under any of the given schemas" in errors({**config, "bad_key": "bad_value"})
     # addon properties (e.g., trigger) are valid siblings:
     assert not errors({**config, "trigger": "task_setup == complete"})
 
@@ -893,7 +895,9 @@ def test_schema_ecflow_refs_nodecontainer_family():
     config = {"task_one": {"script": {"execution": {"incantation": "/path/to/run.sh"}}}}
     assert not errors(config)
     # Extra properties are not allowed:
-    assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_value"})
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
     # addon properties are valid siblings:
     assert not errors({**config, "defstatus": "suspended"})
 
@@ -904,7 +908,7 @@ def test_schema_ecflow_refs_nodecontainer_task():
     config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
     assert not errors(config)
     # Extra properties are not allowed:
-    assert "Unevaluated properties are not allowed" in errors({**config, "bad_key": "bad_value"})
+    assert "is not valid under any of the given schemas" in errors({**config, "bad_key": "bad_value"})
     # addon properties are valid siblings:
     assert not errors({**config, "defstatus": "suspended"})
 
@@ -914,7 +918,7 @@ def test_schema_ecflow_refs_family():
     # Basic spec:
     config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
     assert not errors(config)
-    assert "Unevaluated properties are not allowed" in errors({**config, "extra": 2})
+    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
 def test_schema_ecflow_refs_familycontainer():
@@ -942,7 +946,7 @@ def test_schema_ecflow_refs_task():
     }
     assert not errors(config)
     assert "'script' is a required property" in errors({"defstatus": "complete"})
-    assert "Unevaluated properties are not allowed" in errors({**config, "extra": 2})
+    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
 def test_schema_ecflow_refs_taskcontainer():

@@ -359,7 +359,16 @@
     },
     "family": {
       "$ref": "#/$defs/familycontainer",
-      "unevaluatedProperties": false
+      "propertyNames": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/addon_property_names"
+          },
+          {
+            "pattern": "^(families|family|task|tasks)_.+$"
+          }
+        ]
+      }
     },
     "familycontainer": {
       "allOf": [
@@ -383,15 +392,45 @@
               "$ref": "#/$defs/familycontainer"
             }
           ],
-          "unevaluatedProperties": false
+          "propertyNames": {
+            "anyOf": [
+              {
+                "const": "expand"
+              },
+              {
+                "$ref": "#/$defs/addon_property_names"
+              },
+              {
+                "pattern": "^(families|family|task|tasks)_.+$"
+              }
+            ]
+          }
         },
         "^family_.+$": {
           "$ref": "#/$defs/familycontainer",
-          "unevaluatedProperties": false
+          "propertyNames": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/addon_property_names"
+              },
+              {
+                "pattern": "^(families|family|task|tasks)_.+$"
+              }
+            ]
+          }
         },
         "^task_.+$": {
           "$ref": "#/$defs/taskcontainer",
-          "unevaluatedProperties": false
+          "propertyNames": {
+            "anyOf": [
+              {
+                "const": "script"
+              },
+              {
+                "$ref": "#/$defs/addon_property_names"
+              }
+            ]
+          }
         },
         "^tasks_.+$": {
           "allOf": [
@@ -402,14 +441,35 @@
               "$ref": "#/$defs/taskcontainer"
             }
           ],
-          "unevaluatedProperties": false
+          "propertyNames": {
+            "anyOf": [
+              {
+                "const": "expand"
+              },
+              {
+                "const": "script"
+              },
+              {
+                "$ref": "#/$defs/addon_property_names"
+              }
+            ]
+          }
         }
       },
       "type": "object"
     },
     "task": {
       "$ref": "#/$defs/taskcontainer",
-      "unevaluatedProperties": false
+      "propertyNames": {
+        "anyOf": [
+          {
+            "const": "script"
+          },
+          {
+            "$ref": "#/$defs/addon_property_names"
+          }
+        ]
+      }
     },
     "taskcontainer": {
       "allOf": [
@@ -480,6 +540,26 @@
           "type": "object"
         }
       ]
+    },
+    "addon_property_names": {
+      "enum": [
+        "defstatus",
+        "events",
+        "inlimits",
+        "labels",
+        "late",
+        "limits",
+        "meters",
+        "repeat_date",
+        "repeat_datelist",
+        "repeat_datetime",
+        "repeat_day",
+        "repeat_enumerated",
+        "repeat_int",
+        "repeat_string",
+        "trigger",
+        "vars"
+      ]
     }
   },
   "properties": {
@@ -495,7 +575,16 @@
               "$ref": "#/$defs/addons"
             }
           ],
-          "unevaluatedProperties": false
+          "propertyNames": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/addon_property_names"
+              },
+              {
+                "pattern": "^(families|family|task|tasks)_.+$"
+              }
+            ]
+          }
         },
         "^suites_.+$": {
           "allOf": [
@@ -506,7 +595,19 @@
               "$ref": "#/$defs/familycontainer"
             }
           ],
-          "unevaluatedProperties": false
+          "propertyNames": {
+            "anyOf": [
+              {
+                "const": "expand"
+              },
+              {
+                "$ref": "#/$defs/addon_property_names"
+              },
+              {
+                "pattern": "^(families|family|task|tasks)_.+$"
+              }
+            ]
+          }
         }
       },
       "properties": {
