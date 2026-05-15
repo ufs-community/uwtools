@@ -425,14 +425,29 @@
                   "type": "string"
                 },
                 "execution": {
-                  "anyOf": [
-                    {
-                      "$ref": "urn:uwtools:execution-parallel"
+                  "additionalProperties": false,
+                  "properties": {
+                    "batchargs": {
+                      "$ref": "urn:uwtools:batchargs"
                     },
-                    {
-                      "$ref": "urn:uwtools:execution-serial"
+                    "envcmds": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "incantation": {
+                      "type": "string"
+                    },
+                    "threads": {
+                      "minimum": 1,
+                      "type": "integer"
                     }
-                  ]
+                  },
+                  "required": [
+                    "incantation"
+                  ],
+                  "type": "object"
                 },
                 "manual": {
                   "type": "string"
