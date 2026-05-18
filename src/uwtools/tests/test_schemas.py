@@ -1098,8 +1098,8 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
     )
     # At least one namelist entry is required:
     assert non_empty_dict(errors({}))
-    # At least one val/var pair is required:
-    assert non_empty_dict(errors({"nml": {}}))
+    # Allow empty namelists
+    assert not errors({"nml": {}})
 
 
 def test_schema_fv3_rundir(fv3_prop):
@@ -1526,8 +1526,8 @@ def test_schema_mpas_namelist_update_values(mpas_prop):
     )
     # At least one namelist entry is required:
     assert non_empty_dict(errors({}))
-    # At least one val/var pair is required:
-    assert non_empty_dict(errors({"nml": {}}))
+    # Allow empty namelists
+    assert not errors({"nml": {}})
 
 
 def test_schema_mpas_rundir(mpas_prop):
@@ -1619,8 +1619,8 @@ def test_schema_mpas_init_namelist_update_values(mpas_init_prop):
     )
     # At least one namelist entry is required:
     assert non_empty_dict(errors({}))
-    # At least one val/var pair is required:
-    assert non_empty_dict(errors({"nml": {}}))
+    # Allow empty namelists
+    assert not errors({"nml": {}})
 
 
 def test_schema_mpas_init_rundir(mpas_init_prop):
@@ -1904,8 +1904,8 @@ def test_schema_namelist():
     assert errormsg % "{}" in errors({"namelist": {"dict": {}}})
     # Needs at least one namelist value:
     assert non_empty_dict(errors({}))
-    # Needs at least one name-value value:
-    assert non_empty_dict(errors({"namelist": {}}))
+    # Allow empty namelists
+    assert not errors({"namelist": {}})
     # Namelist level must be a mapping:
     assert "[] is not of type 'object'\n" in errors([])
     # Name-value level level must be a mapping:
