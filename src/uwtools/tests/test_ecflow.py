@@ -660,7 +660,7 @@ class TestECFlowDef:
                 "suite_ensemble": {
                     "tasks_member_{{ ec.MEM }}": {
                         "expand": {"MEM": ["01", "02", "03"]},
-                        "script": {"execution": {"incantation": "hello"}},
+                        "script": {"execution": {"incantation": "hello.exe"}},
                     }
                 }
             }
