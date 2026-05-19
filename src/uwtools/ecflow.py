@@ -94,65 +94,6 @@ class _ECFlowDef:
         with writable(path) as f:
             print(str(self).rstrip("\n"), file=f)
 
-    def _add_workflow_components(self) -> None:
-        """
-        Add suite(s) and other attributes to the suite definition.
-        """
-        for key, subconfig in self._config.items():
-            tag, name = self._tag_name(key)
-            match tag:
-                case EC.extern:
-                    for ext in subconfig:
-                        self._d.add_extern(ext)
-                case EC.vars:
-                    self._d.add_variable(subconfig)
-                case EC.suite:
-                    self._add_node(subconfig, Suite(name), self._d)
-                case EC.suites:
-                    self._expand_block(subconfig, name, Suite, self._d)
-
-    def _expand_block(
-        self,
-        config: dict,
-        name: str,
-        nodetype: Node,
-        parent: NodeContainer,
-        refs: dict | None = None,
-    ) -> None:
-        """
-        Expand a YAML block over a set of named Nodes.
-
-        :param config: Configuration data for these components.
-        :param name: Name of this suite.
-        :param nodetype: The class of Node that needs expanding (Suite, Family, or Task)
-        :param parent: The parent object to add this set of Nodes to.
-        :param refs: Variable/value pairs used in higher-level expand blocks.
-        """
-        refs = refs if refs is not None else {}
-        expand = config[EC.expand]
-
-        # Check to make sure all lists are the same length.
-        try:
-            assert list(zip(*expand.values(), strict=True))
-        except ValueError as e:
-            msg = "All expand variables under %s must be the same length" % (parent.name())
-            raise UWConfigError(msg) from e
-
-        # Build up the new blocks in the suite definition.
-        primary_variable = list(expand.keys())[0]
-        for i in range(len(expand[primary_variable])):
-            new_refs = deepcopy(refs)
-            new_refs.update({k: v[i] for k, v in expand.items()})
-            new_block = YAMLConfig({name: config}).dereference(context={"ec": new_refs})
-            new_name = list(new_block.keys())[0]
-            args = {
-                EC.config: new_block[new_name],
-                EC.node: nodetype(new_name),
-                EC.parent: parent,
-                EC.refs: new_refs,
-            }
-            self._add_node(**args)
-
     def _add_node(  # noqa: PLR0912
         self,
         config: dict,
@@ -248,6 +189,23 @@ class _ECFlowDef:
             if config.get(k) is not None
         ]
         node.add_repeat(repeat(*args))
+
+    def _add_workflow_components(self) -> None:
+        """
+        Add suite(s) and other attributes to the suite definition.
+        """
+        for key, subconfig in self._config.items():
+            tag, name = self._tag_name(key)
+            match tag:
+                case EC.extern:
+                    for ext in subconfig:
+                        self._d.add_extern(ext)
+                case EC.vars:
+                    self._d.add_variable(subconfig)
+                case EC.suite:
+                    self._add_node(subconfig, Suite(name), self._d)
+                case EC.suites:
+                    self._expand_block(subconfig, name, Suite, self._d)
 
     def _create_ecf_script(self, config: dict, task: Task) -> None:
         """
@@ -346,6 +304,48 @@ class _ECFlowDef:
             ECF_NAME="ECF_NAME",
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
+
+    def _expand_block(
+        self,
+        config: dict,
+        name: str,
+        nodetype: Node,
+        parent: NodeContainer,
+        refs: dict | None = None,
+    ) -> None:
+        """
+        Expand a YAML block over a set of named Nodes.
+
+        :param config: Configuration data for these components.
+        :param name: Name of this suite.
+        :param nodetype: The class of Node that needs expanding (Suite, Family, or Task)
+        :param parent: The parent object to add this set of Nodes to.
+        :param refs: Variable/value pairs used in higher-level expand blocks.
+        """
+        refs = refs if refs is not None else {}
+        expand = config[EC.expand]
+
+        # Check to make sure all lists are the same length.
+        try:
+            assert list(zip(*expand.values(), strict=True))
+        except ValueError as e:
+            msg = "All expand variables under %s must be the same length" % (parent.name())
+            raise UWConfigError(msg) from e
+
+        # Build up the new blocks in the suite definition.
+        primary_variable = list(expand.keys())[0]
+        for i in range(len(expand[primary_variable])):
+            new_refs = deepcopy(refs)
+            new_refs.update({k: v[i] for k, v in expand.items()})
+            new_block = YAMLConfig({name: config}).dereference(context={"ec": new_refs})
+            new_name = list(new_block.keys())[0]
+            args = {
+                EC.config: new_block[new_name],
+                EC.node: nodetype(new_name),
+                EC.parent: parent,
+                EC.refs: new_refs,
+            }
+            self._add_node(**args)
 
     def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
         """
