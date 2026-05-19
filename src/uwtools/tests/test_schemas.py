@@ -887,6 +887,16 @@ def test_schema_ecflow_refs_task_expander():
     )
     # addon properties (e.g., trigger) are valid siblings:
     assert not errors({**config, "trigger": "task_setup == complete"})
+    # script is required (taskcontainer is applied within tasks_* expanders):
+    assert "'script' is a required property" in errors(with_del(config, "script"))
+    # script.execution content is validated — incantation is required:
+    assert "'incantation' is a required property" in errors(
+        with_set(config, {}, "script", "execution")
+    )
+    # script.execution rejects unknown keys (e.g., executable has no effect in ecflow):
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "run.exe", "script", "execution", "executable")
+    )
 
 
 def test_schema_ecflow_refs_nodecontainer_family():
