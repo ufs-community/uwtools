@@ -140,9 +140,6 @@ class TestECFlowDef:
         assert [event.name() for event in task.events] == ["event1", "event2"]
 
     def test_ecflow__ECFlowDef__add_node__with_expand_tag(self, instance):
-        """
-        Test that expand tag is silently skipped (already processed by _expand_block).
-        """
         suite = Suite("test")
         task = Task("t1")
         config = {"expand": {"VAR": ["a", "b"]}, "trigger": "1==1"}
@@ -155,7 +152,7 @@ class TestECFlowDef:
         config: dict = {"family_myfam": {"task_t1": {}}}
         with patch.object(instance, "_add_node", wraps=instance._add_node) as mock:
             instance._add_node(config, suite, instance._d)
-        # Called for suite, family, and task
+        # Called for suite, family, and task.
         assert mock.call_count == 3
 
     def test_ecflow__ECFlowDef__add_node__with_families(self, instance):
@@ -209,9 +206,6 @@ class TestECFlowDef:
         assert task.get_repeat().name() == "STEP"
 
     def test_ecflow__ECFlowDef__add_node__with_script_last(self, instance):
-        """
-        Test that loop exits after processing script as the last item.
-        """
         suite = Suite("test")
         task = Task("t1")
         # Place script LAST so loop exits after processing it.
@@ -240,7 +234,7 @@ class TestECFlowDef:
             instance._add_node(config, suite, instance._d)
         # Called twice: once for suite, once for task
         assert mock.call_count == 2
-    
+
     def test_ecflow__ECFlowDef__add_node__with_tasks(self, instance):
         suite = Suite("test")
         config = {"tasks_t": {"expand": {"VAR": ["a", "b"]}}}
@@ -299,9 +293,6 @@ class TestECFlowDef:
 
     @mark.parametrize("repeat_type", ["datelist", "string"])
     def test_ecflow__ECFlowDef__add_repeat__enumerated_variants(self, instance, repeat_type):
-        """
-        Test that datelist and string repeat types also use RepeatEnumerated.
-        """
         node = Task("t1")
         config = {"variable": "VAR", "list": ["a", "b"]}
         instance._add_repeat(config.copy(), repeat_type, node)
