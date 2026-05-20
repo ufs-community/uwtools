@@ -1,0 +1,20 @@
+usage: uw ecflow server [-h] [--version] [--insecure] [--port PORT] [--report]
+                        [--quiet] [--verbose]
+
+Start an ecFlow server
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --insecure
+      Start server without SSL security
+  --port PORT
+      TCP port for the ecFlow server (default: random from 49152-65535)
+  --report
+      Output server details (hostname, port) as JSON to stdout
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

@@ -8,6 +8,11 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWError
 
 
+def test_api_ecflow_server():
+    with raises(NotImplementedError):
+        ecflow.server()
+
+
 def test_api_ecflow_realize():
     path1, path2 = Path("foo"), Path("bar")
     with patch.object(ecflow, "_realize") as _realize:

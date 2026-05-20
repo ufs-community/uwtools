@@ -99,6 +99,17 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
      - ``task_run_model`` → ``model.ecf``
      - ``task_process_output_files`` → ``process_output_files.ecf``
 
+.. _cli_ecflow_server_examples:
+
+``server``
+----------
+
+.. literalinclude:: ecflow/server-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ecflow/server-help.out
+   :language: text
+
 .. _cli_ecflow_validate_examples:
 
 ``validate``

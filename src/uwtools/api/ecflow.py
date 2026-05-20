@@ -45,6 +45,27 @@ def realize(
     return True
 
 
+def server(
+    port: int | None = None,
+    insecure: bool = False,
+    report: bool = False,
+) -> bool:
+    """
+    Start an ecFlow server on an available TCP port with SSL security enabled.
+
+    If no port is specified, a random port in the dynamic/private range (49152-65535) is chosen,
+    retrying if the port is unavailable. SSL certificates are read from or written to
+    ``$HOME/.ecflowrc/ssl``. Use ``insecure`` to skip SSL. Use ``report`` to emit a JSON report
+    of the server details (hostname, port) to ``stdout``.
+
+    :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
+    :param insecure: Start the server without SSL security.
+    :param report: Output server details (hostname, port) as JSON to ``stdout``.
+    :return: ``True``.
+    """
+    raise NotImplementedError
+
+
 def validate(
     config: _YAMLConfig | dict | Path | str | None = None,
     stdin_ok: bool = False,
