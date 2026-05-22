@@ -9,8 +9,17 @@ from uwtools.exceptions import UWError
 
 
 def test_api_ecflow_server():
-    with raises(NotImplementedError):
-        ecflow.server()
+    with patch.object(ecflow, "_server") as mock_server:
+        result = ecflow.server(port=12345, insecure=False, report=True)
+    mock_server.assert_called_once_with(port=12345, insecure=False, report=True)
+    assert result is True
+
+
+def test_api_ecflow_server__defaults():
+    with patch.object(ecflow, "_server") as mock_server:
+        result = ecflow.server()
+    mock_server.assert_called_once_with(port=None, insecure=False, report=False)
+    assert result is True
 
 
 def test_api_ecflow_realize():

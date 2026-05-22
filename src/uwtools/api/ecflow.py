@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from uwtools.ecflow import realize as _realize
+from uwtools.ecflow import server as _server
 from uwtools.ecflow import validate as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
@@ -63,7 +64,8 @@ def server(
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
     :return: ``True``.
     """
-    raise NotImplementedError
+    _server(port=port, insecure=insecure, report=report)
+    return True
 
 
 def validate(

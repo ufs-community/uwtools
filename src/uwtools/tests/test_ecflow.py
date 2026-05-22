@@ -16,7 +16,7 @@ from pytest import fixture, mark, raises
 from uwtools import ecflow
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.ecflow import _ECFlowDef
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.utils.file import _stdinproxy
 
 # Fixtures
@@ -693,3 +693,128 @@ def test_ecflow_validate__suite_with_optional_properties():
 
 def test_ecflow_validate__yamlconfig(minimal_config):
     assert ecflow.validate(YAMLConfig(minimal_config))
+
+
+# SSL provisioning tests
+
+
+def test_ecflow__provision_ssl__all_files_exist(logged, tmp_path, monkeypatch):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    for fname in ["dh2048.pem", "server.crt", "server.key"]:
+        (ssl_dir / fname).touch()
+    monkeypatch.setattr(ecflow, "_SSL_DIR", ssl_dir)
+    ecflow._provision_ssl()
+    assert logged("Using existing SSL certificates in")
+
+
+def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path, monkeypatch):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    (ssl_dir / "server.crt").touch()
+    monkeypatch.setattr(ecflow, "_SSL_DIR", ssl_dir)
+    with raises(UWError, match="missing required file"):
+        ecflow._provision_ssl()
+
+
+def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path, monkeypatch):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    monkeypatch.setattr(ecflow, "_SSL_DIR", ssl_dir)
+    with (
+        patch.object(ecflow, "_ssl_generate_key") as mock_key,
+        patch.object(ecflow, "_ssl_generate_cert") as mock_cert,
+        patch.object(ecflow, "_ssl_generate_dhparam") as mock_dh,
+    ):
+        ecflow._provision_ssl()
+    assert ssl_dir.is_dir()
+    mock_key.assert_called_once_with(ssl_dir / "server.key")
+    mock_cert.assert_called_once_with(ssl_dir / "server.crt", ssl_dir / "server.key")
+    mock_dh.assert_called_once_with(ssl_dir / "dh2048.pem")
+    assert logged("Creating SSL directory")
+
+
+def test_ecflow__ssl_touch__creates_file_with_600_perms(tmp_path):
+    path = tmp_path / "test.pem"
+    ecflow._ssl_touch(path)
+    assert path.exists()
+    assert oct(path.stat().st_mode)[-3:] == "600"
+
+
+def test_ecflow__ssl_generate_key__success(tmp_path):
+    path = tmp_path / "server.key"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
+        patch.object(ecflow, "_ssl_touch") as mock_touch,
+    ):
+        ecflow._ssl_generate_key(path)
+    mock_touch.assert_called_once_with(path)
+    mock_cmd.assert_called_once()
+    assert f"-out {path}" in mock_cmd.call_args[0][0]
+
+
+def test_ecflow__ssl_generate_key__failure(tmp_path):
+    path = tmp_path / "server.key"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        patch.object(ecflow, "_ssl_touch"),
+        raises(UWError, match="Failed to generate SSL private key"),
+    ):
+        ecflow._ssl_generate_key(path)
+
+
+def test_ecflow__ssl_generate_cert__success(tmp_path):
+    cert_path = tmp_path / "server.crt"
+    key_path = tmp_path / "server.key"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
+        patch.object(ecflow, "_ssl_touch") as mock_touch,
+    ):
+        ecflow._ssl_generate_cert(cert_path, key_path)
+    mock_touch.assert_called_once_with(cert_path)
+    mock_cmd.assert_called_once()
+    assert f"-out {cert_path}" in mock_cmd.call_args[0][0]
+
+
+def test_ecflow__ssl_generate_cert__failure(tmp_path):
+    cert_path = tmp_path / "server.crt"
+    key_path = tmp_path / "server.key"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        patch.object(ecflow, "_ssl_touch"),
+        raises(UWError, match="Failed to generate SSL certificate"),
+    ):
+        ecflow._ssl_generate_cert(cert_path, key_path)
+
+
+def test_ecflow__ssl_generate_dhparam__success(tmp_path):
+    path = tmp_path / "dh2048.pem"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
+        patch.object(ecflow, "_ssl_touch") as mock_touch,
+    ):
+        ecflow._ssl_generate_dhparam(path)
+    mock_touch.assert_called_once_with(path)
+    mock_cmd.assert_called_once()
+    assert f"-out {path}" in mock_cmd.call_args[0][0]
+
+
+def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
+    path = tmp_path / "dh2048.pem"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        patch.object(ecflow, "_ssl_touch"),
+        raises(UWError, match="Failed to generate DH parameters"),
+    ):
+        ecflow._ssl_generate_dhparam(path)
+
+
+def test_ecflow_server__calls_provision_ssl():
+    with patch.object(ecflow, "_provision_ssl") as mock_ssl:
+        ecflow.server()
+    mock_ssl.assert_called_once()
+
+
+def test_ecflow_server__insecure_skips_ssl():
+    with patch.object(ecflow, "_provision_ssl") as mock_ssl:
+        ecflow.server(insecure=True)
+    mock_ssl.assert_not_called()

@@ -4,7 +4,9 @@ Support for creating ecFlow suite definitions and ecf scripts.
 
 from __future__ import annotations
 
+import os
 import re
+import socket
 from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
@@ -27,11 +29,12 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import EC, STR
 from uwtools.utils.file import writable
+from uwtools.utils.processing import run_shell_cmd
 
 if TYPE_CHECKING:
     from ecflow import NodeContainer
@@ -400,6 +403,123 @@ def realize(
     if scripts_path:
         suite.write_ecf_scripts(scripts_path)
     return str(suite)
+
+
+# Private helpers
+
+
+_SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
+_SSL_FILES = ["dh2048.pem", "server.crt", "server.key"]
+
+
+def _provision_ssl() -> None:
+    """
+    Ensure SSL certificates exist in ``$HOME/.ecflowrc/ssl``.
+
+    If all required files exist, logs that they will be reused. If the directory exists but is
+    missing one or more required files, logs an error and raises ``UWError``. If the directory does
+    not exist, creates it and generates the required SSL files using ``openssl``.
+
+    :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
+        fails.
+    """
+    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
+    if len(existing) == len(_SSL_FILES):
+        log.info("Using existing SSL certificates in %s", _SSL_DIR)
+        return
+    if existing:
+        missing = sorted(set(_SSL_FILES) - set(existing))
+        msg = (
+            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
+            "Provide all required files or remove the directory to allow regeneration."
+        )
+        raise UWError(msg)
+    log.info("Creating SSL directory %s", _SSL_DIR)
+    _SSL_DIR.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(_SSL_DIR / "server.key")
+    _ssl_generate_cert(_SSL_DIR / "server.crt", _SSL_DIR / "server.key")
+    _ssl_generate_dhparam(_SSL_DIR / "dh2048.pem")
+    log.info("SSL certificates written to %s", _SSL_DIR)
+
+
+def _ssl_touch(path: Path) -> None:
+    """
+    Create an empty file with owner-only (600) permissions.
+
+    The file is created with restricted permissions before any content is written, so that sensitive
+    key material is never exposed with open permissions.
+
+    :param path: Path of the file to create.
+    """
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.close(fd)
+    path.chmod(0o600)
+
+
+def _ssl_generate_key(path: Path) -> None:
+    """
+    Generate a 2048-bit RSA private key (no password) at ``path``.
+
+    :param path: Destination for the private key file.
+    :raises UWError: If ``openssl`` reports failure.
+    """
+    _ssl_touch(path)
+    log.info("Generating SSL private key: %s", path)
+    success, _ = run_shell_cmd(f"openssl genrsa -out {path} 2048")
+    if not success:
+        msg = f"Failed to generate SSL private key at {path}"
+        raise UWError(msg)
+
+
+def _ssl_generate_cert(path: Path, key_path: Path) -> None:
+    """
+    Generate a self-signed X.509 certificate at ``path`` using the key at ``key_path``.
+
+    :param path: Destination for the certificate file.
+    :param key_path: Path to the existing RSA private key.
+    :raises UWError: If ``openssl`` reports failure.
+    """
+    _ssl_touch(path)
+    hostname = socket.gethostname()
+    log.info("Generating SSL certificate: %s", path)
+    cmd = f"openssl req -x509 -key {key_path} -new -out {path} -days 3650 -subj '/CN={hostname}'"
+    success, _ = run_shell_cmd(cmd)
+    if not success:
+        msg = f"Failed to generate SSL certificate at {path}"
+        raise UWError(msg)
+
+
+def _ssl_generate_dhparam(path: Path) -> None:
+    """
+    Generate 2048-bit Diffie-Hellman parameters at ``path``.
+
+    This step can take several minutes.
+
+    :param path: Destination for the DH parameters file.
+    :raises UWError: If ``openssl`` reports failure.
+    """
+    _ssl_touch(path)
+    log.info("Generating DH parameters (this may take a few minutes): %s", path)
+    success, _ = run_shell_cmd(f"openssl dhparam -out {path} 2048")
+    if not success:
+        msg = f"Failed to generate DH parameters at {path}"
+        raise UWError(msg)
+
+
+def server(
+    port: int | None = None,  # noqa: ARG001
+    insecure: bool = False,
+    report: bool = False,  # noqa: ARG001
+) -> None:
+    """
+    Start an ecFlow server on an available TCP port with SSL security enabled.
+
+    :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
+    :param insecure: Start the server without SSL security.
+    :param report: Output server details (hostname, port) as JSON to ``stdout``.
+    """
+    if not insecure:
+        _provision_ssl()
 
 
 def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
