@@ -148,8 +148,20 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     :param d: A dict object.
     :param sort: Sort dict/mapping keys?
     """
+
+    class UWYAMLDumper(yaml.Dumper):
+        def ignore_aliases(self, *_args):
+            return True
+
     add_yaml_representers()
-    return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
+    return yaml.dump(
+        d,
+        Dumper=UWYAMLDumper,
+        default_flow_style=False,
+        indent=2,
+        sort_keys=sort,
+        width=math.inf,
+    ).strip()
 
 
 class UWYAMLTag:

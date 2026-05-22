@@ -88,6 +88,31 @@ def test_config_support_dict_to_yaml_str(capsys):
     assert capsys.readouterr().out.strip() == expected
 
 
+def test_config_support_dict_to_yaml_str__no_aliases(capsys, tmp_path):
+    path = tmp_path / "a.yaml"
+    s1 = """
+    a: &a
+      foo: bar
+    b: *a
+    c: *a
+    """
+    path.write_text(dedent(s1))
+    s2 = """
+    a:
+      foo: bar
+    b:
+      foo: bar
+    c:
+      foo: bar
+    """
+    expected = dedent(s2).strip()
+    cfgobj = YAMLConfig(path)
+    assert repr(cfgobj) == expected
+    assert str(cfgobj) == expected
+    cfgobj.dump()
+    assert capsys.readouterr().out.strip() == expected
+
+
 def test_config_support_from_od():
     assert support.from_od(d=OrderedDict([("example", OrderedDict([("key", "value")]))])) == {
         "example": {"key": "value"}
