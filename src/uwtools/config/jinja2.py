@@ -295,8 +295,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
 
     # Update context, converting tagged values to their final representations when possible, but
     # otherwise replacing them with a Jinja2 Undefined so that any template expression referencing
-    # them (directly or via a nested dict/list) raises UndefinedError and causes _deref_render to
-    # return the original value unchanged.
+    # them raises UndefinedError and leads to the original value being returned unchanged.
 
     def resolve(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
@@ -305,9 +304,9 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
             except Exception:  # noqa: BLE001
                 return StrictUndefined(name=v.tagged_string)
         if isinstance(v, dict):
-            return {k: resolve(vv) for k, vv in v.items()}
+            return {k: resolve(x) for k, x in v.items()}
         if isinstance(v, list):
-            return [resolve(vv) for vv in v]
+            return [resolve(x) for x in v]
         return v
 
     context = {k: resolve(v) for k, v in {**(local or {}), **context}.items()}
