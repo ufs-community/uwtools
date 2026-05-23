@@ -777,6 +777,26 @@ def test_config_tools_realize__reference_tagged_val_2(capsys, tmp_path):
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
+def test_config_tools_realize__reference_tagged_val_3(capsys, tmp_path):
+    path = tmp_path / "config,yaml"
+    s = """
+    d:
+      i: !int '{{ s }}'
+    s: '1'
+    x: !dict '{{ dict(d) }}'
+    """
+    path.write_text(dedent(s))
+    tools.realize(input_config=path)
+    expected = """
+    d:
+      i: 1
+    s: '1'
+    x:
+      i: 1
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
 def test_config_tools_realize__remove_nml_to_nml(tmp_path):
     input_config = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
     s = """

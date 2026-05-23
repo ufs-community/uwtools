@@ -294,22 +294,30 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     """
 
     # Update context, converting tagged values to their final representations when possible, but
-    # otherwise replacing them with a Jinja2 Undefined so that any template expression referencing
-    # them raises UndefinedError and leads to the original value being returned unchanged.
+    # otherwise omitting top-level keys whose value trees contain any not-yet-convertible tagged
+    # values. This prevents string representations of unconverted tags from leaking into rendered
+    # expressions, whether at the top level or nested inside dicts/lists.
 
     def resolve(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
-            try:
-                return v.converted
-            except Exception:  # noqa: BLE001
-                return StrictUndefined(name=v.tagged_string)
+            return v.converted  # raises if not yet convertible
         if isinstance(v, dict):
             return {k: resolve(x) for k, x in v.items()}
         if isinstance(v, list):
             return [resolve(x) for x in v]
         return v
 
-    context = {k: resolve(v) for k, v in {**(local or {}), **context}.items()}
+    nil = object()
+
+    def safe_resolve(v: Any) -> Any:
+        try:
+            return resolve(v)
+        except Exception:  # noqa: BLE001
+            return nil
+
+    context = {
+        k: r for k, v in {**(local or {}), **context}.items() if (r := safe_resolve(v)) is not nil
+    }
 
     # Render.
 
