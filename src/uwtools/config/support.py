@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import cache, partial
 from importlib import import_module
@@ -192,8 +193,11 @@ class UWYAMLTag:
 
         Implements the interface required by pyyaml's add_representer() function. See the pyyaml
         documentation for details.
+
+        Returns a copy of the node to prevent pyyaml from seeing the same node object at multiple
+        positions in the tree and emitting anchors and aliases to eliminate repetition.
         """
-        return data.node
+        return deepcopy(data.node)
 
 
 class UWYAMLTaggedStr(UWYAMLTag):

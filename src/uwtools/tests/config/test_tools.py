@@ -320,6 +320,41 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
             outpath.unlink()
 
 
+def test_config_tools_compose__no_anchors_or_aliases(capsys, tmp_path):
+    yaml1 = """
+    b: *a
+    c: *a
+    """
+    config1 = tmp_path / "config1.yaml"
+    config1.write_text(dedent(yaml1))
+    yaml2 = """
+    a: &a
+      foo: !int '1'
+    """
+    config2 = tmp_path / "config2.yaml"
+    config2.write_text(dedent(yaml2))
+    tools.compose(configs=[config1, config2], realize=False)
+    expected_unrealized = """
+    b:
+      foo: !int '1'
+    c:
+      foo: !int '1'
+    a:
+      foo: !int '1'
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected_unrealized).strip()
+    tools.compose(configs=[config1, config2], realize=True)
+    expected_realized = """
+    b:
+      foo: 1
+    c:
+      foo: 1
+    a:
+      foo: 1
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected_realized).strip()
+
+
 @mark.parametrize("realize", [False, True])
 def test_config_tools_compose__realize(realize, tmp_path, utc):
     dyaml = """
