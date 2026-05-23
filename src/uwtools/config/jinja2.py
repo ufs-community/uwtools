@@ -293,21 +293,24 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :return: The rendered value (potentially unchanged).
     """
 
-    # Update context, convering tagged values to their final representations when possible, but
-    # otherwise omitting them to prevent their string representations from appearing in rendered
-    # expressions.
+    # Update context, converting tagged values to their final representations when possible, but
+    # otherwise replacing them with a Jinja2 Undefined so that any template expression referencing
+    # them (directly or via a nested dict/list) raises UndefinedError and causes _deref_render to
+    # return the original value unchanged.
 
-    def convert(v: Any) -> Any:
+    def resolve(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
             try:
                 return v.converted
             except Exception:  # noqa: BLE001
-                return nil
+                return StrictUndefined(name=v.tagged_string)
+        if isinstance(v, dict):
+            return {k: resolve(vv) for k, vv in v.items()}
+        if isinstance(v, list):
+            return [resolve(vv) for vv in v]
         return v
 
-    nil = object()
-    kvpairs = {**(local or {}), **context}.items()
-    context = {k: r for k, v in kvpairs if (r := convert(v)) is not nil}
+    context = {k: resolve(v) for k, v in {**(local or {}), **context}.items()}
 
     # Render.
 
