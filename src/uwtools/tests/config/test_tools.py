@@ -743,6 +743,21 @@ def test_config_tools_realize__output_file_format(tmp_path):
     assert compare_files(outfile, infile)
 
 
+def test_config_tools_realize__reference_tagged_val(capsys, tmp_path):
+    path = tmp_path / "config,yaml"
+    s = """
+    a: !int '{{ 1 + 1 }}'
+    b: '{{ a }} is 2'
+    """
+    path.write_text(dedent(s))
+    tools.realize(input_config=path)
+    expected = """
+    a: 2
+    b: '2 is 2'
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
 def test_config_tools_realize__remove_nml_to_nml(tmp_path):
     input_config = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
     s = """
