@@ -753,7 +753,7 @@ def test_config_tools_realize__reference_tagged_val(capsys, tmp_path):
     tools.realize(input_config=path)
     expected = """
     a: 2
-    b: '2 is 2'
+    b: 2 is 2
     """
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 

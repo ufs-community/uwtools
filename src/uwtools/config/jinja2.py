@@ -291,9 +291,20 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
+
+    def resolve(v: object) -> object:
+        if isinstance(v, UWYAMLConvert):
+            try:
+                return v.converted
+            except Exception:  # noqa: BLE001
+                return nil
+        return v
+
+    nil = object()
     env = _register_filters(Environment(undefined=StrictUndefined))
     template = env.from_string(val)
-    context = {**(local or {}), **context}
+    kvpairs = {**(local or {}), **context}.items()
+    context = {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
     try:
         rendered = template.render(context)
     except Exception as e:  # noqa: BLE001
