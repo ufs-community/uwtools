@@ -293,7 +293,11 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :return: The rendered value (potentially unchanged).
     """
 
-    def resolve(v: Any) -> Any:
+    # Update context, convering tagged values to their final representations when possible, but
+    # otherwise omitting them to prevent their string representations from appearing in rendered
+    # expressions.
+
+    def convert(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
             try:
                 return v.converted
@@ -302,10 +306,13 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
         return v
 
     nil = object()
+    kvpairs = {**(local or {}), **context}.items()
+    context = {k: r for k, v in kvpairs if (r := convert(v)) is not nil}
+
+    # Render.
+
     env = _register_filters(Environment(undefined=StrictUndefined))
     template = env.from_string(val)
-    kvpairs = {**(local or {}), **context}.items()
-    context = {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
     try:
         rendered = template.render(context)
     except Exception as e:  # noqa: BLE001
