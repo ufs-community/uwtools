@@ -743,7 +743,7 @@ def test_config_tools_realize__output_file_format(tmp_path):
     assert compare_files(outfile, infile)
 
 
-def test_config_tools_realize__reference_tagged_val(capsys, tmp_path):
+def test_config_tools_realize__reference_tagged_val_1(capsys, tmp_path):
     path = tmp_path / "config,yaml"
     s = """
     a: !int '{{ 1 + 1 }}'
@@ -754,6 +754,25 @@ def test_config_tools_realize__reference_tagged_val(capsys, tmp_path):
     expected = """
     a: 2
     b: 2 is 2
+    """
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
+def test_config_tools_realize__reference_tagged_val_2(capsys, tmp_path):
+    path = tmp_path / "config,yaml"
+    s = """
+    freq: '{{ val.step }}h'
+    td: !timedelta '6'
+    val:
+      step: !int '{{ (td.total_seconds() / 3600) | int }}'
+    """
+    path.write_text(dedent(s))
+    tools.realize(input_config=path)
+    expected = """
+    freq: 6h
+    td: !timedelta '6:00:00'
+    val:
+      step: 6
     """
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
