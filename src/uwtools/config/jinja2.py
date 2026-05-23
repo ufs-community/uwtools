@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timedelta
 from functools import cached_property
 from pathlib import Path
+from typing import Any
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
@@ -292,7 +293,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :return: The rendered value (potentially unchanged).
     """
 
-    def resolve(v: object) -> object:
+    def resolve(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
             try:
                 return v.converted
