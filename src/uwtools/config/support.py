@@ -248,7 +248,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
 
         :raises: Appropriate exception if the value cannot be represented as the required type.
         """
-        load_as = lambda t, v: t(yaml.safe_load(v))
+        load_as = lambda t, v: t(yaml.load(v, Loader=uw_yaml_loader()))
         converters: list[Callable[..., UWYAMLConvert.TaggedValT]] = [
             partial(load_as, bool),  # !bool
             to_datetime,  # !datetime
