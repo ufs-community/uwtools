@@ -280,24 +280,19 @@ def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     return converted
 
 
-def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
+def _update_context(context: dict, local: dict | None = None) -> dict:
     """
-    Render a Jinja2 variable/expression as part of dereferencing.
+    Update context, converting tagged values to their final representations when possible.
 
-    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
-    will be logged and the original value will be returned unchanged.
+    Values that cannot yet be converted because they contain unrendered content are replaced with
+    Pending sentinels. When Jinja2 serializes a template containing such a sentinel, UndefinedError
+    # is raised; then the template render fails gracefully and the original value is returned #
+    unchanged (held for a later iteration with a better context).
 
-    :param val: The value potentially containing Jinja2 syntax to render.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
-    :return: The rendered value (potentially unchanged).
+    :return: The updated context.
     """
-
-    # Update context, converting tagged values to their final representations when possible. Values
-    # that cannot yet be converted because they contain unrendered content are replaced with Pending
-    # sentinels. When Jinja2 serializes a template containing such a sentinel, an UndefinedError is
-    # raised, causing the template render to fail gracefully and the original value to be returned
-    # unchanged (held for a later iteration with a better context).
 
     class Pending:
         def __repr__(self) -> NoReturn:
@@ -318,10 +313,22 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
         return v
 
     kvpairs = {**(local or {}), **context}.items()
-    context = {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
+    return {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
 
-    # Render.
 
+def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
+    """
+    Render a Jinja2 variable/expression as part of dereferencing.
+
+    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
+    will be logged and the original value will be returned unchanged.
+
+    :param val: The value potentially containing Jinja2 syntax to render.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
+    :return: The rendered value (potentially unchanged).
+    """
+    context = _update_context(context, local)
     env = _register_filters(Environment(undefined=StrictUndefined))
     template = env.from_string(val)
     try:
