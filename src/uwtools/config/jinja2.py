@@ -280,42 +280,6 @@ def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     return converted
 
 
-def _update_context(context: dict, local: dict | None = None) -> dict:
-    """
-    Update context, converting tagged values to their final representations when possible.
-
-    Values that cannot yet be converted because they contain unrendered content are replaced with
-    Pending sentinels. When Jinja2 serializes a template containing such a sentinel, UndefinedError
-    # is raised; then the template render fails gracefully and the original value is returned #
-    unchanged (held for a later iteration with a better context).
-
-    :param context: Values to use when rendering Jinja2 syntax.
-    :param local: Local sibling values to use if a match is not found in context.
-    :return: The updated context.
-    """
-
-    class Pending:
-        def __repr__(self) -> NoReturn:
-            raise UndefinedError
-
-    nil = object()
-
-    def resolve(v: Any) -> Any:
-        if isinstance(v, UWYAMLConvert):
-            try:
-                return v.converted
-            except Exception:  # noqa: BLE001
-                return nil
-        if isinstance(v, dict):
-            return {k: Pending() if (r := resolve(x)) is nil else r for k, x in v.items()}
-        if isinstance(v, list):
-            return [resolve(x) for x in v]
-        return v
-
-    kvpairs = {**(local or {}), **context}.items()
-    return {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
-
-
 def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     """
     Render a Jinja2 variable/expression as part of dereferencing.
@@ -438,6 +402,42 @@ def _supplement_values(
         values.update(os.environ)
         log.debug("Supplemented template values with environment variables")
     return values
+
+
+def _update_context(context: dict, local: dict | None = None) -> dict:
+    """
+    Update context, converting tagged values to their final representations when possible.
+
+    Values that cannot yet be converted because they contain unrendered content are replaced with
+    Pending sentinels. When Jinja2 serializes a template containing such a sentinel, UndefinedError
+    # is raised; then the template render fails gracefully and the original value is returned #
+    unchanged (held for a later iteration with a better context).
+
+    :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
+    :return: The updated context.
+    """
+
+    class Pending:
+        def __repr__(self) -> NoReturn:
+            raise UndefinedError
+
+    nil = object()
+
+    def resolve(v: Any) -> Any:
+        if isinstance(v, UWYAMLConvert):
+            try:
+                return v.converted
+            except Exception:  # noqa: BLE001
+                return nil
+        if isinstance(v, dict):
+            return {k: Pending() if (r := resolve(x)) is nil else r for k, x in v.items()}
+        if isinstance(v, list):
+            return [resolve(x) for x in v]
+        return v
+
+    kvpairs = {**(local or {}), **context}.items()
+    return {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
 
 
 def _values_needed(undeclared_variables: set[str]) -> None:
