@@ -8,7 +8,7 @@ import os
 from datetime import datetime, timedelta
 from functools import cached_property
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
@@ -293,18 +293,14 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :return: The rendered value (potentially unchanged).
     """
 
-    # Update context, converting tagged values to their final representations when possible.
-    # UWYAMLConvert values that cannot yet be converted (because their inner template hasn't been
-    # rendered yet) are replaced with Pending sentinels. When Jinja2 serializes a template
-    # result containing such a sentinel (e.g. via __repr__), UndefinedError is raised, causing the
-    # template render to fail gracefully and the original value to be returned unchanged (held for a
-    # later iteration with a better context). This ensures that:
-    #   - Sibling keys in the same dict remain accessible to other templates.
-    #   - Templates that depend on not-yet-available values are held rather than converting with
-    #     partial/incorrect data.
+    # Update context, converting tagged values to their final representations when possible. Values
+    # that cannot yet be converted because they contain unrendered content are replaced with Pending
+    # sentinels. When Jinja2 serializes a template containing such a sentinel, an UndefinedError is
+    # raised, causing the template render to fail gracefully and the original value to be returned
+    # unchanged (held for a later iteration with a better context).
 
     class Pending:
-        def __repr__(self) -> str:
+        def __repr__(self) -> NoReturn:
             msg = "Value is not yet resolvable"
             raise UndefinedError(msg)
 
