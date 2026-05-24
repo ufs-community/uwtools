@@ -301,8 +301,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
 
     class Pending:
         def __repr__(self) -> NoReturn:
-            msg = "Value is not yet resolvable"
-            raise UndefinedError(msg)
+            raise UndefinedError
 
     nil = object()
 
