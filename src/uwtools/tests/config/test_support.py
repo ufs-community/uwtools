@@ -88,16 +88,14 @@ def test_config_support_dict_to_yaml_str(capsys):
     assert capsys.readouterr().out.strip() == expected
 
 
-def test_config_support_dict_to_yaml_str__no_aliases(capsys, tmp_path):
-    path = tmp_path / "a.yaml"
-    s1 = """
+def test_config_support_dict_to_yaml_str__no_anchors_or_aliases(capsys, tmp_path):
+    yaml1 = """
     a: &a
       foo: bar
     b: *a
     c: *a
     """
-    path.write_text(dedent(s1))
-    s2 = """
+    yaml2 = """
     a:
       foo: bar
     b:
@@ -105,7 +103,9 @@ def test_config_support_dict_to_yaml_str__no_aliases(capsys, tmp_path):
     c:
       foo: bar
     """
-    expected = dedent(s2).strip()
+    path = tmp_path / "a.yaml"
+    path.write_text(dedent(yaml1))
+    expected = dedent(yaml2).strip()
     cfgobj = YAMLConfig(path)
     assert repr(cfgobj) == expected
     assert str(cfgobj) == expected

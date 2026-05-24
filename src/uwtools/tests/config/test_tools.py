@@ -744,57 +744,60 @@ def test_config_tools_realize__output_file_format(tmp_path):
 
 
 def test_config_tools_realize__reference_tagged_val_1(capsys, tmp_path):
-    path = tmp_path / "config,yaml"
-    s = """
+    yaml1 = """
     a: !int '{{ 1 + 1 }}'
     b: '{{ a }} is 2'
     """
-    path.write_text(dedent(s))
-    tools.realize(input_config=path)
-    expected = """
+    yaml2 = """
     a: 2
     b: 2 is 2
     """
-    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+    path = tmp_path / "config,yaml"
+    path.write_text(dedent(yaml1))
+    tools.realize(input_config=path)
+    expected = dedent(yaml2).strip()
+    assert capsys.readouterr().out.strip() == expected
 
 
 def test_config_tools_realize__reference_tagged_val_2(capsys, tmp_path):
-    path = tmp_path / "config,yaml"
-    s = """
+    yaml1 = """
     freq: '{{ val.step }}h'
     td: !timedelta '6'
     val:
       step: !int '{{ (td.total_seconds() / 3600) | int }}'
     """
-    path.write_text(dedent(s))
-    tools.realize(input_config=path)
-    expected = """
+    yaml2 = """
     freq: 6h
     td: !timedelta '6:00:00'
     val:
       step: 6
     """
-    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+    path = tmp_path / "config,yaml"
+    path.write_text(dedent(yaml1))
+    tools.realize(input_config=path)
+    expected = dedent(yaml2).strip()
+    assert capsys.readouterr().out.strip() == expected
 
 
 def test_config_tools_realize__reference_tagged_val_3(capsys, tmp_path):
-    path = tmp_path / "config,yaml"
-    s = """
+    yaml1 = """
     d:
       i: !int '{{ s }}'
     s: '1'
     x: !dict '{{ dict(d) }}'
     """
-    path.write_text(dedent(s))
-    tools.realize(input_config=path)
-    expected = """
+    yaml2 = """
     d:
       i: 1
     s: '1'
     x:
       i: 1
     """
-    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+    path = tmp_path / "config,yaml"
+    path.write_text(dedent(yaml1))
+    tools.realize(input_config=path)
+    expected = dedent(yaml2).strip()
+    assert capsys.readouterr().out.strip() == expected
 
 
 def test_config_tools_realize__remove_nml_to_nml(tmp_path):
