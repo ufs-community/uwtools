@@ -317,7 +317,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     def resolve(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
             try:
-                return v.converted  # raises if not yet convertible
+                return v.converted
             except Exception:  # noqa: BLE001
                 return nil
         if isinstance(v, dict):
