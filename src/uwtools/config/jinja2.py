@@ -304,13 +304,9 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     #     partial/incorrect data.
 
     class Pending:
-        msg = "Value is not yet resolvable"
-
         def __repr__(self) -> str:
-            raise UndefinedError(self.msg)
-
-        def __str__(self) -> str:
-            raise UndefinedError(self.msg)
+            msg = "Value is not yet resolvable"
+            raise UndefinedError(msg)
 
     nil = object()
 
