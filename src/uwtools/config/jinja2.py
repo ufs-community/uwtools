@@ -295,7 +295,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
 
     # Update context, converting tagged values to their final representations when possible.
     # UWYAMLConvert values that cannot yet be converted (because their inner template hasn't been
-    # rendered yet) are replaced with _Unresolvable sentinels. When Jinja2 serializes a template
+    # rendered yet) are replaced with Pending sentinels. When Jinja2 serializes a template
     # result containing such a sentinel (e.g. via __repr__), UndefinedError is raised, causing the
     # template render to fail gracefully and the original value to be returned unchanged (held for a
     # later iteration with a better context). This ensures that:
@@ -303,7 +303,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     #   - Templates that depend on not-yet-available values are held rather than converting with
     #     partial/incorrect data.
 
-    class _Unresolvable:
+    class Pending:
         """
         Sentinel for a value that cannot yet be converted.
         """
@@ -322,9 +322,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
         if isinstance(v, UWYAMLConvert):
             return v.converted  # raises if not yet convertible
         if isinstance(v, dict):
-            return {
-                k: _Unresolvable() if (r := safe_resolve(x)) is nil else r for k, x in v.items()
-            }
+            return {k: Pending() if (r := safe_resolve(x)) is nil else r for k, x in v.items()}
         if isinstance(v, list):
             return [resolve(x) for x in v]
         return v
