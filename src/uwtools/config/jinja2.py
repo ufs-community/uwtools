@@ -292,9 +292,9 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
-    context = _update_context(context, local)
     env = _register_filters(Environment(undefined=StrictUndefined))
     template = env.from_string(val)
+    context = _update_context(context, local)
     try:
         rendered = template.render(context)
     except Exception as e:  # noqa: BLE001
