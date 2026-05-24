@@ -326,9 +326,8 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
             return [resolve(x) for x in v]
         return v
 
-    context = {
-        k: r for k, v in {**(local or {}), **context}.items() if (r := resolve(v)) is not nil
-    }
+    kvpairs = {**(local or {}), **context}.items()
+    context = {k: r for k, v in kvpairs if (r := resolve(v)) is not nil}
 
     # Render.
 
