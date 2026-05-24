@@ -304,37 +304,30 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     #     partial/incorrect data.
 
     class Pending:
-        """
-        Sentinel for a value that cannot yet be converted.
-        """
+        msg = "Value is not yet resolvable"
 
         def __repr__(self) -> str:
-            msg = "value is not yet resolvable"
-            raise UndefinedError(msg)
+            raise UndefinedError(self.msg)
 
         def __str__(self) -> str:
-            msg = "value is not yet resolvable"
-            raise UndefinedError(msg)
+            raise UndefinedError(self.msg)
 
     nil = object()
 
     def resolve(v: Any) -> Any:
         if isinstance(v, UWYAMLConvert):
-            return v.converted  # raises if not yet convertible
+            try:
+                return v.converted  # raises if not yet convertible
+            except Exception:  # noqa: BLE001
+                return nil
         if isinstance(v, dict):
-            return {k: Pending() if (r := safe_resolve(x)) is nil else r for k, x in v.items()}
+            return {k: Pending() if (r := resolve(x)) is nil else r for k, x in v.items()}
         if isinstance(v, list):
             return [resolve(x) for x in v]
         return v
 
-    def safe_resolve(v: Any) -> Any:
-        try:
-            return resolve(v)
-        except Exception:  # noqa: BLE001
-            return nil
-
     context = {
-        k: r for k, v in {**(local or {}), **context}.items() if (r := safe_resolve(v)) is not nil
+        k: r for k, v in {**(local or {}), **context}.items() if (r := resolve(v)) is not nil
     }
 
     # Render.
