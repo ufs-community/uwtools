@@ -410,8 +410,8 @@ def _update_context(context: dict, local: dict | None = None) -> dict:
 
     Values that cannot yet be converted because they contain unrendered content are replaced with
     Pending sentinels. When Jinja2 serializes a template containing such a sentinel, UndefinedError
-    # is raised; then the template render fails gracefully and the original value is returned #
-    unchanged (held for a later iteration with a better context).
+    is raised, the render fails gracefully, and the original value is returned unchanged, held for a
+    later iteration with better context.
 
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
