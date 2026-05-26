@@ -301,7 +301,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
         rendered = val
         deref_debug("Rendering failed", val)
         for line in str(e).split("\n"):
-            deref_debug(line)
+            deref_debug(f"  Exception text: {line}")
     else:
         deref_debug("Rendered", rendered)
     try:
