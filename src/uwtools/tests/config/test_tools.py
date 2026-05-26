@@ -320,37 +320,49 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
             outpath.unlink()
 
 
-def test_config_tools_compose__no_anchors_or_aliases(capsys, tmp_path):
+@mark.parametrize(
+    ("initial", "final"),
+    [
+        (" !bool 'yes'", " true"),
+        (" !datetime '2026-05-26T12'", " 2026-05-26T12:00:00"),
+        (" !dict '{a: 1}'", "\n        a: 1"),
+        (" !float '3.14'", " 3.14"),
+        (" !int '1'", " 1"),
+        (" !list '[1, 2]'", "\n      - 1\n      - 2"),
+        (" !timedelta '6'", " !timedelta '6:00:00'"),
+    ],
+)
+def test_config_tools_compose__no_anchors_or_aliases(capsys, initial, final, tmp_path):
     yaml1 = """
     b: *a
     c: *a
     """
     config1 = tmp_path / "config1.yaml"
     config1.write_text(dedent(yaml1))
-    yaml2 = """
+    yaml2 = f"""
     a: &a
-      foo: !int '1'
+      foo:{initial}
     """
     config2 = tmp_path / "config2.yaml"
     config2.write_text(dedent(yaml2))
     tools.compose(configs=[config1, config2], realize=False)
-    expected_unrealized = """
+    expected_unrealized = f"""
     b:
-      foo: !int '1'
+      foo:{initial}
     c:
-      foo: !int '1'
+      foo:{initial}
     a:
-      foo: !int '1'
+      foo:{initial}
     """
     assert capsys.readouterr().out.strip() == dedent(expected_unrealized).strip()
     tools.compose(configs=[config1, config2], realize=True)
-    expected_realized = """
+    expected_realized = f"""
     b:
-      foo: 1
+      foo:{final}
     c:
-      foo: 1
+      foo:{final}
     a:
-      foo: 1
+      foo:{final}
     """
     assert capsys.readouterr().out.strip() == dedent(expected_realized).strip()
 
