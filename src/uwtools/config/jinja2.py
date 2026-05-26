@@ -138,6 +138,7 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
+    report = lambda x: deref_debug("Rendering", x)
     rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
@@ -151,14 +152,14 @@ def dereference(
     elif isinstance(val, list):
         rendered = [dereference(v, context) for v in val]
     elif isinstance(val, str):
-        deref_debug("Rendering", val)
+        report(val)
         rendered = _deref_render(val, context, local)
     elif isinstance(val, UWYAMLConvert):
-        deref_debug("Rendering", val.value)
+        report(val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
     elif isinstance(val, UWYAMLGlob):
-        deref_debug("Rendering", val.value)
+        report(val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = val
     else:
