@@ -507,17 +507,26 @@ def _ssl_generate_dhparam(path: Path) -> None:
 
 
 def server(
-    port: int | None = None,  # noqa: ARG001
+    config: Path | None = None,
+    port: int | None = None,
     insecure: bool = False,
     report: bool = False,  # noqa: ARG001
 ) -> None:
     """
     Start an ecFlow server on an available TCP port with SSL security enabled.
 
-    :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
+    :param config: Path to UW YAML config file providing server settings (``None`` => no config
+        file).
+    :param port: TCP port to use; overrides any value in config (``None`` => pick a random
+        available port from 49152-65535).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
     """
+    if config is not None:
+        cfg = YAMLConfig(config)
+        cfg.dereference()
+        if port is None:
+            port = cfg.data.get(STR.port)
     if not insecure:
         _provision_ssl()
 

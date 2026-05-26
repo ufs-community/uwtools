@@ -149,6 +149,7 @@ def _add_subparser_ecflow_server(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.server, "Start an ecFlow server")
     optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
     _add_arg_insecure(optional)
     _add_arg_port(optional)
     _add_arg_report(optional, helpmsg="Output server details (hostname, port) as JSON to stdout")
@@ -202,6 +203,7 @@ def _dispatch_ecflow_server(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.ecflow.server(
+        config=args.get(STR.config_file),
         port=args.get(STR.port),
         insecure=args[STR.insecure],
         report=args[STR.report],

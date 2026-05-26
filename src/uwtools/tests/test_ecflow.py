@@ -818,3 +818,29 @@ def test_ecflow_server__insecure_skips_ssl():
     with patch.object(ecflow, "_provision_ssl") as mock_ssl:
         ecflow.server(insecure=True)
     mock_ssl.assert_not_called()
+
+
+def test_ecflow_server__config_port_used_when_no_cli_port():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"port": 55000}
+    with (
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg) as mock_cfg_cls,
+    ):
+        ecflow.server(config=config_path, port=None)
+    mock_cfg_cls.assert_called_once_with(config_path)
+    mock_cfg.dereference.assert_called_once()
+
+
+def test_ecflow_server__cli_port_overrides_config():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"port": 55000}
+    with (
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg) as mock_cfg_cls,
+    ):
+        ecflow.server(config=config_path, port=54321)
+    mock_cfg_cls.assert_called_once_with(config_path)
+    mock_cfg.dereference.assert_called_once()

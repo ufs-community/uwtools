@@ -525,10 +525,11 @@ def test_cli__dispatch_ecflow_realize():
 
 
 def test_cli__dispatch_ecflow_server():
-    args = {STR.port: 54321, STR.insecure: False, STR.report: True}
+    args = {STR.config_file: None, STR.port: 54321, STR.insecure: False, STR.report: True}
     with patch.object(uwtools.api.ecflow, "server") as server:
         cli._dispatch_ecflow_server(args)
     server.assert_called_once_with(
+        config=None,
         port=54321,
         insecure=False,
         report=True,
@@ -536,10 +537,11 @@ def test_cli__dispatch_ecflow_server():
 
 
 def test_cli__dispatch_ecflow_server_defaults():
-    args = {STR.port: None, STR.insecure: False, STR.report: False}
+    args = {STR.config_file: None, STR.port: None, STR.insecure: False, STR.report: False}
     with patch.object(uwtools.api.ecflow, "server") as server:
         cli._dispatch_ecflow_server(args)
     server.assert_called_once_with(
+        config=None,
         port=None,
         insecure=False,
         report=False,
