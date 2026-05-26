@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import cache, partial
 from importlib import import_module
@@ -148,8 +149,20 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     :param d: A dict object.
     :param sort: Sort dict/mapping keys?
     """
+
+    class UWYAMLDumper(yaml.Dumper):
+        def ignore_aliases(self, *_args):
+            return True
+
     add_yaml_representers()
-    return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
+    return yaml.dump(
+        d,
+        Dumper=UWYAMLDumper,
+        default_flow_style=False,
+        indent=2,
+        sort_keys=sort,
+        width=math.inf,
+    ).strip()
 
 
 class UWYAMLTag:
@@ -180,8 +193,11 @@ class UWYAMLTag:
 
         Implements the interface required by pyyaml's add_representer() function. See the pyyaml
         documentation for details.
+
+        Returns a copy of the node to prevent pyyaml from seeing the same node object at multiple
+        positions in the tree and emitting anchors and aliases to eliminate repetition.
         """
-        return data.node
+        return deepcopy(data.node)
 
 
 class UWYAMLTaggedStr(UWYAMLTag):
@@ -232,7 +248,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
 
         :raises: Appropriate exception if the value cannot be represented as the required type.
         """
-        load_as = lambda t, v: t(yaml.safe_load(v))
+        load_as = lambda t, v: t(yaml.load(v, Loader=uw_yaml_loader()))
         converters: list[Callable[..., UWYAMLConvert.TaggedValT]] = [
             partial(load_as, bool),  # !bool
             to_datetime,  # !datetime
