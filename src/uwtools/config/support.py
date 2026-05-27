@@ -151,7 +151,7 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     """
 
     class UWYAMLDumper(yaml.Dumper):
-        def ignore_aliases(self, data: object) -> bool:  # noqa: ARG002
+        def ignore_aliases(self, _data: object) -> bool:
             return True
 
     add_yaml_representers()
