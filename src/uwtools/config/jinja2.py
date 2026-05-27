@@ -5,7 +5,8 @@ Support for rendering Jinja2 templates.
 from __future__ import annotations
 
 import os
-from datetime import datetime, timedelta
+import re
+from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from pathlib import Path
 from typing import Any, NoReturn
@@ -24,6 +25,7 @@ from uwtools.config.support import (
 )
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_config_format, readable, writable
+from uwtools.utils.time import to_iso8601
 
 _ConfigVal = (
     bool
@@ -138,6 +140,7 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
+    report = lambda x: deref_debug("Rendering", x)
     rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
@@ -151,14 +154,14 @@ def dereference(
     elif isinstance(val, list):
         rendered = [dereference(v, context) for v in val]
     elif isinstance(val, str):
-        deref_debug("Rendering", val)
+        report(val)
         rendered = _deref_render(val, context, local)
     elif isinstance(val, UWYAMLConvert):
-        deref_debug("Rendering", val.value)
+        report(val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
     elif isinstance(val, UWYAMLGlob):
-        deref_debug("Rendering", val.value)
+        report(val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = val
     else:
@@ -301,9 +304,10 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
         rendered = val
         deref_debug("Rendering failed", val)
         for line in str(e).split("\n"):
-            deref_debug(line)
+            deref_debug(f"  Exception text: {line}")
     else:
         deref_debug("Rendered", rendered)
+    rendered = _deref_render_datetime(rendered)
     try:
         loaded = yaml.load(rendered, Loader=uw_yaml_loader())
     except Exception as e:  # noqa: BLE001
@@ -315,6 +319,24 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
         rendered = val
         deref_debug("Held", rendered)
     return rendered
+
+
+def _deref_render_datetime(s: str) -> str:
+    """
+    Returns the given string with datetime repr strings, e.g. datetime.datetime(2026, 5, 27, 12),
+    converted to ISO8601 timestamps so that they can be YAML-loaded again without error.
+
+    :param s: A string potentially containing a datetime repr string.
+    """
+    orig = s
+    pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
+    for old, argstr in re.findall(pattern, s):
+        dtargs: Any = map(int, argstr.split(","))
+        dt = datetime(*dtargs, tzinfo=timezone.utc)  # type: ignore[misc]
+        new = to_iso8601(dt)
+        s = s.replace(old, new)
+        log.debug("Replaced '%s' with '%s' in '%s'", old, new, orig)
+    return s
 
 
 def _dry_run_template(rendered_template: str) -> str:

@@ -69,6 +69,7 @@ ignore = [
   "FLY002",  # static-join-to-f-string
   "N813",    # camelcase-imported-as-lowercase
   "PLR0913", # too-many-arguments
+  "PLR2004", # magic-value-comparison
   "PT019",   # pytest-fixture-param-without-value
   "PTH207",  # glob
   "RUF015",  # unnecessary-iterable-allocation-for-first-element
@@ -86,7 +87,6 @@ ignore = [
 "uwtools/tests/*" = [
   "ANN001",  # missing-type-function-argument
   "N802",    # invalid-function-name
-  "PLR2004", # magic-value-comparison
   "PT013",   # pytest-incorrect-pytest-import
   "SLF001",  # private-member-access
 ]

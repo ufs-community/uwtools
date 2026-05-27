@@ -227,6 +227,32 @@ def test_config_tools_compose__bad_duplicate_anchor(tmp_path):
     assert "found duplicate anchor 'A'" in str(e.value)
 
 
+def test_config_tools_compose__datetime(capsys, tmp_path):
+    yaml1 = """
+    a:
+      t: !datetime 2022-02-01T00
+    c: !dict '{{ b }}'
+    """
+    config1 = tmp_path / "config1.yaml"
+    config1.write_text(dedent(yaml1))
+    yaml2 = """
+    b:
+      t: !datetime '{{ a.t }}'
+    """
+    config2 = tmp_path / "config2.yaml"
+    config2.write_text(dedent(yaml2))
+    expected = """
+    a:
+      t: 2022-02-01T00:00:00
+    c:
+      t: 2022-02-01T00:00:00
+    b:
+      t: 2022-02-01T00:00:00
+    """
+    tools.compose(configs=[config1, config2], realize=True)
+    assert capsys.readouterr().out.strip() == dedent(expected).strip()
+
+
 @mark.parametrize(("configclass", "fmt"), [(INIConfig, FORMAT.ini), (NMLConfig, FORMAT.nml)])
 def test_config_tools_compose__fmt_ini_nml_2x(configclass, fmt, logged, tmp_path):
     d = {"constants": {"pi": 3.142, "e": 2.718}, "trees": {"leaf": "elm", "needle": "spruce"}}
