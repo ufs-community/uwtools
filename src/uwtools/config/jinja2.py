@@ -322,6 +322,12 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
 
 
 def _deref_render_datetime(s: str) -> str:
+    """
+    Returns the given string with datetime repr strings, e.g. datetime.datetime(2026, 5, 27, 12),
+    converted to ISO8601 timestamps so that they can be YAML-loaded again without error.
+
+    :param s: A string potentially containing a datetime repr string.
+    """
     orig = s
     pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
     for old, argstr in re.findall(pattern, s):
