@@ -36,7 +36,7 @@ class INIConfig(Config):
         # INI configs have one level for the [section], and one level for each key, so are exactly
         # depth 2.
 
-        return depth == 2  # noqa: PLR2004
+        return depth == 2
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
