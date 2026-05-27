@@ -5,6 +5,7 @@ Support for creating ecFlow suite definitions and ecf scripts.
 from __future__ import annotations
 
 import os
+import random
 import re
 import socket
 from copy import deepcopy
@@ -412,7 +413,7 @@ _SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
 _SSL_FILES = ["dh2048.pem", "server.crt", "server.key"]
 
 
-def _provision_ssl() -> None:
+def _provision_ssl(ssl_dir: Path = _SSL_DIR) -> None:
     """
     Ensure SSL certificates exist in ``$HOME/.ecflowrc/ssl``.
 
@@ -420,26 +421,28 @@ def _provision_ssl() -> None:
     missing one or more required files, logs an error and raises ``UWError``. If the directory does
     not exist, creates it and generates the required SSL files using ``openssl``.
 
+    :param ssl_dir: Directory where SSL certificates are stored. Defaults to
+        ``$HOME/.ecflowrc/ssl``.
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
     """
-    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
+    existing = [f for f in _SSL_FILES if (ssl_dir / f).exists()]
     if len(existing) == len(_SSL_FILES):
-        log.info("Using existing SSL certificates in %s", _SSL_DIR)
+        log.info("Using existing SSL certificates in %s", ssl_dir)
         return
     if existing:
         missing = sorted(set(_SSL_FILES) - set(existing))
         msg = (
-            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
+            f"SSL directory {ssl_dir} exists but is missing required file(s): {missing}. "
             "Provide all required files or remove the directory to allow regeneration."
         )
         raise UWError(msg)
-    log.info("Creating SSL directory %s", _SSL_DIR)
-    _SSL_DIR.mkdir(parents=True, exist_ok=True)
-    _ssl_generate_key(_SSL_DIR / "server.key")
-    _ssl_generate_cert(_SSL_DIR / "server.crt", _SSL_DIR / "server.key")
-    _ssl_generate_dhparam(_SSL_DIR / "dh2048.pem")
-    log.info("SSL certificates written to %s", _SSL_DIR)
+    log.info("Creating SSL directory %s", ssl_dir)
+    ssl_dir.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(ssl_dir / "server.key")
+    _ssl_generate_cert(ssl_dir / "server.crt", ssl_dir / "server.key")
+    _ssl_generate_dhparam(ssl_dir / "dh2048.pem")
+    log.info("SSL credentials written to %s", ssl_dir)
 
 
 def _ssl_touch(path: Path) -> None:
@@ -463,7 +466,6 @@ def _ssl_generate_key(path: Path) -> None:
     :param path: Destination for the private key file.
     :raises UWError: If ``openssl`` reports failure.
     """
-    _ssl_touch(path)
     log.info("Generating SSL private key: %s", path)
     success, _ = run_shell_cmd(f"openssl genrsa -out {path} 2048")
     if not success:
@@ -479,7 +481,6 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     :param key_path: Path to the existing RSA private key.
     :raises UWError: If ``openssl`` reports failure.
     """
-    _ssl_touch(path)
     hostname = socket.gethostname()
     log.info("Generating SSL certificate: %s", path)
     cmd = f"openssl req -x509 -key {key_path} -new -out {path} -days 3650 -subj '/CN={hostname}'"
@@ -507,7 +508,7 @@ def _ssl_generate_dhparam(path: Path) -> None:
 
 
 def server(
-    config: Path | None = None,
+    config: Path,
     port: int | None = None,
     insecure: bool = False,
     report: bool = False,  # noqa: ARG001
@@ -515,20 +516,43 @@ def server(
     """
     Start an ecFlow server on an available TCP port with SSL security enabled.
 
-    :param config: Path to UW YAML config file providing server settings (``None`` => no config
-        file).
-    :param port: TCP port to use; overrides any value in config (``None`` => pick a random
-        available port from 49152-65535).
+    :param config: Path to UW YAML config file providing server settings.
+    :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
     """
-    if config is not None:
-        cfg = YAMLConfig(config)
-        cfg.dereference()
-        if port is None:
-            port = cfg.data.get(STR.port)
+    cfg = YAMLConfig(config)
+    cfg.dereference()
+    validate_internal(schema_name="ecflow-server", desc="ecFlow server config", config_data=cfg)
     if not insecure:
         _provision_ssl()
+    env = {**os.environ, **{k: str(v) for k, v in cfg.data.items()}}
+    ssl_flag = "" if insecure else " --ssl"
+    if port is not None:
+        success, output = run_shell_cmd(
+            cmd=f"ecflow_server --port={port}{ssl_flag}",
+            cwd=cfg.data["ECF_HOME"],
+            env=env,
+            taskname="ecflow_server",
+        )
+        if not success:
+            msg = f"ecflow_server failed on port {port}: {output}"
+            raise UWError(msg)
+    else:
+        while True:
+            port = random.randint(49152, 65535)  # noqa: S311
+            success, output = run_shell_cmd(
+                cmd=f"ecflow_server --port={port}{ssl_flag}",
+                cwd=cfg.data["ECF_HOME"],
+                env=env,
+                taskname="ecflow_server",
+            )
+            if success:
+                break
+            if "bad port" in output:
+                continue
+            msg = f"ecflow_server failed: {output}"
+            raise UWError(msg)
 
 
 def validate(config: dict | YAMLConfig | Path | None = None) -> bool:

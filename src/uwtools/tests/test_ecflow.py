@@ -698,34 +698,31 @@ def test_ecflow_validate__yamlconfig(minimal_config):
 # SSL provisioning tests
 
 
-def test_ecflow__provision_ssl__all_files_exist(logged, tmp_path, monkeypatch):
+def test_ecflow__provision_ssl__all_files_exist(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     for fname in ["dh2048.pem", "server.crt", "server.key"]:
         (ssl_dir / fname).touch()
-    monkeypatch.setattr(ecflow, "_SSL_DIR", ssl_dir)
-    ecflow._provision_ssl()
+    ecflow._provision_ssl(ssl_dir)
     assert logged("Using existing SSL certificates in")
 
 
-def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path, monkeypatch):
+def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     (ssl_dir / "server.crt").touch()
-    monkeypatch.setattr(ecflow, "_SSL_DIR", ssl_dir)
     with raises(UWError, match="missing required file"):
-        ecflow._provision_ssl()
+        ecflow._provision_ssl(ssl_dir)
 
 
-def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path, monkeypatch):
+def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
-    monkeypatch.setattr(ecflow, "_SSL_DIR", ssl_dir)
     with (
         patch.object(ecflow, "_ssl_generate_key") as mock_key,
         patch.object(ecflow, "_ssl_generate_cert") as mock_cert,
         patch.object(ecflow, "_ssl_generate_dhparam") as mock_dh,
     ):
-        ecflow._provision_ssl()
+        ecflow._provision_ssl(ssl_dir)
     assert ssl_dir.is_dir()
     mock_key.assert_called_once_with(ssl_dir / "server.key")
     mock_cert.assert_called_once_with(ssl_dir / "server.crt", ssl_dir / "server.key")
@@ -742,12 +739,8 @@ def test_ecflow__ssl_touch__creates_file_with_600_perms(tmp_path):
 
 def test_ecflow__ssl_generate_key__success(tmp_path):
     path = tmp_path / "server.key"
-    with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
-        patch.object(ecflow, "_ssl_touch") as mock_touch,
-    ):
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
         ecflow._ssl_generate_key(path)
-    mock_touch.assert_called_once_with(path)
     mock_cmd.assert_called_once()
     assert f"-out {path}" in mock_cmd.call_args[0][0]
 
@@ -756,7 +749,6 @@ def test_ecflow__ssl_generate_key__failure(tmp_path):
     path = tmp_path / "server.key"
     with (
         patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
-        patch.object(ecflow, "_ssl_touch"),
         raises(UWError, match="Failed to generate SSL private key"),
     ):
         ecflow._ssl_generate_key(path)
@@ -765,12 +757,8 @@ def test_ecflow__ssl_generate_key__failure(tmp_path):
 def test_ecflow__ssl_generate_cert__success(tmp_path):
     cert_path = tmp_path / "server.crt"
     key_path = tmp_path / "server.key"
-    with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
-        patch.object(ecflow, "_ssl_touch") as mock_touch,
-    ):
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
         ecflow._ssl_generate_cert(cert_path, key_path)
-    mock_touch.assert_called_once_with(cert_path)
     mock_cmd.assert_called_once()
     assert f"-out {cert_path}" in mock_cmd.call_args[0][0]
 
@@ -780,7 +768,6 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
     key_path = tmp_path / "server.key"
     with (
         patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
-        patch.object(ecflow, "_ssl_touch"),
         raises(UWError, match="Failed to generate SSL certificate"),
     ):
         ecflow._ssl_generate_cert(cert_path, key_path)
@@ -808,39 +795,145 @@ def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
         ecflow._ssl_generate_dhparam(path)
 
 
+def test_ecflow_server__validates_config():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal") as mock_validate,
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
+    ):
+        ecflow.server(config=config_path, port=3141)
+    mock_validate.assert_called_once_with(
+        schema_name="ecflow-server", desc="ecFlow server config", config_data=mock_cfg
+    )
+
+
 def test_ecflow_server__calls_provision_ssl():
-    with patch.object(ecflow, "_provision_ssl") as mock_ssl:
-        ecflow.server()
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl") as mock_ssl,
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
+    ):
+        ecflow.server(config=config_path, port=3141)
     mock_ssl.assert_called_once()
 
 
 def test_ecflow_server__insecure_skips_ssl():
-    with patch.object(ecflow, "_provision_ssl") as mock_ssl:
-        ecflow.server(insecure=True)
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl") as mock_ssl,
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
+    ):
+        ecflow.server(config=config_path, port=3141, insecure=True)
     mock_ssl.assert_not_called()
 
 
-def test_ecflow_server__config_port_used_when_no_cli_port():
+def test_ecflow_server__fixed_port_ssl():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"port": 55000}
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
     with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
         patch.object(ecflow, "_provision_ssl"),
-        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg) as mock_cfg_cls,
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
     ):
-        ecflow.server(config=config_path, port=None)
-    mock_cfg_cls.assert_called_once_with(config_path)
-    mock_cfg.dereference.assert_called_once()
+        ecflow.server(config=config_path, port=3141)
+    cmd = mock_cmd.call_args[1]["cmd"]
+    assert "--port=3141" in cmd
+    assert "--ssl" in cmd
 
 
-def test_ecflow_server__cli_port_overrides_config():
+def test_ecflow_server__fixed_port_insecure():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"port": 55000}
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
     with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
         patch.object(ecflow, "_provision_ssl"),
-        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg) as mock_cfg_cls,
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
     ):
-        ecflow.server(config=config_path, port=54321)
-    mock_cfg_cls.assert_called_once_with(config_path)
-    mock_cfg.dereference.assert_called_once()
+        ecflow.server(config=config_path, port=3141, insecure=True)
+    cmd = mock_cmd.call_args[1]["cmd"]
+    assert "--port=3141" in cmd
+    assert "--ssl" not in cmd
+
+
+def test_ecflow_server__fixed_port_failure_raises():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "something went wrong")),
+        raises(UWError, match="ecflow_server failed on port 3141"),
+    ):
+        ecflow.server(config=config_path, port=3141)
+
+
+def test_ecflow_server__random_port_success():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "random") as mock_random,
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
+    ):
+        mock_random.randint.return_value = 54321
+        ecflow.server(config=config_path)
+    mock_random.randint.assert_called_once_with(49152, 65535)
+    assert "--port=54321" in mock_cmd.call_args[1]["cmd"]
+
+
+def test_ecflow_server__random_port_retries_on_bad_port():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "random") as mock_random,
+        patch.object(
+            ecflow,
+            "run_shell_cmd",
+            side_effect=[(False, "bad port"), (True, "")],
+        ) as mock_cmd,
+    ):
+        mock_random.randint.side_effect = [50000, 50001]
+        ecflow.server(config=config_path)
+    assert mock_cmd.call_count == 2
+
+
+def test_ecflow_server__random_port_non_recoverable_raises():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_random = Mock()
+    mock_random.randint.return_value = 54321
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "random", mock_random),
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "something broke")),
+        raises(UWError, match="ecflow_server failed"),
+    ):
+        ecflow.server(config=config_path)
