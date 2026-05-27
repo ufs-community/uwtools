@@ -307,10 +307,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
             deref_debug(f"  Exception text: {line}")
     else:
         deref_debug("Rendered", rendered)
-    for dtstr, argstr in re.findall(re.compile(r"(datetime\.datetime\(([^)]+)\))"), rendered):
-        dtargs: Any = map(int, argstr.split(","))
-        dt = datetime(*dtargs, tzinfo=timezone.utc)  # type: ignore[misc]
-        rendered = rendered.replace(dtstr, to_iso8601(dt))
+    rendered = _deref_render_datetime(rendered)
     try:
         loaded = yaml.load(rendered, Loader=uw_yaml_loader())
     except Exception as e:  # noqa: BLE001
@@ -321,6 +318,15 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     if isinstance(loaded, UWYAMLConvert):
         rendered = val
         deref_debug("Held", rendered)
+    return rendered
+
+
+def _deref_render_datetime(rendered: str) -> str:
+    pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
+    for dtstr, argstr in re.findall(pattern, rendered):
+        dtargs: Any = map(int, argstr.split(","))
+        dt = datetime(*dtargs, tzinfo=timezone.utc)  # type: ignore[misc]
+        rendered = rendered.replace(dtstr, to_iso8601(dt))
     return rendered
 
 
