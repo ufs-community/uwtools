@@ -322,13 +322,14 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
 
 
 def _deref_render_datetime(s: str) -> str:
+    orig = s
     pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
     for old, argstr in re.findall(pattern, s):
         dtargs: Any = map(int, argstr.split(","))
         dt = datetime(*dtargs, tzinfo=timezone.utc)  # type: ignore[misc]
         new = to_iso8601(dt)
         s = s.replace(old, new)
-        log.debug("Replaced '%s' with '%s' in '%s'", old, new, s)
+        log.debug("Replaced '%s' with '%s' in '%s'", old, new, orig)
     return s
 
 
