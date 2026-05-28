@@ -673,7 +673,7 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
 # ecflow
 
 
-def test_schema_ecflow():
+def test_schema_ecflow_suitedef():
     errors = schema_validator("ecflow")
     # Basic spec:
     config = {
@@ -695,7 +695,7 @@ def test_schema_ecflow():
     assert not errors(config)
 
 
-def test_schema_ecflow_nested_family():
+def test_schema_ecflow_suitedef_nested_family():
     errors = schema_validator("ecflow")
     config = {
         "ecflow": {
@@ -718,14 +718,14 @@ def test_schema_ecflow_nested_family():
     )
 
 
-def test_schema_ecflow_refs_addons_defstatus():
+def test_schema_ecflow_suitedef_refs_addons_defstatus():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"defstatus": "suspended"})
     assert "'halted' is not one of" in errors({"defstatus": "halted"})
 
 
-def test_schema_ecflow_refs_addons_events():
+def test_schema_ecflow_suitedef_refs_addons_events():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"events": [[1, "sim_complete"]]})
@@ -738,7 +738,7 @@ def test_schema_ecflow_refs_addons_events():
     )
 
 
-def test_schema_ecflow_refs_addons_inlimits():
+def test_schema_ecflow_suitedef_refs_addons_inlimits():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Supports one of four categories:
     assert not errors({"inlimits": [["max_members"]]})
@@ -755,7 +755,7 @@ def test_schema_ecflow_refs_addons_inlimits():
     assert "[] should be non-empty" in errors({"inlimits": []})
 
 
-def test_schema_ecflow_refs_addons_labels():
+def test_schema_ecflow_suitedef_refs_addons_labels():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Allows for a list of 2-lists:
     assert not errors({"labels": [["info", "running"], ["progress", "75%"]]})
@@ -765,13 +765,13 @@ def test_schema_ecflow_refs_addons_labels():
     assert "[] should be non-empty" in errors({"labels": []})
 
 
-def test_schema_ecflow_refs_addons_late():
+def test_schema_ecflow_suitedef_refs_addons_late():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"late": {"active": "00:15", "complete": "+02:00", "submitted": "20:00"}})
 
 
-def test_schema_ecflow_refs_addons_limits():
+def test_schema_ecflow_suitedef_refs_addons_limits():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"limits": [["max_tasks", 10], ["max_procs", 8]]})
@@ -780,7 +780,7 @@ def test_schema_ecflow_refs_addons_limits():
     assert "[] should be non-empty" in errors({"limits": []})
 
 
-def test_schema_ecflow_refs_addons_meters():
+def test_schema_ecflow_suitedef_refs_addons_meters():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     assert not errors({"meters": [["progress", 0, 100], ["step", 0, 10]]})
@@ -792,7 +792,7 @@ def test_schema_ecflow_refs_addons_meters():
 
 
 @mark.parametrize("top_level", ["repeat_date", "repeat_int"])
-def test_schema_ecflow_refs_addons_repeat_ints(top_level):
+def test_schema_ecflow_suitedef_refs_addons_repeat_ints(top_level):
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     config = {"variable": "MEMBER", "start": 20260101, "end": 20260102}
@@ -809,7 +809,7 @@ def test_schema_ecflow_refs_addons_repeat_ints(top_level):
 
 
 @mark.parametrize("top_level", ["repeat_datelist", "repeat_enumerated", "repeat_string"])
-def test_schema_ecflow_refs_addons_repeat_lists(top_level):
+def test_schema_ecflow_suitedef_refs_addons_repeat_lists(top_level):
     errors = schema_validator("ecflow", "$defs", "addons")
     type_ = int if top_level == "repeat_datelist" else str
     # Basic spec:
@@ -824,7 +824,7 @@ def test_schema_ecflow_refs_addons_repeat_lists(top_level):
     )
 
 
-def test_schema_ecflow_refs_addons_repeat_datetime():
+def test_schema_ecflow_suitedef_refs_addons_repeat_datetime():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     config = {"variable": "CYCLE", "start": "20260101T120000", "end": "20260102T123000"}
@@ -842,7 +842,7 @@ def test_schema_ecflow_refs_addons_repeat_datetime():
     )
 
 
-def test_schema_ecflow_refs_addons_repeat_day():
+def test_schema_ecflow_suitedef_refs_addons_repeat_day():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     config = {"step": 2}
@@ -854,7 +854,7 @@ def test_schema_ecflow_refs_addons_repeat_day():
     )
 
 
-def test_schema_ecflow_refs_families_expander():
+def test_schema_ecflow_suitedef_refs_families_expander():
     errors = schema_validator(
         "ecflow", "$defs", "nodecontainer", "patternProperties", "^families_.+$"
     )
@@ -874,7 +874,7 @@ def test_schema_ecflow_refs_families_expander():
     assert not errors({**config, "trigger": "task_setup == complete"})
 
 
-def test_schema_ecflow_refs_task_expander():
+def test_schema_ecflow_suitedef_refs_task_expander():
     errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^tasks_.+$")
     # Basic spec:
     config = {
@@ -905,7 +905,7 @@ def test_schema_ecflow_refs_task_expander():
     )
 
 
-def test_schema_ecflow_refs_nodecontainer_family():
+def test_schema_ecflow_suitedef_refs_nodecontainer_family():
     errors = schema_validator(
         "ecflow", "$defs", "nodecontainer", "patternProperties", "^family_.+$"
     )
@@ -920,7 +920,7 @@ def test_schema_ecflow_refs_nodecontainer_family():
     assert not errors({**config, "defstatus": "suspended"})
 
 
-def test_schema_ecflow_refs_nodecontainer_task():
+def test_schema_ecflow_suitedef_refs_nodecontainer_task():
     errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^task_.+$")
     # Basic spec:
     config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
@@ -933,7 +933,7 @@ def test_schema_ecflow_refs_nodecontainer_task():
     assert not errors({**config, "defstatus": "suspended"})
 
 
-def test_schema_ecflow_refs_family():
+def test_schema_ecflow_suitedef_refs_family():
     errors = schema_validator("ecflow", "$defs", "family")
     # Basic spec:
     config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
@@ -941,7 +941,7 @@ def test_schema_ecflow_refs_family():
     assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
-def test_schema_ecflow_refs_familycontainer():
+def test_schema_ecflow_suitedef_refs_familycontainer():
     errors = schema_validator("ecflow", "$defs", "familycontainer")
     # Basic spec:
     config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
@@ -949,7 +949,7 @@ def test_schema_ecflow_refs_familycontainer():
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
 
-def test_schema_ecflow_refs_nodecontainer():
+def test_schema_ecflow_suitedef_refs_nodecontainer():
     errors = schema_validator("ecflow", "$defs", "nodecontainer")
     # Basic spec:
     config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
@@ -957,7 +957,7 @@ def test_schema_ecflow_refs_nodecontainer():
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
 
-def test_schema_ecflow_refs_task():
+def test_schema_ecflow_suitedef_refs_task():
     errors = schema_validator("ecflow", "$defs", "task")
     # Basic spec:
     config = {
@@ -969,7 +969,7 @@ def test_schema_ecflow_refs_task():
     assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
-def test_schema_ecflow_refs_taskcontainer():
+def test_schema_ecflow_suitedef_refs_taskcontainer():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
     config = {
@@ -980,7 +980,7 @@ def test_schema_ecflow_refs_taskcontainer():
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
 
-def test_schema_ecflow_refs_taskcontainer_script():
+def test_schema_ecflow_suitedef_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
     config = {
@@ -991,7 +991,7 @@ def test_schema_ecflow_refs_taskcontainer_script():
     assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
 
 
-def test_schema_ecflow_scheduler():
+def test_schema_ecflow_suitedef_scheduler():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # Valid schedulers:
     for sched in ("lsf", "pbs", "slurm"):
@@ -1000,7 +1000,7 @@ def test_schema_ecflow_scheduler():
     assert "'torque' is not one of" in errors({"scheduler": "torque"})
 
 
-def test_schema_ecflow_extern():
+def test_schema_ecflow_suitedef_extern():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # extern is a list of strings:
     assert not errors({"extern": ["/other/suite/task"]})
@@ -1010,7 +1010,7 @@ def test_schema_ecflow_extern():
     assert "is not of type 'array'" in errors({"extern": "/other/suite/task"})
 
 
-def test_schema_ecflow_execution():
+def test_schema_ecflow_suitedef_execution():
     errors = schema_validator(
         "ecflow",
         "$defs",
