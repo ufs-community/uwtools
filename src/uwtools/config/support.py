@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import math
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime, timedelta
-from functools import partial
+from functools import cache, partial
 from importlib import import_module
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,11 @@ if TYPE_CHECKING:
 
 INCLUDE_TAG = "!include"
 YAMLKey = bool | float | int | str
+
+
+class _UWYAMLLoader(yaml.SafeLoader):
+    pass
+
 
 # Public functions
 
@@ -70,7 +76,7 @@ def add_yaml_representers() -> None:
         ),
     )
     yaml.add_representer(timedelta, timedelta2str)
-    for tag_class in [UWYAMLConvert, UWYAMLGlob, UWYAMLRemove]:
+    for tag_class in [UWYAMLConvert, UWYAMLExtend, UWYAMLGlob, UWYAMLRemove]:
         yaml.add_representer(tag_class, tag_class.represent)
 
 
@@ -124,12 +130,13 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
+@cache
 def uw_yaml_loader() -> type[yaml.SafeLoader]:
     """
     A loader with basic UW constructors added.
     """
-    loader = yaml.SafeLoader
-    for tag_class in (UWYAMLConvert, UWYAMLGlob, UWYAMLRemove):
+    loader = _UWYAMLLoader
+    for tag_class in (UWYAMLConvert, UWYAMLExtend, UWYAMLGlob, UWYAMLRemove):
         for tag in tag_class.TAGS:
             loader.add_constructor(tag, tag_class)
     return loader
@@ -142,8 +149,20 @@ def dict_to_yaml_str(d: dict, sort: bool = False) -> str:
     :param d: A dict object.
     :param sort: Sort dict/mapping keys?
     """
+
+    class UWYAMLDumper(yaml.Dumper):
+        def ignore_aliases(self, _data: object) -> bool:
+            return True
+
     add_yaml_representers()
-    return yaml.dump(d, default_flow_style=False, indent=2, sort_keys=sort, width=math.inf).strip()
+    return yaml.dump(
+        d,
+        Dumper=UWYAMLDumper,
+        default_flow_style=False,
+        indent=2,
+        sort_keys=sort,
+        width=math.inf,
+    ).strip()
 
 
 class UWYAMLTag:
@@ -174,8 +193,11 @@ class UWYAMLTag:
 
         Implements the interface required by pyyaml's add_representer() function. See the pyyaml
         documentation for details.
+
+        Returns a copy of the node to prevent pyyaml from seeing the same node object at multiple
+        positions in the tree and emitting anchors and aliases to eliminate repetition.
         """
-        return data.node
+        return deepcopy(data.node)
 
 
 class UWYAMLTaggedStr(UWYAMLTag):
@@ -226,7 +248,7 @@ class UWYAMLConvert(UWYAMLTaggedStr):
 
         :raises: Appropriate exception if the value cannot be represented as the required type.
         """
-        load_as = lambda t, v: t(yaml.safe_load(v))
+        load_as = lambda t, v: t(yaml.load(v, Loader=uw_yaml_loader()))
         converters: list[Callable[..., UWYAMLConvert.TaggedValT]] = [
             partial(load_as, bool),  # !bool
             to_datetime,  # !datetime
@@ -244,6 +266,14 @@ class UWYAMLConvert(UWYAMLTaggedStr):
         Return the string representation of the value, with tag.
         """
         return f"{self.tag} '{self.value}'"
+
+
+class UWYAMLExtend(UWYAMLTag):
+    """
+    Support for a YAML tag that extends a sequence.
+    """
+
+    TAGS = ("!extend",)
 
 
 class UWYAMLGlob(UWYAMLTaggedStr):

@@ -12,7 +12,14 @@ from typing import Any, cast
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import INCLUDE_TAG, depth, dict_to_yaml_str, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLExtend,
+    depth,
+    dict_to_yaml_str,
+    log_and_error,
+    uw_yaml_loader,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import str2path
@@ -280,14 +287,27 @@ class Config(ABC, UserDict):
         :param src: The dictionary with new data to use.
         """
 
-        def update(src: dict, dst: dict) -> None:
-            for key, val in src.items():
-                if isinstance(val, dict):
-                    if isinstance(dst.get(key), dict):
-                        update(val, dst[key])
-                    else:
-                        dst[key] = val
-                else:
-                    dst[key] = val
+        def error(msg: str, keys: list) -> None:
+            keypath = ".".join(keys)
+            raise UWConfigError("At %s, %s" % (keypath, msg))
+
+        def update(src: dict, dst: dict, keys: list | None = None) -> None:
+            for key, new in src.items():
+                nextkeys = [*(keys or []), key]
+                old = dst.get(key)
+                match (new, old):
+                    case (dict(), dict()):
+                        update(new, old, nextkeys)
+                    case (UWYAMLExtend(), list()):
+                        if isinstance(new.node, yaml.SequenceNode):
+                            old.extend(uw_yaml_loader()("").construct_sequence(new.node))
+                        else:
+                            nodeid = getattr(new.node, "id", None)
+                            assert nodeid in ("mapping", "scalar")
+                            error(f"!extend must tag a sequence, not a {nodeid}", nextkeys)
+                    case (UWYAMLExtend(), object()):
+                        error("found no sequence to extend", nextkeys)
+                    case _:
+                        dst[key] = new
 
         update(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)

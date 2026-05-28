@@ -431,6 +431,18 @@ def test_config_jinja2__deref_render__unloadable_val(logged):
     assert not logged("Rendering failed")
 
 
+def test_config_jinja2__deref_render_datetime(uwcaplog):
+    s = "foo datetime.datetime(2026, 5, 27) bar datetime.datetime(2026, 5, 27, 1, 2, 3, 4) baz"
+    actual = jinja2._deref_render_datetime(s)
+    expected = "foo 2026-05-27T00:00:00 bar 2026-05-27T01:02:03 baz"
+    assert actual == expected
+    for old, new in [
+        ("datetime.datetime(2026, 5, 27)", "2026-05-27T00:00:00"),
+        ("datetime.datetime(2026, 5, 27, 1, 2, 3, 4)", "2026-05-27T01:02:03"),
+    ]:
+        assert f"Replaced '{old}' with '{new}' in '{s}'" in uwcaplog.text
+
+
 def test_config_jinja2__dry_run_template(logged):
     jinja2._dry_run_template("roses are red\nviolets are blue")
     assert logged("roses are red")

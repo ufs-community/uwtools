@@ -9,7 +9,6 @@ from yaml.constructor import ConstructorError
 from uwtools.config.formats.base import Config
 from uwtools.config.support import (
     INCLUDE_TAG,
-    add_yaml_representers,
     dict_to_yaml_str,
     log_and_error,
     uw_yaml_loader,
@@ -73,7 +72,6 @@ class YAMLConfig(Config):
 
         :param cfg: The in-memory config object.
         """
-        add_yaml_representers()
         return dict_to_yaml_str(cfg)
 
     @staticmethod
