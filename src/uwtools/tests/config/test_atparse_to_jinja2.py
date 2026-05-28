@@ -4,6 +4,7 @@ Tests for uwtools.utils.atparse_to_jinja2 module.
 
 import sys
 from io import StringIO
+from textwrap import dedent
 from unittest.mock import patch
 
 from pytest import fixture
@@ -16,18 +17,20 @@ from uwtools.utils.file import _stdinproxy
 
 @fixture
 def txt_atparse():
-    return """
-@[greeting] to the @[subject]
-@[flowers] are @[color]
-""".strip()
+    s = """
+    @[greeting] to the @[subject]
+    @[flowers] are @[color]
+    """
+    return dedent(s).strip()
 
 
 @fixture
 def txt_jinja2():
-    return """
-{{ greeting }} to the {{ subject }}
-{{ flowers }} are {{ color }}
-""".strip()
+    s = """
+    {{ greeting }} to the {{ subject }}
+    {{ flowers }} are {{ color }}
+    """
+    return dedent(s).strip()
 
 
 @fixture
