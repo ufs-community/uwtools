@@ -790,7 +790,7 @@ def test_config_tools_realize__reference_tagged_val_1(capsys, tmp_path):
     a: 2
     b: 2 is 2
     """
-    path = tmp_path / "config,yaml"
+    path = tmp_path / "config.yaml"
     path.write_text(dedent(yaml1))
     tools.realize(input_config=path)
     expected = dedent(yaml2).strip()
@@ -810,7 +810,7 @@ def test_config_tools_realize__reference_tagged_val_2(capsys, tmp_path):
     val:
       step: 6
     """
-    path = tmp_path / "config,yaml"
+    path = tmp_path / "config.yaml"
     path.write_text(dedent(yaml1))
     tools.realize(input_config=path)
     expected = dedent(yaml2).strip()
@@ -831,7 +831,7 @@ def test_config_tools_realize__reference_tagged_val_3(capsys, tmp_path):
     x:
       i: 1
     """
-    path = tmp_path / "config,yaml"
+    path = tmp_path / "config.yaml"
     path.write_text(dedent(yaml1))
     tools.realize(input_config=path)
     expected = dedent(yaml2).strip()
