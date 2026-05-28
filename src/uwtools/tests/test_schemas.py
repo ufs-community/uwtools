@@ -171,6 +171,26 @@ def chgres_cube_prop():
 
 
 @fixture
+def ecflow_config():
+    return {
+        "ecflow": {
+            "suitedef": {
+                "suite_one": {
+                    "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
+                    "families_two": {
+                        "expand": {
+                            "MEM": ["00", "06"],
+                        },
+                        "family_three": {},
+                    },
+                },
+                "scheduler": "pbs",
+            }
+        },
+    }
+
+
+@fixture
 def enkf_prop():
     return partial(schema_validator, "enkf", "properties", "enkf", "properties")
 
@@ -673,49 +693,26 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
 # ecflow
 
 
-def test_schema_ecflow_suitedef():
-    errors = schema_validator("ecflow")
+def test_schema_ecflow_suitedef(ecflow_config):
+    config = ecflow_config["ecflow"]["suitedef"]
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # Basic spec:
-    config = {
-        "ecflow": {
-            "suitedef": {
-                "suite_one": {
-                    "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
-                    "families_two": {
-                        "expand": {
-                            "MEM": ["00", "06"],
-                        },
-                        "family_three": {},
-                    },
-                },
-                "scheduler": "pbs",
-            }
-        },
-    }
     assert not errors(config)
 
 
 def test_schema_ecflow_suitedef_nested_family():
-    errors = schema_validator("ecflow")
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     config = {
-        "ecflow": {
-            "suitedef": {
-                "suites_a": {
-                    "family_a": {
-                        "families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}
-                    },
-                    "expand": {
-                        "MEMBER": ["00", "06"],
-                    },
-                }
-            }
+        "suites_a": {
+            "family_a": {"families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}},
+            "expand": {
+                "MEMBER": ["00", "06"],
+            },
         }
     }
     assert not errors(config)
     # Ensure that the required "expand" key is present:
-    assert "'expand' is a required property" in errors(
-        with_del(config, "ecflow", "suitedef", "suites_a", "expand")
-    )
+    assert "'expand' is a required property" in errors(with_del(config, "suites_a", "expand"))
 
 
 def test_schema_ecflow_suitedef_refs_addons_defstatus():
