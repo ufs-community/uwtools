@@ -2,9 +2,9 @@ name: readthedocs
 channels:
   - conda-forge
 dependencies:
-  - linkchecker 10.4.*
+  - linkchecker 10.6.*
   - python 3.10 # keep in sync with pymin in meta.yaml
-  - sphinx 7.4.*
-  - sphinx_rtd_theme 3.0.*
-  - sphinxcontrib-bibtex 2.6.*
-  - tree 2.2.*
+  - sphinx 8.1.*
+  - sphinx_rtd_theme 3.1.*
+  - sphinxcontrib-bibtex 2.7.*
+  - tree 2.3.*

@@ -6,5 +6,6 @@ Contributor Guide
 
    developer_setup
    code_quality
+   conventions
    fork_pr_model
    documentation

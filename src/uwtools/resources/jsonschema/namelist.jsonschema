@@ -8,7 +8,6 @@
         "string"
       ]
     },
-    "minProperties": 1,
     "type": "object"
   },
   "minProperties": 1,

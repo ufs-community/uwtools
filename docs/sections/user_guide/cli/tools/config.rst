@@ -198,7 +198,7 @@ Examples
 ``realize``
 -----------
 
-In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` action can build a complete config file from two or more separate files.
+In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. Specificallly, the ``realize`` action replaces `YAML aliases <https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/>`_ with their anchored content, and renders :jinja2:`Jinja2 expressions<templates>`. It can build a complete config file from two or more separate files.
 
 .. literalinclude:: config/realize-help.cmd
    :language: text
@@ -392,6 +392,8 @@ and YAML file ``update.yaml`` with contents:
      :language: text
 
   Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately via shell redirection.
+
+.. attention:: If ``uwtools`` detects a ``repr()``-style representation of a Python :python:`datetime <datetime.html#datetime.datetime>` object in a Jinja2 expression string, it replaces it with the `ISO8601 <https://www.iso.org/iso-8601-date-and-time-format.html>`_ representation of that ``datetime``. For example, if ``datetime.datetime(2026, 5, 27, 12)`` appears, it is replaced in the string with ``2026-05-27T12:00:00``. This is done to support cases where ``uwtools`` internally renders expressions and then later re-parses them as YAML.
 
 .. _cli_config_validate_examples:
 

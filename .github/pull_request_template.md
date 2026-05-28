@@ -37,3 +37,4 @@ INSTRUCTIONS
 
 - [ ] I have added myself and any co-authors to the PR's _Assignees_ list.
 - [ ] I have reviewed the documentation and have made any updates necessitated by this change.
+- [ ] Where helpful, I have written comments in this PR's _Files changed_ view to assist reviewers.
