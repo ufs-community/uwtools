@@ -81,6 +81,36 @@ Converts the tagged node to a Python ``dict`` value. For example, given ``input.
    d3: {'k0': 0, 'k1': 1, 'k2': 2}
    d4: {'k0': 0, 'k1': 1, 'k2': 2}
 
+``!extend``
+^^^^^^^^^^^
+
+Extends an existing list in a base config with additional items. For example, given ``input.yaml``:
+
+.. code-block:: yaml
+
+   values:
+   - 1
+   - 2
+
+and ``update.yaml``:
+
+.. code-block:: yaml
+
+   values: !extend
+   - 3
+   - 4
+
+.. code-block:: text
+
+   $ uw config realize -i input.yaml --update-file update.yaml
+   values:
+   - 1
+   - 2
+   - 3
+   - 4
+
+The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key, with a sequence value, at the same key path.
+
 ``!float``
 ^^^^^^^^^^
 

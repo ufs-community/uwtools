@@ -54,7 +54,7 @@ class NMLConfig(Config):
         # per f90nml. uwtools can map back and forth between these formats, but it should be clear
         # that a ceiling cannot be defined for the YAML depth.
 
-        return depth >= 2  # noqa: PLR2004
+        return depth >= 2
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
