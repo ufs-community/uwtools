@@ -71,29 +71,29 @@ def test_convert_input_file_to_stdout(atparsefile, capsys, txt_jinja2):
 def test_convert_preserve_whitespace(tmp_path):
     atparse = """
 
-@[first_entry]
-  @[second_entry]
-  @[third_entry]
-    @[fourth_entry]
+    @[first_entry]
+      @[second_entry]
+      @[third_entry]
+        @[fourth_entry]
 
-        @[fifth_entry] @[sixth_entry]
+            @[fifth_entry] @[sixth_entry]
 
-"""
+    """
     infile = tmp_path / "atparse"
-    infile.write_text(atparse)
+    infile.write_text(dedent(atparse))
     outfile = tmp_path / "jinja2"
     atparse_to_jinja2.convert(input_file=infile, output_file=outfile)
     expected = """
 
-{{ first_entry }}
-  {{ second_entry }}
-  {{ third_entry }}
-    {{ fourth_entry }}
+    {{ first_entry }}
+      {{ second_entry }}
+      {{ third_entry }}
+        {{ fourth_entry }}
 
-        {{ fifth_entry }} {{ sixth_entry }}
+            {{ fifth_entry }} {{ sixth_entry }}
 
-"""
-    assert outfile.read_text() == expected
+    """
+    assert outfile.read_text() == dedent(expected)
 
 
 def test_convert_stdin_to_file(txt_atparse, capsys, txt_jinja2, tmp_path):
