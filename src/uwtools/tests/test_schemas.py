@@ -174,6 +174,7 @@ def chgres_cube_prop():
 def ecflow_config():
     return {
         "ecflow": {
+            "server": {},
             "suitedef": {
                 "suite_one": {
                     "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
@@ -185,7 +186,7 @@ def ecflow_config():
                     },
                 },
                 "scheduler": "pbs",
-            }
+            },
         },
     }
 
@@ -693,11 +694,25 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
 # ecflow
 
 
+def test_schema_ecflow(ecflow_config):
+    config = ecflow_config
+    errors = schema_validator("ecflow")
+    # Basic spec:
+    assert not errors(config)
+    # A config with just one of the top-level keys is fine:
+    for key in config["ecflow"]:
+        assert not errors(with_del(config, "ecflow", key))
+    # But at least one is required:
+    assert "is not valid" in errors({"ecflow": {}})
+
+
 def test_schema_ecflow_suitedef(ecflow_config):
     config = ecflow_config["ecflow"]["suitedef"]
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # Basic spec:
     assert not errors(config)
+    # No top-level keys are required:
+    assert not errors({})
 
 
 def test_schema_ecflow_suitedef_nested_family():
