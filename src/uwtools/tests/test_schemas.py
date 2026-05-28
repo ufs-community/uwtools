@@ -678,16 +678,18 @@ def test_schema_ecflow():
     # Basic spec:
     config = {
         "ecflow": {
-            "suite_one": {
-                "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
-                "families_two": {
-                    "expand": {
-                        "MEM": ["00", "06"],
+            "suitedef": {
+                "suite_one": {
+                    "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
+                    "families_two": {
+                        "expand": {
+                            "MEM": ["00", "06"],
+                        },
+                        "family_three": {},
                     },
-                    "family_three": {},
                 },
-            },
-            "scheduler": "pbs",
+                "scheduler": "pbs",
+            }
         },
     }
     assert not errors(config)
@@ -697,18 +699,22 @@ def test_schema_ecflow_nested_family():
     errors = schema_validator("ecflow")
     config = {
         "ecflow": {
-            "suites_a": {
-                "family_a": {"families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}},
-                "expand": {
-                    "MEMBER": ["00", "06"],
-                },
+            "suitedef": {
+                "suites_a": {
+                    "family_a": {
+                        "families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}
+                    },
+                    "expand": {
+                        "MEMBER": ["00", "06"],
+                    },
+                }
             }
         }
     }
     assert not errors(config)
     # Ensure that the required "expand" key is present:
     assert "'expand' is a required property" in errors(
-        with_del(config, "ecflow", "suites_a", "expand")
+        with_del(config, "ecflow", "suitedef", "suites_a", "expand")
     )
 
 
@@ -986,7 +992,7 @@ def test_schema_ecflow_refs_taskcontainer_script():
 
 
 def test_schema_ecflow_scheduler():
-    errors = schema_validator("ecflow", "properties", "ecflow")
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # Valid schedulers:
     for sched in ("lsf", "pbs", "slurm"):
         assert not errors({"scheduler": sched})
@@ -995,7 +1001,7 @@ def test_schema_ecflow_scheduler():
 
 
 def test_schema_ecflow_extern():
-    errors = schema_validator("ecflow", "properties", "ecflow")
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # extern is a list of strings:
     assert not errors({"extern": ["/other/suite/task"]})
     # Non-string items fail:
