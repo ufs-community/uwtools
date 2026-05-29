@@ -50,4 +50,4 @@ class FileStager:
         taskname, config, rundir = self.taskname, self.config, self.rundir  # type: ignore[attr-defined]
         yield taskname("files linked")
         files = config.get("files_to_link", {})
-        yield Linker(config=files, target_dir=rundir).go("files_to_hardlink") if files else None
+        yield Linker(config=files, target_dir=rundir).go("files_to_link") if files else None
