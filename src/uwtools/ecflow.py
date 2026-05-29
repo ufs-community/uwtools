@@ -4,6 +4,7 @@ Support for creating ecFlow suite definitions and ecf scripts.
 
 from __future__ import annotations
 
+import json
 import os
 import random
 import re
@@ -508,15 +509,15 @@ def _ssl_generate_dhparam(path: Path) -> None:
 
 
 def server(
-    config: Path,
+    config: dict | YAMLConfig | Path,
     port: int | None = None,
     insecure: bool = False,
-    report: bool = False,  # noqa: ARG001
+    report: bool = False,
 ) -> None:
     """
     Start an ecFlow server on an available TCP port with SSL security enabled.
 
-    :param config: Path to UW YAML config file providing server settings.
+    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings.
     :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
@@ -528,31 +529,65 @@ def server(
         _provision_ssl()
     env = {**os.environ, **{k: str(v) for k, v in cfg.data.items()}}
     ssl_flag = "" if insecure else " --ssl"
+    port = _secure_port(port)
+    if report:
+        _server_report(port=port, insecure=insecure)
+    success, output = run_shell_cmd(
+        cmd=f"ecflow_server --port={port}{ssl_flag}",
+        cwd=cfg.data["ECF_HOME"],
+        env=env,
+        taskname="ecflow_server",
+    )
+    if not success:
+        msg = f"ecflow_server failed on port {port}: {output}"
+        raise UWError(msg)
+
+
+def _port_available(port: int) -> bool:
+    """
+    Report whether a TCP port can be bound on this host.
+
+    :param port: The TCP port to test.
+    :return: ``True`` if the port is available.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind(("", port))
+        except OSError:
+            return False
+        return True
+
+
+def _secure_port(port: int | None) -> int:
+    """
+    Secure a TCP port for the ecFlow server.
+
+    :param port: A specific port to use, or ``None`` to pick a random available port (49152-65535).
+    :return: The secured port number.
+    :raises UWError: If the requested port is unavailable.
+    """
     if port is not None:
-        success, output = run_shell_cmd(
-            cmd=f"ecflow_server --port={port}{ssl_flag}",
-            cwd=cfg.data["ECF_HOME"],
-            env=env,
-            taskname="ecflow_server",
-        )
-        if not success:
-            msg = f"ecflow_server failed on port {port}: {output}"
+        if not _port_available(port):
+            msg = f"Requested port {port} is unavailable"
             raise UWError(msg)
-    else:
-        while True:
-            port = random.randint(49152, 65535)  # noqa: S311
-            success, output = run_shell_cmd(
-                cmd=f"ecflow_server --port={port}{ssl_flag}",
-                cwd=cfg.data["ECF_HOME"],
-                env=env,
-                taskname="ecflow_server",
-            )
-            if success:
-                break
-            if "bad port" in output:
-                continue
-            msg = f"ecflow_server failed: {output}"
-            raise UWError(msg)
+        return port
+    while True:
+        candidate = random.randint(49152, 65535)  # noqa: S311
+        if _port_available(candidate):
+            return candidate
+
+
+def _server_report(port: int, insecure: bool) -> None:
+    """
+    Print ecFlow server details as JSON to ``stdout``.
+
+    :param port: The TCP port the server will use.
+    :param insecure: Whether SSL security is disabled.
+    """
+    vars_: dict[str, str] = {"ECF_HOST": socket.gethostname(), "ECF_PORT": str(port)}
+    if not insecure:
+        vars_["ECF_SSL"] = "1"
+    print(json.dumps({"vars": vars_}, indent=2, sort_keys=True))
 
 
 def validate(config: dict | YAMLConfig | Path | None = None) -> bool:

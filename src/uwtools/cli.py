@@ -207,6 +207,7 @@ def _dispatch_ecflow_server(args: Args) -> bool:
         port=args.get(STR.port),
         insecure=args[STR.insecure],
         report=args[STR.report],
+        stdin_ok=True,
     )
 
 

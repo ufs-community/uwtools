@@ -533,6 +533,7 @@ def test_cli__dispatch_ecflow_server():
         port=54321,
         insecure=False,
         report=True,
+        stdin_ok=True,
     )
 
 
@@ -545,6 +546,7 @@ def test_cli__dispatch_ecflow_server_defaults():
         port=None,
         insecure=False,
         report=False,
+        stdin_ok=True,
     )
 
 

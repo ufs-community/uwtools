@@ -47,10 +47,11 @@ def realize(
 
 
 def server(
-    config: Path | None = None,
+    config: _YAMLConfig | dict | Path | str | None = None,
     port: int | None = None,
     insecure: bool = False,
     report: bool = False,
+    stdin_ok: bool = False,
 ) -> bool:
     """
     Start an ecFlow server on an available TCP port with SSL security enabled.
@@ -60,14 +61,21 @@ def server(
     ``$HOME/.ecflowrc/ssl``. Use ``insecure`` to skip SSL. Use ``report`` to emit a JSON report
     of the server details (hostname, port) to ``stdout``.
 
-    :param config: Path to UW YAML config file (``None`` => no config file).
+    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML config file (``None`` => read
+        ``stdin``).
     :param port: TCP port to use; overrides config value (``None`` => pick a random available port
         from 49152-65535).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True``.
     """
-    _server(config=_str2path(config), port=port, insecure=insecure, report=report)
+    _server(
+        config=_ensure_data_source(_str2path(config), stdin_ok),
+        port=port,
+        insecure=insecure,
+        report=report,
+    )
     return True
 
 

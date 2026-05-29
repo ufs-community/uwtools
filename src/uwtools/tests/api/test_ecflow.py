@@ -9,17 +9,47 @@ from uwtools.exceptions import UWError
 
 
 def test_api_ecflow_server():
+    path = Path("foo")
     with patch.object(ecflow, "_server") as mock_server:
-        result = ecflow.server(port=12345, insecure=False, report=True)
-    mock_server.assert_called_once_with(config=None, port=12345, insecure=False, report=True)
+        result = ecflow.server(config=path, port=12345, insecure=False, report=True)
+    mock_server.assert_called_once_with(config=path, port=12345, insecure=False, report=True)
     assert result is True
 
 
-def test_api_ecflow_server__defaults():
+def test_api_ecflow_server__str():
     with patch.object(ecflow, "_server") as mock_server:
-        result = ecflow.server()
+        result = ecflow.server(config="foo")
+    mock_server.assert_called_once_with(config=Path("foo"), port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__dict():
+    cfg = {"ECF_HOME": "/ecf"}
+    with patch.object(ecflow, "_server") as mock_server:
+        result = ecflow.server(config=cfg)
+    mock_server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__yamlconfig():
+    cfg = YAMLConfig({"ECF_HOME": "/ecf"})
+    with patch.object(ecflow, "_server") as mock_server:
+        result = ecflow.server(config=cfg)
+    mock_server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__stdin():
+    with patch.object(ecflow, "_server") as mock_server:
+        result = ecflow.server(stdin_ok=True)
     mock_server.assert_called_once_with(config=None, port=None, insecure=False, report=False)
     assert result is True
+
+
+def test_api_ecflow_server__no_stdin_no_config():
+    with raises(UWError) as e:
+        ecflow.server()
+    assert "Set stdin_ok=True to permit read from stdin" in str(e.value)
 
 
 def test_api_ecflow_realize():
