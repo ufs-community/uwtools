@@ -101,6 +101,7 @@
       "required": [
         "domain",
         "execution",
+        "length",
         "namelist",
         "rundir",
         "streams"
