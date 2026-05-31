@@ -1441,6 +1441,7 @@ def test_schema_mpas(mpas_streams):
         "domain": "regional",
         "execution": {"executable": "atmosphere_model"},
         "lateral_boundary_conditions": {"interval_hours": 3, "offset": 3, "path": "/path/to/lbcs"},
+        "length": 6,
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "rundir": "path/to/rundir",
         "streams": mpas_streams,
