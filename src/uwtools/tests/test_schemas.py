@@ -1450,7 +1450,7 @@ def test_schema_mpas(mpas_streams):
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("domain", "execution", "namelist", "rundir", "streams"):
+    for key in ("domain", "execution", "length", "namelist", "rundir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
