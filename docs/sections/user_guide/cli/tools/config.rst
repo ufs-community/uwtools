@@ -198,7 +198,7 @@ Examples
 ``realize``
 -----------
 
-In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. Specificallly, the ``realize`` action replaces `YAML aliases <https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/>`_ with their anchored content, and renders :jinja2:`Jinja2 expressions<templates>`. It can build a complete config file from two or more separate files.
+In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. Specifically, the ``realize`` action replaces `YAML aliases <https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/>`_ with their anchored content, and renders :jinja2:`Jinja2 expressions<templates>`. It can build a complete config file from two or more separate files.
 
 .. literalinclude:: config/realize-help.cmd
    :language: text
