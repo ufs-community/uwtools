@@ -12,7 +12,7 @@ ISO8601FMT = "%Y-%m-%dT%H:%M:%S"
 def to_datetime(value: str | datetime) -> datetime:
     if isinstance(value, datetime):
         return value
-    return datetime.fromisoformat(value)
+    return datetime.fromisoformat(value).replace(tzinfo=None)
 
 
 def to_iso8601(value: str | datetime) -> str:
