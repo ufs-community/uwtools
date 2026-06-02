@@ -47,7 +47,7 @@ class EnKF(DriverCycleBased, FileStager):
             Linker(
                 config=files.as_dict(),
                 target_dir=self.rundir,
-            ).go("background_files")
+            ).go("background files")
             for files in file_sets
         ]
 
