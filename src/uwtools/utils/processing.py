@@ -50,8 +50,9 @@ def run_shell_cmd(
         success = True
     except CalledProcessError as e:
         output = e.output
-        log.error("%sFailed with status: %s", pre, e.returncode)
-        logfunc = log.error
+        if not quiet:
+            log.error("%sFailed with status: %s", pre, e.returncode)
+            logfunc = log.error
         success = False
     if output and (log_output or not success):
         logfunc("%sOutput:", pre)
