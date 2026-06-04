@@ -656,5 +656,6 @@
   },
   "required": [
     "ecflow"
-  ]
+  ],
+  "type": "object"
 }
