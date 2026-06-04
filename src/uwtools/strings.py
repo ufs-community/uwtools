@@ -67,6 +67,7 @@ class _EC(_ValsMatchKeys):
     step: str = _
     string: str = _
     suite: str = _
+    suitedef: str = _
     suites: str = _
     task: str = _
     tasks: str = _

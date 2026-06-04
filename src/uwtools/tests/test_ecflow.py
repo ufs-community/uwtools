@@ -45,7 +45,7 @@ def instance_with_scheduler(instance):
 
 @fixture
 def minimal_config():
-    return {"ecflow": {}}
+    return {"ecflow": {"suitedef": {}}}
 
 
 # Helpers
@@ -454,14 +454,16 @@ class TestECFlowDef:
     def test_ecflow__ECFlowDef__init__defs_check_bad_trigger(self):
         config = {
             "ecflow": {
-                "suite_test": {
-                    "task_a": {
-                        "script": {
-                            "execution": {
-                                "incantation": "/path/to/run.sh",
-                            }
-                        },
-                        "trigger": "nonexistent_task == complete",
+                "suitedef": {
+                    "suite_test": {
+                        "task_a": {
+                            "script": {
+                                "execution": {
+                                    "incantation": "/path/to/run.sh",
+                                }
+                            },
+                            "trigger": "nonexistent_task == complete",
+                        }
                     }
                 }
             }
@@ -472,24 +474,26 @@ class TestECFlowDef:
     def test_ecflow__ECFlowDef__init__full_workflow(self, tmp_path):
         config = {
             "ecflow": {
-                "suite_test": {
-                    "vars": {"SUITE_VAR": "value"},
-                    "family_prep": {
-                        "task_setup": {
-                            "trigger": "1==1",
-                            "script": {
-                                "execution": {
-                                    "incantation": "/path/to/prep.sh",
+                "suitedef": {
+                    "suite_test": {
+                        "vars": {"SUITE_VAR": "value"},
+                        "family_prep": {
+                            "task_setup": {
+                                "trigger": "1==1",
+                                "script": {
+                                    "execution": {
+                                        "incantation": "/path/to/prep.sh",
+                                    },
                                 },
                             },
                         },
-                    },
-                    "task_run": {
-                        "trigger": "/test/prep/setup == complete",
-                        "script": {
-                            "execution": {"incantation": "/path/to/run.sh"},
+                        "task_run": {
+                            "trigger": "/test/prep/setup == complete",
+                            "script": {
+                                "execution": {"incantation": "/path/to/run.sh"},
+                            },
                         },
-                    },
+                    }
                 }
             }
         }
@@ -525,10 +529,12 @@ class TestECFlowDef:
     def test_ecflow__ECFlowDef__init__with_expand(self):
         config = {
             "ecflow": {
-                "suite_ensemble": {
-                    "tasks_member_{{ ec.MEM }}": {
-                        "expand": {"MEM": ["01", "02", "03"]},
-                        "script": {"execution": {"incantation": "hello.exe"}},
+                "suitedef": {
+                    "suite_ensemble": {
+                        "tasks_member_{{ ec.MEM }}": {
+                            "expand": {"MEM": ["01", "02", "03"]},
+                            "script": {"execution": {"incantation": "hello.exe"}},
+                        }
                     }
                 }
             }
@@ -542,13 +548,13 @@ class TestECFlowDef:
 
     def test_ecflow__ECFlowDef__init__with_path(self, tmp_path):
         config_file = tmp_path / "config.yaml"
-        config_file.write_text("ecflow:\n  scheduler: pbs\n")
+        config_file.write_text("ecflow:\n  suitedef:\n    scheduler: pbs\n")
         ecf = _ECFlowDef(config=config_file)
         assert ecf._scheduler == "pbs"
         assert isinstance(ecf._d, Defs)
 
     def test_ecflow__ECFlowDef__init__with_scheduler(self):
-        config = {"ecflow": {"scheduler": "slurm"}}
+        config = {"ecflow": {"suitedef": {"scheduler": "slurm"}}}
         ecf = _ECFlowDef(config=config)
         assert ecf._scheduler == "slurm"
 
@@ -668,16 +674,18 @@ def test_ecflow_validate__stdin(minimal_config):
 
 
 def test_ecflow_validate__suite_only():
-    config: dict = {"ecflow": {"suite_mysuite": {}}}
+    config: dict = {"ecflow": {"suitedef": {"suite_mysuite": {}}}}
     assert ecflow.validate(config)
 
 
 def test_ecflow_validate__suite_with_optional_properties():
     config = {
         "ecflow": {
-            "scheduler": "slurm",
-            "vars": {"FOO": "bar"},
-            "suite_mysuite": {},
+            "suitedef": {
+                "scheduler": "slurm",
+                "vars": {"FOO": "bar"},
+                "suite_mysuite": {},
+            }
         }
     }
     assert ecflow.validate(config)
