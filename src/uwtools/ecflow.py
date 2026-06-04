@@ -8,11 +8,14 @@ import json
 import os
 import random
 import re
+import signal
 import socket
 from copy import deepcopy
 from pathlib import Path
+from subprocess import STDOUT, CalledProcessError, check_output
 from textwrap import dedent
-from typing import TYPE_CHECKING
+from threading import Event, Thread, current_thread
+from typing import TYPE_CHECKING, cast
 
 from ecflow import (  # type: ignore[import-untyped]
     Defs,
@@ -39,6 +42,8 @@ from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
 if TYPE_CHECKING:
+    from types import FrameType
+
     from ecflow import NodeContainer
 
 
@@ -508,6 +513,18 @@ def _ssl_generate_dhparam(path: Path) -> None:
         raise UWError(msg)
 
 
+class _ServerThread(Thread):
+    """
+    A thread that runs an ecFlow server, tracking the port in use and shutdown state.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.port: int | None = None
+        self.terminal = Event()
+        self.error: str | None = None
+
+
 def server(
     config: dict | YAMLConfig | Path,
     port: int | None = None,
@@ -517,76 +534,121 @@ def server(
     """
     Start an ecFlow server on an available TCP port with SSL security enabled.
 
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is
+    shut down gracefully via ``ecflow_client --terminate``.
+
     :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings.
     :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
+    :raises UWError: If the server fails to start.
     """
     cfg = YAMLConfig(config)
     cfg.dereference()
     validate_internal(schema_name="ecflow-server", desc="ecFlow server config", config_data=cfg)
     if not insecure:
         _provision_ssl()
+    rundir = Path(cfg.data["ECF_HOME"])
     env = {**os.environ, **{k: str(v) for k, v in cfg.data.items()}}
-    ssl_flag = "" if insecure else " --ssl"
-    port = _secure_port(port)
-    if report:
-        _server_report(port=port, insecure=insecure)
-    success, output = run_shell_cmd(
-        cmd=f"ecflow_server --port={port}{ssl_flag}",
-        cwd=cfg.data["ECF_HOME"],
-        env=env,
-        taskname="ecflow_server",
-    )
-    if not success:
-        msg = f"ecflow_server failed on port {port}: {output}"
-        raise UWError(msg)
+    if insecure:
+        # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
+        env.pop("ECF_SSL", None)
+    else:
+        env["ECF_SSL"] = "1"
+    # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
+    # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
+    report_vars = {k: str(v) for k, v in cfg.data.items()}
+    report_vars["ECF_HOST"] = socket.gethostname()
+    if not insecure:
+        report_vars["ECF_SSL"] = "1"
+    thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
+
+    def shutdown(_signum: int, _frame: FrameType | None) -> None:
+        log.info("Terminating")
+        thread.terminal.set()
+        if thread.port:
+            run_shell_cmd(cmd=f"ecflow_client --port {thread.port} --terminate=yes", quiet=True)
+
+    signal.signal(signal.SIGINT, shutdown)
+    thread.start()
+    _server_wait(thread, report_vars=report_vars if report else None)
+    thread.join()
+    if thread.error:
+        raise UWError(thread.error)
 
 
-def _port_available(port: int) -> bool:
+def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
     """
-    Report whether a TCP port can be bound on this host.
+    Thread target: launch ``ecflow_server``, hunting for a free port if none was specified.
 
-    :param port: The TCP port to test.
-    :return: ``True`` if the port is available.
+    The subprocess ignores SIGINT (via ``preexec_fn``) so that the main thread alone handles
+    keyboard interrupts and shuts the server down gracefully.
+
+    :param rundir: Directory to run the server in (``ECF_HOME``).
+    :param env: Base environment variables for the server.
+    :param port: A specific port to use, or ``None`` to pick a random port (49152-65535).
+    :param insecure: Start the server without SSL security.
     """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    thread = cast(_ServerThread, current_thread())
+    fixed = port is not None
+    cmd = ["ecflow_server", *([] if insecure else ["--ssl"])]
+    while not thread.terminal.is_set():
+        candidate = port if fixed else random.randint(49152, 65535)  # noqa: S311
+        log.debug("Trying to start server on port %s", candidate)
+        thread.port = candidate
         try:
-            sock.bind(("", port))
-        except OSError:
-            return False
-        return True
+            check_output(  # noqa: S603
+                cmd,  # noqa: S607
+                cwd=rundir,
+                encoding="utf-8",
+                env={**env, "ECF_PORT": str(candidate)},
+                preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_IGN),
+                stderr=STDOUT,
+                text=True,
+            )
+        except CalledProcessError as e:
+            if "bind: Address already in use" in (e.stdout or ""):
+                thread.port = None
+                if fixed:
+                    thread.terminal.set()
+                    thread.error = f"Requested port {candidate} is unavailable"
+                    return
+                log.debug("Port %s already in use", candidate)
+                continue
+            thread.terminal.set()
+            thread.error = f"ecflow_server failed on port {candidate}: {e.stdout}"
+            for line in (e.stdout or "").split("\n"):
+                log.error(line)
+            return
 
 
-def _secure_port(port: int | None) -> int:
+def _server_wait(thread: _ServerThread, report_vars: dict[str, str] | None) -> None:
     """
-    Secure a TCP port for the ecFlow server.
+    Wait for the server to respond to a ping, then optionally report its details.
 
-    :param port: A specific port to use, or ``None`` to pick a random available port (49152-65535).
-    :return: The secured port number.
-    :raises UWError: If the requested port is unavailable.
+    :param thread: The running server thread.
+    :param report_vars: Server variables to report as JSON once the server is up (``None`` => do
+        not report).
     """
-    if port is not None:
-        if not _port_available(port):
-            msg = f"Requested port {port} is unavailable"
-            raise UWError(msg)
-        return port
-    while True:
-        candidate = random.randint(49152, 65535)  # noqa: S311
-        if _port_available(candidate):
-            return candidate
+    while not thread.terminal.is_set():
+        if thread.port:
+            cmd = f"ecflow_client --port {thread.port} --ping"
+            success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+            if success:
+                log.info("Server started on port %s", thread.port)
+                if report_vars is not None:
+                    _server_report(port=thread.port, report_vars=report_vars)
+                break
 
 
-def _server_report(port: int, insecure: bool) -> None:
+def _server_report(port: int, report_vars: dict[str, str]) -> None:
     """
     Print ecFlow server details as JSON to ``stdout``.
 
-    :param port: The TCP port the server will use.
-    :param insecure: Whether SSL security is disabled.
+    :param port: The TCP port the server is using.
+    :param report_vars: Server variables to report, exclusive of ``ECF_PORT``.
     """
-    vars_: dict[str, str] = {"ECF_HOST": socket.gethostname(), "ECF_PORT": str(port)}
-    if not insecure:
-        vars_["ECF_SSL"] = "1"
+    vars_ = {**report_vars, "ECF_PORT": str(port)}
     print(json.dumps({"vars": vars_}, indent=2, sort_keys=True))
 
 
