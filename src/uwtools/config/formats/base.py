@@ -14,6 +14,7 @@ import yaml
 from uwtools.config import jinja2
 from uwtools.config.support import (
     INCLUDE_TAG,
+    UWYAMLConvert,
     UWYAMLExtend,
     depth,
     dict_to_yaml_str,
@@ -305,6 +306,12 @@ class Config(ABC, UserDict):
                             nodeid = getattr(new.node, "id", None)
                             assert nodeid in ("mapping", "scalar")
                             error(f"!extend must tag a sequence, not a {nodeid}", nextkeys)
+                    case (UWYAMLExtend(), UWYAMLConvert()):
+                        msg = (
+                            "only literal sequences can be extended, "
+                            "not unrealized expressions like: %s"
+                        )
+                        error(msg % old.tagged_string, nextkeys)
                     case (UWYAMLExtend(), object()):
                         error("found no sequence to extend", nextkeys)
                     case _:
