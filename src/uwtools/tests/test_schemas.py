@@ -1812,6 +1812,7 @@ def test_schema_mpas(mpas_streams):
         "domain": "regional",
         "execution": {"executable": "atmosphere_model"},
         "lateral_boundary_conditions": {"interval_hours": 3, "offset": 3, "path": "/path/to/lbcs"},
+        "length": 6,
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "rundir": "path/to/rundir",
         "streams": mpas_streams,
@@ -1820,7 +1821,7 @@ def test_schema_mpas(mpas_streams):
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("domain", "execution", "namelist", "rundir", "streams"):
+    for key in ("domain", "execution", "length", "namelist", "rundir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})

@@ -227,14 +227,15 @@ def test_config_tools_compose__bad_duplicate_anchor(tmp_path):
     assert "found duplicate anchor 'A'" in str(e.value)
 
 
-def test_config_tools_compose__datetime(capsys, tmp_path):
+@mark.parametrize("dtval", ["2022-02-01T00", "2022-02-01T00:00:00+00:00"])
+def test_config_tools_compose__datetime(capsys, dtval, tmp_path):
     yaml1 = """
     a:
-      t: !datetime 2022-02-01T00
+      t: !datetime %s
     c: !dict '{{ b }}'
     """
     config1 = tmp_path / "config1.yaml"
-    config1.write_text(dedent(yaml1))
+    config1.write_text(dedent(yaml1 % dtval))
     yaml2 = """
     b:
       t: !datetime '{{ a.t }}'
@@ -790,7 +791,7 @@ def test_config_tools_realize__reference_tagged_val_1(capsys, tmp_path):
     a: 2
     b: 2 is 2
     """
-    path = tmp_path / "config,yaml"
+    path = tmp_path / "config.yaml"
     path.write_text(dedent(yaml1))
     tools.realize(input_config=path)
     expected = dedent(yaml2).strip()
@@ -810,7 +811,7 @@ def test_config_tools_realize__reference_tagged_val_2(capsys, tmp_path):
     val:
       step: 6
     """
-    path = tmp_path / "config,yaml"
+    path = tmp_path / "config.yaml"
     path.write_text(dedent(yaml1))
     tools.realize(input_config=path)
     expected = dedent(yaml2).strip()
@@ -831,7 +832,7 @@ def test_config_tools_realize__reference_tagged_val_3(capsys, tmp_path):
     x:
       i: 1
     """
-    path = tmp_path / "config,yaml"
+    path = tmp_path / "config.yaml"
     path.write_text(dedent(yaml1))
     tools.realize(input_config=path)
     expected = dedent(yaml2).strip()
