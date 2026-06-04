@@ -111,7 +111,7 @@ and ``update.yaml``:
 
 .. note::
 
-   There are uses cases where ``!extend`` is the ideal tool, but it also has significant limitations:
+   There are use cases where ``!extend`` is the ideal tool, but it also has significant limitations:
 
    * It must be applied to a literal YAML sequence.
    * It must be applied via a second, updating config, either via ``uw config realize`` with ``--update-file`` specified, as shown above, or via ``uw config compose``.
