@@ -109,7 +109,7 @@ and ``update.yaml``:
    - 3
    - 4
 
-The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key, with a sequence value, at the same key path.
+The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key, with a sequence value, at the same key path. The value in the base config must be a literal YAML sequence; in particular, it cannot be a tagged Jinaj2 expression like ``!list '{{ x }}'`` that will *eventually* be a sequence that could be extended.
 
 ``!float``
 ^^^^^^^^^^
