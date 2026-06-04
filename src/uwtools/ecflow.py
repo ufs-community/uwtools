@@ -48,7 +48,7 @@ class _ECFlowDef:
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
         validate(cfgobj)
-        self._config = cfgobj.data[EC.ecflow]
+        self._config = cfgobj.data[EC.ecflow][EC.suitedef]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
         log.debug("Adding workflow components to suite definition.")

@@ -565,67 +565,89 @@
   "properties": {
     "ecflow": {
       "additionalProperties": false,
-      "patternProperties": {
-        "^suite_.+$": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/nodecontainer"
-            },
-            {
-              "$ref": "#/$defs/addons"
-            }
-          ],
-          "propertyNames": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/addon_property_names"
-              },
-              {
-                "pattern": "^(families|family|task|tasks)_.+$"
-              }
-            ]
-          }
+      "anyOf": [
+        {
+          "required": [
+            "server"
+          ]
         },
-        "^suites_.+$": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/expander"
-            },
-            {
-              "$ref": "#/$defs/familycontainer"
-            }
-          ],
-          "propertyNames": {
-            "anyOf": [
-              {
-                "const": "expand"
-              },
-              {
-                "$ref": "#/$defs/addon_property_names"
-              },
-              {
-                "pattern": "^(families|family|task|tasks)_.+$"
-              }
-            ]
-          }
+        {
+          "required": [
+            "suitedef"
+          ]
         }
-      },
+      ],
       "properties": {
-        "extern": {
-          "items": {
-            "type": "string"
+        "server": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "suitedef": {
+          "additionalProperties": false,
+          "patternProperties": {
+            "^suite_.+$": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/nodecontainer"
+                },
+                {
+                  "$ref": "#/$defs/addons"
+                }
+              ],
+              "propertyNames": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/addon_property_names"
+                  },
+                  {
+                    "pattern": "^(families|family|task|tasks)_.+$"
+                  }
+                ]
+              }
+            },
+            "^suites_.+$": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/expander"
+                },
+                {
+                  "$ref": "#/$defs/familycontainer"
+                }
+              ],
+              "propertyNames": {
+                "anyOf": [
+                  {
+                    "const": "expand"
+                  },
+                  {
+                    "$ref": "#/$defs/addon_property_names"
+                  },
+                  {
+                    "pattern": "^(families|family|task|tasks)_.+$"
+                  }
+                ]
+              }
+            }
           },
-          "type": "array"
-        },
-        "scheduler": {
-          "enum": [
-            "lsf",
-            "pbs",
-            "slurm"
-          ],
-          "type": "string"
-        },
-        "vars": {
+          "properties": {
+            "extern": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "scheduler": {
+              "enum": [
+                "lsf",
+                "pbs",
+                "slurm"
+              ],
+              "type": "string"
+            },
+            "vars": {
+              "type": "object"
+            }
+          },
           "type": "object"
         }
       },
