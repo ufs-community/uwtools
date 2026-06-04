@@ -171,6 +171,27 @@ def chgres_cube_prop():
 
 
 @fixture
+def ecflow_config():
+    return {
+        "ecflow": {
+            "server": {},
+            "suitedef": {
+                "suite_one": {
+                    "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
+                    "families_two": {
+                        "expand": {
+                            "MEM": ["00", "06"],
+                        },
+                        "family_three": {},
+                    },
+                },
+                "scheduler": "pbs",
+            },
+        },
+    }
+
+
+@fixture
 def enkf_prop():
     return partial(schema_validator, "enkf", "properties", "enkf", "properties")
 
@@ -668,6 +689,374 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cu
         assert "is not of type 'array', 'string'\n" in errors(with_set(config, None, key))
         assert "is not of type 'string'\n" in errors(with_set(config, [1, 2, 3], key))
         assert not errors(with_set(config, ["foo", "bar", "baz"], key))
+
+
+# ecflow
+
+
+def test_schema_ecflow(ecflow_config):
+    config = ecflow_config
+    errors = schema_validator("ecflow")
+    # Basic spec:
+    assert not errors(config)
+    # A config with just one of the top-level keys is fine:
+    for key in config["ecflow"]:
+        assert not errors(with_del(config, "ecflow", key))
+    # But at least one is required:
+    assert "is not valid" in errors({"ecflow": {}})
+
+
+def test_schema_ecflow_suitedef(ecflow_config):
+    config = ecflow_config["ecflow"]["suitedef"]
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    # Basic spec:
+    assert not errors(config)
+    # No top-level keys are required:
+    assert not errors({})
+
+
+def test_schema_ecflow_suitedef_nested_family():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    config = {
+        "suites_a": {
+            "family_a": {"families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}},
+            "expand": {
+                "MEMBER": ["00", "06"],
+            },
+        }
+    }
+    assert not errors(config)
+    # Ensure that the required "expand" key is present:
+    assert "'expand' is a required property" in errors(with_del(config, "suites_a", "expand"))
+
+
+def test_schema_ecflow_suitedef_refs_addons_defstatus():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"defstatus": "suspended"})
+    assert "'halted' is not one of" in errors({"defstatus": "halted"})
+
+
+def test_schema_ecflow_suitedef_refs_addons_events():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"events": [[1, "sim_complete"]]})
+    assert not errors({"events": [1, "sim_complete"]})
+    assert not errors({"events": [1, 2, 3]})
+    assert not errors({"events": ["sim_complete", "post_done", "arch_done"]})
+    # Must be one of the specified patterns:
+    assert "is not valid under any of the given schemas" in errors(
+        {"events": [["sim_complete", 2]]}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_addons_inlimits():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Supports one of four categories:
+    assert not errors({"inlimits": [["max_members"]]})
+    assert not errors({"inlimits": [["max_members", "/suite/limit"]]})
+    assert not errors(
+        {"inlimits": [["max_members", "/suite/limit", 10], ["max_procs", "/other/limit"]]}
+    )
+    assert not errors({"inlimits": [["max_members", "/suite/limit", 10, True]]})
+    # Exactly one is required:
+    assert "['max_members', 2] is not valid under any of the given schemas" in errors(
+        {"inlimits": [["max_members", 2]]}
+    )
+    assert "{} is not of type 'array'" in errors({"inlimits": {}})
+    assert "[] should be non-empty" in errors({"inlimits": []})
+
+
+def test_schema_ecflow_suitedef_refs_addons_labels():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Allows for a list of 2-lists:
+    assert not errors({"labels": [["info", "running"], ["progress", "75%"]]})
+    # List must contain 2-item lists:
+    assert "'info' is not of type 'array'" in errors({"labels": ["info", "running"]})
+    assert "['info'] is too short" in errors({"labels": [["info"]]})
+    assert "[] should be non-empty" in errors({"labels": []})
+
+
+def test_schema_ecflow_suitedef_refs_addons_late():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"late": {"active": "00:15", "complete": "+02:00", "submitted": "20:00"}})
+
+
+def test_schema_ecflow_suitedef_refs_addons_limits():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"limits": [["max_tasks", 10], ["max_procs", 8]]})
+    # It's a list of lists:
+    assert "'max_tasks' is not of type 'array'" in errors({"limits": ["max_tasks"]})
+    assert "[] should be non-empty" in errors({"limits": []})
+
+
+def test_schema_ecflow_suitedef_refs_addons_meters():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    assert not errors({"meters": [["progress", 0, 100], ["step", 0, 10]]})
+    # It's a list of lists:
+    assert "'progress' is not valid under any of the given schemas" in errors(
+        {"meters": ["progress"]}
+    )
+    assert "[] should be non-empty" in errors({"meters": []})
+
+
+@mark.parametrize("top_level", ["repeat_date", "repeat_int"])
+def test_schema_ecflow_suitedef_refs_addons_repeat_ints(top_level):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"variable": "MEMBER", "start": 20260101, "end": 20260102}
+    assert not errors({top_level: config})
+    with_step = {**config, "step": 2}
+    assert not errors({top_level: with_step})
+    # All top-level keys are required:
+    for key in ("end", "start", "variable"):
+        assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {top_level: {**config, "bad_key": "bad_value"}}
+    )
+
+
+@mark.parametrize("top_level", ["repeat_datelist", "repeat_enumerated", "repeat_string"])
+def test_schema_ecflow_suitedef_refs_addons_repeat_lists(top_level):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    type_ = int if top_level == "repeat_datelist" else str
+    # Basic spec:
+    config = {"variable": "CYCLE", "list": [type_(i) for i in (20270104, 20270204)]}
+    assert not errors({top_level: config})
+    # All top-level keys are required:
+    for key in ("variable", "list"):
+        assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {top_level: {**config, "bad_key": "bad_value"}}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_addons_repeat_datetime():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"variable": "CYCLE", "start": "20260101T120000", "end": "20260102T123000"}
+    assert not errors({"repeat_datetime": config})
+    with_step = {**config, "step": "02:00:00"}
+    assert not errors({"repeat_datetime": with_step})
+    # All top-level keys are required:
+    for key in ("end", "start", "variable"):
+        assert f"'{key}' is a required property" in errors(
+            {"repeat_datetime": with_del(config, key)}
+        )
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {"repeat_datetime": {**config, "bad_key": "bad_value"}}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_addons_repeat_day():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"step": 2}
+    assert not errors({"repeat_day": config})
+    # step is a required top-level key:
+    assert "'step' is a required property" in errors({"repeat_day": with_del(config, "step")})
+    assert "Additional properties are not allowed" in errors(
+        {"repeat_day": {**config, "bad_key": "bad_value"}}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_families_expander():
+    errors = schema_validator(
+        "ecflow", "$defs", "nodecontainer", "patternProperties", "^families_.+$"
+    )
+    # Basic spec:
+    config = {"expand": {"MEM": ["01", "02"]}, "family_member": {}}
+    assert not errors(config)
+    # expand is a required top-level key:
+    assert "'expand' is a required property" in errors(with_del(config, "expand"))
+    # expand requires at least one variable/list pair:
+    assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
+    assert "{} should be non-empty" in errors({**config, "expand": {}})
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties (e.g., trigger) are valid siblings:
+    assert not errors({**config, "trigger": "task_setup == complete"})
+
+
+def test_schema_ecflow_suitedef_refs_task_expander():
+    errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^tasks_.+$")
+    # Basic spec:
+    config = {
+        "expand": {"MEM": ["01", "02"]},
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+    }
+    assert not errors(config)
+    # expand is a required top-level key:
+    assert "'expand' is a required property" in errors(with_del(config, "expand"))
+    # expand requires at least one variable/list pair:
+    assert "'01' is not of type 'array'" in errors({**config, "expand": {"MEM": "01"}})
+    assert "{} should be non-empty" in errors({**config, "expand": {}})
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties (e.g., trigger) are valid siblings:
+    assert not errors({**config, "trigger": "task_setup == complete"})
+    # script is required (taskcontainer is applied within tasks_* expanders):
+    assert "'script' is a required property" in errors(with_del(config, "script"))
+    # script.execution content is validated — incantation is required:
+    assert "'incantation' is a required property" in errors(
+        with_set(config, {}, "script", "execution")
+    )
+    # script.execution rejects unknown keys (e.g., executable has no effect in ecflow):
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "run.exe", "script", "execution", "executable")
+    )
+
+
+def test_schema_ecflow_suitedef_refs_nodecontainer_family():
+    errors = schema_validator(
+        "ecflow", "$defs", "nodecontainer", "patternProperties", "^family_.+$"
+    )
+    # Basic spec:
+    config = {"task_one": {"script": {"execution": {"incantation": "/path/to/run.sh"}}}}
+    assert not errors(config)
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties are valid siblings:
+    assert not errors({**config, "defstatus": "suspended"})
+
+
+def test_schema_ecflow_suitedef_refs_nodecontainer_task():
+    errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^task_.+$")
+    # Basic spec:
+    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
+    assert not errors(config)
+    # Extra properties are not allowed:
+    assert "is not valid under any of the given schemas" in errors(
+        {**config, "bad_key": "bad_value"}
+    )
+    # addon properties are valid siblings:
+    assert not errors({**config, "defstatus": "suspended"})
+
+
+def test_schema_ecflow_suitedef_refs_family():
+    errors = schema_validator("ecflow", "$defs", "family")
+    # Basic spec:
+    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
+    assert not errors(config)
+    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
+
+
+def test_schema_ecflow_suitedef_refs_familycontainer():
+    errors = schema_validator("ecflow", "$defs", "familycontainer")
+    # Basic spec:
+    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
+    assert not errors(config)
+    # Note: expected to allow additional properties since it's used to compose higher-level refs.
+
+
+def test_schema_ecflow_suitedef_refs_nodecontainer():
+    errors = schema_validator("ecflow", "$defs", "nodecontainer")
+    # Basic spec:
+    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
+    assert not errors(config)
+    # Note: expected to allow additional properties since it's used to compose higher-level refs.
+
+
+def test_schema_ecflow_suitedef_refs_task():
+    errors = schema_validator("ecflow", "$defs", "task")
+    # Basic spec:
+    config = {
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "vars": {"MEMBER": "00", "LEAD": "006"},
+    }
+    assert not errors(config)
+    assert "'script' is a required property" in errors({"defstatus": "complete"})
+    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
+
+
+def test_schema_ecflow_suitedef_refs_taskcontainer():
+    errors = schema_validator("ecflow", "$defs", "taskcontainer")
+    # Basic spec:
+    config = {
+        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "vars": {"MEMBER": "00", "LEAD": "006"},
+    }
+    assert not errors(config)
+    # Note: expected to allow additional properties since it's used to compose higher-level refs.
+
+
+def test_schema_ecflow_suitedef_refs_taskcontainer_script():
+    errors = schema_validator("ecflow", "$defs", "taskcontainer")
+    # Basic spec:
+    config = {
+        "script": {"execution": {"incantation": "/path/to/run.sh"}, "post_includes": ["tail.h"]}
+    }
+    assert not errors(config)
+    assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
+    assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
+
+
+def test_schema_ecflow_suitedef_scheduler():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    # Valid schedulers:
+    for sched in ("lsf", "pbs", "slurm"):
+        assert not errors({"scheduler": sched})
+    # Unknown scheduler fails:
+    assert "'torque' is not one of" in errors({"scheduler": "torque"})
+
+
+def test_schema_ecflow_suitedef_extern():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    # extern is a list of strings:
+    assert not errors({"extern": ["/other/suite/task"]})
+    # Non-string items fail:
+    assert "is not of type 'string'" in errors({"extern": [123]})
+    # Must be a list (not a scalar):
+    assert "is not of type 'array'" in errors({"extern": "/other/suite/task"})
+
+
+def test_schema_ecflow_suitedef_execution():
+    errors = schema_validator(
+        "ecflow",
+        "$defs",
+        "taskcontainer",
+        "allOf",
+        1,
+        "properties",
+        "script",
+        "properties",
+        "execution",
+    )
+    # Basic spec:
+    assert not errors({"incantation": "/path/to/run.sh"})
+    # incantation is required:
+    assert "'incantation' is a required property" in errors({})
+    # executable is not a valid key:
+    assert "Additional properties are not allowed" in errors(
+        {"incantation": "/path/to/run.sh", "executable": "run.exe"}
+    )
+    # mpiargs and mpicmd are not valid keys:
+    assert "Additional properties are not allowed" in errors(
+        {"incantation": "/path/to/run.sh", "mpicmd": "srun"}
+    )
+    # Optional keys are valid:
+    assert not errors(
+        {
+            "incantation": "/path/to/run.sh",
+            "batchargs": {"walltime": "00:30:00"},
+            "envcmds": ["module load python"],
+            "threads": 4,
+        }
+    )
+    # threads must be a positive integer:
+    assert "is less than the minimum" in errors({"incantation": "/path/to/run.sh", "threads": 0})
 
 
 # enkf

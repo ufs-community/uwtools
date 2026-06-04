@@ -1,0 +1,13 @@
+[2025-01-02T03:04:05]     INFO Validating config against internal schema: ecflow
+[2025-01-02T03:04:05]     INFO Schema validation succeeded for ecFlow config
+
+#5.15.2
+suite forecast
+  family prep
+    task get_obs
+      trigger 1==1
+  endfamily
+  task run_model
+    trigger /forecast/prep/get_obs == complete
+endsuite
+# enddef

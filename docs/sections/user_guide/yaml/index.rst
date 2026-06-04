@@ -10,4 +10,5 @@ UW YAML
    makedirs
    updating_values
    components/index
+   ecflow
    rocoto

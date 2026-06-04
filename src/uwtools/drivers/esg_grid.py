@@ -29,7 +29,7 @@ class ESGGrid(DriverTimeInvariant):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        base_file = self.config[STR.namelist].get(STR.basefile)
+        base_file = self.config[STR.namelist].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
             config_class=NMLConfig,
@@ -56,7 +56,7 @@ class ESGGrid(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.esggrid
+        return STR.esg_grid
 
     @property
     def output(self) -> dict[str, Path]:

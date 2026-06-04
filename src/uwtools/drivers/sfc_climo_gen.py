@@ -30,7 +30,7 @@ class SfcClimoGen(DriverTimeInvariant):
         yield self.taskname(f"namelist file {fn}")
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        vals = self.config[STR.namelist][STR.updatevalues]["config"]
+        vals = self.config[STR.namelist][STR.update_values]["config"]
         input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
         input_paths += [Path(vals["mosaic_file_mdl"])]
         input_paths += [Path(vals["orog_dir_mdl"], fn) for fn in vals["orog_files_mdl"]]
@@ -71,7 +71,7 @@ class SfcClimoGen(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.sfcclimogen
+        return STR.sfc_climo_gen
 
 
 set_driver_docstring(SfcClimoGen)

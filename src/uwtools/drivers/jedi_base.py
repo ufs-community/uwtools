@@ -30,7 +30,7 @@ class JEDIBase(DriverCycleBased, FileStager):
         yield self.taskname(fn)
         path = self.rundir / fn
         yield Asset(path, path.is_file)
-        base_file = self.config["configuration_file"].get(STR.basefile)
+        base_file = self.config["configuration_file"].get(STR.base_file)
         yield file(Path(base_file)) if base_file else None
         self.create_user_updated_config(
             config_class=YAMLConfig,

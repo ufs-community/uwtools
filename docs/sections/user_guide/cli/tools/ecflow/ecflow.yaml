@@ -1,0 +1,16 @@
+ecflow:
+  suitedef:
+    suite_forecast:
+      family_prep:
+        task_get_obs:
+          trigger: "1==1"
+          script:
+            execution:
+              incantation: /path/to/get_obs.sh
+            manual: Retrieve observation data
+      task_run_model:
+        trigger: /forecast/prep/get_obs == complete
+        script:
+          execution:
+            incantation: /path/to/run_model.sh
+          manual: Run the forecast model
