@@ -45,7 +45,7 @@ class GlobalEquivResol(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.globalequivresol
+        return STR.global_equiv_resol
 
     @property
     def output(self) -> dict[str, Path]:

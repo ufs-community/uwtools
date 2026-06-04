@@ -56,7 +56,7 @@ class MakeSoloMosaic(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.makesolomosaic
+        return STR.make_solo_mosaic
 
     # Private helper methods
 

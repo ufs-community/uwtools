@@ -13,6 +13,9 @@
     "executable": {
       "type": "string"
     },
+    "incantation": {
+      "type": "string"
+    },
     "mpiargs": {
       "items": {
         "type": "string"

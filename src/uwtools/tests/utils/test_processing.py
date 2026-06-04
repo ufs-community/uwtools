@@ -10,16 +10,19 @@ from uwtools.logging import log
 from uwtools.utils import processing
 
 
-def test_utils_processing_run_shell_cmd__failure(logged):
+@mark.parametrize("quiet", [True, False])
+def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
+    caplog.set_level(logging.INFO if quiet else logging.DEBUG)
     cmd = "expr 1 / 0"
-    success, output = processing.run_shell_cmd(cmd=cmd)
+    success, output = processing.run_shell_cmd(cmd=cmd, quiet=quiet)
     assert "division by zero" in output
     assert success is False
-    assert logged("Running:")
-    assert logged("  %s" % cmd)
-    assert logged("Failed with status: 2")
-    assert logged("Output:")
-    assert logged("  expr: division by zero")
+    check = lambda msg: not logged(msg) if quiet else logged
+    assert check("Running:")
+    assert check("  %s" % cmd)
+    assert check("Failed with status: 2")
+    assert check("Output:")
+    assert check("  expr: division by zero")
 
 
 @mark.parametrize("log_output", [True, False])

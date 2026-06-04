@@ -1,0 +1,1 @@
+uw ecflow validate --help

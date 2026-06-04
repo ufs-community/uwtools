@@ -43,10 +43,10 @@ class ChgresCube(DriverCycleLeadtimeBased):
         yield Asset(path, path.is_file)
         input_files = []
         namelist = self.config[STR.namelist]
-        if base_file := namelist.get(STR.basefile):
-            context = ".".join([STR.namelist, STR.basefile])
+        if base_file := namelist.get(STR.base_file):
+            context = ".".join([STR.namelist, STR.base_file])
             input_files.append((base_file, context))
-        if update_values := namelist.get(STR.updatevalues):
+        if update_values := namelist.get(STR.update_values):
             config_files = update_values["config"]
             for k in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
                 context = ".".join(["config", k])
@@ -111,7 +111,7 @@ class ChgresCube(DriverCycleLeadtimeBased):
         """
         The name of this driver.
         """
-        return STR.chgrescube
+        return STR.chgres_cube
 
     @property
     def output(self) -> dict[str, list[Path]]:

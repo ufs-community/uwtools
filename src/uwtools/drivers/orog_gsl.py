@@ -92,7 +92,7 @@ class OrogGSL(DriverTimeInvariant):
         """
         The name of this driver.
         """
-        return STR.oroggsl
+        return STR.orog_gsl
 
     @property
     def output(self) -> dict[str, Path]:

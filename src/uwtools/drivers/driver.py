@@ -112,8 +112,8 @@ class Assets(ABC):
         :param path: Path to dump file to.
         :param schema: Schema to validate final config against.
         """
-        user_values = config_values.get(STR.updatevalues, {})
-        if base_file := config_values.get(STR.basefile):
+        user_values = config_values.get(STR.update_values, {})
+        if base_file := config_values.get(STR.base_file):
             cfgobj = config_class(base_file)
             cfgobj.update_from(user_values)
             cfgobj.dereference()
@@ -157,7 +157,7 @@ class Assets(ABC):
                 STR.properties,
                 STR.namelist,
                 STR.properties,
-                STR.updatevalues,
+                STR.update_values,
             ]:
                 schema = schema[schema_key]
         return schema
