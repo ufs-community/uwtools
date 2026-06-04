@@ -230,9 +230,11 @@ class Copier(FileStager):
     """
 
     @collection
-    def go(self):
+    def go(self, name: str = ""):
         """
         Copy files.
+
+        :param name: A string identifier to disambiguate the task from others like it.
         """
 
         # If a source path is a glob pattern, the existence of the file(s) found via glob expansion
@@ -240,7 +242,7 @@ class Copier(FileStager):
         # a source path is a full explicit path, its existence should be checked before any attempt
         # is made to copy it.
 
-        yield "File copies"
+        yield f"File copies {name}"
         yield [
             filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst), check=nonglob)
             for dst, src, nonglob in self._expand_glob()
@@ -286,7 +288,7 @@ class Linker(FileStager):
         self.fallback = fallback
 
     @collection
-    def go(self):
+    def go(self, name: str = ""):
         """
         Create links to filesystem items.
 
@@ -294,12 +296,14 @@ class Linker(FileStager):
         and directories; when ``True``, links may not be made across filesystems, or to directories.
         When ``fallback`` is set, a ``copy`` or ``symlink`` will be created, if possible, if a
         hardlink cannot be created.
+
+        :param name: A string identifier to disambiguate the task from others like it.
         """
 
         # See comment in Copier.go() in re: "check" argument.
 
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
-        yield "File links"
+        yield f"File {'hardlinks' if self.hardlink else 'links'} {name}"
         yield [
             hardlink(
                 target=Path(v),

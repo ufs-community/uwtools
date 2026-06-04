@@ -5,6 +5,7 @@ Test methods in stager.
 from pathlib import Path
 from unittest.mock import patch
 
+from iotaa import collection
 from pytest import fixture, mark
 
 from uwtools.api.config import get_yaml_config
@@ -21,6 +22,15 @@ class NullDriver(FileStager):
 
     def taskname(self, s):
         return f"Null {s}"
+
+    @collection
+    def stage_files(self):
+        yield "stage all"
+        yield [
+            self.files_copied(),
+            self.files_hardlinked(),
+            self.files_linked(),
+        ]
 
 
 @fixture
@@ -68,6 +78,19 @@ def test_files_to_hardlink(driver, success, tmp_path):
 
 def test_files_to_link(driver, tmp_path):
     driver.files_linked()
+    for fn in ["c", "d", "output/a", "output/b"]:
+        fp = Path(tmp_path / f"{fn}.foo")
+        assert fp.is_symlink()
+
+
+def test_all_sections(driver, tmp_path):
+    driver.stage_files()
+    # Copied files are there
+    assert (tmp_path / "a.foo").is_file()
+    assert (tmp_path / "b.foo").is_file()
+    # Hardlinked file is there
+    assert (tmp_path / "e.foo").is_file()
+    # Symlinked files are there
     for fn in ["c", "d", "output/a", "output/b"]:
         fp = Path(tmp_path / f"{fn}.foo")
         assert fp.is_symlink()
