@@ -63,6 +63,7 @@ class _EC(_ValsMatchKeys):
     repeat: str = _
     rundir: str = _
     script: str = _
+    server: str = _
     start: str = _
     step: str = _
     string: str = _
