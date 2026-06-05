@@ -352,6 +352,28 @@ def test_config_base__obj_update_from(config):
     assert config == {"foo": 42, "a": "11", "b": "12", "c": "13"}
 
 
+def test_config_base__obj_update_from_bad(tmp_path):
+    yaml1 = """
+    a: !list '{{ z }}'
+    z: [1, 2]
+    """
+    path1 = tmp_path / "a.yaml"
+    path1.write_text(dedent(yaml1))
+    yaml2 = """
+    a: !extend [3, 4]
+    """
+    path2 = tmp_path / "b.yaml"
+    path2.write_text(dedent(yaml2))
+    config1, config2 = map(YAMLConfig, [path1, path2])
+    with raises(UWConfigError) as e:
+        config1.update_from(config2)
+    msg = (
+        "At a, only literal sequences can be extended, "
+        "not unrealized expressions like: !list '{{ z }}'"
+    )
+    assert str(e.value) == msg
+
+
 def test_config_base__obj_update_from_immutatble():
     """
     Test that updating a config doesn't change the original config.

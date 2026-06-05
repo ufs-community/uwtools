@@ -109,7 +109,38 @@ and ``update.yaml``:
    - 3
    - 4
 
-The ``!extend`` tag must tag a YAML sequence, and the base config must have a matching key, with a sequence value, at the same key path.
+.. note::
+
+   There are use cases where ``!extend`` is the ideal tool, but it also has significant limitations:
+
+   * It must be applied to a literal YAML sequence.
+   * It must be applied via a second, updating config, either via ``uw config realize`` with ``--update-file`` specified, as shown above, or via ``uw config compose``.
+   * The value-to-extend in the base config must exist at the same keypath as the value tagged ``!extend`` in the updating config.
+   * The value-to-extend in the base config must be a literal YAML sequence; in particular, it cannot be a tagged Jinaj2 expression like ``!list '{{ x }}'`` that will only *eventually* be a extendable sequence.
+
+.. tip::
+
+   In light of these limitations, note that Jinja2 expressions combining and slicing Python ``list`` objects may address a larger set of use cases. They can be used within a single config, can reference values at arbitrary keypaths, can prepend as well as append elements, can insert items at abitrary positions, and can even remove items. For example:
+
+   .. code-block:: yaml
+      :caption: a.yaml
+
+      lo: [1, 2]
+      hi: [7, 8]
+      numbers: [3, 5, 6, 42]
+      final: !list '{{ lo + numbers[:1] + [4] + numbers[1:3] + hi }}'
+
+  .. code-block:: text
+
+     $ uw config realize -i a.yaml --key-path final
+     - 1
+     - 2
+     - 3
+     - 4
+     - 5
+     - 6
+     - 7
+     - 8
 
 ``!float``
 ^^^^^^^^^^
