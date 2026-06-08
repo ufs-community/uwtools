@@ -13,7 +13,7 @@ Optional arguments:
   --insecure
       Start server without SSL security
   --port PORT
-      TCP port for the ecFlow server (default: random from 49152-65535)
+      TCP port for the ecFlow server (default: random from 1024-49151)
   --report
       Output server details (hostname, port) as JSON to stdout
   --quiet, -q

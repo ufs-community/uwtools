@@ -56,7 +56,7 @@ def server(
     """
     Start an ecFlow server on an available TCP port with SSL security enabled.
 
-    If no port is specified, a random port in the dynamic/private range (49152-65535) is chosen,
+    If no port is specified, a random port in the registered range (1024-49151) is chosen,
     retrying if the port is unavailable. SSL certificates are read from or written to
     ``$HOME/.ecflowrc/ssl``. Use ``insecure`` to skip SSL. Use ``report`` to emit a JSON report
     of the server details (hostname, port) to ``stdout``.
@@ -64,7 +64,7 @@ def server(
     :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML config file (``None`` => read
         ``stdin``).
     :param port: TCP port to use; overrides config value (``None`` => pick a random available port
-        from 49152-65535).
+        from 1024-49151).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
     :param stdin_ok: OK to read from ``stdin``?

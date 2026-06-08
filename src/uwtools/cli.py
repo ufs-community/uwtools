@@ -1090,7 +1090,7 @@ def _add_arg_output_dir(group: Group, required: bool = False) -> None:
 def _add_arg_port(group: Group) -> None:
     group.add_argument(
         _switch(STR.port),
-        help="TCP port for the ecFlow server (default: random from 49152-65535)",
+        help="TCP port for the ecFlow server (default: random from 1024-49151)",
         metavar="PORT",
         type=int,
     )

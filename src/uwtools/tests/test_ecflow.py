@@ -940,10 +940,10 @@ def test_ecflow_server__raises_on_thread_error():
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
         patch.object(ecflow, "_server_wait"),
-        raises(UWError, match="ecflow_server failed on port 3141"),
     ):
         mock_thread_cls.return_value.error = "ecflow_server failed on port 3141: boom"
-        ecflow.server(config=config_path, port=3141)
+        with raises(UWError, match="ecflow_server failed on port 3141"):
+            ecflow.server(config=config_path, port=3141)
 
 
 def test_ecflow_server__shutdown_terminates():
@@ -967,7 +967,32 @@ def test_ecflow_server__shutdown_terminates():
         shutdown(2, None)
     mock_thread.terminal.set.assert_called()
     cmd = mock_run.call_args.kwargs["cmd"]
+    assert "--ssl" in cmd
     assert "--port 54321" in cmd
+    assert "--terminate=yes" in cmd
+
+
+def test_ecflow_server__shutdown_terminates_insecure_no_ssl():
+    config_path = Path("/some/server.yaml")
+    mock_cfg = Mock()
+    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
+        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "_provision_ssl"),
+        patch.object(ecflow, "_ServerThread") as mock_thread_cls,
+        patch.object(ecflow.signal, "signal") as mock_signal,
+        patch.object(ecflow, "_server_wait"),
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_run,
+    ):
+        mock_thread = mock_thread_cls.return_value
+        mock_thread.error = None
+        mock_thread.port = 54321
+        ecflow.server(config=config_path, port=54321, insecure=True)
+        shutdown = mock_signal.call_args.args[1]
+        shutdown(2, None)
+    cmd = mock_run.call_args.kwargs["cmd"]
+    assert "--ssl" not in cmd
     assert "--terminate=yes" in cmd
 
 
@@ -1127,12 +1152,12 @@ def test_ecflow__server_start__random_port_retries_until_available():
 
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow.random, "randint", side_effect=[50000, 50001]),
+        patch.object(ecflow.random, "randint", side_effect=[30000, 30001]),
         patch.object(ecflow, "check_output", side_effect=fake_check_output),
     ):
         ecflow._server_start(Path("/ecf"), {}, None, False)
-    assert ports == ["50000", "50001"]
-    assert thread.port == 50001
+    assert ports == ["30000", "30001"]
+    assert thread.port == 30001
     assert thread.error is None
 
 
@@ -1141,11 +1166,11 @@ def test_ecflow__server_start__random_port_failure():
     err = CalledProcessError(1, "ecflow_server", output="something broke")
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow.random, "randint", return_value=54321),
+        patch.object(ecflow.random, "randint", return_value=31415),
         patch.object(ecflow, "check_output", side_effect=err),
     ):
         ecflow._server_start(Path("/ecf"), {}, None, False)
-    assert thread.error == "ecflow_server failed on port 54321: something broke"
+    assert thread.error == "ecflow_server failed on port 31415: something broke"
     assert thread.terminal.is_set()
 
 
@@ -1153,17 +1178,29 @@ def test_ecflow__server_wait__pings_then_reports(capsys):
     thread = ecflow._ServerThread()
     thread.port = 54321
     with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
-        ecflow._server_wait(thread, report_vars={"ECF_HOME": "/ecf", "ECF_SSL": "1"})
-    assert "--ping" in mock_cmd.call_args.kwargs["cmd"]
+        ecflow._server_wait(
+            thread, ssl_opt="--ssl ", report_vars={"ECF_HOME": "/ecf", "ECF_SSL": "1"}
+        )
+    cmd = mock_cmd.call_args.kwargs["cmd"]
+    assert "--ssl" in cmd
+    assert "--ping" in cmd
     report = yaml.safe_load(capsys.readouterr().out)
     assert report == {"vars": {"ECF_HOME": "/ecf", "ECF_SSL": "1", "ECF_PORT": "54321"}}
+
+
+def test_ecflow__server_wait__insecure_ping_no_ssl():
+    thread = ecflow._ServerThread()
+    thread.port = 54321
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
+        ecflow._server_wait(thread, ssl_opt="", report_vars=None)
+    assert "--ssl" not in mock_cmd.call_args.kwargs["cmd"]
 
 
 def test_ecflow__server_wait__no_report(capsys):
     thread = ecflow._ServerThread()
     thread.port = 54321
     with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
-        ecflow._server_wait(thread, report_vars=None)
+        ecflow._server_wait(thread, ssl_opt="--ssl ", report_vars=None)
     assert capsys.readouterr().out == ""
 
 
@@ -1171,8 +1208,28 @@ def test_ecflow__server_wait__exits_on_terminal():
     thread = ecflow._ServerThread()
     thread.terminal.set()
     with patch.object(ecflow, "run_shell_cmd") as mock_cmd:
-        ecflow._server_wait(thread, report_vars=None)
+        ecflow._server_wait(thread, ssl_opt="--ssl ", report_vars=None)
     mock_cmd.assert_not_called()
+
+
+def test_ecflow__server_wait__no_port_loops():
+    thread = ecflow._ServerThread()
+    thread.port = None
+    thread.terminal = Mock()
+    thread.terminal.is_set.side_effect = [False, True]
+    with patch.object(ecflow, "run_shell_cmd") as mock_cmd:
+        ecflow._server_wait(thread, ssl_opt="--ssl ", report_vars=None)
+    mock_cmd.assert_not_called()
+
+
+def test_ecflow__server_wait__ping_fails_then_loops():
+    thread = ecflow._ServerThread()
+    thread.port = 54321
+    thread.terminal = Mock()
+    thread.terminal.is_set.side_effect = [False, True]
+    with patch.object(ecflow, "run_shell_cmd", return_value=(False, "")) as mock_cmd:
+        ecflow._server_wait(thread, ssl_opt="--ssl ", report_vars=None)
+    mock_cmd.assert_called_once()
 
 
 def test_ecflow__server_report(capsys):

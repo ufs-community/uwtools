@@ -538,7 +538,7 @@ def server(
     shut down gracefully via ``ecflow_client --terminate``.
 
     :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings.
-    :param port: TCP port to use (``None`` => pick a random available port from 49152-65535).
+    :param port: TCP port to use (``None`` => pick a random available port from 1024-49151).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
     :raises UWError: If the server fails to start.
@@ -562,16 +562,20 @@ def server(
     if not insecure:
         report_vars["ECF_SSL"] = "1"
     thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
+    # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
+    ssl_opt = "" if insecure else "--ssl "
 
     def shutdown(_signum: int, _frame: FrameType | None) -> None:
         log.info("Terminating")
         thread.terminal.set()
         if thread.port:
-            run_shell_cmd(cmd=f"ecflow_client --port {thread.port} --terminate=yes", quiet=True)
+            run_shell_cmd(
+                cmd=f"ecflow_client {ssl_opt}--port {thread.port} --terminate=yes", quiet=True
+            )
 
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
-    _server_wait(thread, report_vars=report_vars if report else None)
+    _server_wait(thread, ssl_opt=ssl_opt, report_vars=report_vars if report else None)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
@@ -586,19 +590,20 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
 
     :param rundir: Directory to run the server in (``ECF_HOME``).
     :param env: Base environment variables for the server.
-    :param port: A specific port to use, or ``None`` to pick a random port (49152-65535).
+    :param port: A specific port to use, or ``None`` to pick a random port (1024-49151).
     :param insecure: Start the server without SSL security.
     """
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
     cmd = ["ecflow_server", *([] if insecure else ["--ssl"])]
     while not thread.terminal.is_set():
-        candidate = port if fixed else random.randint(49152, 65535)  # noqa: S311
+        # ecFlow accepts ports only in the registered range 1024-49151.
+        candidate = port if fixed else random.randint(1024, 49151)  # noqa: S311
         log.debug("Trying to start server on port %s", candidate)
         thread.port = candidate
         try:
             check_output(  # noqa: S603
-                cmd,  # noqa: S607
+                cmd,
                 cwd=rundir,
                 encoding="utf-8",
                 env={**env, "ECF_PORT": str(candidate)},
@@ -622,17 +627,18 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             return
 
 
-def _server_wait(thread: _ServerThread, report_vars: dict[str, str] | None) -> None:
+def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str] | None) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
+    :param ssl_opt: ``ecflow_client`` SSL option (``"--ssl "`` for secure servers, else ``""``).
     :param report_vars: Server variables to report as JSON once the server is up (``None`` => do
         not report).
     """
     while not thread.terminal.is_set():
         if thread.port:
-            cmd = f"ecflow_client --port {thread.port} --ping"
+            cmd = f"ecflow_client {ssl_opt}--port {thread.port} --ping"
             success, _ = run_shell_cmd(cmd=cmd, quiet=True)
             if success:
                 log.info("Server started on port %s", thread.port)
@@ -649,7 +655,9 @@ def _server_report(port: int, report_vars: dict[str, str]) -> None:
     :param report_vars: Server variables to report, exclusive of ``ECF_PORT``.
     """
     vars_ = {**report_vars, "ECF_PORT": str(port)}
-    print(json.dumps({"vars": vars_}, indent=2, sort_keys=True))
+    # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs, rather
+    # than only when the block-buffered stream is flushed at server exit.
+    print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
 def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
