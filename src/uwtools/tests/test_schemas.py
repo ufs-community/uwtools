@@ -174,7 +174,7 @@ def chgres_cube_prop():
 def ecflow_config():
     return {
         "ecflow": {
-            "server": {},
+            "server": {"ECF_HOME": "/path/to/ecf"},
             "suitedef": {
                 "suite_one": {
                     "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
@@ -713,6 +713,21 @@ def test_schema_ecflow_suitedef(ecflow_config):
     assert not errors(config)
     # No top-level keys are required:
     assert not errors({})
+
+
+def test_schema_ecflow_server():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "server")
+    # Basic spec:
+    assert not errors({"ECF_HOME": "/path/to/ecf"})
+    # ECF_HOME is required:
+    assert "'ECF_HOME' is a required property" in errors({})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {"ECF_HOME": "/path/to/ecf", "ECF_BOGUS": "x"}
+    )
+    # ECF_CHECKMODE is constrained to an enum:
+    assert "is not one of" in errors({"ECF_HOME": "/path/to/ecf", "ECF_CHECKMODE": "bad"})
+    assert not errors({"ECF_HOME": "/path/to/ecf", "ECF_CHECKMODE": "CHECK_ON_TIME"})
 
 
 def test_schema_ecflow_suitedef_nested_family():

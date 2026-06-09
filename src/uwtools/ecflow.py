@@ -541,7 +541,7 @@ def server(
     report: bool = False,
 ) -> None:
     """
-    Start an ecFlow server on an available TCP port with SSL security enabled.
+    Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
 
     The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is
     shut down gracefully via ``ecflow_client --terminate``.
@@ -550,16 +550,17 @@ def server(
         (``None`` => read ``stdin``).
     :param port: TCP port to use (``None`` => pick a random available port from 1024-49151).
     :param insecure: Start the server without SSL security.
-    :param report: Output server details (hostname, port) as JSON to ``stdout``.
+    :param report: Output server details (e.g. hostname, port) as JSON to ``stdout``.
     :raises UWError: If the server fails to start.
     """
     cfg = YAMLConfig(config)
     cfg.dereference()
-    validate_internal(schema_name="ecflow-server", desc="ecFlow server config", config_data=cfg)
+    validate(cfg)
+    server_cfg = cfg.data[EC.ecflow][EC.server]
     if not insecure:
         _provision_ssl()
-    rundir = Path(cfg.data["ECF_HOME"])
-    cfg_vars = {k: str(v) for k, v in cfg.data.items()}
+    rundir = Path(server_cfg["ECF_HOME"])
+    cfg_vars = {k: str(v) for k, v in server_cfg.items()}
     env = {**os.environ, **cfg_vars}
     if insecure:
         # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.

@@ -24,7 +24,7 @@ def test_api_ecflow_server__str():
 
 
 def test_api_ecflow_server__dict():
-    cfg = {"ECF_HOME": "/ecf"}
+    cfg = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with patch.object(ecflow, "_server") as mock_server:
         result = ecflow.server(config=cfg)
     mock_server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
@@ -32,7 +32,7 @@ def test_api_ecflow_server__dict():
 
 
 def test_api_ecflow_server__yamlconfig():
-    cfg = YAMLConfig({"ECF_HOME": "/ecf"})
+    cfg = YAMLConfig({"ecflow": {"server": {"ECF_HOME": "/ecf"}}})
     with patch.object(ecflow, "_server") as mock_server:
         result = ecflow.server(config=cfg)
     mock_server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)

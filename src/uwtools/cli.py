@@ -152,7 +152,9 @@ def _add_subparser_ecflow_server(subparsers: Subparsers) -> ActionChecks:
     _add_arg_config_file(optional)
     _add_arg_insecure(optional)
     _add_arg_port(optional)
-    _add_arg_report(optional, helpmsg="Output server details (hostname, port) as JSON to stdout")
+    _add_arg_report(
+        optional, helpmsg="Output server details (e.g. hostname, port) as JSON to stdout"
+    )
     return _add_args_verbosity(optional)
 
 

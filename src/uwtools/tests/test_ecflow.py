@@ -801,10 +801,10 @@ def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
 def test_ecflow_server__validates_config():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal") as mock_validate,
+        patch.object(ecflow, "validate") as mock_validate,
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -812,9 +812,7 @@ def test_ecflow_server__validates_config():
     ):
         mock_thread_cls.return_value.error = None
         ecflow.server(config=config_path, port=3141)
-    mock_validate.assert_called_once_with(
-        schema_name="ecflow-server", desc="ecFlow server config", config_data=mock_cfg
-    )
+    mock_validate.assert_called_once_with(mock_cfg)
 
 
 @mark.parametrize(
@@ -822,10 +820,10 @@ def test_ecflow_server__validates_config():
 )
 def test_ecflow_server__accepts_config_types(config):
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg) as mock_yamlconfig,
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -839,10 +837,10 @@ def test_ecflow_server__accepts_config_types(config):
 def test_ecflow_server__calls_provision_ssl():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl") as mock_ssl,
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -856,10 +854,10 @@ def test_ecflow_server__calls_provision_ssl():
 def test_ecflow_server__insecure_skips_ssl():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl") as mock_ssl,
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -873,10 +871,10 @@ def test_ecflow_server__insecure_skips_ssl():
 def test_ecflow_server__secure_sets_ecf_ssl_env():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -894,10 +892,10 @@ def test_ecflow_server__secure_sets_ecf_ssl_env():
 def test_ecflow_server__insecure_unsets_ecf_ssl_env():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf", "ECF_SSL": "1"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "1"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -913,10 +911,10 @@ def test_ecflow_server__insecure_unsets_ecf_ssl_env():
 def test_ecflow_server__starts_thread_and_waits():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal") as mock_signal,
@@ -934,10 +932,10 @@ def test_ecflow_server__starts_thread_and_waits():
 def test_ecflow_server__raises_on_thread_error():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -951,10 +949,10 @@ def test_ecflow_server__raises_on_thread_error():
 def test_ecflow_server__shutdown_terminates():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal") as mock_signal,
@@ -977,10 +975,10 @@ def test_ecflow_server__shutdown_terminates():
 def test_ecflow_server__shutdown_terminates_insecure_no_ssl():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal") as mock_signal,
@@ -1001,14 +999,13 @@ def test_ecflow_server__shutdown_terminates_insecure_no_ssl():
 def test_ecflow_server__shutdown_without_port_skips_terminate():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal") as mock_signal,
-        patch.object(ecflow, "_server_wait"),
         patch.object(ecflow, "run_shell_cmd") as mock_run,
     ):
         mock_thread = mock_thread_cls.return_value
@@ -1023,10 +1020,10 @@ def test_ecflow_server__shutdown_without_port_skips_terminate():
 def test_ecflow_server__report_vars_include_config():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf", "ECF_LOG": "my.log"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_LOG": "my.log"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -1046,10 +1043,10 @@ def test_ecflow_server__report_vars_include_config():
 def test_ecflow_server__report_vars_insecure_omits_ssl():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
@@ -1067,10 +1064,10 @@ def test_ecflow_server__report_vars_insecure_omits_ssl():
 def test_ecflow_server__no_report_passes_none():
     config_path = Path("/some/server.yaml")
     mock_cfg = Mock()
-    mock_cfg.data = {"ECF_HOME": "/ecf"}
+    mock_cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=mock_cfg),
-        patch.object(ecflow, "validate_internal"),
+        patch.object(ecflow, "validate"),
         patch.object(ecflow, "_provision_ssl"),
         patch.object(ecflow, "_ServerThread") as mock_thread_cls,
         patch.object(ecflow.signal, "signal"),
