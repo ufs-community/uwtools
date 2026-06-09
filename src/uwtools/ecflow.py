@@ -416,7 +416,10 @@ def realize(
 
 
 _SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
-_SSL_FILES = ["dh2048.pem", "server.crt", "server.key"]
+_SSL_KEY = "server.key"
+_SSL_CERT = "server.crt"
+_SSL_DHPARAM = "dh2048.pem"
+_SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
 
 
 def _provision_ssl(ssl_dir: Path = _SSL_DIR) -> None:
@@ -445,9 +448,9 @@ def _provision_ssl(ssl_dir: Path = _SSL_DIR) -> None:
         raise UWError(msg)
     log.info("Creating SSL directory %s", ssl_dir)
     ssl_dir.mkdir(parents=True, exist_ok=True)
-    _ssl_generate_key(ssl_dir / "server.key")
-    _ssl_generate_cert(ssl_dir / "server.crt", ssl_dir / "server.key")
-    _ssl_generate_dhparam(ssl_dir / "dh2048.pem")
+    _ssl_generate_key(ssl_dir / _SSL_KEY)
+    _ssl_generate_cert(ssl_dir / _SSL_CERT, ssl_dir / _SSL_KEY)
+    _ssl_generate_dhparam(ssl_dir / _SSL_DHPARAM)
     log.info("SSL credentials written to %s", ssl_dir)
 
 
@@ -549,7 +552,8 @@ def server(
     if not insecure:
         _provision_ssl()
     rundir = Path(cfg.data["ECF_HOME"])
-    env = {**os.environ, **{k: str(v) for k, v in cfg.data.items()}}
+    cfg_vars = {k: str(v) for k, v in cfg.data.items()}
+    env = {**os.environ, **cfg_vars}
     if insecure:
         # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
         env.pop("ECF_SSL", None)
@@ -557,8 +561,7 @@ def server(
         env["ECF_SSL"] = "1"
     # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
     # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
-    report_vars = {k: str(v) for k, v in cfg.data.items()}
-    report_vars["ECF_HOST"] = socket.gethostname()
+    report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
     if not insecure:
         report_vars["ECF_SSL"] = "1"
     thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
