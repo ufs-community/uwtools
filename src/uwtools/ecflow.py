@@ -591,8 +591,10 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     """
     Thread target: launch ``ecflow_server``, hunting for a free port if none was specified.
 
-    The subprocess ignores SIGINT (via ``preexec_fn``) so that the main thread alone handles
-    keyboard interrupts and shuts the server down gracefully.
+    The subprocess is placed in its own session (``start_new_session=True``) so that it does not
+    receive the terminal's SIGINT; the main thread alone handles keyboard interrupts and shuts the
+    server down gracefully. (``start_new_session`` is preferred over ``preexec_fn``, which the
+    Python docs warn is unsafe in a multi-threaded process.)
 
     :param rundir: Directory to run the server in (``ECF_HOME``).
     :param env: Base environment variables for the server.
@@ -613,7 +615,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
                 cwd=rundir,
                 encoding="utf-8",
                 env={**env, "ECF_PORT": str(candidate)},
-                preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_IGN),
+                start_new_session=True,
                 stderr=STDOUT,
                 text=True,
             )
@@ -630,6 +632,13 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             thread.error = f"ecflow_server failed on port {candidate}: {e.stdout}"
             for line in (e.stdout or "").split("\n"):
                 log.error(line)
+            return
+        except OSError as e:
+            # The server could not be launched at all, e.g. ecflow_server is not on PATH or the
+            # run directory (ECF_HOME) does not exist. Set terminal so the waiter does not hang.
+            thread.terminal.set()
+            thread.error = f"Failed to launch ecflow_server: {e}"
+            log.error(thread.error)
             return
 
 

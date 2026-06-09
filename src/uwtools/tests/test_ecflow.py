@@ -1142,6 +1142,18 @@ def test_ecflow__server_start__fixed_port_other_failure():
     assert thread.terminal.is_set()
 
 
+def test_ecflow__server_start__launch_failure():
+    thread = ecflow._ServerThread()
+    err = FileNotFoundError(2, "No such file or directory", "ecflow_server")
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "check_output", side_effect=err),
+    ):
+        ecflow._server_start(Path("/ecf"), {}, 3141, False)
+    assert thread.error.startswith("Failed to launch ecflow_server:")
+    assert thread.terminal.is_set()
+
+
 def test_ecflow__server_start__random_port_retries_until_available():
     thread = ecflow._ServerThread()
     bind_err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
