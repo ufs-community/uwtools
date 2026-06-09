@@ -744,7 +744,7 @@ def test_ecflow__ssl_generate_key__success(tmp_path):
         ecflow._ssl_generate_key(path)
     mock_cmd.assert_called_once()
     assert f"-out {path}" in mock_cmd.call_args[0][0]
-    # The key file is pre-created with owner-only permissions before openssl writes to it.
+    # The key file is set to owner-only permissions after openssl writes to it.
     assert oct(path.stat().st_mode)[-3:] == "600"
 
 
@@ -764,7 +764,7 @@ def test_ecflow__ssl_generate_cert__success(tmp_path):
         ecflow._ssl_generate_cert(cert_path, key_path)
     mock_cmd.assert_called_once()
     assert f"-out {cert_path}" in mock_cmd.call_args[0][0]
-    # The cert file is pre-created with owner-only permissions before openssl writes to it.
+    # The cert file is set to owner-only permissions after openssl writes to it.
     assert oct(cert_path.stat().st_mode)[-3:] == "600"
 
 
@@ -780,14 +780,12 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
 
 def test_ecflow__ssl_generate_dhparam__success(tmp_path):
     path = tmp_path / "dh2048.pem"
-    with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd,
-        patch.object(ecflow, "_ssl_touch") as mock_touch,
-    ):
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
         ecflow._ssl_generate_dhparam(path)
-    mock_touch.assert_called_once_with(path)
     mock_cmd.assert_called_once()
     assert f"-out {path}" in mock_cmd.call_args[0][0]
+    # The DH params file is set to owner-only permissions after openssl writes to it.
+    assert oct(path.stat().st_mode)[-3:] == "600"
 
 
 def test_ecflow__ssl_generate_dhparam__failure(tmp_path):

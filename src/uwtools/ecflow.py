@@ -482,6 +482,7 @@ def _ssl_generate_key(path: Path) -> None:
     if not success:
         msg = f"Failed to generate SSL private key at {path}"
         raise UWError(msg)
+    path.chmod(0o600)
 
 
 def _ssl_generate_cert(path: Path, key_path: Path) -> None:
@@ -500,6 +501,7 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     if not success:
         msg = f"Failed to generate SSL certificate at {path}"
         raise UWError(msg)
+    path.chmod(0o600)
 
 
 def _ssl_generate_dhparam(path: Path) -> None:
@@ -517,6 +519,7 @@ def _ssl_generate_dhparam(path: Path) -> None:
     if not success:
         msg = f"Failed to generate DH parameters at {path}"
         raise UWError(msg)
+    path.chmod(0o600)
 
 
 class _ServerThread(Thread):
