@@ -744,6 +744,8 @@ def test_ecflow__ssl_generate_key__success(tmp_path):
         ecflow._ssl_generate_key(path)
     mock_cmd.assert_called_once()
     assert f"-out {path}" in mock_cmd.call_args[0][0]
+    # The key file is pre-created with owner-only permissions before openssl writes to it.
+    assert oct(path.stat().st_mode)[-3:] == "600"
 
 
 def test_ecflow__ssl_generate_key__failure(tmp_path):
@@ -762,6 +764,8 @@ def test_ecflow__ssl_generate_cert__success(tmp_path):
         ecflow._ssl_generate_cert(cert_path, key_path)
     mock_cmd.assert_called_once()
     assert f"-out {cert_path}" in mock_cmd.call_args[0][0]
+    # The cert file is pre-created with owner-only permissions before openssl writes to it.
+    assert oct(cert_path.stat().st_mode)[-3:] == "600"
 
 
 def test_ecflow__ssl_generate_cert__failure(tmp_path):

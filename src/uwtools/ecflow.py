@@ -475,6 +475,7 @@ def _ssl_generate_key(path: Path) -> None:
     :param path: Destination for the private key file.
     :raises UWError: If ``openssl`` reports failure.
     """
+    _ssl_touch(path)
     log.info("Generating SSL private key: %s", path)
     success, _ = run_shell_cmd(f"openssl genrsa -out {path} 2048")
     if not success:
@@ -491,6 +492,7 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     :raises UWError: If ``openssl`` reports failure.
     """
     hostname = socket.gethostname()
+    _ssl_touch(path)
     log.info("Generating SSL certificate: %s", path)
     cmd = f"openssl req -x509 -key {key_path} -new -out {path} -days 3650 -subj '/CN={hostname}'"
     success, _ = run_shell_cmd(cmd)
@@ -529,7 +531,7 @@ class _ServerThread(Thread):
 
 
 def server(
-    config: dict | YAMLConfig | Path,
+    config: dict | YAMLConfig | Path | None = None,
     port: int | None = None,
     insecure: bool = False,
     report: bool = False,
@@ -540,7 +542,8 @@ def server(
     The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is
     shut down gracefully via ``ecflow_client --terminate``.
 
-    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings.
+    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings
+        (``None`` => read ``stdin``).
     :param port: TCP port to use (``None`` => pick a random available port from 1024-49151).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (hostname, port) as JSON to ``stdout``.
