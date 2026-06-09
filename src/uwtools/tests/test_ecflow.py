@@ -1150,6 +1150,7 @@ def test_ecflow__server_start__launch_failure():
         patch.object(ecflow, "check_output", side_effect=err),
     ):
         ecflow._server_start(Path("/ecf"), {}, 3141, False)
+    assert thread.error is not None
     assert thread.error.startswith("Failed to launch ecflow_server:")
     assert thread.terminal.is_set()
 
