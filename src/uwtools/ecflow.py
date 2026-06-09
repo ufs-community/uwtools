@@ -15,6 +15,7 @@ from pathlib import Path
 from subprocess import STDOUT, CalledProcessError, check_output
 from textwrap import dedent
 from threading import Event, Thread, current_thread
+from time import sleep
 from typing import TYPE_CHECKING, cast
 
 from ecflow import (  # type: ignore[import-untyped]
@@ -660,6 +661,9 @@ def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str
                 if report_vars is not None:
                     _server_report(port=thread.port, report_vars=report_vars)
                 break
+        # Wait briefly before re-checking, so polling does not spin a CPU core or hammer
+        # ecflow_client while the server starts up (or fails to).
+        sleep(0.2)
 
 
 def _server_report(port: int, report_vars: dict[str, str]) -> None:

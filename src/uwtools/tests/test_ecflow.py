@@ -1234,9 +1234,13 @@ def test_ecflow__server_wait__no_port_loops():
     thread.port = None
     thread.terminal = Mock()
     thread.terminal.is_set.side_effect = [False, True]
-    with patch.object(ecflow, "run_shell_cmd") as mock_cmd:
+    with (
+        patch.object(ecflow, "sleep") as mock_sleep,
+        patch.object(ecflow, "run_shell_cmd") as mock_cmd,
+    ):
         ecflow._server_wait(thread, ssl_opt="--ssl ", report_vars=None)
     mock_cmd.assert_not_called()
+    mock_sleep.assert_called_once_with(0.2)
 
 
 def test_ecflow__server_wait__ping_fails_then_loops():
@@ -1244,9 +1248,13 @@ def test_ecflow__server_wait__ping_fails_then_loops():
     thread.port = 54321
     thread.terminal = Mock()
     thread.terminal.is_set.side_effect = [False, True]
-    with patch.object(ecflow, "run_shell_cmd", return_value=(False, "")) as mock_cmd:
+    with (
+        patch.object(ecflow, "sleep") as mock_sleep,
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "")) as mock_cmd,
+    ):
         ecflow._server_wait(thread, ssl_opt="--ssl ", report_vars=None)
     mock_cmd.assert_called_once()
+    mock_sleep.assert_called_once_with(0.2)
 
 
 def test_ecflow__server_report(capsys):
