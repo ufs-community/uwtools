@@ -5,7 +5,7 @@
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy-glob/dst/foo: Ready
 [2025-01-02T03:04:05]     INFO Local src/bar -> dst/copy-glob/dst/bar: Executing
 [2025-01-02T03:04:05]     INFO Local src/bar -> dst/copy-glob/dst/bar: Ready
-[2025-01-02T03:04:05]     INFO File copies: Ready
+[2025-01-02T03:04:05]     INFO File copies : Ready
 {
   "notready": [],
   "ready": [
