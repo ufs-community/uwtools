@@ -426,6 +426,13 @@ def test_cli__displatch_config_realize__bad_keypath(args_config_realize, logged,
         assert logged("Bad keypath: foo.BADKEY")
 
 
+def test_cli__displatch_config_realize__other_keyerror(args_config_realize):
+    with patch.object(uwtools.api.config, "realize", side_effect=KeyError("TESTING")):
+        with raises(KeyError) as e:
+            cli._dispatch_config_realize(args_config_realize)
+        assert e.value.args[0] == "TESTING"
+
+
 def test_cli__dispatch_config_validate_config_obj():
     _dispatch_config_validate_args = {
         STR.schema_file: Path("/path/to/a.jsonschema"),
