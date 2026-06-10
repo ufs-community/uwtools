@@ -47,7 +47,7 @@ def realize(
 
 
 def server(
-    config: _YAMLConfig | dict | Path | str | None = None,
+    config: _YAMLConfig | dict | Path | str | None,
     port: int | None = None,
     insecure: bool = False,
     report: bool = False,

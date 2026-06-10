@@ -519,7 +519,7 @@ class _ServerThread(Thread):
 
 
 def server(
-    config: dict | YAMLConfig | Path | None = None,
+    config: dict | YAMLConfig | Path | None,
     port: int | None = None,
     insecure: bool = False,
     report: bool = False,
