@@ -377,6 +377,11 @@ def _dispatch_config_realize(args: Args) -> bool:
             msg += " Try with %s for details." % _switch(STR.values_needed)
         log.error(msg)
         return False
+    except KeyError as e:
+        if e.args[0] == args[STR.key_path][-1]:
+            log.debug("Bad keypath: %s", ".".join(args[STR.key_path]))
+            return False
+        raise
     return True
 
 
