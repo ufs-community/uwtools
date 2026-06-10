@@ -496,12 +496,10 @@ def _ssl_generate_dhparam(path: Path) -> None:
     """
     Generate 2048-bit Diffie-Hellman parameters at ``path``.
 
-    This step can take several minutes.
-
     :param path: Destination for the DH parameters file.
     :raises UWError: If ``openssl`` reports failure.
     """
-    log.info("Generating DH parameters (this may take a few minutes): %s", path)
+    log.info("Generating DH parameters: %s", path)
     success, _ = run_shell_cmd(f"umask 0077 && openssl dhparam -out {path} 2048")
     if not success:
         msg = f"Failed to generate DH parameters at {path}"
@@ -588,6 +586,8 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     server down gracefully. (``start_new_session`` is preferred over ``preexec_fn``, which the
     Python docs warn is unsafe in a multi-threaded process.)
 
+    The run directory (``ECF_HOME``) is created if it does not already exist.
+
     :param rundir: Directory to run the server in (``ECF_HOME``).
     :param env: Base environment variables for the server.
     :param port: A specific port to use, or ``None`` to pick a random port
@@ -597,6 +597,8 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
     cmd = ["ecflow_server", *([] if insecure else ["--ssl"])]
+    # Create the run directory (ECF_HOME) on the user's behalf if it does not already exist.
+    rundir.mkdir(parents=True, exist_ok=True)
     while not thread.terminal.is_set():
         # ecFlow accepts ports only in the registered range ECFLOW_PORT_MIN-ECFLOW_PORT_MAX.
         candidate = (
