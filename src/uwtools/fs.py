@@ -303,7 +303,7 @@ class Linker(FileStager):
         # See comment in Copier.go() in re: "check" argument.
 
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
-        yield "File %s %s" % ("hardlinks" if self.hardlink else "links", f" {name}" if name else "")
+        yield "File %s%s" % ("hardlinks" if self.hardlink else "links", f" {name}" if name else "")
         yield [
             hardlink(
                 target=Path(v),
