@@ -242,7 +242,7 @@ class Copier(FileStager):
         # a source path is a full explicit path, its existence should be checked before any attempt
         # is made to copy it.
 
-        yield f"File copies {name}"
+        yield "File copies%s" % (f" {name}" if name else "")
         yield [
             filecopy(src=src, dst=self._simple(self._target_dir) / self._simple(dst), check=nonglob)
             for dst, src, nonglob in self._expand_glob()
@@ -303,7 +303,7 @@ class Linker(FileStager):
         # See comment in Copier.go() in re: "check" argument.
 
         linkname = lambda k: Path(self._target_dir / k if self._target_dir else k)
-        yield f"File {'hardlinks' if self.hardlink else 'links'} {name}"
+        yield "File %s %s" % ("hardlinks" if self.hardlink else "links", f" {name}" if name else "")
         yield [
             hardlink(
                 target=Path(v),
