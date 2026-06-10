@@ -28,7 +28,12 @@ import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
+from uwtools.exceptions import (
+    UWConfigKeyError,
+    UWConfigRealizeError,
+    UWError,
+    UWTemplateRenderError,
+)
 from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
@@ -376,6 +381,9 @@ def _dispatch_config_realize(args: Args) -> bool:
         if not args[STR.values_needed]:
             msg += " Try with %s for details." % _switch(STR.values_needed)
         log.error(msg)
+        return False
+    except UWConfigKeyError as e:
+        log.debug(str(e))
         return False
     return True
 

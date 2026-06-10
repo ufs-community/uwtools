@@ -236,7 +236,7 @@ class Config(ABC, UserDict):
     def incomplete(
         self,
         data: Any = NIL,
-        keypath: list | None = None,
+        key_path: list | None = None,
         keys: list | None = None,
         vals: list | None = None,
     ) -> tuple[list[list], list[list]]:
@@ -244,23 +244,23 @@ class Config(ABC, UserDict):
         Return lists of keys leading to keys and values with unrendered content.
 
         :param data: The data object to inspect for unrendered keys/values.
-        :param keypath: A list of keys/indexes leading to the current data object.
-        :param keys: A list of keypaths leading to keys with unrendered content.
-        :param vals: A list of keypaths leading to values with unrendered content.
+        :param key_path: A list of keys/indexes leading to the current data object.
+        :param keys: A list of key paths leading to keys with unrendered content.
+        :param vals: A list of key paths leading to values with unrendered content.
         """
         unrendered = lambda x: "{{" in str(x) or "{%" in str(x)
         data = self.data if data is NIL else data
-        keypath, keys, vals = [[] if x is None else x for x in (keypath, keys, vals)]
+        key_path, keys, vals = [[] if x is None else x for x in (key_path, keys, vals)]
         if isinstance(data, dict):
             for k, v in data.items():
                 if unrendered(k):
-                    keys.append([*keypath, k])
-                self.incomplete(v, [*keypath, k], keys, vals)
+                    keys.append([*key_path, k])
+                self.incomplete(v, [*key_path, k], keys, vals)
         elif isinstance(data, list):
             for i, v in enumerate(data):
-                self.incomplete(v, [*keypath, i], keys, vals)
+                self.incomplete(v, [*key_path, i], keys, vals)
         elif unrendered(data):
-            vals.append(keypath)
+            vals.append(key_path)
         return keys, vals
 
     @abstractmethod
@@ -289,8 +289,8 @@ class Config(ABC, UserDict):
         """
 
         def error(msg: str, keys: list) -> None:
-            keypath = ".".join(keys)
-            raise UWConfigError("At %s, %s" % (keypath, msg))
+            key_path = ".".join(keys)
+            raise UWConfigError("At %s, %s" % (key_path, msg))
 
         def update(src: dict, dst: dict, keys: list | None = None) -> None:
             for key, new in src.items():
