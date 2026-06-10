@@ -286,10 +286,7 @@ def _realize_output_setup(
     log.debug("Writing output to %s", output_file or "stdout")
     fmt = input_obj._get_format()  # noqa: SLF001
     _validate_format("output", output_format, fmt)
-    output_data = input_obj.data
-    if key_path is not None:
-        for key in key_path:
-            output_data = output_data[key]
+    output_data = reduce(getitem, key_path or [], input_obj.data)
     validate_depth(output_data, output_format)
     return output_data, output_format
 
