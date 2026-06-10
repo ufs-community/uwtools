@@ -42,6 +42,10 @@ from uwtools.strings import EC, STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
+# ecFlow accepts ports only in the registered range 1024-49151.
+ECFLOW_PORT_MIN = 1024
+ECFLOW_PORT_MAX = 49151
+
 if TYPE_CHECKING:
     from types import FrameType
 
@@ -423,7 +427,7 @@ _SSL_DHPARAM = "dh2048.pem"
 _SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
 
 
-def _provision_ssl(ssl_dir: Path = _SSL_DIR) -> None:
+def _provision_ssl() -> None:
     """
     Ensure SSL certificates exist in ``$HOME/.ecflowrc/ssl``.
 
@@ -431,11 +435,10 @@ def _provision_ssl(ssl_dir: Path = _SSL_DIR) -> None:
     missing one or more required files, logs an error and raises ``UWError``. If the directory does
     not exist, creates it and generates the required SSL files using ``openssl``.
 
-    :param ssl_dir: Directory where SSL certificates are stored. Defaults to
-        ``$HOME/.ecflowrc/ssl``.
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
     """
+    ssl_dir = _SSL_DIR
     existing = [f for f in _SSL_FILES if (ssl_dir / f).exists()]
     if len(existing) == len(_SSL_FILES):
         log.info("Using existing SSL certificates in %s", ssl_dir)
@@ -455,20 +458,6 @@ def _provision_ssl(ssl_dir: Path = _SSL_DIR) -> None:
     log.info("SSL credentials written to %s", ssl_dir)
 
 
-def _ssl_touch(path: Path) -> None:
-    """
-    Create an empty file with owner-only (600) permissions.
-
-    The file is created with restricted permissions before any content is written, so that sensitive
-    key material is never exposed with open permissions.
-
-    :param path: Path of the file to create.
-    """
-    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    os.close(fd)
-    path.chmod(0o600)
-
-
 def _ssl_generate_key(path: Path) -> None:
     """
     Generate a 2048-bit RSA private key (no password) at ``path``.
@@ -476,13 +465,11 @@ def _ssl_generate_key(path: Path) -> None:
     :param path: Destination for the private key file.
     :raises UWError: If ``openssl`` reports failure.
     """
-    _ssl_touch(path)
     log.info("Generating SSL private key: %s", path)
-    success, _ = run_shell_cmd(f"openssl genrsa -out {path} 2048")
+    success, _ = run_shell_cmd(f"umask 0077 && openssl genrsa -out {path} 2048")
     if not success:
         msg = f"Failed to generate SSL private key at {path}"
         raise UWError(msg)
-    path.chmod(0o600)
 
 
 def _ssl_generate_cert(path: Path, key_path: Path) -> None:
@@ -494,14 +481,15 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     :raises UWError: If ``openssl`` reports failure.
     """
     hostname = socket.gethostname()
-    _ssl_touch(path)
     log.info("Generating SSL certificate: %s", path)
-    cmd = f"openssl req -x509 -key {key_path} -new -out {path} -days 3650 -subj '/CN={hostname}'"
+    cmd = (
+        f"umask 0077 && openssl req -x509 -key {key_path} -new -out {path} "
+        f"-days 3650 -subj '/CN={hostname}'"
+    )
     success, _ = run_shell_cmd(cmd)
     if not success:
         msg = f"Failed to generate SSL certificate at {path}"
         raise UWError(msg)
-    path.chmod(0o600)
 
 
 def _ssl_generate_dhparam(path: Path) -> None:
@@ -513,13 +501,11 @@ def _ssl_generate_dhparam(path: Path) -> None:
     :param path: Destination for the DH parameters file.
     :raises UWError: If ``openssl`` reports failure.
     """
-    _ssl_touch(path)
     log.info("Generating DH parameters (this may take a few minutes): %s", path)
-    success, _ = run_shell_cmd(f"openssl dhparam -out {path} 2048")
+    success, _ = run_shell_cmd(f"umask 0077 && openssl dhparam -out {path} 2048")
     if not success:
         msg = f"Failed to generate DH parameters at {path}"
         raise UWError(msg)
-    path.chmod(0o600)
 
 
 class _ServerThread(Thread):
@@ -548,7 +534,8 @@ def server(
 
     :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings
         (``None`` => read ``stdin``).
-    :param port: TCP port to use (``None`` => pick a random available port from 1024-49151).
+    :param port: TCP port to use (``None`` => pick a random available port from
+        ``ECFLOW_PORT_MIN``-``ECFLOW_PORT_MAX``).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (e.g. hostname, port) as JSON to ``stdout``.
     :raises UWError: If the server fails to start.
@@ -603,15 +590,18 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
 
     :param rundir: Directory to run the server in (``ECF_HOME``).
     :param env: Base environment variables for the server.
-    :param port: A specific port to use, or ``None`` to pick a random port (1024-49151).
+    :param port: A specific port to use, or ``None`` to pick a random port
+        (``ECFLOW_PORT_MIN``-``ECFLOW_PORT_MAX``).
     :param insecure: Start the server without SSL security.
     """
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
     cmd = ["ecflow_server", *([] if insecure else ["--ssl"])]
     while not thread.terminal.is_set():
-        # ecFlow accepts ports only in the registered range 1024-49151.
-        candidate = port if fixed else random.randint(1024, 49151)  # noqa: S311
+        # ecFlow accepts ports only in the registered range ECFLOW_PORT_MIN-ECFLOW_PORT_MAX.
+        candidate = (
+            port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
+        )
         log.debug("Trying to start server on port %s", candidate)
         thread.port = candidate
         try:

@@ -704,7 +704,8 @@ def test_ecflow__provision_ssl__all_files_exist(logged, tmp_path):
     ssl_dir.mkdir(parents=True)
     for fname in ["dh2048.pem", "server.crt", "server.key"]:
         (ssl_dir / fname).touch()
-    ecflow._provision_ssl(ssl_dir)
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
+        ecflow._provision_ssl()
     assert logged("Using existing SSL certificates in")
 
 
@@ -712,18 +713,19 @@ def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     (ssl_dir / "server.crt").touch()
-    with raises(UWError, match="missing required file"):
-        ecflow._provision_ssl(ssl_dir)
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir), raises(UWError, match="missing required file"):
+        ecflow._provision_ssl()
 
 
 def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     with (
+        patch.object(ecflow, "_SSL_DIR", ssl_dir),
         patch.object(ecflow, "_ssl_generate_key") as mock_key,
         patch.object(ecflow, "_ssl_generate_cert") as mock_cert,
         patch.object(ecflow, "_ssl_generate_dhparam") as mock_dh,
     ):
-        ecflow._provision_ssl(ssl_dir)
+        ecflow._provision_ssl()
     assert ssl_dir.is_dir()
     mock_key.assert_called_once_with(ssl_dir / "server.key")
     mock_cert.assert_called_once_with(ssl_dir / "server.crt", ssl_dir / "server.key")
@@ -731,21 +733,14 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     assert logged("Creating SSL directory")
 
 
-def test_ecflow__ssl_touch__creates_file_with_600_perms(tmp_path):
-    path = tmp_path / "test.pem"
-    ecflow._ssl_touch(path)
-    assert path.exists()
-    assert oct(path.stat().st_mode)[-3:] == "600"
-
-
 def test_ecflow__ssl_generate_key__success(tmp_path):
     path = tmp_path / "server.key"
     with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
         ecflow._ssl_generate_key(path)
     mock_cmd.assert_called_once()
-    assert f"-out {path}" in mock_cmd.call_args[0][0]
-    # The key file is set to owner-only permissions after openssl writes to it.
-    assert oct(path.stat().st_mode)[-3:] == "600"
+    cmd = mock_cmd.call_args[0][0]
+    assert cmd.startswith("umask 0077 && ")
+    assert f"-out {path}" in cmd
 
 
 def test_ecflow__ssl_generate_key__failure(tmp_path):
@@ -763,9 +758,9 @@ def test_ecflow__ssl_generate_cert__success(tmp_path):
     with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
         ecflow._ssl_generate_cert(cert_path, key_path)
     mock_cmd.assert_called_once()
-    assert f"-out {cert_path}" in mock_cmd.call_args[0][0]
-    # The cert file is set to owner-only permissions after openssl writes to it.
-    assert oct(cert_path.stat().st_mode)[-3:] == "600"
+    cmd = mock_cmd.call_args[0][0]
+    assert cmd.startswith("umask 0077 && ")
+    assert f"-out {cert_path}" in cmd
 
 
 def test_ecflow__ssl_generate_cert__failure(tmp_path):
@@ -783,16 +778,15 @@ def test_ecflow__ssl_generate_dhparam__success(tmp_path):
     with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
         ecflow._ssl_generate_dhparam(path)
     mock_cmd.assert_called_once()
-    assert f"-out {path}" in mock_cmd.call_args[0][0]
-    # The DH params file is set to owner-only permissions after openssl writes to it.
-    assert oct(path.stat().st_mode)[-3:] == "600"
+    cmd = mock_cmd.call_args[0][0]
+    assert cmd.startswith("umask 0077 && ")
+    assert f"-out {path}" in cmd
 
 
 def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
     path = tmp_path / "dh2048.pem"
     with (
         patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
-        patch.object(ecflow, "_ssl_touch"),
         raises(UWError, match="Failed to generate DH parameters"),
     ):
         ecflow._ssl_generate_dhparam(path)
