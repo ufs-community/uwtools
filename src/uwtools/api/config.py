@@ -280,8 +280,8 @@ The output destination may be specified as a filesystem path. When it is not, it
 
 If ``values_needed=True``, a report of keys and values with incomplete Jinja2 expressions,
 indicating values needed to fully realize the config, is logged. Additionally, the return will be a
-``dict`` object whose ``keys`` item provides a list of keypaths leading to incomplete keys and whose
-``vals`` item provides a list of keypaths leading to incomplete values. If ``total=False`` (see
+``dict`` object whose ``keys`` item provides a list of key paths leading to incomplete keys and whose
+``vals`` item provides a list of key paths leading to incomplete values. If ``total=False`` (see
 below), the function will return after logging the values-needed report.
 
 If ``total=True``, an exception will be raised if any Jinja2 content cannot be rendered. Otherwise,

@@ -408,7 +408,9 @@ def test_cli__dispatch_config_realize__fail(args_config_realize, caplog, values_
 
 
 @mark.parametrize("verbose", [True, False])
-def test_cli__displatch_config_realize__bad_keypath(args_config_realize, logged, tmp_path, verbose):
+def test_cli__displatch_config_realize__bad_key_path(
+    args_config_realize, logged, tmp_path, verbose
+):
     path = tmp_path / "config.yaml"
     path.write_text("{foo: {bar: baz}}")
     args = {
@@ -423,7 +425,7 @@ def test_cli__displatch_config_realize__bad_keypath(args_config_realize, logged,
     success = cli._dispatch_config_realize(args)
     assert success is False
     if verbose:
-        assert logged("Bad keypath: foo.BADKEY")
+        assert logged("Bad key path: foo.BADKEY")
 
 
 def test_cli__displatch_config_realize__other_keyerror(args_config_realize):

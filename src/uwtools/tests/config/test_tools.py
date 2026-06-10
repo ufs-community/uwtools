@@ -678,13 +678,13 @@ def test_config_tools_realize__extend(tmp_path):
 
 
 @mark.parametrize(
-    ("config", "keypath", "name", "update"),
+    ("config", "key_path", "name", "update"),
     [
         ({"a": [1, 2, 3]}, "a", "scalar", "a: !extend 42"),
         ({"a": {"b": [1, 2, 3]}}, "a.b", "mapping", "a: {b: !extend {foo: bar}}"),
     ],
 )
-def test_config_tools_realize__extend_bad_tagged_node(config, keypath, name, tmp_path, update):
+def test_config_tools_realize__extend_bad_tagged_node(config, key_path, name, tmp_path, update):
     update_config = tmp_path / "update.yaml"
     update_config.write_text(update)
     with raises(UWConfigError) as e:
@@ -693,7 +693,7 @@ def test_config_tools_realize__extend_bad_tagged_node(config, keypath, name, tmp
             update_config=update_config,
             output_format=FORMAT.yaml,
         )
-    assert str(e.value).startswith(f"At {keypath}, !extend must tag a sequence, not a {name}")
+    assert str(e.value).startswith(f"At {key_path}, !extend must tag a sequence, not a {name}")
 
 
 @mark.parametrize("val", [{"a": [1, 2, 3]}, {"x": 42}, {"x": {"foo": "bar"}}])

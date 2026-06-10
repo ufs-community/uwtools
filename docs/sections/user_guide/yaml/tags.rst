@@ -115,12 +115,12 @@ and ``update.yaml``:
 
    * It must be applied to a literal YAML sequence.
    * It must be applied via a second, updating config, either via ``uw config realize`` with ``--update-file`` specified, as shown above, or via ``uw config compose``.
-   * The value-to-extend in the base config must exist at the same keypath as the value tagged ``!extend`` in the updating config.
+   * The value-to-extend in the base config must exist at the same key path as the value tagged ``!extend`` in the updating config.
    * The value-to-extend in the base config must be a literal YAML sequence; in particular, it cannot be a tagged Jinaj2 expression like ``!list '{{ x }}'`` that will only *eventually* be a extendable sequence.
 
 .. tip::
 
-   In light of these limitations, note that Jinja2 expressions combining and slicing Python ``list`` objects may address a larger set of use cases. They can be used within a single config, can reference values at arbitrary keypaths, can prepend as well as append elements, can insert items at abitrary positions, and can even remove items. For example:
+   In light of these limitations, note that Jinja2 expressions combining and slicing Python ``list`` objects may address a larger set of use cases. They can be used within a single config, can reference values at arbitrary key paths, can prepend as well as append elements, can insert items at abitrary positions, and can even remove items. For example:
 
    .. code-block:: yaml
       :caption: a.yaml

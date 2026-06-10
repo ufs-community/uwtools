@@ -15,6 +15,12 @@ class UWConfigError(UWError):
     """
 
 
+class UWConfigKeyError(UWError):
+    """
+    Exception for key errors arising from config traveral.
+    """
+
+
 class UWConfigRealizeError(UWConfigError):
     """
     Exception for issues arising from config realization.

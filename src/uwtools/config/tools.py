@@ -19,7 +19,7 @@ from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
-from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigKeyError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_config_format
@@ -286,7 +286,12 @@ def _realize_output_setup(
     log.debug("Writing output to %s", output_file or "stdout")
     fmt = input_obj._get_format()  # noqa: SLF001
     _validate_format("output", output_format, fmt)
-    output_data = reduce(getitem, key_path or [], input_obj.data)
+    try:
+        output_data = reduce(getitem, key_path or [], input_obj.data)
+    except KeyError as e:
+        assert key_path is not None
+        msg = "Bad key path: %s" % ".".join(map(str, key_path))
+        raise UWConfigKeyError(msg) from e
     validate_depth(output_data, output_format)
     return output_data, output_format
 
@@ -326,25 +331,25 @@ def _realize_update(
 
 def _realize_values_needed(config: Config) -> dict[str, list[list]]:
     """
-    Report keypaths of keys and values with incompletely rendered content.
+    Report key paths of keys and values with incompletely rendered content.
 
     :param config: The config to inspect.
-    :return: A tuple of lists of keypaths to incomplete keys and values.
+    :return: A tuple of lists of key paths to incomplete keys and values.
     """
-    dotted = lambda keypath: ".".join(map(str, keypath))
+    dotted = lambda key_path: ".".join(map(str, key_path))
     some = "%s with unrendered content:"
     no = "No %s have unrendered content."
     keys, vals = config.incomplete()
     if keys:
         log.info(some % "Keys")
-        for keypath in keys:
-            log.info("  %s" % dotted(keypath))
+        for key_path in keys:
+            log.info("  %s" % dotted(key_path))
     else:
         log.info(no % "keys")
     if vals:
         log.info(some % "Values")
-        for keypath in vals:
-            log.info("  %s: %s", dotted(keypath), reduce(getitem, keypath, config))
+        for key_path in vals:
+            log.info("  %s: %s", dotted(key_path), reduce(getitem, key_path, config))
     else:
         log.info(no % "values")
     return {"keys": keys, "vals": vals}
