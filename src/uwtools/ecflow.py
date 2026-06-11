@@ -30,7 +30,7 @@ from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
-from uwtools.strings import EC, STR
+from uwtools.strings import STR
 from uwtools.utils.file import writable
 
 if TYPE_CHECKING:
@@ -48,7 +48,7 @@ class _ECFlowDef:
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
         validate(cfgobj)
-        self._config = cfgobj.data[EC.ecflow][EC.suitedef]
+        self._config = cfgobj.data[STR.ecflow][STR.suitedef]
         self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
         log.debug("Adding workflow components to suite definition.")
@@ -117,44 +117,44 @@ class _ECFlowDef:
             match tag:
                 # Tree buiding cases
 
-                case EC.family:
+                case STR.family:
                     self._add_node(subconfig, Family(name), node, refs)
-                case EC.families:
+                case STR.families:
                     self._expand_block(subconfig, name, Family, node, refs)
-                case EC.task:
+                case STR.task:
                     self._add_node(subconfig, Task(name), node, refs)
-                case EC.tasks:
+                case STR.tasks:
                     self._expand_block(subconfig, name, Task, node, refs)
 
                 # Node attribute cases
 
-                case EC.defstatus:
+                case STR.defstatus:
                     node.add_defstatus(getattr(DState, subconfig))
-                case EC.events:
+                case STR.events:
                     for event in subconfig:
                         if isinstance(event, list):
                             node.add_event(*event)
                         else:
                             node.add_event(event)
-                case EC.inlimits:
+                case STR.inlimits:
                     add_items(node.add_inlimit, subconfig)
-                case EC.labels:
+                case STR.labels:
                     add_items(node.add_label, subconfig)
-                case EC.late:
+                case STR.late:
                     node.add_late(Late(**subconfig))
-                case EC.limits:
+                case STR.limits:
                     add_items(node.add_limit, subconfig)
-                case EC.meters:
+                case STR.meters:
                     add_items(node.add_meter, subconfig)
-                case EC.repeat:  # Only one repeat is allowed per node.
+                case STR.repeat:  # Only one repeat is allowed per node.
                     self._add_repeat(subconfig, name, node)
-                case EC.script:
+                case STR.script:
                     self._create_ecf_script(subconfig, node)
-                case EC.trigger:  # Only one trigger is allowed per node.
+                case STR.trigger:  # Only one trigger is allowed per node.
                     node.add_trigger(subconfig)
-                case EC.vars:  # add_variable accepts a dict.
+                case STR.vars:  # add_variable accepts a dict.
                     node.add_variable(subconfig)
-                case EC.expand:  # Already processed by _expand_block.
+                case STR.expand:  # Already processed by _expand_block.
                     pass
                 case _:
                     msg = f"Unrecognized tag: {tag}"
@@ -169,15 +169,15 @@ class _ECFlowDef:
         :param node: The node to add the repeat to.
         """
         match name:
-            case EC.date:
+            case STR.date:
                 repeat = RepeatDate
-            case EC.datelist | EC.enumerated | EC.string:
+            case STR.datelist | STR.enumerated | STR.string:
                 repeat = RepeatEnumerated
-            case EC.datetime:
+            case STR.datetime:
                 repeat = RepeatDateTime
-            case EC.day:
+            case STR.day:
                 repeat = RepeatDay
-            case EC.int:
+            case STR.int:
                 repeat = RepeatInteger
 
         # The schema-checked config blocks for each of these will be the variable and either the
@@ -185,7 +185,7 @@ class _ECFlowDef:
         # ensure their order is either (argument, start, end, [step]) or (argument, list).
         args = [
             config.get(k)
-            for k in (EC.variable, EC.start, EC.end, EC.step, EC.list)
+            for k in (STR.variable, STR.start, STR.end, STR.step, STR.list)
             if config.get(k) is not None
         ]
         node.add_repeat(repeat(*args))
@@ -197,14 +197,14 @@ class _ECFlowDef:
         for key, subconfig in self._config.items():
             tag, name = self._tag_name(key)
             match tag:
-                case EC.extern:
+                case STR.extern:
                     for ext in subconfig:
                         self._d.add_extern(ext)
-                case EC.vars:
+                case STR.vars:
                     self._d.add_variable(subconfig)
-                case EC.suite:
+                case STR.suite:
                     self._add_node(subconfig, Suite(name), self._d)
-                case EC.suites:
+                case STR.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
 
     def _create_ecf_script(self, config: dict, task: Task) -> None:
@@ -216,25 +216,25 @@ class _ECFlowDef:
         """
         scheduler = (
             self._jobscheduler(
-                account=config.get(EC.account, ""),
-                execution=config.get(EC.execution, ""),
-                rundir=config.get(EC.rundir, ""),
+                account=config.get(STR.account, ""),
+                execution=config.get(STR.execution, ""),
+                rundir=config.get(STR.rundir, ""),
             )
             if self._scheduler
             else None
         )
         execution = config[STR.execution]
         try:
-            cmd = execution[EC.incantation]
+            cmd = execution[STR.incantation]
         except KeyError as e:
             msg = "The execution block for %s must include 'incantation'" % task.name()
             raise UWConfigError(msg) from e
         script_contents = self._ecflowscript(
             execution=[cmd],
-            manual=config.get(EC.manual, f"Script to run {task.name()}"),
-            envcmds=execution.get(EC.envcmds, []),
-            pre_includes=config.get(EC.pre_includes, []),
-            post_includes=config.get(EC.post_includes, []),
+            manual=config.get(STR.manual, f"Script to run {task.name()}"),
+            envcmds=execution.get(STR.envcmds, []),
+            pre_includes=config.get(STR.pre_includes, []),
+            post_includes=config.get(STR.post_includes, []),
             scheduler=scheduler,
         )
 
@@ -323,7 +323,7 @@ class _ECFlowDef:
         :param refs: Variable/value pairs used in higher-level expand blocks.
         """
         refs = refs if refs is not None else {}
-        expand = config[EC.expand]
+        expand = config[STR.expand]
 
         # Check to make sure all lists are the same length.
         try:
@@ -340,10 +340,10 @@ class _ECFlowDef:
             new_block = YAMLConfig({name: config}).dereference(context={"ec": new_refs})
             new_name = list(new_block.keys())[0]
             args = {
-                EC.config: new_block[new_name],
-                EC.node: nodetype(new_name),
-                EC.parent: parent,
-                EC.refs: new_refs,
+                STR.config: new_block[new_name],
+                STR.node: nodetype(new_name),
+                STR.parent: parent,
+                STR.refs: new_refs,
             }
             self._add_node(**args)
 
@@ -411,7 +411,7 @@ def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     :return: ``True`` if the config conforms to the schema.
     :raises: ``UWConfigError`` if validation fails.
     """
-    kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecFlow config"}
+    kwargs: dict = {"schema_name": STR.ecflow, "desc": "ecFlow config"}
     if isinstance(config, (dict, YAMLConfig)):
         kwargs["config_data"] = config
     else:

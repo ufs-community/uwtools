@@ -24,60 +24,6 @@ class _ValsMatchKeys:
 
 
 @dataclass(frozen=True)
-class _EC(_ValsMatchKeys):
-    """
-    EcFlow-specific strings.
-    """
-
-    account: str = _
-    config: str = _
-    date: str = _
-    datelist: str = _
-    datetime: str = _
-    day: str = _
-    defstatus: str = _
-    ecflow: str = _
-    end: str = _
-    enumerated: str = _
-    envcmds: str = _
-    events: str = _
-    execution: str = _
-    expand: str = _
-    extern: str = _
-    families: str = _
-    family: str = _
-    inlimits: str = _
-    int: str = _
-    incantation: str = _
-    labels: str = _
-    late: str = _
-    limits: str = _
-    list: str = _
-    manual: str = _
-    meters: str = _
-    node: str = _
-    parent: str = _
-    post_includes: str = _
-    pre_includes: str = _
-    refs: str = _
-    repeat: str = _
-    rundir: str = _
-    script: str = _
-    server: str = _
-    start: str = _
-    step: str = _
-    string: str = _
-    suite: str = _
-    suitedef: str = _
-    suites: str = _
-    task: str = _
-    tasks: str = _
-    trigger: str = _
-    variable: str = _
-    vars: str = _
-
-
-@dataclass(frozen=True)
 class _FORMAT(_ValsMatchKeys):
     """
     Format names.
@@ -135,16 +81,28 @@ class _STR(_ValsMatchKeys):
     copy: str = _
     cycle: str = _
     database: str = _
+    date: str = _
+    datelist: str = _
+    datetime: str = _
+    day: str = _
+    defstatus: str = _
     dry_run: str = _
     ecflow: str = _
+    end: str = _
     enkf: str = _
+    enumerated: str = _
     env: str = _
     envcmds: str = _
     esg_grid: str = _
+    events: str = _
     executable: str = _
     execute: str = _
     execution: str = _
+    expand: str = _
+    extern: str = _
     fallback: str = _
+    families: str = _
+    family: str = _
     file: str = _
     filter_topo: str = _
     format1: str = _
@@ -158,18 +116,27 @@ class _STR(_ValsMatchKeys):
     help: str = _
     hsi: str = _
     htar: str = _
+    incantation: str = _
+    inlimits: str = _
     input_file: str = _
     input_format: str = _
+    int: str = _
     ioda: str = _
     iterate: str = _
     jedi: str = _
     key_eq_val_pairs: str = _
     key_path: str = _
+    labels: str = _
+    late: str = _
     leadtime: str = _
+    limits: str = _
     link: str = _
+    list: str = _
     make_hgrid: str = _
     make_solo_mosaic: str = _
     makedirs: str = _
+    manual: str = _
+    meters: str = _
     mode: str = _
     module: str = _
     mpas: str = _
@@ -178,21 +145,27 @@ class _STR(_ValsMatchKeys):
     mpiargs: str = _
     mpicmd: str = _
     namelist: str = _
+    node: str = _
     notready: str = _
     orog: str = _
     orog_gsl: str = _
     output_dir: str = _
     output_file: str = _
     output_format: str = _
+    parent: str = _
     path1: str = _
     path2: str = _
     platform: str = _
+    post_includes: str = _
+    pre_includes: str = _
     properties: str = _
     quiet: str = _
     rate: str = _
     ready: str = _
     realize: str = _
+    refs: str = _
     render: str = _
+    repeat: str = _
     report: str = _
     rocoto: str = _
     run: str = _
@@ -200,13 +173,21 @@ class _STR(_ValsMatchKeys):
     scheduler: str = _
     schema_file: str = _
     schism: str = _
+    script: str = _
     scripts_dir: str = _
     search_path: str = _
+    server: str = _
     sfc_climo_gen: str = _
     shave: str = _
     show_schema: str = _
     stacksize: str = _
+    start: str = _
     stdout: str = _
+    step: str = _
+    string: str = _
+    suite: str = _
+    suitedef: str = _
+    suites: str = _
     symlink: str = _
     target_dir: str = _
     task: str = _
@@ -215,6 +196,7 @@ class _STR(_ValsMatchKeys):
     threads: str = _
     total: str = _
     translate: str = _
+    trigger: str = _
     ungrib: str = _
     update_file: str = _
     update_format: str = _
@@ -231,6 +213,8 @@ class _STR(_ValsMatchKeys):
     values_file: str = _
     values_format: str = _
     values_needed: str = _
+    variable: str = _
+    vars: str = _
     verbose: str = _
     version: str = _
     workflow: str = _
@@ -239,6 +223,5 @@ class _STR(_ValsMatchKeys):
 
 # Public
 
-EC = _EC()
 FORMAT = _FORMAT()
 STR = _STR()
