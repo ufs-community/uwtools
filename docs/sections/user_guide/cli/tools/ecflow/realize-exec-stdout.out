@@ -1,6 +1,6 @@
 [2025-01-02T03:04:05]     INFO Validating config against internal schema: ecflow
 [2025-01-02T03:04:05]     INFO Schema validation succeeded for ecFlow config
-#5.15.2
+#5.16.0
 suite forecast
   family prep
     task get_obs

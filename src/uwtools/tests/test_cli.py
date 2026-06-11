@@ -403,13 +403,41 @@ def test_cli__dispatch_config_realize(args_config_realize, utc):
 
 
 @mark.parametrize("values_needed_requested", [True, False])
-def test_cli__dispatch_config_realize_fail(args_config_realize, caplog, values_needed_requested):
+def test_cli__dispatch_config_realize__fail(args_config_realize, caplog, values_needed_requested):
     args_config_realize[STR.values_needed] = values_needed_requested
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         assert cli._dispatch_config_realize(args_config_realize) is False
     assert "Config could not be realized." in caplog.text
     present = f"Try with {cli._switch(STR.values_needed)} for details." in caplog.text
     assert not present if values_needed_requested else present
+
+
+@mark.parametrize("verbose", [True, False])
+def test_cli__displatch_config_realize__bad_key_path(
+    args_config_realize, logged, tmp_path, verbose
+):
+    path = tmp_path / "config.yaml"
+    path.write_text("{foo: {bar: baz}}")
+    args = {
+        **args_config_realize,
+        STR.input_file: path,
+        STR.key_path: ["foo", "BADKEY"],
+        STR.output_file: None,
+        STR.update_file: None,
+        STR.update_format: None,
+        STR.verbose: verbose,
+    }
+    success = cli._dispatch_config_realize(args)
+    assert success is False
+    if verbose:
+        assert logged("Bad key path: foo.BADKEY")
+
+
+def test_cli__displatch_config_realize__other_keyerror(args_config_realize):
+    with patch.object(uwtools.api.config, "realize", side_effect=KeyError("TESTING")):
+        with raises(KeyError) as e:
+            cli._dispatch_config_realize(args_config_realize)
+        assert e.value.args[0] == "TESTING"
 
 
 def test_cli__dispatch_config_validate_config_obj():
