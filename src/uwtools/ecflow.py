@@ -438,24 +438,23 @@ def _provision_ssl() -> None:
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
     """
-    ssl_dir = _SSL_DIR
-    existing = [f for f in _SSL_FILES if (ssl_dir / f).exists()]
+    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
     if len(existing) == len(_SSL_FILES):
-        log.info("Using existing SSL certificates in %s", ssl_dir)
+        log.info("Using existing SSL certificates in %s", _SSL_DIR)
         return
     if existing:
         missing = sorted(set(_SSL_FILES) - set(existing))
         msg = (
-            f"SSL directory {ssl_dir} exists but is missing required file(s): {missing}. "
+            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
             "Provide all required files or remove the directory to allow regeneration."
         )
         raise UWError(msg)
-    log.info("Creating SSL directory %s", ssl_dir)
-    ssl_dir.mkdir(parents=True, exist_ok=True)
-    _ssl_generate_key(ssl_dir / _SSL_KEY)
-    _ssl_generate_cert(ssl_dir / _SSL_CERT, ssl_dir / _SSL_KEY)
-    _ssl_generate_dhparam(ssl_dir / _SSL_DHPARAM)
-    log.info("SSL credentials written to %s", ssl_dir)
+    log.info("Creating SSL directory %s", _SSL_DIR)
+    _SSL_DIR.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(_SSL_DIR / _SSL_KEY)
+    _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
+    _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
+    log.info("SSL credentials written to %s", _SSL_DIR)
 
 
 def _ssl_generate_key(path: Path) -> None:

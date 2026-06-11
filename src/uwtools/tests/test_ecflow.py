@@ -754,6 +754,7 @@ def test_ecflow__ssl_generate_key__failure(tmp_path):
         raises(UWError, match="Failed to generate SSL private key"),
     ):
         ecflow._ssl_generate_key(path)
+    assert not path.is_file()
 
 
 def test_ecflow__ssl_generate_cert__success(tmp_path):
@@ -774,6 +775,8 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
         raises(UWError, match="Failed to generate SSL certificate"),
     ):
         ecflow._ssl_generate_cert(cert_path, key_path)
+    assert not cert_path.is_file()
+    assert not key_path.is_file()
 
 
 def test_ecflow__ssl_generate_dhparam__success(tmp_path):
@@ -786,7 +789,7 @@ def test_ecflow__ssl_generate_dhparam__success(tmp_path):
         ecflow._ssl_generate_dhparam(path)
     mock_cmd.assert_called_once()
     cmd = mock_cmd.call_args[0][0]
-    assert cmd.startswith("umask 0077 && ")
+    assert cmd.startswith("umask 0077 && openssl dhparam")
     assert f"-out {path}" in cmd
 
 
@@ -797,6 +800,7 @@ def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
         raises(UWError, match="Failed to generate DH parameters"),
     ):
         ecflow._ssl_generate_dhparam(path)
+    assert not path.is_file()
 
 
 def test_ecflow_server__validates_config():
