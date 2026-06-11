@@ -387,11 +387,10 @@ def realize(
 ) -> str:
     """
     Realize the ecFlow suite defined in a given YAML as a Suite Definition and corresponding ecf
-    scripts (if ``scripts_path`` is provided).
+    scripts (if 'scripts_path' is provided).
 
-    :param config: Path to YAML input file (None => read ``stdin``), or YAMLConfig object.
-    :param output_path: Path to write the rendered Suite Definition file (None => write to
-        ``stdout``).
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_path: Path to write the rendered Suite Definition file (None => write to stdout).
     :param scripts_path: Path to write the rendered ecf scripts (None => do not write scripts).
     :return: Suite Definition as a string.
     """
@@ -406,10 +405,10 @@ def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     """
     Validate an ecFlow config against the internal ecFlow schema.
 
-    :param config: A ``dict``, a ``YAMLConfig``, a path to a YAML file, or ``None``
-        (``None`` => read ``stdin``).
-    :return: ``True`` if the config conforms to the schema.
-    :raises: ``UWConfigError`` if validation fails.
+    :param config: A dict, a YAMLConfig, a path to a YAML file, or None
+        (None => read stdin).
+    :return: True if the config conforms to the schema.
+    :raises: UWConfigError if validation fails.
     """
     kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecFlow config"}
     if isinstance(config, (dict, YAMLConfig)):
