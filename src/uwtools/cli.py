@@ -28,7 +28,6 @@ import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.ecflow import ECFLOW_PORT_MAX, ECFLOW_PORT_MIN
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
@@ -1095,7 +1094,8 @@ def _add_arg_port(group: Group) -> None:
         _switch(STR.port),
         help=(
             f"TCP port for the ecFlow server "
-            f"(default: random from {ECFLOW_PORT_MIN}-{ECFLOW_PORT_MAX})"
+            f"(default: random from "
+            f"{uwtools.api.ecflow.ECFLOW_PORT_MIN}-{uwtools.api.ecflow.ECFLOW_PORT_MAX})"
         ),
         metavar="PORT",
         type=int,
