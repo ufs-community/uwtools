@@ -4,7 +4,7 @@ API access to ``uwtools`` ecFlow support.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from uwtools.ecflow import ECFLOW_PORT_MAX, ECFLOW_PORT_MIN
 from uwtools.ecflow import realize as _realize
@@ -54,11 +54,11 @@ def server(
     report: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
-    f"""
+    """
     Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
 
     If no port is specified, a random port in the registered range
-    (``{ECFLOW_PORT_MIN}``-``{ECFLOW_PORT_MAX}``) is chosen,
+    (``{port_min}``-``{port_max}``) is chosen,
     retrying if the port is unavailable. SSL certificates are read from or written to
     ``$HOME/.ecflowrc/ssl``. Use ``insecure`` to skip SSL. Use ``report`` to emit a JSON report
     of the server details (e.g. hostname, port) to ``stdout``.
@@ -66,7 +66,7 @@ def server(
     :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML config file (``None`` => read
         ``stdin``).
     :param port: TCP port to use; overrides config value (``None`` => pick a random available port
-        from ``{ECFLOW_PORT_MIN}``-``{ECFLOW_PORT_MAX}``).
+        from ``{port_min}``-``{port_max}``).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (e.g. hostname, port) as JSON to ``stdout``.
     :param stdin_ok: OK to read from ``stdin``?
@@ -79,6 +79,11 @@ def server(
         report=report,
     )
     return True
+
+
+server.__doc__ = cast("str", server.__doc__).format(
+    port_min=ECFLOW_PORT_MIN, port_max=ECFLOW_PORT_MAX
+)
 
 
 def validate(
