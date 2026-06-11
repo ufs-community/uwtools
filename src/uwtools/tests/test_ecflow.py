@@ -723,8 +723,7 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
 
     def fake_run(cmd, **_kwargs):
         # Emulate openssl by creating the file named after its "-out" argument.
-        out = Path(cmd.split("-out ", 1)[1].split()[0])
-        out.write_text("x")
+        Path(cmd.split("-out ", 1)[1].split()[0]).touch()
         return (True, "")
 
     with (

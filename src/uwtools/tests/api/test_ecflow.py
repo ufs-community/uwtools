@@ -10,39 +10,39 @@ from uwtools.exceptions import UWError
 
 def test_api_ecflow_server():
     path = Path("foo")
-    with patch.object(ecflow, "_server") as mock_server:
+    with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config=path, port=12345, insecure=False, report=True)
-    mock_server.assert_called_once_with(config=path, port=12345, insecure=False, report=True)
+    _server.assert_called_once_with(config=path, port=12345, insecure=False, report=True)
     assert result is True
 
 
 def test_api_ecflow_server__str():
-    with patch.object(ecflow, "_server") as mock_server:
+    with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config="foo")
-    mock_server.assert_called_once_with(config=Path("foo"), port=None, insecure=False, report=False)
+    _server.assert_called_once_with(config=Path("foo"), port=None, insecure=False, report=False)
     assert result is True
 
 
 def test_api_ecflow_server__dict():
     cfg = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
-    with patch.object(ecflow, "_server") as mock_server:
+    with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config=cfg)
-    mock_server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
+    _server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
     assert result is True
 
 
 def test_api_ecflow_server__yamlconfig():
     cfg = YAMLConfig({"ecflow": {"server": {"ECF_HOME": "/ecf"}}})
-    with patch.object(ecflow, "_server") as mock_server:
+    with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config=cfg)
-    mock_server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
+    _server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
     assert result is True
 
 
 def test_api_ecflow_server__stdin():
-    with patch.object(ecflow, "_server") as mock_server:
+    with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config=None, stdin_ok=True)
-    mock_server.assert_called_once_with(config=None, port=None, insecure=False, report=False)
+    _server.assert_called_once_with(config=None, port=None, insecure=False, report=False)
     assert result is True
 
 
