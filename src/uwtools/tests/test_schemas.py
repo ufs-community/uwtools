@@ -174,7 +174,7 @@ def chgres_cube_prop():
 def ecflow_config():
     return {
         "ecflow": {
-            "server": {},
+            "server": {"ECF_HOME": "/path/to/ecf"},
             "suitedef": {
                 "suite_one": {
                     "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
@@ -713,6 +713,52 @@ def test_schema_ecflow_suitedef(ecflow_config):
     assert not errors(config)
     # No top-level keys are required:
     assert not errors({})
+
+
+def test_schema_ecflow_server():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "server")
+    err = lambda k, v: errors({"ECF_HOME": "/path/to/ecf", k: v})
+    # Basic spec:
+    assert not errors({"ECF_HOME": "/path/to/ecf"})
+    # ECF_HOME is required:
+    assert "'ECF_HOME' is a required property" in errors({})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in err("ECF_BOGUS", "x")
+    # These values must be strings:
+    ks_string = [
+        "ECF_CHECK",
+        "ECF_CHECKOLD",
+        "ECF_CUSTOM_PASSWD",
+        "ECF_HOME",
+        "ECF_JOB_CMD",
+        "ECF_KILL_CMD",
+        "ECF_LISTS",
+        "ECF_LOG",
+        "ECF_PASSWD",
+        "ECF_STATUS_CMD",
+        "ECF_URL",
+        "ECF_URL_BASE",
+        "ECF_URL_CMD",
+    ]
+    for k in ks_string:
+        assert "is not of type 'string'\n" in err(k, 42)
+    # These values must be integers >= 1:
+    for k in ["ECF_CHECKINTERVAL", "ECF_INTERVAL"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 1" in err(k, 0)
+        assert not err(k, 1)
+    # ECF_TASK_THRESHOLD must be an integer >= 0:
+    assert "is not of type 'integer'\n" in err("ECF_TASK_THRESHOLD", "x")
+    assert "is less than the minimum of 0" in err("ECF_TASK_THRESHOLD", -1)
+    assert not err("ECF_TASK_THRESHOLD", 0)
+    # ECF_CHECKMODE is constrained to an enum:
+    assert "is not one of" in err("ECF_CHECKMODE", "bad")
+    assert not err("ECF_CHECKMODE", "CHECK_ON_TIME")
+    # ECF_MICRODEF must be a single character:
+    assert "is not of type 'string'\n" in err("ECF_MICRODEF", 1)
+    assert "should be non-empty" in err("ECF_MICRODEF", "")
+    assert "is too long" in err("ECF_MICRODEF", "ab")
+    assert not err("ECF_MICRODEF", "%")
 
 
 def test_schema_ecflow_suitedef_nested_family():

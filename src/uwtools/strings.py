@@ -156,10 +156,12 @@ class _STR(_ValsMatchKeys):
     gsi: str = _
     hardlink: str = _
     help: str = _
+    hostname: str = _
     hsi: str = _
     htar: str = _
     input_file: str = _
     input_format: str = _
+    insecure: str = _
     ioda: str = _
     iterate: str = _
     jedi: str = _
@@ -187,6 +189,7 @@ class _STR(_ValsMatchKeys):
     path1: str = _
     path2: str = _
     platform: str = _
+    port: str = _
     properties: str = _
     quiet: str = _
     rate: str = _
@@ -200,6 +203,7 @@ class _STR(_ValsMatchKeys):
     scheduler: str = _
     schema_file: str = _
     schism: str = _
+    server: str = _
     scripts_dir: str = _
     search_path: str = _
     sfc_climo_gen: str = _

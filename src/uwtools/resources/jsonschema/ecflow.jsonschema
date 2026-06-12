@@ -580,6 +580,93 @@
       "properties": {
         "server": {
           "additionalProperties": false,
+          "properties": {
+            "ECF_CHECK": {
+              "description": "Name of the checkpoint file. Prepended with <host>.<port> at runtime. Default: ecf.check",
+              "type": "string"
+            },
+            "ECF_CHECKINTERVAL": {
+              "description": "Interval in seconds between automatic checkpoint saves.",
+              "minimum": 1,
+              "type": "integer"
+            },
+            "ECF_CHECKMODE": {
+              "description": "Checkpoint mode: when to auto-save the checkpoint file.",
+              "enum": [
+                "CHECK_ALWAYS",
+                "CHECK_NEVER",
+                "CHECK_ON_TIME"
+              ],
+              "type": "string"
+            },
+            "ECF_CHECKOLD": {
+              "description": "Name of the backup checkpoint file. Prepended with <host>.<port> at runtime. Default: ecf.check.b",
+              "type": "string"
+            },
+            "ECF_CUSTOM_PASSWD": {
+              "description": "Password file for users whose UID on the remote client does not match that on the server. Default: <host>.<port>.ecf.custom_passwd",
+              "type": "string"
+            },
+            "ECF_HOME": {
+              "description": "Root directory for all .ecf script files.",
+              "type": "string"
+            },
+            "ECF_INTERVAL": {
+              "description": "Period in seconds for traversing dependencies and submitting jobs.",
+              "minimum": 1,
+              "type": "integer"
+            },
+            "ECF_JOB_CMD": {
+              "description": "Shell command used for job submission.",
+              "type": "string"
+            },
+            "ECF_KILL_CMD": {
+              "description": "Shell command used to kill a running job.",
+              "type": "string"
+            },
+            "ECF_LISTS": {
+              "description": "File listing users permitted to access the server via client commands. Default: <host>.<port>.ecf.lists",
+              "type": "string"
+            },
+            "ECF_LOG": {
+              "description": "Name of the log file. Prepended with <host>.<port> at runtime. Default: ecf.log",
+              "type": "string"
+            },
+            "ECF_MICRODEF": {
+              "description": "Character used for ECF pre-processing and variable substitution in .ecf scripts.",
+              "maxLength": 1,
+              "minLength": 1,
+              "type": "string"
+            },
+            "ECF_PASSWD": {
+              "description": "Password file for full user password authentication. Default: <host>.<port>.ecf.passwd",
+              "type": "string"
+            },
+            "ECF_STATUS_CMD": {
+              "description": "Command executed by the server to obtain the current status of a job.",
+              "type": "string"
+            },
+            "ECF_TASK_THRESHOLD": {
+              "description": "Report tasks taking longer than this threshold (in milliseconds).",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "ECF_URL": {
+              "description": "URL path appended to ECF_URL_BASE for browser-based job status links.",
+              "type": "string"
+            },
+            "ECF_URL_BASE": {
+              "description": "Base URL used with ECF_URL for browser-based job status links.",
+              "type": "string"
+            },
+            "ECF_URL_CMD": {
+              "description": "Command executed by the client to open a browser with the job status URL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "ECF_HOME"
+          ],
           "type": "object"
         },
         "suitedef": {
