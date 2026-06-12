@@ -45,12 +45,12 @@ class Stager(ABC):
         key_path: list[YAMLKey] | None = None,
     ) -> None:
         """
-        :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+        :param config: YAML-file path, or dict (read stdin if missing or None).
         :param target_dir: Path to target directory.
-        :param cycle: A ``datetime`` object to make available for use in the config.
-        :param leadtime: A ``timedelta`` object to make available for use in the config.
+        :param cycle: A datetime object to make available for use in the config.
+        :param leadtime: A timedelta object to make available for use in the config.
         :param key_path: Path of keys to config block to use.
-        :raises: ``UWConfigError`` if config fails validation.
+        :raises: UWConfigError if config fails validation.
         """
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
@@ -274,14 +274,14 @@ class Linker(FileStager):
         fallback: str | None = None,
     ) -> None:
         """
-        :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+        :param config: YAML-file path, or dict (read stdin if missing or None).
         :param target_dir: Path to target directory.
-        :param cycle: A ``datetime`` object to make available for use in the config.
+        :param cycle: A datetime object to make available for use in the config.
         :param hardlink: Create hardlinks instead of symlinks?
-        :param leadtime: A ``timedelta`` object to make available for use in the config.
+        :param leadtime: A timedelta object to make available for use in the config.
         :param key_path: Path of keys to config block to use.
         :param fallback: Choice of copy or symlink if hardlink fails when hardlink=True?
-        :raises: ``UWConfigError`` if config fails validation.
+        :raises: UWConfigError if config fails validation.
         """
         super().__init__(config, target_dir, cycle, leadtime, key_path)
         self.hardlink = hardlink
@@ -292,10 +292,10 @@ class Linker(FileStager):
         """
         Create links to filesystem items.
 
-        When ``hardlink`` is ``False`` (the default), links may target files, hardlinks, symlinks,
-        and directories; when ``True``, links may not be made across filesystems, or to directories.
-        When ``fallback`` is set, a ``copy`` or ``symlink`` will be created, if possible, if a
-        hardlink cannot be created.
+        When 'hardlink' is False (the default), links may target files, hardlinks, symlinks, and
+        directories; when True, links may not be made across filesystems, or to directories. When
+        'fallback' is set, a copy or symlink will be created, if possible, if a hardlink cannot be
+        created.
 
         :param name: A string identifier to disambiguate the task from others like it.
         """
