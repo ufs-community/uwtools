@@ -166,7 +166,7 @@ def _execute(
     """
     Execute a task.
 
-    If ``batch`` is specified, a runscript will be written and submitted to the batch system.
+    If 'batch' is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
     :param driver_class: Class of driver object to instantiate.
@@ -180,7 +180,7 @@ def _execute(
     :param key_path: Path of keys to config block to use.
     :param schema_file: The JSON Schema file to use for validation.
     :param stdin_ok: OK to read from stdin?
-    :return: ``True`` if task completes without raising an exception.
+    :return: True if task completes without raising an exception.
     """
     kwargs = dict(
         config=ensure_data_source(str2path(config), stdin_ok),

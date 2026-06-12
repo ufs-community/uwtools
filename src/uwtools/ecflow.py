@@ -402,11 +402,10 @@ def realize(
 ) -> str:
     """
     Realize the ecFlow suite defined in a given YAML as a Suite Definition and corresponding ecf
-    scripts (if ``scripts_path`` is provided).
+    scripts (if 'scripts_path' is provided).
 
-    :param config: Path to YAML input file (None => read ``stdin``), or YAMLConfig object.
-    :param output_path: Path to write the rendered Suite Definition file (None => write to
-        ``stdout``).
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_path: Path to write the rendered Suite Definition file (None => write to stdout).
     :param scripts_path: Path to write the rendered ecf scripts (None => do not write scripts).
     :return: Suite Definition as a string.
     """
@@ -429,11 +428,11 @@ _SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
 
 def _provision_ssl() -> None:
     """
-    Ensure SSL certificates exist in ``$HOME/.ecflowrc/ssl``.
+    Ensure SSL certificates exist in $HOME/.ecflowrc/ssl.
 
     If all required files exist, logs that they will be reused. If the directory exists but is
-    missing one or more required files, logs an error and raises ``UWError``. If the directory does
-    not exist, creates it and generates the required SSL files using ``openssl``.
+    missing one or more required files, logs an error and raises UWError. If the directory does not
+    exist, creates it and generates the required SSL files using openssl.
 
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
@@ -459,10 +458,10 @@ def _provision_ssl() -> None:
 
 def _ssl_generate_key(path: Path) -> None:
     """
-    Generate a 2048-bit RSA private key (no password) at ``path``.
+    Generate a 2048-bit RSA private key (no password) at 'path'.
 
     :param path: Destination for the private key file.
-    :raises UWError: If ``openssl`` reports failure.
+    :raises UWError: If openssl reports failure.
     """
     log.info("Generating SSL private key: %s", path)
     success, _ = run_shell_cmd(f"umask 0077 && openssl genrsa -out {path} 2048")
@@ -473,11 +472,11 @@ def _ssl_generate_key(path: Path) -> None:
 
 def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     """
-    Generate a self-signed X.509 certificate at ``path`` using the key at ``key_path``.
+    Generate a self-signed X.509 certificate at 'path' using the key at 'key_path'.
 
     :param path: Destination for the certificate file.
     :param key_path: Path to the existing RSA private key.
-    :raises UWError: If ``openssl`` reports failure.
+    :raises UWError: If openssl reports failure.
     """
     hostname = socket.gethostname()
     log.info("Generating SSL certificate: %s", path)
@@ -493,10 +492,10 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
 
 def _ssl_generate_dhparam(path: Path) -> None:
     """
-    Generate 2048-bit Diffie-Hellman parameters at ``path``.
+    Generate 2048-bit Diffie-Hellman parameters at 'path'.
 
     :param path: Destination for the DH parameters file.
-    :raises UWError: If ``openssl`` reports failure.
+    :raises UWError: If openssl reports failure.
     """
     log.info("Generating DH parameters: %s", path)
     success, _ = run_shell_cmd(f"umask 0077 && openssl dhparam -out {path} 2048")
@@ -526,15 +525,15 @@ def server(
     """
     Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
 
-    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is
-    shut down gracefully via ``ecflow_client --terminate``.
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
+    down gracefully via 'ecflow_client --terminate'.
 
-    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings
-        (``None`` => read ``stdin``).
-    :param port: TCP port to use (``None`` => pick a random available port from
-        ``ECFLOW_PORT_MIN``-``ECFLOW_PORT_MAX``).
+    :param config: A dict, a YAMLConfig, or a path to a YAML file providing server settings (None =>
+        read stdin).
+    :param port: TCP port to use (None => pick a random available port from the range
+        ECFLOW_PORT_MIN through ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
-    :param report: Output server details (e.g. hostname, port) as JSON to ``stdout``.
+    :param report: Output server details (e.g. hostname, port) as JSON to stdout.
     :raises UWError: If the server fails to start.
     """
     cfg = YAMLConfig(config)
@@ -578,19 +577,19 @@ def server(
 
 def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
     """
-    Thread target: launch ``ecflow_server``, hunting for a free port if none was specified.
+    Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
-    The subprocess is placed in its own session (``start_new_session=True``) so that it does not
+    The subprocess is placed in its own session (start_new_session=True) so that it does not
     receive the terminal's SIGINT; the main thread alone handles keyboard interrupts and shuts the
-    server down gracefully. (``start_new_session`` is preferred over ``preexec_fn``, which the
+    server down gracefully. ('start_new_session' is preferred over 'preexec_fn', which the
     Python docs warn is unsafe in a multi-threaded process.)
 
-    The run directory (``ECF_HOME``) is created if it does not already exist.
+    The run directory (ECF_HOME) is created if it does not already exist.
 
-    :param rundir: Directory to run the server in (``ECF_HOME``).
+    :param rundir: Directory to run the server in (ECF_HOME).
     :param env: Base environment variables for the server.
-    :param port: A specific port to use, or ``None`` to pick a random port
-        (``ECFLOW_PORT_MIN``-``ECFLOW_PORT_MAX``).
+    :param port: A specific port to use, or None to pick a random port from the range
+        ECFLOW_PORT_MIN through ECFLOW_PORT_MAX.
     :param insecure: Start the server without SSL security.
     """
     thread = cast(_ServerThread, current_thread())
@@ -643,9 +642,9 @@ def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
-    :param ssl_opt: ``ecflow_client`` SSL option (``"--ssl "`` for secure servers, else ``""``).
-    :param report_vars: Server variables to report as JSON once the server is up (``None`` => do
-        not report).
+    :param ssl_opt: ecflow_client SSL option ('--ssl' for secure servers, else the empty string).
+    :param report_vars: Server variables to report as JSON once the server is up (None => do not
+        report).
     """
     while not thread.terminal.is_set():
         if thread.port:
@@ -663,10 +662,10 @@ def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str
 
 def _server_report(port: int, report_vars: dict[str, str]) -> None:
     """
-    Print ecFlow server details as JSON to ``stdout``.
+    Print ecFlow server details as JSON to stdout.
 
     :param port: The TCP port the server is using.
-    :param report_vars: Server variables to report, exclusive of ``ECF_PORT``.
+    :param report_vars: Server variables to report, exclusive of ECF_PORT.
     """
     vars_ = {**report_vars, "ECF_PORT": str(port)}
     # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs, rather
@@ -678,10 +677,9 @@ def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     """
     Validate an ecFlow config against the internal ecFlow schema.
 
-    :param config: A ``dict``, a ``YAMLConfig``, a path to a YAML file, or ``None``
-        (``None`` => read ``stdin``).
-    :return: ``True`` if the config conforms to the schema.
-    :raises: ``UWConfigError`` if validation fails.
+    :param config: A dict, a YAMLConfig, a path to a YAML file, or None (None => read stdin).
+    :return: True if the config conforms to the schema.
+    :raises: UWConfigError if validation fails.
     """
     kwargs: dict = {"schema_name": EC.ecflow, "desc": "ecFlow config"}
     if isinstance(config, (dict, YAMLConfig)):

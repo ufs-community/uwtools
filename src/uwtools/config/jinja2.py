@@ -250,7 +250,7 @@ def unrendered(s: str) -> bool:
     Does the supplied string contain unrendered Jinja2 variables/expressions?
 
     :param s: The string to check for unrendered content.
-    :return: ``True`` if unrendered content was found, ``False`` otherwise.
+    :return: True if unrendered content was found, False otherwise.
     """
     try:
         Environment(undefined=StrictUndefined).from_string(s).render({})
