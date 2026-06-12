@@ -540,7 +540,7 @@ def server(
     cfg = YAMLConfig(config)
     cfg.dereference()
     validate(cfg)
-    server_cfg = cfg.data[EC.ecflow][EC.server]
+    server_cfg = cfg.data[STR.ecflow][STR.server]
     if not insecure:
         _provision_ssl()
     rundir = Path(server_cfg["ECF_HOME"])

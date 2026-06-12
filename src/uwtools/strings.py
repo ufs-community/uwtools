@@ -180,7 +180,6 @@ class _STR(_ValsMatchKeys):
     scripts_dir: str = _
     search_path: str = _
     server: str = _
-    server: str = _
     sfc_climo_gen: str = _
     shave: str = _
     show_schema: str = _
