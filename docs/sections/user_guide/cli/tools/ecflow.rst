@@ -99,6 +99,52 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
      - ``task_run_model`` → ``model.ecf``
      - ``task_process_output_files`` → ``process_output_files.ecf``
 
+.. _cli_ecflow_server_examples:
+
+``server``
+----------
+
+.. literalinclude:: ecflow/server-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ecflow/server-help.out
+   :language: text
+
+Examples
+^^^^^^^^
+
+* To start a server on a random available port with SSL security:
+
+  .. code-block:: text
+
+     uw ecflow server --config-file server.yaml
+
+* To start a server on a specific port:
+
+  .. code-block:: text
+
+     uw ecflow server --config-file server.yaml --port 54321
+
+* To emit a JSON report of the server details to ``stdout``:
+
+  .. code-block:: text
+
+     uw ecflow server --config-file server.yaml --report
+
+  The ``--report`` switch prints the ecFlow connection variables, ready to be consumed by downstream tooling (e.g. merged into a UW YAML for ``uw ecflow realize``):
+
+  .. code-block:: json
+
+     {
+       "vars": {
+         "ECF_HOST": "server.hostname.com",
+         "ECF_PORT": "54321",
+         "ECF_SSL": "1"
+       }
+     }
+
+  ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given).
+
 .. _cli_ecflow_validate_examples:
 
 ``validate``

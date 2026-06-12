@@ -127,6 +127,7 @@ def _add_subparser_ecflow(subparsers: Subparsers) -> dict[str, ActionChecks]:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.realize: _add_subparser_ecflow_realize(subparsers),
+        STR.server: _add_subparser_ecflow_server(subparsers),
         STR.validate: _add_subparser_ecflow_validate(subparsers),
     }
 
@@ -142,6 +143,23 @@ def _add_subparser_ecflow_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_config_file(optional)
     _add_arg_output_dir(optional)
     _add_arg_scripts_dir(optional)
+    return _add_args_verbosity(optional)
+
+
+def _add_subparser_ecflow_server(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: ecflow server.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.server, "Start an ecFlow server")
+    optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
+    _add_arg_insecure(optional)
+    _add_arg_port(optional)
+    _add_arg_report(
+        optional, helpmsg="Output server details (e.g. hostname, port) as JSON to stdout"
+    )
     return _add_args_verbosity(optional)
 
 
@@ -165,6 +183,7 @@ def _dispatch_ecflow(args: Args) -> bool:
     """
     actions = {
         STR.realize: _dispatch_ecflow_realize,
+        STR.server: _dispatch_ecflow_server,
         STR.validate: _dispatch_ecflow_validate,
     }
     return actions[args[STR.action]](args)
@@ -180,6 +199,21 @@ def _dispatch_ecflow_realize(args: Args) -> bool:
         config=args[STR.config_file],
         output_path=args.get(STR.output_dir),
         scripts_path=args.get(STR.scripts_dir),
+        stdin_ok=True,
+    )
+
+
+def _dispatch_ecflow_server(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow server action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ecflow.server(
+        config=args.get(STR.config_file),
+        port=args.get(STR.port),
+        insecure=args[STR.insecure],
+        report=args[STR.report],
         stdin_ok=True,
     )
 
@@ -484,7 +518,7 @@ def _add_subparser_fs_common(parser: Parser) -> tuple[ActionChecks, Group]:
     _add_arg_dry_run(optional)
     _add_arg_threads(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
-    _add_arg_report(optional)
+    _add_arg_report(optional, helpmsg="Show JSON report on [non]ready assets")
     return _add_args_verbosity(optional), optional
 
 
@@ -971,6 +1005,14 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_insecure(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.insecure),
+        action="store_true",
+        help="Start server without SSL security",
+    )
+
+
 def _add_arg_input_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.input_format),
@@ -1055,6 +1097,19 @@ def _add_arg_output_dir(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_port(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.port),
+        help=(
+            f"TCP port for the ecFlow server "
+            f"(default: random from "
+            f"{uwtools.api.ecflow.ECFLOW_PORT_MIN}-{uwtools.api.ecflow.ECFLOW_PORT_MAX})"
+        ),
+        metavar="PORT",
+        type=int,
+    )
+
+
 def _add_arg_quiet(group: Group) -> None:
     group.add_argument(
         _switch(STR.quiet),
@@ -1085,11 +1140,11 @@ def _add_arg_realize(group: Group) -> None:
     )
 
 
-def _add_arg_report(group: Group) -> None:
+def _add_arg_report(group: Group, helpmsg: str) -> None:
     group.add_argument(
         _switch(STR.report),
         action="store_true",
-        help="Show JSON report on [non]ready assets",
+        help=helpmsg,
     )
 
 
