@@ -114,12 +114,14 @@ class _STR(_ValsMatchKeys):
     gsi: str = _
     hardlink: str = _
     help: str = _
+    hostname: str = _
     hsi: str = _
     htar: str = _
     incantation: str = _
     inlimits: str = _
     input_file: str = _
     input_format: str = _
+    insecure: str = _
     int: str = _
     ioda: str = _
     iterate: str = _
@@ -156,6 +158,7 @@ class _STR(_ValsMatchKeys):
     path1: str = _
     path2: str = _
     platform: str = _
+    port: str = _
     post_includes: str = _
     pre_includes: str = _
     properties: str = _
@@ -176,6 +179,7 @@ class _STR(_ValsMatchKeys):
     script: str = _
     scripts_dir: str = _
     search_path: str = _
+    server: str = _
     server: str = _
     sfc_climo_gen: str = _
     shave: str = _

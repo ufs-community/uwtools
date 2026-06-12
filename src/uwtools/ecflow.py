@@ -4,11 +4,19 @@ Support for creating ecFlow suite definitions and ecf scripts.
 
 from __future__ import annotations
 
+import json
+import os
+import random
 import re
+import signal
+import socket
 from copy import deepcopy
 from pathlib import Path
+from subprocess import STDOUT, CalledProcessError, check_output
 from textwrap import dedent
-from typing import TYPE_CHECKING
+from threading import Event, Thread, current_thread
+from time import sleep
+from typing import TYPE_CHECKING, cast
 
 from ecflow import (  # type: ignore[import-untyped]
     Defs,
@@ -27,13 +35,20 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
+from uwtools.utils.processing import run_shell_cmd
+
+# ecFlow accepts ports only in the registered range 1024-49151.
+ECFLOW_PORT_MIN = 1024
+ECFLOW_PORT_MAX = 49151
 
 if TYPE_CHECKING:
+    from types import FrameType
+
     from ecflow import NodeContainer
 
 
@@ -400,6 +415,263 @@ def realize(
     if scripts_path:
         suite.write_ecf_scripts(scripts_path)
     return str(suite)
+
+
+# Private helpers
+
+
+_SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
+_SSL_KEY = "server.key"
+_SSL_CERT = "server.crt"
+_SSL_DHPARAM = "dh2048.pem"
+_SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
+
+
+def _provision_ssl() -> None:
+    """
+    Ensure SSL certificates exist in ``$HOME/.ecflowrc/ssl``.
+
+    If all required files exist, logs that they will be reused. If the directory exists but is
+    missing one or more required files, logs an error and raises ``UWError``. If the directory does
+    not exist, creates it and generates the required SSL files using ``openssl``.
+
+    :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
+        fails.
+    """
+    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
+    if len(existing) == len(_SSL_FILES):
+        log.info("Using existing SSL certificates in %s", _SSL_DIR)
+        return
+    if existing:
+        missing = sorted(set(_SSL_FILES) - set(existing))
+        msg = (
+            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
+            "Provide all required files or remove the directory to allow regeneration."
+        )
+        raise UWError(msg)
+    log.info("Creating SSL directory %s", _SSL_DIR)
+    _SSL_DIR.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(_SSL_DIR / _SSL_KEY)
+    _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
+    _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
+    log.info("SSL credentials written to %s", _SSL_DIR)
+
+
+def _ssl_generate_key(path: Path) -> None:
+    """
+    Generate a 2048-bit RSA private key (no password) at ``path``.
+
+    :param path: Destination for the private key file.
+    :raises UWError: If ``openssl`` reports failure.
+    """
+    log.info("Generating SSL private key: %s", path)
+    success, _ = run_shell_cmd(f"umask 0077 && openssl genrsa -out {path} 2048")
+    if not success:
+        msg = f"Failed to generate SSL private key at {path}"
+        raise UWError(msg)
+
+
+def _ssl_generate_cert(path: Path, key_path: Path) -> None:
+    """
+    Generate a self-signed X.509 certificate at ``path`` using the key at ``key_path``.
+
+    :param path: Destination for the certificate file.
+    :param key_path: Path to the existing RSA private key.
+    :raises UWError: If ``openssl`` reports failure.
+    """
+    hostname = socket.gethostname()
+    log.info("Generating SSL certificate: %s", path)
+    cmd = (
+        f"umask 0077 && openssl req -x509 -key {key_path} -new -out {path} "
+        f"-days 3650 -subj '/CN={hostname}'"
+    )
+    success, _ = run_shell_cmd(cmd)
+    if not success:
+        msg = f"Failed to generate SSL certificate at {path}"
+        raise UWError(msg)
+
+
+def _ssl_generate_dhparam(path: Path) -> None:
+    """
+    Generate 2048-bit Diffie-Hellman parameters at ``path``.
+
+    :param path: Destination for the DH parameters file.
+    :raises UWError: If ``openssl`` reports failure.
+    """
+    log.info("Generating DH parameters: %s", path)
+    success, _ = run_shell_cmd(f"umask 0077 && openssl dhparam -out {path} 2048")
+    if not success:
+        msg = f"Failed to generate DH parameters at {path}"
+        raise UWError(msg)
+
+
+class _ServerThread(Thread):
+    """
+    A thread that runs an ecFlow server, tracking the port in use and shutdown state.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.port: int | None = None
+        self.terminal = Event()
+        self.error: str | None = None
+
+
+def server(
+    config: dict | YAMLConfig | Path | None,
+    port: int | None = None,
+    insecure: bool = False,
+    report: bool = False,
+) -> None:
+    """
+    Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
+
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is
+    shut down gracefully via ``ecflow_client --terminate``.
+
+    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML file providing server settings
+        (``None`` => read ``stdin``).
+    :param port: TCP port to use (``None`` => pick a random available port from
+        ``ECFLOW_PORT_MIN``-``ECFLOW_PORT_MAX``).
+    :param insecure: Start the server without SSL security.
+    :param report: Output server details (e.g. hostname, port) as JSON to ``stdout``.
+    :raises UWError: If the server fails to start.
+    """
+    cfg = YAMLConfig(config)
+    cfg.dereference()
+    validate(cfg)
+    server_cfg = cfg.data[EC.ecflow][EC.server]
+    if not insecure:
+        _provision_ssl()
+    rundir = Path(server_cfg["ECF_HOME"])
+    cfg_vars = {k: str(v) for k, v in server_cfg.items()}
+    env = {**os.environ, **cfg_vars}
+    if insecure:
+        # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
+        env.pop("ECF_SSL", None)
+    else:
+        env["ECF_SSL"] = "1"
+    # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
+    # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
+    report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
+    if not insecure:
+        report_vars["ECF_SSL"] = "1"
+    thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
+    # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
+    ssl_opt = "" if insecure else "--ssl "
+
+    def shutdown(_signum: int, _frame: FrameType | None) -> None:
+        log.info("Terminating")
+        thread.terminal.set()
+        if thread.port:
+            run_shell_cmd(
+                cmd=f"ecflow_client {ssl_opt}--port {thread.port} --terminate=yes", quiet=True
+            )
+
+    signal.signal(signal.SIGINT, shutdown)
+    thread.start()
+    _server_wait(thread, ssl_opt=ssl_opt, report_vars=report_vars if report else None)
+    thread.join()
+    if thread.error:
+        raise UWError(thread.error)
+
+
+def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
+    """
+    Thread target: launch ``ecflow_server``, hunting for a free port if none was specified.
+
+    The subprocess is placed in its own session (``start_new_session=True``) so that it does not
+    receive the terminal's SIGINT; the main thread alone handles keyboard interrupts and shuts the
+    server down gracefully. (``start_new_session`` is preferred over ``preexec_fn``, which the
+    Python docs warn is unsafe in a multi-threaded process.)
+
+    The run directory (``ECF_HOME``) is created if it does not already exist.
+
+    :param rundir: Directory to run the server in (``ECF_HOME``).
+    :param env: Base environment variables for the server.
+    :param port: A specific port to use, or ``None`` to pick a random port
+        (``ECFLOW_PORT_MIN``-``ECFLOW_PORT_MAX``).
+    :param insecure: Start the server without SSL security.
+    """
+    thread = cast(_ServerThread, current_thread())
+    fixed = port is not None
+    cmd = ["ecflow_server", *([] if insecure else ["--ssl"])]
+    # Create the run directory (ECF_HOME) on the user's behalf if it does not already exist.
+    rundir.mkdir(parents=True, exist_ok=True)
+    while not thread.terminal.is_set():
+        # ecFlow accepts ports only in the registered range ECFLOW_PORT_MIN-ECFLOW_PORT_MAX.
+        candidate = (
+            port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
+        )
+        log.debug("Trying to start server on port %s", candidate)
+        thread.port = candidate
+        try:
+            check_output(  # noqa: S603
+                cmd,
+                cwd=rundir,
+                encoding="utf-8",
+                env={**env, "ECF_PORT": str(candidate)},
+                start_new_session=True,
+                stderr=STDOUT,
+                text=True,
+            )
+        except CalledProcessError as e:
+            if "bind: Address already in use" in (e.stdout or ""):
+                thread.port = None
+                if fixed:
+                    thread.terminal.set()
+                    thread.error = f"Requested port {candidate} is unavailable"
+                    return
+                log.debug("Port %s already in use", candidate)
+                continue
+            thread.terminal.set()
+            thread.error = f"ecflow_server failed on port {candidate}: {e.stdout}"
+            for line in (e.stdout or "").split("\n"):
+                log.error(line)
+            return
+        except OSError as e:
+            # The server could not be launched at all, e.g. ecflow_server is not on PATH or the
+            # run directory (ECF_HOME) does not exist. Set terminal so the waiter does not hang.
+            thread.terminal.set()
+            thread.error = f"Failed to launch ecflow_server: {e}"
+            log.error(thread.error)
+            return
+
+
+def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str] | None) -> None:
+    """
+    Wait for the server to respond to a ping, then optionally report its details.
+
+    :param thread: The running server thread.
+    :param ssl_opt: ``ecflow_client`` SSL option (``"--ssl "`` for secure servers, else ``""``).
+    :param report_vars: Server variables to report as JSON once the server is up (``None`` => do
+        not report).
+    """
+    while not thread.terminal.is_set():
+        if thread.port:
+            cmd = f"ecflow_client {ssl_opt}--port {thread.port} --ping"
+            success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+            if success:
+                log.info("Server started on port %s", thread.port)
+                if report_vars is not None:
+                    _server_report(port=thread.port, report_vars=report_vars)
+                break
+        # Wait briefly before re-checking, so polling does not spin a CPU core or hammer
+        # ecflow_client while the server starts up (or fails to).
+        sleep(0.2)
+
+
+def _server_report(port: int, report_vars: dict[str, str]) -> None:
+    """
+    Print ecFlow server details as JSON to ``stdout``.
+
+    :param port: The TCP port the server is using.
+    :param report_vars: Server variables to report, exclusive of ``ECF_PORT``.
+    """
+    vars_ = {**report_vars, "ECF_PORT": str(port)}
+    # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs, rather
+    # than only when the block-buffered stream is flushed at server exit.
+    print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
 def validate(config: dict | YAMLConfig | Path | None = None) -> bool:

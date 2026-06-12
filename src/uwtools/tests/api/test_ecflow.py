@@ -8,6 +8,50 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWError
 
 
+def test_api_ecflow_server():
+    path = Path("foo")
+    with patch.object(ecflow, "_server") as _server:
+        result = ecflow.server(config=path, port=12345, insecure=False, report=True)
+    _server.assert_called_once_with(config=path, port=12345, insecure=False, report=True)
+    assert result is True
+
+
+def test_api_ecflow_server__str():
+    with patch.object(ecflow, "_server") as _server:
+        result = ecflow.server(config="foo")
+    _server.assert_called_once_with(config=Path("foo"), port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__dict():
+    cfg = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
+    with patch.object(ecflow, "_server") as _server:
+        result = ecflow.server(config=cfg)
+    _server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__yamlconfig():
+    cfg = YAMLConfig({"ecflow": {"server": {"ECF_HOME": "/ecf"}}})
+    with patch.object(ecflow, "_server") as _server:
+        result = ecflow.server(config=cfg)
+    _server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__stdin():
+    with patch.object(ecflow, "_server") as _server:
+        result = ecflow.server(config=None, stdin_ok=True)
+    _server.assert_called_once_with(config=None, port=None, insecure=False, report=False)
+    assert result is True
+
+
+def test_api_ecflow_server__no_stdin_no_config():
+    with raises(UWError) as e:
+        ecflow.server(config=None)
+    assert "Set stdin_ok=True to permit read from stdin" in str(e.value)
+
+
 def test_api_ecflow_realize():
     path1, path2 = Path("foo"), Path("bar")
     with patch.object(ecflow, "_realize") as _realize:

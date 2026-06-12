@@ -113,12 +113,17 @@ def test_cli__add_subparser_config_validate(subparsers):
 
 def test_cli__add_subparser_ecflow(subparsers):
     cli._add_subparser_ecflow(subparsers)
-    assert actions(subparsers.choices[STR.ecflow]) == [STR.realize, STR.validate]
+    assert actions(subparsers.choices[STR.ecflow]) == [STR.realize, STR.server, STR.validate]
 
 
 def test_cli__add_subparser_ecflow_realize(subparsers):
     cli._add_subparser_ecflow_realize(subparsers)
     assert subparsers.choices[STR.realize]
+
+
+def test_cli__add_subparser_ecflow_server(subparsers):
+    cli._add_subparser_ecflow_server(subparsers)
+    assert subparsers.choices[STR.server]
 
 
 def test_cli__add_subparser_ecflow_validate(subparsers):
@@ -523,6 +528,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     "params",
     [
         (STR.realize, "_dispatch_ecflow_realize"),
+        (STR.server, "_dispatch_ecflow_server"),
         (STR.validate, "_dispatch_ecflow_validate"),
     ],
 )
@@ -542,6 +548,32 @@ def test_cli__dispatch_ecflow_realize():
         config=args[STR.config_file],
         output_path=args[STR.output_dir],
         scripts_path=None,
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_server():
+    args = {STR.config_file: None, STR.port: 54321, STR.insecure: False, STR.report: True}
+    with patch.object(uwtools.api.ecflow, "server") as server:
+        cli._dispatch_ecflow_server(args)
+    server.assert_called_once_with(
+        config=None,
+        port=54321,
+        insecure=False,
+        report=True,
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_server_defaults():
+    args = {STR.config_file: None, STR.port: None, STR.insecure: False, STR.report: False}
+    with patch.object(uwtools.api.ecflow, "server") as server:
+        cli._dispatch_ecflow_server(args)
+    server.assert_called_once_with(
+        config=None,
+        port=None,
+        insecure=False,
+        report=False,
         stdin_ok=True,
     )
 
