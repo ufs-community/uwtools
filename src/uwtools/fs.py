@@ -292,10 +292,10 @@ class Linker(FileStager):
         """
         Create links to filesystem items.
 
-        When 'hardlink' is False (the default), links may target files, hardlinks, symlinks,
-        and directories; when True, links may not be made across filesystems, or to directories.
-        When 'fallback' is set, a copy or symlink will be created, if possible, if a
-        hardlink cannot be created.
+        When 'hardlink' is False (the default), links may target files, hardlinks, symlinks, and
+        directories; when True, links may not be made across filesystems, or to directories. When
+        'fallback' is set, a copy or symlink will be created, if possible, if a hardlink cannot be
+        created.
 
         :param name: A string identifier to disambiguate the task from others like it.
         """

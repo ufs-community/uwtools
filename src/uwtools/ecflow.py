@@ -431,8 +431,8 @@ def _provision_ssl() -> None:
     Ensure SSL certificates exist in $HOME/.ecflowrc/ssl.
 
     If all required files exist, logs that they will be reused. If the directory exists but is
-    missing one or more required files, logs an error and raises UWError. If the directory does
-    not exist, creates it and generates the required SSL files using openssl.
+    missing one or more required files, logs an error and raises UWError. If the directory does not
+    exist, creates it and generates the required SSL files using openssl.
 
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
@@ -525,11 +525,11 @@ def server(
     """
     Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
 
-    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is
-    shut down gracefully via 'ecflow_client --terminate'.
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
+    down gracefully via 'ecflow_client --terminate'.
 
-    :param config: A dict, a YAMLConfig, or a path to a YAML file providing server settings
-        (None => read stdin).
+    :param config: A dict, a YAMLConfig, or a path to a YAML file providing server settings (None =>
+        read stdin).
     :param port: TCP port to use (None => pick a random available port from the range
         ECFLOW_PORT_MIN through ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
@@ -643,8 +643,8 @@ def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str
 
     :param thread: The running server thread.
     :param ssl_opt: ecflow_client SSL option ('--ssl' for secure servers, else the empty string).
-    :param report_vars: Server variables to report as JSON once the server is up (None => do
-        not report).
+    :param report_vars: Server variables to report as JSON once the server is up (None => do not
+        report).
     """
     while not thread.terminal.is_set():
         if thread.port:
@@ -677,8 +677,7 @@ def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     """
     Validate an ecFlow config against the internal ecFlow schema.
 
-    :param config: A dict, a YAMLConfig, a path to a YAML file, or None
-        (None => read stdin).
+    :param config: A dict, a YAMLConfig, a path to a YAML file, or None (None => read stdin).
     :return: True if the config conforms to the schema.
     :raises: UWConfigError if validation fails.
     """

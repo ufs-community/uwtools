@@ -130,8 +130,8 @@ def validate_internal(
     """
     Validate a config against a uwtools-internal schema.
 
-    Specify at most one of config_data or config_path. If no config is specified, stdin is read
-    and will be parsed as YAML and then validated.
+    Specify at most one of config_data or config_path. If no config is specified, stdin is read and
+    will be parsed as YAML and then validated.
 
     :param schema_name: Name of uwtools schema to validate the config against.
     :param desc: A description of the config being validated, for logging.
@@ -158,8 +158,8 @@ def validate_external(
     """
     Validate a YAML config against the JSON Schema in the given schema file.
 
-    Specify at most one of config_data or config_path. If no config is specified, stdin is read
-    and will be parsed as YAML and then validated.
+    Specify at most one of config_data or config_path. If no config is specified, stdin is read and
+    will be parsed as YAML and then validated.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param desc: A description of the config being validated, for logging.
