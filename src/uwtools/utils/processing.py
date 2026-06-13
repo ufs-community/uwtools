@@ -20,6 +20,7 @@ def run_shell_cmd(
     log_output: bool | None = False,
     taskname: str | None = None,
     quiet: bool | None = None,
+    executable: str | None = None,
 ) -> tuple[bool, str]:
     """
     Run a command in a shell.
@@ -30,6 +31,7 @@ def run_shell_cmd(
     :param log_output: Log output from successful cmd? (Error output is always logged.)
     :param taskname: Name of task executing this command, for logging.
     :param quiet: Log INFO messages as DEBUG.
+    :param executable: Interpreter to use (e.g. "/bin/bash")
     :return: A result object providing combined stder/stdout output and success values.
     """
     pre = f"{taskname}: " if taskname else ""
@@ -43,10 +45,11 @@ def run_shell_cmd(
     logfunc = log.debug if quiet else log.info
     logfunc(msg, pre)
     logfunc("%s  %s", pre, cmd)
+    kwargs: dict = dict(cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True)  # noqa: S604
+    if executable:
+        kwargs["executable"] = executable
     try:
-        output = check_output(
-            cmd, cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True
-        )
+        output = check_output(cmd, **kwargs)  # noqa: S603
         success = True
     except CalledProcessError as e:
         output = e.output
