@@ -25,14 +25,22 @@ def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
     assert check("  expr: division by zero")
 
 
+@mark.parametrize("executable", ["/bin/bash", None])
 @mark.parametrize("log_output", [True, False])
 @mark.parametrize("quiet", [True, False])
-def test_utils_processing_run_shell_cmd__success(caplog, logged, log_output, quiet, tmp_path):
+def test_utils_processing_run_shell_cmd__success(
+    caplog, executable, logged, log_output, quiet, tmp_path
+):
     cmd = "echo hello $FOO"
     if quiet:
         log.setLevel(logging.INFO)
     success, _ = processing.run_shell_cmd(
-        cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=log_output, quiet=quiet
+        cmd=cmd,
+        cwd=tmp_path,
+        env={"FOO": "bar"},
+        log_output=log_output,
+        quiet=quiet,
+        executable=executable,
     )
     assert success
     if quiet:
