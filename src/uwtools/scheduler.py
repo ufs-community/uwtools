@@ -7,6 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import dataclass, fields
+from shutil import which
 from typing import TYPE_CHECKING, Any
 
 from uwtools.exceptions import UWConfigError
@@ -90,7 +91,7 @@ class JobScheduler(ABC):
         cmd = f"{self._submit_cmd} {runscript.name}"
         if submit_file:
             cmd = "set -o pipefail && %s 2>&1 | tee %s" % (cmd, submit_file.name)
-        success, _ = run_shell_cmd(cmd=cmd, cwd=f"{runscript.parent}", executable="/bin/bash")
+        success, _ = run_shell_cmd(cmd=cmd, cwd=f"{runscript.parent}", executable=which("bash"))
         return success
 
     # Private methods
