@@ -124,7 +124,7 @@ def test_JobScheduler_submit_job(schedulerobj, supply_submit_file, tmp_path):
             cmd = f"set -o pipefail && sub {runscript.name} 2>&1 | tee {submit_file.name}"
         else:
             cmd = f"sub {runscript.name}"
-        run_shell_cmd.assert_called_once_with(cmd=cmd, cwd=str(tmp_path))
+        run_shell_cmd.assert_called_once_with(cmd=cmd, cwd=str(tmp_path), executable="/bin/bash")
 
 
 def test_JobScheduler__directive_separator(schedulerobj):

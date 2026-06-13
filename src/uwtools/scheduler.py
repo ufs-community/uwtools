@@ -90,7 +90,7 @@ class JobScheduler(ABC):
         cmd = f"{self._submit_cmd} {runscript.name}"
         if submit_file:
             cmd = "set -o pipefail && %s 2>&1 | tee %s" % (cmd, submit_file.name)
-        success, _ = run_shell_cmd(cmd=cmd, cwd=f"{runscript.parent}")
+        success, _ = run_shell_cmd(cmd=cmd, cwd=f"{runscript.parent}", executable="/bin/bash")
         return success
 
     # Private methods
