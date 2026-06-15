@@ -357,7 +357,7 @@
           "type": "string"
         },
         "vars": {
-          "type": "object"
+          "$ref": "#/$defs/vars"
         }
       },
       "type": "object"
@@ -560,6 +560,24 @@
           "type": "object"
         }
       ]
+    },
+    "vars": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(?!ECF_)": {}
+      },
+      "properties": {
+        "ECF_MICRO": {
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string"
+        },
+        "ECF_TRIES": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
     }
   },
   "properties": {
@@ -737,7 +755,7 @@
               "type": "string"
             },
             "vars": {
-              "type": "object"
+              "$ref": "#/$defs/vars"
             }
           },
           "type": "object"
