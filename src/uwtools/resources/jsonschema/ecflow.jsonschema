@@ -644,6 +644,7 @@
             },
             "ECF_PRUNE_NODE_LOG": {
               "description": "Prune node log/edit history older than this number of days when checkpoint is loaded.",
+              "minimum": 0,
               "type": "integer"
             },
             "ECF_STATUS_CMD": {

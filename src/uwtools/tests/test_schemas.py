@@ -747,10 +747,11 @@ def test_schema_ecflow_server():
         assert "is not of type 'integer'\n" in err(k, "x")
         assert "is less than the minimum of 1" in err(k, 0)
         assert not err(k, 1)
-    # ECF_TASK_THRESHOLD must be an integer >= 0:
-    assert "is not of type 'integer'\n" in err("ECF_TASK_THRESHOLD", "x")
-    assert "is less than the minimum of 0" in err("ECF_TASK_THRESHOLD", -1)
-    assert not err("ECF_TASK_THRESHOLD", 0)
+    # These values must be integers >= 0:
+    for k in ["ECF_PRUNE_NODE_LOG", "ECF_TASK_THRESHOLD"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 0" in err(k, -1)
+        assert not err(k, 0)
     # ECF_CHECKMODE is constrained to an enum:
     assert "is not one of" in err("ECF_CHECKMODE", "bad")
     assert not err("ECF_CHECKMODE", "CHECK_ON_TIME")
