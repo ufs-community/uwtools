@@ -744,7 +744,7 @@
           "additionalProperties": false,
           "properties": {
             "ECF_CHECK": {
-              "description": "Name of the checkpoint file, pepended with <host>.<port> at runtime",
+              "description": "Name of the checkpoint file, prepended with <host>.<port> at runtime",
               "type": "string"
             },
             "ECF_CHECKINTERVAL": {
