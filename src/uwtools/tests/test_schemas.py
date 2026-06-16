@@ -747,10 +747,11 @@ def test_schema_ecflow_server():
         assert "is not of type 'integer'\n" in err(k, "x")
         assert "is less than the minimum of 1" in err(k, 0)
         assert not err(k, 1)
-    # ECF_TASK_THRESHOLD must be an integer >= 0:
-    assert "is not of type 'integer'\n" in err("ECF_TASK_THRESHOLD", "x")
-    assert "is less than the minimum of 0" in err("ECF_TASK_THRESHOLD", -1)
-    assert not err("ECF_TASK_THRESHOLD", 0)
+    # These values must be integers >= 0:
+    for k in ["ECF_PRUNE_NODE_LOG", "ECF_TASK_THRESHOLD"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 0" in err(k, -1)
+        assert not err(k, 0)
     # ECF_CHECKMODE is constrained to an enum:
     assert "is not one of" in err("ECF_CHECKMODE", "bad")
     assert not err("ECF_CHECKMODE", "CHECK_ON_TIME")
@@ -1103,6 +1104,70 @@ def test_schema_ecflow_suitedef_execution():
     )
     # threads must be a positive integer:
     assert "is less than the minimum" in errors({"incantation": "/path/to/run.sh", "threads": 0})
+
+
+def test_schema_ecflow_suitedef_refs_vars():
+    errors = schema_validator("ecflow", "$defs", "vars")
+    err = lambda k, v: errors({k: v})
+    # Non-ECF_ keys are accepted with any value type:
+    assert not errors({"MY_VAR": "hello", "count": 42, "flag": True})
+    # Unknown ECF_ keys are rejected:
+    assert "does not match any of the regexes" in err("ECF_BOGUS", "x")
+    # These values must be strings:
+    ks_string = [
+        "ECF_CHECK",
+        "ECF_CHECKINTERVAL",
+        "ECF_CHECKMODE",
+        "ECF_CHECKOLD",
+        "ECF_CLOCK",
+        "ECF_CUSTOM_PASSWD",
+        "ECF_DUMMY_TASK",
+        "ECF_EXTN",
+        "ECF_FILES",
+        "ECF_HOME",
+        "ECF_INCLUDE",
+        "ECF_JOB",
+        "ECF_JOBOUT",
+        "ECF_JOB_CMD",
+        "ECF_KILL_CMD",
+        "ECF_LISTS",
+        "ECF_LOG",
+        "ECF_NAME",
+        "ECF_NODE",
+        "ECF_OUT",
+        "ECF_PASS",
+        "ECF_PASSWD",
+        "ECF_RID",
+        "ECF_SCRIPT",
+        "ECF_STATUS_CMD",
+        "ECF_URL",
+        "ECF_URL_BASE",
+        "ECF_URL_CMD",
+    ]
+    for k in ks_string:
+        assert "is not of type 'string'\n" in err(k, 42)
+        assert not err(k, "value")
+    # These values must be integers >= 1:
+    for k in ["ECF_INTERVAL", "ECF_JULIAN", "ECF_PORT", "ECF_TRIES", "ECF_TRYNO"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 1" in err(k, 0)
+        assert not err(k, 1)
+    # ECF_MICRO must be a single character:
+    assert "is not of type 'string'\n" in err("ECF_MICRO", 1)
+    assert "should be non-empty" in err("ECF_MICRO", "")
+    assert "is too long" in err("ECF_MICRO", "ab")
+    assert not err("ECF_MICRO", "%")
+    # ECF_DATE must be an 8-digit string:
+    assert "is not of type 'string'\n" in err("ECF_DATE", 20260101)
+    assert "does not match" in err("ECF_DATE", "2026abc1")
+    assert "does not match" in err("ECF_DATE", "2026010")
+    assert "does not match" in err("ECF_DATE", "202601011")
+    assert not err("ECF_DATE", "20260101")
+    # ECF_TIME must match HH:MM pattern:
+    assert "is not of type 'string'\n" in err("ECF_TIME", 1200)
+    assert "does not match" in err("ECF_TIME", "1200")
+    assert "does not match" in err("ECF_TIME", "12:00:00")
+    assert not err("ECF_TIME", "12:00")
 
 
 # enkf

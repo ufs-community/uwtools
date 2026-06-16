@@ -16,7 +16,7 @@ requirements:
     - python {{ pymin }}
     - setuptools
   run:
-    - ecflow 5.16.*
+    - ecflow 5.16.* # keep docs/conf.py in-sync
     - f90nml >=1.4,<1.6
     - iotaa 1.6.*
     - jinja2 >=3.1,<3.2

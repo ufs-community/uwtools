@@ -357,7 +357,7 @@
           "type": "string"
         },
         "vars": {
-          "type": "object"
+          "$ref": "#/$defs/vars"
         }
       },
       "type": "object"
@@ -560,6 +560,168 @@
           "type": "object"
         }
       ]
+    },
+    "vars": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(?!ECF_)": {}
+      },
+      "properties": {
+        "ECF_CHECK": {
+          "description": "Name of the checkpoint file",
+          "type": "string"
+        },
+        "ECF_CHECKINTERVAL": {
+          "description": "The interval, in seconds, between saving current state into the checkpoint file",
+          "type": "string"
+        },
+        "ECF_CHECKMODE": {
+          "description": "The mode to perform checkpoint file saving",
+          "type": "string"
+        },
+        "ECF_CHECKOLD": {
+          "description": "Name of the backup of the checkpoint file",
+          "type": "string"
+        },
+        "ECF_CLOCK": {
+          "description": "Composite weekday, month, Day Of the Week, Day Of Year",
+          "type": "string"
+        },
+        "ECF_CUSTOM_PASSWD": {
+          "description": "Default custom password string to replace the real password, when communicating with the server",
+          "type": "string"
+        },
+        "ECF_DATE": {
+          "description": "Single date in format YYYYMMDD",
+          "pattern": "^[0-9]{8}$",
+          "type": "string"
+        },
+        "ECF_DUMMY_TASK": {
+          "description": "Stops job generation checking from raising errors",
+          "type": "string"
+        },
+        "ECF_EXTN": {
+          "description": "Overrides the default script extension",
+          "type": "string"
+        },
+        "ECF_FILES": {
+          "description": "Alternate location for ecFlow files",
+          "type": "string"
+        },
+        "ECF_HOME": {
+          "description": "Home for all the ecFlow files",
+          "type": "string"
+        },
+        "ECF_INCLUDE": {
+          "description": "Path for the include files",
+          "type": "string"
+        },
+        "ECF_INTERVAL": {
+          "description": "The interval between check of time dependencies and job submission",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ECF_JOB": {
+          "description": "Name of the job file created by ECF",
+          "type": "string"
+        },
+        "ECF_JOBOUT": {
+          "description": "The filename of the job output",
+          "type": "string"
+        },
+        "ECF_JOB_CMD": {
+          "description": "Command to be executed to send a job",
+          "type": "string"
+        },
+        "ECF_JULIAN": {
+          "description": "Julian day",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ECF_KILL_CMD": {
+          "description": "Command to be executed to kill a job",
+          "type": "string"
+        },
+        "ECF_LISTS": {
+          "description": "Name of the ecFlow white-list file",
+          "type": "string"
+        },
+        "ECF_LOG": {
+          "description": "Name of the ecFlow history, or log file",
+          "type": "string"
+        },
+        "ECF_MICRO": {
+          "description": "The default preprocessor character used during variable substitution",
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string"
+        },
+        "ECF_NAME": {
+          "description": "Full name of the task",
+          "type": "string"
+        },
+        "ECF_NODE": {
+          "description": "The hostname of the machine running ECF",
+          "type": "string"
+        },
+        "ECF_OUT": {
+          "description": "Alternate location for job and cmd output files",
+          "type": "string"
+        },
+        "ECF_PASS": {
+          "description": "Password for the task to enable login to ECF",
+          "type": "string"
+        },
+        "ECF_PASSWD": {
+          "description": "Default password string to replace the real password, when communicating with the server",
+          "type": "string"
+        },
+        "ECF_PORT": {
+          "description": "The ecFlow server TCP port number",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ECF_RID": {
+          "description": "The Request ID of the job (only for running jobs)",
+          "type": "string"
+        },
+        "ECF_SCRIPT": {
+          "description": "The full pathname for the script",
+          "type": "string"
+        },
+        "ECF_STATUS_CMD": {
+          "description": "Command to be executed to retrieve the job status",
+          "type": "string"
+        },
+        "ECF_TIME": {
+          "description": "Time of the suites clock, HH:MM",
+          "pattern": "^[0-9]{2}:[0-9]{2}$",
+          "type": "string"
+        },
+        "ECF_TRIES": {
+          "description": "The default number of tries for each task",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ECF_TRYNO": {
+          "description": "The current try number for the task ",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ECF_URL": {
+          "description": "The stem suffix for the job URL",
+          "type": "string"
+        },
+        "ECF_URL_BASE": {
+          "description": "The base prefix for the job URL",
+          "type": "string"
+        },
+        "ECF_URL_CMD": {
+          "description": "Command to be executed to open job files in a browser",
+          "type": "string"
+        }
+      },
+      "type": "object"
     }
   },
   "properties": {
@@ -582,16 +744,16 @@
           "additionalProperties": false,
           "properties": {
             "ECF_CHECK": {
-              "description": "Name of the checkpoint file. Prepended with <host>.<port> at runtime. Default: ecf.check",
+              "description": "Name of the checkpoint file, prepended with <host>.<port> at runtime",
               "type": "string"
             },
             "ECF_CHECKINTERVAL": {
-              "description": "Interval in seconds between automatic checkpoint saves.",
+              "description": "Interval in seconds between automatic checkpoint saves",
               "minimum": 1,
               "type": "integer"
             },
             "ECF_CHECKMODE": {
-              "description": "Checkpoint mode: when to auto-save the checkpoint file.",
+              "description": "Checkpoint mode: when to auto-save the checkpoint file",
               "enum": [
                 "CHECK_ALWAYS",
                 "CHECK_NEVER",
@@ -600,67 +762,72 @@
               "type": "string"
             },
             "ECF_CHECKOLD": {
-              "description": "Name of the backup checkpoint file. Prepended with <host>.<port> at runtime. Default: ecf.check.b",
+              "description": "Name of the backup checkpoint file, prepended with <host>.<port> at runtime",
               "type": "string"
             },
             "ECF_CUSTOM_PASSWD": {
-              "description": "Password file for users whose UID on the remote client does not match that on the server. Default: <host>.<port>.ecf.custom_passwd",
+              "description": "Password file for users whose UID on the remote client does not match that on the server",
               "type": "string"
             },
             "ECF_HOME": {
-              "description": "Root directory for all .ecf script files.",
+              "description": "Root directory for all .ecf script files",
               "type": "string"
             },
             "ECF_INTERVAL": {
-              "description": "Period in seconds for traversing dependencies and submitting jobs.",
+              "description": "Period in seconds for traversing dependencies and submitting jobs",
               "minimum": 1,
               "type": "integer"
             },
             "ECF_JOB_CMD": {
-              "description": "Shell command used for job submission.",
+              "description": "Shell command used for job submission",
               "type": "string"
             },
             "ECF_KILL_CMD": {
-              "description": "Shell command used to kill a running job.",
+              "description": "Shell command used to kill a running job",
               "type": "string"
             },
             "ECF_LISTS": {
-              "description": "File listing users permitted to access the server via client commands. Default: <host>.<port>.ecf.lists",
+              "description": "File listing users permitted to access the server via client commands",
               "type": "string"
             },
             "ECF_LOG": {
-              "description": "Name of the log file. Prepended with <host>.<port> at runtime. Default: ecf.log",
+              "description": "Name of the log file, prepended with <host>.<port> at runtime",
               "type": "string"
             },
             "ECF_MICRODEF": {
-              "description": "Character used for ECF pre-processing and variable substitution in .ecf scripts.",
+              "description": "Character used for ECF pre-processing and variable substitution in .ecf scripts",
               "maxLength": 1,
               "minLength": 1,
               "type": "string"
             },
             "ECF_PASSWD": {
-              "description": "Password file for full user password authentication. Default: <host>.<port>.ecf.passwd",
+              "description": "Password file for full user password authentication",
               "type": "string"
             },
+            "ECF_PRUNE_NODE_LOG": {
+              "description": "Prune node log/edit history older than this number of days when checkpoint is loaded",
+              "minimum": 0,
+              "type": "integer"
+            },
             "ECF_STATUS_CMD": {
-              "description": "Command executed by the server to obtain the current status of a job.",
+              "description": "Command executed by the server to obtain the current status of a job",
               "type": "string"
             },
             "ECF_TASK_THRESHOLD": {
-              "description": "Report tasks taking longer than this threshold (in milliseconds).",
+              "description": "Report tasks taking longer than this threshold (in milliseconds)",
               "minimum": 0,
               "type": "integer"
             },
             "ECF_URL": {
-              "description": "URL path appended to ECF_URL_BASE for browser-based job status links.",
+              "description": "URL path appended to ECF_URL_BASE for browser-based job status links",
               "type": "string"
             },
             "ECF_URL_BASE": {
-              "description": "Base URL used with ECF_URL for browser-based job status links.",
+              "description": "Base URL used with ECF_URL for browser-based job status links",
               "type": "string"
             },
             "ECF_URL_CMD": {
-              "description": "Command executed by the client to open a browser with the job status URL.",
+              "description": "Command executed by the client to open a browser with the job status URL",
               "type": "string"
             }
           },
@@ -732,7 +899,7 @@
               "type": "string"
             },
             "vars": {
-              "type": "object"
+              "$ref": "#/$defs/vars"
             }
           },
           "type": "object"
