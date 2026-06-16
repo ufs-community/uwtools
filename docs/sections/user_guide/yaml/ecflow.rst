@@ -24,6 +24,8 @@ UW YAML Keys
 
 ``scheduler:`` -- Optional. The batch scheduler to use when generating ``.ecf`` scripts. Supported values are ``lsf``, ``pbs``, and ``slurm``. When set, the scheduler's directives are automatically added to generated ``.ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
 
+.. _ecflow_suite_level_vars:
+
 ``vars:`` -- Optional. A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite. For example:
 
 .. code-block:: yaml
@@ -32,6 +34,10 @@ UW YAML Keys
      vars:
        ECF_HOME: /path/to/ecf
        ACCOUNT: myproject
+
+Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``.ecf`` scripts, but can be overriden by users in a suite-definition file.
+
+See the :ecflow:`ecFlow documentation<ug/user_manual/ecflow_variables/index.html>` for more information on available variables and their meanings.
 
 ``extern:`` -- Optional. A list of external node paths to declare in the suite definition. Useful for triggering tasks across suites. For example:
 
@@ -95,6 +101,8 @@ The following attributes may appear under any suite, family, or task node:
        MEMBER: "001"
      script:
        ...
+
+See :ref:`this section <ecflow_suite_level_vars>` for more information on ``ECF_`` and other variables that can be set on nodes as well as at the suite level.
 
 ``trigger:`` -- A string expression defining the conditions under which a node may run (see :ecflow:`ecflow.Trigger <python_api/Trigger.html>`). Only one ``trigger:`` is allowed per node. For example:
 
