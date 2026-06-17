@@ -419,41 +419,44 @@ def realize(
 # Private helpers
 
 
-_SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
+_SSL_DEFAULT_DIR = Path.home() / ".ecflowrc" / "ssl"
 _SSL_KEY = "server.key"
 _SSL_CERT = "server.crt"
 _SSL_DHPARAM = "dh2048.pem"
 _SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
 
 
-def _provision_ssl() -> None:
+def _provision_ssl(ssl_dir: Path | None = None) -> None:
     """
-    Ensure SSL certificates exist in $HOME/.ecflowrc/ssl.
+    Ensure SSL certificates exist in the given directory (or the default $HOME/.ecflowrc/ssl).
 
     If all required files exist, logs that they will be reused. If the directory exists but is
     missing one or more required files, logs an error and raises UWError. If the directory does not
     exist, creates it and generates the required SSL files using openssl.
 
+    :param ssl_dir: Directory in which to provision certificates. Defaults to $HOME/.ecflowrc/ssl
+        when None.
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
     """
-    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
+    cert_dir = ssl_dir if ssl_dir is not None else _SSL_DEFAULT_DIR
+    existing = [f for f in _SSL_FILES if (cert_dir / f).exists()]
     if len(existing) == len(_SSL_FILES):
-        log.info("Using existing SSL certificates in %s", _SSL_DIR)
+        log.info("Using existing SSL certificates in %s", cert_dir)
         return
     if existing:
         missing = sorted(set(_SSL_FILES) - set(existing))
         msg = (
-            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
+            f"SSL directory {cert_dir} exists but is missing required file(s): {missing}. "
             "Provide all required files or remove the directory to allow regeneration."
         )
         raise UWError(msg)
-    log.info("Creating SSL directory %s", _SSL_DIR)
-    _SSL_DIR.mkdir(parents=True, exist_ok=True)
-    _ssl_generate_key(_SSL_DIR / _SSL_KEY)
-    _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
-    _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
-    log.info("SSL credentials written to %s", _SSL_DIR)
+    log.info("Creating SSL directory %s", cert_dir)
+    cert_dir.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(cert_dir / _SSL_KEY)
+    _ssl_generate_cert(cert_dir / _SSL_CERT, cert_dir / _SSL_KEY)
+    _ssl_generate_dhparam(cert_dir / _SSL_DHPARAM)
+    log.info("SSL credentials written to %s", cert_dir)
 
 
 def _ssl_generate_key(path: Path) -> None:
@@ -541,7 +544,8 @@ def server(
     validate(cfg)
     server_cfg = cfg.data[STR.ecflow][STR.server]
     if not insecure:
-        _provision_ssl()
+        ssl_dir = Path(v) if (v := server_cfg.get("ECF_SSL_DIR")) is not None else None
+        _provision_ssl(ssl_dir=ssl_dir)
     rundir = Path(server_cfg["ECF_HOME"])
     cfg_vars = {k: str(v) for k, v in server_cfg.items()}
     env = {**os.environ, **cfg_vars}

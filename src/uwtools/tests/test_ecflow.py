@@ -705,8 +705,7 @@ def test_ecflow__provision_ssl__all_files_exist(logged, tmp_path):
     ssl_dir.mkdir(parents=True)
     for fname in ["dh2048.pem", "server.crt", "server.key"]:
         (ssl_dir / fname).touch()
-    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
-        ecflow._provision_ssl()
+    ecflow._provision_ssl(ssl_dir=ssl_dir)
     assert logged("Using existing SSL certificates in")
 
 
@@ -714,8 +713,8 @@ def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     (ssl_dir / "server.crt").touch()
-    with patch.object(ecflow, "_SSL_DIR", ssl_dir), raises(UWError, match="missing required file"):
-        ecflow._provision_ssl()
+    with raises(UWError, match="missing required file"):
+        ecflow._provision_ssl(ssl_dir=ssl_dir)
 
 
 def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
@@ -726,11 +725,8 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
         Path(cmd.split("-out ", 1)[1].split()[0]).touch()
         return (True, "")
 
-    with (
-        patch.object(ecflow, "_SSL_DIR", ssl_dir),
-        patch.object(ecflow, "run_shell_cmd", side_effect=fake_run),
-    ):
-        ecflow._provision_ssl()
+    with patch.object(ecflow, "run_shell_cmd", side_effect=fake_run):
+        ecflow._provision_ssl(ssl_dir=ssl_dir)
     assert ssl_dir.is_dir()
     assert (ssl_dir / "server.key").is_file()
     assert (ssl_dir / "server.crt").is_file()
@@ -852,7 +848,22 @@ def test_ecflow_server__accepts_config_types(server_mocks, config):
 
 def test_ecflow_server__calls_provision_ssl(server_mocks):
     ecflow.server(config=server_mocks.config_path, port=3141)
-    server_mocks.provision_ssl.assert_called_once()
+    server_mocks.provision_ssl.assert_called_once_with(ssl_dir=None)
+
+
+def test_ecflow_server__custom_ssl_dir_passed_to_provision(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL_DIR": "/shared/certs"}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.provision_ssl.assert_called_once_with(ssl_dir=Path("/shared/certs"))
+
+
+def test_ecflow_server__ecf_ssl_dir_in_env(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL_DIR": "/shared/certs"}}}
+    ecflow.server(config=m.config_path, port=3141)
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert env["ECF_SSL_DIR"] == "/shared/certs"
 
 
 def test_ecflow_server__insecure_skips_ssl(server_mocks):
