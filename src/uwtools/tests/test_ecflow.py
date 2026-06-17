@@ -720,12 +720,12 @@ def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path):
 def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
 
-    def fake_run(cmd, **_kwargs):
+    def fake_run(args, **_kwargs):
         # Emulate openssl by creating the file named after its "-out" argument.
-        Path(cmd.split("-out ", 1)[1].split()[0]).touch()
-        return (True, "")
+        Path(args[args.index("-out") + 1]).touch()
+        return Mock(returncode=0)
 
-    with patch.object(ecflow, "run_shell_cmd", side_effect=fake_run):
+    with patch.object(ecflow, "subprocess_run", side_effect=fake_run):
         ecflow._provision_ssl(ssl_dir=ssl_dir)
     assert ssl_dir.is_dir()
     assert (ssl_dir / "server.key").is_file()
@@ -735,18 +735,26 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     assert logged("SSL credentials written to")
 
 
+def test_ecflow__openssl__not_found():
+    with (
+        patch.object(ecflow.shutil, "which", return_value=None),
+        raises(UWError, match="openssl not found on PATH"),
+    ):
+        ecflow._openssl()
+
+
 def test_ecflow__ssl_generate_key__success(tmp_path):
     path = tmp_path / "server.key"
     ecflow._ssl_generate_key(path)
     assert path.is_file()
-    # The 'umask 0077 &&' prefix on the openssl call must yield owner-only permissions.
+    # os.umask(0o077) yields owner-only permissions on generated files.
     assert oct(path.stat().st_mode)[-3:] == "600"
 
 
 def test_ecflow__ssl_generate_key__failure(tmp_path):
     path = tmp_path / "server.key"
     with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        patch.object(ecflow, "subprocess_run", return_value=Mock(returncode=1)),
         raises(UWError, match="Failed to generate SSL private key"),
     ):
         ecflow._ssl_generate_key(path)
@@ -759,7 +767,7 @@ def test_ecflow__ssl_generate_cert__success(tmp_path):
     ecflow._ssl_generate_key(key_path)
     ecflow._ssl_generate_cert(cert_path, key_path)
     assert cert_path.is_file()
-    # The 'umask 0077 &&' prefix on the openssl call must yield owner-only permissions.
+    # os.umask(0o077) yields owner-only permissions on generated files.
     assert oct(cert_path.stat().st_mode)[-3:] == "600"
 
 
@@ -767,7 +775,7 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
     cert_path = tmp_path / "server.crt"
     key_path = tmp_path / "server.key"
     with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        patch.object(ecflow, "subprocess_run", return_value=Mock(returncode=1)),
         raises(UWError, match="Failed to generate SSL certificate"),
     ):
         ecflow._ssl_generate_cert(cert_path, key_path)
@@ -777,22 +785,21 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
 
 def test_ecflow__ssl_generate_dhparam__success(tmp_path):
     # DH-parameter generation is slow and entropy-dependent, so (unlike the key and cert tests,
-    # which exercise real openssl) mock the shell call and assert the umask-prefixed command. The
-    # resulting 0600 permissions are verified for real by the key and cert tests, which share this
-    # umask mechanism.
+    # which exercise real openssl) mock the subprocess call and assert the argument list. The
+    # resulting 0600 permissions are verified for real by the key and cert tests, which share the
+    # os.umask(0o077) mechanism.
     path = tmp_path / "dh2048.pem"
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
+    with patch.object(ecflow, "subprocess_run", return_value=Mock(returncode=0)) as mock_run:
         ecflow._ssl_generate_dhparam(path)
-    mock_cmd.assert_called_once()
-    cmd = mock_cmd.call_args[0][0]
-    assert cmd.startswith("umask 0077 && openssl dhparam")
-    assert f"-out {path}" in cmd
+    mock_run.assert_called_once()
+    args = mock_run.call_args[0][0]
+    assert args == [ecflow._openssl(), "dhparam", "-out", str(path), "2048"]
 
 
 def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
     path = tmp_path / "dh2048.pem"
     with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        patch.object(ecflow, "subprocess_run", return_value=Mock(returncode=1)),
         raises(UWError, match="Failed to generate DH parameters"),
     ):
         ecflow._ssl_generate_dhparam(path)
