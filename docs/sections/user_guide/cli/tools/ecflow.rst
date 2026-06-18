@@ -125,7 +125,7 @@ Examples
 
      uw ecflow server --config-file server.yaml --port 54321
 
-bi* To start a server using a custom SSL certificate directory:
+* To start a server using a custom SSL certificate:
 
   .. code-block:: text
 
@@ -138,9 +138,9 @@ bi* To start a server using a custom SSL certificate directory:
      ecflow:
        server:
          ECF_HOME: /path/to/run
-         ECF_SSL_DIR: /shared/certs/ecflow
+         ECF_SSL: /shared/certs/server.crt
 
-  ``ECF_SSL_DIR`` overrides the default certificate location (``$HOME/.ecflowrc/ssl``) used by ``uw ecflow server`` to provision SSL certificates. See :ref:`ecflow_workflows` for full server YAML documentation.
+  ``ECF_SSL`` accepts ``true`` to enable SSL using the default certificate location (``$HOME/.ecflowrc/ssl/server.crt``), or a path string to use a specific certificate file. See :ref:`ecflow_workflows` for full server YAML documentation.
 
 * To emit a JSON report of the server details to ``stdout``:
 
@@ -157,12 +157,11 @@ bi* To start a server using a custom SSL certificate directory:
          "ECF_HOME": "/path/to/run",
          "ECF_HOST": "server.hostname.com",
          "ECF_PORT": "54321",
-         "ECF_SSL": "1",
-         "ECF_SSL_DIR": "/shared/certs/ecflow"
+         "ECF_SSL": "/shared/certs/server.crt"
        }
      }
 
-  ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given). ``ECF_SSL_DIR`` is included only when set in the config.
+  ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given and ``ECF_SSL`` is not ``false`` in the config).
 
 .. _cli_ecflow_validate_examples:
 

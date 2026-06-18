@@ -420,7 +420,7 @@ def realize(
 # Private helpers
 
 
-_SSL_DEFAULT_DIR = Path.home() / ".ecflowrc" / "ssl"
+_SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
 _SSL_KEY = "server.key"
 _SSL_CERT = "server.crt"
 _SSL_DHPARAM = "dh2048.pem"
@@ -440,37 +440,34 @@ def _openssl() -> Path:
     return Path(path)
 
 
-def _provision_ssl(ssl_dir: Path | None = None) -> None:
+def _provision_ssl() -> None:
     """
-    Ensure SSL certificates exist in the given directory (or the default $HOME/.ecflowrc/ssl).
+    Ensure SSL certificates exist in $HOME/.ecflowrc/ssl.
 
     If all required files exist, logs that they will be reused. If the directory exists but is
     missing one or more required files, logs an error and raises UWError. If the directory does not
     exist, creates it and generates the required SSL files using openssl.
 
-    :param ssl_dir: Directory in which to provision certificates. Defaults to $HOME/.ecflowrc/ssl
-        when None.
     :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
         fails.
     """
-    cert_dir = ssl_dir if ssl_dir is not None else _SSL_DEFAULT_DIR
-    existing = [f for f in _SSL_FILES if (cert_dir / f).exists()]
+    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
     if len(existing) == len(_SSL_FILES):
-        log.info("Using existing SSL certificates in %s", cert_dir)
+        log.info("Using existing SSL certificates in %s", _SSL_DIR)
         return
     if existing:
         missing = sorted(set(_SSL_FILES) - set(existing))
         msg = (
-            f"SSL directory {cert_dir} exists but is missing required file(s): {missing}. "
+            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
             "Provide all required files or remove the directory to allow regeneration."
         )
         raise UWError(msg)
-    log.info("Creating SSL directory %s", cert_dir)
-    cert_dir.mkdir(parents=True, exist_ok=True)
-    _ssl_generate_key(cert_dir / _SSL_KEY)
-    _ssl_generate_cert(cert_dir / _SSL_CERT, cert_dir / _SSL_KEY)
-    _ssl_generate_dhparam(cert_dir / _SSL_DHPARAM)
-    log.info("SSL credentials written to %s", cert_dir)
+    log.info("Creating SSL directory %s", _SSL_DIR)
+    _SSL_DIR.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(_SSL_DIR / _SSL_KEY)
+    _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
+    _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
+    log.info("SSL credentials written to %s", _SSL_DIR)
 
 
 def _ssl_generate_key(path: Path) -> None:
@@ -559,22 +556,27 @@ def server(
     cfg.dereference()
     validate(cfg)
     server_cfg = cfg.data[STR.ecflow][STR.server]
-    if not insecure:
-        ssl_dir = Path(v) if (v := server_cfg.get("ECF_SSL_DIR")) is not None else None
-        _provision_ssl(ssl_dir=ssl_dir)
+    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a string path to a
+    # specific certificate file, False (SSL off), or absent (defaults to SSL on).
+    ecf_ssl = server_cfg.get("ECF_SSL")
+    ssl_on = not insecure and ecf_ssl is not False
+    if ssl_on and not isinstance(ecf_ssl, str):
+        _provision_ssl()
     rundir = Path(server_cfg["ECF_HOME"])
-    cfg_vars = {k: str(v) for k, v in server_cfg.items()}
+    # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
+    # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
+    cfg_vars = {k: str(v) for k, v in server_cfg.items() if k != "ECF_SSL"}
     env = {**os.environ, **cfg_vars}
-    if insecure:
+    if ssl_on:
+        env["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
+    else:
         # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
         env.pop("ECF_SSL", None)
-    else:
-        env["ECF_SSL"] = "1"
     # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
     # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
     report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
-    if not insecure:
-        report_vars["ECF_SSL"] = "1"
+    if ssl_on:
+        report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
     thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
     # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
     ssl_opt = "" if insecure else "--ssl "

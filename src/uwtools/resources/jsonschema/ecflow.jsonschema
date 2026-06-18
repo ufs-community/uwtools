@@ -809,9 +809,17 @@
               "minimum": 0,
               "type": "integer"
             },
-            "ECF_SSL_DIR": {
-              "description": "Custom SSL certificate directory; overrides the default $HOME/.ecflowrc/ssl",
-              "type": "string"
+            "ECF_SSL": {
+              "description": "SSL mode: true to enable SSL using the default certificate location ($HOME/.ecflowrc/ssl/server.crt), a path string to use a specific certificate file, or false to disable SSL",
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              ]
             },
             "ECF_STATUS_CMD": {
               "description": "Command executed by the server to obtain the current status of a job",

@@ -295,16 +295,22 @@ The ``uw ecflow server`` command reads configuration from an ``ecflow: server:``
 
 All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. ``ECF_HOME`` is the only required key.
 
-``ECF_SSL_DIR`` -- Optional. A path to a directory containing SSL certificate files (``dh2048.pem``, ``server.crt``, ``server.key``). When set, overrides the default location of ``$HOME/.ecflowrc/ssl``. For example:
+``ECF_SSL`` -- Optional. Controls SSL for the server. Accepts a boolean or a path string:
+
+- ``true`` (default when ``--insecure`` is not given): Enable SSL using the auto-provisioned certificate at ``$HOME/.ecflowrc/ssl/server.crt``.
+- A path string (e.g. ``/shared/certs/server.crt``): Enable SSL using the specified certificate file. The matching ``server.key`` and ``dh2048.pem`` must already exist alongside it.
+- ``false``: Disable SSL (equivalent to passing ``--insecure``).
+
+For example, to use a shared certificate:
 
 .. code-block:: yaml
 
    ecflow:
      server:
        ECF_HOME: /path/to/run
-       ECF_SSL_DIR: /shared/certs/ecflow
+       ECF_SSL: /shared/certs/server.crt
 
-When ``--insecure`` is given to ``uw ecflow server``, SSL is disabled entirely (no certificate provisioning occurs) and ``ECF_SSL_DIR`` has no effect.
+When ``--insecure`` is given to ``uw ecflow server``, SSL is disabled entirely regardless of the ``ECF_SSL`` setting.
 
 Generated Artifacts
 -------------------
