@@ -125,7 +125,7 @@ Examples
 
      uw ecflow server --config-file server.yaml --port 54321
 
-* To start a server using a custom SSL certificate directory:
+bi* To start a server using a custom SSL certificate directory:
 
   .. code-block:: text
 
@@ -140,7 +140,7 @@ Examples
          ECF_HOME: /path/to/run
          ECF_SSL_DIR: /shared/certs/ecflow
 
-  ``ECF_SSL_DIR`` overrides the default certificate location (``$HOME/.ecflowrc/ssl``) for both the server and any ``ecflow_client`` commands that inherit the environment, including job child commands. See :ref:`ecflow_workflows` for full server YAML documentation.
+  ``ECF_SSL_DIR`` overrides the default certificate location (``$HOME/.ecflowrc/ssl``) used by ``uw ecflow server`` to provision SSL certificates. See :ref:`ecflow_workflows` for full server YAML documentation.
 
 * To emit a JSON report of the server details to ``stdout``:
 

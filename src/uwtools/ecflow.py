@@ -14,7 +14,6 @@ import socket
 from copy import deepcopy
 from pathlib import Path
 from subprocess import STDOUT, CalledProcessError, check_output
-from subprocess import run as subprocess_run
 from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -428,7 +427,7 @@ _SSL_DHPARAM = "dh2048.pem"
 _SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
 
 
-def _openssl() -> str:
+def _openssl() -> Path:
     """
     Return the absolute path to the openssl executable.
 
@@ -438,7 +437,7 @@ def _openssl() -> str:
     if path is None:
         msg = "openssl not found on PATH"
         raise UWError(msg)
-    return path
+    return Path(path)
 
 
 def _provision_ssl(ssl_dir: Path | None = None) -> None:
@@ -482,16 +481,9 @@ def _ssl_generate_key(path: Path) -> None:
     :raises UWError: If openssl reports failure.
     """
     log.info("Generating SSL private key: %s", path)
-    old_umask = os.umask(0o077)
-    try:
-        result = subprocess_run(  # noqa: S603
-            [_openssl(), "genrsa", "-out", str(path), "2048"],
-            capture_output=True,
-            check=False,
-        )
-    finally:
-        os.umask(old_umask)
-    if result.returncode != 0:
+    cmd = f"umask 077 && {_openssl()} genrsa -out {path} 2048"
+    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+    if not success:
         msg = f"Failed to generate SSL private key at {path}"
         raise UWError(msg)
 
@@ -506,29 +498,12 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     """
     hostname = socket.gethostname()
     log.info("Generating SSL certificate: %s", path)
-    old_umask = os.umask(0o077)
-    try:
-        result = subprocess_run(  # noqa: S603
-            [
-                _openssl(),
-                "req",
-                "-x509",
-                "-key",
-                str(key_path),
-                "-new",
-                "-out",
-                str(path),
-                "-days",
-                "3650",
-                "-subj",
-                f"/CN={hostname}",
-            ],
-            capture_output=True,
-            check=False,
-        )
-    finally:
-        os.umask(old_umask)
-    if result.returncode != 0:
+    cmd = (
+        f"umask 077 && {_openssl()} req -x509 -key {key_path}"
+        f" -new -out {path} -days 3650 -subj /CN={hostname}"
+    )
+    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+    if not success:
         msg = f"Failed to generate SSL certificate at {path}"
         raise UWError(msg)
 
@@ -541,16 +516,9 @@ def _ssl_generate_dhparam(path: Path) -> None:
     :raises UWError: If openssl reports failure.
     """
     log.info("Generating DH parameters: %s", path)
-    old_umask = os.umask(0o077)
-    try:
-        result = subprocess_run(  # noqa: S603
-            [_openssl(), "dhparam", "-out", str(path), "2048"],
-            capture_output=True,
-            check=False,
-        )
-    finally:
-        os.umask(old_umask)
-    if result.returncode != 0:
+    cmd = f"umask 077 && {_openssl()} dhparam -out {path} 2048"
+    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+    if not success:
         msg = f"Failed to generate DH parameters at {path}"
         raise UWError(msg)
 

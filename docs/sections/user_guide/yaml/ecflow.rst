@@ -304,8 +304,6 @@ All keys in the ``server:`` block are passed as environment variables to ``ecflo
        ECF_HOME: /path/to/run
        ECF_SSL_DIR: /shared/certs/ecflow
 
-Because ``ECF_SSL_DIR`` is a native ecflow environment variable, both ``ecflow_server`` and ``ecflow_client`` (including job child commands) read certificates from this directory automatically. Jobs that inherit ``ECF_SSL_DIR`` from the server environment will locate certificates without any additional symlinking.
-
 When ``--insecure`` is given to ``uw ecflow server``, SSL is disabled entirely (no certificate provisioning occurs) and ``ECF_SSL_DIR`` has no effect.
 
 Generated Artifacts

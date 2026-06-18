@@ -810,7 +810,7 @@
               "type": "integer"
             },
             "ECF_SSL_DIR": {
-              "description": "Custom SSL certificate directory; overrides the default $HOME/.ecflowrc/ssl. Recognized by ecflow_server and ecflow_client (including job child commands), so jobs inheriting this variable will also locate certificates here without symlinking.",
+              "description": "Custom SSL certificate directory; overrides the default $HOME/.ecflowrc/ssl",
               "type": "string"
             },
             "ECF_STATUS_CMD": {
