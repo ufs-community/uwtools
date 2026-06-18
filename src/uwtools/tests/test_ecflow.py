@@ -797,6 +797,7 @@ def test_ecflow__ssl_generate_dhparam__success(tmp_path):
     assert "umask 077" in cmd
     assert f"dhparam -out {path} 2048" in cmd
 
+
 def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
     path = tmp_path / "dh2048.pem"
     with (
