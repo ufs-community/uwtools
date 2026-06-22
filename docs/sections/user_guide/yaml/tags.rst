@@ -5,7 +5,7 @@ Custom Tags
 
 Tags are used to denote the type of a YAML node when converting to a Python object.
 
-UW supports the use of standard YAML tags, denoted by `!!` as defined `here <http://yaml.org/type/index.html>`_. Additionally, UW defines the following tags to support use cases not covered by standard tags, denoted by `!` and described in detail below. Where standard YAML tags are applied to their values immediately, application of UW YAML tags is delayed until after Jinja2 expressions in tagged values are dereferenced.
+UW supports the use of standard YAML tags, denoted by `!!` as defined `here <https://yaml.org/spec/1.2.2/#tags>`_. Additionally, UW defines the following tags to support use cases not covered by standard tags, denoted by `!` and described in detail below. Where standard YAML tags are applied to their values immediately, application of UW YAML tags is delayed until after Jinja2 expressions in tagged values are dereferenced.
 
 Tags may be implicit:
 
