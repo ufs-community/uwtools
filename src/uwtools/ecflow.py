@@ -470,6 +470,28 @@ def _provision_ssl() -> None:
     log.info("SSL credentials written to %s", _SSL_DIR)
 
 
+def _check_ssl_named(prefix: str) -> None:
+    """
+    Verify that the named SSL certificate triplet for 'prefix' exists in $HOME/.ecflowrc/ssl.
+
+    The required files are <prefix>.crt, <prefix>.key, and <prefix>.pem. These files must be
+    supplied by the user; this function only checks for their existence and raises UWError if any
+    are missing.
+
+    :param prefix: The <host>.<port> prefix identifying the certificate triplet.
+    :raises UWError: If one or more of the required files are missing.
+    """
+    extensions = [".crt", ".key", ".pem"]
+    missing = [f"{prefix}{ext}" for ext in extensions if not (_SSL_DIR / f"{prefix}{ext}").exists()]
+    if missing:
+        msg = (
+            f"SSL certificate file(s) {missing} not found in {_SSL_DIR}. "
+            f"Provide all required files for prefix '{prefix}'."
+        )
+        raise UWError(msg)
+    log.info("Using existing SSL certificates for prefix '%s' in %s", prefix, _SSL_DIR)
+
+
 def _ssl_generate_key(path: Path) -> None:
     """
     Generate a 2048-bit RSA private key (no password) at 'path'.
@@ -556,12 +578,16 @@ def server(
     cfg.dereference()
     validate(cfg)
     server_cfg = cfg.data[STR.ecflow][STR.server]
-    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a string path to a
-    # specific certificate file, False (SSL off), or absent (defaults to SSL on).
+    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
+    # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
+    # (defaults to SSL on with auto-provisioned default certificates).
     ecf_ssl = server_cfg.get("ECF_SSL")
     ssl_on = not insecure and ecf_ssl is not False
-    if ssl_on and not isinstance(ecf_ssl, str):
-        _provision_ssl()
+    if ssl_on:
+        if isinstance(ecf_ssl, str):
+            _check_ssl_named(ecf_ssl)
+        else:
+            _provision_ssl()
     rundir = Path(server_cfg["ECF_HOME"])
     # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
     # and ecFlow interprets any non-empty env string as an SSL flag or cert path).

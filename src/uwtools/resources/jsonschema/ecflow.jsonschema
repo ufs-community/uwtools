@@ -810,7 +810,7 @@
               "type": "integer"
             },
             "ECF_SSL": {
-              "description": "SSL mode: true to enable SSL using the default certificate location ($HOME/.ecflowrc/ssl/server.crt), a path string to use a specific certificate file, or false to disable SSL",
+              "description": "SSL mode: true to enable SSL using the default certificate triplet (server.crt/server.key/dh2048.pem) in $HOME/.ecflowrc/ssl, a <host>.<port> prefix string to select a named certificate triplet (<host>.<port>.crt/.key/.pem) from $HOME/.ecflowrc/ssl, or false to disable SSL",
               "oneOf": [
                 {
                   "type": "boolean"

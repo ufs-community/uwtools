@@ -301,14 +301,16 @@ All keys in the ``server:`` block are passed as environment variables to ``ecflo
 - A path string (e.g. ``/shared/certs/server.crt``): Enable SSL using the specified certificate file. The matching ``server.key`` and ``dh2048.pem`` must already exist alongside it.
 - ``false``: Disable SSL (equivalent to passing ``--insecure``).
 
-For example, to use a shared certificate:
+For example, to force use of a named certificate triplet when running on a static port:
 
 .. code-block:: yaml
 
    ecflow:
      server:
        ECF_HOME: /path/to/run
-       ECF_SSL: /shared/certs/server.crt
+       ECF_SSL: myhost.8888
+
+The ``--port`` value passed to ``uw ecflow server`` must match the port in the prefix. The three files ``myhost.8888.crt``, ``myhost.8888.key``, and ``myhost.8888.pem`` must already exist in ``$HOME/.ecflowrc/ssl``; they are not auto-generated.
 
 When ``--insecure`` is given to ``uw ecflow server``, SSL is disabled entirely regardless of the ``ECF_SSL`` setting.
 
