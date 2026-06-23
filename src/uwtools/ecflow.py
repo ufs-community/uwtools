@@ -36,7 +36,7 @@ from ecflow import (  # type: ignore[import-untyped]
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError, UWError, UWSSLCertificateError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
@@ -439,56 +439,37 @@ def _openssl() -> Path:
     return Path(path)
 
 
-def _ssl_check(prefix: str) -> None:
+def _ssl_check(prefix: str | None) -> None:
     """
-    Verify that the named SSL certificate triplet for 'prefix' exists in $HOME/.ecflowrc/ssl.
+    Verify that the appropriate SSL certificate triplet exists in $HOME/.ecflowrc/ssl.
 
-    The required files are <prefix>.crt, <prefix>.key, and <prefix>.pem. These files must be
-    supplied by the user; this function only checks for their existence and raises UWError if any
-    are missing.
+    The files comprising the triplet are <prefix>.{crt,key,pem} when 'prefix' is provided, otherwise
+    the default files specified by _SSL_FILES.
 
     :param prefix: The <host>.<port> prefix identifying the certificate triplet.
-    :raises UWError: If one or more of the required files are missing.
+    :raises UWSSLCertificateError: If one or more of the required files are missing.
     """
-    extensions = [".crt", ".key", ".pem"]
-    missing = [f"{prefix}{ext}" for ext in extensions if not (_SSL_DIR / f"{prefix}{ext}").exists()]
-    if missing:
-        msg = (
-            f"SSL certificate file(s) {missing} not found in {_SSL_DIR}. "
-            f"Provide all required files for prefix '{prefix}'."
-        )
-        raise UWError(msg)
-    log.info("Using existing SSL certificates for prefix '%s' in %s", prefix, _SSL_DIR)
+    fns = [f"{prefix}{ext}" for ext in (".crt", ".key", ".pem")] if prefix else _SSL_FILES
+    paths = [_SSL_DIR / fn for fn in fns]
+    if missing := [path for path in paths if not path.is_file()]:
+        msg = "Missing SSL certificate file(s): %s" % ", ".join(map(str, missing))
+        if not prefix:
+            msg += ". Provide these files or remove %s to automatically generate" % _SSL_DIR
+        raise UWSSLCertificateError(msg)
+    log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
 
 
 def _ssl_provision() -> None:
     """
-    Ensure SSL certificates exist in $HOME/.ecflowrc/ssl.
+    Provision SSL certificates in $HOME/.ecflowrc/ssl.
 
-    If all required files exist, logs that they will be reused. If the directory exists but is
-    missing one or more required files, logs an error and raises UWError. If the directory does not
-    exist, creates it and generates the required SSL files using openssl.
-
-    :raises UWError: If the SSL directory exists but is incomplete, or if certificate generation
-        fails.
+    :raises UWError: If or if certificate generation fails.
     """
-    existing = [f for f in _SSL_FILES if (_SSL_DIR / f).exists()]
-    if len(existing) == len(_SSL_FILES):
-        log.info("Using existing SSL certificates in %s", _SSL_DIR)
-        return
-    if existing:
-        missing = sorted(set(_SSL_FILES) - set(existing))
-        msg = (
-            f"SSL directory {_SSL_DIR} exists but is missing required file(s): {missing}. "
-            "Provide all required files or remove the directory to allow regeneration."
-        )
-        raise UWError(msg)
-    log.info("Creating SSL directory %s", _SSL_DIR)
     _SSL_DIR.mkdir(parents=True, exist_ok=True)
     _ssl_generate_key(_SSL_DIR / _SSL_KEY)
     _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
     _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
-    log.info("SSL credentials written to %s", _SSL_DIR)
+    log.info("SSL certificate files written to %s", _SSL_DIR)
 
 
 def _ssl_generate_cert(path: Path, key_path: Path) -> None:
@@ -583,9 +564,9 @@ def server(
     ecf_ssl = server_cfg.get("ECF_SSL")
     ssl_on = not insecure and ecf_ssl is not False
     if ssl_on:
-        if isinstance(ecf_ssl, str):
+        try:
             _ssl_check(ecf_ssl)
-        else:
+        except UWSSLCertificateError:
             _ssl_provision()
     rundir = Path(server_cfg["ECF_HOME"])
     # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,

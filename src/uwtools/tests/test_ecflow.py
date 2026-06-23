@@ -18,7 +18,7 @@ from pytest import fixture, mark, raises
 from uwtools import ecflow
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.ecflow import _ECFlowDef
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError, UWError, UWSSLCertificateError
 from uwtools.utils.file import _stdinproxy
 
 # Fixtures
@@ -712,34 +712,35 @@ def test_ecflow__ssl_check__all_files_exist(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     prefix = "myhost.3141"
-    for ext in [".crt", ".key", ".pem"]:
-        (ssl_dir / f"{prefix}{ext}").touch()
+    fns = [f"{prefix}.{ext}" for ext in ("crt", "key", "pem")]
+    for fn in fns:
+        (ssl_dir / fn).touch()
     with patch.object(ecflow, "_SSL_DIR", ssl_dir):
         ecflow._ssl_check(prefix)
-    assert logged("Using existing SSL certificates for prefix")
+    assert logged("Using SSL certificates %s in %s" % (", ".join(fns), ssl_dir))
 
 
-@mark.parametrize("extension", ["crt", "key", "pem"])
-def test_ecflow__ssl_check__missing_files_raises(extension, tmp_path):
-    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
-    ssl_dir.mkdir(parents=True)
+@mark.parametrize("excluded", ["dh2048.pem", "server.crt", "server.key"])
+def test_ecflow__ssl_check__missing_default_files_raises(excluded, tmp_path):
+    fns = ["dh2048.pem", "server.crt", "server.key"]
+    fns.remove(excluded)
+    for fn in fns:
+        (tmp_path / fn).touch()
+    with patch.object(ecflow, "_SSL_DIR", tmp_path), raises(UWSSLCertificateError) as e:
+        ecflow._ssl_check(None)
+    assert "Missing SSL certificate file(s): %s" % (tmp_path / excluded) in str(e.value)
+
+
+@mark.parametrize("excluded", ["crt", "key", "pem"])
+def test_ecflow__ssl_check__missing_named_files_raises(excluded, tmp_path):
     prefix = "myhost.3141"
-    (ssl_dir / f"{prefix}.{extension}").touch()
-    with (
-        patch.object(ecflow, "_SSL_DIR", ssl_dir),
-        raises(UWError, match="not found in"),
-    ):
+    for extension in [x for x in ("crt", "key", "pem") if x != excluded]:
+        (tmp_path / f"{prefix}.{extension}").touch()
+    with patch.object(ecflow, "_SSL_DIR", tmp_path), raises(UWSSLCertificateError) as e:
         ecflow._ssl_check(prefix)
-
-
-def test_ecflow__ssl_provision__all_files_exist(logged, tmp_path):
-    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
-    ssl_dir.mkdir(parents=True)
-    for fname in ["dh2048.pem", "server.crt", "server.key"]:
-        (ssl_dir / fname).touch()
-    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
-        ecflow._ssl_provision()
-    assert logged("Using existing SSL certificates in")
+    assert "Missing SSL certificate file(s): %s" % (tmp_path / f"{prefix}.{excluded}") in str(
+        e.value
+    )
 
 
 def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
@@ -760,19 +761,7 @@ def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
     assert (ssl_dir / "server.key").is_file()
     assert (ssl_dir / "server.crt").is_file()
     assert (ssl_dir / "dh2048.pem").is_file()
-    assert logged("Creating SSL directory")
-    assert logged("SSL credentials written to")
-
-
-def test_ecflow__ssl_provision__incomplete_dir_raises(tmp_path):
-    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
-    ssl_dir.mkdir(parents=True)
-    (ssl_dir / "server.crt").touch()
-    with (
-        patch.object(ecflow, "_SSL_DIR", ssl_dir),
-        raises(UWError, match="missing required file"),
-    ):
-        ecflow._ssl_provision()
+    assert logged("SSL certificate files written to %s" % ssl_dir)
 
 
 def test_ecflow__ssl_generate_cert__failure(tmp_path):
@@ -853,8 +842,8 @@ def server_mocks():
         patch.object(ecflow, "YAMLConfig", return_value=cfg) as yamlconfig,
         patch.object(ecflow, "_ServerThread") as thread_cls,
         patch.object(ecflow, "_server_wait") as server_wait,
-        patch.object(ecflow, "_ssl_check") as check_ssl_named,
-        patch.object(ecflow, "_ssl_provision") as provision_ssl,
+        patch.object(ecflow, "_ssl_check") as ssl_check,
+        patch.object(ecflow, "_ssl_provision") as ssl_provision,
         patch.object(ecflow, "validate") as validate,
         patch.object(ecflow.signal, "signal") as signal,
     ):
@@ -862,11 +851,11 @@ def server_mocks():
         thread.error = None
         yield ns(
             cfg=cfg,
-            check_ssl_named=check_ssl_named,
             config_path=Path("/some/server.yaml"),
-            provision_ssl=provision_ssl,
             server_wait=server_wait,
             signal=signal,
+            ssl_check=ssl_check,
+            ssl_provision=ssl_provision,
             thread=thread,
             thread_cls=thread_cls,
             validate=validate,
@@ -889,15 +878,17 @@ def test_ecflow_server__accepts_config_types(server_mocks, config):
 
 
 def test_ecflow_server__calls_ssl_provision(server_mocks):
+    server_mocks.ssl_check.side_effect = UWSSLCertificateError
     ecflow.server(config=server_mocks.config_path, port=3141)
-    server_mocks.provision_ssl.assert_called_once_with()
+    server_mocks.ssl_provision.assert_called_once_with()
 
 
 def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
     m = server_mocks
     m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": True}}}
+    m.ssl_check.side_effect = UWSSLCertificateError
     ecflow.server(config=m.config_path, port=3141)
-    m.provision_ssl.assert_called_once_with()
+    m.ssl_provision.assert_called_once_with()
     _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
     assert env["ECF_SSL"] == "1"
 
@@ -906,8 +897,8 @@ def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
     m = server_mocks
     m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "myhost.3141"}}}
     ecflow.server(config=m.config_path, port=3141)
-    m.provision_ssl.assert_not_called()
-    m.check_ssl_named.assert_called_once_with("myhost.3141")
+    m.ssl_provision.assert_not_called()
+    m.ssl_check.assert_called_once_with("myhost.3141")
     _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
     assert env["ECF_SSL"] == "myhost.3141"
 
@@ -916,15 +907,15 @@ def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
     m = server_mocks
     m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": False}}}
     ecflow.server(config=m.config_path, port=3141)
-    m.provision_ssl.assert_not_called()
+    m.ssl_provision.assert_not_called()
     _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
     assert "ECF_SSL" not in env
 
 
 def test_ecflow_server__insecure_skips_ssl(server_mocks):
     ecflow.server(config=server_mocks.config_path, port=3141, insecure=True)
-    server_mocks.provision_ssl.assert_not_called()
-    server_mocks.check_ssl_named.assert_not_called()
+    server_mocks.ssl_provision.assert_not_called()
+    server_mocks.ssl_check.assert_not_called()
 
 
 def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
