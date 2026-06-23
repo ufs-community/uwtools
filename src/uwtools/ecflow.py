@@ -43,8 +43,8 @@ from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
-ECFLOW_PORT_MIN = 1024  # minimum port number accepted by ecFlow
-ECFLOW_PORT_MAX = 49151  # maximum port number accepted by ecFlow
+ECFLOW_PORT_MIN = 1024  # minimum TCP port number accepted by ecFlow
+ECFLOW_PORT_MAX = 49151  # maximum TCP port number accepted by ecFlow
 
 if TYPE_CHECKING:
     from types import FrameType
