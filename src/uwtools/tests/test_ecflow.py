@@ -729,6 +729,7 @@ def test_ecflow__ssl_check__missing_default_files_raises(excluded, tmp_path):
     with patch.object(ecflow, "_SSL_DIR", tmp_path), raises(UWSSLCertificateError) as e:
         ecflow._ssl_check(None)
     assert "Missing SSL certificate file(s): %s" % (tmp_path / excluded) in str(e.value)
+    assert "Provide these files or remove %s to automatically generate" % tmp_path in str(e.value)
 
 
 @mark.parametrize("excluded", ["crt", "key", "pem"])
