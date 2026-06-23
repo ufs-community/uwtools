@@ -336,7 +336,7 @@ The ``uw ecflow server`` command reads configuration from an ``ecflow.server`` b
      server:
        ECF_HOME: /path/to/run
 
-All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. ``ECF_HOME`` is the only required key.
+All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. Only ``ECF_HOME`` is required. All supported variables, and values accepted by UW YAML for ecFlow, are described :ecflow:`here<glossary.html#term-ecflow_server>`. The lone exception is ``ECF_SSL``, which accepts values as described below.
 
 ``ECF_SSL``
 
@@ -352,7 +352,6 @@ For example, to use a certificate-filename prefix when running on a static port:
 
    ecflow:
      server:
-       ECF_HOME: /path/to/run
        ECF_SSL: myhost.8888
 
 The ``--port`` value passed to ``uw ecflow server`` must match the port in the prefix. The three files ``myhost.8888.crt``, ``myhost.8888.key``, and ``myhost.8888.pem`` must already exist in ``$HOME/.ecflowrc/ssl``; they are not auto-generated.
