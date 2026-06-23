@@ -3,53 +3,66 @@
 ecFlow Workflows
 ================
 
-:ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (``suite.def``) to describe the workflow, and ``.ecf`` scripts to carry out individual tasks.
+:ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (e.g. ``suite.def``) to describe the workflow, and ``.ecf`` scripts to carry out individual tasks.
 
 The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translated into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ``.ecf`` scripts.
 
 Top-Level Structure
 -------------------
 
-The UW YAML config for ecFlow must have a top-level ``ecflow:`` key:
+UW YAML for ecFlow nests under a top-level ``ecflow:`` key, and the suite definition under a ``suitedef:`` child:
 
 .. code-block:: yaml
 
    ecflow:
-     scheduler: slurm
-     suite_forecast:
+     suitedef:
        ...
 
-UW YAML Keys
-^^^^^^^^^^^^
+Suite-Definition Root UW YAML Keys
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``scheduler:`` -- Optional. The batch scheduler to use when generating ``.ecf`` scripts. Supported values are ``lsf``, ``pbs``, and ``slurm``. When set, the scheduler's directives are automatically added to generated ``.ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
+The following keys may appear at the top of the suite definition, directly under ``ecflow.suitedef``:
+
+.. code-block:: yaml
+
+   ecflow:
+     suitedef:
+       extern:
+         - /other_suite/family/task
+       scheduler: slurm
+       suite_forecast:
+         ...
+       suites_example:
+         ...
+       vars:
+         ECF_HOME: /path/to/ecf
+         ACCOUNT: myproject
+
+``extern:``
+
+An optional list of external node paths to declare in the suite definition. Useful for triggering tasks across suites. For example:
+
+``scheduler:``
+
+The batch scheduler to target when generating ``.ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, the scheduler's directives are automatically added to generated ``.ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
 
 .. _ecflow_suite_level_vars:
 
-``vars:`` -- Optional. A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite. For example:
+``suite_<name>:``
 
-.. code-block:: yaml
+One or more suite definitions. The portion of the key following ``suite_`` becomes the suite name in ecFlow. For example, ``suite_forecast`` creates a suite named ``forecast``. See `Suite and Node Structure`_ for the contents of a suite.
 
-   ecflow:
-     vars:
-       ECF_HOME: /path/to/ecf
-       ACCOUNT: myproject
+``suites_<name>:``
+
+An expand block for generating multiple suites from a parameterized template. See `Expand Blocks`_.
+
+``vars:``
+
+A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite. For example:
 
 Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``.ecf`` scripts, but can be overriden by users in a suite-definition file.
 
 See the :ecflow:`ecFlow documentation<ug/user_manual/ecflow_variables/index.html>` for more information on available variables and their meanings.
-
-``extern:`` -- Optional. A list of external node paths to declare in the suite definition. Useful for triggering tasks across suites. For example:
-
-.. code-block:: yaml
-
-   ecflow:
-     extern:
-       - /other_suite/family/task
-
-``suite_<name>:`` -- One or more suite definitions. The portion of the key following ``suite_`` becomes the suite name in ecFlow. For example, ``suite_forecast`` creates a suite named ``forecast``. See `Suite and Node Structure`_ for the contents of a suite.
-
-``suites_<name>:`` -- An expand block for generating multiple suites from a parameterized template. See `Expand Blocks`_.
 
 Suite and Node Structure
 ------------------------
@@ -59,27 +72,29 @@ Suites, families, and tasks are defined as nested YAML blocks. Keys are prefixed
 .. code-block:: yaml
 
    ecflow:
-     suite_forecast:
-       family_prep:
-         task_get_obs:
-           trigger: "1==1"
+     suitedef:
+       suite_forecast:
+         family_prep:
+           task_get_obs:
+             trigger: "1==1"
+             script:
+               execution:
+                 executable: uw fs get_obs.yaml
+                 incantation: /path/to/run_get_obs.sh
+               manual: Retrieve observation data
+         task_run_model:
+           trigger: /forecast/prep/get_obs == complete
            script:
              execution:
-               executable: uw fs get_obs.yaml
-               incantation: /path/to/run_get_obs.sh
-             manual: Retrieve observation data
-       task_run_model:
-         trigger: /forecast/prep/get_obs == complete
-         script:
-           execution:
-             executable: model.exe
-             incantation: /path/to/run_model.sh
-           manual: Run the forecast model
+               executable: model.exe
+               incantation: /path/to/run_model.sh
+             manual: Run the forecast model
 
 This example defines a suite ``forecast`` containing a family ``prep`` with task ``get_obs``, and a top-level task ``run_model``.
 
 .. important::
-   **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated (via ``--scripts-path``), only the ``<name>`` portion becomes the script filename.
+
+   **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated (via CLI argument ``--scripts-path`` or API argument ``script_path``), only the ``<name>`` portion becomes the script filename.
 
    Examples:
 
@@ -90,39 +105,20 @@ This example defines a suite ``forecast`` containing a family ``prep`` with task
 Node Attributes
 ^^^^^^^^^^^^^^^
 
-The following attributes may appear under any suite, family, or task node:
+The following attributes may be set on suite, family, or task nodes, at any level in the config hierarchy:
 
-``vars:`` -- A mapping of variable name/value pairs to set as ecFlow edit variables on the node (see :ecflow:`ecflow.Variable <python_api/Variable.html>`). For example:
+``defstatus:``
 
-.. code-block:: yaml
-
-   task_run_model:
-     vars:
-       MEMBER: "001"
-     script:
-       ...
-
-See :ref:`this section <ecflow_suite_level_vars>` for more information on ``ECF_`` and other variables that can be set on nodes as well as at the suite level.
-
-``trigger:`` -- A string expression defining the conditions under which a node may run (see :ecflow:`ecflow.Trigger <python_api/Trigger.html>`). Only one ``trigger:`` is allowed per node. For example:
-
-.. code-block:: yaml
-
-   task_run_model:
-     trigger: /forecast/prep/get_obs == complete
-     script:
-       ...
-
-``defstatus:`` -- Sets the default status of a node (see :ecflow:`ecflow.DState <python_api/DState.html>`). Accepted values are ``complete``, ``suspended``, ``aborted``, ``queued``, ``submitted``, ``active``, and ``unknown``. For example:
+Sets the default status of a node (see :ecflow:`ecflow.DState <python_api/DState.html>`). Accepted values are ``complete``, ``suspended``, ``aborted``, ``queued``, ``submitted``, ``active``, and ``unknown``. For example:
 
 .. code-block:: yaml
 
    task_get_obs:
      defstatus: complete
-     script:
-       ...
 
-``events:`` -- A list of named events attached to a node (see :ecflow:`ecflow.Event <python_api/Event.html>`). Each item may be a string (event name) or a two-element list ``[number, name]``. For example:
+``events:``
+
+A list of named events attached to a node (see :ecflow:`ecflow.Event <python_api/Event.html>`). Each item may be a string (event name) or a two-element list ``[number, name]``. For example:
 
 .. code-block:: yaml
 
@@ -130,10 +126,41 @@ See :ref:`this section <ecflow_suite_level_vars>` for more information on ``ECF_
      events:
        - obs_ready
        - [2, model_ready]
-     script:
-       ...
 
-``limits:`` -- A list of limits defined on a suite or family (see :ecflow:`ecflow.Limit <python_api/Limit.html>`). Each item is a two-element list ``[name, max_count]``. For example:
+``inlimits:``
+
+A list of limits that a node consumes (see :ecflow:`ecflow.InLimit <python_api/InLimit.html>`). Each item may be a one-, two-, or three-element list ``[limit_name]``, ``[limit_path, limit_name]``, or ``[limit_path, limit_name, tokens]``. For example:
+
+.. code-block:: yaml
+
+   task_run_model:
+     inlimits:
+       - [/forecast, max_jobs]
+
+``labels:``
+
+A list of label name/value pairs on a node (see :ecflow:`ecflow.Label <python_api/Label.html>`). Each item is a two-element list ``[name, value]``. For example:
+
+.. code-block:: yaml
+
+   task_run_model:
+     labels:
+       - [progress, "0%"]
+
+``late:``
+
+Defines late notification thresholds for a node (see :ecflow:`ecflow.Late <python_api/Late.html>`). Accepts ``submitted``, ``active``, and ``complete`` as keys, each with a time value. For example:
+
+.. code-block:: yaml
+
+   task_run_model:
+     late:
+       active: "02:00:00"
+       submitted: "00:05:00"
+
+``limits:``
+
+A list of limits defined on a suite or family (see :ecflow:`ecflow.Limit <python_api/Limit.html>`). Each item is a two-element list ``[name, max_count]``. For example:
 
 .. code-block:: yaml
 
@@ -141,53 +168,45 @@ See :ref:`this section <ecflow_suite_level_vars>` for more information on ``ECF_
      limits:
        - [max_jobs, 4]
 
-``inlimits:`` -- A list of limits that a node consumes (see :ecflow:`ecflow.InLimit <python_api/InLimit.html>`). Each item may be a one-, two-, or three-element list ``[limit_name]``, ``[limit_path, limit_name]``, or ``[limit_path, limit_name, tokens]``. For example:
+``meters:``
 
-.. code-block:: yaml
-
-   task_run_model:
-     inlimits:
-       - [/forecast, max_jobs]
-     script:
-       ...
-
-``labels:`` -- A list of label name/value pairs on a node (see :ecflow:`ecflow.Label <python_api/Label.html>`). Each item is a two-element list ``[name, value]``. For example:
-
-.. code-block:: yaml
-
-   task_run_model:
-     labels:
-       - [progress, "0%"]
-     script:
-       ...
-
-``late:`` -- Defines late notification thresholds for a node (see :ecflow:`ecflow.Late <python_api/Late.html>`). Accepts ``submitted``, ``active``, and ``complete`` as keys, each with a time value. For example:
-
-.. code-block:: yaml
-
-   task_run_model:
-     late:
-       submitted: "00:05:00"
-       active: "02:00:00"
-     script:
-       ...
-
-``meters:`` -- A list of meters on a node (see :ecflow:`ecflow.Meter <python_api/Meter.html>`). Each item is a three- or four-element list ``[name, min, max]`` or ``[name, min, max, threshold]``. For example:
+A list of meters on a node (see :ecflow:`ecflow.Meter <python_api/Meter.html>`). Each item is a three- or four-element list ``[name, min, max]`` or ``[name, min, max, threshold]``. For example:
 
 .. code-block:: yaml
 
    task_run_model:
      meters:
        - [progress, 0, 100]
-     script:
-       ...
+
+``trigger:``
+
+A string expression defining the conditions under which a node may run (see :ecflow:`ecflow.Trigger <python_api/Trigger.html>`). Only one ``trigger:`` is allowed per node. For example:
+
+.. code-block:: yaml
+
+   task_run_model:
+     trigger: /forecast/prep/get_obs == complete
+
+``vars:``
+
+A mapping of variable name/value pairs to set as ecFlow edit variables on the node (see :ecflow:`ecflow.Variable <python_api/Variable.html>`). For example:
+
+.. code-block:: yaml
+
+   task_run_model:
+     vars:
+       MEMBER: "001"
+
+See :ref:`this section <ecflow_suite_level_vars>` for more information on ``ECF_`` and other variables that can be set on nodes to override those set at the suite level.
 
 Repeat Attributes
 ^^^^^^^^^^^^^^^^^
 
 Only one ``repeat_*:`` attribute is allowed per node. The available repeat types are:
 
-``repeat_date:`` -- Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers). Optional ``step`` (default 1).
+``repeat_date:``
+
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers). Optional ``step`` (default 1).
 
 .. code-block:: yaml
 
@@ -198,24 +217,38 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
        end: 20240131
        step: 1
 
-``repeat_datelist:`` -- Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/RepeatDateList.html>`) (as YYYYMMDD integers). Requires ``variable`` and ``list``.
+``repeat_datelist:``
 
-``repeat_datetime:`` -- Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings). Optional ``step`` (as ``HH:mm:ss``).
+Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/RepeatDateList.html>`) (as YYYYMMDD integers). Requires ``variable`` and ``list``.
 
-``repeat_day:`` -- Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/RepeatDay.html>`). Requires ``step``.
+``repeat_datetime:``
 
-``repeat_enumerated:`` -- Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/RepeatEnumerated.html>`). Requires ``variable`` and ``list``.
+Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings). Optional ``step`` (as ``HH:mm:ss``).
 
-``repeat_int:`` -- Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``. Optional ``step``.
+``repeat_day:``
 
-``repeat_string:`` -- Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/RepeatString.html>`). Requires ``variable`` and ``list``.
+Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/RepeatDay.html>`). Requires ``step``.
+
+``repeat_enumerated:``
+
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/RepeatEnumerated.html>`). Requires ``variable`` and ``list``.
+
+``repeat_int:``
+
+Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``. Optional ``step``.
+
+``repeat_string:``
+
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/RepeatString.html>`). Requires ``variable`` and ``list``.
 
 Task Script Block
 -----------------
 
 Tasks are required to have a ``script:`` block that defines the ``.ecf`` script to generate. The ``script:`` block has the following keys:
 
-``execution:`` -- **Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` documentation for full details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``.ecf`` script body, and is required by the code.
+``execution:``
+
+**Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` for details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``.ecf`` script body, and is required by the code.
 
 .. code-block:: yaml
 
@@ -224,15 +257,25 @@ Tasks are required to have a ``script:`` block that defines the ``.ecf`` script 
        executable: /path/to/run_model.sh
        incantation: /path/to/run_model.sh
 
-``manual:`` -- Optional. A brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
+``manual:``
 
-``account:`` -- Optional. The account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
+Optional. A brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
 
-``rundir:`` -- Optional. The directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
+``account:``
 
-``pre_includes:`` -- Optional. A list of ecFlow include file names (without path) to include at the top of the generated ``.ecf`` script, using ``%include <name>``.
+Optional. The account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
 
-``post_includes:`` -- Optional. A list of ecFlow include file names (without path) to include at the bottom of the generated ``.ecf`` script.
+``rundir:``
+
+Optional. The directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
+
+``pre_includes:``
+
+Optional. A list of ecFlow include file names (without path) to include at the top of the generated ``.ecf`` script, using ``%include <name>``.
+
+``post_includes:``
+
+Optional. A list of ecFlow include file names (without path) to include at the bottom of the generated ``.ecf`` script.
 
 .. code-block:: yaml
 
@@ -295,7 +338,9 @@ The ``uw ecflow server`` command reads configuration from an ``ecflow.server`` b
 
 All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. ``ECF_HOME`` is the only required key.
 
-``ECF_SSL`` -- Optional. Controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
+``ECF_SSL``
+
+Optional. Controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
 
 - ``true`` (default when ``--insecure`` is not given): Enable SSL using the auto-provisioned default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``.
 - A certificate-filename prefix string (e.g. ``myhost.8888``): Enable SSL using the specified certificate files. Files with the given prefix and the extensions ``.crt``, ``.key``, and ``.pem`` must exist under ``$HOME/.ecflowrc/ssl/``.
@@ -317,6 +362,10 @@ When ``--insecure`` is given to ``uw ecflow server``, SSL is disabled entirely r
 Generated Artifacts
 -------------------
 
-``suite.def`` -- The ecFlow suite definition file, written to ``<output-path>/suite.def``. If no ``--output-path`` is given, the suite definition is written to ``stdout``.
+``suite.def``
 
-``.ecf`` scripts -- One ``.ecf`` script per task, written under ``<scripts-path>/``. Each script is nested under the ``<scripts-path>`` in the same manner as it is in the suite definition. The example above will output a script at ``<scripts-path>/forecast/prep/get_obs.ecf`` and at ``<scripts-path>/forecast/run_model``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
+The ecFlow suite definition file, written to ``<output-path>/suite.def``. If no ``--output-path`` is given, the suite definition is written to ``stdout``.
+
+``.ecf`` scripts
+
+One ``.ecf`` script per task, written under ``<scripts-path>/``. Each script is nested under the ``<scripts-path>`` in the same manner as it is in the suite definition. The example above will output a script at ``<scripts-path>/forecast/prep/get_obs.ecf`` and at ``<scripts-path>/forecast/run_model``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
