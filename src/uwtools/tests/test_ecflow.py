@@ -714,7 +714,10 @@ def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     (ssl_dir / "server.crt").touch()
-    with patch.object(ecflow, "_SSL_DIR", ssl_dir), raises(UWError, match="missing required file"):
+    with (
+        patch.object(ecflow, "_SSL_DIR", ssl_dir),
+        raises(UWError, match="missing required file"),
+    ):
         ecflow._provision_ssl()
 
 
@@ -723,7 +726,8 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
 
     def fake_run(cmd, **_kwargs):
         # Emulate openssl by creating the file named after its "-out" argument.
-        Path(cmd.split("-out ", 1)[1].split()[0]).touch()
+        parts = cmd.split()
+        Path(parts[parts.index("-out") + 1]).touch()
         return (True, "")
 
     with (
@@ -739,11 +743,42 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     assert logged("SSL credentials written to")
 
 
+def test_ecflow__check_ssl_named__all_files_exist(logged, tmp_path):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    prefix = "myhost.3141"
+    for ext in [".crt", ".key", ".pem"]:
+        (ssl_dir / f"{prefix}{ext}").touch()
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
+        ecflow._check_ssl_named(prefix)
+    assert logged("Using existing SSL certificates for prefix")
+
+
+def test_ecflow__check_ssl_named__missing_files_raises(tmp_path):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    prefix = "myhost.3141"
+    (ssl_dir / f"{prefix}.crt").touch()
+    with (
+        patch.object(ecflow, "_SSL_DIR", ssl_dir),
+        raises(UWError, match="not found in"),
+    ):
+        ecflow._check_ssl_named(prefix)
+
+
+def test_ecflow__openssl__not_found():
+    with (
+        patch.object(ecflow.shutil, "which", return_value=None),
+        raises(UWError, match="openssl not found on PATH"),
+    ):
+        ecflow._openssl()
+
+
 def test_ecflow__ssl_generate_key__success(tmp_path):
     path = tmp_path / "server.key"
     ecflow._ssl_generate_key(path)
     assert path.is_file()
-    # The 'umask 0077 &&' prefix on the openssl call must yield owner-only permissions.
+    # umask 077 in the shell command yields owner-only permissions on generated files.
     assert oct(path.stat().st_mode)[-3:] == "600"
 
 
@@ -763,7 +798,7 @@ def test_ecflow__ssl_generate_cert__success(tmp_path):
     ecflow._ssl_generate_key(key_path)
     ecflow._ssl_generate_cert(cert_path, key_path)
     assert cert_path.is_file()
-    # The 'umask 0077 &&' prefix on the openssl call must yield owner-only permissions.
+    # umask 077 in the shell command yields owner-only permissions on generated files.
     assert oct(cert_path.stat().st_mode)[-3:] == "600"
 
 
@@ -781,16 +816,16 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
 
 def test_ecflow__ssl_generate_dhparam__success(tmp_path):
     # DH-parameter generation is slow and entropy-dependent, so (unlike the key and cert tests,
-    # which exercise real openssl) mock the shell call and assert the umask-prefixed command. The
-    # resulting 0600 permissions are verified for real by the key and cert tests, which share this
-    # umask mechanism.
+    # which exercise real openssl) mock the subprocess call and assert the command string. The
+    # resulting 0600 permissions are verified for real by the key and cert tests, which share the
+    # umask 077 shell mechanism.
     path = tmp_path / "dh2048.pem"
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_cmd:
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_run:
         ecflow._ssl_generate_dhparam(path)
-    mock_cmd.assert_called_once()
-    cmd = mock_cmd.call_args[0][0]
-    assert cmd.startswith("umask 0077 && openssl dhparam")
-    assert f"-out {path}" in cmd
+    mock_run.assert_called_once()
+    cmd = mock_run.call_args.kwargs["cmd"]
+    assert "umask 077" in cmd
+    assert f"dhparam -out {path} 2048" in cmd
 
 
 def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
@@ -817,6 +852,7 @@ def server_mocks():
         patch.object(ecflow, "YAMLConfig", return_value=cfg) as yamlconfig,
         patch.object(ecflow, "validate") as validate,
         patch.object(ecflow, "_provision_ssl") as provision_ssl,
+        patch.object(ecflow, "_check_ssl_named") as check_ssl_named,
         patch.object(ecflow, "_ServerThread") as thread_cls,
         patch.object(ecflow.signal, "signal") as signal,
         patch.object(ecflow, "_server_wait") as server_wait,
@@ -829,6 +865,7 @@ def server_mocks():
             yamlconfig=yamlconfig,
             validate=validate,
             provision_ssl=provision_ssl,
+            check_ssl_named=check_ssl_named,
             thread_cls=thread_cls,
             thread=thread,
             signal=signal,
@@ -852,12 +889,41 @@ def test_ecflow_server__accepts_config_types(server_mocks, config):
 
 def test_ecflow_server__calls_provision_ssl(server_mocks):
     ecflow.server(config=server_mocks.config_path, port=3141)
-    server_mocks.provision_ssl.assert_called_once()
+    server_mocks.provision_ssl.assert_called_once_with()
+
+
+def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": True}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.provision_ssl.assert_called_once_with()
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert env["ECF_SSL"] == "1"
+
+
+def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "myhost.3141"}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.provision_ssl.assert_not_called()
+    m.check_ssl_named.assert_called_once_with("myhost.3141")
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert env["ECF_SSL"] == "myhost.3141"
+
+
+def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": False}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.provision_ssl.assert_not_called()
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert "ECF_SSL" not in env
 
 
 def test_ecflow_server__insecure_skips_ssl(server_mocks):
     ecflow.server(config=server_mocks.config_path, port=3141, insecure=True)
     server_mocks.provision_ssl.assert_not_called()
+    server_mocks.check_ssl_named.assert_not_called()
 
 
 def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):

@@ -125,6 +125,23 @@ Examples
 
      uw ecflow server --config-file server.yaml --port 54321
 
+* To start a server using a named certificate triplet:
+
+  .. code-block:: text
+
+     uw ecflow server --config-file server.yaml --port 8888
+
+  Where ``server.yaml`` contains:
+
+  .. code-block:: yaml
+
+     ecflow:
+       server:
+         ECF_HOME: /path/to/run
+         ECF_SSL: myhost.8888
+
+  ``ECF_SSL`` accepts ``true`` to enable SSL using the default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``, or a ``<host>.<port>`` prefix string to select a named certificate triplet (``<host>.<port>.crt`` / ``.key`` / ``.pem``) from the same directory. The ``--port`` value must match the port in the prefix when using a named triplet. See :ref:`ecflow_workflows` for full server YAML documentation.
+
 * To emit a JSON report of the server details to ``stdout``:
 
   .. code-block:: text
@@ -137,13 +154,14 @@ Examples
 
      {
        "vars": {
+         "ECF_HOME": "/path/to/run",
          "ECF_HOST": "server.hostname.com",
-         "ECF_PORT": "54321",
-         "ECF_SSL": "1"
+         "ECF_PORT": "8888",
+         "ECF_SSL": "myhost.8888"
        }
      }
 
-  ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given).
+  ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given and ``ECF_SSL`` is not ``false`` in the config).
 
 .. _cli_ecflow_validate_examples:
 

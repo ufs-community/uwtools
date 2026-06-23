@@ -282,6 +282,38 @@ Multiple expand variables of the same length may be provided together:
        MEM: ["01", "02"]
        LABEL: ["ctrl", "pert"]
 
+Server Configuration
+--------------------
+
+The ``uw ecflow server`` command reads configuration from an ``ecflow.server`` block:
+
+.. code-block:: yaml
+
+   ecflow:
+     server:
+       ECF_HOME: /path/to/run
+
+All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. ``ECF_HOME`` is the only required key.
+
+``ECF_SSL`` -- Optional. Controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
+
+- ``true`` (default when ``--insecure`` is not given): Enable SSL using the auto-provisioned default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``.
+- A certificate-filename prefix string (e.g. ``myhost.8888``): Enable SSL using the specified certificate files. Files with the given prefix and the extensions ``.crt``, ``.key``, and ``.pem`` must exist under ``$HOME/.ecflowrc/ssl/``.
+- ``false``: Disable SSL (equivalent to passing ``--insecure``).
+
+For example, to use a certificate-filename prefix when running on a static port:
+
+.. code-block:: yaml
+
+   ecflow:
+     server:
+       ECF_HOME: /path/to/run
+       ECF_SSL: myhost.8888
+
+The ``--port`` value passed to ``uw ecflow server`` must match the port in the prefix. The three files ``myhost.8888.crt``, ``myhost.8888.key``, and ``myhost.8888.pem`` must already exist in ``$HOME/.ecflowrc/ssl``; they are not auto-generated.
+
+When ``--insecure`` is given to ``uw ecflow server``, SSL is disabled entirely regardless of the ``ECF_SSL`` setting.
+
 Generated Artifacts
 -------------------
 
