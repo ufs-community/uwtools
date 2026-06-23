@@ -754,11 +754,12 @@ def test_ecflow__check_ssl_named__all_files_exist(logged, tmp_path):
     assert logged("Using existing SSL certificates for prefix")
 
 
-def test_ecflow__check_ssl_named__missing_files_raises(tmp_path):
+@mark.parametrize("extension", ["crt", "key", "pem"])
+def test_ecflow__check_ssl_named__missing_files_raises(extension, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     prefix = "myhost.3141"
-    (ssl_dir / f"{prefix}.crt").touch()
+    (ssl_dir / f"{prefix}.{extension}").touch()
     with (
         patch.object(ecflow, "_SSL_DIR", ssl_dir),
         raises(UWError, match="not found in"),
