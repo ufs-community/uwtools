@@ -7,7 +7,7 @@ from copy import deepcopy
 from io import StringIO
 from pathlib import Path
 from subprocess import CalledProcessError
-from types import SimpleNamespace
+from types import SimpleNamespace as ns
 from unittest.mock import Mock, patch
 
 import ecflow as ecflowlib  # type: ignore[import-untyped]
@@ -700,28 +700,49 @@ def test_ecflow_validate__yamlconfig(minimal_config):
 # SSL provisioning tests
 
 
-def test_ecflow__provision_ssl__all_files_exist(logged, tmp_path):
+def test_ecflow__openssl__not_found():
+    with (
+        patch.object(ecflow.shutil, "which", return_value=None),
+        raises(UWError, match="openssl not found on PATH"),
+    ):
+        ecflow._openssl()
+
+
+def test_ecflow__ssl_check__all_files_exist(logged, tmp_path):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    prefix = "myhost.3141"
+    for ext in [".crt", ".key", ".pem"]:
+        (ssl_dir / f"{prefix}{ext}").touch()
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
+        ecflow._ssl_check(prefix)
+    assert logged("Using existing SSL certificates for prefix")
+
+
+@mark.parametrize("extension", ["crt", "key", "pem"])
+def test_ecflow__ssl_check__missing_files_raises(extension, tmp_path):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    prefix = "myhost.3141"
+    (ssl_dir / f"{prefix}.{extension}").touch()
+    with (
+        patch.object(ecflow, "_SSL_DIR", ssl_dir),
+        raises(UWError, match="not found in"),
+    ):
+        ecflow._ssl_check(prefix)
+
+
+def test_ecflow__ssl_provision__all_files_exist(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
     for fname in ["dh2048.pem", "server.crt", "server.key"]:
         (ssl_dir / fname).touch()
     with patch.object(ecflow, "_SSL_DIR", ssl_dir):
-        ecflow._provision_ssl()
+        ecflow._ssl_provision()
     assert logged("Using existing SSL certificates in")
 
 
-def test_ecflow__provision_ssl__incomplete_dir_raises(tmp_path):
-    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
-    ssl_dir.mkdir(parents=True)
-    (ssl_dir / "server.crt").touch()
-    with (
-        patch.object(ecflow, "_SSL_DIR", ssl_dir),
-        raises(UWError, match="missing required file"),
-    ):
-        ecflow._provision_ssl()
-
-
-def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
+def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
 
     def fake_run(cmd, **_kwargs):
@@ -734,7 +755,7 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
         patch.object(ecflow, "_SSL_DIR", ssl_dir),
         patch.object(ecflow, "run_shell_cmd", side_effect=fake_run),
     ):
-        ecflow._provision_ssl()
+        ecflow._ssl_provision()
     assert ssl_dir.is_dir()
     assert (ssl_dir / "server.key").is_file()
     assert (ssl_dir / "server.crt").is_file()
@@ -743,64 +764,15 @@ def test_ecflow__provision_ssl__creates_dir_and_files(logged, tmp_path):
     assert logged("SSL credentials written to")
 
 
-def test_ecflow__check_ssl_named__all_files_exist(logged, tmp_path):
+def test_ecflow__ssl_provision__incomplete_dir_raises(tmp_path):
     ssl_dir = tmp_path / ".ecflowrc" / "ssl"
     ssl_dir.mkdir(parents=True)
-    prefix = "myhost.3141"
-    for ext in [".crt", ".key", ".pem"]:
-        (ssl_dir / f"{prefix}{ext}").touch()
-    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
-        ecflow._check_ssl_named(prefix)
-    assert logged("Using existing SSL certificates for prefix")
-
-
-@mark.parametrize("extension", ["crt", "key", "pem"])
-def test_ecflow__check_ssl_named__missing_files_raises(extension, tmp_path):
-    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
-    ssl_dir.mkdir(parents=True)
-    prefix = "myhost.3141"
-    (ssl_dir / f"{prefix}.{extension}").touch()
+    (ssl_dir / "server.crt").touch()
     with (
         patch.object(ecflow, "_SSL_DIR", ssl_dir),
-        raises(UWError, match="not found in"),
+        raises(UWError, match="missing required file"),
     ):
-        ecflow._check_ssl_named(prefix)
-
-
-def test_ecflow__openssl__not_found():
-    with (
-        patch.object(ecflow.shutil, "which", return_value=None),
-        raises(UWError, match="openssl not found on PATH"),
-    ):
-        ecflow._openssl()
-
-
-def test_ecflow__ssl_generate_key__success(tmp_path):
-    path = tmp_path / "server.key"
-    ecflow._ssl_generate_key(path)
-    assert path.is_file()
-    # umask 077 in the shell command yields owner-only permissions on generated files.
-    assert oct(path.stat().st_mode)[-3:] == "600"
-
-
-def test_ecflow__ssl_generate_key__failure(tmp_path):
-    path = tmp_path / "server.key"
-    with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
-        raises(UWError, match="Failed to generate SSL private key"),
-    ):
-        ecflow._ssl_generate_key(path)
-    assert not path.is_file()
-
-
-def test_ecflow__ssl_generate_cert__success(tmp_path):
-    cert_path = tmp_path / "server.crt"
-    key_path = tmp_path / "server.key"
-    ecflow._ssl_generate_key(key_path)
-    ecflow._ssl_generate_cert(cert_path, key_path)
-    assert cert_path.is_file()
-    # umask 077 in the shell command yields owner-only permissions on generated files.
-    assert oct(cert_path.stat().st_mode)[-3:] == "600"
+        ecflow._ssl_provision()
 
 
 def test_ecflow__ssl_generate_cert__failure(tmp_path):
@@ -813,6 +785,26 @@ def test_ecflow__ssl_generate_cert__failure(tmp_path):
         ecflow._ssl_generate_cert(cert_path, key_path)
     assert not cert_path.is_file()
     assert not key_path.is_file()
+
+
+def test_ecflow__ssl_generate_cert__success(tmp_path):
+    cert_path = tmp_path / "server.crt"
+    key_path = tmp_path / "server.key"
+    ecflow._ssl_generate_key(key_path)
+    ecflow._ssl_generate_cert(cert_path, key_path)
+    assert cert_path.is_file()
+    # umask 077 in the shell command yields owner-only permissions on generated files.
+    assert oct(cert_path.stat().st_mode)[-3:] == "600"
+
+
+def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
+    path = tmp_path / "dh2048.pem"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        raises(UWError, match="Failed to generate DH parameters"),
+    ):
+        ecflow._ssl_generate_dhparam(path)
+    assert not path.is_file()
 
 
 def test_ecflow__ssl_generate_dhparam__success(tmp_path):
@@ -829,14 +821,22 @@ def test_ecflow__ssl_generate_dhparam__success(tmp_path):
     assert f"dhparam -out {path} 2048" in cmd
 
 
-def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
-    path = tmp_path / "dh2048.pem"
+def test_ecflow__ssl_generate_key__failure(tmp_path):
+    path = tmp_path / "server.key"
     with (
         patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
-        raises(UWError, match="Failed to generate DH parameters"),
+        raises(UWError, match="Failed to generate SSL private key"),
     ):
-        ecflow._ssl_generate_dhparam(path)
+        ecflow._ssl_generate_key(path)
     assert not path.is_file()
+
+
+def test_ecflow__ssl_generate_key__success(tmp_path):
+    path = tmp_path / "server.key"
+    ecflow._ssl_generate_key(path)
+    assert path.is_file()
+    # umask 077 in the shell command yields owner-only permissions on generated files.
+    assert oct(path.stat().st_mode)[-3:] == "600"
 
 
 @fixture
@@ -851,26 +851,26 @@ def server_mocks():
     cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
     with (
         patch.object(ecflow, "YAMLConfig", return_value=cfg) as yamlconfig,
-        patch.object(ecflow, "validate") as validate,
-        patch.object(ecflow, "_provision_ssl") as provision_ssl,
-        patch.object(ecflow, "_check_ssl_named") as check_ssl_named,
         patch.object(ecflow, "_ServerThread") as thread_cls,
-        patch.object(ecflow.signal, "signal") as signal,
         patch.object(ecflow, "_server_wait") as server_wait,
+        patch.object(ecflow, "_ssl_check") as check_ssl_named,
+        patch.object(ecflow, "_ssl_provision") as provision_ssl,
+        patch.object(ecflow, "validate") as validate,
+        patch.object(ecflow.signal, "signal") as signal,
     ):
         thread = thread_cls.return_value
         thread.error = None
-        yield SimpleNamespace(
-            config_path=Path("/some/server.yaml"),
+        yield ns(
             cfg=cfg,
-            yamlconfig=yamlconfig,
-            validate=validate,
-            provision_ssl=provision_ssl,
             check_ssl_named=check_ssl_named,
-            thread_cls=thread_cls,
-            thread=thread,
-            signal=signal,
+            config_path=Path("/some/server.yaml"),
+            provision_ssl=provision_ssl,
             server_wait=server_wait,
+            signal=signal,
+            thread=thread,
+            thread_cls=thread_cls,
+            validate=validate,
+            yamlconfig=yamlconfig,
         )
 
 
@@ -888,7 +888,7 @@ def test_ecflow_server__accepts_config_types(server_mocks, config):
     server_mocks.yamlconfig.assert_called_once_with(config)
 
 
-def test_ecflow_server__calls_provision_ssl(server_mocks):
+def test_ecflow_server__calls_ssl_provision(server_mocks):
     ecflow.server(config=server_mocks.config_path, port=3141)
     server_mocks.provision_ssl.assert_called_once_with()
 
