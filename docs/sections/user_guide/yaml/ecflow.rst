@@ -246,6 +246,10 @@ Task Script Block
 
 Tasks are required to have a ``script:`` block that defines the ``.ecf`` script to generate. The ``script:`` block has the following keys:
 
+``account:``
+
+The optional account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
+
 ``execution:``
 
 **Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` for details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``.ecf`` script body, and is required by the code.
@@ -260,14 +264,6 @@ Tasks are required to have a ``script:`` block that defines the ``.ecf`` script 
 ``manual:``
 
 An optional brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
-
-``account:``
-
-The optional account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
-
-``rundir:``
-
-The optional directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
 
 ``pre_includes:``
 
@@ -293,6 +289,10 @@ An optional list of ecFlow include file names (without path) to include at the b
          batchargs:
            walltime: "01:00:00"
        manual: Run the forecast model
+
+``rundir:``
+
+The optional directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
 
 Expand Blocks
 -------------
