@@ -363,7 +363,7 @@ Generated Artifacts
 
 ``suite.def``
 
-The ecFlow suite definition file, written to ``<output-path>/suite.def``. If no ``--output-path`` is given, the suite definition is written to ``stdout``.
+The ecFlow suite definition file, written to ``<output-path>/suite.def`` if ``--output-path`` is given, otherwise to ``stdout``.
 
 ``.ecf`` scripts
 
