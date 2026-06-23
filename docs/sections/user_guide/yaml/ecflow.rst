@@ -206,7 +206,7 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
 
 ``repeat_date:``
 
-Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers). Optional ``step`` (default 1).
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers); ``step`` is optional (default 1).
 
 .. code-block:: yaml
 
@@ -223,7 +223,7 @@ Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <pyth
 
 ``repeat_datetime:``
 
-Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings). Optional ``step`` (as ``HH:mm:ss``).
+Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings); ``step`` (as ``HH:mm:ss``) is optional.
 
 ``repeat_day:``
 
@@ -235,7 +235,7 @@ Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <
 
 ``repeat_int:``
 
-Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``. Optional ``step``.
+Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional.
 
 ``repeat_string:``
 
@@ -259,23 +259,23 @@ Tasks are required to have a ``script:`` block that defines the ``.ecf`` script 
 
 ``manual:``
 
-Optional. A brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
+An optional brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
 
 ``account:``
 
-Optional. The account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
+The optional account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
 
 ``rundir:``
 
-Optional. The directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
+The optional directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
 
 ``pre_includes:``
 
-Optional. A list of ecFlow include file names (without path) to include at the top of the generated ``.ecf`` script, using ``%include <name>``.
+An optional list of ecFlow include file names (without path) to include at the top of the generated ``.ecf`` script, using ``%include <name>``.
 
 ``post_includes:``
 
-Optional. A list of ecFlow include file names (without path) to include at the bottom of the generated ``.ecf`` script.
+An optional list of ecFlow include file names (without path) to include at the bottom of the generated ``.ecf`` script.
 
 .. code-block:: yaml
 
@@ -340,7 +340,7 @@ All keys in the ``server:`` block are passed as environment variables to ``ecflo
 
 ``ECF_SSL``
 
-Optional. Controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
+Optionally controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
 
 - ``true`` (default when ``--insecure`` is not given): Enable SSL using the auto-provisioned default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``.
 - A certificate-filename prefix string (e.g. ``myhost.8888``): Enable SSL using the specified certificate files. Files with the given prefix and the extensions ``.crt``, ``.key``, and ``.pem`` must exist under ``$HOME/.ecflowrc/ssl/``.
