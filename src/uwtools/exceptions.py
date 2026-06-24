@@ -33,6 +33,12 @@ class UWNotImplementedError(UWError):
     """
 
 
+class UWSSLCertificateError(UWError):
+    """
+    Exception for signaling issues with SSL certificates.
+    """
+
+
 class UWTemplateRenderError(UWError):
     """
     Exception for issues arising from template rendering.
