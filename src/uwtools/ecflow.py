@@ -43,8 +43,8 @@ from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
-ECFLOW_PORT_MIN = 1024  # minimum port number accepted by ecFlow
-ECFLOW_PORT_MAX = 49151  # maximum port number accepted by ecFlow
+ECFLOW_PORT_MIN = 1024  # minimum TCP port number accepted by ecFlow
+ECFLOW_PORT_MAX = 49151  # maximum TCP port number accepted by ecFlow
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -452,10 +452,10 @@ def _ssl_check(prefix: str | None) -> None:
     fns = [f"{prefix}{ext}" for ext in (".crt", ".key", ".pem")] if prefix else _SSL_FILES
     paths = [_SSL_DIR / fn for fn in fns]
     if missing := [path for path in paths if not path.is_file()]:
-        msg = "Missing SSL certificate file(s): %s" % ", ".join(map(str, missing))
+        log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
         if not prefix:
-            msg += ". Provide these files or remove %s to automatically generate" % _SSL_DIR
-        raise UWSSLCertificateError(msg)
+            log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
+        raise UWSSLCertificateError
     log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
 
 
@@ -567,7 +567,8 @@ def server(
         try:
             _ssl_check(ecf_ssl)
         except UWSSLCertificateError:
-            _ssl_provision()
+            if ecf_ssl in [None, True]:
+                _ssl_provision()
     rundir = Path(server_cfg["ECF_HOME"])
     # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
     # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
