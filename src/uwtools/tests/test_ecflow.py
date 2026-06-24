@@ -721,15 +721,26 @@ def test_ecflow__ssl_check__all_files_exist(logged, tmp_path):
 
 
 @mark.parametrize("excluded", ["dh2048.pem", "server.crt", "server.key"])
-def test_ecflow__ssl_check__missing_default_files_raises(excluded, tmp_path, uwcaplog):
-    fns = ["dh2048.pem", "server.crt", "server.key"]
-    fns.remove(excluded)
-    for fn in fns:
-        (tmp_path / fn).touch()
-    with patch.object(ecflow, "_SSL_DIR", tmp_path), raises(UWSSLCertificateError):
+@mark.parametrize("ssl_dir_exists", [True, False])
+def test_ecflow__ssl_check__missing_default_files_raises(
+    excluded, ssl_dir_exists, tmp_path, uwcaplog
+):
+    ssl_dir = tmp_path / "ssl"
+    if ssl_dir_exists:
+        ssl_dir.mkdir()
+        fns = ["dh2048.pem", "server.crt", "server.key"]
+        fns.remove(excluded)
+        for fn in fns:
+            (ssl_dir / fn).touch()
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir), raises(UWSSLCertificateError):
         ecflow._ssl_check(None)
-    assert "Missing SSL certificate file(s): %s" % (tmp_path / excluded) in uwcaplog.text
-    assert "Provide these files or remove %s to automatically generate" % tmp_path in uwcaplog.text
+    msgs = [
+        "Missing SSL certificate file(s): %s" % (ssl_dir / excluded),
+        "Provide these files or remove %s to automatically generate" % ssl_dir,
+    ]
+    for msg in msgs:
+        if ssl_dir_exists:
+            assert msg in uwcaplog.text
 
 
 @mark.parametrize("excluded", ["crt", "key", "pem"])

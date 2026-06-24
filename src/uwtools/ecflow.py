@@ -452,9 +452,10 @@ def _ssl_check(prefix: str | None) -> None:
     fns = [f"{prefix}{ext}" for ext in (".crt", ".key", ".pem")] if prefix else _SSL_FILES
     paths = [_SSL_DIR / fn for fn in fns]
     if missing := [path for path in paths if not path.is_file()]:
-        log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
-        if not prefix:
-            log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
+        if _SSL_DIR.is_dir():
+            log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
+            if not prefix:
+                log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
         raise UWSSLCertificateError
     log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
 
