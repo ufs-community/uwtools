@@ -501,55 +501,33 @@
             "script": {
               "additionalProperties": false,
               "properties": {
-                "account": {
+                "batchargs": {
+                  "$ref": "urn:uwtools:batchargs"
+                },
+                "body": {
                   "type": "string"
                 },
-                "execution": {
+                "includes": {
                   "additionalProperties": false,
                   "properties": {
-                    "batchargs": {
-                      "$ref": "urn:uwtools:batchargs"
-                    },
-                    "envcmds": {
+                    "entry": {
                       "items": {
                         "type": "string"
                       },
                       "type": "array"
                     },
-                    "incantation": {
-                      "type": "string"
-                    },
-                    "threads": {
-                      "minimum": 1,
-                      "type": "integer"
+                    "exit": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
                     }
                   },
-                  "required": [
-                    "incantation"
-                  ],
                   "type": "object"
-                },
-                "manual": {
-                  "type": "string"
-                },
-                "post_includes": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                "pre_includes": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                "rundir": {
-                  "type": "string"
                 }
               },
               "required": [
-                "execution"
+                "body"
               ],
               "type": "object"
             }

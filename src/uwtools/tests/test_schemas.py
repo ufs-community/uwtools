@@ -177,7 +177,7 @@ def ecflow_config():
             "server": {"ECF_HOME": "/path/to/ecf"},
             "suitedef": {
                 "suite_one": {
-                    "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
+                    "task_two": {"script": {"body": "run.sh"}},
                     "families_two": {
                         "expand": {
                             "MEM": ["00", "06"],
@@ -938,7 +938,7 @@ def test_schema_ecflow_suitedef_refs_task_expander():
     # Basic spec:
     config = {
         "expand": {"MEM": ["01", "02"]},
-        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "script": {"body": "run.sh"},
     }
     assert not errors(config)
     # expand is a required top-level key:
@@ -954,13 +954,11 @@ def test_schema_ecflow_suitedef_refs_task_expander():
     assert not errors({**config, "trigger": "task_setup == complete"})
     # script is required (taskcontainer is applied within tasks_* expanders):
     assert "'script' is a required property" in errors(with_del(config, "script"))
-    # script.execution content is validated — incantation is required:
-    assert "'incantation' is a required property" in errors(
-        with_set(config, {}, "script", "execution")
-    )
-    # script.execution rejects unknown keys (e.g., executable has no effect in ecflow):
+    # script.body is required:
+    assert "'body' is a required property" in errors(with_set(config, {}, "script"))
+    # script rejects unknown keys:
     assert "Additional properties are not allowed" in errors(
-        with_set(config, "run.exe", "script", "execution", "executable")
+        with_set(config, "x", "script", "extra")
     )
 
 
@@ -969,7 +967,7 @@ def test_schema_ecflow_suitedef_refs_nodecontainer_family():
         "ecflow", "$defs", "nodecontainer", "patternProperties", "^family_.+$"
     )
     # Basic spec:
-    config = {"task_one": {"script": {"execution": {"incantation": "/path/to/run.sh"}}}}
+    config = {"task_one": {"script": {"body": "run.sh"}}}
     assert not errors(config)
     # Extra properties are not allowed:
     assert "is not valid under any of the given schemas" in errors(
@@ -982,7 +980,7 @@ def test_schema_ecflow_suitedef_refs_nodecontainer_family():
 def test_schema_ecflow_suitedef_refs_nodecontainer_task():
     errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^task_.+$")
     # Basic spec:
-    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
+    config = {"script": {"body": "run.sh"}}
     assert not errors(config)
     # Extra properties are not allowed:
     assert "is not valid under any of the given schemas" in errors(
@@ -1020,7 +1018,7 @@ def test_schema_ecflow_suitedef_refs_task():
     errors = schema_validator("ecflow", "$defs", "task")
     # Basic spec:
     config = {
-        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "script": {"body": "run.sh"},
         "vars": {"MEMBER": "00", "LEAD": "006"},
     }
     assert not errors(config)
@@ -1032,7 +1030,7 @@ def test_schema_ecflow_suitedef_refs_taskcontainer():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
     config = {
-        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "script": {"body": "run.sh"},
         "vars": {"MEMBER": "00", "LEAD": "006"},
     }
     assert not errors(config)
@@ -1042,11 +1040,9 @@ def test_schema_ecflow_suitedef_refs_taskcontainer():
 def test_schema_ecflow_suitedef_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
-    config = {
-        "script": {"execution": {"incantation": "/path/to/run.sh"}, "post_includes": ["tail.h"]}
-    }
+    config = {"script": {"body": "run.sh", "includes": {"entry": ["head.h"]}}}
     assert not errors(config)
-    assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
+    assert "'body' is a required property" in errors(with_del(config, "script", "body"))
     assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
 
 
@@ -1069,7 +1065,7 @@ def test_schema_ecflow_suitedef_extern():
     assert "is not of type 'array'" in errors({"extern": "/other/suite/task"})
 
 
-def test_schema_ecflow_suitedef_execution():
+def test_schema_ecflow_suitedef_script():
     errors = schema_validator(
         "ecflow",
         "$defs",
@@ -1078,32 +1074,25 @@ def test_schema_ecflow_suitedef_execution():
         1,
         "properties",
         "script",
-        "properties",
-        "execution",
     )
     # Basic spec:
-    assert not errors({"incantation": "/path/to/run.sh"})
-    # incantation is required:
-    assert "'incantation' is a required property" in errors({})
-    # executable is not a valid key:
-    assert "Additional properties are not allowed" in errors(
-        {"incantation": "/path/to/run.sh", "executable": "run.exe"}
-    )
-    # mpiargs and mpicmd are not valid keys:
-    assert "Additional properties are not allowed" in errors(
-        {"incantation": "/path/to/run.sh", "mpicmd": "srun"}
-    )
+    assert not errors({"body": "run.sh"})
+    # body is required:
+    assert "'body' is a required property" in errors({})
+    # Unknown keys are not allowed:
+    assert "Additional properties are not allowed" in errors({"body": "run.sh", "extra": "x"})
     # Optional keys are valid:
     assert not errors(
         {
-            "incantation": "/path/to/run.sh",
             "batchargs": {"walltime": "00:30:00"},
-            "envcmds": ["module load python"],
-            "threads": 4,
+            "body": "run.sh",
+            "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
         }
     )
-    # threads must be a positive integer:
-    assert "is less than the minimum" in errors({"incantation": "/path/to/run.sh", "threads": 0})
+    # includes rejects unknown keys:
+    assert "Additional properties are not allowed" in errors(
+        {"body": "run.sh", "includes": {"bad": ["x"]}}
+    )
 
 
 def test_schema_ecflow_suitedef_refs_vars():

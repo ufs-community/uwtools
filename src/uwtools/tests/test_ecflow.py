@@ -211,7 +211,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script LAST so loop exits after processing it.
-        script_config = {"execution": {"incantation": "echo hi"}}
+        script_config = {"body": "echo hi"}
         config = {"trigger": "1==1", "script": script_config}
         instance._add_node(config, task, suite)
         # Verify both trigger and script were processed.
@@ -222,7 +222,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script FIRST so loop must continue to process trigger afterward.
-        script_config = {"execution": {"incantation": "echo hi"}}
+        script_config = {"body": "echo hi"}
         config = {"script": script_config, "trigger": "1==1"}
         instance._add_node(config, task, suite)
         # Verify script was created and loop continued to process trigger.
@@ -460,9 +460,7 @@ class TestECFlowDef:
                     "suite_test": {
                         "task_a": {
                             "script": {
-                                "execution": {
-                                    "incantation": "/path/to/run.sh",
-                                }
+                                "body": "/path/to/run.sh",
                             },
                             "trigger": "nonexistent_task == complete",
                         }
@@ -483,16 +481,14 @@ class TestECFlowDef:
                             "task_setup": {
                                 "trigger": "1==1",
                                 "script": {
-                                    "execution": {
-                                        "incantation": "/path/to/prep.sh",
-                                    },
+                                    "body": "/path/to/prep.sh",
                                 },
                             },
                         },
                         "task_run": {
                             "trigger": "/test/prep/setup == complete",
                             "script": {
-                                "execution": {"incantation": "/path/to/run.sh"},
+                                "body": "/path/to/run.sh",
                             },
                         },
                     }
@@ -534,8 +530,12 @@ class TestECFlowDef:
                 "suitedef": {
                     "suite_ensemble": {
                         "tasks_member_{{ ec.MEM }}": {
-                            "expand": {"MEM": ["01", "02", "03"]},
-                            "script": {"execution": {"incantation": "hello.exe"}},
+                            "expand": {
+                                "MEM": ["01", "02", "03"],
+                            },
+                            "script": {
+                                "body": "hello.exe",
+                            },
                         }
                     }
                 }
