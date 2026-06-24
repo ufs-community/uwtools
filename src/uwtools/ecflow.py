@@ -13,7 +13,7 @@ import signal
 import socket
 from copy import deepcopy
 from pathlib import Path
-from subprocess import STDOUT, CalledProcessError, check_output
+from subprocess import CalledProcessError
 from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -452,8 +452,9 @@ def _ssl_check(prefix: str | None) -> None:
     fns = [f"{prefix}{ext}" for ext in (".crt", ".key", ".pem")] if prefix else _SSL_FILES
     paths = [_SSL_DIR / fn for fn in fns]
     if missing := [path for path in paths if not path.is_file()]:
-        log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
-        if not prefix:
+        if _SSL_DIR.is_dir() or prefix:
+            log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
+        if _SSL_DIR.is_dir() and not prefix:
             log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
         raise UWSSLCertificateError
     log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
@@ -482,9 +483,11 @@ def _ssl_generate_cert(path: Path, key_path: Path) -> None:
     """
     hostname = socket.gethostname()
     log.info("Generating SSL certificate: %s", path)
-    cmd = (
-        f"umask 077 && {_openssl()} req -x509 -key {key_path}"
-        f" -new -out {path} -days 3650 -subj /CN={hostname}"
+    cmd = "umask 077 && %s req -x509 -key %s -new -out %s -days 3650 -subj /CN=%s" % (
+        _openssl(),
+        key_path,
+        path,
+        hostname,
     )
     success, _ = run_shell_cmd(cmd=cmd, quiet=True)
     if not success:
@@ -500,7 +503,7 @@ def _ssl_generate_dhparam(path: Path) -> None:
     :raises UWError: If openssl reports failure.
     """
     log.info("Generating DH parameters: %s", path)
-    cmd = f"umask 077 && {_openssl()} dhparam -out {path} 2048"
+    cmd = "umask 077 && %s dhparam -out %s 2048" % (_openssl(), path)
     success, _ = run_shell_cmd(cmd=cmd, quiet=True)
     if not success:
         msg = f"Failed to generate DH parameters at {path}"
@@ -515,7 +518,7 @@ def _ssl_generate_key(path: Path) -> None:
     :raises UWError: If openssl reports failure.
     """
     log.info("Generating SSL private key: %s", path)
-    cmd = f"umask 077 && {_openssl()} genrsa -out {path} 2048"
+    cmd = "umask 077 && %s genrsa -out %s 2048" % (_openssl(), path)
     success, _ = run_shell_cmd(cmd=cmd, quiet=True)
     if not success:
         msg = f"Failed to generate SSL private key at {path}"
@@ -592,9 +595,8 @@ def server(
         log.info("Terminating")
         thread.terminal.set()
         if thread.port:
-            run_shell_cmd(
-                cmd=f"ecflow_client {ssl_opt}--port {thread.port} --terminate=yes", quiet=True
-            )
+            cmd = "ecflow_client %s--port %s --terminate=yes" % (ssl_opt, thread.port)
+            run_shell_cmd(cmd=cmd, quiet=True)
 
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
@@ -623,7 +625,6 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     """
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
-    cmd = ["ecflow_server", *([] if insecure else ["--ssl"])]
     # Create the run directory (ECF_HOME) on the user's behalf if it does not already exist.
     rundir.mkdir(parents=True, exist_ok=True)
     while not thread.terminal.is_set():
@@ -634,15 +635,8 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
         log.debug("Trying to start server on port %s", candidate)
         thread.port = candidate
         try:
-            check_output(  # noqa: S603
-                cmd,
-                cwd=rundir,
-                encoding="utf-8",
-                env={**env, "ECF_PORT": str(candidate)},
-                start_new_session=True,
-                stderr=STDOUT,
-                text=True,
-            )
+            cmd = "ecflow_server%s" % ("" if insecure else " --ssl")
+            run_shell_cmd(cmd=cmd, cwd=rundir, env={**env, "ECF_PORT": str(candidate)}, quiet=True)
         except CalledProcessError as e:
             if "bind: Address already in use" in (e.stdout or ""):
                 thread.port = None

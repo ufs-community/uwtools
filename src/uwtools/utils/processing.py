@@ -34,17 +34,16 @@ def run_shell_cmd(
     :param executable: Interpreter to use (e.g. "/bin/bash")
     :return: A result object providing combined stder/stdout output and success values.
     """
-    pre = f"{taskname}: " if taskname else ""
-    msg = "%sRunning"
-    if cwd:
-        msg += f" in {cwd}"
-    if env:
-        kvpairs = " ".join(f"{k}={v}" for k, v in env.items())
-        msg += f" with environment variables {kvpairs}"
-    msg += ":"
+    pre = f"[{taskname}] " if taskname else ""
     logfunc = log.debug if quiet else log.info
-    logfunc(msg, pre)
-    logfunc("%s  %s", pre, cmd)
+    logfunc("%sRunning: %s", pre, cmd)
+    if cwd:
+        logfunc("  in directory")
+        logfunc("    %s", cwd)
+    if env:
+        logfunc("  with environment")
+        for k in sorted(env):
+            logfunc("    %s=%s", k, env[k])
     kwargs: dict = dict(cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True)  # noqa: S604
     if executable:
         kwargs["executable"] = executable

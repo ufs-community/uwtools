@@ -3,6 +3,7 @@ Tests for uwtools.utils.processing module.
 """
 
 import logging
+from textwrap import dedent
 
 from pytest import mark
 
@@ -28,8 +29,9 @@ def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
 @mark.parametrize("executable", ["/bin/bash", None])
 @mark.parametrize("log_output", [True, False])
 @mark.parametrize("quiet", [True, False])
+@mark.parametrize("taskname", ["test", None])
 def test_utils_processing_run_shell_cmd__success(
-    caplog, executable, logged, log_output, quiet, tmp_path
+    executable, log_output, quiet, taskname, tmp_path, uwcaplog
 ):
     cmd = "echo hello $FOO"
     if quiet:
@@ -39,14 +41,22 @@ def test_utils_processing_run_shell_cmd__success(
         cwd=tmp_path,
         env={"FOO": "bar"},
         log_output=log_output,
+        taskname=taskname,
         quiet=quiet,
         executable=executable,
     )
     assert success
     if quiet:
-        assert not caplog.messages
+        assert not uwcaplog.messages
     elif log_output:
-        assert logged("Running in %s with environment variables FOO=bar:" % tmp_path)
-        assert logged("  %s" % cmd)
-        assert logged("Output:")
-        assert logged("  hello bar")
+        pre = f"[{taskname}] " if taskname else ""
+        expected = """
+        %sRunning: %s
+          in directory
+            %s
+          with environment
+            FOO=bar
+        %sOutput:
+        %s  hello bar
+        """ % (pre, cmd, tmp_path, pre, pre)
+        assert uwcaplog.text.strip() == dedent(expected).strip()

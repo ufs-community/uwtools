@@ -721,15 +721,26 @@ def test_ecflow__ssl_check__all_files_exist(logged, tmp_path):
 
 
 @mark.parametrize("excluded", ["dh2048.pem", "server.crt", "server.key"])
-def test_ecflow__ssl_check__missing_default_files_raises(excluded, tmp_path, uwcaplog):
-    fns = ["dh2048.pem", "server.crt", "server.key"]
-    fns.remove(excluded)
-    for fn in fns:
-        (tmp_path / fn).touch()
-    with patch.object(ecflow, "_SSL_DIR", tmp_path), raises(UWSSLCertificateError):
+@mark.parametrize("ssl_dir_exists", [True, False])
+def test_ecflow__ssl_check__missing_default_files_raises(
+    excluded, ssl_dir_exists, tmp_path, uwcaplog
+):
+    ssl_dir = tmp_path / "ssl"
+    if ssl_dir_exists:
+        ssl_dir.mkdir()
+        fns = ["dh2048.pem", "server.crt", "server.key"]
+        fns.remove(excluded)
+        for fn in fns:
+            (ssl_dir / fn).touch()
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir), raises(UWSSLCertificateError):
         ecflow._ssl_check(None)
-    assert "Missing SSL certificate file(s): %s" % (tmp_path / excluded) in uwcaplog.text
-    assert "Provide these files or remove %s to automatically generate" % tmp_path in uwcaplog.text
+    msgs = [
+        "Missing SSL certificate file(s): %s" % (ssl_dir / excluded),
+        "Provide these files or remove %s to automatically generate" % ssl_dir,
+    ]
+    for msg in msgs:
+        if ssl_dir_exists:
+            assert msg in uwcaplog.text
 
 
 @mark.parametrize("excluded", ["crt", "key", "pem"])
@@ -1023,40 +1034,38 @@ def test_ecflow_server__no_report_passes_none(server_mocks):
 
 
 def test_ecflow__server_start__fixed_port_ssl(tmp_path):
-    thread = ecflow._ServerThread()
-    rundir = tmp_path / "ecf"
-
-    def fake_check_output(_cmd, **_kwargs):
+    def fake_run_shell_cmd(*_args, **_kwargs):
         thread.terminal.set()
         return ""
 
+    thread = ecflow._ServerThread()
+    rundir = tmp_path / "ecf"
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "check_output", side_effect=fake_check_output) as mock_co,
+        patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd) as run_shell_cmd,
     ):
         ecflow._server_start(rundir, {"ECF_HOME": str(rundir)}, 3141, False)
     assert rundir.is_dir()
-    assert mock_co.call_args.args[0] == ["ecflow_server", "--ssl"]
-    assert mock_co.call_args.kwargs["env"]["ECF_PORT"] == "3141"
-    assert mock_co.call_args.kwargs["cwd"] == rundir
+    assert run_shell_cmd.call_args.kwargs["cmd"] == "ecflow_server --ssl"
+    assert run_shell_cmd.call_args.kwargs["cwd"] == rundir
+    assert run_shell_cmd.call_args.kwargs["env"]["ECF_PORT"] == "3141"
     assert thread.port == 3141
     assert thread.error is None
 
 
 def test_ecflow__server_start__fixed_port_insecure(tmp_path):
-    thread = ecflow._ServerThread()
-    rundir = tmp_path / "ecf"
-
-    def fake_check_output(_cmd, **_kwargs):
+    def fake_run_shell_cmd(*_args, **_kwargs):
         thread.terminal.set()
         return ""
 
+    thread = ecflow._ServerThread()
+    rundir = tmp_path / "ecf"
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "check_output", side_effect=fake_check_output) as mock_co,
+        patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd) as run_shell_cmd,
     ):
         ecflow._server_start(rundir, {}, 3141, True)
-    assert mock_co.call_args.args[0] == ["ecflow_server"]
+    assert run_shell_cmd.call_args.kwargs["cmd"] == "ecflow_server"
 
 
 def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
@@ -1065,7 +1074,7 @@ def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
     err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "check_output", side_effect=err),
+        patch.object(ecflow, "run_shell_cmd", side_effect=err),
     ):
         ecflow._server_start(rundir, {}, 3141, False)
     assert thread.error == "Requested port 3141 is unavailable"
@@ -1079,7 +1088,7 @@ def test_ecflow__server_start__fixed_port_other_failure(tmp_path):
     err = CalledProcessError(1, "ecflow_server", output="something went wrong")
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "check_output", side_effect=err),
+        patch.object(ecflow, "run_shell_cmd", side_effect=err),
     ):
         ecflow._server_start(rundir, {}, 3141, False)
     assert thread.error == "ecflow_server failed on port 3141: something went wrong"
@@ -1092,7 +1101,7 @@ def test_ecflow__server_start__launch_failure(tmp_path):
     err = FileNotFoundError(2, "No such file or directory", "ecflow_server")
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "check_output", side_effect=err),
+        patch.object(ecflow, "run_shell_cmd", side_effect=err),
     ):
         ecflow._server_start(rundir, {}, 3141, False)
     assert thread.error is not None
@@ -1101,22 +1110,21 @@ def test_ecflow__server_start__launch_failure(tmp_path):
 
 
 def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
-    thread = ecflow._ServerThread()
-    rundir = tmp_path / "ecf"
-    bind_err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
-    ports = []
-
-    def fake_check_output(_cmd, **kwargs):
+    def fake_run_shell_cmd(*_args, **kwargs):
         ports.append(kwargs["env"]["ECF_PORT"])
         if len(ports) == 1:
             raise bind_err
         thread.terminal.set()
         return ""
 
+    thread = ecflow._ServerThread()
+    rundir = tmp_path / "ecf"
+    bind_err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
+    ports: list[str] = []
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow.random, "randint", side_effect=[30000, 30001]),
-        patch.object(ecflow, "check_output", side_effect=fake_check_output),
+        patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd),
     ):
         ecflow._server_start(rundir, {}, None, False)
     assert ports == ["30000", "30001"]
@@ -1130,8 +1138,8 @@ def test_ecflow__server_start__random_port_failure(tmp_path):
     err = CalledProcessError(1, "ecflow_server", output="something broke")
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", side_effect=err),
         patch.object(ecflow.random, "randint", return_value=31415),
-        patch.object(ecflow, "check_output", side_effect=err),
     ):
         ecflow._server_start(rundir, {}, None, False)
     assert thread.error == "ecflow_server failed on port 31415: something broke"
