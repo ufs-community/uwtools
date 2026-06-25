@@ -63,7 +63,7 @@ class _ECFlowDef:
         self._config = cfgobj.data[STR.ecflow][STR.suitedef]
         self._d = Defs()
         self._scheduler = self._config.get(STR.scheduler)
-        self._scripts: dict[Path, str] = {}
+        self._scripts: dict[str, str] = {}
         log.debug("Adding workflow components to suite definition.")
         self._add_workflow_components()
         log.debug("Workflow components added. Scripts: %s", list(self._scripts.keys()))
@@ -73,7 +73,7 @@ class _ECFlowDef:
     def __str__(self):
         return self._d.__str__()
 
-    def write_ecf_scripts(self, path: Path | str) -> None:
+    def write_ecf_scripts(self, path: Path) -> None:
         """
         The ecf scripts for this workflow.
 
@@ -81,10 +81,11 @@ class _ECFlowDef:
         """
         if self._scripts:
             for subpath, content in self._scripts.items():
-                outpath = Path(path) / subpath
+                assert subpath.startswith("/")
+                outpath = Path(str(path) + subpath).with_suffix(".ecf")
                 outpath.parent.mkdir(parents=True, exist_ok=True)
                 log.debug("Writing ecf script: %s", outpath)
-                outpath.write_text(content)
+                outpath.write_text(content + "\n")
         else:
             log.debug("No scripts are configured for this workflow.")
 
@@ -268,10 +269,7 @@ class _ECFlowDef:
         includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
         sections = filter(None, [directives, includes_entry, "{body}", includes_exit])
         contents = "\n\n".join(sections).format(body=config[STR.body])
-        subdir = Path(task.get_abs_node_path().lstrip("/")).parent
-        fn = f"{task.name().split('_', maxsplit=1)[-1]}.ecf"
-        path = subdir / fn
-        self._scripts[path] = contents
+        self._scripts[task.get_abs_node_path()] = contents
 
     def _tag_name(self, key: str) -> tuple[str, str]:
         """

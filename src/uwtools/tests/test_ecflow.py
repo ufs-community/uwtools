@@ -77,14 +77,14 @@ class TestECFlowDef:
         assert logged("No scripts are configured for this workflow")
 
     def test_ecflow__ECFlowDef_write_ecf_scripts__with_scripts(self, instance, tmp_path):
-        instance._scripts = {Path("test/hello.ecf"): "#!/bin/bash\necho hello"}
+        instance._scripts = {"/test/hello.ecf": "#!/bin/bash\necho hello"}
         instance.write_ecf_scripts(tmp_path)
         outfile = tmp_path / "test" / "hello.ecf"
         assert outfile.is_file()
         assert "echo hello" in outfile.read_text()
 
     def test_ecflow__ECFlowDef_write_ecf_scripts__with_string_path(self, instance, tmp_path):
-        instance._scripts = {Path("suite/task.ecf"): "#!/bin/bash\necho test"}
+        instance._scripts = {"/suite/task.ecf": "#!/bin/bash\necho test"}
         instance.write_ecf_scripts(str(tmp_path))
         outfile = tmp_path / "suite" / "task.ecf"
         assert outfile.is_file()
