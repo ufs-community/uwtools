@@ -990,14 +990,6 @@ def test_schema_ecflow_suitedef_refs_nodecontainer_task():
     assert not errors({**config, "defstatus": "suspended"})
 
 
-def test_schema_ecflow_suitedef_refs_family():
-    errors = schema_validator("ecflow", "$defs", "family")
-    # Basic spec:
-    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
-    assert not errors(config)
-    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
-
-
 def test_schema_ecflow_suitedef_refs_familycontainer():
     errors = schema_validator("ecflow", "$defs", "familycontainer")
     # Basic spec:
@@ -1012,18 +1004,6 @@ def test_schema_ecflow_suitedef_refs_nodecontainer():
     config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
     assert not errors(config)
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
-
-
-def test_schema_ecflow_suitedef_refs_task():
-    errors = schema_validator("ecflow", "$defs", "task")
-    # Basic spec:
-    config = {
-        "script": {"body": "run.sh"},
-        "vars": {"MEMBER": "00", "LEAD": "006"},
-    }
-    assert not errors(config)
-    assert "'script' is a required property" in errors({"defstatus": "complete"})
-    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
 def test_schema_ecflow_suitedef_refs_taskcontainer():

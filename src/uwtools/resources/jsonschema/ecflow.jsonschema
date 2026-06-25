@@ -377,19 +377,6 @@
       ],
       "type": "object"
     },
-    "family": {
-      "$ref": "#/$defs/familycontainer",
-      "propertyNames": {
-        "anyOf": [
-          {
-            "$ref": "#/$defs/addon_property_names"
-          },
-          {
-            "pattern": "^(families|family|task|tasks)_.+$"
-          }
-        ]
-      }
-    },
     "familycontainer": {
       "allOf": [
         {
@@ -477,19 +464,6 @@
         }
       },
       "type": "object"
-    },
-    "task": {
-      "$ref": "#/$defs/taskcontainer",
-      "propertyNames": {
-        "anyOf": [
-          {
-            "const": "script"
-          },
-          {
-            "$ref": "#/$defs/addon_property_names"
-          }
-        ]
-      }
     },
     "taskcontainer": {
       "allOf": [
