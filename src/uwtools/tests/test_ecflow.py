@@ -2,6 +2,7 @@
 Tests for uwtools.ecflow module.
 """
 
+import re
 import sys
 from copy import deepcopy
 from io import StringIO
@@ -102,6 +103,11 @@ class TestECFlowDef:
         nested_path = tmp_path / "nested" / "output"
         instance.write_suite_definition(nested_path)
         assert (nested_path / "suite.def").is_file()
+
+    def test_ecflow__ECFlowDef__add_node__bad_name(self, instance):
+        with raises(UWConfigError) as e:
+            instance._add_node({"task_%bad%": {}}, Suite("test"), instance._d)
+        assert re.match(r"^Invalid node name .*: %bad%", str(e.value))
 
     def test_ecflow__ECFlowDef__add_node__basic(self, instance):
         suite = Suite("test")
@@ -470,8 +476,9 @@ class TestECFlowDef:
                 }
             }
         }
-        with raises(AssertionError):
+        with raises(AssertionError) as e:
             _ECFlowDef(config=config)
+        assert "Could not find node 'nonexistent_task'" in str(e)
 
     def test_ecflow__ECFlowDef__init__full_workflow(self, tmp_path):
         config = {

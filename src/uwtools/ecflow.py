@@ -125,7 +125,6 @@ class _ECFlowDef:
         :param refs: Optional references from expanded nodes from higher in the tree.
         """
         parent.add(node)
-
         add_items = lambda method, cfg: [method(*args) for args in cfg]
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
@@ -133,11 +132,11 @@ class _ECFlowDef:
                 # Tree buiding cases
 
                 case STR.family:
-                    self._add_node(subconfig, Family(name), node, refs)
+                    self._add_node(subconfig, _node(Family, name), node, refs)
                 case STR.families:
                     self._expand_block(subconfig, name, Family, node, refs)
                 case STR.task:
-                    self._add_node(subconfig, Task(name), node, refs)
+                    self._add_node(subconfig, _node(Task, name), node, refs)
                 case STR.tasks:
                     self._expand_block(subconfig, name, Task, node, refs)
 
@@ -218,7 +217,7 @@ class _ECFlowDef:
                 case STR.vars:
                     self._d.add_variable(subconfig)
                 case STR.suite:
-                    self._add_node(subconfig, Suite(name), self._d)
+                    self._add_node(subconfig, _node(Suite, name), self._d)
                 case STR.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
 
@@ -356,7 +355,7 @@ class _ECFlowDef:
             new_name = list(new_block.keys())[0]
             args = {
                 STR.config: new_block[new_name],
-                STR.node: nodetype(new_name),
+                STR.node: _node(nodetype, new_name),
                 STR.parent: parent,
                 STR.refs: new_refs,
             }
@@ -424,6 +423,13 @@ _SSL_KEY = "server.key"
 _SSL_CERT = "server.crt"
 _SSL_DHPARAM = "dh2048.pem"
 _SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
+
+
+def _node(cls: type[Node], name: str) -> Node:
+    try:
+        return cls(name)
+    except RuntimeError as e:
+        raise UWConfigError(str(e)) from e
 
 
 def _openssl() -> Path:
