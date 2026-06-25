@@ -954,10 +954,12 @@ def test_schema_ecflow_suitedef_refs_task_expander():
     assert not errors({**config, "trigger": "task_setup == complete"})
     # script is required (taskcontainer is applied within tasks_* expanders):
     assert "'script' is a required property" in errors(with_del(config, "script"))
-    # script.body is required:
-    assert "'body' is a required property" in errors(with_set(config, {}, "script"))
+    # script may be a string:
+    assert not errors({**config, "script": "/path/to/a.ecf"})
+    # script as an object without body is invalid:
+    assert "is not valid under any of the given schemas" in errors(with_set(config, {}, "script"))
     # script rejects unknown keys:
-    assert "Additional properties are not allowed" in errors(
+    assert "is not valid under any of the given schemas" in errors(
         with_set(config, "x", "script", "extra")
     )
 
@@ -1022,8 +1024,15 @@ def test_schema_ecflow_suitedef_refs_taskcontainer_script():
     # Basic spec:
     config = {"script": {"body": "run.sh", "includes": {"entry": ["head.h"]}}}
     assert not errors(config)
-    assert "'body' is a required property" in errors(with_del(config, "script", "body"))
-    assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
+    # script may be a string:
+    assert not errors({"script": "/path/to/a.ecf"})
+    # script as an object without body is invalid:
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(config, "script", "body")
+    )
+    assert "is not valid under any of the given schemas" in errors(
+        with_set(config, 2, "script", "extra")
+    )
 
 
 def test_schema_ecflow_suitedef_scheduler():
@@ -1054,6 +1063,35 @@ def test_schema_ecflow_suitedef_script():
         1,
         "properties",
         "script",
+    )
+    # script may be a string:
+    assert not errors("/path/to/a.ecf")
+    # script may be an object with body:
+    assert not errors({"body": "run.sh"})
+    # script as object with optional keys is valid:
+    assert not errors(
+        {
+            "batchargs": {"walltime": "00:30:00"},
+            "body": "run.sh",
+            "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
+        }
+    )
+    # An invalid value matches neither oneOf option:
+    for val in [{}, 42, {"body": "run.sh", "extra": "x"}]:
+        assert "is not valid under any of the given schemas" in errors(val)
+
+
+def test_schema_ecflow_suitedef_script_object():
+    errors = schema_validator(
+        "ecflow",
+        "$defs",
+        "taskcontainer",
+        "allOf",
+        1,
+        "properties",
+        "script",
+        "oneOf",
+        1,
     )
     # Basic spec:
     assert not errors({"body": "run.sh"})

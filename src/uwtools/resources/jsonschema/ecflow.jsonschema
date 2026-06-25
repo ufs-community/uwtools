@@ -473,37 +473,46 @@
         {
           "properties": {
             "script": {
-              "additionalProperties": false,
-              "properties": {
-                "batchargs": {
-                  "$ref": "urn:uwtools:batchargs"
-                },
-                "body": {
+              "oneOf": [
+                {
+                  "description": "Path to an existing .ecf file",
                   "type": "string"
                 },
-                "includes": {
+                {
                   "additionalProperties": false,
+                  "description": "Recipe for constructing an .ecf file",
                   "properties": {
-                    "entry": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array"
+                    "batchargs": {
+                      "$ref": "urn:uwtools:batchargs"
                     },
-                    "exit": {
-                      "items": {
-                        "type": "string"
+                    "body": {
+                      "type": "string"
+                    },
+                    "includes": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "entry": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "exit": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
                       },
-                      "type": "array"
+                      "type": "object"
                     }
                   },
+                  "required": [
+                    "body"
+                  ],
                   "type": "object"
                 }
-              },
-              "required": [
-                "body"
-              ],
-              "type": "object"
+              ]
             }
           },
           "required": [
