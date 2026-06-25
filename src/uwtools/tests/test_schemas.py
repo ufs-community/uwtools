@@ -1059,6 +1059,8 @@ def test_schema_ecflow_suitedef_script():
     assert not errors({"body": "run.sh"})
     # body is required:
     assert "'body' is a required property" in errors({})
+    # body must be a string:
+    assert "is not of type 'string'" in errors({"body": 42})
     # Unknown keys are not allowed:
     assert "Additional properties are not allowed" in errors({"body": "run.sh", "extra": "x"})
     # Optional keys are valid:
@@ -1069,10 +1071,24 @@ def test_schema_ecflow_suitedef_script():
             "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
         }
     )
+    # includes with only entry is valid:
+    assert not errors({"body": "run.sh", "includes": {"entry": ["head.h"]}})
+    # includes with only exit is valid:
+    assert not errors({"body": "run.sh", "includes": {"exit": ["tail.h"]}})
+    # includes with no sub-keys is valid:
+    assert not errors({"body": "run.sh", "includes": {}})
     # includes rejects unknown keys:
     assert "Additional properties are not allowed" in errors(
         {"body": "run.sh", "includes": {"bad": ["x"]}}
     )
+    # includes.entry must be an array:
+    assert "is not of type 'array'" in errors({"body": "run.sh", "includes": {"entry": "head.h"}})
+    # includes.entry items must be strings:
+    assert "is not of type 'string'" in errors({"body": "run.sh", "includes": {"entry": [42]}})
+    # includes.exit must be an array:
+    assert "is not of type 'array'" in errors({"body": "run.sh", "includes": {"exit": "tail.h"}})
+    # includes.exit items must be strings:
+    assert "is not of type 'string'" in errors({"body": "run.sh", "includes": {"exit": [42]}})
 
 
 def test_schema_ecflow_suitedef_refs_vars():
