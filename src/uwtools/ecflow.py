@@ -389,9 +389,9 @@ class _ECFlowDef:
         :return: Tag and name of key.
         """
         # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
-        parts = key.split("_")
+        parts = key.split("_", maxsplit=1)
         tag = parts[0]
-        name = "_".join(parts[1:]) if parts[1:] else ""
+        name = parts[1] if parts[1:] else ""
         return tag, name
 
 
