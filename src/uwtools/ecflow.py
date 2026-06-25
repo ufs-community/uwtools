@@ -213,27 +213,6 @@ class _ECFlowDef:
                 case STR.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
 
-    def _prepare_ecf_script(self, config: dict, task: Task) -> None:
-        """
-        Prepare and store an ecf script to later write to disk.
-
-        :param config: The configuration for the script.
-        :param task: The ecFlow task node.
-        """
-        directives = ""
-        if self._scheduler:
-            props = {STR.scheduler: self._scheduler, **config[STR.batchargs]}
-            scheduler = JobScheduler.get_scheduler(props)
-            directives = "\n".join(scheduler.directives)
-        fmt = lambda k: "\n".join(f"%include {x}" for x in config.get(STR.includes, {}).get(k, []))
-        includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
-        sections = filter(None, [directives, includes_entry, "{body}", includes_exit])
-        contents = "\n\n".join(sections).format(body=config[STR.body])
-        subdir = Path(task.get_abs_node_path().lstrip("/")).parent
-        fn = f"{task.name().split('_', maxsplit=1)[-1]}.ecf"
-        path = subdir / fn
-        self._scripts[path] = contents
-
     def _expand_block(
         self,
         config: dict,
@@ -273,6 +252,27 @@ class _ECFlowDef:
                 STR.refs: new_refs,
             }
             self._add_node(**args)
+
+    def _prepare_ecf_script(self, config: dict, task: Task) -> None:
+        """
+        Prepare and store an ecf script to later write to disk.
+
+        :param config: The configuration for the script.
+        :param task: The ecFlow task node.
+        """
+        directives = ""
+        if self._scheduler:
+            props = {STR.scheduler: self._scheduler, **config[STR.batchargs]}
+            scheduler = JobScheduler.get_scheduler(props)
+            directives = "\n".join(scheduler.directives)
+        fmt = lambda k: "\n".join(f"%include {x}" for x in config.get(STR.includes, {}).get(k, []))
+        includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
+        sections = filter(None, [directives, includes_entry, "{body}", includes_exit])
+        contents = "\n\n".join(sections).format(body=config[STR.body])
+        subdir = Path(task.get_abs_node_path().lstrip("/")).parent
+        fn = f"{task.name().split('_', maxsplit=1)[-1]}.ecf"
+        path = subdir / fn
+        self._scripts[path] = contents
 
     def _tag_name(self, key: str) -> tuple[str, str]:
         """
