@@ -185,7 +185,6 @@ class _ECFlowDef:
                 repeat = RepeatDay
             case STR.int:
                 repeat = RepeatInteger
-
         # The schema-checked config blocks for each of these will be the variable and either the
         # start/end/[step] keys or the list key. Since they must be passed as positional arguments,
         # ensure their order is either (argument, start, end, [step]) or (argument, list).
@@ -284,7 +283,7 @@ class _ECFlowDef:
         # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_", maxsplit=1)
         tag = parts[0]
-        name = parts[1] if parts[1:] else ""
+        name = parts[1] if len(parts) > 1 else ""
         return tag, name
 
 
