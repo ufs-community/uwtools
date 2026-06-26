@@ -1123,25 +1123,35 @@ def test_ecflow__server_wait__unhandled_exception(uwcaplog):
 
 
 @mark.parametrize("insecure", [True, False])
-@mark.parametrize("ping_effect", [None, RuntimeError("Failed to connect")])
+@mark.parametrize("ping_effect", [None, [RuntimeError("Failed to connect"), None]])
 @mark.parametrize("report_vars", [{"FOO": "bar"}, None])
 def test_ecflow__server_wait_ok(insecure, ping_effect, report_vars, uwcaplog):
     portnum = 54321
     thread = ecflow._ServerThread()
+    ping = Mock(side_effect=ping_effect)
     with (
-        patch.object(ecflow, "_client", Mock(ping=Mock(side_effect=ping_effect))) as _client,
+        patch.object(ecflow, "_client", return_value=Mock(ping=ping)) as _client,
         patch.object(ecflow, "_server_report") as _server_report,
         patch.object(ecflow, "sleep") as sleep,
         patch.object(
-            ecflow._ServerThread, "port", new=PropertyMock(side_effect=[None, portnum]), create=True
+            ecflow._ServerThread,
+            "port",
+            new=PropertyMock(side_effect=[None, portnum, portnum]),
+            create=True,
         ) as port,
     ):
         ecflow._server_wait(thread, insecure=insecure, report_vars=report_vars)
-    _client.assert_called_once_with(portnum, insecure)
+    _client.assert_called_with(portnum, insecure)
     _server_report.assert_called_once_with(portnum, report_vars)
     assert f"Server started on port {portnum}" in uwcaplog.text
-    assert port.call_count == 2
-    sleep.assert_called_once()
+    if ping_effect:
+        assert _client.call_count == 2
+        assert port.call_count == 3
+        assert sleep.call_count == 2
+    else:
+        assert _client.call_count == 1
+        assert port.call_count == 2
+        assert sleep.call_count == 1
 
 
 # _ssl_check
