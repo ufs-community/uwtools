@@ -106,7 +106,6 @@ class _STR(_ValsMatchKeys):
     fallback: str = _
     families: str = _
     family: str = _
-    file: str = _
     filter_topo: str = _
     format1: str = _
     format2: str = _
@@ -117,10 +116,8 @@ class _STR(_ValsMatchKeys):
     gsi: str = _
     hardlink: str = _
     help: str = _
-    hostname: str = _
     hsi: str = _
     htar: str = _
-    incantation: str = _
     includes: str = _
     inlimits: str = _
     input_file: str = _
@@ -141,7 +138,6 @@ class _STR(_ValsMatchKeys):
     make_hgrid: str = _
     make_solo_mosaic: str = _
     makedirs: str = _
-    manual: str = _
     meters: str = _
     mode: str = _
     module: str = _
