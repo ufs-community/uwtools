@@ -933,6 +933,20 @@ def test_ecflow__client(insecure):
         Client().enable_ssl.assert_called_once_with()
 
 
+# _node
+
+
+def test_ecflow__node():
+    task = ecflow._node(cls=Task, name="foo")
+    assert isinstance(task, Task)
+
+
+def test_ecflow__node__bad_name():
+    with raises(UWConfigError) as e:
+        ecflow._node(cls=Task, name=".bad.")
+    assert "Invalid node name" in str(e)
+
+
 # _openssl
 
 
