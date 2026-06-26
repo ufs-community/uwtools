@@ -20,7 +20,6 @@ from time import sleep
 from typing import TYPE_CHECKING, cast
 
 from ecflow import (  # type: ignore[import-untyped]
-    Client,
     Defs,
     DState,
     Family,
@@ -526,14 +525,6 @@ class _ServerThread(Thread):
         self.port: int | None = None
         self.terminal = Event()
         self.error: str | None = None
-
-
-def _client(port: int, insecure: bool) -> Client:
-    hostname = socket.gethostname()
-    c = Client(hostname, str(port))
-    if not insecure:
-        c.enable_ssl()
-    return c
 
 
 def _node(cls: type[Node], name: str) -> Node:
