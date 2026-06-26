@@ -967,6 +967,12 @@ def test_ecflow__server_report(capsys):
     assert report == {"vars": {"ECF_HOST": "host.com", "ECF_SSL": "1", "ECF_PORT": "54321"}}
 
 
+@mark.parametrize("report_vars", [None, {}])
+def test_ecflow__server_report_no_op(capsys, report_vars):
+    ecflow._server_report(port=54321, report_vars=report_vars)
+    assert not capsys.readouterr().out
+
+
 # _server_start
 
 
