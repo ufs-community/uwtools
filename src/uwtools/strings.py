@@ -69,8 +69,8 @@ class _STR(_ValsMatchKeys):
     action: str = _
     base_file: str = _
     batch: str = _
-    body: str = _
     batchargs: str = _
+    body: str = _
     cdeps: str = _
     chgres_cube: str = _
     classname: str = _
@@ -138,6 +138,7 @@ class _STR(_ValsMatchKeys):
     make_hgrid: str = _
     make_solo_mosaic: str = _
     makedirs: str = _
+    manual: str = _
     meters: str = _
     mode: str = _
     module: str = _

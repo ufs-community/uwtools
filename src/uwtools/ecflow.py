@@ -267,7 +267,8 @@ class _ECFlowDef:
             directives = "\n".join(scheduler.directives)
         fmt = lambda k: "\n".join(f"%include {x}" for x in config.get(STR.includes, {}).get(k, []))
         includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
-        sections = [directives, includes_entry, "{body}", includes_exit]
+        manual = "\n".join(["%manual", config[STR.manual], "%end"]) if STR.manual in config else ""
+        sections = [directives, manual, includes_entry, "{body}", includes_exit]
         contents = "\n\n".join(filter(None, sections)).format(body=config[STR.body])
         self._scripts[task.get_abs_node_path()] = contents
 
