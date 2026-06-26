@@ -1074,6 +1074,7 @@ def test_schema_ecflow_suitedef_script():
             "batchargs": {"walltime": "00:30:00"},
             "body": "run.sh",
             "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
+            "manual": "This is the manual",
         }
     )
     # An invalid value matches neither oneOf option:
@@ -1107,6 +1108,7 @@ def test_schema_ecflow_suitedef_script_object():
             "batchargs": {"walltime": "00:30:00"},
             "body": "run.sh",
             "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
+            "manual": "This is the manual",
         }
     )
     # includes with only entry is valid:

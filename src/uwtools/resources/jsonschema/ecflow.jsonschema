@@ -505,6 +505,9 @@
                         }
                       },
                       "type": "object"
+                    },
+                    "manual": {
+                      "type": "string"
                     }
                   },
                   "required": [
