@@ -43,13 +43,130 @@ from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
-ECFLOW_PORT_MIN = 1024  # minimum TCP port number accepted by ecFlow
-ECFLOW_PORT_MAX = 49151  # maximum TCP port number accepted by ecFlow
-
 if TYPE_CHECKING:
     from types import FrameType
 
     from ecflow import NodeContainer
+
+
+# Public
+
+ECFLOW_PORT_MIN = 1024  # minimum TCP port number accepted by ecFlow
+ECFLOW_PORT_MAX = 49151  # maximum TCP port number accepted by ecFlow
+
+
+def realize(
+    config: YAMLConfig | Path | None,
+    output_path: Path | None = None,
+    scripts_path: Path | None = None,
+) -> str:
+    """
+    Realize the ecFlow suite defined in a given YAML as a Suite Definition and corresponding ecf
+    scripts (if 'scripts_path' is provided).
+
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_path: Path to write the rendered Suite Definition file (None => write to stdout).
+    :param scripts_path: Path to write the rendered ecf scripts (None => do not write scripts).
+    :return: Suite Definition as a string.
+    """
+    suite = _ECFlowDef(config)
+    suite.write_suite_definition(output_path)
+    if scripts_path:
+        suite.write_ecf_scripts(scripts_path)
+    return str(suite)
+
+
+def server(
+    config: dict | YAMLConfig | Path | None,
+    port: int | None = None,
+    insecure: bool = False,
+    report: bool = False,
+) -> None:
+    """
+    Start an ecFlow server, optionally with SSL security enabled.
+
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
+    down gracefully via the ecFlow client's terminate option.
+
+    :param config: Config providing server settings (None => read stdin).
+    :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
+    :param insecure: Start the server without SSL security.
+    :param report: Output server details (e.g. hostname, port) as JSON to stdout.
+    :raises UWError: If the server fails to start.
+    """
+
+    def shutdown(_signum: int, _frame: FrameType | None) -> None:
+        log.info("Terminating")
+        thread.terminal.set()
+        if thread.port:
+            cmd = "ecflow_client %s--port %s --terminate=yes" % (ssl_opt, thread.port)
+            run_shell_cmd(cmd=cmd, quiet=True)
+
+    cfg = YAMLConfig(config)
+    cfg.dereference()
+    validate(cfg)
+    server_cfg = cfg.data[STR.ecflow][STR.server]
+    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
+    # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
+    # (defaults to SSL on with auto-provisioned default certificates).
+    ecf_ssl = server_cfg.get("ECF_SSL")
+    ssl_on = not insecure and ecf_ssl is not False
+    if ssl_on:
+        try:
+            _ssl_check(ecf_ssl)
+        except UWSSLCertificateError:
+            if ecf_ssl in [None, True]:
+                _ssl_provision()
+    rundir = Path(server_cfg["ECF_HOME"])
+    # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
+    # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
+    cfg_vars = {k: str(v) for k, v in server_cfg.items() if k != "ECF_SSL"}
+    env = {**os.environ, **cfg_vars}
+    if ssl_on:
+        env["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
+    else:
+        # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
+        env.pop("ECF_SSL", None)
+    # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
+    # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
+    report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
+    if ssl_on:
+        report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
+    thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
+    # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
+    ssl_opt = "" if insecure else "--ssl "
+    signal.signal(signal.SIGINT, shutdown)
+    thread.start()
+    _server_wait(thread, ssl_opt=ssl_opt, report_vars=report_vars if report else None)
+    thread.join()
+    if thread.error:
+        raise UWError(thread.error)
+
+
+def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
+    """
+    Validate an ecFlow config against the internal ecFlow schema.
+
+    :param config: A dict, a YAMLConfig, a path to a YAML file, or None (None => read stdin).
+    :return: True if the config conforms to the schema.
+    :raises: UWConfigError if validation fails.
+    """
+    kwargs: dict = {"schema_name": STR.ecflow, "desc": "ecFlow config"}
+    if isinstance(config, (dict, YAMLConfig)):
+        kwargs["config_data"] = config
+    else:
+        kwargs["config_path"] = config
+    validate_internal(**kwargs)
+    return True
+
+
+# Private
+
+_SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
+_SSL_KEY = "server.key"
+_SSL_CERT = "server.crt"
+_SSL_DHPARAM = "dh2048.pem"
+_SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
 
 
 class _ECFlowDef:
@@ -74,6 +191,8 @@ class _ECFlowDef:
 
     def __str__(self):
         return self._d.__str__()
+
+    # Public
 
     def write_ecf_scripts(self, path: Path | str) -> None:
         """
@@ -108,6 +227,8 @@ class _ECFlowDef:
             log.debug("No output path provided, writing the suite definition to stdout.")
         with writable(path) as f:
             print(str(self).rstrip("\n"), file=f)
+
+    # Private
 
     def _add_node(  # noqa: PLR0912
         self,
@@ -394,35 +515,16 @@ class _ECFlowDef:
         return tag, name
 
 
-def realize(
-    config: YAMLConfig | Path | None,
-    output_path: Path | None = None,
-    scripts_path: Path | None = None,
-) -> str:
+class _ServerThread(Thread):
     """
-    Realize the ecFlow suite defined in a given YAML as a Suite Definition and corresponding ecf
-    scripts (if 'scripts_path' is provided).
-
-    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
-    :param output_path: Path to write the rendered Suite Definition file (None => write to stdout).
-    :param scripts_path: Path to write the rendered ecf scripts (None => do not write scripts).
-    :return: Suite Definition as a string.
+    A thread that runs an ecFlow server, tracking the port in use and shutdown state.
     """
-    suite = _ECFlowDef(config)
-    suite.write_suite_definition(output_path)
-    if scripts_path:
-        suite.write_ecf_scripts(scripts_path)
-    return str(suite)
 
-
-# Private helpers
-
-
-_SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
-_SSL_KEY = "server.key"
-_SSL_CERT = "server.crt"
-_SSL_DHPARAM = "dh2048.pem"
-_SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.port: int | None = None
+        self.terminal = Event()
+        self.error: str | None = None
 
 
 def _node(cls: type[Node], name: str) -> Node:
@@ -445,173 +547,6 @@ def _openssl() -> Path:
     return Path(path)
 
 
-def _ssl_check(prefix: str | None) -> None:
-    """
-    Verify that the appropriate SSL certificate triplet exists in $HOME/.ecflowrc/ssl.
-
-    The files comprising the triplet are <prefix>.{crt,key,pem} when 'prefix' is provided, otherwise
-    the default files specified by _SSL_FILES.
-
-    :param prefix: The <host>.<port> prefix identifying the certificate triplet.
-    :raises UWSSLCertificateError: If one or more of the required files are missing.
-    """
-    fns = [f"{prefix}{ext}" for ext in (".crt", ".key", ".pem")] if prefix else _SSL_FILES
-    paths = [_SSL_DIR / fn for fn in fns]
-    if missing := [path for path in paths if not path.is_file()]:
-        if _SSL_DIR.is_dir() or prefix:
-            log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
-        if _SSL_DIR.is_dir() and not prefix:
-            log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
-        raise UWSSLCertificateError
-    log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
-
-
-def _ssl_provision() -> None:
-    """
-    Provision SSL certificates in $HOME/.ecflowrc/ssl.
-
-    :raises UWError: If or if certificate generation fails.
-    """
-    _SSL_DIR.mkdir(parents=True, exist_ok=True)
-    _ssl_generate_key(_SSL_DIR / _SSL_KEY)
-    _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
-    _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
-    log.info("SSL certificate files written to %s", _SSL_DIR)
-
-
-def _ssl_generate_cert(path: Path, key_path: Path) -> None:
-    """
-    Generate a self-signed X.509 certificate at 'path' using the key at 'key_path'.
-
-    :param path: Destination for the certificate file.
-    :param key_path: Path to the existing RSA private key.
-    :raises UWError: If openssl reports failure.
-    """
-    hostname = socket.gethostname()
-    log.info("Generating SSL certificate: %s", path)
-    cmd = "umask 077 && %s req -x509 -key %s -new -out %s -days 3650 -subj /CN=%s" % (
-        _openssl(),
-        key_path,
-        path,
-        hostname,
-    )
-    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
-    if not success:
-        msg = f"Failed to generate SSL certificate at {path}"
-        raise UWError(msg)
-
-
-def _ssl_generate_dhparam(path: Path) -> None:
-    """
-    Generate 2048-bit Diffie-Hellman parameters at 'path'.
-
-    :param path: Destination for the DH parameters file.
-    :raises UWError: If openssl reports failure.
-    """
-    log.info("Generating DH parameters: %s", path)
-    cmd = "umask 077 && %s dhparam -out %s 2048" % (_openssl(), path)
-    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
-    if not success:
-        msg = f"Failed to generate DH parameters at {path}"
-        raise UWError(msg)
-
-
-def _ssl_generate_key(path: Path) -> None:
-    """
-    Generate a 2048-bit RSA private key (no password) at 'path'.
-
-    :param path: Destination for the private key file.
-    :raises UWError: If openssl reports failure.
-    """
-    log.info("Generating SSL private key: %s", path)
-    cmd = "umask 077 && %s genrsa -out %s 2048" % (_openssl(), path)
-    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
-    if not success:
-        msg = f"Failed to generate SSL private key at {path}"
-        raise UWError(msg)
-
-
-class _ServerThread(Thread):
-    """
-    A thread that runs an ecFlow server, tracking the port in use and shutdown state.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.port: int | None = None
-        self.terminal = Event()
-        self.error: str | None = None
-
-
-def server(
-    config: dict | YAMLConfig | Path | None,
-    port: int | None = None,
-    insecure: bool = False,
-    report: bool = False,
-) -> None:
-    """
-    Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
-
-    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
-    down gracefully via 'ecflow_client --terminate'.
-
-    :param config: A dict, a YAMLConfig, or a path to a YAML file providing server settings (None =>
-        read stdin).
-    :param port: TCP port to use (None => pick a random available port from the range
-        ECFLOW_PORT_MIN through ECFLOW_PORT_MAX).
-    :param insecure: Start the server without SSL security.
-    :param report: Output server details (e.g. hostname, port) as JSON to stdout.
-    :raises UWError: If the server fails to start.
-    """
-    cfg = YAMLConfig(config)
-    cfg.dereference()
-    validate(cfg)
-    server_cfg = cfg.data[STR.ecflow][STR.server]
-    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
-    # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
-    # (defaults to SSL on with auto-provisioned default certificates).
-    ecf_ssl = server_cfg.get("ECF_SSL")
-    ssl_on = not insecure and ecf_ssl is not False
-    if ssl_on:
-        try:
-            _ssl_check(ecf_ssl)
-        except UWSSLCertificateError:
-            if ecf_ssl in [None, True]:
-                _ssl_provision()
-    rundir = Path(server_cfg["ECF_HOME"])
-    # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
-    # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
-    cfg_vars = {k: str(v) for k, v in server_cfg.items() if k != "ECF_SSL"}
-    env = {**os.environ, **cfg_vars}
-    if ssl_on:
-        env["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
-    else:
-        # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
-        env.pop("ECF_SSL", None)
-    # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
-    # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
-    report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
-    if ssl_on:
-        report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
-    thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
-    # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
-    ssl_opt = "" if insecure else "--ssl "
-
-    def shutdown(_signum: int, _frame: FrameType | None) -> None:
-        log.info("Terminating")
-        thread.terminal.set()
-        if thread.port:
-            cmd = "ecflow_client %s--port %s --terminate=yes" % (ssl_opt, thread.port)
-            run_shell_cmd(cmd=cmd, quiet=True)
-
-    signal.signal(signal.SIGINT, shutdown)
-    thread.start()
-    _server_wait(thread, ssl_opt=ssl_opt, report_vars=report_vars if report else None)
-    thread.join()
-    if thread.error:
-        raise UWError(thread.error)
-
-
 def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
@@ -625,8 +560,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
 
     :param rundir: Directory to run the server in (ECF_HOME).
     :param env: Base environment variables for the server.
-    :param port: A specific port to use, or None to pick a random port from the range
-        ECFLOW_PORT_MIN through ECFLOW_PORT_MAX.
+    :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
     """
     thread = cast(_ServerThread, current_thread())
@@ -702,18 +636,87 @@ def _server_report(port: int, report_vars: dict[str, str]) -> None:
     print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
-def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
+def _ssl_check(prefix: str | None) -> None:
     """
-    Validate an ecFlow config against the internal ecFlow schema.
+    Verify that the appropriate SSL certificate triplet exists in $HOME/.ecflowrc/ssl.
 
-    :param config: A dict, a YAMLConfig, a path to a YAML file, or None (None => read stdin).
-    :return: True if the config conforms to the schema.
-    :raises: UWConfigError if validation fails.
+    The files comprising the triplet are <prefix>.{crt,key,pem} when 'prefix' is provided, otherwise
+    the default files specified by _SSL_FILES.
+
+    :param prefix: The <host>.<port> prefix identifying the certificate triplet.
+    :raises UWSSLCertificateError: If one or more of the required files are missing.
     """
-    kwargs: dict = {"schema_name": STR.ecflow, "desc": "ecFlow config"}
-    if isinstance(config, (dict, YAMLConfig)):
-        kwargs["config_data"] = config
-    else:
-        kwargs["config_path"] = config
-    validate_internal(**kwargs)
-    return True
+    fns = [f"{prefix}{ext}" for ext in (".crt", ".key", ".pem")] if prefix else _SSL_FILES
+    paths = [_SSL_DIR / fn for fn in fns]
+    if missing := [path for path in paths if not path.is_file()]:
+        if _SSL_DIR.is_dir() or prefix:
+            log.error("Missing SSL certificate file(s): %s", ", ".join(map(str, missing)))
+        if _SSL_DIR.is_dir() and not prefix:
+            log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
+        raise UWSSLCertificateError
+    log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
+
+
+def _ssl_generate_cert(path: Path, key_path: Path) -> None:
+    """
+    Generate a self-signed X.509 certificate at 'path' using the key at 'key_path'.
+
+    :param path: Destination for the certificate file.
+    :param key_path: Path to the existing RSA private key.
+    :raises UWError: If openssl reports failure.
+    """
+    hostname = socket.gethostname()
+    log.info("Generating SSL certificate: %s", path)
+    cmd = "umask 077 && %s req -x509 -key %s -new -out %s -days 3650 -subj /CN=%s" % (
+        _openssl(),
+        key_path,
+        path,
+        hostname,
+    )
+    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+    if not success:
+        msg = f"Failed to generate SSL certificate at {path}"
+        raise UWError(msg)
+
+
+def _ssl_generate_dhparam(path: Path) -> None:
+    """
+    Generate 2048-bit Diffie-Hellman parameters at 'path'.
+
+    :param path: Destination for the DH parameters file.
+    :raises UWError: If openssl reports failure.
+    """
+    log.info("Generating DH parameters: %s", path)
+    cmd = "umask 077 && %s dhparam -out %s 2048" % (_openssl(), path)
+    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+    if not success:
+        msg = f"Failed to generate DH parameters at {path}"
+        raise UWError(msg)
+
+
+def _ssl_generate_key(path: Path) -> None:
+    """
+    Generate a 2048-bit RSA private key (no password) at 'path'.
+
+    :param path: Destination for the private key file.
+    :raises UWError: If openssl reports failure.
+    """
+    log.info("Generating SSL private key: %s", path)
+    cmd = "umask 077 && %s genrsa -out %s 2048" % (_openssl(), path)
+    success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+    if not success:
+        msg = f"Failed to generate SSL private key at {path}"
+        raise UWError(msg)
+
+
+def _ssl_provision() -> None:
+    """
+    Provision SSL certificates in $HOME/.ecflowrc/ssl.
+
+    :raises UWError: If or if certificate generation fails.
+    """
+    _SSL_DIR.mkdir(parents=True, exist_ok=True)
+    _ssl_generate_key(_SSL_DIR / _SSL_KEY)
+    _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
+    _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
+    log.info("SSL certificate files written to %s", _SSL_DIR)
