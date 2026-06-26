@@ -84,19 +84,25 @@ def server(
     report: bool = False,
 ) -> None:
     """
-    Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
+    Start an ecFlow server, optionally with SSL security enabled.
 
     The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
-    down gracefully via 'ecflow_client --terminate'.
+    down gracefully via the ecFlow client's terminate option.
 
-    :param config: A dict, a YAMLConfig, or a path to a YAML file providing server settings (None =>
-        read stdin).
-    :param port: TCP port to use (None => pick a random available port from the range
-        ECFLOW_PORT_MIN through ECFLOW_PORT_MAX).
+    :param config: Config providing server settings (None => read stdin).
+    :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
     :param report: Output server details (e.g. hostname, port) as JSON to stdout.
     :raises UWError: If the server fails to start.
     """
+
+    def shutdown(_signum: int, _frame: FrameType | None) -> None:
+        log.info("Terminating")
+        thread.terminal.set()
+        if thread.port:
+            cmd = "ecflow_client %s--port %s --terminate=yes" % (ssl_opt, thread.port)
+            run_shell_cmd(cmd=cmd, quiet=True)
+
     cfg = YAMLConfig(config)
     cfg.dereference()
     validate(cfg)
@@ -128,20 +134,11 @@ def server(
     if ssl_on:
         report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
     thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
-
-    def shutdown(_signum: int, _frame: FrameType | None) -> None:
-        log.info("Terminating")
-        thread.terminal.set()
-        if thread.port:
-            cmd = "ecflow_client %s--port %s --terminate=yes" % (
-                "" if insecure else "--ssh",
-                thread.port,
-            )
-            run_shell_cmd(cmd=cmd, quiet=True)
-
+    # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
+    ssl_opt = "" if insecure else "--ssl "
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
-    _server_wait(thread, insecure, report_vars=report_vars if report else None)
+    _server_wait(thread, ssl_opt=ssl_opt, report_vars=report_vars if report else None)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
@@ -163,6 +160,7 @@ def validate(config: dict | YAMLConfig | Path | None = None) -> bool:
     validate_internal(**kwargs)
     return True
 
+
 # Private
 
 _SSL_DIR = Path.home() / ".ecflowrc" / "ssl"
@@ -170,6 +168,7 @@ _SSL_KEY = "server.key"
 _SSL_CERT = "server.crt"
 _SSL_DHPARAM = "dh2048.pem"
 _SSL_FILES = [_SSL_DHPARAM, _SSL_CERT, _SSL_KEY]
+
 
 class _ECFlowDef:
     """
@@ -570,8 +569,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
 
     :param rundir: Directory to run the server in (ECF_HOME).
     :param env: Base environment variables for the server.
-    :param port: A specific port to use, or None to pick a random port from the range
-        ECFLOW_PORT_MIN through ECFLOW_PORT_MAX.
+    :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
     """
     thread = cast(_ServerThread, current_thread())
@@ -611,28 +609,27 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             return
 
 
-def _server_wait(thread: _ServerThread, insecure: bool, report_vars: dict[str, str] | None) -> None:
+def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str] | None) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
-    :param insecure: Run without SSL?
-    :param report_vars: Server variables to report as JSON (None => do not report).
+    :param ssl_opt: ecflow_client SSL option ('--ssl' for secure servers, else the empty string).
+    :param report_vars: Server variables to report as JSON once the server is up (None => do not
+        report).
     """
     while not thread.terminal.is_set():
         if thread.port:
-            try:
-                _client(thread.port, insecure).ping()
-            except RuntimeError as e:
-                if "Failed to connect" in str(e):
-                    log.debug("Waiting for server on %s:%s", hostname, thread.port)
-                    sleep(0.2)
-                    continue
-                raise
-            log.info("Server started on port %s", thread.port)
-            if report_vars is not None:
-                _server_report(port=thread.port, report_vars=report_vars)
-            break
+            cmd = f"ecflow_client {ssl_opt}--port {thread.port} --ping"
+            success, _ = run_shell_cmd(cmd=cmd, quiet=True)
+            if success:
+                log.info("Server started on port %s", thread.port)
+                if report_vars is not None:
+                    _server_report(port=thread.port, report_vars=report_vars)
+                break
+        # Wait briefly before re-checking, so polling does not spin a CPU core or hammer
+        # ecflow_client while the server starts up (or fails to).
+        sleep(0.2)
 
 
 def _server_report(port: int, report_vars: dict[str, str]) -> None:
