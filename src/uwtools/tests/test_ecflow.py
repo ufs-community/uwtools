@@ -606,6 +606,16 @@ class TestECFlowDef:
     #         instance_with_scheduler._prepare_ecf_script(config, task)
     #     _jobscheduler.assert_called_once()
 
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_manual(self, instance):
+        task = Task("hello")
+        suite = Suite("test")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {"body": "echo hello", "manual": "RTFM"}
+        instance._prepare_ecf_script(config, task)
+        script_content = instance._scripts[task.get_abs_node_path()]
+        assert_lines_in_order(script_content, ["%manual", "RTFM", "%end"])
+
     def test_ecflow__ECFlowDef__str__(self, instance):
         result = str(instance)
         assert isinstance(result, str)
