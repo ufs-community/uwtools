@@ -3,6 +3,7 @@ Tests for uwtools.ecflow module.
 """
 
 import re
+import socket
 import sys
 from copy import deepcopy
 from io import StringIO
@@ -67,7 +68,293 @@ def assert_lines_in_order(result: str, expected: list[str]) -> None:
 # Tests
 
 
-class TestECFlowDef:
+# realize
+
+
+def test_ecflow_realize__cfg_to_file(tmp_path, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
+    output = (tmp_path / "suite.def").read_text()
+    assert output == expected
+
+
+def test_ecflow_realize__cfg_to_stdout(capsys, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=YAMLConfig(cfgfile))
+    output = capsys.readouterr().out
+    assert output == expected
+
+
+def test_ecflow_realize__file_to_file(tmp_path, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=cfgfile, output_path=tmp_path)
+    output = (tmp_path / "suite.def").read_text()
+    assert output == expected
+
+
+def test_ecflow_realize__file_to_stdout(capsys, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=cfgfile)
+    output = capsys.readouterr().out
+    assert output == expected
+
+
+def test_ecflow_realize__write_scripts(capsys, assets):
+    cfgfile, script_path, expected = assets
+    with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
+        ecflow.realize(config=cfgfile, scripts_path=script_path)
+        write_scripts.assert_called_once_with(script_path)
+    output = capsys.readouterr().out
+    assert output == expected
+
+
+# server
+
+
+@fixture
+def server_mocks():
+    """
+    Patch the collaborators of ecflow.server() and yield handles to the mocks.
+
+    The default config is a minimal valid secure-server config; tests that need
+    different data can reassign `m.cfg.data` before calling ecflow.server().
+    """
+    cfg = Mock()
+    cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=cfg) as yamlconfig,
+        patch.object(ecflow, "_ServerThread") as thread_cls,
+        patch.object(ecflow, "_server_wait") as server_wait,
+        patch.object(ecflow, "_ssl_check") as ssl_check,
+        patch.object(ecflow, "_ssl_provision") as ssl_provision,
+        patch.object(ecflow, "validate") as validate,
+        patch.object(ecflow.signal, "signal") as signal,
+    ):
+        thread = thread_cls.return_value
+        thread.error = None
+        yield ns(
+            cfg=cfg,
+            config_path=Path("/some/server.yaml"),
+            server_wait=server_wait,
+            signal=signal,
+            ssl_check=ssl_check,
+            ssl_provision=ssl_provision,
+            thread=thread,
+            thread_cls=thread_cls,
+            validate=validate,
+            yamlconfig=yamlconfig,
+        )
+
+
+@mark.parametrize(
+    "config", [{"ECF_HOME": "/ecf"}, YAMLConfig({"ECF_HOME": "/ecf"}), Path("s.yaml")]
+)
+def test_ecflow_server__accepts_config_types(server_mocks, config):
+    ecflow.server(config=config, port=3141)
+    server_mocks.yamlconfig.assert_called_once_with(config)
+
+
+def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": False}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_not_called()
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert "ECF_SSL" not in env
+
+
+def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "myhost.3141"}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_not_called()
+    m.ssl_check.assert_called_once_with("myhost.3141")
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert env["ECF_SSL"] == "myhost.3141"
+
+
+def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": True}}}
+    m.ssl_check.side_effect = UWSSLCertificateError
+    ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_called_once_with()
+    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
+    assert env["ECF_SSL"] == "1"
+
+
+def test_ecflow_server__insecure_skips_ssl(server_mocks):
+    ecflow.server(config=server_mocks.config_path, port=3141, insecure=True)
+    server_mocks.ssl_provision.assert_not_called()
+    server_mocks.ssl_check.assert_not_called()
+
+
+def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "1"}}}
+    ecflow.server(config=m.config_path, port=3141, insecure=True)
+    _, env, _, insecure = m.thread_cls.call_args.kwargs["args"]
+    assert "ECF_SSL" not in env
+    assert insecure is True
+
+
+def test_ecflow_server__no_report_passes_none(server_mocks):
+    m = server_mocks
+    ecflow.server(config=m.config_path, port=54321)
+    assert m.server_wait.call_args.args[2] is None
+
+
+def test_ecflow_server__raises_on_thread_error(server_mocks):
+    m = server_mocks
+    m.thread.error = "ecflow_server failed on port 3141: boom"
+    with raises(UWError, match="ecflow_server failed on port 3141"):
+        ecflow.server(config=m.config_path, port=3141)
+
+
+def test_ecflow_server__report_vars_include_config(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_LOG": "my.log"}}}
+    with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
+        ecflow.server(config=m.config_path, port=54321, report=True)
+    assert m.server_wait.call_args.args[2] == {
+        "ECF_HOME": "/ecf",
+        "ECF_LOG": "my.log",
+        "ECF_HOST": "server.hostname.com",
+        "ECF_SSL": "1",
+    }
+
+
+def test_ecflow_server__report_vars_insecure_omits_ssl(server_mocks):
+    m = server_mocks
+    with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
+        ecflow.server(config=m.config_path, port=54321, insecure=True, report=True)
+    assert m.server_wait.call_args.args[2] == {
+        "ECF_HOME": "/ecf",
+        "ECF_HOST": "server.hostname.com",
+    }
+
+
+def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
+    ecflow.server(config=server_mocks.config_path, port=3141)
+    rundir, env, port, insecure = server_mocks.thread_cls.call_args.kwargs["args"]
+    assert rundir == Path("/ecf")
+    assert env["ECF_SSL"] == "1"
+    assert port == 3141
+    assert insecure is False
+
+
+def test_ecflow_server__shutdown_terminates(server_mocks):
+    m = server_mocks
+    m.thread.port = 54321
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
+        ecflow.server(config=m.config_path, port=54321)
+        shutdown = m.signal.call_args.args[1]
+        shutdown(2, None)
+    m.thread.terminal.set.assert_called()
+    cmd = run.call_args.kwargs["cmd"]
+    assert "--ssl" in cmd
+    assert "--port 54321" in cmd
+    assert "--terminate=yes" in cmd
+
+
+def test_ecflow_server__shutdown_terminates_insecure_no_ssl(server_mocks):
+    m = server_mocks
+    m.thread.port = 54321
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
+        ecflow.server(config=m.config_path, port=54321, insecure=True)
+        shutdown = m.signal.call_args.args[1]
+        shutdown(2, None)
+    cmd = run.call_args.kwargs["cmd"]
+    assert "--ssl" not in cmd
+    assert "--terminate=yes" in cmd
+
+
+def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):
+    m = server_mocks
+    m.thread.port = None
+    with patch.object(ecflow, "run_shell_cmd") as run:
+        ecflow.server(config=m.config_path, port=54321)
+        shutdown = m.signal.call_args.args[1]
+        shutdown(2, None)
+    run.assert_not_called()
+
+
+@mark.parametrize("ecf_ssl", [None, True, False, "myhost.8888"])
+def test_ecflow_server__ssl_provision(ecf_ssl, server_mocks):
+    server_mocks.ssl_check.side_effect = UWSSLCertificateError
+    server_mocks.cfg.data["ecflow"]["server"]["ECF_SSL"] = ecf_ssl
+    ecflow.server(config=server_mocks.config_path, port=3141)
+    if ecf_ssl in [None, True]:
+        server_mocks.ssl_provision.assert_called_once_with()
+    else:
+        server_mocks.ssl_provision.assert_not_called()
+
+
+def test_ecflow_server__starts_thread_and_waits(server_mocks):
+    m = server_mocks
+    ecflow.server(config=m.config_path, port=3141)
+    m.signal.assert_called_once_with(ecflow.signal.SIGINT, m.signal.call_args.args[1])
+    m.thread.start.assert_called_once()
+    m.server_wait.assert_called_once()
+    m.thread.join.assert_called_once()
+
+
+def test_ecflow_server__validates_config(server_mocks):
+    m = server_mocks
+    ecflow.server(config=m.config_path, port=3141)
+    m.validate.assert_called_once_with(m.cfg)
+
+
+# validate
+
+
+def test_ecflow_validate__dict(minimal_config):
+    assert ecflow.validate(minimal_config)
+
+
+def test_ecflow_validate__invalid(tmp_path):
+    yaml_file = tmp_path / "ecflow.yaml"
+    yaml_file.write_text("not_ecflow: {}\n")
+    with raises(UWConfigError) as e:
+        ecflow.validate(yaml_file)
+    assert "YAML validation errors" in str(e.value)
+
+
+def test_ecflow_validate__path(tmp_path, minimal_config):
+    path = tmp_path / "config.yaml"
+    YAMLConfig(minimal_config).dump(path)
+    assert ecflow.validate(path)
+
+
+def test_ecflow_validate__stdin(minimal_config):
+    _stdinproxy.cache_clear()
+    with StringIO(yaml.safe_dump(minimal_config)) as sio, patch.object(sys, "stdin", new=sio):
+        assert ecflow.validate()
+
+
+def test_ecflow_validate__suite_only():
+    config: dict = {"ecflow": {"suitedef": {"suite_mysuite": {}}}}
+    assert ecflow.validate(config)
+
+
+def test_ecflow_validate__suite_with_optional_properties():
+    config = {
+        "ecflow": {
+            "suitedef": {
+                "scheduler": "slurm",
+                "vars": {"FOO": "bar"},
+                "suite_mysuite": {},
+            }
+        }
+    }
+    assert ecflow.validate(config)
+
+
+def test_ecflow_validate__yamlconfig(minimal_config):
+    assert ecflow.validate(YAMLConfig(minimal_config))
+
+
+class Test_ECFlowDef:  # noqa: N801
     """
     Tests for class uwtools.ecflow._ECFlowDef.
     """
@@ -631,290 +918,19 @@ class TestECFlowDef:
         assert instance._tag_name(key) == expected
 
 
-# realize
+# _client
 
 
-def test_ecflow_realize__cfg_to_file(tmp_path, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
-    output = (tmp_path / "suite.def").read_text()
-    assert output == expected
-
-
-def test_ecflow_realize__cfg_to_stdout(capsys, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=YAMLConfig(cfgfile))
-    output = capsys.readouterr().out
-    assert output == expected
-
-
-def test_ecflow_realize__file_to_file(tmp_path, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=cfgfile, output_path=tmp_path)
-    output = (tmp_path / "suite.def").read_text()
-    assert output == expected
-
-
-def test_ecflow_realize__file_to_stdout(capsys, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=cfgfile)
-    output = capsys.readouterr().out
-    assert output == expected
-
-
-def test_ecflow_realize__write_scripts(capsys, assets):
-    cfgfile, script_path, expected = assets
-    with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
-        ecflow.realize(config=cfgfile, scripts_path=script_path)
-        write_scripts.assert_called_once_with(script_path)
-    output = capsys.readouterr().out
-    assert output == expected
-
-
-# server
-
-
-@fixture
-def server_mocks():
-    """
-    Patch the collaborators of ecflow.server() and yield handles to the mocks.
-
-    The default config is a minimal valid secure-server config; tests that need
-    different data can reassign `m.cfg.data` before calling ecflow.server().
-    """
-    cfg = Mock()
-    cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
-    with (
-        patch.object(ecflow, "YAMLConfig", return_value=cfg) as yamlconfig,
-        patch.object(ecflow, "_ServerThread") as thread_cls,
-        patch.object(ecflow, "_server_wait") as server_wait,
-        patch.object(ecflow, "_ssl_check") as ssl_check,
-        patch.object(ecflow, "_ssl_provision") as ssl_provision,
-        patch.object(ecflow, "validate") as validate,
-        patch.object(ecflow.signal, "signal") as signal,
-    ):
-        thread = thread_cls.return_value
-        thread.error = None
-        yield ns(
-            cfg=cfg,
-            config_path=Path("/some/server.yaml"),
-            server_wait=server_wait,
-            signal=signal,
-            ssl_check=ssl_check,
-            ssl_provision=ssl_provision,
-            thread=thread,
-            thread_cls=thread_cls,
-            validate=validate,
-            yamlconfig=yamlconfig,
-        )
-
-
-@mark.parametrize(
-    "config", [{"ECF_HOME": "/ecf"}, YAMLConfig({"ECF_HOME": "/ecf"}), Path("s.yaml")]
-)
-def test_ecflow_server__accepts_config_types(server_mocks, config):
-    ecflow.server(config=config, port=3141)
-    server_mocks.yamlconfig.assert_called_once_with(config)
-
-
-def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
-    m = server_mocks
-    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": False}}}
-    ecflow.server(config=m.config_path, port=3141)
-    m.ssl_provision.assert_not_called()
-    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
-    assert "ECF_SSL" not in env
-
-
-def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
-    m = server_mocks
-    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "myhost.3141"}}}
-    ecflow.server(config=m.config_path, port=3141)
-    m.ssl_provision.assert_not_called()
-    m.ssl_check.assert_called_once_with("myhost.3141")
-    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
-    assert env["ECF_SSL"] == "myhost.3141"
-
-
-def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
-    m = server_mocks
-    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": True}}}
-    m.ssl_check.side_effect = UWSSLCertificateError
-    ecflow.server(config=m.config_path, port=3141)
-    m.ssl_provision.assert_called_once_with()
-    _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
-    assert env["ECF_SSL"] == "1"
-
-
-def test_ecflow_server__insecure_skips_ssl(server_mocks):
-    ecflow.server(config=server_mocks.config_path, port=3141, insecure=True)
-    server_mocks.ssl_provision.assert_not_called()
-    server_mocks.ssl_check.assert_not_called()
-
-
-def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
-    m = server_mocks
-    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "1"}}}
-    ecflow.server(config=m.config_path, port=3141, insecure=True)
-    _, env, _, insecure = m.thread_cls.call_args.kwargs["args"]
-    assert "ECF_SSL" not in env
-    assert insecure is True
-
-
-def test_ecflow_server__no_report_passes_none(server_mocks):
-    m = server_mocks
-    ecflow.server(config=m.config_path, port=54321)
-    assert m.server_wait.call_args.args[2] is None
-
-
-def test_ecflow_server__raises_on_thread_error(server_mocks):
-    m = server_mocks
-    m.thread.error = "ecflow_server failed on port 3141: boom"
-    with raises(UWError, match="ecflow_server failed on port 3141"):
-        ecflow.server(config=m.config_path, port=3141)
-
-
-def test_ecflow_server__report_vars_include_config(server_mocks):
-    m = server_mocks
-    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_LOG": "my.log"}}}
-    with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
-        ecflow.server(config=m.config_path, port=54321, report=True)
-    assert m.server_wait.call_args.args[2] == {
-        "ECF_HOME": "/ecf",
-        "ECF_LOG": "my.log",
-        "ECF_HOST": "server.hostname.com",
-        "ECF_SSL": "1",
-    }
-
-
-def test_ecflow_server__report_vars_insecure_omits_ssl(server_mocks):
-    m = server_mocks
-    with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
-        ecflow.server(config=m.config_path, port=54321, insecure=True, report=True)
-    assert m.server_wait.call_args.args[2] == {
-        "ECF_HOME": "/ecf",
-        "ECF_HOST": "server.hostname.com",
-    }
-
-
-def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
-    ecflow.server(config=server_mocks.config_path, port=3141)
-    rundir, env, port, insecure = server_mocks.thread_cls.call_args.kwargs["args"]
-    assert rundir == Path("/ecf")
-    assert env["ECF_SSL"] == "1"
-    assert port == 3141
-    assert insecure is False
-
-
-def test_ecflow_server__shutdown_terminates(server_mocks):
-    m = server_mocks
-    m.thread.port = 54321
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
-        ecflow.server(config=m.config_path, port=54321)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    m.thread.terminal.set.assert_called()
-    cmd = run.call_args.kwargs["cmd"]
-    assert "--ssl" in cmd
-    assert "--port 54321" in cmd
-    assert "--terminate=yes" in cmd
-
-
-def test_ecflow_server__shutdown_terminates_insecure_no_ssl(server_mocks):
-    m = server_mocks
-    m.thread.port = 54321
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
-        ecflow.server(config=m.config_path, port=54321, insecure=True)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    cmd = run.call_args.kwargs["cmd"]
-    assert "--ssl" not in cmd
-    assert "--terminate=yes" in cmd
-
-
-def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):
-    m = server_mocks
-    m.thread.port = None
-    with patch.object(ecflow, "run_shell_cmd") as run:
-        ecflow.server(config=m.config_path, port=54321)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    run.assert_not_called()
-
-
-@mark.parametrize("ecf_ssl", [None, True, False, "myhost.8888"])
-def test_ecflow_server__ssl_provision(ecf_ssl, server_mocks):
-    server_mocks.ssl_check.side_effect = UWSSLCertificateError
-    server_mocks.cfg.data["ecflow"]["server"]["ECF_SSL"] = ecf_ssl
-    ecflow.server(config=server_mocks.config_path, port=3141)
-    if ecf_ssl in [None, True]:
-        server_mocks.ssl_provision.assert_called_once_with()
+@mark.parametrize("insecure", [True, False])
+def test_ecflow__client(insecure):
+    portnum = 54321
+    with patch.object(ecflow, "Client") as Client:  # noqa: N806
+        ecflow._client(port=portnum, insecure=insecure)
+    Client.assert_called_once_with(socket.gethostname(), str(portnum))
+    if insecure:
+        Client().enable_ssl.assert_not_called()
     else:
-        server_mocks.ssl_provision.assert_not_called()
-
-
-def test_ecflow_server__starts_thread_and_waits(server_mocks):
-    m = server_mocks
-    ecflow.server(config=m.config_path, port=3141)
-    m.signal.assert_called_once_with(ecflow.signal.SIGINT, m.signal.call_args.args[1])
-    m.thread.start.assert_called_once()
-    m.server_wait.assert_called_once()
-    m.thread.join.assert_called_once()
-
-
-def test_ecflow_server__validates_config(server_mocks):
-    m = server_mocks
-    ecflow.server(config=m.config_path, port=3141)
-    m.validate.assert_called_once_with(m.cfg)
-
-
-# validate
-
-
-def test_ecflow_validate__dict(minimal_config):
-    assert ecflow.validate(minimal_config)
-
-
-def test_ecflow_validate__invalid(tmp_path):
-    yaml_file = tmp_path / "ecflow.yaml"
-    yaml_file.write_text("not_ecflow: {}\n")
-    with raises(UWConfigError) as e:
-        ecflow.validate(yaml_file)
-    assert "YAML validation errors" in str(e.value)
-
-
-def test_ecflow_validate__path(tmp_path, minimal_config):
-    path = tmp_path / "config.yaml"
-    YAMLConfig(minimal_config).dump(path)
-    assert ecflow.validate(path)
-
-
-def test_ecflow_validate__stdin(minimal_config):
-    _stdinproxy.cache_clear()
-    with StringIO(yaml.safe_dump(minimal_config)) as sio, patch.object(sys, "stdin", new=sio):
-        assert ecflow.validate()
-
-
-def test_ecflow_validate__suite_only():
-    config: dict = {"ecflow": {"suitedef": {"suite_mysuite": {}}}}
-    assert ecflow.validate(config)
-
-
-def test_ecflow_validate__suite_with_optional_properties():
-    config = {
-        "ecflow": {
-            "suitedef": {
-                "scheduler": "slurm",
-                "vars": {"FOO": "bar"},
-                "suite_mysuite": {},
-            }
-        }
-    }
-    assert ecflow.validate(config)
-
-
-def test_ecflow_validate__yamlconfig(minimal_config):
-    assert ecflow.validate(YAMLConfig(minimal_config))
+        Client().enable_ssl.assert_called_once_with()
 
 
 # _openssl
