@@ -4,7 +4,7 @@ Utilities for interacting with external processes.
 
 from __future__ import annotations
 
-from subprocess import STDOUT, CalledProcessError, check_output
+from subprocess import PIPE, STDOUT, Popen
 from typing import TYPE_CHECKING
 
 from uwtools.logging import INDENT, log
@@ -44,16 +44,24 @@ def run_shell_cmd(
         logfunc("  with environment")
         for k in sorted(env):
             logfunc("    %s=%s", k, env[k])
-    kwargs: dict = dict(cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True)  # noqa: S604
+    kwargs: dict = dict(  # noqa: S604
+        cwd=cwd,
+        encoding="utf=8",
+        env=env,
+        shell=True,
+        stderr=STDOUT,
+        stdout=PIPE,
+        text=True,
+    )
     if executable:
         kwargs["executable"] = executable
-    try:
-        output = check_output(cmd, **kwargs)  # noqa: S603
+    proc = Popen(cmd, **kwargs)  # noqa: S603
+    output, _ = proc.communicate()
+    if proc.returncode == 0:
         success = True
-    except CalledProcessError as e:
-        output = e.output
+    else:
         if not quiet:
-            log.error("%sFailed with status: %s", pre, e.returncode)
+            log.error("%sFailed with status: %s", pre, proc.returncode)
             logfunc = log.error
         success = False
     if output and (log_output or not success):
