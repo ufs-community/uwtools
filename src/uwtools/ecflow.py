@@ -12,6 +12,7 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
+from functools import cache
 from pathlib import Path
 from subprocess import CalledProcessError
 from textwrap import dedent
@@ -527,6 +528,7 @@ class _ServerThread(Thread):
         self.error: str | None = None
 
 
+@cache
 def _client(port: int, insecure: bool) -> Client:
     """
     Returns an ecFlow client, optionally with SSL enabled.
