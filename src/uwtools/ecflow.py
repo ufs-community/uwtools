@@ -555,6 +555,20 @@ def _openssl() -> Path:
     return Path(path)
 
 
+def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
+    """
+    Print ecFlow server details as JSON to stdout.
+
+    :param port: The TCP port the server is using.
+    :param report_vars: Server variables to report, exclusive of ECF_PORT.
+    """
+    if report_vars:
+        vars_ = {**report_vars, "ECF_PORT": str(port)}
+        # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
+        # rather than only when the block-buffered stream is flushed at server exit.
+        print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
+
+
 def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
@@ -629,20 +643,6 @@ def _server_wait(thread: _ServerThread, insecure: bool, report_vars: dict[str, s
                 _server_report(port, report_vars)
                 break
         sleep(0.2)
-
-
-def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
-    """
-    Print ecFlow server details as JSON to stdout.
-
-    :param port: The TCP port the server is using.
-    :param report_vars: Server variables to report, exclusive of ECF_PORT.
-    """
-    if report_vars:
-        vars_ = {**report_vars, "ECF_PORT": str(port)}
-        # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
-        # rather than only when the block-buffered stream is flushed at server exit.
-        print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
 def _ssl_check(prefix: str | None) -> None:
