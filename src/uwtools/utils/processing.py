@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from uwtools.logging import INDENT, log
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 
@@ -20,6 +21,7 @@ def run_shell_cmd(
     log_output: bool | None = False,
     taskname: str | None = None,
     quiet: bool | None = None,
+    callback: Callable[[Popen], None] | None = None,
     executable: str | None = None,
 ) -> tuple[bool, str]:
     """
@@ -32,6 +34,7 @@ def run_shell_cmd(
     :param taskname: Name of task executing this command, for logging.
     :param quiet: Log INFO messages as DEBUG.
     :param executable: Interpreter to use (e.g. "/bin/bash")
+    :param callback: Optional callable, called with the Popen process object.
     :return: A result object providing combined stder/stdout output and success values.
     """
     pre = f"[{taskname}] " if taskname else ""
@@ -56,6 +59,8 @@ def run_shell_cmd(
     if executable:
         kwargs["executable"] = executable
     proc = Popen(cmd, **kwargs)  # noqa: S603
+    if callback:
+        callback(proc)
     output, _ = proc.communicate()
     if proc.returncode == 0:
         success = True
