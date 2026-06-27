@@ -528,14 +528,26 @@ class _ServerThread(Thread):
 
 
 def _client(port: int, insecure: bool) -> Client:
+    """
+    Returns an ecFlow client, optionally with SSL enabled.
+
+    :param port: TCP port to use.
+    :param insecure: Start the server without SSL security.
+    """
     hostname = socket.gethostname()
     c = Client(hostname, str(port))
     if not insecure:
-        c.enable_ssl()  # PM DO WE NEED ALTERNATE CERT INFO HERE?
+        c.enable_ssl()
     return c
 
 
 def _node(cls: type[Node], name: str) -> Node:
+    """
+    Returns an ecFlow suite-definition node of the given type, with the given name.
+
+    :param cls: The ecFlow suite-definiton class to instantiate.
+    :param name: The name of the node.
+    """
     try:
         return cls(name)
     except RuntimeError as e:
