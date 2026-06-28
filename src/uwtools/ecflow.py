@@ -98,7 +98,7 @@ def server(
         log.info("Terminating")
         thread.terminal.set()
         proc = cast(Popen, thread.proc)
-        os.killpg(os.getpgid(proc.pid), signal.SIGINT)
+        proc.send_signal(signal.SIGINT)
         proc.wait()
 
     cfg = YAMLConfig(config)
@@ -569,12 +569,12 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
         )
         log.debug("Trying to start server on port %s", candidate)
         thread.port = candidate
+        cmd_components = ["ecflow_server", "--port", str(candidate), None if insecure else "--ssl"]
         try:
-            cmd = "ecflow_server%s" % ("" if insecure else " --ssl")
             run_shell_cmd(
-                cmd=cmd,
+                cmd=list(filter(None, cmd_components)),
                 cwd=rundir,
-                env={**env, "ECF_PORT": str(candidate)},
+                env=env,
                 quiet=True,
                 callback=lambda proc: setattr(thread, "proc", proc),
             )

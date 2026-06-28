@@ -7,6 +7,7 @@ import sys
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from signal import SIGINT
 from subprocess import CalledProcessError
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, patch
@@ -808,15 +809,12 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
 
 def test_ecflow_server__shutdown(server_mocks):
     m = server_mocks
-    with (
-        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
-        patch.object(ecflow.os, "killpg") as killpg,
-    ):
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
         ecflow.server(config=m.config_path, port=54321)
         shutdown = m.signal.call_args.args[1]
         shutdown(2, None)
     m.thread.terminal.set.assert_called_once_with()
-    killpg.assert_called_once()
+    m.thread.proc.send_signal.assert_called_once_with(SIGINT)
     m.thread.proc.wait.assert_called_once_with()
 
 
@@ -931,9 +929,8 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     ):
         ecflow._server_start(rundir, {"ECF_HOME": str(rundir)}, 3141, False)
     assert rundir.is_dir()
-    assert run_shell_cmd.call_args.kwargs["cmd"] == "ecflow_server --ssl"
+    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server", "--port", "3141", "--ssl"]
     assert run_shell_cmd.call_args.kwargs["cwd"] == rundir
-    assert run_shell_cmd.call_args.kwargs["env"]["ECF_PORT"] == "3141"
     assert thread.port == 3141
     assert thread.error is None
 
@@ -950,7 +947,7 @@ def test_ecflow__server_start__fixed_port_insecure(tmp_path):
         patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd) as run_shell_cmd,
     ):
         ecflow._server_start(rundir, {}, 3141, True)
-    assert run_shell_cmd.call_args.kwargs["cmd"] == "ecflow_server"
+    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server", "--port", "3141"]
 
 
 def test_ecflow__server_start__fixed_port_other_failure(tmp_path):
@@ -1010,7 +1007,7 @@ def test_ecflow__server_start__random_port_failure(tmp_path):
 
 def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
     def fake_run_shell_cmd(*_args, **kwargs):
-        ports.append(kwargs["env"]["ECF_PORT"])
+        ports.append(kwargs["cmd"][2])
         if len(ports) == 1:
             raise bind_err
         thread.terminal.set()
@@ -1022,12 +1019,12 @@ def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
     ports: list[str] = []
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow.random, "randint", side_effect=[30000, 30001]),
         patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd),
+        patch.object(ecflow.random, "randint", side_effect=[12345, 54321]),
     ):
         ecflow._server_start(rundir, {}, None, False)
-    assert ports == ["30000", "30001"]
-    assert thread.port == 30001
+    assert ports == ["12345", "54321"]
+    assert thread.port == 54321
     assert thread.error is None
 
 
