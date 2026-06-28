@@ -576,7 +576,13 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
         thread.port = candidate
         try:
             cmd = "ecflow_server%s" % ("" if insecure else " --ssl")
-            run_shell_cmd(cmd=cmd, cwd=rundir, env={**env, "ECF_PORT": str(candidate)}, quiet=True)
+            run_shell_cmd(
+                cmd=cmd,
+                cwd=rundir,
+                env={**env, "ECF_PORT": str(candidate)},
+                quiet=True,
+                callback=lambda proc: setattr(thread, "proc", proc),
+            )
         except CalledProcessError as e:
             if "bind: Address already in use" in (e.stdout or ""):
                 thread.port = None
