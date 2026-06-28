@@ -105,7 +105,7 @@ class Ungrib(DriverCycleBased):
         yield self.taskname("run via local execution")
         yield [Asset(path, path.is_file) for path in self.output["paths"]]
         yield self.provisioned_rundir()
-        cmd = "{x} >{x}.out".format(x=self._runscript_path)
+        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Public helper methods
