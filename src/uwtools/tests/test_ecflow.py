@@ -3,6 +3,7 @@ Tests for uwtools.ecflow module.
 """
 
 import re
+import signal
 import sys
 from copy import deepcopy
 from io import StringIO
@@ -808,38 +809,13 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
 
 def test_ecflow_server__shutdown_terminates(server_mocks):
     m = server_mocks
-    m.thread.port = 54321
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
         ecflow.server(config=m.config_path, port=54321)
         shutdown = m.signal.call_args.args[1]
         shutdown(2, None)
-    m.thread.terminal.set.assert_called()
-    cmd = run.call_args.kwargs["cmd"]
-    assert "--ssl" in cmd
-    assert "--port 54321" in cmd
-    assert "--terminate=yes" in cmd
-
-
-def test_ecflow_server__shutdown_terminates_insecure_no_ssl(server_mocks):
-    m = server_mocks
-    m.thread.port = 54321
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
-        ecflow.server(config=m.config_path, port=54321, insecure=True)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    cmd = run.call_args.kwargs["cmd"]
-    assert "--ssl" not in cmd
-    assert "--terminate=yes" in cmd
-
-
-def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):
-    m = server_mocks
-    m.thread.port = None
-    with patch.object(ecflow, "run_shell_cmd") as run:
-        ecflow.server(config=m.config_path, port=54321)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    run.assert_not_called()
+    m.thread.terminal.set.assert_called_once_with()
+    m.thread.proc.send_signal.assert_called_once_with(signal.SIGINT)
+    m.thread.proc.wait.assert_called_once_with()
 
 
 @mark.parametrize("ecf_ssl", [None, True, False, "myhost.8888"])

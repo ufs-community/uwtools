@@ -13,7 +13,7 @@ import signal
 import socket
 from copy import deepcopy
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, Popen
 from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -85,8 +85,7 @@ def server(
     """
     Start an ecFlow server, optionally with SSL security enabled.
 
-    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
-    down gracefully via the ecFlow client's terminate option.
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), then terminated.
 
     :param config: Config providing server settings (None => read stdin).
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
@@ -98,9 +97,9 @@ def server(
     def shutdown(_signum: int, _frame: FrameType | None) -> None:
         log.info("Terminating")
         thread.terminal.set()
-        if thread.port:
-            cmd = "ecflow_client %s--port %s --terminate=yes" % (ssl_opt, thread.port)
-            run_shell_cmd(cmd=cmd, quiet=True)
+        proc = cast(Popen, thread.proc)
+        proc.send_signal(signal.SIGINT)
+        proc.wait()
 
     cfg = YAMLConfig(config)
     cfg.dereference()
@@ -522,9 +521,10 @@ class _ServerThread(Thread):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.port: int | None = None
-        self.terminal = Event()
         self.error: str | None = None
+        self.port: int | None = None
+        self.proc: Popen | None = None
+        self.terminal = Event()
 
 
 def _node(cls: type[Node], name: str) -> Node:
@@ -551,12 +551,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
-    The subprocess is placed in its own session (start_new_session=True) so that it does not
-    receive the terminal's SIGINT; the main thread alone handles keyboard interrupts and shuts the
-    server down gracefully. ('start_new_session' is preferred over 'preexec_fn', which the
-    Python docs warn is unsafe in a multi-threaded process.)
-
-    The run directory (ECF_HOME) is created if it does not already exist.
+    The run directory is created if it does not already exist.
 
     :param rundir: Directory to run the server in (ECF_HOME).
     :param env: Base environment variables for the server.
