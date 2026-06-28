@@ -52,7 +52,6 @@ def run_shell_cmd(
         encoding="utf=8",
         env=env,
         shell=True,
-        start_new_session=True,  # to ignore ctrl-c
         stderr=STDOUT,
         stdout=PIPE,
         text=True,
