@@ -3,7 +3,6 @@ Tests for uwtools.ecflow module.
 """
 
 import re
-import signal
 import sys
 from copy import deepcopy
 from io import StringIO
@@ -807,14 +806,17 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
     assert insecure is False
 
 
-def test_ecflow_server__shutdown_terminates(server_mocks):
+def test_ecflow_server__shutdown(server_mocks):
     m = server_mocks
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
+        patch.object(ecflow.os, "killpg") as killpg,
+    ):
         ecflow.server(config=m.config_path, port=54321)
         shutdown = m.signal.call_args.args[1]
         shutdown(2, None)
     m.thread.terminal.set.assert_called_once_with()
-    m.thread.proc.send_signal.assert_called_once_with(signal.SIGINT)
+    killpg.assert_called_once()
     m.thread.proc.wait.assert_called_once_with()
 
 

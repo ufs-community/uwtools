@@ -98,7 +98,7 @@ def server(
         log.info("Terminating")
         thread.terminal.set()
         proc = cast(Popen, thread.proc)
-        proc.send_signal(signal.SIGINT)
+        os.killpg(os.getpgid(proc.pid), signal.SIGINT)
         proc.wait()
 
     cfg = YAMLConfig(config)
