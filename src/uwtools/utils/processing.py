@@ -18,11 +18,12 @@ def run_shell_cmd(
     cmd: str,
     cwd: Path | str | None = None,
     env: dict[str, str] | None = None,
-    log_output: bool | None = False,
-    taskname: str | None = None,
-    quiet: bool | None = None,
+    start_new_session: bool = False,
     callback: Callable[[Popen], None] | None = None,
     executable: str | None = None,
+    log_output: bool = False,
+    quiet: bool = False,
+    taskname: str | None = None,
 ) -> tuple[bool, str]:
     """
     Run a command in a shell.
@@ -30,11 +31,12 @@ def run_shell_cmd(
     :param cmd: The command to run.
     :param cwd: Change to this directory before running cmd.
     :param env: Environment variables to set before running cmd.
-    :param log_output: Log output from successful cmd? (Error output is always logged.)
-    :param taskname: Name of task executing this command, for logging.
-    :param quiet: Log INFO messages as DEBUG.
-    :param executable: Interpreter to use (e.g. "/bin/bash")
+    :param start_new_session: Run process in a new session?
     :param callback: Optional callable, called with the Popen process object.
+    :param executable: Interpreter to use (e.g. "/bin/bash")
+    :param log_output: Log output from successful cmd? (Error output is always logged.)
+    :param quiet: Log INFO messages as DEBUG.
+    :param taskname: Name of task executing this command, for logging.
     :return: A result object providing combined stder/stdout output and success values.
     """
     pre = f"[{taskname}] " if taskname else ""
@@ -52,6 +54,7 @@ def run_shell_cmd(
         encoding="utf=8",
         env=env,
         shell=True,
+        start_new_session=start_new_session,
         stderr=STDOUT,
         stdout=PIPE,
         text=True,
