@@ -22,6 +22,12 @@ def test_utils_processing_run_shell_cmd__callback():
     assert isinstance(callback.call_args[0][0], Popen)
 
 
+def test_utils_processing_run_shell_cmd__cmd_list():
+    success, output = processing.run_shell_cmd(cmd=["echo", "hello", "world"])
+    assert success
+    assert "hello world" in output
+
+
 @mark.parametrize("quiet", [True, False])
 def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
     caplog.set_level(logging.INFO if quiet else logging.DEBUG)

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 def run_shell_cmd(
-    cmd: str,
+    cmd: str | list[str],
     cwd: Path | str | None = None,
     env: dict[str, str] | None = None,
     start_new_session: bool = False,
@@ -49,11 +49,11 @@ def run_shell_cmd(
         logfunc("  with environment")
         for k in sorted(env):
             logfunc("    %s=%s", k, env[k])
-    kwargs: dict = dict(  # noqa: S604
+    kwargs: dict = dict(
         cwd=cwd,
         encoding="utf=8",
         env=env,
-        shell=True,
+        shell=isinstance(cmd, str),
         start_new_session=start_new_session,
         stderr=STDOUT,
         stdout=PIPE,
