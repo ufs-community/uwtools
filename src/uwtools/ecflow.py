@@ -560,19 +560,15 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     """
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
-    # Create the run directory (ECF_HOME) on the user's behalf if it does not already exist.
     rundir.mkdir(parents=True, exist_ok=True)
     while not thread.terminal.is_set():
-        # ecFlow accepts ports only in the registered range ECFLOW_PORT_MIN-ECFLOW_PORT_MAX.
-        candidate = (
-            port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
-        )
+        candidate = port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", candidate)
         thread.port = candidate
-        cmd_components = ["ecflow_server", "--port", str(candidate), None if insecure else "--ssl"]
+        cmd_parts = ["ecflow_server", "--port", str(candidate), None if insecure else "--ssl"]
         try:
             run_shell_cmd(
-                cmd=list(filter(None, cmd_components)),
+                cmd=list(filter(None, cmd_parts)),
                 cwd=rundir,
                 env=env,
                 quiet=True,
