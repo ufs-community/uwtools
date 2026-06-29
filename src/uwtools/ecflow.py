@@ -106,22 +106,21 @@ def server(
     config = YAMLConfig(config)
     config.dereference()
     validate(config)
-    server_cfg = config.data[STR.ecflow][STR.server]
+    server_config = config.data[STR.ecflow][STR.server]
     # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
     # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
     # (defaults to SSL on with auto-provisioned default certificates).
-    ecf_ssl = server_cfg.get("ECF_SSL")
-    ssl_on = not insecure and ecf_ssl is not False
-    if ssl_on:
+    ecf_ssl = server_config.get("ECF_SSL")
+    if ssl_on := not insecure and ecf_ssl is not False:
         try:
             _ssl_check(ecf_ssl)
         except UWSSLCertificateError:
             if ecf_ssl in [None, True]:
                 _ssl_provision()
-    rundir = Path(server_cfg["ECF_HOME"])
+    rundir = Path(server_config["ECF_HOME"])
     # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
     # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
-    cfg_vars = {k: str(v) for k, v in server_cfg.items() if k != "ECF_SSL"}
+    cfg_vars = {k: str(v) for k, v in server_config.items() if k != "ECF_SSL"}
     env = {**os.environ, **cfg_vars}
     if ssl_on:
         env["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
