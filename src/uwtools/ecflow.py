@@ -586,13 +586,16 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
-    The run directory is created if it does not already exist.
-
     :param rundir: Directory to run the server in (ECF_HOME).
     :param env: Base environment variables for the server.
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
     """
+
+    def fail(error: str) -> None:
+        thread.terminal.set()
+        thread.error = error
+
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
     rundir.mkdir(parents=True, exist_ok=True)
@@ -610,26 +613,21 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
                 callback=lambda proc: setattr(thread, "proc", proc),
             )
         except CalledProcessError as e:
+            thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
-                thread.port = None
                 if fixed:
-                    thread.terminal.set()
-                    thread.error = f"Requested port {candidate} is unavailable"
-                    return
-                log.debug("Port %s already in use", candidate)
-                continue
-            thread.terminal.set()
-            thread.error = f"ecflow_server failed on port {candidate}: {e.stdout}"
-            for line in (e.stdout or "").split("\n"):
-                log.error(line)
-            return
+                    fail(f"Requested port {candidate} is unavailable")
+                else:
+                    log.debug("Port %s already in use", candidate)
+                    continue  # try next random port
+            else:
+                fail(f"ecflow_server failed on port {candidate}: {e.stdout}")
+                for line in (e.stdout or "").split("\n"):
+                    log.error(line)
         except OSError as e:
-            # The server could not be launched at all, e.g. ecflow_server is not on PATH or the
-            # run directory (ECF_HOME) does not exist. Set terminal so the waiter does not hang.
-            thread.terminal.set()
-            thread.error = f"Failed to launch ecflow_server: {e}"
+            fail(f"Failed to launch ecflow_server: {e}")
             log.error(thread.error)
-            return
+        break
 
 
 def _server_wait(thread: _ServerThread, insecure: bool, report_vars: dict[str, str] | None) -> None:

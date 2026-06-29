@@ -70,7 +70,7 @@ def server_mocks():
         patch.object(ecflow, "_ssl_check") as ssl_check,
         patch.object(ecflow, "_ssl_provision") as ssl_provision,
         patch.object(ecflow, "validate") as validate,
-        patch.object(ecflow.signal, "signal") as signal,
+        patch.object(ecflow.signal, "signal") as signal_,
     ):
         thread = thread_cls.return_value
         thread.error = None
@@ -78,7 +78,7 @@ def server_mocks():
             cfg=cfg,
             config_path=Path("/some/server.yaml"),
             server_wait=server_wait,
-            signal=signal,
+            signal=signal_,
             ssl_check=ssl_check,
             ssl_provision=ssl_provision,
             thread=thread,
@@ -253,6 +253,23 @@ def test_ecflow_server__shutdown(server_mocks):
     m.thread.terminal.set.assert_called_once_with()
     m.thread.proc.send_signal.assert_called_once_with(SIGINT)
     m.thread.proc.wait.assert_called_once_with()
+
+
+# def test_ecflow_server__shutdown(server_mocks):
+#     m = server_mocks
+#     portnum = 54321
+#     with (
+#         patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
+#         patch.object(ecflow, "_client") as _client,
+#     ):
+#         ecflow.server(config=m.config_path, port=54321)
+#         shutdown = m.signal.call_args.args[1]
+#         m.thread.port = portnum
+#         shutdown(2, None)
+#     m.thread.terminal.set.assert_called_once_with()
+#     _client.assert_called_once_with(portnum, False)
+#     _client().terminate_server.assert_called_once_with()
+#     m.thread.proc.wait.assert_called_once_with()
 
 
 def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):

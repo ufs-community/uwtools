@@ -64,7 +64,7 @@ def run_shell_cmd(
     proc = Popen(cmd, **kwargs)  # noqa: S603
     if callback:
         callback(proc)
-    output, _ = proc.communicate()
+    output, _ = proc.communicate()  # thread blocks here
     if proc.returncode == 0:
         success = True
     else:
