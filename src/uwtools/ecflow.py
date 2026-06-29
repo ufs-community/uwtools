@@ -599,11 +599,11 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             for line in messages.split("\n"):
                 log.error(line)
 
-    thread = cast(_ServerThread, current_thread())
-    fixed = port is not None
     rundir.mkdir(parents=True, exist_ok=True)
+    thread = cast(_ServerThread, current_thread())
+    static = port is not None
     while not thread.terminal.is_set():
-        port = port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
+        port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         thread.port = port
         log.debug("Trying to start server on port %s", port)
         cmd_parts = ["ecflow_server", "--port", str(port), None if insecure else "--ssl"]
@@ -618,7 +618,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
         except CalledProcessError as e:
             thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
-                if fixed:
+                if static:
                     fail(f"Requested port {port} is unavailable")
                 else:
                     log.debug("Port %s already in use", port)
