@@ -3,12 +3,29 @@ Tests for uwtools.utils.processing module.
 """
 
 import logging
+from subprocess import Popen
 from textwrap import dedent
+from unittest.mock import Mock
 
 from pytest import mark
 
 from uwtools.logging import log
 from uwtools.utils import processing
+
+
+def test_utils_processing_run_shell_cmd__callback():
+    callback = Mock()
+    success, output = processing.run_shell_cmd(cmd="echo callback_test", callback=callback)
+    assert success
+    assert "callback_test" in output
+    callback.assert_called_once()
+    assert isinstance(callback.call_args[0][0], Popen)
+
+
+def test_utils_processing_run_shell_cmd__cmd_list():
+    success, output = processing.run_shell_cmd(cmd=["echo", "hello", "world"])
+    assert success
+    assert "hello world" in output
 
 
 @mark.parametrize("quiet", [True, False])
