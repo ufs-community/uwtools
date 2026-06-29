@@ -103,10 +103,10 @@ def server(
         proc.send_signal(signal.SIGINT)
         proc.wait()
 
-    cfg = YAMLConfig(config)
-    cfg.dereference()
-    validate(cfg)
-    server_cfg = cfg.data[STR.ecflow][STR.server]
+    config = YAMLConfig(config)
+    config.dereference()
+    validate(config)
+    server_cfg = config.data[STR.ecflow][STR.server]
     # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
     # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
     # (defaults to SSL on with auto-provisioned default certificates).
