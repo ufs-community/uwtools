@@ -8,7 +8,6 @@ import sys
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from signal import SIGINT
 from subprocess import CalledProcessError
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, PropertyMock, patch
