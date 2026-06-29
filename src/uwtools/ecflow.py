@@ -12,6 +12,7 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
+from functools import cache
 from pathlib import Path
 from subprocess import CalledProcessError, Popen
 from textwrap import dedent
@@ -20,6 +21,7 @@ from time import sleep
 from typing import TYPE_CHECKING, cast
 
 from ecflow import (  # type: ignore[import-untyped]
+    Client,
     Defs,
     DState,
     Family,
@@ -132,11 +134,9 @@ def server(
     if ssl_on:
         report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
     thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
-    # ecflow_client must speak SSL to a secure server, else requests fail with a TLS mismatch.
-    ssl_opt = "" if insecure else "--ssl "
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
-    _server_wait(thread, ssl_opt=ssl_opt, report_vars=report_vars if report else None)
+    _server_wait(thread, insecure, report_vars if report else None)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
@@ -527,7 +527,28 @@ class _ServerThread(Thread):
         self.terminal = Event()
 
 
+@cache
+def _client(port: int, insecure: bool) -> Client:
+    """
+    Returns an ecFlow client, optionally with SSL enabled.
+
+    :param port: TCP port to use.
+    :param insecure: Start the server without SSL security.
+    """
+    hostname = socket.gethostname()
+    c = Client(hostname, str(port))
+    if not insecure:
+        c.enable_ssl()
+    return c
+
+
 def _node(cls: type[Node], name: str) -> Node:
+    """
+    Returns an ecFlow suite-definition node of the given type, with the given name.
+
+    :param cls: The ecFlow suite-definiton class to instantiate.
+    :param name: The name of the node.
+    """
     try:
         return cls(name)
     except RuntimeError as e:
@@ -545,6 +566,20 @@ def _openssl() -> Path:
         msg = "openssl not found on PATH"
         raise UWError(msg)
     return Path(path)
+
+
+def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
+    """
+    Print ecFlow server details as JSON to stdout.
+
+    :param port: The TCP port the server is using.
+    :param report_vars: Server variables to report, exclusive of ECF_PORT.
+    """
+    if report_vars:
+        vars_ = {**report_vars, "ECF_PORT": str(port)}
+        # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
+        # rather than only when the block-buffered stream is flushed at server exit.
+        print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
 def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
@@ -597,40 +632,27 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             return
 
 
-def _server_wait(thread: _ServerThread, ssl_opt: str, report_vars: dict[str, str] | None) -> None:
+def _server_wait(thread: _ServerThread, insecure: bool, report_vars: dict[str, str] | None) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
-    :param ssl_opt: ecflow_client SSL option ('--ssl' for secure servers, else the empty string).
-    :param report_vars: Server variables to report as JSON once the server is up (None => do not
-        report).
+    :param insecure: Do not use SSL.
+    :param report_vars: Server variables to report as JSON (None => do not report).
     """
     while not thread.terminal.is_set():
-        if thread.port:
-            cmd = f"ecflow_client {ssl_opt}--port {thread.port} --ping"
-            success, _ = run_shell_cmd(cmd=cmd, quiet=True)
-            if success:
-                log.info("Server started on port %s", thread.port)
-                if report_vars is not None:
-                    _server_report(port=thread.port, report_vars=report_vars)
+        port = thread.port
+        if port:
+            try:
+                _client(port, insecure).ping()
+            except RuntimeError as e:
+                if "Failed to connect" not in str(e):
+                    raise
+            else:
+                log.info("Server started on port %s", port)
+                _server_report(port, report_vars)
                 break
-        # Wait briefly before re-checking, so polling does not spin a CPU core or hammer
-        # ecflow_client while the server starts up (or fails to).
         sleep(0.2)
-
-
-def _server_report(port: int, report_vars: dict[str, str]) -> None:
-    """
-    Print ecFlow server details as JSON to stdout.
-
-    :param port: The TCP port the server is using.
-    :param report_vars: Server variables to report, exclusive of ECF_PORT.
-    """
-    vars_ = {**report_vars, "ECF_PORT": str(port)}
-    # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs, rather
-    # than only when the block-buffered stream is flushed at server exit.
-    print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
 def _ssl_check(prefix: str | None) -> None:
