@@ -592,7 +592,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     :param insecure: Start the server without SSL security.
     """
 
-    def fail(error: str, messages: str | None = None) -> None:
+    def complain(error: str, messages: str | None = None) -> None:
         thread.terminal.set()
         thread.error = error
         if messages:
@@ -619,14 +619,14 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
                 if static:
-                    fail(f"Requested port {port} is unavailable")
+                    complain(f"Requested port {port} is unavailable")
                 else:
                     log.debug("Port %s already in use", port)
                     continue  # try next random port
             else:
-                fail(f"ecflow_server failed on port {port}: {e.stdout}", e.stdout or "")
+                complain(f"ecflow_server failed on port {port}: {e.stdout}", e.stdout or "")
         except OSError as e:
-            fail(f"Failed to launch ecflow_server: {e}", thread.error)
+            complain(f"Failed to launch ecflow_server: {e}", thread.error)
         break
 
 
