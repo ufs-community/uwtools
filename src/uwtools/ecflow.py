@@ -108,11 +108,12 @@ def server(
     validate(config)
     server_config = config.data[STR.ecflow][STR.server]
     ssl = server_config.get("ECF_SSL")
+    prefix = ssl if isinstance(ssl, str) else None
     ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
     server_config.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
     if not insecure and ssl is not False:
         try:
-            _ssl_check(ssl)
+            _ssl_check(prefix)
         except UWSSLCertificateError:
             if ssl == "1":
                 _ssl_provision()
