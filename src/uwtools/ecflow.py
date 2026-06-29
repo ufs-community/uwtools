@@ -110,16 +110,16 @@ def server(
     ssl = server_config.get("ECF_SSL")
     prefix = ssl if isinstance(ssl, str) else None
     ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
-    server_config.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
     if not insecure and ssl is not False:
         try:
             _ssl_check(prefix)
         except UWSSLCertificateError:
             if ssl == "1":
                 _ssl_provision()
+    server_config.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
+    os.environ.update(server_config)
     rundir = Path(server_config["ECF_HOME"])
-    env = {**os.environ, **server_config}
-    thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
+    thread = _ServerThread(target=_server_start, args=[rundir, port, insecure])
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
     _server_wait(thread, insecure, server_config if report else None)
@@ -568,12 +568,11 @@ def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
         print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
-def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
+def _server_start(rundir: Path, port: int | None, insecure: bool) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
     :param rundir: Directory to run the server in (ECF_HOME).
-    :param env: Base environment variables for the server.
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     :param insecure: Start the server without SSL security.
     """
@@ -596,7 +595,7 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
         cmd = list(filter(None, parts))
         log.debug("Trying to start server on port %s", port)
         try:
-            run_shell_cmd(cmd=cmd, cwd=rundir, env=env, quiet=True, callback=callback)
+            run_shell_cmd(cmd=cmd, cwd=rundir, env=dict(os.environ), quiet=True, callback=callback)
         except CalledProcessError as e:
             thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
