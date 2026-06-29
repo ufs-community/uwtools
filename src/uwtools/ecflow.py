@@ -601,20 +601,16 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
 
     rundir.mkdir(parents=True, exist_ok=True)
     thread = cast(_ServerThread, current_thread())
+    callback = lambda proc: setattr(thread, "proc", proc)
     static = port is not None
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         thread.port = port
+        parts = ["ecflow_server", "--port", str(port), None if insecure else "--ssl"]
+        cmd = list(filter(None, parts))
         log.debug("Trying to start server on port %s", port)
-        cmd_parts = ["ecflow_server", "--port", str(port), None if insecure else "--ssl"]
         try:
-            run_shell_cmd(
-                cmd=list(filter(None, cmd_parts)),
-                cwd=rundir,
-                env=env,
-                quiet=True,
-                callback=lambda proc: setattr(thread, "proc", proc),
-            )
+            run_shell_cmd(cmd=cmd, cwd=rundir, env=env, quiet=True, callback=callback)
         except CalledProcessError as e:
             thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
