@@ -592,9 +592,12 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     :param insecure: Start the server without SSL security.
     """
 
-    def fail(error: str) -> None:
+    def fail(error: str, messages: str | None = None) -> None:
         thread.terminal.set()
         thread.error = error
+        if messages:
+            for line in messages.split("\n"):
+                log.error(line)
 
     thread = cast(_ServerThread, current_thread())
     fixed = port is not None
@@ -621,12 +624,9 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
                     log.debug("Port %s already in use", candidate)
                     continue  # try next random port
             else:
-                fail(f"ecflow_server failed on port {candidate}: {e.stdout}")
-                for line in (e.stdout or "").split("\n"):
-                    log.error(line)
+                fail(f"ecflow_server failed on port {candidate}: {e.stdout}", e.stdout or "")
         except OSError as e:
-            fail(f"Failed to launch ecflow_server: {e}")
-            log.error(thread.error)
+            fail(f"Failed to launch ecflow_server: {e}", thread.error)
         break
 
 
