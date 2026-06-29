@@ -155,7 +155,7 @@ def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
     ecflow.server(config=m.config_path, port=3141)
     m.ssl_provision.assert_not_called()
     _, env, _, _ = m.thread_cls.call_args.kwargs["args"]
-    assert "ECF_SSL" not in env
+    assert env["ECF_SSL"] == ""
 
 
 def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
@@ -186,10 +186,10 @@ def test_ecflow_server__insecure_skips_ssl(server_mocks):
 
 def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
     m = server_mocks
-    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": "1"}}}
+    m.cfg.data = {"ecflow": {"server": {"ECF_HOME": "/ecf", "ECF_SSL": True}}}
     ecflow.server(config=m.config_path, port=3141, insecure=True)
     _, env, _, insecure = m.thread_cls.call_args.kwargs["args"]
-    assert "ECF_SSL" not in env
+    assert env["ECF_SSL"] == "1"
     assert insecure is True
 
 
@@ -232,6 +232,7 @@ def test_ecflow_server__report_vars_insecure_omits_ssl(server_mocks):
     assert m.server_wait.call_args.args[2] == {
         "ECF_HOME": "/ecf",
         "ECF_HOST": "server.hostname.com",
+        "ECF_SSL": "1",
     }
 
 

@@ -107,35 +107,21 @@ def server(
     config.dereference()
     validate(config)
     server_config = config.data[STR.ecflow][STR.server]
-    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
-    # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
-    # (defaults to SSL on with auto-provisioned default certificates).
-    ecf_ssl = server_config.get("ECF_SSL")
-    if ssl_on := not insecure and ecf_ssl is not False:
+    ssl = server_config.get("ECF_SSL")
+    ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
+    server_config.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
+    if not insecure and ssl is not False:
         try:
-            _ssl_check(ecf_ssl)
+            _ssl_check(ssl)
         except UWSSLCertificateError:
-            if ecf_ssl in [None, True]:
+            if ssl == "1":
                 _ssl_provision()
     rundir = Path(server_config["ECF_HOME"])
-    # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
-    # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
-    cfg_vars = {k: str(v) for k, v in server_config.items() if k != "ECF_SSL"}
-    env = {**os.environ, **cfg_vars}
-    if ssl_on:
-        env["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
-    else:
-        # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
-        env.pop("ECF_SSL", None)
-    # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
-    # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
-    report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
-    if ssl_on:
-        report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
+    env = {**os.environ, **server_config}
     thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
-    _server_wait(thread, insecure, report_vars if report else None)
+    _server_wait(thread, insecure, server_config if report else None)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
