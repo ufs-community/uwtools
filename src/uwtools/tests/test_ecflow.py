@@ -8,6 +8,7 @@ import sys
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from signal import SIGINT
 from subprocess import CalledProcessError
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, PropertyMock, patch
@@ -243,30 +244,15 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
     assert insecure is False
 
 
-def test_ecflow_server__shutdown_terminates(server_mocks):
+def test_ecflow_server__shutdown(server_mocks):
     m = server_mocks
-    m.thread.port = 54321
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
         ecflow.server(config=m.config_path, port=54321)
         shutdown = m.signal.call_args.args[1]
         shutdown(2, None)
-    m.thread.terminal.set.assert_called()
-    cmd = run.call_args.kwargs["cmd"]
-    assert "--ssl" in cmd
-    assert "--port 54321" in cmd
-    assert "--terminate=yes" in cmd
-
-
-def test_ecflow_server__shutdown_terminates_insecure_no_ssl(server_mocks):
-    m = server_mocks
-    m.thread.port = 54321
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as run:
-        ecflow.server(config=m.config_path, port=54321, insecure=True)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    cmd = run.call_args.kwargs["cmd"]
-    assert "--ssl" not in cmd
-    assert "--terminate=yes" in cmd
+    m.thread.terminal.set.assert_called_once_with()
+    m.thread.proc.send_signal.assert_called_once_with(SIGINT)
+    m.thread.proc.wait.assert_called_once_with()
 
 
 def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):
