@@ -603,10 +603,10 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
     fixed = port is not None
     rundir.mkdir(parents=True, exist_ok=True)
     while not thread.terminal.is_set():
-        candidate = port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
-        log.debug("Trying to start server on port %s", candidate)
-        thread.port = candidate
-        cmd_parts = ["ecflow_server", "--port", str(candidate), None if insecure else "--ssl"]
+        port = port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
+        thread.port = port
+        log.debug("Trying to start server on port %s", port)
+        cmd_parts = ["ecflow_server", "--port", str(port), None if insecure else "--ssl"]
         try:
             run_shell_cmd(
                 cmd=list(filter(None, cmd_parts)),
@@ -619,12 +619,12 @@ def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure:
             thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
                 if fixed:
-                    fail(f"Requested port {candidate} is unavailable")
+                    fail(f"Requested port {port} is unavailable")
                 else:
-                    log.debug("Port %s already in use", candidate)
+                    log.debug("Port %s already in use", port)
                     continue  # try next random port
             else:
-                fail(f"ecflow_server failed on port {candidate}: {e.stdout}", e.stdout or "")
+                fail(f"ecflow_server failed on port {port}: {e.stdout}", e.stdout or "")
         except OSError as e:
             fail(f"Failed to launch ecflow_server: {e}", thread.error)
         break
