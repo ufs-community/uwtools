@@ -974,9 +974,9 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd) as run_shell_cmd,
     ):
-        ecflow._server_start(rundir, 3141, False)
+        ecflow._server_start(rundir, 3141)
     assert rundir.is_dir()
-    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server", "--port", "3141", "--ssl"]
+    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
     assert run_shell_cmd.call_args.kwargs["cwd"] == rundir
     assert thread.port == 3141
     assert thread.error is None
@@ -993,8 +993,8 @@ def test_ecflow__server_start__fixed_port_insecure(tmp_path):
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd) as run_shell_cmd,
     ):
-        ecflow._server_start(rundir, 3141, True)
-    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server", "--port", "3141"]
+        ecflow._server_start(rundir, 3141)
+    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
 
 
 def test_ecflow__server_start__fixed_port_other_failure(tmp_path):
@@ -1005,7 +1005,7 @@ def test_ecflow__server_start__fixed_port_other_failure(tmp_path):
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=err),
     ):
-        ecflow._server_start(rundir, 3141, False)
+        ecflow._server_start(rundir, 3141)
     assert thread.error == "ecflow_server failed on port 3141: something went wrong"
     assert thread.terminal.is_set()
 
@@ -1018,7 +1018,7 @@ def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=err),
     ):
-        ecflow._server_start(rundir, 3141, False)
+        ecflow._server_start(rundir, 3141)
     assert thread.error == "Requested port 3141 is unavailable"
     assert thread.terminal.is_set()
     assert thread.port is None
@@ -1032,7 +1032,7 @@ def test_ecflow__server_start__launch_failure(tmp_path):
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=err),
     ):
-        ecflow._server_start(rundir, 3141, False)
+        ecflow._server_start(rundir, 3141)
     assert thread.error is not None
     assert thread.error.startswith("Failed to launch ecflow_server:")
     assert thread.terminal.is_set()
@@ -1047,14 +1047,14 @@ def test_ecflow__server_start__random_port_failure(tmp_path):
         patch.object(ecflow, "run_shell_cmd", side_effect=err),
         patch.object(ecflow.random, "randint", return_value=31415),
     ):
-        ecflow._server_start(rundir, None, False)
+        ecflow._server_start(rundir, None)
     assert thread.error == "ecflow_server failed on port 31415: something broke"
     assert thread.terminal.is_set()
 
 
 def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
-    def fake_run_shell_cmd(*_args, **kwargs):
-        ports.append(kwargs["cmd"][2])
+    def fake_run_shell_cmd(*_args, **_kwargs):
+        ports.append(os.environ["ECF_PORT"])
         if len(ports) == 1:
             raise bind_err
         thread.terminal.set()
@@ -1065,11 +1065,12 @@ def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
     bind_err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
     ports: list[str] = []
     with (
+        patch.dict(os.environ, {}),
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=fake_run_shell_cmd),
         patch.object(ecflow.random, "randint", side_effect=[12345, 54321]),
     ):
-        ecflow._server_start(rundir, None, False)
+        ecflow._server_start(rundir, None)
     assert ports == ["12345", "54321"]
     assert thread.port == 54321
     assert thread.error is None

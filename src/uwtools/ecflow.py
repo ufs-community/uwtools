@@ -568,13 +568,12 @@ def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
         print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
-def _server_start(rundir: Path, port: int | None, insecure: bool) -> None:
+def _server_start(rundir: Path, port: int | None) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
     :param rundir: Directory to run the server in (ECF_HOME).
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
-    :param insecure: Start the server without SSL security.
     """
 
     def complain(error: str, messages: str | None = None) -> None:
@@ -586,14 +585,14 @@ def _server_start(rundir: Path, port: int | None, insecure: bool) -> None:
 
     rundir.mkdir(parents=True, exist_ok=True)
     thread = cast(_ServerThread, current_thread())
+    cmd = ["ecflow_server"]
     callback = lambda proc: setattr(thread, "proc", proc)
     static = port is not None
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
-        thread.port = port
-        parts = ["ecflow_server", "--port", str(port), None if insecure else "--ssl"]
-        cmd = list(filter(None, parts))
         log.debug("Trying to start server on port %s", port)
+        os.environ["ECF_PORT"] = str(port)
+        thread.port = port
         try:
             run_shell_cmd(cmd=cmd, cwd=rundir, env=dict(os.environ), quiet=True, callback=callback)
         except CalledProcessError as e:
