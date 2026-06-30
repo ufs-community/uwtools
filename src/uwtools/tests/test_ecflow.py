@@ -235,27 +235,6 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
     assert port == 3141
 
 
-def test_ecflow_server__shutdown(server_mocks):
-    m = server_mocks
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
-        ecflow.server(config=m.config_path, port=54321)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    m.thread.terminal.set.assert_called_once_with()
-    m.thread.proc.terminate.assert_called_once_with()
-    m.thread.proc.wait.assert_called_once_with()
-
-
-def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):
-    m = server_mocks
-    m.thread.port = None
-    with patch.object(ecflow, "run_shell_cmd") as run:
-        ecflow.server(config=m.config_path, port=54321)
-        shutdown = m.signal.call_args.args[1]
-        shutdown(2, None)
-    run.assert_not_called()
-
-
 @mark.parametrize("ecf_ssl", [None, True, False, "myhost.8888"])
 def test_ecflow_server__ssl_provision(ecf_ssl, server_mocks):
     server_mocks.ssl_check.side_effect = UWSSLCertificateError
@@ -274,6 +253,18 @@ def test_ecflow_server__starts_thread_and_waits(server_mocks):
     m.thread.start.assert_called_once()
     m.server_wait.assert_called_once()
     m.thread.join.assert_called_once()
+
+
+def test_ecflow_server__terminate(server_mocks, uwcaplog):
+    m = server_mocks
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
+        ecflow.server(config=m.config_path, port=54321)
+        terminate = m.signal.call_args.args[1]
+        terminate(2, None)
+    m.thread.terminal.set.assert_called_once_with()
+    m.thread.proc.terminate.assert_called_once_with()
+    m.thread.proc.wait.assert_called_once_with()
+    assert "Terminating" in uwcaplog.text
 
 
 def test_ecflow_server__validates_config(server_mocks):
