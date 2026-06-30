@@ -117,9 +117,7 @@ def server(
             if ssl == "1":
                 _ssl_provision()
     env.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
-    os.environ.update(env)
-    rundir = Path(env["ECF_HOME"])
-    thread = _ServerThread(target=_server_start, args=[rundir, port])
+    thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
     _server_wait(thread, insecure, env if report else None)
@@ -568,11 +566,11 @@ def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
         print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
-def _server_start(rundir: Path, port: int | None) -> None:
+def _server_start(env: dict[str, str], port: int | None) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
-    :param rundir: Directory to run the server in (ECF_HOME).
+    :param env: Environment variables from the server config.
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     """
 
@@ -583,18 +581,20 @@ def _server_start(rundir: Path, port: int | None) -> None:
             for line in messages.split("\n"):
                 log.error(line)
 
-    rundir.mkdir(parents=True, exist_ok=True)
+    cmd = ["ecflow_server"]
+    cwd = Path(env["ECF_HOME"])
+    cwd.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, **env}
     thread = cast(_ServerThread, current_thread())
     callback = lambda proc: setattr(thread, "proc", proc)
-    cmd = ["ecflow_server"]
     static = port is not None
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", port)
-        os.environ["ECF_PORT"] = str(port)
+        env["ECF_PORT"] = str(port)
         thread.port = port
         try:
-            run_shell_cmd(cmd=cmd, cwd=rundir, env=dict(os.environ), quiet=True, callback=callback)
+            run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=callback)
         except CalledProcessError as e:
             thread.port = None
             if "bind: Address already in use" in (e.stdout or ""):
