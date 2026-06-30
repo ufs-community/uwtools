@@ -942,9 +942,12 @@ def test_ecflow__server_start__doa(tmp_path):
 
 
 def test_ecflow__server_start__fixed_port_ssl(tmp_path):
+    def f(*_args, **_kwargs):
+        run_shell_cmd.call_args.kwargs["callback"](None)
+        thread.terminal.set()
+
     thread = ecflow._ServerThread()
     cwd = tmp_path / "ecf"
-    f = lambda *_args, **_kwargs: thread.terminal.set()
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
@@ -1019,14 +1022,19 @@ def test_ecflow__server_start__random_port_failure(tmp_path):
 
 
 def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
+    def f(*_args, **_kwargs):
+        port = run_shell_cmd.call_args.kwargs["env"][STR.ECF_PORT]
+        if int(port) == ports[0]:
+            raise CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
+        run_shell_cmd.call_args.kwargs["callback"](None)
+
     cwd = tmp_path / "ecf"
     assert not cwd.exists()
     thread = ecflow._ServerThread()
-    err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
     ports = [12345, 54321]
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "run_shell_cmd", side_effect=[err, None]),
+        patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
         patch.object(ecflow.random, "randint", side_effect=ports),
     ):
         ecflow._server_start(env={STR.ECF_HOME: cwd}, port=None)

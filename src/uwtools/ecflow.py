@@ -575,6 +575,10 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     """
 
+    def callback(proc: Popen) -> None:
+        thread.proc = proc
+        thread.port = port
+
     def complain(error: str, messages: str | None = None) -> None:
         thread.terminal.set()
         thread.error = error
@@ -587,13 +591,11 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
     cwd.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, **env}
     thread = cast(_ServerThread, current_thread())
-    callback = lambda proc: setattr(thread, "proc", proc)
     static = port is not None
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", port)
         env[STR.ECF_PORT] = str(port)
-        thread.port = port
         try:
             run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=callback)
         except CalledProcessError as e:
