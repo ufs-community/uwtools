@@ -96,7 +96,7 @@ def server(
     :raises UWError: If the server fails to start.
     """
 
-    def shutdown(_signum: int, _frame: FrameType | None) -> None:
+    def terminate(_signum: int, _frame: FrameType | None) -> None:
         log.info("Terminating")
         thread.terminal.set()
         proc = cast(Popen, thread.proc)
@@ -120,7 +120,7 @@ def server(
     os.environ.update(server_config)
     rundir = Path(server_config["ECF_HOME"])
     thread = _ServerThread(target=_server_start, args=[rundir, port])
-    signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGINT, terminate)
     thread.start()
     _server_wait(thread, insecure, server_config if report else None)
     thread.join()
@@ -502,7 +502,7 @@ class _ECFlowDef:
 
 class _ServerThread(Thread):
     """
-    A thread that runs an ecFlow server, tracking the port in use and shutdown state.
+    A thread that runs an ecFlow server, tracking runtime-state attributes.
     """
 
     def __init__(self, *args, **kwargs):
