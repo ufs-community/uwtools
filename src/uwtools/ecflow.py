@@ -599,22 +599,6 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", port)
         env[STR.ECF_PORT] = str(port)
-        # try:
-        #     success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
-        # except OSError as e:
-        #     complain(f"Failed to launch ecflow_server: {e}", thread.error)
-        # else:
-        #     if not success:
-        #         thread.port = None
-        #         if "bind: Address already in use" in output:
-        #             if static:
-        #                 complain(f"Requested port {port} is unavailable")
-        #             else:
-        #                 log.debug("Port %s already in use", port)
-        #                 continue  # try next random port
-        #         else:
-        #             complain(f"ecflow_server failed on port {port}: {e.stdout}", e.stdout or "")
-        # break
         try:
             success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
         except OSError as e:

@@ -938,25 +938,31 @@ def test_ecflow__server_start__doa(tmp_path):
         thread.terminal.set()
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=9999)
     run_shell_cmd.assert_not_called()  # main loop never entered
+    assert thread.error is None
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
 
 
 def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     def f(*_args, **_kwargs):
-        run_shell_cmd.call_args.kwargs["callback"](None)
+        run_shell_cmd.call_args.kwargs["callback"](proc)
         thread.terminal.set()
         return True, "all good"
 
+    proc = object()
     thread = ecflow._ServerThread()
-    cwd = tmp_path / "ecf"
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
     ):
-        ecflow._server_start(env={STR.ECF_HOME: cwd}, port=3141)
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
     assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
-    assert run_shell_cmd.call_args.kwargs["cwd"] == cwd
-    assert thread.port == 3141
+    assert run_shell_cmd.call_args.kwargs["cwd"] == tmp_path
     assert thread.error is None
+    assert thread.initial.is_set()
+    assert thread.port == 3141
+    assert thread.proc is proc
 
 
 def test_ecflow__server_start__fixed_port_insecure(tmp_path):
@@ -981,9 +987,12 @@ def test_ecflow__server_start__fixed_port_other_failure(tmp_path, uwcaplog):
         patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
-    assert thread.error == "ecflow_server failed on port 3141"
-    assert thread.terminal.is_set()
     assert "ABJECT FAILURE" in uwcaplog.text
+    assert thread.error == "ecflow_server failed on port 3141"
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
 
 
 def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
@@ -995,8 +1004,10 @@ def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
     assert thread.error == "Requested port 3141 is unavailable"
-    assert thread.terminal.is_set()
+    assert thread.initial.is_set()
     assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
 
 
 def test_ecflow__server_start__launch_failure(tmp_path):
@@ -1009,6 +1020,9 @@ def test_ecflow__server_start__launch_failure(tmp_path):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
     assert thread.error is not None
     assert thread.error.startswith("Failed to launch ecflow_server:")
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
     assert thread.terminal.is_set()
 
 
@@ -1021,11 +1035,14 @@ def test_ecflow__server_start__random_port_failure(tmp_path, uwcaplog):
         patch.object(ecflow.random, "randint", return_value=31415),
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=None)
-    assert thread.error == "ecflow_server failed on port 31415"
-    assert thread.terminal.is_set()
     lines = uwcaplog.text.split("\n")
     assert "bad" in lines
     assert "news" in lines
+    assert thread.error == "ecflow_server failed on port 31415"
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
 
 
 def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
