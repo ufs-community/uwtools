@@ -69,7 +69,7 @@ def server_mocks():
         patch.object(ecflow, "_ssl_check") as ssl_check,
         patch.object(ecflow, "_ssl_provision") as ssl_provision,
         patch.object(ecflow, "validate") as validate,
-        patch.object(ecflow.signal, "signal") as signal_,
+        patch.object(ecflow.signal, "signal") as signal,
     ):
         thread = thread_cls.return_value
         thread.error = None
@@ -77,7 +77,7 @@ def server_mocks():
             cfg=cfg,
             config_path=Path("/some/server.yaml"),
             server_wait=server_wait,
-            signal=signal_,
+            signal=signal,
             ssl_check=ssl_check,
             ssl_provision=ssl_provision,
             thread=thread,
