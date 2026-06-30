@@ -422,7 +422,7 @@ class _ECFlowDef:
             manual=manual,
             pre_includes="\n".join([f"%include <{inc}>" for inc in pre_includes]),
             post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
-            ECF_NAME=STR.ECF_HOME,
+            ECF_NAME=STR.ECF_NAME,
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
 
