@@ -84,7 +84,7 @@ def server(
     report: bool = False,
 ) -> None:
     """
-    Start an ecFlow server, optionally with SSL security enabled.
+    Start an ecFlow server, optionally with SSL security disabled.
 
     The server runs in the foreground until interrupted (e.g. via CTRL-C), then terminated.
 
@@ -96,29 +96,30 @@ def server(
     """
 
     def certsetup() -> None:
-        if not insecure and ssl is not False:
-            prefix = ssl if isinstance(ssl, str) else None
+        if not insecure and ssl_cfg is not False:
+            prefix = ssl_cfg if isinstance(ssl_cfg, str) else None
             try:
                 _ssl_check(prefix)
             except UWSSLCertificateError:
-                if ssl in [True, None]:
+                if ssl_cfg in [True, None]:
                     _ssl_provision()
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
-        log.info("Terminating")
+        log.debug("Terminating")
         thread.terminal.set()
-        proc = cast(Popen, thread.proc)
-        proc.terminate()
-        proc.wait()
+        thread.initial.wait()
+        if thread.proc:
+            thread.proc.terminate()
+            thread.proc.wait()
 
     config = YAMLConfig(config)
     config.dereference()
     validate(config)
     env = config.data[STR.ecflow][STR.server]
-    ssl = env.get(STR.ECF_SSL)
+    ssl_cfg = env.get(STR.ECF_SSL)
     certsetup()
-    ssl = ssl if isinstance(ssl, str) else "" if insecure or ssl is False else "1"
-    env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl})
+    ssl_env = ssl_cfg if isinstance(ssl_cfg, str) else "" if insecure or ssl_cfg is False else "1"
+    env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl_env})
     thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
@@ -508,6 +509,7 @@ class _ServerThread(Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.error: str | None = None
+        self.initial = Event()
         self.port: int | None = None
         self.proc: Popen | None = None
         self.terminal = Event()
@@ -576,8 +578,9 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
     """
 
     def callback(proc: Popen) -> None:
-        thread.proc = proc
         thread.port = port
+        thread.proc = proc
+        thread.initial.set()
 
     def complain(error: str, messages: str | None = None) -> None:
         thread.terminal.set()
@@ -611,6 +614,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         except OSError as e:
             complain(f"Failed to launch ecflow_server: {e}", thread.error)
         break
+    thread.initial.set()
 
 
 def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | None) -> None:
