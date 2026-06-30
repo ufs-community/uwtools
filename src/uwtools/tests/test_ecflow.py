@@ -199,13 +199,13 @@ def test_ecflow_server__raises_on_thread_error(server_mocks):
         ecflow.server(config=m.config_path, port=3141)
 
 
-@mark.parametrize("report_vars", [None, {}])
-def test_ecflow__server_report_no_op(capsys, report_vars):
-    ecflow._server_report(port=54321, report_vars=report_vars)
+@mark.parametrize("env", [None, {}])
+def test_ecflow__server_report_no_op(capsys, env):
+    ecflow._server_report(port=54321, env=env)
     assert not capsys.readouterr().out
 
 
-def test_ecflow_server__report_vars_include_config(server_mocks):
+def test_ecflow_server__env_include_config(server_mocks):
     m = server_mocks
     m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_LOG: "my.log"}}}
     with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
@@ -218,7 +218,7 @@ def test_ecflow_server__report_vars_include_config(server_mocks):
     }
 
 
-def test_ecflow_server__report_vars_insecure_omits_ssl(server_mocks):
+def test_ecflow_server__env_insecure_omits_ssl(server_mocks):
     m = server_mocks
     with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
         ecflow.server(config=m.config_path, port=54321, insecure=True, report=True)
@@ -925,7 +925,7 @@ def test_ecflow__openssl__not_found():
 
 
 def test_ecflow__server_report(capsys):
-    ecflow._server_report(port=54321, report_vars={STR.ECF_HOST: "host.com", STR.ECF_SSL: "1"})
+    ecflow._server_report(port=54321, env={STR.ECF_HOST: "host.com", STR.ECF_SSL: "1"})
     report = yaml.safe_load(capsys.readouterr().out)
     assert report == {"vars": {STR.ECF_HOST: "host.com", STR.ECF_SSL: "1", STR.ECF_PORT: "54321"}}
 
@@ -1035,10 +1035,10 @@ def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
     assert cwd.is_dir()
 
 
+@mark.parametrize("env", [{"FOO": "bar"}, None])
 @mark.parametrize("insecure", [True, False])
 @mark.parametrize("ping_effect", [None, [RuntimeError("Failed to connect"), None]])
-@mark.parametrize("report_vars", [{"FOO": "bar"}, None])
-def test_ecflow__server_wait__ok(insecure, ping_effect, report_vars, uwcaplog):
+def test_ecflow__server_wait__ok(env, insecure, ping_effect, uwcaplog):
     portnum = 54321
     thread = ecflow._ServerThread()
     ping = Mock(side_effect=ping_effect)
@@ -1053,9 +1053,9 @@ def test_ecflow__server_wait__ok(insecure, ping_effect, report_vars, uwcaplog):
             create=True,
         ) as port,
     ):
-        ecflow._server_wait(thread, insecure=insecure, report_vars=report_vars)
+        ecflow._server_wait(thread, insecure=insecure, env=env)
     _client.assert_called_with(portnum, insecure)
-    _server_report.assert_called_once_with(portnum, report_vars)
+    _server_report.assert_called_once_with(portnum, env)
     assert f"Server started on port {portnum}" in uwcaplog.text
     if ping_effect:
         assert _client.call_count == 2
@@ -1077,7 +1077,7 @@ def test_ecflow__server_wait__no_op(uwcaplog):
         patch.object(ecflow, "sleep") as sleep,
         patch.object(thread.terminal, "is_set", Mock(side_effect=[False, True])),
     ):
-        ecflow._server_wait(thread, insecure=False, report_vars=None)
+        ecflow._server_wait(thread, insecure=False, env=None)
     _client.assert_not_called()
     _server_report.assert_not_called()
     assert not uwcaplog.text
@@ -1093,13 +1093,13 @@ def test_ecflow__server_wait__unhandled_exception(uwcaplog):
         patch.object(ecflow, "_client", return_value=Mock(ping=ping)) as _client,
         patch.object(ecflow, "_server_report") as _server_report,
         patch.object(ecflow, "sleep") as sleep,
-        raises(RuntimeError) as e,
+        raises(UWError) as e,
     ):
-        ecflow._server_wait(thread, insecure=False, report_vars=None)
+        ecflow._server_wait(thread, insecure=False, env=None)
     _client.assert_called_once_with(portnum, False)
     _server_report.assert_not_called()
     assert not uwcaplog.text
-    assert str(e.value) == "Test"
+    assert str(e.value) == "Could not start server on port 54321"
     sleep.assert_not_called()
 
 

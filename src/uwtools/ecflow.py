@@ -12,7 +12,6 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
-from functools import cache
 from pathlib import Path
 from subprocess import CalledProcessError, Popen
 from textwrap import dedent
@@ -514,7 +513,6 @@ class _ServerThread(Thread):
         self.terminal = Event()
 
 
-@cache
 def _client(port: int, insecure: bool) -> Client:
     """
     Returns an ecFlow client, optionally with SSL enabled.
@@ -555,15 +553,15 @@ def _openssl() -> Path:
     return Path(path)
 
 
-def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
+def _server_report(port: int, env: dict[str, str] | None) -> None:
     """
     Print ecFlow server details as JSON to stdout.
 
     :param port: The TCP port the server is using.
-    :param report_vars: Server variables to report, exclusive of ECF_PORT.
+    :param env: Server variables to report, exclusive of ECF_PORT.
     """
-    if report_vars:
-        vars_ = {**report_vars, STR.ECF_PORT: str(port)}
+    if env:
+        vars_ = {**env, STR.ECF_PORT: str(port)}
         # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
         # rather than only when the block-buffered stream is flushed at server exit.
         print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
@@ -613,25 +611,25 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         break
 
 
-def _server_wait(thread: _ServerThread, insecure: bool, report_vars: dict[str, str] | None) -> None:
+def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | None) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
     :param insecure: Do not use SSL.
-    :param report_vars: Server variables to report as JSON (None => do not report).
+    :param env: Server variables to report as JSON (None => do not report).
     """
     while not thread.terminal.is_set():
-        port = thread.port
-        if port:
+        if port := thread.port:
             try:
+                # PM USE AN EVENT INSTEAD Of PORT VAL?
                 _client(port, insecure).ping()
             except RuntimeError as e:
                 if "Failed to connect" not in str(e):
-                    raise
+                    raise UWError("Could not start server on port %s" % port) from e
             else:
                 log.info("Server started on port %s", port)
-                _server_report(port, report_vars)
+                _server_report(port, env)
                 break
         sleep(0.2)
 
