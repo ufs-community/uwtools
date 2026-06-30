@@ -256,23 +256,6 @@ def test_ecflow_server__shutdown(server_mocks):
     m.thread.proc.wait.assert_called_once_with()
 
 
-# def test_ecflow_server__shutdown(server_mocks):
-#     m = server_mocks
-#     portnum = 54321
-#     with (
-#         patch.object(ecflow, "run_shell_cmd", return_value=(True, "")),
-#         patch.object(ecflow, "_client") as _client,
-#     ):
-#         ecflow.server(config=m.config_path, port=54321)
-#         shutdown = m.signal.call_args.args[1]
-#         m.thread.port = portnum
-#         shutdown(2, None)
-#     m.thread.terminal.set.assert_called_once_with()
-#     _client.assert_called_once_with(portnum, False)
-#     _client().terminate_server.assert_called_once_with()
-#     m.thread.proc.wait.assert_called_once_with()
-
-
 def test_ecflow_server__shutdown_without_port_skips_terminate(server_mocks):
     m = server_mocks
     m.thread.port = None
