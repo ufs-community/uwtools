@@ -155,7 +155,7 @@ Examples
      {
        "vars": {
          "ECF_HOME": "/path/to/run",
-         "ECF_HOST": "server.hostname.com",
+         STR.ECF_HOST: "server.hostname.com",
          "ECF_PORT": "8888",
          "ECF_SSL": "myhost.8888"
        }

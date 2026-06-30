@@ -107,7 +107,7 @@ def server(
     config.dereference()
     validate(config)
     env = config.data[STR.ecflow][STR.server]
-    ssl = env.get("ECF_SSL")
+    ssl = env.get(STR.ECF_SSL)
     prefix = ssl if isinstance(ssl, str) else None
     ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
     if not insecure and ssl is not False:
@@ -116,7 +116,7 @@ def server(
         except UWSSLCertificateError:
             if ssl == "1":
                 _ssl_provision()
-    env.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
+    env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl})
     thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
@@ -419,7 +419,7 @@ class _ECFlowDef:
             manual=manual,
             pre_includes="\n".join([f"%include <{inc}>" for inc in pre_includes]),
             post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
-            ECF_NAME="ECF_NAME",
+            ECF_NAME=STR.ECF_HOME,
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
 
@@ -560,7 +560,7 @@ def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
     :param report_vars: Server variables to report, exclusive of ECF_PORT.
     """
     if report_vars:
-        vars_ = {**report_vars, "ECF_PORT": str(port)}
+        vars_ = {**report_vars, STR.ECF_PORT: str(port)}
         # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
         # rather than only when the block-buffered stream is flushed at server exit.
         print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
@@ -582,7 +582,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
                 log.error(line)
 
     cmd = ["ecflow_server"]
-    cwd = Path(env["ECF_HOME"])
+    cwd = Path(env[STR.ECF_HOME])
     cwd.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, **env}
     thread = cast(_ServerThread, current_thread())
@@ -591,7 +591,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", port)
-        env["ECF_PORT"] = str(port)
+        env[STR.ECF_PORT] = str(port)
         thread.port = port
         try:
             run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=callback)
