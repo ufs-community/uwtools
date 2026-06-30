@@ -255,27 +255,23 @@ def test_ecflow_server__starts_thread_and_waits(server_mocks):
     m.thread.join.assert_called_once()
 
 
-def test_ecflow_server__terminate(server_mocks, uwcaplog):
+@mark.parametrize("proc", [True, False])
+def test_ecflow_server__terminate(proc, server_mocks, uwcaplog):
     m = server_mocks
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
+    if not proc:
+        m.thread.proc = None  # it's a Mock otherwise
+    # terminate() is nested in server() and so is normally inaccessible, but is passed as the second
+    # argument to signal() which is mocked in server_mocks, so get a reference to it from signal()'s
+    # call args, then call it.
+    with patch.object(ecflow, "_server_start"):
         ecflow.server(config=m.config_path, port=54321)
-        terminate = m.signal.call_args.args[1]
-        terminate(2, None)
-    m.thread.terminal.set.assert_called_once_with()
-    m.thread.proc.terminate.assert_called_once_with()
-    m.thread.proc.wait.assert_called_once_with()
-    assert "Terminating" in uwcaplog.text
-
-
-def test_ecflow_server__terminate__no_proc(server_mocks, uwcaplog):
-    m = server_mocks
-    m.thread.proc = None
-    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
-        ecflow.server(config=m.config_path, port=54321)
-        terminate = m.signal.call_args.args[1]
-        terminate(2, None)
+    terminate = m.signal.call_args.args[1]
+    terminate(2, None)
     m.thread.terminal.set.assert_called_once_with()
     assert "Terminating" in uwcaplog.text
+    if proc:
+        m.thread.proc.terminate.assert_called_once_with()
+        m.thread.proc.wait.assert_called_once_with()
 
 
 def test_ecflow_server__validates_config(server_mocks):
