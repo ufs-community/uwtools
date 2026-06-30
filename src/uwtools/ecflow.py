@@ -96,6 +96,14 @@ def server(
     :raises UWError: If the server fails to start.
     """
 
+    def certsetup() -> None:
+        if not insecure and ssl is not False:
+            try:
+                _ssl_check(prefix)
+            except UWSSLCertificateError:
+                if ssl == "1":
+                    _ssl_provision()
+
     def terminate(_signum: int, _frame: FrameType | None) -> None:
         log.info("Terminating")
         thread.terminal.set()
@@ -110,12 +118,7 @@ def server(
     ssl = env.get(STR.ECF_SSL)
     prefix = ssl if isinstance(ssl, str) else None
     ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
-    if not insecure and ssl is not False:
-        try:
-            _ssl_check(prefix)
-        except UWSSLCertificateError:
-            if ssl == "1":
-                _ssl_provision()
+    certsetup()
     env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl})
     thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
