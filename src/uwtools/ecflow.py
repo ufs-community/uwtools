@@ -98,10 +98,11 @@ def server(
 
     def certsetup() -> None:
         if not insecure and ssl is not False:
+            prefix = ssl if isinstance(ssl, str) else None
             try:
                 _ssl_check(prefix)
             except UWSSLCertificateError:
-                if ssl == "1":
+                if ssl in [True, None]:
                     _ssl_provision()
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
@@ -116,9 +117,8 @@ def server(
     validate(config)
     env = config.data[STR.ecflow][STR.server]
     ssl = env.get(STR.ECF_SSL)
-    prefix = ssl if isinstance(ssl, str) else None
-    ssl = ssl if isinstance(ssl, str) else "" if insecure or ssl is False else "1"
     certsetup()
+    ssl = ssl if isinstance(ssl, str) else "" if insecure or ssl is False else "1"
     env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl})
     thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
