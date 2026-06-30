@@ -604,7 +604,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         except OSError as e:
             complain(f"Failed to launch ecflow_server: {e}", thread.error)
             break
-        if success:
+        if success or not output:
             break
         thread.port = None
         if "bind: Address already in use" in output:
