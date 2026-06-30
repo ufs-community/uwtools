@@ -119,7 +119,7 @@ def server(
     server_config.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
     os.environ.update(server_config)
     rundir = Path(server_config["ECF_HOME"])
-    thread = _ServerThread(target=_server_start, args=[rundir, port, insecure])
+    thread = _ServerThread(target=_server_start, args=[rundir, port])
     signal.signal(signal.SIGINT, shutdown)
     thread.start()
     _server_wait(thread, insecure, server_config if report else None)
@@ -651,7 +651,7 @@ def _ssl_check(prefix: str | None) -> None:
         if _SSL_DIR.is_dir() and not prefix:
             log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
         raise UWSSLCertificateError
-    log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
+    log.debug("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
 
 
 def _ssl_generate_cert(path: Path, key_path: Path) -> None:

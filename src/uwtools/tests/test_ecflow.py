@@ -157,7 +157,6 @@ def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
         ecflow.server(config=m.config_path, port=3141)
         assert env["ECF_SSL"] == ""
     m.ssl_provision.assert_not_called()
-    _, _, _ = m.thread_cls.call_args.kwargs["args"]
 
 
 def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
@@ -168,7 +167,6 @@ def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
         assert env["ECF_SSL"] == "myhost.3141"
     m.ssl_provision.assert_not_called()
     m.ssl_check.assert_called_once_with("myhost.3141")
-    _, _, _ = m.thread_cls.call_args.kwargs["args"]
 
 
 def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
@@ -179,7 +177,6 @@ def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
         ecflow.server(config=m.config_path, port=3141)
         assert env["ECF_SSL"] == "1"
     m.ssl_provision.assert_called_once_with()
-    _, _, _ = m.thread_cls.call_args.kwargs["args"]
 
 
 def test_ecflow_server__insecure_skips_ssl(server_mocks):
@@ -194,8 +191,6 @@ def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
     with patch.dict(os.environ, {}) as env:
         ecflow.server(config=m.config_path, port=3141, insecure=True)
         assert env["ECF_SSL"] == "1"
-    _, _, insecure = m.thread_cls.call_args.kwargs["args"]
-    assert insecure is True
 
 
 def test_ecflow_server__no_report_passes_none(server_mocks):
@@ -245,10 +240,9 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
     with patch.dict(os.environ, {}) as env:
         ecflow.server(config=server_mocks.config_path, port=3141)
         assert env["ECF_SSL"] == "1"
-    rundir, port, insecure = server_mocks.thread_cls.call_args.kwargs["args"]
+    rundir, port = server_mocks.thread_cls.call_args.kwargs["args"]
     assert rundir == Path("/ecf")
     assert port == 3141
-    assert insecure is False
 
 
 def test_ecflow_server__shutdown(server_mocks):
