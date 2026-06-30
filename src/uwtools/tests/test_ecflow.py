@@ -267,6 +267,17 @@ def test_ecflow_server__terminate(server_mocks, uwcaplog):
     assert "Terminating" in uwcaplog.text
 
 
+def test_ecflow_server__terminate__no_proc(server_mocks, uwcaplog):
+    m = server_mocks
+    m.thread.proc = None
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")):
+        ecflow.server(config=m.config_path, port=54321)
+        terminate = m.signal.call_args.args[1]
+        terminate(2, None)
+    m.thread.terminal.set.assert_called_once_with()
+    assert "Terminating" in uwcaplog.text
+
+
 def test_ecflow_server__validates_config(server_mocks):
     m = server_mocks
     ecflow.server(config=m.config_path, port=3141)
