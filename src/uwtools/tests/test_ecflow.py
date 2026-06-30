@@ -9,7 +9,6 @@ import sys
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from signal import SIGINT
 from subprocess import CalledProcessError
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, PropertyMock, patch
@@ -252,7 +251,7 @@ def test_ecflow_server__shutdown(server_mocks):
         shutdown = m.signal.call_args.args[1]
         shutdown(2, None)
     m.thread.terminal.set.assert_called_once_with()
-    m.thread.proc.send_signal.assert_called_once_with(SIGINT)
+    m.thread.proc.terminate.assert_called_once_with()
     m.thread.proc.wait.assert_called_once_with()
 
 

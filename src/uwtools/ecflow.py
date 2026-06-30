@@ -100,7 +100,7 @@ def server(
         log.info("Terminating")
         thread.terminal.set()
         proc = cast(Popen, thread.proc)
-        proc.send_signal(signal.SIGINT)
+        proc.terminate()
         proc.wait()
 
     config = YAMLConfig(config)
@@ -585,8 +585,8 @@ def _server_start(rundir: Path, port: int | None) -> None:
 
     rundir.mkdir(parents=True, exist_ok=True)
     thread = cast(_ServerThread, current_thread())
-    cmd = ["ecflow_server"]
     callback = lambda proc: setattr(thread, "proc", proc)
+    cmd = ["ecflow_server"]
     static = port is not None
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
