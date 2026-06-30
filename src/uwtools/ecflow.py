@@ -624,7 +624,6 @@ def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | No
     while not thread.terminal.is_set():
         if port := thread.port:
             try:
-                # PM USE AN EVENT INSTEAD Of PORT VAL?
                 _client(port, insecure).ping()
             except RuntimeError as e:
                 if "Failed to connect" not in str(e):
