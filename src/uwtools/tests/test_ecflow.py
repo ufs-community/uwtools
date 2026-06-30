@@ -938,6 +938,17 @@ def test_ecflow__server_report(capsys):
     assert report == {"vars": {"ECF_HOST": "host.com", "ECF_SSL": "1", "ECF_PORT": "54321"}}
 
 
+def test_ecflow__server_start__doa(tmp_path):
+    thread = ecflow._ServerThread()
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd") as run_shell_cmd,
+    ):
+        thread.terminal.set()
+        ecflow._server_start(tmp_path, 9999)
+    run_shell_cmd.assert_not_called()  # main loop never entered
+
+
 def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     def fake_run_shell_cmd(*_args, **_kwargs):
         thread.terminal.set()
@@ -1038,6 +1049,7 @@ def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
 
     thread = ecflow._ServerThread()
     rundir = tmp_path / "ecf"
+    assert not rundir.exists()
     bind_err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
     ports: list[str] = []
     with (
@@ -1050,6 +1062,7 @@ def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
     assert ports == ["12345", "54321"]
     assert thread.port == 54321
     assert thread.error is None
+    assert rundir.is_dir()
 
 
 @mark.parametrize("insecure", [True, False])
