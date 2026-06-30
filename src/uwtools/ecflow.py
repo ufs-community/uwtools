@@ -106,8 +106,8 @@ def server(
     config = YAMLConfig(config)
     config.dereference()
     validate(config)
-    server_config = config.data[STR.ecflow][STR.server]
-    ssl = server_config.get("ECF_SSL")
+    env = config.data[STR.ecflow][STR.server]
+    ssl = env.get("ECF_SSL")
     prefix = ssl if isinstance(ssl, str) else None
     ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
     if not insecure and ssl is not False:
@@ -116,13 +116,13 @@ def server(
         except UWSSLCertificateError:
             if ssl == "1":
                 _ssl_provision()
-    server_config.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
-    os.environ.update(server_config)
-    rundir = Path(server_config["ECF_HOME"])
+    env.update({"ECF_HOST": socket.gethostname(), "ECF_SSL": ssl})
+    os.environ.update(env)
+    rundir = Path(env["ECF_HOME"])
     thread = _ServerThread(target=_server_start, args=[rundir, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
-    _server_wait(thread, insecure, server_config if report else None)
+    _server_wait(thread, insecure, env if report else None)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
