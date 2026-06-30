@@ -13,7 +13,6 @@ import signal
 import socket
 from copy import deepcopy
 from pathlib import Path
-from subprocess import CalledProcessError, Popen
 from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -45,6 +44,7 @@ from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
 if TYPE_CHECKING:
+    from subprocess import Popen
     from types import FrameType
 
     from ecflow import NodeContainer
@@ -577,17 +577,17 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
     """
 
-    def callback(proc: Popen) -> None:
-        thread.port = port
-        thread.proc = proc
-        thread.initial.set()
-
     def complain(error: str, messages: str | None = None) -> None:
         thread.terminal.set()
         thread.error = error
         if messages:
             for line in messages.split("\n"):
                 log.error(line)
+
+    def post(proc: Popen) -> None:
+        thread.port = port
+        thread.proc = proc
+        thread.initial.set()
 
     cmd = ["ecflow_server"]
     cwd = Path(env[STR.ECF_HOME])
@@ -599,20 +599,37 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", port)
         env[STR.ECF_PORT] = str(port)
+        # try:
+        #     success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
+        # except OSError as e:
+        #     complain(f"Failed to launch ecflow_server: {e}", thread.error)
+        # else:
+        #     if not success:
+        #         thread.port = None
+        #         if "bind: Address already in use" in output:
+        #             if static:
+        #                 complain(f"Requested port {port} is unavailable")
+        #             else:
+        #                 log.debug("Port %s already in use", port)
+        #                 continue  # try next random port
+        #         else:
+        #             complain(f"ecflow_server failed on port {port}: {e.stdout}", e.stdout or "")
+        # break
         try:
-            run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=callback)
-        except CalledProcessError as e:
-            thread.port = None
-            if "bind: Address already in use" in (e.stdout or ""):
-                if static:
-                    complain(f"Requested port {port} is unavailable")
-                else:
-                    log.debug("Port %s already in use", port)
-                    continue  # try next random port
-            else:
-                complain(f"ecflow_server failed on port {port}: {e.stdout}", e.stdout or "")
+            success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
         except OSError as e:
             complain(f"Failed to launch ecflow_server: {e}", thread.error)
+            break
+        if success:
+            break
+        thread.port = None
+        if "bind: Address already in use" in output:
+            if static:
+                complain(f"Requested port {port} is unavailable")
+                break
+            log.debug("Port %s already in use", port)
+            continue  # try next random port
+        complain(f"ecflow_server failed on port {port}", output)
         break
     thread.initial.set()
 

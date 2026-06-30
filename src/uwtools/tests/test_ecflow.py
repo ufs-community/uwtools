@@ -8,7 +8,6 @@ import sys
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from subprocess import CalledProcessError
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, PropertyMock, patch
 
@@ -945,6 +944,7 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     def f(*_args, **_kwargs):
         run_shell_cmd.call_args.kwargs["callback"](None)
         thread.terminal.set()
+        return True, "all good"
 
     thread = ecflow._ServerThread()
     cwd = tmp_path / "ecf"
@@ -960,8 +960,11 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
 
 
 def test_ecflow__server_start__fixed_port_insecure(tmp_path):
+    def f(*_args, **_kwargs):
+        thread.terminal.set()
+        return True, "all good"
+
     thread = ecflow._ServerThread()
-    f = lambda *_args, **_kwargs: thread.terminal.set()
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
@@ -970,24 +973,25 @@ def test_ecflow__server_start__fixed_port_insecure(tmp_path):
     assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
 
 
-def test_ecflow__server_start__fixed_port_other_failure(tmp_path):
+def test_ecflow__server_start__fixed_port_other_failure(tmp_path, uwcaplog):
     thread = ecflow._ServerThread()
-    err = CalledProcessError(1, "ecflow_server", output="something went wrong")
+    success, output = False, "ABJECT FAILURE"
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "run_shell_cmd", side_effect=err),
+        patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
-    assert thread.error == "ecflow_server failed on port 3141: something went wrong"
+    assert thread.error == "ecflow_server failed on port 3141"
     assert thread.terminal.is_set()
+    assert "ABJECT FAILURE" in uwcaplog.text
 
 
 def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
     thread = ecflow._ServerThread()
-    err = CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
+    success, output = False, "bind: Address already in use"
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "run_shell_cmd", side_effect=err),
+        patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
     assert thread.error == "Requested port 3141 is unavailable"
@@ -1008,25 +1012,29 @@ def test_ecflow__server_start__launch_failure(tmp_path):
     assert thread.terminal.is_set()
 
 
-def test_ecflow__server_start__random_port_failure(tmp_path):
+def test_ecflow__server_start__random_port_failure(tmp_path, uwcaplog):
     thread = ecflow._ServerThread()
-    err = CalledProcessError(1, "ecflow_server", output="something broke")
+    success, output = False, "bad\nnews"
     with (
         patch.object(ecflow, "current_thread", return_value=thread),
-        patch.object(ecflow, "run_shell_cmd", side_effect=err),
+        patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
         patch.object(ecflow.random, "randint", return_value=31415),
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=None)
-    assert thread.error == "ecflow_server failed on port 31415: something broke"
+    assert thread.error == "ecflow_server failed on port 31415"
     assert thread.terminal.is_set()
+    lines = uwcaplog.text.split("\n")
+    assert "bad" in lines
+    assert "news" in lines
 
 
 def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
     def f(*_args, **_kwargs):
         port = run_shell_cmd.call_args.kwargs["env"][STR.ECF_PORT]
         if int(port) == ports[0]:
-            raise CalledProcessError(1, "ecflow_server", output="ecf: bind: Address already in use")
+            return False, "ecf: bind: Address already in use"
         run_shell_cmd.call_args.kwargs["callback"](None)
+        return True, "all good"
 
     cwd = tmp_path / "ecf"
     assert not cwd.exists()
