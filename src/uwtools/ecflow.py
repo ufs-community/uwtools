@@ -117,7 +117,7 @@ def server(
     env = config.data[STR.ecflow][STR.server]
     ssl = env.get(STR.ECF_SSL)
     prefix = ssl if isinstance(ssl, str) else None
-    ssl = ssl if isinstance(ssl, str) else "" if ssl is False else "1"
+    ssl = ssl if isinstance(ssl, str) else "" if insecure or ssl is False else "1"
     certsetup()
     env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl})
     thread = _ServerThread(target=_server_start, args=[env, port])
