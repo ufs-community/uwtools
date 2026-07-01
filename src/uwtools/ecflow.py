@@ -12,9 +12,7 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
-from functools import cache
 from pathlib import Path
-from subprocess import CalledProcessError
 from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -46,6 +44,7 @@ from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
 
 if TYPE_CHECKING:
+    from subprocess import Popen
     from types import FrameType
 
     from ecflow import NodeContainer
@@ -85,10 +84,9 @@ def server(
     report: bool = False,
 ) -> None:
     """
-    Start an ecFlow server, optionally with SSL security enabled.
+    Start an ecFlow server, optionally with SSL security disabled.
 
-    The server runs in the foreground until interrupted (e.g. via CTRL-C), at which point it is shut
-    down gracefully via the ecFlow client's terminate option.
+    The server runs in the foreground until interrupted (e.g. via CTRL-C), then terminated.
 
     :param config: Config providing server settings (None => read stdin).
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
@@ -97,48 +95,35 @@ def server(
     :raises UWError: If the server fails to start.
     """
 
-    def shutdown(_signum: int, _frame: FrameType | None) -> None:
-        log.info("Terminating")
-        thread.terminal.set()
-        if thread.port:
-            ssl_opt = "" if insecure else "--ssl "
-            cmd = "ecflow_client %s--port %s --terminate=yes" % (ssl_opt, thread.port)
-            run_shell_cmd(cmd=cmd, quiet=True)
+    def certsetup() -> None:
+        if not insecure and ssl_cfg is not False:
+            prefix = ssl_cfg if isinstance(ssl_cfg, str) else None
+            try:
+                _ssl_check(prefix)
+            except UWSSLCertificateError:
+                if ssl_cfg in [True, None]:
+                    _ssl_provision()
 
-    cfg = YAMLConfig(config)
-    cfg.dereference()
-    validate(cfg)
-    server_cfg = cfg.data[STR.ecflow][STR.server]
-    # ECF_SSL in the YAML config can be: True (SSL on, default cert location), a <host>.<port>
-    # prefix string selecting named certificates in $HOME/.ecflowrc/ssl, False (SSL off), or absent
-    # (defaults to SSL on with auto-provisioned default certificates).
-    ecf_ssl = server_cfg.get("ECF_SSL")
-    ssl_on = not insecure and ecf_ssl is not False
-    if ssl_on:
-        try:
-            _ssl_check(ecf_ssl)
-        except UWSSLCertificateError:
-            if ecf_ssl in [None, True]:
-                _ssl_provision()
-    rundir = Path(server_cfg["ECF_HOME"])
-    # Exclude ECF_SSL from cfg_vars: it is handled explicitly below (it may be a bool in the YAML,
-    # and ecFlow interprets any non-empty env string as an SSL flag or cert path).
-    cfg_vars = {k: str(v) for k, v in server_cfg.items() if k != "ECF_SSL"}
-    env = {**os.environ, **cfg_vars}
-    if ssl_on:
-        env["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
-    else:
-        # ecFlow enables SSL if ECF_SSL is set to any value, so unset it for an insecure server.
-        env.pop("ECF_SSL", None)
-    # Server variables to echo back when reporting: all config-supplied ECF_* values plus the
-    # runtime-determined host and SSL setting. ECF_PORT is added once the port is known.
-    report_vars = {**cfg_vars, "ECF_HOST": socket.gethostname()}
-    if ssl_on:
-        report_vars["ECF_SSL"] = ecf_ssl if isinstance(ecf_ssl, str) else "1"
-    thread = _ServerThread(target=_server_start, args=[rundir, env, port, insecure])
-    signal.signal(signal.SIGINT, shutdown)
+    def terminate(_signum: int, _frame: FrameType | None) -> None:
+        log.debug("Terminating")
+        thread.terminal.set()
+        thread.initial.wait()
+        if thread.proc:
+            thread.proc.terminate()
+            thread.proc.wait()
+
+    config = YAMLConfig(config)
+    config.dereference()
+    validate(config)
+    env = deepcopy(config.data[STR.ecflow][STR.server])
+    ssl_cfg = env.get(STR.ECF_SSL)
+    certsetup()
+    ssl_env = "" if insecure or ssl_cfg is False else ssl_cfg if isinstance(ssl_cfg, str) else "1"
+    env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl_env})
+    thread = _ServerThread(target=_server_start, args=[env, port])
+    signal.signal(signal.SIGINT, terminate)
     thread.start()
-    _server_wait(thread, insecure, report_vars if report else None)
+    _server_wait(thread, insecure, env if report else None)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
@@ -437,7 +422,7 @@ class _ECFlowDef:
             manual=manual,
             pre_includes="\n".join([f"%include <{inc}>" for inc in pre_includes]),
             post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
-            ECF_NAME="ECF_NAME",
+            ECF_NAME=STR.ECF_NAME,
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
 
@@ -518,17 +503,18 @@ class _ECFlowDef:
 
 class _ServerThread(Thread):
     """
-    A thread that runs an ecFlow server, tracking the port in use and shutdown state.
+    A thread that runs an ecFlow server, tracking runtime-state attributes.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.port: int | None = None
-        self.terminal = Event()
         self.error: str | None = None
+        self.initial = Event()
+        self.port: int | None = None
+        self.proc: Popen | None = None
+        self.terminal = Event()
 
 
-@cache
 def _client(port: int, insecure: bool) -> Client:
     """
     Returns an ecFlow client, optionally with SSL enabled.
@@ -569,92 +555,90 @@ def _openssl() -> Path:
     return Path(path)
 
 
-def _server_report(port: int, report_vars: dict[str, str] | None) -> None:
+def _server_report(port: int, env: dict[str, str] | None) -> None:
     """
     Print ecFlow server details as JSON to stdout.
 
     :param port: The TCP port the server is using.
-    :param report_vars: Server variables to report, exclusive of ECF_PORT.
+    :param env: Server variables to report, exclusive of ECF_PORT.
     """
-    if report_vars:
-        vars_ = {**report_vars, "ECF_PORT": str(port)}
+    if env:
+        vars_ = {**env, STR.ECF_PORT: str(port)}
         # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
         # rather than only when the block-buffered stream is flushed at server exit.
         print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
 
 
-def _server_start(rundir: Path, env: dict[str, str], port: int | None, insecure: bool) -> None:
+def _server_start(env: dict[str, str], port: int | None) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
-    The subprocess is placed in its own session (start_new_session=True) so that it does not
-    receive the terminal's SIGINT; the main thread alone handles keyboard interrupts and shuts the
-    server down gracefully. ('start_new_session' is preferred over 'preexec_fn', which the
-    Python docs warn is unsafe in a multi-threaded process.)
-
-    The run directory (ECF_HOME) is created if it does not already exist.
-
-    :param rundir: Directory to run the server in (ECF_HOME).
-    :param env: Base environment variables for the server.
+    :param env: Environment variables from the server config.
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
-    :param insecure: Start the server without SSL security.
     """
-    thread = cast(_ServerThread, current_thread())
-    fixed = port is not None
-    # Create the run directory (ECF_HOME) on the user's behalf if it does not already exist.
-    rundir.mkdir(parents=True, exist_ok=True)
-    while not thread.terminal.is_set():
-        # ecFlow accepts ports only in the registered range ECFLOW_PORT_MIN-ECFLOW_PORT_MAX.
-        candidate = (
-            port if fixed else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
-        )
-        log.debug("Trying to start server on port %s", candidate)
-        thread.port = candidate
-        try:
-            cmd = "ecflow_server%s" % ("" if insecure else " --ssl")
-            run_shell_cmd(cmd=cmd, cwd=rundir, env={**env, "ECF_PORT": str(candidate)}, quiet=True)
-        except CalledProcessError as e:
-            if "bind: Address already in use" in (e.stdout or ""):
-                thread.port = None
-                if fixed:
-                    thread.terminal.set()
-                    thread.error = f"Requested port {candidate} is unavailable"
-                    return
-                log.debug("Port %s already in use", candidate)
-                continue
-            thread.terminal.set()
-            thread.error = f"ecflow_server failed on port {candidate}: {e.stdout}"
-            for line in (e.stdout or "").split("\n"):
+
+    def complain(error: str, messages: str | None = None) -> None:
+        thread.terminal.set()
+        thread.error = error
+        if messages:
+            for line in messages.split("\n"):
                 log.error(line)
-            return
+
+    def post(proc: Popen) -> None:
+        thread.port = port
+        thread.proc = proc
+        thread.initial.set()
+
+    cmd = ["ecflow_server"]
+    cwd = Path(env[STR.ECF_HOME])
+    cwd.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, **env}
+    thread = cast(_ServerThread, current_thread())
+    static = port is not None
+    while not thread.terminal.is_set():
+        port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
+        log.debug("Trying to start server on port %s", port)
+        env[STR.ECF_PORT] = str(port)
+        try:
+            success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
         except OSError as e:
-            # The server could not be launched at all, e.g. ecflow_server is not on PATH or the
-            # run directory (ECF_HOME) does not exist. Set terminal so the waiter does not hang.
-            thread.terminal.set()
-            thread.error = f"Failed to launch ecflow_server: {e}"
-            log.error(thread.error)
-            return
+            complain(f"Failed to launch ecflow_server: {e}", thread.error)
+            break
+        if success or not output:
+            break
+        thread.port = None
+        if "bind: Address already in use" in output:
+            if static:
+                complain(f"Requested port {port} is unavailable")
+                break
+            log.debug("Port %s already in use", port)
+            continue  # try next random port
+        complain(f"ecflow_server failed on port {port}", output)
+        break
+    thread.initial.set()
 
 
-def _server_wait(thread: _ServerThread, insecure: bool, report_vars: dict[str, str] | None) -> None:
+def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | None) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
     :param insecure: Do not use SSL.
-    :param report_vars: Server variables to report as JSON (None => do not report).
+    :param env: Server variables to report as JSON (None => do not report).
     """
     while not thread.terminal.is_set():
-        port = thread.port
-        if port:
+        if port := thread.port:
             try:
                 _client(port, insecure).ping()
             except RuntimeError as e:
+                log.debug("Error pinging server:")
+                for line in str(e).split("\n"):
+                    log.debug(f"  {line}")
                 if "Failed to connect" not in str(e):
-                    raise
+                    raise UWError("Could not start server on port %s" % port) from e
             else:
                 log.info("Server started on port %s", port)
-                _server_report(port, report_vars)
+                _server_report(port, env)
                 break
         sleep(0.2)
 
@@ -677,7 +661,7 @@ def _ssl_check(prefix: str | None) -> None:
         if _SSL_DIR.is_dir() and not prefix:
             log.error("Provide these files or remove %s to automatically generate", _SSL_DIR)
         raise UWSSLCertificateError
-    log.info("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
+    log.debug("Using SSL certificates %s in %s", ", ".join(fns), _SSL_DIR)
 
 
 def _ssl_generate_cert(path: Path, key_path: Path) -> None:
