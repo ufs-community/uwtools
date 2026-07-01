@@ -115,7 +115,7 @@ def server(
     config = YAMLConfig(config)
     config.dereference()
     validate(config)
-    env = config.data[STR.ecflow][STR.server]
+    env = deepcopy(config.data[STR.ecflow][STR.server])
     ssl_cfg = env.get(STR.ECF_SSL)
     certsetup()
     ssl_env = "" if insecure or ssl_cfg is False else ssl_cfg if isinstance(ssl_cfg, str) else "1"
