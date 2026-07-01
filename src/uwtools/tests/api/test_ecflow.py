@@ -6,6 +6,7 @@ from pytest import raises
 from uwtools.api import ecflow
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWError
+from uwtools.strings import STR
 
 
 def test_api_ecflow_server():
@@ -24,7 +25,7 @@ def test_api_ecflow_server__str():
 
 
 def test_api_ecflow_server__dict():
-    cfg = {"ecflow": {"server": {"ECF_HOME": "/ecf"}}}
+    cfg = {"ecflow": {"server": {STR.ECF_HOME: "/ecf"}}}
     with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config=cfg)
     _server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)
@@ -32,7 +33,7 @@ def test_api_ecflow_server__dict():
 
 
 def test_api_ecflow_server__yamlconfig():
-    cfg = YAMLConfig({"ecflow": {"server": {"ECF_HOME": "/ecf"}}})
+    cfg = YAMLConfig({"ecflow": {"server": {STR.ECF_HOME: "/ecf"}}})
     with patch.object(ecflow, "_server") as _server:
         result = ecflow.server(config=cfg)
     _server.assert_called_once_with(config=cfg, port=None, insecure=False, report=False)

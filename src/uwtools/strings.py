@@ -65,6 +65,12 @@ class _STR(_ValsMatchKeys):
     General strings.
     """
 
+    ECF_HOME: str = _
+    ECF_HOST: str = _
+    ECF_LOG: str = _
+    ECF_NAME: str = _
+    ECF_PORT: str = _
+    ECF_SSL: str = _
     account: str = _
     action: str = _
     base_file: str = _
