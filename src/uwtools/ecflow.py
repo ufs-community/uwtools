@@ -593,7 +593,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         export ECF_TRYNO=%ECF_TRYNO%
         export PATH={conda}/bin/:$PATH
         """.format(conda=os.environ["CONDA_PREFIX"])
-        Path(env[STR.ECF_HOME], "server.h").write_text(dedent(s).strip())
+        Path(env[STR.ECF_HOME], "server.h").write_text(dedent(s).lstrip())
         thread.port = port
         thread.proc = proc
         thread.initial.set()
