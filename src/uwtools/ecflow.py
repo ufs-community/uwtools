@@ -585,15 +585,10 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
                 log.error(line)
 
     def post(proc: Popen) -> None:
-        s = """
-        export ECF_HOST=%ECF_HOST%
-        export ECF_NAME=%ECF_NAME%
-        export ECF_PASS=%ECF_PASS%
-        export ECF_PORT=%ECF_PORT%
-        export ECF_TRYNO=%ECF_TRYNO%
-        export PATH={conda}/bin/:$PATH
-        """.format(conda=os.environ["CONDA_PREFIX"])
-        Path(env[STR.ECF_HOME], "server.h").write_text(dedent(s).lstrip())
+        keys = (STR.ECF_HOST, STR.ECF_NAME, STR.ECF_PASS, STR.ECF_PORT, STR.ECF_TRYNO)
+        lines = [f"export {k}=%{k}%" for k in keys]
+        lines.append("export PATH=%s/bin/:$PATH" % os.environ["CONDA_PREFIX"])
+        Path(env[STR.ECF_HOME], "server.h").write_text("\n".join(lines) + "\n")
         thread.port = port
         thread.proc = proc
         thread.initial.set()
