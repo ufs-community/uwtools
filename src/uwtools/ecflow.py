@@ -631,6 +631,9 @@ def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | No
             try:
                 _client(port, insecure).ping()
             except RuntimeError as e:
+                log.debug("Error pinging server:")
+                for line in str(e).split("\n"):
+                    log.debug(f"  {line}")
                 if "Failed to connect" not in str(e):
                     raise UWError("Could not start server on port %s" % port) from e
             else:

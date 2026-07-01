@@ -1119,7 +1119,8 @@ def test_ecflow__server_wait__unhandled_exception(uwcaplog):
     portnum = 54321
     thread = ecflow._ServerThread()
     thread.port = portnum
-    ping = Mock(side_effect=RuntimeError("Test"))
+    msg = "UNMITIGATED DISASTER"
+    ping = Mock(side_effect=RuntimeError(msg))
     with (
         patch.object(ecflow, "_client", return_value=Mock(ping=ping)) as _client,
         patch.object(ecflow, "_server_report") as _server_report,
@@ -1129,7 +1130,7 @@ def test_ecflow__server_wait__unhandled_exception(uwcaplog):
         ecflow._server_wait(thread, insecure=False, env=None)
     _client.assert_called_once_with(portnum, False)
     _server_report.assert_not_called()
-    assert not uwcaplog.text
+    assert msg in uwcaplog.text
     assert str(e.value) == "Could not start server on port 54321"
     sleep.assert_not_called()
 
