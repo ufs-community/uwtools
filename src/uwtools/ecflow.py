@@ -7,13 +7,11 @@ from __future__ import annotations
 import json
 import os
 import random
-import re
 import shutil
 import signal
 import socket
 from copy import deepcopy
 from pathlib import Path
-from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
 from typing import TYPE_CHECKING, cast
@@ -178,6 +176,8 @@ class _ECFlowDef:
     def __str__(self):
         return self._d.__str__()
 
+    # Public
+
     def write_ecf_scripts(self, path: Path) -> None:
         """
         The ecf scripts for this workflow.
@@ -319,104 +319,6 @@ class _ECFlowDef:
                     self._add_node(subconfig, _node(Suite, name), self._d)
                 case STR.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
-
-    def _create_ecf_script(self, config: dict, task: Task) -> None:
-        """
-        Write the ecf script for the task to disk.
-
-        :param config: The configuration for the script.
-        :param task: The task node.
-        """
-        scheduler = (
-            self._jobscheduler(
-                account=config.get(STR.account, ""),
-                execution=config.get(STR.execution, ""),
-                rundir=config.get(STR.rundir, ""),
-            )
-            if self._scheduler
-            else None
-        )
-        execution = config[STR.execution]
-        try:
-            cmd = execution[STR.incantation]
-        except KeyError as e:
-            msg = "The execution block for %s must include 'incantation'" % task.name()
-            raise UWConfigError(msg) from e
-        script_contents = self._ecflowscript(
-            execution=[cmd],
-            manual=config.get(STR.manual, f"Script to run {task.name()}"),
-            envcmds=execution.get(STR.envcmds, []),
-            pre_includes=config.get(STR.pre_includes, []),
-            post_includes=config.get(STR.post_includes, []),
-            scheduler=scheduler,
-        )
-
-        path = (
-            Path(task.get_abs_node_path().lstrip("/")).parent
-            / f"{task.name().split('_', 1)[-1]}.ecf"
-        )
-        self._scripts[path] = script_contents
-
-    def _ecflowscript(
-        self,
-        execution: list[str],
-        manual: str,
-        envcmds: list[str] | None = None,
-        envvars: dict[str, str] | None = None,
-        pre_includes: list[str] | None = None,
-        post_includes: list[str] | None = None,
-        scheduler: JobScheduler | None = None,
-    ) -> str:
-        """
-        Return a driver ecFlow script.
-
-        :param execution: Statements to execute.
-        :param manual: A brief explanation of purpose of script.
-        :param envcmds: Shell commands to set up runtime environment.
-        :param envvars: Environment variables to set in runtime environment.
-        :param pre_includes: Names of scripts to be included before execution.
-        :param post_includes: Names of scripts to be included after execution.
-        :param scheduler: A configured job-scheduler object.
-        """
-        template = """
-        {directives}
-
-        model=%MODEL%
-
-        {pre_includes}
-
-        {envcmds}
-
-        {envvars}
-
-        {execution}
-        if [[ $? -ne 0 ]]; then
-           ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
-           ecflow_client --abort
-           exit 1
-        fi
-
-        {post_includes}
-
-        %manual
-        {manual}
-        %end
-        """
-        pre_includes = pre_includes or []
-        post_includes = post_includes or []
-        directives = scheduler.directives if scheduler else ""
-        initcmds = scheduler.initcmds if scheduler else [""]
-        rs = dedent(template).format(
-            directives="\n".join(directives),
-            envcmds="\n".join(envcmds or []),
-            envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
-            execution="\n".join([*initcmds, *execution]),
-            manual=manual,
-            pre_includes="\n".join([f"%include <{inc}>" for inc in pre_includes]),
-            post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
-            ECF_NAME=STR.ECF_NAME,
-        )
-        return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
 
     def _expand_block(
         self,
