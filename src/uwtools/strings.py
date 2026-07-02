@@ -69,8 +69,10 @@ class _STR(_ValsMatchKeys):
     ECF_HOST: str = _
     ECF_LOG: str = _
     ECF_NAME: str = _
+    ECF_PASS: str = _
     ECF_PORT: str = _
     ECF_SSL: str = _
+    ECF_TRYNO: str = _
     account: str = _
     action: str = _
     base_file: str = _

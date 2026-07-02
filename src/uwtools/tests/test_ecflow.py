@@ -2,12 +2,14 @@
 Tests for uwtools.ecflow module.
 """
 
+import os
 import re
 import socket
 import sys
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from textwrap import dedent
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, PropertyMock, patch
 
@@ -948,6 +950,8 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
         thread.terminal.set()
         return True, "all good"
 
+    header = tmp_path / "server.h"
+    assert not header.is_file()
     proc = object()
     thread = ecflow._ServerThread()
     with (
@@ -961,6 +965,16 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     assert thread.initial.is_set()
     assert thread.port == 3141
     assert thread.proc is proc
+    assert header.is_file()
+    expected = """
+    export ECF_HOST=%ECF_HOST%
+    export ECF_NAME=%ECF_NAME%
+    export ECF_PASS=%ECF_PASS%
+    export ECF_PORT=%ECF_PORT%
+    export ECF_TRYNO=%ECF_TRYNO%
+    export PATH={conda}/bin/:$PATH
+    """.format(conda=os.environ["CONDA_PREFIX"])
+    assert header.read_text() == dedent(expected).lstrip()
 
 
 def test_ecflow__server_start__fixed_port_insecure(tmp_path):
