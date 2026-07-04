@@ -798,7 +798,7 @@ def test_ecflow__openssl__not_found():
 def test_ecflow__server_report(capsys):
     ecflow._server_report(port=54321, env={STR.ECF_HOST: "host.com", STR.ECF_SSL: "1"})
     report = yaml.safe_load(capsys.readouterr().out)
-    assert report == {"vars": {STR.ECF_HOST: "host.com", STR.ECF_SSL: "1", STR.ECF_PORT: "54321"}}
+    assert report == {STR.ECF_HOST: "host.com", STR.ECF_SSL: "1", STR.ECF_PORT: "54321"}
 
 
 def test_ecflow__server_start__doa(tmp_path):

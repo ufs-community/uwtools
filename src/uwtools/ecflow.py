@@ -458,7 +458,7 @@ def _server_report(port: int, env: dict[str, str] | None) -> None:
         vars_ = {**env, STR.ECF_PORT: str(port)}
         # Flush so downstream consumers (e.g. a piped jq) see the report while the server runs,
         # rather than only when the block-buffered stream is flushed at server exit.
-        print(json.dumps({"vars": vars_}, indent=2, sort_keys=True), flush=True)
+        print(json.dumps(vars_, indent=2, sort_keys=True), flush=True)
 
 
 def _server_start(env: dict[str, str], port: int | None) -> None:
