@@ -372,7 +372,9 @@ class _ECFlowDef:
             props = {STR.scheduler: self._scheduler, **config[STR.batchargs]}
             scheduler = JobScheduler.get_scheduler(props)
             directives = "\n".join(scheduler.directives)
-        fmt = lambda k: "\n".join(f"%include {x}" for x in config.get(STR.includes, {}).get(k, []))
+        fmt = lambda k: "\n\n".join(
+            f"%include {x}" for x in config.get(STR.includes, {}).get(k, [])
+        )
         includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
         manual = "\n".join(["%manual", config[STR.manual], "%end"]) if STR.manual in config else ""
         sections = [directives, manual, includes_entry, "{body}", includes_exit]
