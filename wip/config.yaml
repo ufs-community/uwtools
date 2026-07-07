@@ -42,8 +42,8 @@ ecflow:
             entry: [server.h, common.h]
           manual: Perform verification
         trigger: /vx/extract_grids == complete
-        vars:
-          ECF_SUBMIT_CMD: sbatch --parsable %ECF_JOB%
+        #vars:
+        #  ECF_SUBMIT_CMD: sbatch --parsable %ECF_JOB%
 wxvx:
   forecast:
     name: GFSFCST
