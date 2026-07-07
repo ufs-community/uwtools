@@ -20,8 +20,8 @@ ecflow:
             uw config realize -i {{ app.basedir }}/config.yaml --key-path wxvx >{{ app.basedir }}/vx.yaml
             wxvx -c {{ app.basedir }}/vx.yaml -t grids
           includes:
-            entry: [server.h, common.h]
-          manual: Prepare forecast and truth grids
+            entry: [common.h, server.h]
+          manual: Extract forecast and truth grids
         trigger: /vx/fetch_truth == complete
       task_fetch_truth:
         script:
@@ -29,7 +29,7 @@ ecflow:
             init $$
             wget --quiet {{ app.fcst.url }}
           includes:
-            entry: [server.h, common.h]
+            entry: [common.h, server.h]
           manual: Fetch GRIB truth data
       task_verification:
         script:
@@ -39,7 +39,7 @@ ecflow:
             init $SLURM_JOB_ID
             wxvx -c {{ app.basedir }}/vx.yaml -t stats
           includes:
-            entry: [server.h, common.h]
+            entry: [common.h, server.h]
           manual: Perform verification
         trigger: /vx/extract_grids == complete
         #vars:
