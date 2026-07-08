@@ -7,13 +7,11 @@ from __future__ import annotations
 import json
 import os
 import random
-import re
 import shutil
 import signal
 import socket
 from copy import deepcopy
 from pathlib import Path
-from textwrap import dedent
 from threading import Event, Thread, current_thread
 from time import sleep
 from typing import TYPE_CHECKING, cast
@@ -105,11 +103,17 @@ def server(
                     _ssl_provision()
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
-        log.debug("Terminating")
         thread.terminal.set()
         thread.initial.wait()
         if thread.proc:
-            thread.proc.terminate()
+            assert thread.port
+            c = _client(thread.port, insecure)
+            log.info("Halting")
+            c.halt_server()
+            log.info("Checkpointing")
+            c.checkpt()
+            log.info("Terminating")
+            c.terminate_server()
             thread.proc.wait()
 
     config = YAMLConfig(config)
@@ -161,14 +165,14 @@ class _ECFlowDef:
     """
 
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
-        self._scripts: dict[Path, str] = {}
         log.debug("Creating ecFlow definition from %s", config or "stdin")
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         cfgobj.dereference()
         validate(cfgobj)
         self._config = cfgobj.data[STR.ecflow][STR.suitedef]
-        self._scheduler = self._config.get(STR.scheduler)
         self._d = Defs()
+        self._scheduler = self._config.get(STR.scheduler)
+        self._scripts: dict[str, str] = {}
         log.debug("Adding workflow components to suite definition.")
         self._add_workflow_components()
         log.debug("Workflow components added. Scripts: %s", list(self._scripts.keys()))
@@ -180,23 +184,21 @@ class _ECFlowDef:
 
     # Public
 
-    def write_ecf_scripts(self, path: Path | str) -> None:
+    def write_ecf_scripts(self, path: Path) -> None:
         """
         The ecf scripts for this workflow.
 
         :param path: Where to write the ecFlow scripts.
         """
-
-        if not self._scripts:
-            log.warning("No scripts are configured for this workflow.")
-            return
-
-        log.debug("Writing ecf scripts to %s", path)
-        for subpath, content in self._scripts.items():
-            outpath = Path(path) / subpath
-            outpath.parent.mkdir(parents=True, exist_ok=True)
-            log.debug("Writing script: %s", outpath)
-            outpath.write_text(content)
+        if self._scripts:
+            for subpath, content in self._scripts.items():
+                assert subpath.startswith("/")
+                outpath = Path(str(path) + subpath).with_suffix(".ecf")
+                outpath.parent.mkdir(parents=True, exist_ok=True)
+                log.debug("Writing ecf script: %s", outpath)
+                outpath.write_text(content + "\n")
+        else:
+            log.debug("No scripts are configured for this workflow.")
 
     def write_suite_definition(self, path: Path | None) -> None:
         """
@@ -237,7 +239,6 @@ class _ECFlowDef:
             tag, name = self._tag_name(key)
             match tag:
                 # Tree buiding cases
-
                 case STR.family:
                     self._add_node(subconfig, _node(Family, name), node, refs)
                 case STR.families:
@@ -246,9 +247,7 @@ class _ECFlowDef:
                     self._add_node(subconfig, _node(Task, name), node, refs)
                 case STR.tasks:
                     self._expand_block(subconfig, name, Task, node, refs)
-
                 # Node attribute cases
-
                 case STR.defstatus:
                     node.add_defstatus(getattr(DState, subconfig))
                 case STR.events:
@@ -267,16 +266,16 @@ class _ECFlowDef:
                     add_items(node.add_limit, subconfig)
                 case STR.meters:
                     add_items(node.add_meter, subconfig)
-                case STR.repeat:  # Only one repeat is allowed per node.
+                case STR.repeat:
                     self._add_repeat(subconfig, name, node)
                 case STR.script:
-                    self._create_ecf_script(subconfig, node)
-                case STR.trigger:  # Only one trigger is allowed per node.
+                    self._prepare_ecf_script(subconfig, node)
+                case STR.trigger:
                     node.add_trigger(subconfig)
-                case STR.vars:  # add_variable accepts a dict.
+                case STR.vars:
                     node.add_variable(subconfig)
-                case STR.expand:  # Already processed by _expand_block.
-                    pass
+                case STR.expand:
+                    pass  # Already processed by _expand_block.
                 case _:
                     msg = f"Unrecognized tag: {tag}"
                     raise AssertionError(msg)
@@ -300,7 +299,6 @@ class _ECFlowDef:
                 repeat = RepeatDay
             case STR.int:
                 repeat = RepeatInteger
-
         # The schema-checked config blocks for each of these will be the variable and either the
         # start/end/[step] keys or the list key. Since they must be passed as positional arguments,
         # ensure their order is either (argument, start, end, [step]) or (argument, list).
@@ -328,104 +326,6 @@ class _ECFlowDef:
                 case STR.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
 
-    def _create_ecf_script(self, config: dict, task: Task) -> None:
-        """
-        Write the ecf script for the task to disk.
-
-        :param config: The configuration for the script.
-        :param task: The task node.
-        """
-        scheduler = (
-            self._jobscheduler(
-                account=config.get(STR.account, ""),
-                execution=config.get(STR.execution, ""),
-                rundir=config.get(STR.rundir, ""),
-            )
-            if self._scheduler
-            else None
-        )
-        execution = config[STR.execution]
-        try:
-            cmd = execution[STR.incantation]
-        except KeyError as e:
-            msg = "The execution block for %s must include 'incantation'" % task.name()
-            raise UWConfigError(msg) from e
-        script_contents = self._ecflowscript(
-            execution=[cmd],
-            manual=config.get(STR.manual, f"Script to run {task.name()}"),
-            envcmds=execution.get(STR.envcmds, []),
-            pre_includes=config.get(STR.pre_includes, []),
-            post_includes=config.get(STR.post_includes, []),
-            scheduler=scheduler,
-        )
-
-        path = (
-            Path(task.get_abs_node_path().lstrip("/")).parent
-            / f"{task.name().split('_', 1)[-1]}.ecf"
-        )
-        self._scripts[path] = script_contents
-
-    def _ecflowscript(
-        self,
-        execution: list[str],
-        manual: str,
-        envcmds: list[str] | None = None,
-        envvars: dict[str, str] | None = None,
-        pre_includes: list[str] | None = None,
-        post_includes: list[str] | None = None,
-        scheduler: JobScheduler | None = None,
-    ) -> str:
-        """
-        Return a driver ecFlow script.
-
-        :param execution: Statements to execute.
-        :param manual: A brief explanation of purpose of script.
-        :param envcmds: Shell commands to set up runtime environment.
-        :param envvars: Environment variables to set in runtime environment.
-        :param pre_includes: Names of scripts to be included before execution.
-        :param post_includes: Names of scripts to be included after execution.
-        :param scheduler: A configured job-scheduler object.
-        """
-        template = """
-        {directives}
-
-        model=%MODEL%
-
-        {pre_includes}
-
-        {envcmds}
-
-        {envvars}
-
-        {execution}
-        if [[ $? -ne 0 ]]; then
-           ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
-           ecflow_client --abort
-           exit 1
-        fi
-
-        {post_includes}
-
-        %manual
-        {manual}
-        %end
-        """
-        pre_includes = pre_includes or []
-        post_includes = post_includes or []
-        directives = scheduler.directives if scheduler else ""
-        initcmds = scheduler.initcmds if scheduler else [""]
-        rs = dedent(template).format(
-            directives="\n".join(directives),
-            envcmds="\n".join(envcmds or []),
-            envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
-            execution="\n".join([*initcmds, *execution]),
-            manual=manual,
-            pre_includes="\n".join([f"%include <{inc}>" for inc in pre_includes]),
-            post_includes="\n".join([f"%include <{inc}>" for inc in post_includes]),
-            ECF_NAME=STR.ECF_NAME,
-        )
-        return re.sub(r"\n\n\n+", "\n\n", rs.strip()) + "\n"
-
     def _expand_block(
         self,
         config: dict,
@@ -445,14 +345,12 @@ class _ECFlowDef:
         """
         refs = refs if refs is not None else {}
         expand = config[STR.expand]
-
         # Check to make sure all lists are the same length.
         try:
             assert list(zip(*expand.values(), strict=True))
         except ValueError as e:
             msg = "All expand variables under %s must be the same length" % (parent.name())
             raise UWConfigError(msg) from e
-
         # Build up the new blocks in the suite definition.
         primary_variable = list(expand.keys())[0]
         for i in range(len(expand[primary_variable])):
@@ -468,24 +366,26 @@ class _ECFlowDef:
             }
             self._add_node(**args)
 
-    def _jobscheduler(self, account: str, execution: dict, rundir: Path | str) -> JobScheduler:
+    def _prepare_ecf_script(self, config: dict, task: Task) -> None:
         """
-        Use the execution block to build a JobScheduler object.
+        Prepare and store an ecf script to later write to disk.
 
-        :param account: The user account for the batch system.
-        :param execution: The standard UW YAML execution block.
-        :param rundir: The directory where the task will run.
+        :param config: The configuration for the script.
+        :param task: The ecFlow task node.
         """
-        threads = execution.get(STR.threads)
-        resources = {
-            STR.account: account,
-            STR.rundir: rundir,
-            STR.scheduler: self._scheduler,
-            STR.stdout: "%s.out" % Path(rundir),
-            **({STR.threads: threads} if threads else {}),
-            **execution.get(STR.batchargs, {}),
-        }
-        return JobScheduler.get_scheduler(resources)
+        directives = ""
+        if self._scheduler:
+            props = {STR.scheduler: self._scheduler, **config[STR.batchargs]}
+            scheduler = JobScheduler.get_scheduler(props)
+            directives = "\n".join(scheduler.directives)
+        fmt = lambda k: "\n\n".join(
+            f"%include {x}" for x in config.get(STR.includes, {}).get(k, [])
+        )
+        includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
+        manual = "\n".join(["%manual", config[STR.manual], "%end"]) if STR.manual in config else ""
+        sections = [directives, manual, includes_entry, "{body}", includes_exit]
+        contents = "\n\n".join(filter(None, sections)).format(body=config[STR.body])
+        self._scripts[task.get_abs_node_path()] = contents
 
     def _tag_name(self, key: str) -> tuple[str, str]:
         """
@@ -495,9 +395,9 @@ class _ECFlowDef:
         :return: Tag and name of key.
         """
         # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
-        parts = key.split("_")
+        parts = key.split("_", maxsplit=1)
         tag = parts[0]
-        name = "_".join(parts[1:]) if parts[1:] else ""
+        name = parts[1] if len(parts) > 1 else ""
         return tag, name
 
 
@@ -604,7 +504,14 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         log.debug("Trying to start server on port %s", port)
         env[STR.ECF_PORT] = str(port)
         try:
-            success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
+            success, output = run_shell_cmd(
+                cmd=cmd,
+                cwd=cwd,
+                env=env,
+                start_new_session=True,
+                callback=post,
+                quiet=True,
+            )
         except OSError as e:
             complain(f"Failed to launch ecflow_server: {e}", thread.error)
             break

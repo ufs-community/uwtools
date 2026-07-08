@@ -38,11 +38,13 @@ kwargs = {
 
 # Define dependency packages for non-devshell installs.
 
+do_not_install = ["ecflow", "python"]
+
 if not os.environ.get("CONDEV_SHELL"):
     kwargs["install_requires"] = [
         pkg.replace(" ==", "==")
         for pkg in meta["packages"]["run"]
-        if not re.match(r"^python .*$", pkg)
+        if not any(re.match(rf"^{x} .*$", pkg) for x in do_not_install)
     ]
 
 # Install.
