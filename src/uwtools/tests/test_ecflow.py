@@ -44,12 +44,6 @@ def instance(minimal_config):
 
 
 @fixture
-def instance_with_scheduler(instance):
-    instance._scheduler = "slurm"
-    return instance
-
-
-@fixture
 def minimal_config():
     return {"ecflow": {"suitedef": {}}}
 
@@ -87,19 +81,6 @@ def server_mocks():
             validate=validate,
             yamlconfig=yamlconfig,
         )
-
-
-# Helpers
-
-
-def assert_line_in(result: str, line: str) -> None:
-    assert line in (x.strip() for x in result.splitlines())
-
-
-def assert_lines_in_order(result: str, expected: list[str]) -> None:
-    lines = [x.strip() for x in result.splitlines()]
-    actual = [line for line in lines if line in expected]
-    assert actual == expected
 
 
 # Tests
@@ -755,6 +736,61 @@ class Test_ECFlowDef:  # noqa: N801
         with raises(UWConfigError, match="same length"):
             instance._expand_block(config, "suite", Suite, suite)
 
+    def test_ecflow__ECFlowDef__prepare_ecf_script__body_only(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {"body": "echo hello"}
+        instance._prepare_ecf_script(config, task)
+        assert instance._scripts["/test/t1"] == "echo hello"
+
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_includes(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {
+            "body": "run.sh",
+            "includes": {
+                "entry": ["<head.h>", "<env.h>"],
+                "exit": ["<tail.h>"],
+            },
+        }
+        instance._prepare_ecf_script(config, task)
+        result = instance._scripts["/test/t1"]
+        assert "%include <head.h>" in result
+        assert "%include <env.h>" in result
+        assert "%include <tail.h>" in result
+        assert "run.sh" in result
+
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_manual(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {"body": "run.sh", "manual": "This is the manual page."}
+        instance._prepare_ecf_script(config, task)
+        result = instance._scripts["/test/t1"]
+        assert "%manual" in result
+        assert "This is the manual page." in result
+        assert "%end" in result
+
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_scheduler(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        instance._scheduler = "slurm"
+        config = {
+            "body": "run.sh",
+            "batchargs": {"account": "myacct", "nodes": 1, "walltime": "00:10:00"},
+        }
+        instance._prepare_ecf_script(config, task)
+        result = instance._scripts["/test/t1"]
+        assert "#SBATCH" in result
+        assert "run.sh" in result
+
     @mark.parametrize(
         ("key", "expected"),
         [
@@ -779,6 +815,22 @@ def test_ecflow__client(insecure):
         Client().enable_ssl.assert_not_called()
     else:
         Client().enable_ssl.assert_called_once_with()
+
+
+class Test_ServerThread:  # noqa: N801
+    """
+    Tests for class uwtools.ecflow._ServerThread.
+    """
+
+    def test_ecflow__ServerThread__init(self):
+        thread = ecflow._ServerThread(target=lambda: None)
+        assert thread.error is None
+        assert isinstance(thread.initial, ecflow.Event)
+        assert not thread.initial.is_set()
+        assert thread.port is None
+        assert thread.proc is None
+        assert isinstance(thread.terminal, ecflow.Event)
+        assert not thread.terminal.is_set()
 
 
 def test_ecflow__node():
