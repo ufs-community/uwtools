@@ -17,6 +17,7 @@ ecflow:
         script:
           body: |
             init $$
+            sleep 60
             uw config realize -i {{ app.basedir }}/config.yaml --key-path wxvx >{{ app.basedir }}/vx.yaml
             wxvx -c {{ app.basedir }}/vx.yaml -t grids
           includes:
@@ -31,17 +32,17 @@ ecflow:
           includes:
             entry: [common.h, server.h]
           manual: Fetch GRIB truth data
-      task_verification:
-        script:
-          body: |
-            source {{ app.basedir }}/conda/etc/profile.d/conda.sh
-            conda activate demo
-            init $SLURM_JOB_ID
-            wxvx -c {{ app.basedir }}/vx.yaml -t stats
-          includes:
-            entry: [common.h, server.h]
-          manual: Perform verification
-        trigger: /vx/extract_grids == complete
+#       task_verification:
+#         script:
+#           body: |
+#             source {{ app.basedir }}/conda/etc/profile.d/conda.sh
+#             conda activate demo
+#             init $SLURM_JOB_ID
+#             wxvx -c {{ app.basedir }}/vx.yaml -t stats
+#           includes:
+#             entry: [common.h, server.h]
+#           manual: Perform verification
+#         trigger: /vx/extract_grids == complete
       vars:
         ECF_JOB_CMD: /usr/bin/env -S bash %ECF_JOB% >%ECF_JOBOUT% 2>&1
 wxvx:
