@@ -8,7 +8,7 @@ f() { # PM FIXME
 }
   
 set -eu
-if [[ -d cond/ ]]; then
+if [[ -d conda/ ]]; then
   source conda/etc/profile.d/conda.sh
 else
   fn=Miniforge3-Linux-$(uname -m).sh
