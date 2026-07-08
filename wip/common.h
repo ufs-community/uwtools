@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 abort() {
   trap EXIT # unset previous trap
   ecflow_client --abort=$ECF_RID

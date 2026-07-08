@@ -27,7 +27,7 @@ ecflow:
         script:
           body: |
             init $$
-            wget --quiet {{ app.fcst.url }}
+            test -e {{ app.fcst.fn }} || wget --quiet {{ app.fcst.url }}
           includes:
             entry: [common.h, server.h]
           manual: Fetch GRIB truth data
@@ -42,8 +42,8 @@ ecflow:
             entry: [common.h, server.h]
           manual: Perform verification
         trigger: /vx/extract_grids == complete
-        #vars:
-        #  ECF_SUBMIT_CMD: sbatch --parsable %ECF_JOB%
+      vars:
+        ECF_JOB_CMD: /usr/bin/env -S bash %ECF_JOB% >%ECF_JOBOUT% 2>&1
 wxvx:
   forecast:
     name: GFSFCST
@@ -53,9 +53,9 @@ wxvx:
     prefix: '{{ app.prefix }}'
   paths:
     grids:
-      forecast: "{{ app.basedir }}/forecast"
-      truth: "{{ app.basedir }}/truth"
-    run: "{{ app.basedir }}/run"
+      forecast: "{{ app.basedir }}/vx/forecast"
+      truth: "{{ app.basedir }}/vx/truth"
+    run: "{{ app.basedir }}/vx/run"
   timepairs: [[!datetime '{{ app.cycle }}', !int '{{ app.leadtime}} ']]
   truth:
     name: GFS
