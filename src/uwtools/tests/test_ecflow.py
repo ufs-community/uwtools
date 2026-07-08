@@ -268,11 +268,16 @@ def test_ecflow_server__terminate(proc, server_mocks, uwcaplog):
     with patch.object(ecflow, "_server_start"):
         ecflow.server(config=m.config_path, port=54321)
     terminate = m.signal.call_args.args[1]
-    terminate(2, None)
+    with patch.object(ecflow, "_client") as _client:
+        terminate(2, None)
     m.thread.terminal.set.assert_called_once_with()
-    assert "Terminating" in uwcaplog.text
     if proc:
-        m.thread.proc.terminate.assert_called_once_with()
+        assert "Halting" in uwcaplog.text
+        _client().halt_server.assert_called_once_with()
+        assert "Checkpointing" in uwcaplog.text
+        _client().checkpt.assert_called_once_with()
+        assert "Terminating" in uwcaplog.text
+        _client().terminate_server.assert_called_once_with()
         m.thread.proc.wait.assert_called_once_with()
 
 

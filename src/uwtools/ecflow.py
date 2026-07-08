@@ -103,11 +103,17 @@ def server(
                     _ssl_provision()
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
-        log.debug("Terminating")
         thread.terminal.set()
         thread.initial.wait()
         if thread.proc:
-            thread.proc.terminate()
+            assert thread.port
+            c = _client(thread.port, insecure)
+            log.info("Halting")
+            c.halt_server()
+            log.info("Checkpointing")
+            c.checkpt()
+            log.info("Terminating")
+            c.terminate_server()
             thread.proc.wait()
 
     config = YAMLConfig(config)
@@ -498,7 +504,14 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
         log.debug("Trying to start server on port %s", port)
         env[STR.ECF_PORT] = str(port)
         try:
-            success, output = run_shell_cmd(cmd=cmd, cwd=cwd, env=env, quiet=True, callback=post)
+            success, output = run_shell_cmd(
+                cmd=cmd,
+                cwd=cwd,
+                env=env,
+                start_new_session=True,
+                callback=post,
+                quiet=True,
+            )
         except OSError as e:
             complain(f"Failed to launch ecflow_server: {e}", thread.error)
             break

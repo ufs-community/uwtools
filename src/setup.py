@@ -44,7 +44,7 @@ if not os.environ.get("CONDEV_SHELL"):
     kwargs["install_requires"] = [
         pkg.replace(" ==", "==")
         for pkg in meta["packages"]["run"]
-        if not any([re.match(fr"^{x} .*$", pkg) for x in do_not_install])
+        if not any(re.match(rf"^{x} .*$", pkg) for x in do_not_install)
     ]
 
 # Install.
