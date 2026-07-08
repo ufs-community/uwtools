@@ -12,6 +12,7 @@ ecflow:
   server:
     ECF_HOME: '{{ app.basedir }}'
   suitedef:
+    scheduler: slurm
     suite_vx:
       task_extract_grids:
         script:

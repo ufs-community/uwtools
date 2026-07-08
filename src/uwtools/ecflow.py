@@ -374,8 +374,8 @@ class _ECFlowDef:
         :param task: The ecFlow task node.
         """
         directives = ""
-        if self._scheduler:
-            props = {STR.scheduler: self._scheduler, **config[STR.batchargs]}
+        if self._scheduler and (batchargs := config.get(STR.batchargs)):
+            props = {STR.scheduler: self._scheduler, **batchargs}
             scheduler = JobScheduler.get_scheduler(props)
             directives = "\n".join(scheduler.directives)
         fmt = lambda k: "\n\n".join(
