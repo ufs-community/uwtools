@@ -1,1 +1,1 @@
-cat ecflow.yaml | uw ecflow realize
+cat forecast.yaml | uw ecflow realize

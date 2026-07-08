@@ -32,9 +32,9 @@ See :ref:`ecflow_workflows` for more information about the structured UW YAML fo
 Examples
 ^^^^^^^^
 
-The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
+The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
 
-.. literalinclude:: ecflow/ecflow.yaml
+.. literalinclude:: ecflow/forecast.yaml
    :language: yaml
 
 * To realize a UW YAML input file to ``stdout`` in ecFlow suite definition format:
@@ -61,9 +61,9 @@ The examples in this section use a UW YAML file ``ecflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdin-stdout.out
      :language: text
 
-* To also generate ``.ecf`` scripts, using a UW YAML file ``ecflow-workflow.yaml`` with contents:
+* To also generate ``.ecf`` scripts, using a UW YAML file ``workflow.yaml`` with contents:
 
-  .. literalinclude:: ecflow/ecflow-workflow.yaml
+  .. literalinclude:: ecflow/workflow.yaml
      :language: yaml
 
   .. literalinclude:: ecflow/realize-exec-scripts.cmd
@@ -177,7 +177,7 @@ Examples
 Examples
 ^^^^^^^^
 
-The examples in this section use the UW YAML file ``ecflow.yaml`` shown above.
+The examples in this section use the UW YAML file ``forecast.yaml`` shown above.
 
 * To validate a UW YAML config file:
 
