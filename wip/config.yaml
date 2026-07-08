@@ -17,7 +17,6 @@ ecflow:
         script:
           body: |
             init $$
-            sleep 60
             uw config realize -i {{ app.basedir }}/config.yaml --key-path wxvx >{{ app.basedir }}/vx.yaml
             wxvx -c {{ app.basedir }}/vx.yaml -t grids
           includes:
