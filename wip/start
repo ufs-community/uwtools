@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-f() { # PM FIXME
-  pushd ~/git/uwtools/src/
-  pip install --editable .
-  popd
-}
-  
 set -eu
 if [[ -d conda/ ]]; then
   source conda/etc/profile.d/conda.sh
@@ -16,10 +10,16 @@ else
   rm -v $fn
   source conda/etc/profile.d/conda.sh
   # conda create -y -n demo -c local -c oar-gsl bash_kernel jq jupyterlab tree uwtools=2.18 wget wxvx=0.7
+  # PM HACK BEGIN
   conda create -y -n demo -c local -c oar-gsl -c ufs-community bash_kernel ecflow=5.16.0 jq jupyterlab tree uwtools=2.17 wget wxvx=0.7
+  conda activate demo
+  pushd ~/git/uwtools/src/
+  pip install --editable .
+  popd
+  conda deactivate
+  # PM HACK END
 fi    
 conda activate demo
-f # PM FIXME
 python -m bash_kernel.install
 export BASEDIR=$PWD
 jupyter lab ecflow.ipynb
