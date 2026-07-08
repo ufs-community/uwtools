@@ -31,17 +31,21 @@ ecflow:
           includes:
             entry: [common.h, server.h]
           manual: Fetch GRIB truth data
-#       task_verification:
-#         script:
-#           body: |
-#             source {{ app.basedir }}/conda/etc/profile.d/conda.sh
-#             conda activate demo
-#             init $SLURM_JOB_ID
-#             wxvx -c {{ app.basedir }}/vx.yaml -t stats
-#           includes:
-#             entry: [common.h, server.h]
-#           manual: Perform verification
-#         trigger: /vx/extract_grids == complete
+      task_verification:
+        script:
+          batchargs:
+            walltime: 00:01:00
+          body: |
+            source {{ app.basedir }}/conda/etc/profile.d/conda.sh
+            conda activate demo
+            init $SLURM_JOB_ID
+            wxvx -c {{ app.basedir }}/vx.yaml -t stats
+          includes:
+            entry: [common.h, server.h]
+          manual: Perform verification
+        trigger: /vx/extract_grids == complete
+        vars:
+          ECF_JOB_CMD: ecflow_client --alter=add variable ECF_RID $(sbatch --parsable %ECF_JOB%) %ECF_NAME%
       vars:
         ECF_JOB_CMD: /usr/bin/env -S bash %ECF_JOB% >%ECF_JOBOUT% 2>&1
 wxvx:
