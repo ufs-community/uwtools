@@ -3,14 +3,14 @@
 ecFlow Workflows
 ================
 
-:ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (e.g. ``suite.def``) to describe the workflow, and ``ecf`` scripts to carry out individual tasks.
+:ecflow:`ecFlow<>` is a workflow manager developed by `ECMWF <https://www.ecmwf.int/>`_ and popular in the meteorological community. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (e.g. ``suite.def``) to describe the workflow, and ``ecf`` scripts to carry out individual tasks.
 
-The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translated into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ``ecf`` scripts.
+The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key-value configuration file and translated into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ``ecf`` scripts.
 
 Top-Level Structure
 -------------------
 
-UW YAML for ecFlow nests under a top-level ``ecflow:`` key, and the suite definition under a ``suitedef:`` child:
+UW YAML for ecFlow nests under a top-level ``ecflow`` key, and the suite definition under a ``suitedef`` child:
 
 .. code-block:: yaml
 
@@ -40,17 +40,17 @@ The following keys may appear at the top of the suite definition, directly under
 
 ``extern:``
 
-An optional list of external node paths to declare in the suite definition. Useful for triggering tasks across suites. For example:
+An optional list of external node paths to declare in the suite definition. Useful for triggering tasks across suites.
 
 ``scheduler:``
 
-The batch scheduler to target when generating ``ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, the scheduler's directives are automatically added to generated ``.ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
+The batch scheduler to target when generating ``ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, scheduler directives defined in a under ``batchargs:`` in a ``task_<name>`` block are automatically added to generated ``ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
 
 .. _ecflow_suite_level_vars:
 
 ``suite_<name>:``
 
-One or more suite definitions. The portion of the key following ``suite_`` becomes the suite name in ecFlow. For example, ``suite_forecast`` creates a suite named ``forecast``. See `Suite and Node Structure`_ for the contents of a suite.
+A suite definition. The portion of the key following ``suite_`` becomes the suite name in ecFlow. For example, ``suite_forecast`` creates a suite named ``forecast``. See `Suite and Node Structure`_ for the contents of a suite.
 
 ``suites_<name>:``
 
