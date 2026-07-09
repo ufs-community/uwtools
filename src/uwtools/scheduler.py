@@ -149,7 +149,7 @@ class JobScheduler(ABC):
             for x in fields(_DirectivesRequired)
             if getattr(_DirectivesRequired, x.name) not in self._props
         ]:
-            msg = "Missing required directives: %s" % ", ".join(missing)
+            msg = "Missing required directive(s): %s" % ", ".join(missing)
             raise UWConfigError(msg)
 
 
@@ -178,6 +178,7 @@ class LSF(JobScheduler):
         A mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
+            _DirectivesOptional.ACCOUNT: "-P",
             _DirectivesOptional.JOB_NAME: "-J",
             _DirectivesOptional.MEMORY: lambda x: f"-R rusage[mem={x}]",
             _DirectivesOptional.NODES: lambda x: f"-n {x}",
@@ -186,7 +187,6 @@ class LSF(JobScheduler):
             _DirectivesOptional.STDOUT: "-o",
             _DirectivesOptional.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
             _DirectivesOptional.THREADS: lambda x: f"-R affinity[core({x})]",
-            _DirectivesRequired.ACCOUNT: "-P",
             _DirectivesRequired.WALLTIME: "-W",
         }
 
@@ -247,6 +247,7 @@ class PBS(JobScheduler):
         A mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
+            _DirectivesOptional.ACCOUNT: "-A",
             _DirectivesOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
             _DirectivesOptional.EXPORT: "-V",
             _DirectivesOptional.JOB_NAME: "-N",
@@ -257,7 +258,6 @@ class PBS(JobScheduler):
             _DirectivesOptional.STDOUT: "-o",
             _DirectivesOptional.TASKS_PER_NODE: "mpiprocs",
             _DirectivesOptional.THREADS: "ompthreads",
-            _DirectivesRequired.ACCOUNT: "-A",
             _DirectivesRequired.WALLTIME: "-l walltime=",
         }
 
@@ -348,6 +348,7 @@ class Slurm(JobScheduler):
         A mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
+            _DirectivesOptional.ACCOUNT: "--account",
             _DirectivesOptional.CLUSTERS: "--clusters",
             _DirectivesOptional.CORES: "--ntasks",
             _DirectivesOptional.DEBUG: lambda x: "--verbose" if x else None,
@@ -363,7 +364,6 @@ class Slurm(JobScheduler):
             _DirectivesOptional.STDOUT: "--output",
             _DirectivesOptional.TASKS_PER_NODE: "--ntasks-per-node",
             _DirectivesOptional.THREADS: "--cpus-per-task",
-            _DirectivesRequired.ACCOUNT: "--account",
             _DirectivesRequired.WALLTIME: "--time",
         }
 
@@ -395,6 +395,7 @@ class _DirectivesOptional:
     Keys for optional directives.
     """
 
+    ACCOUNT: str = "account"
     CLUSTERS: str = "clusters"
     CORES: str = "cores"
     DEBUG: str = "debug"
@@ -420,5 +421,4 @@ class _DirectivesRequired:
     Keys for required directives.
     """
 
-    ACCOUNT: str = "account"
     WALLTIME: str = "walltime"

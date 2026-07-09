@@ -153,7 +153,7 @@ def test_JobScheduler__validate_props_no(schedulerobj):
     schedulerobj._props = {}
     with raises(UWConfigError) as e:
         schedulerobj._validate_props()
-    assert str(e.value) == "Missing required directives: account, walltime"
+    assert str(e.value) == "Missing required directive(s): walltime"
 
 
 def test_JobScheduler__validate_props_ok(schedulerobj):
