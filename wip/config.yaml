@@ -28,7 +28,7 @@ ecflow:
         script:
           body: |
             init $$
-            test -e {{ app.fcst.fn }} || wget --quiet {{ app.fcst.url }}
+            test -f {{ app.fcst.fn }} || wget --quiet {{ app.fcst.url }}
           includes:
             entry: [common.h, server.h]
           manual: Fetch GRIB truth data
