@@ -385,7 +385,7 @@ class _ECFlowDef:
         )
         includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
         manual = "\n".join(["%manual", config[STR.manual], "%end"]) if STR.manual in config else ""
-        sections = [interpreter, directives, manual, includes_entry, "{body}", includes_exit]
+        sections = [interpreter, directives, includes_entry, "{body}", includes_exit, manual]
         contents = "\n\n".join(filter(None, sections)).format(body=config[STR.body])
         self._scripts[task.get_abs_node_path()] = contents
 
