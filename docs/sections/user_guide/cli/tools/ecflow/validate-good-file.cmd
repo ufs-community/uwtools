@@ -1,1 +1,1 @@
-uw ecflow validate --config-file forecast.yaml
+uw ecflow validate --config-file workflow.yaml

@@ -2,12 +2,14 @@
 [2025-01-02T03:04:05]     INFO Schema validation succeeded for ecFlow config
 
 #5.16.0
-suite forecast
-  family prep
-    task get_obs
-      trigger 1==1
+suite workflow
+  edit WORKFLOW_VAR 'production'
+  family data_prep
+    task fetch
+    task process
+      trigger /workflow/data_prep/fetch == complete
   endfamily
   task run_model
-    trigger /forecast/prep/get_obs == complete
+    trigger /workflow/data_prep == complete
 endsuite
 # enddef

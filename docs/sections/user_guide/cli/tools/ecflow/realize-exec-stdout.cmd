@@ -1,1 +1,1 @@
-uw ecflow realize --config-file forecast.yaml
+uw ecflow realize --config-file workflow.yaml

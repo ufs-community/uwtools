@@ -32,9 +32,9 @@ See :ref:`ecflow_workflows` for more information about the structured UW YAML fo
 Examples
 ^^^^^^^^
 
-The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
+The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
 
-.. literalinclude:: ecflow/forecast.yaml
+.. literalinclude:: ecflow/workflow.yaml
    :language: yaml
 
 * To realize a UW YAML input file to ``stdout`` in ecFlow suite definition format:
@@ -153,12 +153,10 @@ Examples
   .. code-block:: json
 
      {
-       "vars": {
-         "ECF_HOME": "/path/to/run",
-         "ECF_HOST": "server.hostname.com",
-         "ECF_PORT": "8888",
-         "ECF_SSL": "myhost.8888"
-       }
+       "ECF_HOME": "/path/to/run",
+       "ECF_HOST": "server.hostname.com",
+       "ECF_PORT": "8888",
+       "ECF_SSL": "myhost.8888"
      }
 
   ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given and ``ECF_SSL`` is not ``false`` in the config).
@@ -177,7 +175,7 @@ Examples
 Examples
 ^^^^^^^^
 
-The examples in this section use the UW YAML file ``forecast.yaml`` shown above.
+The examples in this section use the UW YAML file ``workflow.yaml`` shown above.
 
 * To validate a UW YAML config file:
 

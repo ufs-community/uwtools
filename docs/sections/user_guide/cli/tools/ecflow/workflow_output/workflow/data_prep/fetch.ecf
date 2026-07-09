@@ -1,1 +1,7 @@
+#!/usr/bin/env bash
+
 echo Fetching data...
+
+%manual
+This task fetches data.
+%end
