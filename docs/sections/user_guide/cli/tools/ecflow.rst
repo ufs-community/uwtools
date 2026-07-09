@@ -19,7 +19,7 @@ The ``uw`` mode for realizing and validating ecFlow suite definitions.
 ``realize``
 -----------
 
-In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw ecflow``, that means transforming a structured UW YAML file into an :ecflow:`ecFlow<>` suite definition file (``suite.def``) and, optionally, a set of ``.ecf`` scripts. The structured YAML language required by UW closely follows the concepts defined by ecFlow.
+In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw ecflow``, that means transforming a structured UW YAML file into an :ecflow:`ecFlow<>` suite definition file (``suite.def``) and, optionally, a set of ``ecf`` scripts. The structured YAML language required by UW closely follows the concepts defined by ecFlow.
 
 See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
 
@@ -61,7 +61,7 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdin-stdout.out
      :language: text
 
-* To also generate ``.ecf`` scripts, using a UW YAML file ``workflow.yaml`` with contents:
+* To also generate ``ecf`` scripts, using a UW YAML file ``workflow.yaml`` with contents:
 
   .. literalinclude:: ecflow/workflow.yaml
      :language: yaml
@@ -72,7 +72,7 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-scripts.out
      :language: text
 
-  The ``--scripts-path`` option specifies the directory under which ``.ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite definition. For the example above, the generated scripts are:
+  The ``--scripts-path`` option specifies the directory under which ``ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite definition. For the example above, the generated scripts are:
 
   * ``workflow_output/workflow/data_prep/fetch.ecf``:
 
@@ -91,7 +91,7 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
 
   .. important::
 
-    **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated, the ``<name>`` portion becomes the script filename with a ``.ecf`` extension. See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
+    **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``ecf`` scripts are generated, the ``<name>`` portion becomes the script filename with a ``.ecf`` extension. See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
 
      Examples:
 

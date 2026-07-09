@@ -734,7 +734,7 @@
               "type": "string"
             },
             "ECF_HOME": {
-              "description": "Root directory for all .ecf script files",
+              "description": "Root directory for all ecf script files",
               "type": "string"
             },
             "ECF_INTERVAL": {
@@ -759,7 +759,7 @@
               "type": "string"
             },
             "ECF_MICRODEF": {
-              "description": "Character used for ECF pre-processing and variable substitution in .ecf scripts",
+              "description": "Character used for ECF pre-processing and variable substitution in ecf scripts",
               "maxLength": 1,
               "minLength": 1,
               "type": "string"

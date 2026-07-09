@@ -3,9 +3,9 @@
 ecFlow Workflows
 ================
 
-:ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (e.g. ``suite.def``) to describe the workflow, and ``.ecf`` scripts to carry out individual tasks.
+:ecflow:`ecFlow<>` is a workflow manager used by :ufs:`UFS<>` users and developers. It defines workflows as suites of tasks with dependencies, resource requirements, and scheduling logic. ecFlow uses a suite definition file (e.g. ``suite.def``) to describe the workflow, and ``ecf`` scripts to carry out individual tasks.
 
-The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translated into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ``.ecf`` scripts.
+The ``uw ecflow`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translated into the artifacts required by ecFlow: a suite definition file and, optionally, a set of ``ecf`` scripts.
 
 Top-Level Structure
 -------------------
@@ -44,7 +44,7 @@ An optional list of external node paths to declare in the suite definition. Usef
 
 ``scheduler:``
 
-The batch scheduler to target when generating ``.ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, the scheduler's directives are automatically added to generated ``.ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
+The batch scheduler to target when generating ``ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, the scheduler's directives are automatically added to generated ``.ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
 
 .. _ecflow_suite_level_vars:
 
@@ -60,7 +60,7 @@ An expand block for generating multiple suites from a parameterized template. Se
 
 A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite. For example:
 
-Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``.ecf`` scripts, but can be overriden by users in a suite-definition file.
+Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``ecf`` scripts, but can be overriden by users in a suite-definition file.
 
 See the :ecflow:`ecFlow documentation<ug/user_manual/ecflow_variables/index.html>` for more information on available variables and their meanings.
 
@@ -94,7 +94,7 @@ This example defines a suite ``forecast`` containing a family ``prep`` with task
 
 .. important::
 
-   **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated (via CLI argument ``--scripts-path`` or API argument ``script_path``), only the ``<name>`` portion becomes the script filename.
+   **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``ecf`` scripts are generated (via CLI argument ``--scripts-path`` or API argument ``script_path``), only the ``<name>`` portion becomes the script filename.
 
    Examples:
 
@@ -244,7 +244,7 @@ Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <pyth
 Task Script Block
 -----------------
 
-Tasks are required to have a ``script:`` block that defines the ``.ecf`` script to generate. The ``script:`` block has the following keys:
+Tasks are required to have a ``script:`` block that defines the ``ecf`` script to generate. The ``script:`` block has the following keys:
 
 ``account:``
 
@@ -252,7 +252,7 @@ The optional account or project charged for batch jobs. Used when ``scheduler:``
 
 ``execution:``
 
-**Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` for details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``.ecf`` script body, and is required by the code.
+**Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` for details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``ecf`` script body, and is required by the code.
 
 .. code-block:: yaml
 
@@ -263,15 +263,15 @@ The optional account or project charged for batch jobs. Used when ``scheduler:``
 
 ``manual:``
 
-An optional brief description of the task's purpose, embedded in the ``.ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
+An optional brief description of the task's purpose, embedded in the ``ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
 
 ``pre_includes:``
 
-An optional list of ecFlow include file names (without path) to include at the top of the generated ``.ecf`` script, using ``%include <name>``.
+An optional list of ecFlow include file names (without path) to include at the top of the generated ``ecf`` script, using ``%include <name>``.
 
 ``post_includes:``
 
-An optional list of ecFlow include file names (without path) to include at the bottom of the generated ``.ecf`` script.
+An optional list of ecFlow include file names (without path) to include at the bottom of the generated ``ecf`` script.
 
 .. code-block:: yaml
 
@@ -365,6 +365,6 @@ Generated Artifacts
 
 The ecFlow suite definition file, written to ``<output-path>/suite.def`` if ``--output-path`` is given, otherwise to ``stdout``.
 
-``.ecf`` scripts
+``ecf`` scripts
 
-One ``.ecf`` script per task, written under ``<scripts-path>/``. Each script is nested under the ``<scripts-path>`` in the same manner as it is in the suite definition. The example above will output a script at ``<scripts-path>/forecast/prep/get_obs.ecf`` and at ``<scripts-path>/forecast/run_model``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
+One ``ecf`` script per task, written under ``<scripts-path>/``. Each script is nested under the ``<scripts-path>`` in the same manner as it is in the suite definition. The example above will output a script at ``<scripts-path>/forecast/prep/get_obs.ecf`` and at ``<scripts-path>/forecast/run_model``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
