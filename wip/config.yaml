@@ -36,12 +36,11 @@ ecflow:
         script:
           batchargs:
             cores: 1
+            export: false
             rundir: '{{ app.basedir }}/vx'
             stdout: verification.out
-            walltime: 00:01:00
+            walltime: 00:05:00
           body: |
-            source {{ app.basedir }}/conda/etc/profile.d/conda.sh
-            conda activate demo
             init $SLURM_JOB_ID
             wxvx -c {{ app.basedir }}/vx.yaml -t stats
           includes:

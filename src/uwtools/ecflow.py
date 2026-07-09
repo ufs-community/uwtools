@@ -373,10 +373,9 @@ class _ECFlowDef:
         :param config: The configuration for the script.
         :param task: The ecFlow task node.
         """
+        interpreter = "#!/usr/bin/env bash"
         directives = ""
-        interpreter = ""
         if self._scheduler and (batchargs := config.get(STR.batchargs)):
-            interpreter = "#!/usr/bin/env bash"
             props = {STR.scheduler: self._scheduler, **batchargs}
             scheduler = JobScheduler.get_scheduler(props)
             directives = "\n".join(scheduler.directives)
