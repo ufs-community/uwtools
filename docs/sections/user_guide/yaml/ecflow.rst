@@ -64,6 +64,8 @@ Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are s
 
 See the :ecflow:`ecFlow documentation<ug/user_manual/ecflow_variables/index.html>` for more information on available variables and their meanings.
 
+.. _suite_and_node_structure:
+
 Suite and Node Structure
 ------------------------
 
@@ -264,14 +266,14 @@ In this example ``prep.h`` and ``post.h`` would need to be placed by the applica
 
 ``manual:``
 
-Optional. A brief description of the task's purpose, embedded in the ``ecf`` script's ``%manual`` section. The manual can, for example, be viewed in the :ecflow:`ecFlow GUI <tutorial/getting_started/using-ecflowui.html#using-ecflow-ui>`.
+Optional. A brief description of the task's purpose, embedded in the ``ecf`` script's ``%manual`` section. The manual can, for example, be viewed in the :ecflow:`ecFlow GUI <ug/ecflow_ui/index.html#ecflow-ui>`.
 
 Expand Blocks
 -------------
 
 The ``expand:`` mechanism generates multiple nodes from a parameterized template. It is used with the plural forms of node prefixes: ``suites_``, ``families_``, and ``tasks_``.
 
-The ``expand:`` key under a node block defines the variable(s) and their lists of values. The remaining keys in the block are templates rendered once for each element in the expand list, with ``{{ ec.VARNAME }}`` placeholders substituted. All lists under ``expand:`` must have the same length.
+The ``expand:`` key under a node block defines one or more variables to expand on, and their lists of values. The other keys in the block are treated as a template, rendered once for each element in the value lists, with ``{{ ec.VARNAME }}`` placeholders substituted. This implies that, when using the ``uw ecflow`` tool, ``ec`` is a reserved top-level key and should not be explicitly defined in YAML.
 
 .. code-block:: yaml
 
@@ -281,14 +283,12 @@ The ``expand:`` key under a node block defines the variable(s) and their lists o
          expand:
            MEM: ["01", "02", "03"]
          script:
-           execution:
-             executable: /path/to/run.sh
-             incantation: /path/to/run.sh
+           body: /path/to/run.sh
            manual: Run ensemble member {{ ec.MEM }}
 
 This expands to three tasks named ``member_01``, ``member_02``, and ``member_03``.
 
-Multiple expand variables of the same length may be provided together:
+Multiple value lists may be specified, provided they all have the same length:
 
 .. code-block:: yaml
 
@@ -296,6 +296,8 @@ Multiple expand variables of the same length may be provided together:
      expand:
        MEM: ["01", "02"]
        LABEL: ["ctrl", "pert"]
+
+This expands to two tasks, ``member_01_ctrl`` and ``member_02_pert``.
 
 Server Configuration
 --------------------
@@ -314,9 +316,9 @@ All keys in the ``server:`` block are passed as environment variables to ``ecflo
 
 Optionally controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
 
-- ``true`` (default when ``--insecure`` is not given): Enable SSL using the auto-provisioned default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``.
-- A certificate-filename prefix string (e.g. ``myhost.8888``): Enable SSL using the specified certificate files. Files with the given prefix and the extensions ``.crt``, ``.key``, and ``.pem`` must exist under ``$HOME/.ecflowrc/ssl/``.
-- ``false``: Disable SSL (equivalent to passing ``--insecure``).
+* ``true``: The default when ``--insecure`` is not specified. Enable SSL using the default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``. If these do not exist, ``uw ecflow server`` will generate them.
+* ``false``: Disable SSL. Equivalent to specifying ``--insecure``.
+* A certificate-filename prefix string (e.g. ``myhost.8888``): Enable SSL using the specified certificate files. Files with the given prefix and the extensions ``.crt``, ``.key``, and ``.pem`` must exist under ``$HOME/.ecflowrc/ssl/``.
 
 For example, to use a certificate-filename prefix when running on a static port:
 
@@ -339,4 +341,4 @@ The ecFlow suite definition file, written to ``<output-path>/suite.def`` if ``--
 
 ``ecf`` scripts
 
-One ``ecf`` script per task, written under ``<scripts-path>/``. Each script is nested under the ``<scripts-path>`` in the same manner as it is in the suite definition. The example above will output a script at ``<scripts-path>/forecast/prep/get_obs.ecf`` and at ``<scripts-path>/forecast/run_model``, where the script name is derived from the portion of the task name after the first underscore. Scripts are only generated when ``--scripts-path`` is provided to ``uw ecflow realize``.
+One ``ecf`` script per task, written under the directory specified by ``--scripts-path``.. Each script is nested under this directory in the same manner as it is in the suite definition. :ref:`This suite definition <suite_and_node_structure>` will create ``<scripts-path>/workflow/data_prep/fetch.ecf``, ``<scripts-path>/workflow/data_prep/process.ecf``, and ``<scripts-path>/workflow/run_model.ecf``. Scripts are only generated when ``--scripts-path`` is specified.
