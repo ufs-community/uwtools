@@ -475,12 +475,12 @@
             "script": {
               "oneOf": [
                 {
-                  "description": "Path to an existing .ecf file",
+                  "description": "Path to an existing ecf script",
                   "type": "string"
                 },
                 {
                   "additionalProperties": false,
-                  "description": "Recipe for constructing an .ecf file",
+                  "description": "Recipe for constructing an ecf script",
                   "properties": {
                     "batchargs": {
                       "$ref": "urn:uwtools:batchargs"
@@ -734,7 +734,7 @@
               "type": "string"
             },
             "ECF_HOME": {
-              "description": "Root directory for all ecf script files",
+              "description": "Root directory for all ecf scripts",
               "type": "string"
             },
             "ECF_INTERVAL": {
