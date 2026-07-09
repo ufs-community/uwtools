@@ -49,6 +49,8 @@ ecflow:
         trigger: /vx/extract_grids == complete
         vars:
           ECF_JOB_CMD: ecflow_client --alter=add variable ECF_RID $(sbatch --parsable %ECF_JOB%) %ECF_NAME%
+          ECF_KILL_CMD: scancel %ECF_RID%
+          ECF_STATUS_CMD: sacct -lj %ECF_RID%
       vars:
         ECF_JOB_CMD: /usr/bin/env -S bash %ECF_JOB% >%ECF_JOBOUT% 2>&1
 wxvx:
