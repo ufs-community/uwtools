@@ -192,8 +192,7 @@ class _ECFlowDef:
         """
         if self._scripts:
             for subpath, content in self._scripts.items():
-                assert subpath.startswith("/")
-                outpath = Path(str(path) + subpath).with_suffix(".ecf")
+                outpath = (path / Path(subpath).relative_to("/")).with_suffix(".ecf")
                 outpath.parent.mkdir(parents=True, exist_ok=True)
                 log.debug("Writing ecf script: %s", outpath)
                 outpath.write_text(content + "\n")
