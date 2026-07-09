@@ -58,7 +58,7 @@ An expand block for generating multiple suites from a parameterized template. Se
 
 ``vars:``
 
-A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite. For example:
+A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite.
 
 Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``ecf`` scripts, but can be overriden by users in a suite-definition file.
 
@@ -69,38 +69,22 @@ Suite and Node Structure
 
 Suites, families, and tasks are defined as nested YAML blocks. Keys are prefixed with ``suite_``, ``family_``, or ``task_`` to indicate their type; the remainder of the key is used as the node name.
 
-.. code-block:: yaml
+.. literalinclude:: /sections/user_guide/cli/tools/ecflow/workflow.yaml
+   :language: yaml
 
-   ecflow:
-     suitedef:
-       suite_forecast:
-         family_prep:
-           task_get_obs:
-             trigger: "1==1"
-             script:
-               execution:
-                 executable: uw fs get_obs.yaml
-                 incantation: /path/to/run_get_obs.sh
-               manual: Retrieve observation data
-         task_run_model:
-           trigger: /forecast/prep/get_obs == complete
-           script:
-             execution:
-               executable: model.exe
-               incantation: /path/to/run_model.sh
-             manual: Run the forecast model
+This example defines a suite ``workflow`` containing a family ``data_prep`` with tasks ``fetch`` and ``process``, and a top-level task ``run_model``.
 
-This example defines a suite ``forecast`` containing a family ``prep`` with task ``get_obs``, and a top-level task ``run_model``.
+  .. important::
 
-.. important::
+    **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``ecf`` scripts are generated, the ``<name>`` portion becomes the script filename with a ``.ecf`` extension. See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
 
-   **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``ecf`` scripts are generated (via CLI argument ``--scripts-path`` or API argument ``script_path``), only the ``<name>`` portion becomes the script filename.
+     Examples:
 
-   Examples:
+     - ``task_fetch`` → ``fetch.ecf``
+     - ``task_run_model`` → ``model.ecf``
+     - ``task_process_output_files`` → ``process_output_files.ecf``
 
-   - ``task_get_obs`` → ``get_obs.ecf``
-   - ``task_run_model`` → ``run_model.ecf``
-   - ``task_process_output_files`` → ``process_output_files.ecf``
+     Names for suites and families follow a corresponding naming convention.
 
 Node Attributes
 ^^^^^^^^^^^^^^^
