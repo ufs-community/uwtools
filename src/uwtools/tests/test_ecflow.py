@@ -743,7 +743,12 @@ class Test_ECFlowDef:  # noqa: N801
         instance._d.add(suite)
         config = {"body": "echo hello"}
         instance._prepare_ecf_script(config, task)
-        assert instance._scripts["/test/t1"] == "echo hello"
+        expected = """
+        #!/usr/bin/env bash
+
+        echo hello
+        """
+        assert instance._scripts["/test/t1"] == dedent(expected).strip()
 
     def test_ecflow__ECFlowDef__prepare_ecf_script__with_includes(self, instance):
         suite = Suite("test")
