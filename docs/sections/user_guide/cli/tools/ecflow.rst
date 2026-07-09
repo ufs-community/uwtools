@@ -37,7 +37,7 @@ The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
 .. literalinclude:: ecflow/workflow.yaml
    :language: yaml
 
-* To realize a UW YAML input file to ``stdout`` in ecFlow suite definition format:
+* To realize a UW YAML config file to ``stdout`` in ecFlow suite definition format:
 
   .. literalinclude:: ecflow/realize-exec-stdout.cmd
      :language: text
@@ -45,7 +45,9 @@ The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdout.out
      :language: text
 
-* To realize a UW YAML input file to a directory (writes ``suite.def`` inside that directory):
+  Note that UW log messages are written to ``stderr`` so can be redirected separately from the suite-definition code.
+
+* To realize a UW YAML config file to the file ``suite.def`` in a specified directory:
 
   .. literalinclude:: ecflow/realize-exec-dir.cmd
      :language: text
@@ -61,10 +63,7 @@ The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdin-stdout.out
      :language: text
 
-* To also generate ``ecf`` scripts, using a UW YAML file ``workflow.yaml`` with contents:
-
-  .. literalinclude:: ecflow/workflow.yaml
-     :language: yaml
+* To also generate ``ecf`` scripts:
 
   .. literalinclude:: ecflow/realize-exec-scripts.cmd
      :language: text
@@ -72,7 +71,7 @@ The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-scripts.out
      :language: text
 
-  The ``--scripts-path`` option specifies the directory under which ``ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite definition. For the example above, the generated scripts are:
+  The ``--scripts-path`` option specifies the directory under which ``ecf`` scripts are written. Here, scripts are arranged in a directory hierarchy following ecFlow's names for tasks, e.g. ``/workflow/data_prep/fetch`` for the task defined at UW YAML key path ``ecflow.suitedef.suite_workflow.family_data_prep.task_fetch``. For the example above, the generated scripts are:
 
   * ``workflow_output/workflow/data_prep/fetch.ecf``:
 
@@ -84,9 +83,9 @@ The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
     .. literalinclude:: ecflow/workflow_output/workflow/data_prep/process.ecf
        :language: bash
 
-  * ``workflow_output/workflow/model.ecf``:
+  * ``workflow_output/workflow/run_model.ecf``:
 
-    .. literalinclude:: ecflow/workflow_output/workflow/model.ecf
+    .. literalinclude:: ecflow/workflow_output/workflow/run_model.ecf
        :language: bash
 
   .. important::
@@ -98,6 +97,8 @@ The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
      - ``task_fetch`` → ``fetch.ecf``
      - ``task_run_model`` → ``model.ecf``
      - ``task_process_output_files`` → ``process_output_files.ecf``
+
+     Names for suites and families follow a corresponding naming convention.
 
 .. _cli_ecflow_server_examples:
 
