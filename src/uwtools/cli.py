@@ -1474,7 +1474,7 @@ def _check_verbosity(args: Args) -> Args:
 
 def _dict_from_key_eq_val_strings(config_items: list[str]) -> dict[str, str]:
     """
-    Given a list of key=value strings, return a dictionary of key/value pairs.
+    Given a list of key=value strings, return a dictionary of key-value pairs.
 
     :param config_items: Strings in the form key=value.
     :return: A dictionary based on the input key=value strings.
