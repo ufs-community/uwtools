@@ -38,6 +38,8 @@ Example block:
      stacksize: 100M
      threads: 8
 
+.. _batchargs:
+
 batchargs:
 """"""""""
 

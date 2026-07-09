@@ -46,8 +46,6 @@ An optional list of external node paths to declare in the suite definition. Usef
 
 The batch scheduler to target when generating ``ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, scheduler directives defined in a under ``batchargs:`` in a ``task_<name>`` block are automatically added to generated ``ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
 
-.. _ecflow_suite_level_vars:
-
 ``suite_<name>:``
 
 A suite definition. The portion of the key following ``suite_`` becomes the suite name in ecFlow. For example, ``suite_forecast`` creates a suite named ``forecast``. See `Suite and Node Structure`_ for the contents of a suite.
@@ -55,6 +53,8 @@ A suite definition. The portion of the key following ``suite_`` becomes the suit
 ``suites_<name>:``
 
 An expand block for generating multiple suites from a parameterized template. See `Expand Blocks`_.
+
+.. _ecflow_suite_level_vars:
 
 ``vars:``
 
@@ -218,55 +218,53 @@ Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <pyth
 Task Script Block
 -----------------
 
-Tasks are required to have a ``script:`` block that defines the ``ecf`` script to generate. The ``script:`` block has the following keys:
+Tasks are required to have a ``script:`` block that defines the ``ecf`` script to generate. The value of  ``script:`` may be
 
-``account:``
+* A string specifying a path to an ``ecf`` script to be passed verbatim to ecFlow. The script can reference ecFlow ``%<VAR>%`` variables, which will be rendered by the server when converting the ``ecf`` script to a final job script, but must otherwise be complete.
 
-The optional account or project charged for batch jobs. Used when ``scheduler:`` is set at the workflow level.
+.. code-block:: yaml
 
-``execution:``
+   script: /path/to/script.sh
 
-**Required.** Defines the execution command for the task. See :doc:`/sections/user_guide/yaml/components/execution` for details. The ``executable:`` key is required by the schema. The ``incantation:`` key specifies the command to run inside the ``ecf`` script body, and is required by the code.
+or
+
+* A YAML mapping with the following required and optional keys:
+
+``batchargs:``
+
+Optional. Batch-scheduler directives to add to the ``ecf`` script. See :ref:`this page <batchargs>` for more information.
+
+``body:``
+
+Required. Executable statements for the task. This may be a single command, including the path to a script to execute, or a multiline YAML string specifying a series of statements to execute in a bash shell.
 
 .. code-block:: yaml
 
    script:
-     execution:
-       executable: /path/to/run_model.sh
-       incantation: /path/to/run_model.sh
+     body: |
+       statement1
+       statement2
+       # etc.
 
-``manual:``
+``includes:``
 
-An optional brief description of the task's purpose, embedded in the ``ecf`` script's ``%manual`` section. Defaults to ``"Script to run <taskname>"``.
-
-``pre_includes:``
-
-An optional list of ecFlow include file names (without path) to include at the top of the generated ``ecf`` script, using ``%include <name>``.
-
-``post_includes:``
-
-An optional list of ecFlow include file names (without path) to include at the bottom of the generated ``ecf`` script.
+Optional: Subkeys ``entry:`` and ``exit:`` specify sequences of files (typically with ``.h`` extensions) to include before and after the ``body`` statements, respectively, translated to ecFlow ``%include`` statements. By default, include files can be found by the ecFlow server under the directory specified by ``ecflow.server.vars.ECF_HOME`` in the config; this can be overridden by defining ``ecflow.server.vars.ECF_INCLUDE`` (see :ecflow:`here <glossary.html#term-ECF_INCLUDE>`). The include file ``server.h``, which exports several crucial environment variables, is created by ``uw ecflow server`` at startup time and is available for inclusion in application ``ecf`` files.
 
 .. code-block:: yaml
 
-   task_run_model:
-     script:
-       account: myproject
-       rundir: /path/to/run
-       pre_includes:
-         - head.h
-       post_includes:
-         - tail.h
-       execution:
-         executable: /path/to/run_model.sh
-         incantation: /path/to/run_model.sh
-         batchargs:
-           walltime: "01:00:00"
-       manual: Run the forecast model
+   script:
+     includes:
+       entry:
+       - server.h
+       - prep.h
+       exit:
+       - post.h
 
-``rundir:``
+In this example ``prep.h`` and ``post.h`` would need to be placed by the application in the ``ECF_HOME`` directory, or in a directory specified by ``ECF_INCLUDE``.
 
-The optional directory in which the task will run. Used when ``scheduler:`` is set at the workflow level.
+``manual:``
+
+Optional. A brief description of the task's purpose, embedded in the ``ecf`` script's ``%manual`` section. The manual can, for example, be viewed in the :ecflow:`ecFlow GUI <tutorial/getting_started/using-ecflowui.html#using-ecflow-ui>`.
 
 Expand Blocks
 -------------
