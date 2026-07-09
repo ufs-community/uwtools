@@ -473,59 +473,49 @@
         {
           "properties": {
             "script": {
-              "additionalProperties": false,
-              "properties": {
-                "account": {
+              "oneOf": [
+                {
+                  "description": "Path to an existing .ecf file",
                   "type": "string"
                 },
-                "execution": {
+                {
                   "additionalProperties": false,
+                  "description": "Recipe for constructing an .ecf file",
                   "properties": {
                     "batchargs": {
                       "$ref": "urn:uwtools:batchargs"
                     },
-                    "envcmds": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array"
-                    },
-                    "incantation": {
+                    "body": {
                       "type": "string"
                     },
-                    "threads": {
-                      "minimum": 1,
-                      "type": "integer"
+                    "includes": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "entry": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "exit": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "manual": {
+                      "type": "string"
                     }
                   },
                   "required": [
-                    "incantation"
+                    "body"
                   ],
                   "type": "object"
-                },
-                "manual": {
-                  "type": "string"
-                },
-                "post_includes": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                "pre_includes": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                "rundir": {
-                  "type": "string"
                 }
-              },
-              "required": [
-                "execution"
-              ],
-              "type": "object"
+              ]
             }
           },
           "required": [

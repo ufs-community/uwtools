@@ -78,6 +78,7 @@ class _STR(_ValsMatchKeys):
     base_file: str = _
     batch: str = _
     batchargs: str = _
+    body: str = _
     cdeps: str = _
     chgres_cube: str = _
     classname: str = _
@@ -98,6 +99,7 @@ class _STR(_ValsMatchKeys):
     ecflow: str = _
     end: str = _
     enkf: str = _
+    entry: str = _
     enumerated: str = _
     env: str = _
     envcmds: str = _
@@ -106,12 +108,12 @@ class _STR(_ValsMatchKeys):
     executable: str = _
     execute: str = _
     execution: str = _
+    exit: str = _
     expand: str = _
     extern: str = _
     fallback: str = _
     families: str = _
     family: str = _
-    file: str = _
     filter_topo: str = _
     format1: str = _
     format2: str = _
@@ -122,10 +124,9 @@ class _STR(_ValsMatchKeys):
     gsi: str = _
     hardlink: str = _
     help: str = _
-    hostname: str = _
     hsi: str = _
     htar: str = _
-    incantation: str = _
+    includes: str = _
     inlimits: str = _
     input_file: str = _
     input_format: str = _
@@ -167,8 +168,6 @@ class _STR(_ValsMatchKeys):
     path2: str = _
     platform: str = _
     port: str = _
-    post_includes: str = _
-    pre_includes: str = _
     properties: str = _
     quiet: str = _
     rate: str = _
