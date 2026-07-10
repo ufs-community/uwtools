@@ -310,11 +310,11 @@ The ``uw ecflow server`` command reads configuration from an ``ecflow.server`` b
      server:
        ECF_HOME: /path/to/run
 
-All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. Only ``ECF_HOME`` is required. All supported variables, and values accepted by UW YAML for ecFlow, are described :ecflow:`here<glossary.html#term-ecflow_server>`. The lone exception is ``ECF_SSL``, which accepts values as described below.
+All keys in the ``server:`` block are passed as environment variables to ``ecflow_server``. Only ``ECF_HOME`` is required. All supported variables, and values accepted by UW YAML for ecFlow, are described :ecflow:`in ecFlow documentation <glossary.html#term-ecflow_server>`. The lone exception is ``ECF_SSL``, which accepts values as described below.
 
 ``ECF_SSL``
 
-Optionally controls SSL for the server. Accepts a boolean or a certificate-filename prefix string:
+Optionally controls SSL-based server security. Accepts a boolean or a certificate-filename prefix string:
 
 * ``true``: The default when ``--insecure`` is not specified. Enable SSL using the default certificate triplet (``server.crt`` / ``server.key`` / ``dh2048.pem``) in ``$HOME/.ecflowrc/ssl``. If these do not exist, ``uw ecflow server`` will generate them.
 * ``false``: Disable SSL. Equivalent to specifying ``--insecure``.
@@ -346,4 +346,4 @@ One ``ecf`` script per task, written under the directory specified by ``--script
 Demonstration Workflow
 ----------------------
 
-View or run a simple ecFlow demonstration workflow :ref:`here <demonstration_workflow>`.
+:ref:`View or run a simple ecFlow demonstration workflow. <demonstration_workflow>`

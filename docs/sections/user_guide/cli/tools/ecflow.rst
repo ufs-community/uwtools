@@ -197,4 +197,4 @@ The examples in this section use the UW YAML file ``workflow.yaml`` shown above.
 Demonstration Workflow
 ----------------------
 
-View or run a simple ecFlow demonstration workflow :ref:`here <demonstration_workflow>`.
+:ref:`View or run a simple ecFlow demonstration workflow. <demonstration_workflow>`
