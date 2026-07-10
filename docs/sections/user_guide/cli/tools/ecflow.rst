@@ -214,7 +214,7 @@ Live Interaction
 
 To bootstrap a virtual environment and run the notebook live:
 
-#. Select an appropriate system to run the demo on. As written, the notebook runs two local tasks, as well as a remote task implemented as a Slurm batch job, so a system with the Slurm batch scheduler would be appropriate. The environment requires ~5.5 GB, so use a filesytem with sufficient quota.
+#. Select an appropriate system to run the demo on. As written, the notebook runs two local tasks, as well as a remote task implemented as a Slurm batch job, so a system with the Slurm batch scheduler would be appropriate. The environment requires ~5.5 GB, so use a filesystem with sufficient quota.
 #. Ensure that X forwarding is enabled and ``ssh`` to your selected system.
 #. Ensure that ``x-www-browser`` is on your ``PATH``. If not, create it as a symlink to the browser you'd like to use, e.g. ``firefox``. You should be able to run ``x-www-browser`` and interact with the browser via X over ssh.
 #. Clone this repo on the selected system.
