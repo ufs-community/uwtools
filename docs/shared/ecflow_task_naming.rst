@@ -5,7 +5,7 @@
    Examples:
 
    - ``task_fetch`` → ``fetch.ecf``
-   - ``task_run_model`` → ``model.ecf``
+   - ``task_run_model`` → ``run_model.ecf``
    - ``task_process_output_files`` → ``process_output_files.ecf``
 
    Names for suites and families follow a corresponding naming convention.
