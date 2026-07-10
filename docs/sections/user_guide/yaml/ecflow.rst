@@ -222,7 +222,7 @@ Task Script Block
 
 Tasks are required to have a ``script:`` block that defines the ``ecf`` script to generate. The value of  ``script:`` may be
 
-* A string specifying a path to an ``ecf`` script to be passed verbatim to ecFlow. The script can reference ecFlow ``%<VAR>%`` variables, which will be rendered by the server when converting the ``ecf`` script to a final job script, but must otherwise be complete.
+* A string specifying a path to an ``ecf`` script to be passed verbatim to ecFlow. The script can reference ecFlow ``%<VAR>%`` variables, which will be rendered by the server when converting the ``ecf`` script to a final job script, but must otherwise be complete. **Note** that this option is discouraged in most cases, as it will inhibit workflow portability and bypasses correctness checks supplied by ``uwtools``.
 
 .. code-block:: yaml
 
