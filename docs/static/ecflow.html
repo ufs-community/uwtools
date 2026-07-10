@@ -7802,7 +7802,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="uwtools-+-ecFlow">uwtools + ecFlow<a class="anchor-link" href="#uwtools-+-ecFlow">¶</a></h2><p>The notebook demonstrates the use of <code>uwtools</code> to configure and run an ecFlow server, to generate an ecFlow workflow (a suite definition an <code>.ecf</code> files), and to load the suite into the server and execute it. As a demo application, we perform verification of 2-meter temperature at the 6-hour leadtime of a GFS forecast against a GFS leadtime-zero forecast as a source of truth.</p>
+<h2 id="uwtools-+-ecFlow">uwtools + ecFlow<a class="anchor-link" href="#uwtools-+-ecFlow">¶</a></h2><p>The notebook demonstrates the use of <code>uwtools</code> to configure and run an ecFlow server, to generate an ecFlow workflow (a suite definition and <code>ecf</code> scripts), and to load the suite into the server and execute it. As a demo application, we perform verification of 2-meter temperature at the 6-hour leadtime of a GFS forecast against a GFS leadtime-zero forecast as a source of truth.</p>
 </div>
 </div>
 </div>
@@ -7960,7 +7960,7 @@ wxvx:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The <code>ecflow.server</code> block provides the bare mininum for running the ecFlow server: A definition of the <code>ECF_HOME</code> environment variable, which specifies where the server should run and where, by default, it will look for <code>.h</code> include files when creating job scripts from <code>.ecf</code> files:</p>
+<p>The <code>ecflow.server</code> block provides the bare mininum for running the ecFlow server: A definition of the <code>ECF_HOME</code> environment variable, which specifies where the server should run and where, by default, it will look for <code>.h</code> include files when creating job scripts from <code>ecf</code> scripts:</p>
 </div>
 </div>
 </div>
@@ -8117,7 +8117,7 @@ wxvx:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>At server-startup time, <code>uw ecflow server</code> also creates a <code>.h</code> include file called <code>server.h</code>, defining environment variables that will be needed by <code>.ecf</code> files:</p>
+<p>At server-startup time, <code>uw ecflow server</code> also creates a <code>.h</code> include file called <code>server.h</code>, defining environment variables that will be needed by <code>ecf</code> scripts:</p>
 </div>
 </div>
 </div>
@@ -8326,7 +8326,7 @@ ecflow_client<span class="w"> </span>--stats<span class="w"> </span><span class=
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now the server is ready to be loaded with a suite definition, provided by the <code>ecflow.suitedef</code> block in <code>config.yaml</code>. The <code>uw ecflow realize</code> command creates a <code>suite.def</code> file in the directory specified by <code>--output-dir</code> and, under the directory specified by <code>--scripts-dir</code>, any <code>.ecf</code> files defined by <code>script</code> blocks in the suite definition:</p>
+<p>Now the server is ready to be loaded with a suite definition, provided by the <code>ecflow.suitedef</code> block in <code>config.yaml</code>. The <code>uw ecflow realize</code> command creates a <code>suite.def</code> file in the directory specified by <code>--output-dir</code> and, under the directory specified by <code>--scripts-dir</code>, any <code>ecf</code> scripts defined by <code>script</code> blocks in the suite definition:</p>
 </div>
 </div>
 </div>
@@ -8415,7 +8415,7 @@ endsuite
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The <code>.ecf</code> files, which are templates used to create executable job scripts that run ecFlow tasks, are created in a directory hierarchy based on the suite name, family names (this demo does not use families), and task names:</p>
+<p>The <code>ecf</code> scripts, which are templates used to create executable job scripts that run ecFlow tasks, are created in a directory hierarchy based on the suite name, family names (this demo does not use families), and task names:</p>
 </div>
 </div>
 </div>
@@ -8564,7 +8564,7 @@ set -euxo pipefail
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Here's <code>extract_grids.ecf</code>, the <code>.ecf</code> file that runs <code>wxvx</code> to extract grids from the forecast and truth datasets to be used in verification:</p>
+<p>Here's <code>extract_grids.ecf</code>, the <code>ecf</code> script that runs <code>wxvx</code> to extract grids from the forecast and truth datasets to be used in verification:</p>
 </div>
 </div>
 </div>

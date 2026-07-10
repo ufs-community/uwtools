@@ -3,7 +3,9 @@ SOURCEDIR   = .
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  = --fail-on-warning --nitpicky --write-all
 
-.PHONY: help clean docs examples
+.PHONY: all help clean docs examples static
+
+all: examples html static
 
 help:
 	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)
@@ -17,6 +19,9 @@ docs:
 
 examples:
 	COLUMNS=80 $(MAKE) -C sections
+
+static:
+	$(MAKE) -C static
 
 %:
 	mkdir -pv $(BUILDDIR)

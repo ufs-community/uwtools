@@ -342,3 +342,8 @@ The ecFlow suite definition file, written to ``<output-path>/suite.def`` if ``--
 ``ecf`` scripts
 
 One ``ecf`` script per task, written under the directory specified by ``--scripts-path``.. Each script is nested under this directory in the same manner as it is in the suite definition. :ref:`This suite definition <suite_and_node_structure>` will create ``<scripts-path>/workflow/data_prep/fetch.ecf``, ``<scripts-path>/workflow/data_prep/process.ecf``, and ``<scripts-path>/workflow/run_model.ecf``. Scripts are only generated when ``--scripts-path`` is specified.
+
+Demonstration Workflow
+----------------------
+
+View or run a simple demonstration workflow :ref:`here <demonstration_workflow>`

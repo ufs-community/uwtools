@@ -21,8 +21,7 @@ devshell:
 	condev-shell || true
 
 docs:
-	$(MAKE) -C docs examples
-	$(MAKE) -C docs docs
+	$(MAKE) -C docs
 
 env: package
 	conda create -y -n $(call spec,buildnum,-) $(CHANNELS) $(call spec,build,=)
