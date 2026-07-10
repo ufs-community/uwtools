@@ -250,7 +250,7 @@ Required. Executable statements for the task. This may be a single command, incl
 
 ``includes:``
 
-Optional: Subkeys ``entry:`` and ``exit:`` specify sequences of files (typically with ``.h`` extensions) to include before and after the ``body`` statements, respectively, translated to ecFlow ``%include`` statements. By default, include files can be found by the ecFlow server under the directory specified by ``ecflow.server.vars.ECF_HOME`` in the config; this can be overridden by defining ``ecflow.server.vars.ECF_INCLUDE`` (see :ecflow:`here <glossary.html#term-ECF_INCLUDE>`). The include file ``server.h``, which exports several crucial environment variables, is created by ``uw ecflow server`` at startup time and is available for inclusion in application ``ecf`` files.
+Optional: Subkeys ``entry:`` and ``exit:`` specify sequences of files (typically with ``.h`` extensions) to include before and after the ``body`` statements, respectively, translated to ecFlow ``%include`` statements. By default, the ecFlow server looks for include under the directory specified by ``ecflow.server.vars.ECF_HOME`` in the config; this can be overridden by defining ``ecflow.server.vars.ECF_INCLUDE`` (see :ecflow:`here <glossary.html#term-ECF_INCLUDE>`). The include file ``server.h``, which exports several crucial environment variables, is created by ``uw ecflow server`` at startup time and is available for inclusion in application ``ecf`` files.
 
 .. code-block:: yaml
 

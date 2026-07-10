@@ -5,7 +5,7 @@ SPHINXOPTS  = --fail-on-warning --nitpicky --write-all
 
 .PHONY: all help clean docs examples static
 
-all: examples html static
+all: examples static docs
 
 help:
 	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)

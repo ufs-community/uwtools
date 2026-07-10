@@ -12,7 +12,7 @@ View-Only
 
 .. raw:: html
 
-   <a href="../../../../_static/ecflow.html">Click here to view a pre-rendered version of the workflow notebook</a>
+   <a href="../_static/ecflow.html">Click here to view a pre-rendered version of the workflow notebook</a>
    <br><br>
 
 Live Interaction
