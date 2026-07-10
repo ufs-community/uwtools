@@ -7803,6 +7803,8 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="uwtools-+-ecFlow">uwtools + ecFlow<a class="anchor-link" href="#uwtools-+-ecFlow">¶</a></h2><p>The notebook demonstrates the use of <code>uwtools</code> to configure and run an ecFlow server, to generate an ecFlow workflow (a suite definition and <code>ecf</code> scripts), and to load the suite into the server and execute it. As a demo application, we perform verification of 2-meter temperature at the 6-hour leadtime of a GFS forecast against a GFS leadtime-zero forecast as a source of truth.</p>
+<p>A recipe for creating a software environment in which this notebook can be interacted with live can be found by following the <em>ecFlow Tool</em> link in the <a href="https://uwtools.readthedocs.io/en/stable/sections/user_guide/index.html#jupyter-notebooks">Jupyter Notebooks</a> section in the uwtools documentation.</p>
+<p>Note that, unlike many Jupyter notebooks, the code cells in this notebook are interpreted by bash rather than Python. So, if you make changes, be sure to enter only valid bash code.</p>
 </div>
 </div>
 </div>
@@ -8203,7 +8205,7 @@ export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/wip/conda/envs/demo/bin/:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Use <code>jq</code> to set environment variables based on these values. extract values from this file to use to set some crucial environment variables that will allow the ecFlow client tool, <code>ecflow_client</code>, to successfully communicate with the server:</p>
+<p>Use <code>jq</code> to set environment variables based on these values. Extract values from this file to use to set some crucial environment variables that will allow the ecFlow client tool, <code>ecflow_client</code>, to successfully communicate with the server:</p>
 </div>
 </div>
 </div>
