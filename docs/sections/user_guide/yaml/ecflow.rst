@@ -44,7 +44,7 @@ An optional list of external node paths to declare in the suite definition. Usef
 
 ``scheduler:``
 
-The batch scheduler to target when generating ``ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, scheduler directives defined in a under ``batchargs:`` in a ``task_<name>`` block are automatically added to generated ``ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
+The batch scheduler to target when generating ``ecf`` scripts. Supported values are ``slurm``, ``pbs``, and ``lsf``. When set, scheduler directives defined under ``batchargs:`` in a ``task_<name>`` block are automatically added to generated ``ecf`` scripts. Omit this key if scripts are not needed or if no batch directives are required.
 
 ``suite_<name>:``
 
@@ -341,7 +341,7 @@ The ecFlow suite definition file, written to ``<output-path>/suite.def`` if ``--
 
 ``ecf`` scripts
 
-One ``ecf`` script per task, written under the directory specified by ``--scripts-path``.. Each script is nested under this directory in the same manner as it is in the suite definition. :ref:`This suite definition <suite_and_node_structure>` will create ``<scripts-path>/workflow/data_prep/fetch.ecf``, ``<scripts-path>/workflow/data_prep/process.ecf``, and ``<scripts-path>/workflow/run_model.ecf``. Scripts are only generated when ``--scripts-path`` is specified.
+One ``ecf`` script per task, written under the directory specified by ``--scripts-path``. Each script is nested under this directory in the same manner as it is in the suite definition. :ref:`This suite definition <suite_and_node_structure>` will create ``<scripts-path>/workflow/data_prep/fetch.ecf``, ``<scripts-path>/workflow/data_prep/process.ecf``, and ``<scripts-path>/workflow/run_model.ecf``. Scripts are only generated when ``--scripts-path`` is specified.
 
 Demonstration Workflow
 ----------------------
