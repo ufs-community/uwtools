@@ -234,7 +234,7 @@ or
 
 ``batchargs:``
 
-Optional. Batch-scheduler directives to add to the ``ecf`` script. See :ref:`this page <batchargs>` for more information.
+Optional. Batch-scheduler directives to add to the ``ecf`` script. See :ref:`batchargs: <batchargs>` for more information.
 
 ``body:``
 
