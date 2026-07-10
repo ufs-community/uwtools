@@ -18,8 +18,8 @@ UW YAML for ecFlow nests under a top-level ``ecflow`` key, and the suite definit
      suitedef:
        ...
 
-Suite-Definition Root UW YAML Keys
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Suite-Definition Root Level Keys
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following keys may appear at the top of the suite definition, directly under ``ecflow.suitedef``:
 
@@ -60,7 +60,7 @@ An expand block for generating multiple suites from a parameterized template. Se
 
 A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite.
 
-Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``ecf`` scripts, but can be overriden by users in a suite-definition file.
+Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``ecf`` scripts, but can be overriden by users in a suite-definition file. Apart from the supported set, variables starting with ``ECF_`` are not permitted.
 
 See the :ecflow:`ecFlow documentation<ug/user_manual/ecflow_variables/index.html>` for more information on available variables and their meanings.
 

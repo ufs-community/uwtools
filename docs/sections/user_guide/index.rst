@@ -9,4 +9,4 @@ User Guide
    api/index
    yaml/index
 
-.. include:: /shared/binder_links.rst
+.. include:: /shared/notebooks.rst
