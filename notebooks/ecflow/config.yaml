@@ -65,7 +65,7 @@ wxvx:
       forecast: "{{ app.basedir }}/vx/forecast"
       truth: "{{ app.basedir }}/vx/truth"
     run: "{{ app.basedir }}/vx/run"
-  timepairs: [[!datetime '{{ app.cycle }}', !int '{{ app.leadtime}} ']]
+  timepairs: [[!datetime '{{ app.cycle }}', !int '{{ app.leadtime }}']]
   truth:
     name: GFS
     type: grid

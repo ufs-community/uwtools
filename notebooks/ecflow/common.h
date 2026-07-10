@@ -1,6 +1,6 @@
 abort() {
   trap EXIT # unset previous trap
-  ecflow_client --abort=$ECF_RID
+  ecflow_client --ssl --abort=$ECF_RID
   exit 1
 }
 
