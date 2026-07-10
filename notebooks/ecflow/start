@@ -13,7 +13,7 @@ else
   # PM HACK BEGIN
   conda create -y -n demo -c local -c oar-gsl -c ufs-community bash_kernel ecflow=5.16.0 jq jupyterlab tree uwtools=2.17 wget wxvx=0.7
   conda activate demo
-  pushd ~/git/uwtools/src/
+  pushd $(git rev-parse --show-toplevel)/src/
   pip install --editable .
   popd
   conda deactivate
