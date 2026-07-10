@@ -346,4 +346,4 @@ One ``ecf`` script per task, written under the directory specified by ``--script
 Demonstration Workflow
 ----------------------
 
-View or run a simple demonstration workflow :ref:`here <demonstration_workflow>`
+View or run a simple ecFlow demonstration workflow :ref:`here <demonstration_workflow>`.
