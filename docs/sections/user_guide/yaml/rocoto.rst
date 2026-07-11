@@ -5,7 +5,7 @@ Rocoto Workflows
 
 :rocoto:`Rocoto<>` is a workflow manager widely used by :ufs:`UFS<>` users and developers. It uses a custom XML language to define a set of tasks, their computational resource needs on a batch system, and their dependencies.
 
-To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
+To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a UW YAML language that can be easily manipulated like any other key-value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
 
 Workflow Section
 ----------------
@@ -38,7 +38,7 @@ UW YAML Keys
 
    For additional information on Rocoto tags mentioned in this section (e.g., ``<workflow>``, ``<cycledef>``, ``<log>``), please see the :rocoto:`Rocoto documentation<>`.
 
-``attrs:`` -- This section allows users to define any number of the available attributes to the ``<workflow>`` tag in Rocoto's native XML language. Set each with a key/value that matches the exact syntax needed by :rocoto:`Rocoto<>`. These attributes work to fill in the ``<workflow>`` tag. For example:
+``attrs:`` -- This section allows users to define any number of the available attributes to the ``<workflow>`` tag in Rocoto's native XML language. Set each with a key-value that matches the exact syntax needed by :rocoto:`Rocoto<>`. These attributes work to fill in the ``<workflow>`` tag. For example:
 
 .. code-block:: xml
 
@@ -70,7 +70,7 @@ UW YAML ``cycledef:`` specs using the "crontab-like" syntax, following examples 
          group: 6hrlyJanFeb
        spec: 0 */6 * 1,2 2006-2010 *
 
-``entities:`` -- This section defines key/value pairs --- each rendered as ``<!ENTITY key "value">`` --- to translate to named entities (variables) in XML. The example above would yield:
+``entities:`` -- This section defines key-value pairs --- each rendered as ``<!ENTITY key "value">`` --- to translate to named entities (variables) in XML. The example above would yield:
 
 .. code-block:: xml
 
@@ -189,7 +189,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 
 ``command:`` -- The command that will be run in the batch job.
 
-``envars:`` -- Any number of key/value pairs defining bash variable names and their corresponding values, to be exported to the environment in which ``<command>`` will run, each rendered in XML like this:
+``envars:`` -- Any number of key-value pairs defining bash variable names and their corresponding values, to be exported to the environment in which ``<command>`` will run, each rendered in XML like this:
 
 .. code-block:: xml
 

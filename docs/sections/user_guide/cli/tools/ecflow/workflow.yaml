@@ -1,18 +1,20 @@
 ecflow:
   suitedef:
     suite_workflow:
-      vars:
-        WORKFLOW_VAR: production
       family_data_prep:
         task_fetch:
           script:
             body: echo Fetching data...
-          trigger: "1==1"
+            manual: This task fetches data.
         task_process:
           script:
             body: echo Processing data...
+            manual: This task processes data.
           trigger: /workflow/data_prep/fetch == complete
       task_run_model:
         script:
           body: echo Running model...
+          manual: This task runs the model.
         trigger: /workflow/data_prep == complete
+      vars:
+        WORKFLOW_VAR: production

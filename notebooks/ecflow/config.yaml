@@ -1,0 +1,77 @@
+app:
+  basedir: '{{ "BASEDIR" | env }}'
+  cycle: 2026-07-04T12:00:00
+  fcst:
+    fn: gfs.t{{ app.hh }}z.pgrb2.1p00.f{{ "%03d" % app.leadtime }}
+    url: '{{ app.prefix }}/{{ app.fcst.fn }}'
+  hh: '{{ app.cycle.strftime("%H") }}'
+  leadtime: 6
+  prefix: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ app.yyyymmdd }}/{{ app.hh }}/atmos
+  yyyymmdd: '{{ app.cycle.strftime("%Y%m%d") }}'
+ecflow:
+  server:
+    ECF_HOME: '{{ app.basedir }}'
+  suitedef:
+    scheduler: slurm
+    suite_vx:
+      task_extract_grids:
+        script:
+          body: |
+            init $$
+            uw config realize -i {{ app.basedir }}/config.yaml --key-path wxvx >{{ app.basedir }}/vx.yaml
+            wxvx -c {{ app.basedir }}/vx.yaml -t grids
+          includes:
+            entry: [common.h, server.h]
+          manual: Extract forecast and truth grids
+        trigger: /vx/fetch_truth == complete
+      task_fetch_truth:
+        script:
+          body: |
+            init $$
+            test -f {{ app.fcst.fn }} || wget --quiet {{ app.fcst.url }}
+          includes:
+            entry: [common.h, server.h]
+          manual: Fetch GRIB truth data
+      task_verification:
+        script:
+          batchargs:
+            cores: 1
+            export: false
+            rundir: '{{ app.basedir }}/vx'
+            stdout: verification.out
+            walltime: 00:05:00
+          body: |
+            init $SLURM_JOB_ID
+            wxvx -c {{ app.basedir }}/vx.yaml -t stats
+          includes:
+            entry: [common.h, server.h]
+          manual: Perform verification
+        trigger: /vx/extract_grids == complete
+        vars:
+          ECF_JOB_CMD: ecflow_client --alter=add variable ECF_RID $(sbatch --parsable %ECF_JOB%) %ECF_NAME%
+          ECF_KILL_CMD: scancel %ECF_RID%
+          ECF_STATUS_CMD: sacct -lj %ECF_RID%
+      vars:
+        ECF_JOB_CMD: /usr/bin/env -S bash %ECF_JOB% >%ECF_JOBOUT% 2>&1
+wxvx:
+  forecast:
+    name: GFSFCST
+    path: '{{ app.basedir }}/{{ app.fcst.fn }}'
+  meta:
+    hh: '{{ app.hh }}'
+    prefix: '{{ app.prefix }}'
+  paths:
+    grids:
+      forecast: "{{ app.basedir }}/vx/forecast"
+      truth: "{{ app.basedir }}/vx/truth"
+    run: "{{ app.basedir }}/vx/run"
+  timepairs: [[!datetime '{{ app.cycle }}', !int '{{ app.leadtime }}']]
+  truth:
+    name: GFS
+    type: grid
+    url: '{{ meta.prefix }}/gfs.t{{ meta.hh }}z.pgrb2.1p00.f000'
+  variables:
+    T2M:
+      level_type: heightAboveGround
+      levels: [2]
+      name: 2t

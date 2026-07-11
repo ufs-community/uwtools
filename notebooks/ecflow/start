@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eu
+if [[ -d conda/ ]]; then
+  source conda/etc/profile.d/conda.sh
+else
+  fn=Miniforge3-Linux-$(uname -m).sh
+  wget https://github.com/conda-forge/miniforge/releases/download/26.3.2-3/$fn
+  bash $fn -bfp conda
+  rm -v $fn
+  source conda/etc/profile.d/conda.sh
+  conda create -y -n demo -c local -c oar-gsl -c ufs-community bash_kernel jq jupyterlab tree uwtools=2.18 wget wxvx=0.7
+fi    
+conda activate demo
+python -m bash_kernel.install
+export BASEDIR=$PWD
+jupyter lab ecflow.ipynb

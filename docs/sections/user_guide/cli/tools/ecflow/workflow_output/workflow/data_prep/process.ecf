@@ -1,1 +1,7 @@
+#!/usr/bin/env bash
+
 echo Processing data...
+
+%manual
+This task processes data.
+%end

@@ -372,9 +372,10 @@ class _ECFlowDef:
         :param config: The configuration for the script.
         :param task: The ecFlow task node.
         """
+        interpreter = "#!/usr/bin/env bash"
         directives = ""
-        if self._scheduler:
-            props = {STR.scheduler: self._scheduler, **config[STR.batchargs]}
+        if self._scheduler and (batchargs := config.get(STR.batchargs)):
+            props = {STR.scheduler: self._scheduler, **batchargs}
             scheduler = JobScheduler.get_scheduler(props)
             directives = "\n".join(scheduler.directives)
         fmt = lambda k: "\n\n".join(
@@ -382,7 +383,7 @@ class _ECFlowDef:
         )
         includes_entry, includes_exit = map(fmt, [STR.entry, STR.exit])
         manual = "\n".join(["%manual", config[STR.manual], "%end"]) if STR.manual in config else ""
-        sections = [directives, manual, includes_entry, "{body}", includes_exit]
+        sections = [interpreter, directives, includes_entry, "{body}", includes_exit, manual]
         contents = "\n\n".join(filter(None, sections)).format(body=config[STR.body])
         self._scripts[task.get_abs_node_path()] = contents
 

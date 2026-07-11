@@ -19,7 +19,7 @@ The ``uw`` mode for realizing and validating ecFlow suite definitions.
 ``realize``
 -----------
 
-In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw ecflow``, that means transforming a structured UW YAML file into an :ecflow:`ecFlow<>` suite definition file (``suite.def``) and, optionally, a set of ``.ecf`` scripts. The structured YAML language required by UW closely follows the concepts defined by ecFlow.
+In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw ecflow``, that means transforming a structured UW YAML file into an :ecflow:`ecFlow<>` suite definition file (``suite.def``) and, optionally, a set of ``ecf`` scripts. The structured YAML language required by UW closely follows the concepts defined by ecFlow.
 
 See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
 
@@ -32,12 +32,12 @@ See :ref:`ecflow_workflows` for more information about the structured UW YAML fo
 Examples
 ^^^^^^^^
 
-The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
+The examples in this section use a UW YAML file ``workflow.yaml`` with contents:
 
-.. literalinclude:: ecflow/forecast.yaml
+.. literalinclude:: ecflow/workflow.yaml
    :language: yaml
 
-* To realize a UW YAML input file to ``stdout`` in ecFlow suite definition format:
+* To realize a UW YAML config file to ``stdout`` in ecFlow suite definition format:
 
   .. literalinclude:: ecflow/realize-exec-stdout.cmd
      :language: text
@@ -45,7 +45,9 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdout.out
      :language: text
 
-* To realize a UW YAML input file to a directory (writes ``suite.def`` inside that directory):
+  Note that UW log messages are written to ``stderr`` so can be redirected separately from the suite-definition code.
+
+* To realize a UW YAML config file to the file ``suite.def`` in a specified directory:
 
   .. literalinclude:: ecflow/realize-exec-dir.cmd
      :language: text
@@ -61,10 +63,7 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-stdin-stdout.out
      :language: text
 
-* To also generate ``.ecf`` scripts, using a UW YAML file ``workflow.yaml`` with contents:
-
-  .. literalinclude:: ecflow/workflow.yaml
-     :language: yaml
+* To also generate ``ecf`` scripts:
 
   .. literalinclude:: ecflow/realize-exec-scripts.cmd
      :language: text
@@ -72,7 +71,7 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
   .. literalinclude:: ecflow/realize-exec-scripts.out
      :language: text
 
-  The ``--scripts-path`` option specifies the directory under which ``.ecf`` scripts are written. Each script is placed at the same nested subdirectory level under ``<scripts-path>`` as dictated by the nesting level of the task node in the suite definition. For the example above, the generated scripts are:
+  The ``--scripts-path`` option specifies the directory under which ``ecf`` scripts are written. Here, scripts are arranged in a directory hierarchy following ecFlow's names for tasks, e.g. ``/workflow/data_prep/fetch`` for the task defined at UW YAML key path ``ecflow.suitedef.suite_workflow.family_data_prep.task_fetch``. For the example above, the generated scripts are:
 
   * ``workflow_output/workflow/data_prep/fetch.ecf``:
 
@@ -84,20 +83,12 @@ The examples in this section use a UW YAML file ``forecast.yaml`` with contents:
     .. literalinclude:: ecflow/workflow_output/workflow/data_prep/process.ecf
        :language: bash
 
-  * ``workflow_output/workflow/model.ecf``:
+  * ``workflow_output/workflow/run_model.ecf``:
 
-    .. literalinclude:: ecflow/workflow_output/workflow/model.ecf
+    .. literalinclude:: ecflow/workflow_output/workflow/run_model.ecf
        :language: bash
 
-  .. important::
-
-    **Task Naming Convention**: Task keys must follow the pattern ``task_<name>``. When ``.ecf`` scripts are generated, the ``<name>`` portion becomes the script filename with a ``.ecf`` extension. See :ref:`ecflow_workflows` for more information about the structured UW YAML for ecFlow.
-
-     Examples:
-
-     - ``task_fetch`` → ``fetch.ecf``
-     - ``task_run_model`` → ``model.ecf``
-     - ``task_process_output_files`` → ``process_output_files.ecf``
+  .. include:: /shared/ecflow_task_naming.rst
 
 .. _cli_ecflow_server_examples:
 
@@ -153,12 +144,10 @@ Examples
   .. code-block:: json
 
      {
-       "vars": {
-         "ECF_HOME": "/path/to/run",
-         "ECF_HOST": "server.hostname.com",
-         "ECF_PORT": "8888",
-         "ECF_SSL": "myhost.8888"
-       }
+       "ECF_HOME": "/path/to/run",
+       "ECF_HOST": "server.hostname.com",
+       "ECF_PORT": "8888",
+       "ECF_SSL": "myhost.8888"
      }
 
   ``ECF_SSL`` is included only when SSL security is enabled (i.e. when ``--insecure`` is not given and ``ECF_SSL`` is not ``false`` in the config).
@@ -177,7 +166,7 @@ Examples
 Examples
 ^^^^^^^^
 
-The examples in this section use the UW YAML file ``forecast.yaml`` shown above.
+The examples in this section use the UW YAML file ``workflow.yaml`` shown above.
 
 * To validate a UW YAML config file:
 
@@ -204,3 +193,8 @@ The examples in this section use the UW YAML file ``forecast.yaml`` shown above.
      :emphasize-lines: 1
   .. literalinclude:: ecflow/validate-bad-file.out
      :language: text
+
+Demonstration Workflow
+----------------------
+
+:ref:`View or run a simple ecFlow demonstration workflow. <demonstration_workflow>`

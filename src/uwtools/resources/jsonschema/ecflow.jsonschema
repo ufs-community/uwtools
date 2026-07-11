@@ -475,12 +475,12 @@
             "script": {
               "oneOf": [
                 {
-                  "description": "Path to an existing .ecf file",
+                  "description": "Path to an existing ecf script",
                   "type": "string"
                 },
                 {
                   "additionalProperties": false,
-                  "description": "Recipe for constructing an .ecf file",
+                  "description": "Recipe for constructing an ecf script",
                   "properties": {
                     "batchargs": {
                       "$ref": "urn:uwtools:batchargs"
@@ -734,7 +734,7 @@
               "type": "string"
             },
             "ECF_HOME": {
-              "description": "Root directory for all .ecf script files",
+              "description": "Root directory for all ecf scripts",
               "type": "string"
             },
             "ECF_INTERVAL": {
@@ -759,7 +759,7 @@
               "type": "string"
             },
             "ECF_MICRODEF": {
-              "description": "Character used for ECF pre-processing and variable substitution in .ecf scripts",
+              "description": "Character used for ECF pre-processing and variable substitution in ecf scripts",
               "maxLength": 1,
               "minLength": 1,
               "type": "string"

@@ -252,7 +252,7 @@ Converts the tagged node to a Python ``list`` value. For example, given ``input.
 ``!remove``
 ^^^^^^^^^^^
 
-Removes the tagged YAML key/value pair. For example, given ``input.yaml``:
+Removes the tagged YAML key-value pair. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 

@@ -1,1 +1,1 @@
-cat forecast.yaml | uw ecflow validate
+cat workflow.yaml | uw ecflow validate
