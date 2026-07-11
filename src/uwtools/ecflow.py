@@ -232,7 +232,7 @@ class _ECFlowDef:
         :param parent: The parent object to add this node to.
         :param refs: Optional references from expanded nodes from higher in the tree.
         """
-        parent.add(node)
+        node = parent.add(node).get_all_nodes()[-1]
         add_items = lambda method, cfg: [method(*args) for args in cfg]
         for key, subconfig in config.items():
             tag, name = self._tag_name(key)
