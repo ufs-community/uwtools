@@ -85,7 +85,7 @@ The following attributes may be set on suite, family, or task nodes, at any leve
 
 ``defstatus:``
 
-Sets the default status of a node (see :ecflow:`ecflow.DState <python_api/DState.html>`). Accepted values are ``complete``, ``suspended``, ``aborted``, ``queued``, ``submitted``, ``active``, and ``unknown``. For example:
+Sets the default status of a node (see :ecflow:`ecflow.DState <python_api/reference/DState.html>`). Accepted values are ``complete``, ``suspended``, ``aborted``, ``queued``, ``submitted``, ``active``, and ``unknown``. For example:
 
 .. code-block:: yaml
 
@@ -94,7 +94,7 @@ Sets the default status of a node (see :ecflow:`ecflow.DState <python_api/DState
 
 ``events:``
 
-A list of named events attached to a node (see :ecflow:`ecflow.Event <python_api/Event.html>`). Each item may be a string (event name) or a two-element list ``[number, name]``. For example:
+A list of named events attached to a node (see :ecflow:`ecflow.Event <python_api/reference/Event.html>`). Each item may be a string (event name) or a two-element list ``[number, name]``. For example:
 
 .. code-block:: yaml
 
@@ -105,7 +105,7 @@ A list of named events attached to a node (see :ecflow:`ecflow.Event <python_api
 
 ``inlimits:``
 
-A list of limits that a node consumes (see :ecflow:`ecflow.InLimit <python_api/InLimit.html>`). Each item may be a one-, two-, or three-element list ``[limit_name]``, ``[limit_path, limit_name]``, or ``[limit_path, limit_name, tokens]``. For example:
+A list of limits that a node consumes (see :ecflow:`ecflow.InLimit <python_api/reference/InLimit.html>`). Each item may be a one-, two-, or three-element list ``[limit_name]``, ``[limit_path, limit_name]``, or ``[limit_path, limit_name, tokens]``. For example:
 
 .. code-block:: yaml
 
@@ -115,7 +115,7 @@ A list of limits that a node consumes (see :ecflow:`ecflow.InLimit <python_api/I
 
 ``labels:``
 
-A list of label name/value pairs on a node (see :ecflow:`ecflow.Label <python_api/Label.html>`). Each item is a two-element list ``[name, value]``. For example:
+A list of label name/value pairs on a node (see :ecflow:`ecflow.Label <python_api/reference/Label.html>`). Each item is a two-element list ``[name, value]``. For example:
 
 .. code-block:: yaml
 
@@ -125,7 +125,7 @@ A list of label name/value pairs on a node (see :ecflow:`ecflow.Label <python_ap
 
 ``late:``
 
-Defines late notification thresholds for a node (see :ecflow:`ecflow.Late <python_api/Late.html>`). Accepts ``submitted``, ``active``, and ``complete`` as keys, each with a time value. For example:
+Defines late notification thresholds for a node (see :ecflow:`ecflow.Late <python_api/reference/Late.html>`). Accepts ``submitted``, ``active``, and ``complete`` as keys, each with a time value. For example:
 
 .. code-block:: yaml
 
@@ -136,7 +136,7 @@ Defines late notification thresholds for a node (see :ecflow:`ecflow.Late <pytho
 
 ``limits:``
 
-A list of limits defined on a suite or family (see :ecflow:`ecflow.Limit <python_api/Limit.html>`). Each item is a two-element list ``[name, max_count]``. For example:
+A list of limits defined on a suite or family (see :ecflow:`ecflow.Limit <python_api/reference/Limit.html>`). Each item is a two-element list ``[name, max_count]``. For example:
 
 .. code-block:: yaml
 
@@ -146,7 +146,7 @@ A list of limits defined on a suite or family (see :ecflow:`ecflow.Limit <python
 
 ``meters:``
 
-A list of meters on a node (see :ecflow:`ecflow.Meter <python_api/Meter.html>`). Each item is a three- or four-element list ``[name, min, max]`` or ``[name, min, max, threshold]``. For example:
+A list of meters on a node (see :ecflow:`ecflow.Meter <python_api/reference/Meter.html>`). Each item is a three- or four-element list ``[name, min, max]`` or ``[name, min, max, threshold]``. For example:
 
 .. code-block:: yaml
 
@@ -156,7 +156,7 @@ A list of meters on a node (see :ecflow:`ecflow.Meter <python_api/Meter.html>`).
 
 ``trigger:``
 
-A string expression defining the conditions under which a node may run (see :ecflow:`ecflow.Trigger <python_api/Trigger.html>`). Only one ``trigger:`` is allowed per node. For example:
+A string expression defining the conditions under which a node may run (see :ecflow:`ecflow.Trigger <python_api/reference/Trigger.html>`). Only one ``trigger:`` is allowed per node. For example:
 
 .. code-block:: yaml
 
@@ -165,7 +165,7 @@ A string expression defining the conditions under which a node may run (see :ecf
 
 ``vars:``
 
-A mapping of variable name/value pairs to set as ecFlow edit variables on the node (see :ecflow:`ecflow.Variable <python_api/Variable.html>`). For example:
+A mapping of variable name/value pairs to set as ecFlow edit variables on the node (see :ecflow:`ecflow.Variable <python_api/reference/Variable.html>`). For example:
 
 .. code-block:: yaml
 
@@ -182,7 +182,7 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
 
 ``repeat_date:``
 
-Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers); ``step`` is optional (default 1).
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers); ``step`` is optional (default 1).
 
 .. code-block:: yaml
 
@@ -195,27 +195,27 @@ Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/RepeatDate
 
 ``repeat_datelist:``
 
-Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/RepeatDateList.html>`) (as YYYYMMDD integers). Requires ``variable`` and ``list``.
+Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`) (as YYYYMMDD integers). Requires ``variable`` and ``list``.
 
 ``repeat_datetime:``
 
-Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings); ``step`` (as ``HH:mm:ss``) is optional.
+Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings); ``step`` (as ``HH:mm:ss``) is optional.
 
 ``repeat_day:``
 
-Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/RepeatDay.html>`). Requires ``step``.
+Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/reference/RepeatDay.html>`). Requires ``step``.
 
 ``repeat_enumerated:``
 
-Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/RepeatEnumerated.html>`). Requires ``variable`` and ``list``.
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/reference/RepeatEnumerated.html>`). Requires ``variable`` and ``list``.
 
 ``repeat_int:``
 
-Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional.
+Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional.
 
 ``repeat_string:``
 
-Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/RepeatString.html>`). Requires ``variable`` and ``list``.
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/reference/RepeatString.html>`). Requires ``variable`` and ``list``.
 
 Task Script Block
 -----------------
