@@ -60,7 +60,7 @@ An expand block for generating multiple suites from a parameterized template. Se
 
 A mapping of variable name/value pairs set as ecFlow edit variables at the workflow (``Defs``) level. These become globally accessible within the suite.
 
-Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``ecf`` scripts, but can be overriden by users in a suite-definition file. Apart from the supported set, variables starting with ``ECF_`` are not permitted.
+Variables beginning with ``ECF_`` are reserved by ecFlow and a defined set are supported: :ecflow:`suite definition variables<ug/user_manual/ecflow_variables/ecflow_suite_definition_variables.html>`, and :ecflow:`generated variables<ug/user_manual/ecflow_variables/generated_variables.html>`. Values for the latter are automatically supplied by the ecFlow server for use in ``ecf`` scripts, but can be overridden by users in a suite-definition file. Apart from the supported set, variables starting with ``ECF_`` are not permitted.
 
 See the :ecflow:`ecFlow documentation<ug/user_manual/ecflow_variables/index.html>` for more information on available variables and their meanings.
 
