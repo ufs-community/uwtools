@@ -454,12 +454,12 @@ class Test_ECFlowDef:  # noqa: N801
     def test_ecflow__ECFlowDef__add_node__bad_name_family_task(self, instance, prefix):
         with raises(UWConfigError) as e:
             instance._add_node({f"{prefix}_%bad%": {}}, Suite("test"), instance._d)
-        assert re.match(r"^Invalid node name .*: %bad%$", str(e.value))
+        assert re.match(r"^Invalid node name .* '%bad%': .*$", str(e.value))
 
     def test_ecflow__ECFlowDef__add_node__bad_name_suite(self):
         with raises(UWConfigError) as e:
             _ECFlowDef({"ecflow": {"suitedef": {"suite_%bad%": {}}}})
-        assert re.match(r"^Invalid node name .*: %bad%$", str(e.value))
+        assert re.match(r"^Invalid node name .* '%bad%': .*$", str(e.value))
 
     def test_ecflow__ECFlowDef__add_node__basic(self, instance):
         suite = Suite("test")
