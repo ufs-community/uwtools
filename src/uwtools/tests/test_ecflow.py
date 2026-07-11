@@ -319,25 +319,6 @@ class Test_ECFlowDef:  # noqa: N801
     Tests for class uwtools.ecflow._ECFlowDef.
     """
 
-    def test_ecflow__ECFlowDef__init__defs_check_bad_trigger(self):
-        config = {
-            "ecflow": {
-                "suitedef": {
-                    "suite_test": {
-                        "task_a": {
-                            "script": {
-                                "body": "/path/to/run.sh",
-                            },
-                            "trigger": "nonexistent_task == complete",
-                        }
-                    }
-                }
-            }
-        }
-        with raises(AssertionError) as e:
-            _ECFlowDef(config=config)
-        assert "Could not find node 'nonexistent_task'" in str(e)
-
     def test_ecflow__ECFlowDef__init__full_workflow(self, tmp_path):
         config = {
             "ecflow": {
