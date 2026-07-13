@@ -1,6 +1,6 @@
 [2025-01-02T03:04:05]     INFO Validating config against internal schema: ecflow
 [2025-01-02T03:04:05]     INFO Schema validation succeeded for ecFlow config
-#5.16.0
+#5.18.0
 suite workflow
   edit WORKFLOW_VAR 'production'
   family data_prep
