@@ -495,10 +495,14 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
 
     cmd = ["ecflow_server"]
     cwd = Path(env[STR.ECF_HOME])
-    cwd.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, **env}
-    thread = cast(_ServerThread, current_thread())
     static = port is not None
+    thread = cast(_ServerThread, current_thread())
+    try:
+        cwd.mkdir(parents=True, exist_ok=True)
+    except Exception as e:  # noqa: BLE001
+        complain(f"Failed to create ECF_HOME directory {cwd}", str(e))
+        return
     while not thread.terminal.is_set():
         port = port if static else random.randint(ECFLOW_PORT_MIN, ECFLOW_PORT_MAX)  # noqa: S311
         log.debug("Trying to start server on port %s", port)

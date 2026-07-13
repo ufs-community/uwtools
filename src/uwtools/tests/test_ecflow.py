@@ -859,6 +859,19 @@ def test_ecflow__server_start__doa(tmp_path):
     assert thread.proc is None
 
 
+def test_ecflow__server_start__bad_ecf_home(tmp_path):
+    ecf_home = tmp_path / "home"
+    tmp_path.chmod(0o555)
+    thread = ecflow._ServerThread()
+    with patch.object(ecflow, "current_thread", return_value=thread):
+        ecflow._server_start(env={STR.ECF_HOME: ecf_home}, port=9999)
+    assert thread.error == f"Failed to create ECF_HOME directory {ecf_home}"
+    assert not thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    tmp_path.chmod(0o755)
+
+
 def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     def f(*_args, **_kwargs):
         run_shell_cmd.call_args.kwargs["callback"](proc)
