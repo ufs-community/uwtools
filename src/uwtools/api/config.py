@@ -79,7 +79,7 @@ def compose_to_dict(
     """
     return compose(
         **{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml}
-    ).data
+    ).as_dict()
 
 
 def get_fieldtable_config(
