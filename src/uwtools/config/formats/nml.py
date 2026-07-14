@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from functools import reduce
 from io import StringIO
 from typing import TYPE_CHECKING
 
@@ -9,7 +8,6 @@ import f90nml  # type: ignore[import-untyped]
 from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import from_od
 from uwtools.config.tools import validate_depth
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -98,12 +96,6 @@ class NMLConfig(Config):
 
     # Public methods
 
-    def as_dict(self) -> dict:
-        """
-        Returns a pure dict version of the config.
-        """
-        return _to_dict(self.data)
-
     def dump(self, path: Path | None) -> None:
         """
         Dump the config in Fortran namelist format.
@@ -122,12 +114,3 @@ class NMLConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
-
-
-def _to_dict(x: dict | Namelist) -> dict:
-    """
-    Recursively convert Namelist/OrderedDict objects to plain dicts.
-    """
-    x = from_od(x.todict()) if isinstance(x, Namelist) else x
-    f = lambda m, e: {**m, e[0]: _to_dict(e[1]) if isinstance(e[1], (dict, Namelist)) else e[1]}
-    return reduce(f, x.items(), {})

@@ -59,12 +59,6 @@ class FieldTableConfig(YAMLConfig):
 
     # Public methods
 
-    def as_dict(self) -> dict:
-        """
-        Returns a pure dict version of the config.
-        """
-        return self.data
-
     def dump(self, path: Path | None = None) -> None:
         """
         Dump the config in Field Table format.
