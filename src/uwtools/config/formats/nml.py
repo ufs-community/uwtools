@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
+from functools import reduce
 from io import StringIO
 from typing import TYPE_CHECKING
 
@@ -101,8 +102,19 @@ class NMLConfig(Config):
         """
         Returns a pure dict version of the config.
         """
-        d = self.data
-        return from_od(d.todict()) if isinstance(d, Namelist) else d
+        return self._to_dict(self.data)
+
+    @staticmethod
+    def _to_dict(d: dict | Namelist) -> dict:
+        """
+        Recursively convert Namelist/OrderedDict objects to plain dicts.
+        """
+        d = from_od(d.todict()) if isinstance(d, Namelist) else d
+        f = lambda acc, kv: {
+            **acc,
+            kv[0]: NMLConfig._to_dict(kv[1]) if isinstance(kv[1], (dict, Namelist)) else kv[1],
+        }
+        return reduce(f, d.items(), {})
 
     def dump(self, path: Path | None) -> None:
         """
