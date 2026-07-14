@@ -96,25 +96,13 @@ class NMLConfig(Config):
             config: dict = f90nml.read(f)
             return config
 
-    @staticmethod
-    def _to_dict(x: dict | Namelist) -> dict:
-        """
-        Recursively convert Namelist/OrderedDict objects to plain dicts.
-        """
-        x = from_od(x.todict()) if isinstance(x, Namelist) else x
-        f = lambda m, e: {
-            **m,
-            e[0]: NMLConfig._to_dict(e[1]) if isinstance(e[1], (dict, Namelist)) else e[1],
-        }
-        return reduce(f, x.items(), {})
-
     # Public methods
 
     def as_dict(self) -> dict:
         """
         Returns a pure dict version of the config.
         """
-        return self._to_dict(self.data)
+        return _to_dict(self.data)
 
     def dump(self, path: Path | None) -> None:
         """
@@ -134,3 +122,12 @@ class NMLConfig(Config):
         """
         with writable(path) as f:
             print(cls._dict_to_str(cfg), file=f)
+
+
+def _to_dict(x: dict | Namelist) -> dict:
+    """
+    Recursively convert Namelist/OrderedDict objects to plain dicts.
+    """
+    x = from_od(x.todict()) if isinstance(x, Namelist) else x
+    f = lambda m, e: {**m, e[0]: _to_dict(e[1]) if isinstance(e[1], (dict, Namelist)) else e[1]}
+    return reduce(f, x.items(), {})
