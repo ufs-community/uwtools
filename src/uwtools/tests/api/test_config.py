@@ -68,7 +68,7 @@ def test_api_config_compose_to_dict():
         "leadtime": None,
     }
     with patch.object(config, "compose") as compose:
-        compose.return_value.data = {"foo": "bar"}
+        compose.return_value = YAMLConfig(config={"foo": "bar"})
         result = config.compose_to_dict(**kwargs)
     compose.assert_called_once_with(
         **{**kwargs, "output_file": Path(os.devnull), "output_format": FORMAT.yaml}
