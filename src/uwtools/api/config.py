@@ -65,6 +65,23 @@ def compose(
     )
 
 
+def compose_to_dict(
+    configs: list[str | Path],
+    realize: bool = False,
+    input_format: str | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
+) -> dict:
+    """
+    Compose config files to a ``dict``.
+
+    See ``compose()`` for details on arguments, etc.
+    """
+    return compose(
+        **{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml}
+    ).data
+
+
 def get_fieldtable_config(
     config: dict | Path | str | None = None, stdin_ok: bool = False
 ) -> FieldTableConfig:
@@ -318,6 +335,7 @@ __all__ = [
     "YAMLConfig",
     "compare",
     "compose",
+    "compose_to_dict",
     "get_fieldtable_config",
     "get_ini_config",
     "get_nml_config",
