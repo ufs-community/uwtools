@@ -110,9 +110,9 @@ class NMLConfig(Config):
         Recursively convert Namelist/OrderedDict objects to plain dicts.
         """
         d = from_od(d.todict()) if isinstance(d, Namelist) else d
-        f = lambda acc, kv: {
-            **acc,
-            kv[0]: NMLConfig._to_dict(kv[1]) if isinstance(kv[1], (dict, Namelist)) else kv[1],
+        f = lambda m, e: {
+            **m,
+            e[0]: NMLConfig._to_dict(e[1]) if isinstance(e[1], (dict, Namelist)) else e[1],
         }
         return reduce(f, d.items(), {})
 
