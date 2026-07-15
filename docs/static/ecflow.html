@@ -7803,7 +7803,7 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="uwtools-+-ecFlow">uwtools + ecFlow<a class="anchor-link" href="#uwtools-+-ecFlow">¶</a></h2><p>The notebook demonstrates the use of <code>uwtools</code> to configure and run an ecFlow server, to generate an ecFlow workflow (a suite definition and <code>ecf</code> scripts), and to load the suite into the server and execute it. As a demo application, we perform verification of 2-meter temperature at the 6-hour leadtime of a GFS forecast against a GFS leadtime-zero forecast as a source of truth.</p>
-<p>A recipe for creating a software environment in which this notebook can be interacted with live can be found by following the <em>ecFlow Tool</em> link in the <a href="https://uwtools.readthedocs.io/en/stable/sections/user_guide/index.html#jupyter-notebooks">Jupyter Notebooks</a> section in the uwtools documentation.</p>
+<p>A recipe for creating a software environment in which this notebook can be interacted with live can be found on the <a href="https://uwtools.readthedocs.io/en/stable/shared/ecflow_demo_workflow.html#demonstration-workflow">ecFlow Demonstration Workflow</a> page in the uwtools documentation.</p>
 <p>Note that, unlike many Jupyter notebooks, the code cells in this notebook are interpreted by bash rather than Python. So, if you make changes, be sure to enter only valid bash code.</p>
 </div>
 </div>
@@ -7875,7 +7875,7 @@ conda<span class="w"> </span>activate<span class="w"> </span>demo
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>app:
   basedir: '{{ "BASEDIR" | env }}'
-  cycle: 2026-07-04T12:00:00
+  cycle: 2026-07-14T12:00:00
   fcst:
     fn: gfs.t{{ app.hh }}z.pgrb2.1p00.f{{ "%03d" % app.leadtime }}
     url: '{{ app.prefix }}/{{ app.fcst.fn }}'
@@ -8036,7 +8036,7 @@ wxvx:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>[1] 2213757
+<pre>[1] 658054
 </pre>
 </div>
 </div>
@@ -8100,13 +8100,13 @@ wxvx:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>[2026-07-11T18:33:14]     INFO Validating config against internal schema: ecflow
-[2026-07-11T18:33:14]     INFO Schema validation succeeded for ecFlow config
-[2026-07-11T18:33:14]     INFO Generating SSL private key: /home/Paul.Madden/.ecflowrc/ssl/server.key
-[2026-07-11T18:33:15]     INFO Generating SSL certificate: /home/Paul.Madden/.ecflowrc/ssl/server.crt
-[2026-07-11T18:33:15]     INFO Generating DH parameters: /home/Paul.Madden/.ecflowrc/ssl/dh2048.pem
-[2026-07-11T18:33:27]     INFO SSL certificate files written to /home/Paul.Madden/.ecflowrc/ssl
-[2026-07-11T18:33:27]     INFO Server started on port 24211
+<pre>[2026-07-15T15:10:43]     INFO Validating config against internal schema: ecflow
+[2026-07-15T15:10:43]     INFO Schema validation succeeded for ecFlow config
+[2026-07-15T15:10:43]     INFO Generating SSL private key: /home/Paul.Madden/.ecflowrc/ssl/server.key
+[2026-07-15T15:10:44]     INFO Generating SSL certificate: /home/Paul.Madden/.ecflowrc/ssl/server.crt
+[2026-07-15T15:10:44]     INFO Generating DH parameters: /home/Paul.Madden/.ecflowrc/ssl/dh2048.pem
+[2026-07-15T15:11:13]     INFO SSL certificate files written to /home/Paul.Madden/.ecflowrc/ssl
+[2026-07-15T15:11:13]     INFO Server started on port 18883
 </pre>
 </div>
 </div>
@@ -8190,7 +8190,7 @@ export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/en
 <pre><span class="ansi-bold">{</span>
   <span class="ansi-blue-intense-fg ansi-bold">"ECF_HOME"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow"</span><span class="ansi-bold">,</span>
   <span class="ansi-blue-intense-fg ansi-bold">"ECF_HOST"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"uecflow01"</span><span class="ansi-bold">,</span>
-  <span class="ansi-blue-intense-fg ansi-bold">"ECF_PORT"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"24211"</span><span class="ansi-bold">,</span>
+  <span class="ansi-blue-intense-fg ansi-bold">"ECF_PORT"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"18883"</span><span class="ansi-bold">,</span>
   <span class="ansi-blue-intense-fg ansi-bold">"ECF_SSL"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"1"</span>
 <span class="ansi-bold">}</span>
 </pre>
@@ -8235,7 +8235,7 @@ export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/en
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>ECF_HOME: /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow
 ECF_HOST: uecflow01
-ECF_PORT: 24211
+ECF_PORT: 18883
 ECF_SSL: 1
 </pre>
 </div>
@@ -8274,7 +8274,7 @@ ECF_SSL: 1
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>ping server(uecflow01:24211) succeeded in 00:00:00.004512  ~4 milliseconds
+<pre>ping server(uecflow01:18883) succeeded in 00:00:00.004949  ~4 milliseconds
 </pre>
 </div>
 </div>
@@ -8353,8 +8353,8 @@ ecflow_client<span class="w"> </span>--stats<span class="w"> </span><span class=
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>[2026-07-11T18:33:30]     INFO Validating config against internal schema: ecflow
-[2026-07-11T18:33:30]     INFO Schema validation succeeded for ecFlow config
+<pre>[2026-07-15T15:11:59]     INFO Validating config against internal schema: ecflow
+[2026-07-15T15:11:59]     INFO Schema validation succeeded for ecFlow config
 </pre>
 </div>
 </div>
@@ -8392,7 +8392,7 @@ ecflow_client<span class="w"> </span>--stats<span class="w"> </span><span class=
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>#5.16.0
+<pre>#5.18.0
 suite vx
   edit ECF_JOB_CMD '/usr/bin/env -S bash %ECF_JOB% &gt;%ECF_JOBOUT% 2&gt;&amp;1'
   task extract_grids
@@ -8492,7 +8492,7 @@ endsuite
 %include server.h
 
 init $$
-test -f gfs.t12z.pgrb2.1p00.f006 || wget --quiet https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260704/12/atmos/gfs.t12z.pgrb2.1p00.f006
+test -f gfs.t12z.pgrb2.1p00.f006 || wget --quiet https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260714/12/atmos/gfs.t12z.pgrb2.1p00.f006
 
 %manual
 Fetch GRIB truth data
@@ -8721,7 +8721,7 @@ Perform verification
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>#5.16.0
+<pre>#5.18.0
 suite vx
   edit ECF_JOB_CMD '/usr/bin/env -S bash %ECF_JOB% &gt;%ECF_JOBOUT% 2&gt;&amp;1'
   task extract_grids
@@ -8805,8 +8805,17 @@ endsuite
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>  fetch_truth: active
-extract_grids: queued
+<pre>  fetch_truth: complete
+extract_grids: active
+verification:  queued
+  fetch_truth: complete
+extract_grids: active
+verification:  queued
+  fetch_truth: complete
+extract_grids: active
+verification:  queued
+  fetch_truth: complete
+extract_grids: active
 verification:  queued
   fetch_truth: complete
 extract_grids: active
@@ -8865,7 +8874,9 @@ verification:  complete
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>-rw-r--r-- 1 Paul.Madden gsd-hpcs 3691 Jul 11 18:34 uecflow01.24211.ecf.log
+<pre>-rw-r--r-- 1 Paul.Madden gsd-hpcs 1977 Jul 15 15:29 uecflow01.18883.ecf.check
+-rw-r--r-- 1 Paul.Madden gsd-hpcs 1495 Jul 15 15:13 uecflow01.18883.ecf.check.b
+-rw-r--r-- 1 Paul.Madden gsd-hpcs 4515 Jul 15 16:05 uecflow01.18883.ecf.log
 </pre>
 </div>
 </div>
@@ -8911,23 +8922,23 @@ verification:  complete
 ├── fetch_truth.ecf
 ├── <span class="ansi-green-intense-fg ansi-bold">fetch_truth.job1</span>
 ├── <span class="ansi-blue-intense-fg ansi-bold">forecast</span>
-│   └── <span class="ansi-blue-intense-fg ansi-bold">20260704</span>
+│   └── <span class="ansi-blue-intense-fg ansi-bold">20260714</span>
 │       └── <span class="ansi-blue-intense-fg ansi-bold">12</span>
 │           └── <span class="ansi-blue-intense-fg ansi-bold">006</span>
 │               ├── 2t-heightAboveGround-0002.grib2
 │               └── gfs.t12z.pgrb2.1p00.f006.ecidx
 ├── <span class="ansi-blue-intense-fg ansi-bold">run</span>
 │   └── <span class="ansi-blue-intense-fg ansi-bold">stats</span>
-│       └── <span class="ansi-blue-intense-fg ansi-bold">20260704</span>
+│       └── <span class="ansi-blue-intense-fg ansi-bold">20260714</span>
 │           └── <span class="ansi-blue-intense-fg ansi-bold">12</span>
 │               └── <span class="ansi-blue-intense-fg ansi-bold">006</span>
-│                   ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V_cnt.txt
-│                   ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.config
-│                   ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.log
-│                   ├── <span class="ansi-green-intense-fg ansi-bold">grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.sh</span>
-│                   └── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.stat
+│                   ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V_cnt.txt
+│                   ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.config
+│                   ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.log
+│                   ├── <span class="ansi-green-intense-fg ansi-bold">grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.sh</span>
+│                   └── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.stat
 ├── <span class="ansi-blue-intense-fg ansi-bold">truth</span>
-│   └── <span class="ansi-blue-intense-fg ansi-bold">20260704</span>
+│   └── <span class="ansi-blue-intense-fg ansi-bold">20260714</span>
 │       └── <span class="ansi-blue-intense-fg ansi-bold">18</span>
 │           └── <span class="ansi-blue-intense-fg ansi-bold">000</span>
 │               ├── 2t-heightAboveGround-0002.grib2
@@ -9001,8 +9012,8 @@ set -euxo pipefail
 
 export ECF_HOST=uecflow01
 export ECF_NAME=/vx/extract_grids
-export ECF_PASS=QzOBO4EV
-export ECF_PORT=24211
+export ECF_PASS=RQCmQzdA
+export ECF_PORT=18883
 export ECF_TRYNO=1
 export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin/:$PATH
 
@@ -9050,40 +9061,40 @@ wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t g
 + ECF_HOST=uecflow01
 + export ECF_NAME=/vx/extract_grids
 + ECF_NAME=/vx/extract_grids
-+ export ECF_PASS=QzOBO4EV
-+ ECF_PASS=QzOBO4EV
-+ export ECF_PORT=24211
-+ ECF_PORT=24211
++ export ECF_PASS=RQCmQzdA
++ ECF_PASS=RQCmQzdA
++ export ECF_PORT=18883
++ ECF_PORT=18883
 + export ECF_TRYNO=1
 + ECF_TRYNO=1
 + export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin/:/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin:/home/Paul.Madden/.local/bin:/usr/local/slurm/default/bin:/usr/local/slurm/default/sbin:/home/Paul.Madden/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/apps/hpss/bin:/apps/bin:/apps/local/bin
 + PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin/:/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin:/home/Paul.Madden/.local/bin:/usr/local/slurm/default/bin:/usr/local/slurm/default/sbin:/home/Paul.Madden/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/apps/hpss/bin:/apps/bin:/apps/local/bin
-+ init 2213875
-+ export ECF_RID=2213875
-+ ECF_RID=2213875
-+ ecflow_client --ssl --init=2213875
++ init 718641
++ export ECF_RID=718641
++ ECF_RID=718641
++ ecflow_client --ssl --init=718641
 + uw config realize -i /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/config.yaml --key-path wxvx
 + wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t grids
-[2026-07-11T18:33:41]     INFO Schema validation succeeded for config
-[2026-07-11T18:33:41]     INFO Preparing task graph for 'grids'
-[2026-07-11T18:33:41]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260704/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx at 20260704 12Z 006: Executing
-[2026-07-11T18:33:42]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260704/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx at 20260704 12Z 006: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260704/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx
-[2026-07-11T18:33:42]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260704/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx at 20260704 12Z 006: Ready
-[2026-07-11T18:33:42]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Executing
-[2026-07-11T18:33:42]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260704/12/atmos/gfs.t12z.pgrb2.1p00.f000.idx
-[2026-07-11T18:33:42]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/gfs.t12z.pgrb2.1p00.f000.idx
-[2026-07-11T18:33:42]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Ready
-[2026-07-11T18:33:42]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260704/12/006/2t-heightAboveGround-0002.grib2: Executing
-[2026-07-11T18:33:42]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260704/12/006/2t-heightAboveGround-0002.grib2: Ready
-[2026-07-11T18:33:42]     INFO GRIB index data at 20260704 18Z 000: Executing
-[2026-07-11T18:33:42]     INFO GRIB index data at 20260704 18Z 000: Ready
-[2026-07-11T18:33:42]     INFO Forecast grids for GFSFCST: Ready
-[2026-07-11T18:33:42]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/2t-heightAboveGround-0002.grib2: Executing
-[2026-07-11T18:33:42]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/2t-heightAboveGround-0002.grib2: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260704/12/atmos/gfs.t12z.pgrb2.1p00.f000 bytes=33774443-33822702
-[2026-07-11T18:33:42]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/2t-heightAboveGround-0002.grib2: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/2t-heightAboveGround-0002.grib2
-[2026-07-11T18:33:42]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260704/18/000/2t-heightAboveGround-0002.grib2: Ready
-[2026-07-11T18:33:42]     INFO Truth grids for GFS: Ready
-[2026-07-11T18:33:42]     INFO Grids: Ready
+[2026-07-15T16:04:44]     INFO Schema validation succeeded for config
+[2026-07-15T16:04:44]     INFO Preparing task graph for 'grids'
+[2026-07-15T16:04:45]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260714/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx at 20260714 12Z 006: Executing
+[2026-07-15T16:04:47]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260714/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx at 20260714 12Z 006: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260714/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx
+[2026-07-15T16:04:47]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260714/12/006/gfs.t12z.pgrb2.1p00.f006.ecidx at 20260714 12Z 006: Ready
+[2026-07-15T16:04:47]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Executing
+[2026-07-15T16:04:47]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260714/12/atmos/gfs.t12z.pgrb2.1p00.f000.idx
+[2026-07-15T16:04:48]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/gfs.t12z.pgrb2.1p00.f000.idx
+[2026-07-15T16:04:48]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/gfs.t12z.pgrb2.1p00.f000.idx: Ready
+[2026-07-15T16:04:48]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260714/12/006/2t-heightAboveGround-0002.grib2: Executing
+[2026-07-15T16:04:48]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260714/12/006/2t-heightAboveGround-0002.grib2: Ready
+[2026-07-15T16:04:48]     INFO GRIB index data at 20260714 18Z 000: Executing
+[2026-07-15T16:04:48]     INFO GRIB index data at 20260714 18Z 000: Ready
+[2026-07-15T16:04:48]     INFO Forecast grids for GFSFCST: Ready
+[2026-07-15T16:04:48]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/2t-heightAboveGround-0002.grib2: Executing
+[2026-07-15T16:04:48]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/2t-heightAboveGround-0002.grib2: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260714/12/atmos/gfs.t12z.pgrb2.1p00.f000 bytes=34264183-34312870
+[2026-07-15T16:04:48]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/2t-heightAboveGround-0002.grib2: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/2t-heightAboveGround-0002.grib2
+[2026-07-15T16:04:48]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260714/18/000/2t-heightAboveGround-0002.grib2: Ready
+[2026-07-15T16:04:48]     INFO Truth grids for GFS: Ready
+[2026-07-15T16:04:48]     INFO Grids: Ready
 + complete
 + ecflow_client --ssl --complete
 </pre>
@@ -9135,7 +9146,7 @@ wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t g
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre><span class="ansi-blue-intense-fg ansi-bold">vx/forecast/</span>
-└── <span class="ansi-blue-intense-fg ansi-bold">20260704</span>
+└── <span class="ansi-blue-intense-fg ansi-bold">20260714</span>
     └── <span class="ansi-blue-intense-fg ansi-bold">12</span>
         └── <span class="ansi-blue-intense-fg ansi-bold">006</span>
             ├── 2t-heightAboveGround-0002.grib2
@@ -9180,7 +9191,7 @@ wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t g
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre><span class="ansi-blue-intense-fg ansi-bold">vx/truth/</span>
-└── <span class="ansi-blue-intense-fg ansi-bold">20260704</span>
+└── <span class="ansi-blue-intense-fg ansi-bold">20260714</span>
     └── <span class="ansi-blue-intense-fg ansi-bold">18</span>
         └── <span class="ansi-blue-intense-fg ansi-bold">000</span>
             ├── 2t-heightAboveGround-0002.grib2
@@ -9226,14 +9237,14 @@ wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t g
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre><span class="ansi-blue-intense-fg ansi-bold">vx/run/</span>
 └── <span class="ansi-blue-intense-fg ansi-bold">stats</span>
-    └── <span class="ansi-blue-intense-fg ansi-bold">20260704</span>
+    └── <span class="ansi-blue-intense-fg ansi-bold">20260714</span>
         └── <span class="ansi-blue-intense-fg ansi-bold">12</span>
             └── <span class="ansi-blue-intense-fg ansi-bold">006</span>
-                ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V_cnt.txt
-                ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.config
-                ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.log
-                ├── <span class="ansi-green-intense-fg ansi-bold">grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.sh</span>
-                └── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260704_180000V.stat
+                ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V_cnt.txt
+                ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.config
+                ├── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.log
+                ├── <span class="ansi-green-intense-fg ansi-bold">grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.sh</span>
+                └── grid_stat_gfsfcst_2t_heightAboveGround_0002_060000L_20260714_180000V.stat
 
 5 directories, 5 files
 </pre>
