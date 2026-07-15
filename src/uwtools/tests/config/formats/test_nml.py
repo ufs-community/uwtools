@@ -135,6 +135,16 @@ def test_nml_as_dict():
     assert isinstance(d2, dict)
 
 
+def test_nml_as_dict_nested():
+    d = {"section": {"key": "value"}}
+    config = NMLConfig(d)
+    config.data = {"outer": f90nml.Namelist({"inner": f90nml.Namelist({"key": "val"})})}
+    result = config.as_dict()
+    assert result == {"outer": {"inner": {"key": "val"}}}
+    assert not isinstance(result["outer"], f90nml.Namelist)
+    assert not isinstance(result["outer"]["inner"], f90nml.Namelist)
+
+
 def test_nml_dump(dumpkit):
     d, expected, path = dumpkit
     NMLConfig(d).dump(path)

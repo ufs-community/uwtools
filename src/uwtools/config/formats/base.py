@@ -5,11 +5,13 @@ import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
+from functools import reduce
 from io import StringIO
 from pathlib import Path
 from typing import Any, cast
 
 import yaml
+from f90nml import Namelist  # type: ignore[import-untyped]
 
 from uwtools.config import jinja2
 from uwtools.config.support import (
@@ -18,6 +20,7 @@ from uwtools.config.support import (
     UWYAMLExtend,
     depth,
     dict_to_yaml_str,
+    from_od,
     log_and_error,
     uw_yaml_loader,
 )
@@ -162,11 +165,11 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    @abstractmethod
     def as_dict(self) -> dict:
         """
         Returns a pure dict version of the config.
         """
+        return _to_dict(self.data)
 
     def compare_config(
         self, dict1: dict, dict2: dict | None = None, header: bool | None = True
@@ -318,3 +321,12 @@ class Config(ABC, UserDict):
                         dst[key] = new
 
         update(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)
+
+
+def _to_dict(x: dict | Namelist) -> dict:
+    """
+    Recursively convert Namelist/OrderedDict objects to plain dicts.
+    """
+    x = from_od(x.todict()) if isinstance(x, Namelist) else x
+    f = lambda m, e: {**m, e[0]: _to_dict(e[1]) if isinstance(e[1], (dict, Namelist)) else e[1]}
+    return reduce(f, x.items(), {})
