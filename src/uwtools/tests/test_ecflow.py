@@ -896,6 +896,8 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     assert header.is_file()
     expected = """
     export ECF_HOST=%ECF_HOST%
+    export ECF_JOB=%ECF_JOB%
+    export ECF_JOBOUT=%ECF_JOBOUT%
     export ECF_NAME=%ECF_NAME%
     export ECF_PASS=%ECF_PASS%
     export ECF_PORT=%ECF_PORT%
