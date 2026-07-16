@@ -17,7 +17,7 @@ else
     ufs-community::uwtools
   )
   conda create -y -n demo ${packages[*]}
-  if [[ -v $PRERELEASE ]]; then
+  if [[ -v DEVMODE ]]; then
     conda install -y conda-build
     make -C $(git rev-parse --show-toplevel) package
     conda install --name demo local::uwtools
