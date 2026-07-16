@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env -S bash -eu
 
-set -eu
 if [[ -d conda/ ]]; then
   source conda/etc/profile.d/conda.sh
 else
@@ -9,8 +8,16 @@ else
   bash $fn -bfp conda
   rm -v $fn
   source conda/etc/profile.d/conda.sh
-  conda create -y -n demo -c local -c oar-gsl -c ufs-community bash_kernel jq jupyterlab tree uwtools=2.18 wget wxvx=0.7
-fi    
+  cmd="conda create -y -n demo bash_kernel jq jupyterlab tree oar-gsl::wxvx"
+  if [[ -v $PRERELEASE ]]; then
+    $cmd
+    conda install -y conda-build
+    reporoot=$(git rev-parse --show-toplevel)
+    make -C $reporoot package
+    conda install --name demo local::uwtools
+  else
+    $cmd ufs-community::uwtools
+  fi    
 conda activate demo
 python -m bash_kernel.install
 export BASEDIR=$PWD
