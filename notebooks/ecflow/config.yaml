@@ -1,6 +1,6 @@
 app:
   basedir: '{{ "BASEDIR" | env }}'
-  cycle: 2026-07-14T12:00:00
+  cycle: '{{ "CYCLE" | env }}'
   fcst:
     fn: gfs.t{{ app.hh }}z.pgrb2.1p00.f{{ "%03d" % app.leadtime }}
     url: '{{ app.prefix }}/{{ app.fcst.fn }}'
