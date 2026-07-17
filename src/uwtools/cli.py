@@ -42,11 +42,37 @@ from uwtools.utils.file import get_config_format, resource_path
 if TYPE_CHECKING:
     from iotaa import Node
 
+DRIVERS = [
+    STR.cdeps,
+    STR.chgres_cube,
+    STR.enkf,
+    STR.esg_grid,
+    STR.filter_topo,
+    STR.fv3,
+    STR.global_equiv_resol,
+    STR.gsi,
+    STR.ioda,
+    STR.jedi,
+    STR.make_hgrid,
+    STR.make_solo_mosaic,
+    STR.mpas,
+    STR.mpas_init,
+    STR.mpassit,
+    STR.orog,
+    STR.orog_gsl,
+    STR.schism,
+    STR.sfc_climo_gen,
+    STR.shave,
+    STR.ungrib,
+    STR.upp,
+    STR.upp_assets,
+    STR.ww3,
+]
+
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
+STATUS = ns(success=0, failure=1, notready=3)
 TITLE_REQ_ARG = "Required arguments"
-
-STATUS = ns(success=0, failure=1)
 
 Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
@@ -83,36 +109,12 @@ def main() -> None:
             STR.ecflow: _dispatch_ecflow,
         }
         drivers: dict[str, Callable[..., bool]] = {
-            x: partial(_dispatch_to_driver, x)
-            for x in [
-                STR.cdeps,
-                STR.chgres_cube,
-                STR.enkf,
-                STR.esg_grid,
-                STR.filter_topo,
-                STR.fv3,
-                STR.global_equiv_resol,
-                STR.gsi,
-                STR.ioda,
-                STR.jedi,
-                STR.make_hgrid,
-                STR.make_solo_mosaic,
-                STR.mpas,
-                STR.mpas_init,
-                STR.mpassit,
-                STR.orog,
-                STR.orog_gsl,
-                STR.schism,
-                STR.sfc_climo_gen,
-                STR.shave,
-                STR.ungrib,
-                STR.upp,
-                STR.upp_assets,
-                STR.ww3,
-            ]
+            x: partial(_dispatch_to_driver, x) for x in DRIVERS
         }
         modes = {**tools, **drivers}
-        sys.exit(STATUS.success if modes[args[STR.mode]](args) else STATUS.failure)
+        mode = args[STR.mode]
+        success = modes[mode](args)
+        sys.exit(STATUS.success if success else STATUS.failure)
     except UWError as e:
         for line in str(e).split("\n"):
             log.error(line)
