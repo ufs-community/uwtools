@@ -964,6 +964,19 @@ def test_cli_main_fail_dispatch(vals):
     assert e.value.code == exit_status
 
 
+@mark.parametrize("vals", [(True, cli.STATUS.success), (False, cli.STATUS.notready)])
+def test_cli_main_fail_dispatch_execute(vals):
+    success, status = vals
+    raw_args = ["testing", STR.execute, "--module", "foo", "--classname", "Bar", "--task", "baz"]
+    with (
+        patch.object(sys, "argv", raw_args),
+        patch.object(cli, "_dispatch_execute", return_value=success),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    assert e.value.code == status
+
+
 def test_cli_main_fail_exception_abort():
     # Mock setup_logging() to raise a UWError in main() before logging is configured, which triggers
     # a call to _abort().
