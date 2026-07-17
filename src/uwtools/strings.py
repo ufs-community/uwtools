@@ -166,6 +166,7 @@ class _STR(_ValsMatchKeys):
     output_file: str = _
     output_format: str = _
     parent: str = _
+    partial: str = _
     path1: str = _
     path2: str = _
     platform: str = _

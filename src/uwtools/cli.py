@@ -1100,6 +1100,14 @@ def _add_arg_output_dir(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_partial(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.partial),
+        action="store_true",
+        help="Treat partial execution as success",
+    )
+
+
 def _add_arg_port(group: Group) -> None:
     group.add_argument(
         _switch(STR.port),

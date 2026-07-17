@@ -81,6 +81,17 @@ def test_cli__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
+def test_cli__add_arg_partial():
+    parser = Parser()
+    group = parser.add_argument_group()
+    cli._add_arg_partial(group)
+    # Verify the argument was added by parsing with and without the flag
+    args = parser.parse_args([])
+    assert args.partial is False
+    args = parser.parse_args(["--partial"])
+    assert args.partial is True
+
+
 def test_cli__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert actions(subparsers.choices[STR.config]) == [
