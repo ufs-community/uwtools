@@ -202,7 +202,8 @@ def test_cli__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-def test_cli__dispatch_execute(utc):
+@mark.parametrize("partial", [False, True])
+def test_cli__dispatch_execute(partial, utc):
     cycle = utc()
     args: dict = {
         "module": "testdriver",
@@ -215,6 +216,7 @@ def test_cli__dispatch_execute(utc):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "partial": partial,
         "task": "forty_two",
         "stdin_ok": True,
     }
@@ -818,7 +820,8 @@ def test_cli__dispatch_template_translate_no_optional():
 
 
 @mark.parametrize("hours", [0, 24, 168])
-def test_cli__dispatch_to_driver(hours, utc):
+@mark.parametrize("partial", [False, True])
+def test_cli__dispatch_to_driver(hours, partial, utc):
     cycle = utc()
     leadtime = timedelta(hours=hours)
     args: dict = {
@@ -830,6 +833,7 @@ def test_cli__dispatch_to_driver(hours, utc):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "partial": partial,
         "schema_file": None,
         "show_schema": False,
         "stdin_ok": True,

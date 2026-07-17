@@ -461,6 +461,7 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to driver config block")
+    _add_arg_partial(optional)
     return {STR.execute: _add_args_verbosity(optional)}
 
 
@@ -1420,6 +1421,7 @@ def _add_subparser_for_driver_task(
         optional,
         helpmsg="Dot-separated path of keys to driver config block",
     )
+    _add_arg_partial(optional)
     _add_arg_schema_file(optional)
     return _add_args_verbosity(optional)
 
