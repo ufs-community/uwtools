@@ -1,0 +1,3 @@
+#!/usr/bin/env -S bash -eu
+
+DEVMODE=1 ./start
