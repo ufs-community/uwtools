@@ -20,7 +20,7 @@ else
   if [[ -v DEVMODE ]]; then
     conda install -y conda-build
     make -C $(git rev-parse --show-toplevel) package
-    conda install --name demo local::uwtools
+    conda install -y -n demo local::uwtools
   fi
 fi
 conda activate demo
