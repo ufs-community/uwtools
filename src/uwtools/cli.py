@@ -16,6 +16,7 @@ from collections.abc import Callable
 from functools import partial
 from importlib import import_module
 from pathlib import Path
+from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING, Any, NoReturn
 
 import uwtools.api
@@ -44,6 +45,8 @@ if TYPE_CHECKING:
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
+
+STATUS = ns(success=0, failure=1)
 
 Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
@@ -109,11 +112,11 @@ def main() -> None:
             ]
         }
         modes = {**tools, **drivers}
-        sys.exit(0 if modes[args[STR.mode]](args) else 1)
+        sys.exit(STATUS.success if modes[args[STR.mode]](args) else STATUS.failure)
     except UWError as e:
         for line in str(e).split("\n"):
             log.error(line)
-        sys.exit(1)
+        sys.exit(STATUS.failure)
 
 
 # Mode ecflow
@@ -1333,7 +1336,7 @@ def _abort(msg: str) -> NoReturn:
     :param msg: The message to print.
     """
     print(msg, file=sys.stderr)
-    sys.exit(1)
+    sys.exit(STATUS.failure)
 
 
 def _add_args_verbosity(group: Group) -> ActionChecks:
