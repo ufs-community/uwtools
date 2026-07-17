@@ -1,7 +1,7 @@
 usage: uw fv3 run --cycle CYCLE [-h] [--version] [--config-file PATH]
                   [--batch] [--dry-run] [--graph-file PATH]
-                  [--key-path KEY[.KEY...]] [--schema-file PATH] [--quiet]
-                  [--verbose]
+                  [--key-path KEY[.KEY...]] [--partial] [--schema-file PATH]
+                  [--quiet] [--verbose]
 
 A run
 
@@ -24,6 +24,8 @@ Optional arguments:
       Path to Graphviz DOT output [experimental]
   --key-path KEY[.KEY...]
       Dot-separated path of keys to driver config block
+  --partial
+      Treat partial execution as success
   --schema-file PATH
       Path to schema file to use for validation
   --quiet, -q
