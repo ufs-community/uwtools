@@ -67,6 +67,8 @@ class _STR(_ValsMatchKeys):
 
     ECF_HOME: str = _
     ECF_HOST: str = _
+    ECF_JOB: str = _
+    ECF_JOBOUT: str = _
     ECF_LOG: str = _
     ECF_NAME: str = _
     ECF_PASS: str = _

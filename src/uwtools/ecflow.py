@@ -485,7 +485,15 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
                 log.error(line)
 
     def post(proc: Popen) -> None:
-        keys = (STR.ECF_HOST, STR.ECF_NAME, STR.ECF_PASS, STR.ECF_PORT, STR.ECF_TRYNO)
+        keys = (
+            STR.ECF_HOST,
+            STR.ECF_JOB,
+            STR.ECF_JOBOUT,
+            STR.ECF_NAME,
+            STR.ECF_PASS,
+            STR.ECF_PORT,
+            STR.ECF_TRYNO,
+        )
         lines = [f"export {k}=%{k}%" for k in keys]
         lines.append("export PATH=%s/bin/:$PATH" % os.environ["CONDA_PREFIX"])
         Path(env[STR.ECF_HOME], "server.h").write_text("\n".join(lines) + "\n")
