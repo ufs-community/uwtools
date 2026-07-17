@@ -13,10 +13,10 @@ from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from collections.abc import Callable
+from enum import IntEnum
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from types import SimpleNamespace as ns
 from typing import TYPE_CHECKING, Any, NoReturn
 
 import uwtools.api
@@ -71,13 +71,18 @@ DRIVERS = [
 
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
-STATUS = ns(success=0, failure=1, notready=3)
 TITLE_REQ_ARG = "Required arguments"
 
 Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
 ModeChecks = dict[str, ActionChecks]
 Checks = dict[str, ModeChecks]
+
+
+class Status(IntEnum):
+    success = 0
+    failure = 1
+    notready = 3
 
 
 def main() -> None:
@@ -114,14 +119,14 @@ def main() -> None:
         modes = {**tools, **drivers}
         mode = args[STR.mode]
         success = modes[mode](args)
-        status = {True: STATUS.success, False: STATUS.failure}
+        status = {True: Status.success, False: Status.failure}
         if mode in DRIVERS or mode == STR.execute:
-            status[False] = STATUS.notready
+            status[False] = Status.notready
         sys.exit(status[success])
     except UWError as e:
         for line in str(e).split("\n"):
             log.error(line)
-        sys.exit(STATUS.failure)
+        sys.exit(Status.failure)
 
 
 # Mode ecflow
@@ -1341,7 +1346,7 @@ def _abort(msg: str) -> NoReturn:
     :param msg: The message to print.
     """
     print(msg, file=sys.stderr)
-    sys.exit(STATUS.failure)
+    sys.exit(Status.failure)
 
 
 def _add_args_verbosity(group: Group) -> ActionChecks:

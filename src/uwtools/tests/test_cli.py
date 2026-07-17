@@ -964,7 +964,7 @@ def test_cli_main_fail_dispatch(vals):
     assert e.value.code == exit_status
 
 
-@mark.parametrize("vals", [(True, cli.STATUS.success), (False, cli.STATUS.notready)])
+@mark.parametrize("vals", [(True, cli.Status.success), (False, cli.Status.notready)])
 def test_cli_main_fail_dispatch_execute(vals):
     success, status = vals
     raw_args = ["testing", STR.execute, "--module", "foo", "--classname", "Bar", "--task", "baz"]
