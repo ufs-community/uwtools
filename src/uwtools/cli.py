@@ -1510,13 +1510,13 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         _abort("No %s specified" % STR.task.upper())
     execute: Callable[..., Node] = module.execute
     kwargs = {
-        "task": args[STR.action],
-        "config": args[STR.config_file],
-        "dry_run": args[STR.dry_run],
-        "graph_file": args[STR.graph_file],
-        "key_path": args[STR.key_path],
-        "schema_file": args[STR.schema_file],
-        "stdin_ok": True,
+        STR.task: args[STR.action],
+        STR.config: args[STR.config_file],
+        STR.dry_run: args[STR.dry_run],
+        STR.graph_file: args[STR.graph_file],
+        STR.key_path: args[STR.key_path],
+        STR.schema_file: args[STR.schema_file],
+        STR.stdin_ok: True,
     }
     kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
     node = execute(**kwargs)

@@ -195,6 +195,7 @@ class _STR(_ValsMatchKeys):
     show_schema: str = _
     stacksize: str = _
     start: str = _
+    stdin_ok: str = _
     stdout: str = _
     step: str = _
     string: str = _
