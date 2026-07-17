@@ -485,7 +485,7 @@ def _dispatch_execute(args: Args) -> bool:
         batch=args[STR.batch],
         stdin_ok=True,
     )
-    return False if node is None else node.ready
+    return False if node is None else True if args[STR.partial] else node.ready
 
 
 # Mode fs
@@ -1520,7 +1520,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     }
     kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
     node = execute(**kwargs)
-    return node.ready
+    return True if args[STR.partial] else node.ready
 
 
 def _formatter(prog: str) -> HelpFormatter:
