@@ -202,8 +202,16 @@ def test_cli__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-@mark.parametrize("partial", [False, True])
-def test_cli__dispatch_execute(partial, utc):
+@mark.parametrize(
+    ("expected", "partial", "ready"),
+    [
+        (True, False, True),
+        (False, False, False),
+        (True, True, True),
+        (True, True, False),
+    ],
+)
+def test_cli__dispatch_execute(expected, partial, ready, utc):
     cycle = utc()
     args: dict = {
         "module": "testdriver",
@@ -221,7 +229,11 @@ def test_cli__dispatch_execute(partial, utc):
         "stdin_ok": True,
     }
     with patch.object(cli.uwtools.api.execute, "execute") as execute:
-        cli._dispatch_execute(args=args)
+        node = Mock()
+        node.ready = ready
+        execute.return_value = node
+        result = cli._dispatch_execute(args=args)
+        assert result == expected
         execute.assert_called_once_with(
             classname="TestDriver",
             module="testdriver",
@@ -236,6 +248,32 @@ def test_cli__dispatch_execute(partial, utc):
             batch=True,
             stdin_ok=True,
         )
+
+
+def test_cli__dispatch_execute_node_none(utc):
+    """
+    Test that _dispatch_execute returns False when node is None.
+    """
+    cycle = utc()
+    args: dict = {
+        "module": "testdriver",
+        "classname": "TestDriver",
+        "schema_file": "/path/to/testdriver.jsonschema",
+        "batch": True,
+        "config_file": "/path/to/config",
+        "cycle": cycle,
+        "leadtime": None,
+        "dry_run": False,
+        "graph_file": None,
+        "key_path": ["foo", "bar"],
+        "partial": False,
+        "task": "forty_two",
+        "stdin_ok": True,
+    }
+    with patch.object(cli.uwtools.api.execute, "execute") as execute:
+        execute.return_value = None
+        result = cli._dispatch_execute(args=args)
+        assert result is False
 
 
 @mark.parametrize(
@@ -820,8 +858,16 @@ def test_cli__dispatch_template_translate_no_optional():
 
 
 @mark.parametrize("hours", [0, 24, 168])
-@mark.parametrize("partial", [False, True])
-def test_cli__dispatch_to_driver(hours, partial, utc):
+@mark.parametrize(
+    ("expected", "partial", "node_ready"),
+    [
+        (True, False, True),
+        (False, False, False),
+        (True, True, True),
+        (True, True, False),
+    ],
+)
+def test_cli__dispatch_to_driver(expected, hours, partial, node_ready, utc):
     cycle = utc()
     leadtime = timedelta(hours=hours)
     args: dict = {
@@ -839,8 +885,12 @@ def test_cli__dispatch_to_driver(hours, partial, utc):
         "stdin_ok": True,
     }
     adriver = Mock()
+    node = Mock()
+    node.ready = node_ready
+    adriver.execute.return_value = node
     with patch.object(cli, "import_module", return_value=adriver):
-        cli._dispatch_to_driver(name="adriver", args=args)
+        result = cli._dispatch_to_driver(name="adriver", args=args)
+        assert result == expected
         adriver.execute.assert_called_once_with(
             batch=True,
             config="/path/to/config",
