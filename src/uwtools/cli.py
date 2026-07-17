@@ -16,7 +16,7 @@ from collections.abc import Callable
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import uwtools.api
 import uwtools.api.config
@@ -37,6 +37,9 @@ from uwtools.exceptions import (
 from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
+
+if TYPE_CHECKING:
+    from iotaa import Node
 
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
@@ -481,7 +484,7 @@ def _dispatch_execute(args: Args) -> bool:
         batch=args[STR.batch],
         stdin_ok=True,
     )
-    return bool(node)
+    return False if node is None else node.ready
 
 
 # Mode fs
@@ -1495,7 +1498,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         return True
     if not args.get(STR.action):
         _abort("No %s specified" % STR.task.upper())
-    execute: Callable[..., bool] = module.execute
+    execute: Callable[..., Node] = module.execute
     kwargs = {
         "task": args[STR.action],
         "config": args[STR.config_file],
@@ -1506,7 +1509,8 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         "stdin_ok": True,
     }
     kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
-    return execute(**kwargs)
+    node = execute(**kwargs)
+    return node.ready
 
 
 def _formatter(prog: str) -> HelpFormatter:
