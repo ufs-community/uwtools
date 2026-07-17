@@ -121,7 +121,7 @@ def main() -> None:
         success = modes[mode](args)
         status = {
             True: Status.success,
-            False: Status.notready if mode in DRIVERS or mode == STR.execute else Status.failure,
+            False: Status.notready if mode in [*DRIVERS, STR.execute] else Status.failure,
         }
         sys.exit(status[success])
     except UWError as e:
