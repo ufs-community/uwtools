@@ -119,9 +119,10 @@ def main() -> None:
         modes = {**tools, **drivers}
         mode = args[STR.mode]
         success = modes[mode](args)
-        status = {True: Status.success, False: Status.failure}
-        if mode in DRIVERS or mode == STR.execute:
-            status[False] = Status.notready
+        status = {
+            True: Status.success,
+            False: Status.notready if mode in DRIVERS or mode == STR.execute else Status.failure,
+        }
         sys.exit(status[success])
     except UWError as e:
         for line in str(e).split("\n"):
