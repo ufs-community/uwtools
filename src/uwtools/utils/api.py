@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     import datetime as dt
     from collections.abc import Callable
 
+    from iotaa import Node
+
     from uwtools.config.support import YAMLKey
     from uwtools.drivers.driver import DriverT
 
@@ -43,7 +45,7 @@ def make_execute(
     driver_class: DriverT,
     with_cycle: bool | None = False,
     with_leadtime: bool | None = False,
-) -> Callable[..., bool]:
+) -> Callable[..., Node]:
     """
     Return a function that executes tasks for the given driver.
 
@@ -61,7 +63,7 @@ def make_execute(
         key_path: list[YAMLKey] | None = None,
         schema_file: Path | str | None = None,
         stdin_ok: bool = False,
-    ) -> bool:
+    ) -> Node:
         return _execute(
             driver_class=driver_class,
             task=task,
@@ -86,7 +88,7 @@ def make_execute(
         key_path: list[YAMLKey] | None = None,
         schema_file: Path | str | None = None,
         stdin_ok: bool = False,
-    ) -> bool:
+    ) -> Node:
         return _execute(
             driver_class=driver_class,
             task=task,
@@ -112,7 +114,7 @@ def make_execute(
         key_path: list[YAMLKey] | None = None,
         schema_file: Path | str | None = None,
         stdin_ok: bool = False,
-    ) -> bool:
+    ) -> Node:
         return _execute(
             driver_class=driver_class,
             task=task,
@@ -162,7 +164,7 @@ def _execute(
     key_path: list[YAMLKey] | None = None,
     schema_file: Path | str | None = None,
     stdin_ok: bool = False,
-) -> bool:
+) -> Node:
     """
     Execute a task.
 
@@ -180,7 +182,7 @@ def _execute(
     :param key_path: Path of keys to config block to use.
     :param schema_file: The JSON Schema file to use for validation.
     :param stdin_ok: OK to read from stdin?
-    :return: True if task completes without raising an exception.
+    :return: The root Node of the ioaa task graph.
     """
     kwargs = dict(
         config=ensure_data_source(str2path(config), stdin_ok),
@@ -195,7 +197,7 @@ def _execute(
     function_scope_locals = locals()
     kwargs.update({arg: function_scope_locals.get(arg) for arg in accepted_args})
     obj = driver_class(**kwargs)
-    node = getattr(obj, task)(dry_run=dry_run)
+    node: Node = getattr(obj, task)(dry_run=dry_run)
     if graph_file:
         Path(graph_file).write_text(f"{node.graph}\n")
-    return True
+    return node

@@ -2,6 +2,7 @@ import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
+from iotaa import Node
 from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
@@ -102,6 +103,8 @@ def test__execute(execute_kwargs, hours, supply_graph_file, tmp_path, utc):
         "graph_file": graph_file if supply_graph_file else None,
     }
     assert not graph_file.is_file()
-    assert api._execute(**kwargs) is True
+    node = api._execute(**kwargs)
+    assert isinstance(node, Node)
+    assert node.ready is True
     if supply_graph_file:
         assert graph_file.is_file()
