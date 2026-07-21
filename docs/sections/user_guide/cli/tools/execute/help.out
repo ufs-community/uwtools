@@ -1,8 +1,8 @@
 usage: uw execute --module MODULE --classname CLASSNAME [-h] [--version]
                   [--task TASK] [--config-file PATH] [--schema-file PATH]
                   [--cycle CYCLE] [--leadtime LEADTIME] [--batch] [--dry-run]
-                  [--graph-file PATH] [--key-path KEY[.KEY...]] [--quiet]
-                  [--verbose]
+                  [--graph-file PATH] [--key-path KEY[.KEY...]] [--partial]
+                  [--quiet] [--verbose]
 
 Execute external driver.
 
@@ -35,6 +35,8 @@ Optional arguments:
       Path to Graphviz DOT output [experimental]
   --key-path KEY[.KEY...]
       Dot-separated path of keys to driver config block
+  --partial
+      Treat partial execution as success
   --quiet, -q
       Print no logging messages
   --verbose, -v

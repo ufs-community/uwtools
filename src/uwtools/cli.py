@@ -13,10 +13,11 @@ from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from collections.abc import Callable
+from enum import IntEnum
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import uwtools.api
 import uwtools.api.config
@@ -38,6 +39,36 @@ from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
 
+if TYPE_CHECKING:
+    from iotaa import Node
+
+DRIVERS = [
+    STR.cdeps,
+    STR.chgres_cube,
+    STR.enkf,
+    STR.esg_grid,
+    STR.filter_topo,
+    STR.fv3,
+    STR.global_equiv_resol,
+    STR.gsi,
+    STR.ioda,
+    STR.jedi,
+    STR.make_hgrid,
+    STR.make_solo_mosaic,
+    STR.mpas,
+    STR.mpas_init,
+    STR.mpassit,
+    STR.orog,
+    STR.orog_gsl,
+    STR.schism,
+    STR.sfc_climo_gen,
+    STR.shave,
+    STR.ungrib,
+    STR.upp,
+    STR.upp_assets,
+    STR.ww3,
+]
+
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
@@ -46,6 +77,12 @@ Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
 ModeChecks = dict[str, ActionChecks]
 Checks = dict[str, ModeChecks]
+
+
+class Status(IntEnum):
+    success = 0
+    failure = 1
+    notready = 3
 
 
 def main() -> None:
@@ -77,40 +114,20 @@ def main() -> None:
             STR.ecflow: _dispatch_ecflow,
         }
         drivers: dict[str, Callable[..., bool]] = {
-            x: partial(_dispatch_to_driver, x)
-            for x in [
-                STR.cdeps,
-                STR.chgres_cube,
-                STR.enkf,
-                STR.esg_grid,
-                STR.filter_topo,
-                STR.fv3,
-                STR.global_equiv_resol,
-                STR.gsi,
-                STR.ioda,
-                STR.jedi,
-                STR.make_hgrid,
-                STR.make_solo_mosaic,
-                STR.mpas,
-                STR.mpas_init,
-                STR.mpassit,
-                STR.orog,
-                STR.orog_gsl,
-                STR.schism,
-                STR.sfc_climo_gen,
-                STR.shave,
-                STR.ungrib,
-                STR.upp,
-                STR.upp_assets,
-                STR.ww3,
-            ]
+            x: partial(_dispatch_to_driver, x) for x in DRIVERS
         }
         modes = {**tools, **drivers}
-        sys.exit(0 if modes[args[STR.mode]](args) else 1)
+        mode = args[STR.mode]
+        success = modes[mode](args)
+        status = {
+            True: Status.success,
+            False: Status.notready if mode in [*DRIVERS, STR.execute] else Status.failure,
+        }
+        sys.exit(status[success])
     except UWError as e:
         for line in str(e).split("\n"):
             log.error(line)
-        sys.exit(1)
+        sys.exit(Status.failure)
 
 
 # Mode ecflow
@@ -458,6 +475,7 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to driver config block")
+    _add_arg_partial(optional)
     return {STR.execute: _add_args_verbosity(optional)}
 
 
@@ -481,7 +499,11 @@ def _dispatch_execute(args: Args) -> bool:
         batch=args[STR.batch],
         stdin_ok=True,
     )
-    return bool(node)
+    if node is None:
+        return False
+    if args[STR.partial]:
+        return True
+    return node.ready
 
 
 # Mode fs
@@ -1097,6 +1119,14 @@ def _add_arg_output_dir(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_partial(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.partial),
+        action="store_true",
+        help="Treat partial execution as success",
+    )
+
+
 def _add_arg_port(group: Group) -> None:
     group.add_argument(
         _switch(STR.port),
@@ -1317,7 +1347,7 @@ def _abort(msg: str) -> NoReturn:
     :param msg: The message to print.
     """
     print(msg, file=sys.stderr)
-    sys.exit(1)
+    sys.exit(Status.failure)
 
 
 def _add_args_verbosity(group: Group) -> ActionChecks:
@@ -1409,6 +1439,7 @@ def _add_subparser_for_driver_task(
         optional,
         helpmsg="Dot-separated path of keys to driver config block",
     )
+    _add_arg_partial(optional)
     _add_arg_schema_file(optional)
     return _add_args_verbosity(optional)
 
@@ -1495,18 +1526,21 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         return True
     if not args.get(STR.action):
         _abort("No %s specified" % STR.task.upper())
-    execute: Callable[..., bool] = module.execute
+    execute: Callable[..., Node] = module.execute
     kwargs = {
-        "task": args[STR.action],
-        "config": args[STR.config_file],
-        "dry_run": args[STR.dry_run],
-        "graph_file": args[STR.graph_file],
-        "key_path": args[STR.key_path],
-        "schema_file": args[STR.schema_file],
-        "stdin_ok": True,
+        STR.task: args[STR.action],
+        STR.config: args[STR.config_file],
+        STR.dry_run: args[STR.dry_run],
+        STR.graph_file: args[STR.graph_file],
+        STR.key_path: args[STR.key_path],
+        STR.schema_file: args[STR.schema_file],
+        STR.stdin_ok: True,
     }
     kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
-    return execute(**kwargs)
+    node = execute(**kwargs)
+    if args[STR.partial]:
+        return True
+    return node.ready
 
 
 def _formatter(prog: str) -> HelpFormatter:

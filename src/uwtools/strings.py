@@ -166,6 +166,7 @@ class _STR(_ValsMatchKeys):
     output_file: str = _
     output_format: str = _
     parent: str = _
+    partial: str = _
     path1: str = _
     path2: str = _
     platform: str = _
@@ -194,6 +195,7 @@ class _STR(_ValsMatchKeys):
     show_schema: str = _
     stacksize: str = _
     start: str = _
+    stdin_ok: str = _
     stdout: str = _
     step: str = _
     string: str = _
