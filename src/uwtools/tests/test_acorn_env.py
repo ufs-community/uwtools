@@ -3,12 +3,19 @@ Acorn (WCOSS2 test environment) smoke tests.
 
 Run these on Acorn after loading the workflow environment:
 
-    module use /path/to/uw-aigfs/modulefiles/
-    module load wflow_wcoss
+    module load intel
+    module load ve/uwtools/0.1
+    module load wgrib2/2.0.8
 
-Then:
+Then run using the PYTHONPATH workaround (pytest is not yet in ve/uwtools/0.1):
 
-    python -m pytest src/uwtools/tests/test_acorn_env.py -v
+    PYTHONPATH=/apps/prod/ve/intel/19.1.3.304/python/3.12.0/mag/7.0/lib/python3.12/site-packages:/apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/0.1/lib/python3.12/site-packages \\
+        python3 -m pytest src/uwtools/tests/test_acorn_env.py -v
+
+NOTE: The PYTHONPATH workaround is needed because pytest is not installed in
+ve/uwtools/0.1. It borrows pytest from the mag/7.0 VE while keeping the
+uwtools/0.1 packages (iotaa, uwtools, etc.) active. Bongi has been asked to
+add pytest to ve/uwtools/0.1 to eliminate this workaround.
 
 These tests verify that the venv, uwtools version, and key dependencies
 are functional before attempting a live workflow run on Acorn/WCOSS2.
@@ -28,9 +35,9 @@ uwtools versions:
 
 Python versions:
   - System Python on WCOSS2: 3.8.6  (DO NOT USE — ecflow is compiled against this)
-  - Venv target: 3.12+ (confirm exact version via `module avail python` on Acorn)
-  - uw-aigfs environment.yml: 3.14.*  (may be aspirational — reconcile with WCOSS2 avail)
-  ACTION: Run `python --version` in the loaded venv and record the actual version here.
+  - Venv actual version (confirmed 2026-07-27): Python 3.12.0
+    Source: /apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/0.1/bin/python3
+  - uw-aigfs environment.yml: 3.14.*  (aspirational — reconcile with WCOSS2 avail)
 
 ecflow versions:
   - WCOSS2 system ecflow: 5.6.x  (Python 3.8.6 bindings)
@@ -38,6 +45,12 @@ ecflow versions:
   RESOLUTION (Phase 2 Task 2): Pre-generate suite .def on Ursa (ecflow 5.15.x) and
   commit it. On WCOSS2 use `ecflow_client --load` directly — bypassing uw ecflow realize.
   The ecflow Python bindings are NOT needed in the runtime venv for the NRT demo.
+
+wgrib2 versions:
+  - wgrib2/3.1.1: module exists but spack install is EMPTY — binary not found on disk.
+    Path registered: /apps/spack/wgrib2/3.1.1/intel/19.1.3.304/.../bin (does not exist)
+  - wgrib2/2.0.8: WORKING — binary at /apps/ops/prod/libs/intel/19.1.3.304/wgrib2/2.0.8/bin/wgrib2
+    USE THIS VERSION until 3.1.1 is fixed by WCOSS2 admins.
 
 ===== KNOWN ISSUES =====
 
@@ -56,20 +69,56 @@ ecflow versions:
   4. load_wflow_modules.sh: still hardcodes `conda activate aigfs`. Needs to be
      replaced with `module load wflow_wcoss` for WCOSS2 (Phase 2 Task 3).
 
-===== TODO: RUN ONCE ACORN IS BACK ONLINE =====
+  5. numpy/netCDF4 binary compatibility warning: test_netcdf4_import emits:
+     RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility.
+     Expected 16 from C header, got 96 from PyObject
+     Not a test failure, but flagged for Bongi — may indicate netCDF4 was compiled
+     against a different numpy than what is in the VE.
 
-  [ ] Run: python -m pytest src/uwtools/tests/test_acorn_env.py -v
-  [ ] Record actual Python version available in the loaded venv
-  [ ] Verify test_ecflow_import is correctly xfail (not unexpectedly passing)
-  [ ] Confirm qsub is on PATH (test_pbs_scheduler_available)
-  [ ] Confirm wgrib2 is on PATH after module load (test_wgrib2_binary)
-  [ ] Confirm `uw` is on PATH from the venv (test_uw_cli_available)
-  [ ] Attempt graphcast install; update test_graphcast_import accordingly
-  [ ] Run test_uwtools_config_realize to confirm Jinja2 rendering works
+  6. pytest not in ve/uwtools/0.1: must use PYTHONPATH workaround to borrow pytest
+     from mag/7.0 VE. Bongi has been asked to add pytest to ve/uwtools/0.1.
+
+  7. wgrib2/3.1.1 spack install is empty: use wgrib2/2.0.8 until fixed by WCOSS2 admins.
+
+===== SMOKE TEST RESULTS — 2026-07-27 =====
+
+  Environment:
+    Node:          alogin01 (Acorn / WCOSS2)
+    Modules:       intel, ve/uwtools/0.1, wgrib2/2.0.8
+    Python:        3.12.0 (/apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/0.1/bin/python3)
+    uwtools:       2.16.0 build 0
+    pytest:        9.0.3 (borrowed from mag/7.0 VE via PYTHONPATH workaround)
+
+  Results:
+    PASSED  (12): test_python_version, test_uwtools_version, test_uwtools_schema_loading,
+                  test_xarray_import, test_netcdf4_import, test_grib2io_import,
+                  test_wgrib2_binary, test_pbs_scheduler_available, test_uw_cli_available,
+                  test_uw_cli_version, test_uwtools_config_realize,
+                  test_ecflow_cli_import_blocker_v217plus
+    XFAIL   (2):  test_ecflow_import (expected — ecflow/Python 3.8.6 mismatch)
+                  test_graphcast_import (expected — graphcast not yet installed)
+    FAILED  (0):  none
+
+  Warnings:
+    - test_netcdf4_import: RuntimeWarning: numpy.ndarray size changed, may indicate
+      binary incompatibility. Expected 16 from C header, got 96 from PyObject.
+      Not a failure. Flagged for Bongi (see Known Issue 5).
+
+  Outstanding requests to Bongi (GDIT):
+    - Add to ve/uwtools/0.1: pytest, xarray (2026.4.*), netCDF4 (1.7.*), grib2io (2.7.*)
+    - Fix or confirm wgrib2/3.1.1 spack install (currently empty); confirm 2.0.8 is OK
+    - Confirm whether numpy/netCDF4 binary compatibility warning is expected in this VE
 
 ===== TODO: AFTER v2.16.0 APPROVAL =====
 
-  [ ] pip install --no-deps uwtools==2.16.0 into aigfs venv; run smoke tests
+  [x] Run: python -m pytest src/uwtools/tests/test_acorn_env.py -v  (done 2026-07-27)
+  [x] Record actual Python version available in the loaded venv  (Python 3.12.0)
+  [x] Verify test_ecflow_import is correctly xfail (not unexpectedly passing)  (confirmed)
+  [x] Confirm qsub is on PATH (test_pbs_scheduler_available)  (confirmed: /opt/pbs/bin/qsub)
+  [x] Confirm wgrib2 is on PATH after module load (test_wgrib2_binary)  (confirmed: wgrib2/2.0.8)
+  [x] Confirm `uw` is on PATH from the venv (test_uw_cli_available)  (confirmed)
+  [x] Run test_uwtools_config_realize to confirm Jinja2 rendering works  (PASSED)
+  [ ] Attempt graphcast install; update test_graphcast_import accordingly
   [ ] Begin v2.18.* approval process (uw-aigfs now requires 2.18.*, not 2.16.0)
   [ ] Build ush/wcoss_config.yaml (fork default_config.yaml with WCOSS2 paths)
   [ ] Build modulefiles/wflow_wcoss (Lmod/TCL; no conda; no ecflow in venv)
@@ -141,7 +190,7 @@ def test_ecflow_import():
     import ecflow  # noqa: PLC0415
 
     version = getattr(ecflow, "__version__", "unknown")
-    print(f"\necflow imported successfully \u2014 version: {version}")
+    print(f"\necflow imported successfully — version: {version}")
 
 
 # ─── Runtime Dependencies ────────────────────────────────────────────────────
@@ -198,21 +247,24 @@ def test_graphcast_import():
 
 def test_wgrib2_binary():
     """
-    wgrib2 must be on PATH \u2014 loaded via module load wgrib2 inside wflow_wcoss.
+    wgrib2 must be on PATH — loaded via module load wgrib2 inside wflow_wcoss.
 
     wgrib2 is called directly by uw-aigfs post scripts and by generate_ics.py
     for GRIB2 variable extraction.
+
+    NOTE: Use wgrib2/2.0.8 — wgrib2/3.1.1 spack install is currently empty on Acorn.
     """
     wgrib2_path = shutil.which("wgrib2")
     assert wgrib2_path is not None, (
         "wgrib2 not found on PATH. "
-        "Check that the wflow_wcoss modulefile includes 'module load wgrib2'."
+        "Check that the wflow_wcoss modulefile includes 'module load wgrib2'. "
+        "Use wgrib2/2.0.8 — wgrib2/3.1.1 spack install is currently empty on Acorn."
     )
 
 
 def test_pbs_scheduler_available():
     """
-    qsub must be on PATH \u2014 WCOSS2 uses PBS Pro, not SLURM.
+    qsub must be on PATH — WCOSS2 uses PBS Pro, not SLURM.
 
     Also confirms that uw-aigfs wcoss_config.yaml must set platform.scheduler: pbs
     (not slurm). Verify the exact scheduler string uwtools expects by checking
@@ -222,7 +274,7 @@ def test_pbs_scheduler_available():
     assert qsub_path is not None, (
         "qsub not found on PATH. "
         "Verify PBS Pro is available on this Acorn node. "
-        "Also confirm the scheduler string uwtools expects for PBS \u2014 check "
+        "Also confirm the scheduler string uwtools expects for PBS — check "
         "uwtools/scheduler.py for the registered scheduler identifiers."
     )
 
@@ -251,7 +303,7 @@ def test_uw_cli_version():
 
     In v2.16.0 the CLI does NOT import ecflow, so this should work even though
     ecflow is not importable from the venv. If this fails with an ImportError for
-    ecflow, the wrong uwtools version is installed \u2014 check with `pip show uwtools`.
+    ecflow, the wrong uwtools version is installed — check with `pip show uwtools`.
     """
     result = subprocess.run(
         ["uw", "--version"],
@@ -314,7 +366,7 @@ def test_ecflow_cli_import_blocker_v217plus():
     In uwtools v2.17+, cli.py does `import uwtools.api.ecflow` at the top level,
     and uwtools/ecflow.py does `from ecflow import Defs, Suite, ...` at the top
     level. On WCOSS2, ecflow is compiled against Python 3.8.6 and cannot be
-    imported from a Python 3.12+ venv \u2014 so the `uw` CLI will fail entirely.
+    imported from a Python 3.12+ venv — so the `uw` CLI will fail entirely.
 
     v2.16.0 does NOT have this problem (ecflow_tool was added in 2.17.0).
 
@@ -338,6 +390,6 @@ def test_ecflow_cli_import_blocker_v217plus():
         assert not ecflow_leaked, (
             f"Importing '{mod_name}' pulled in ecflow. "
             "This means uwtools eagerly imports ecflow at module load time. "
-            "On WCOSS2 this will make ALL uwtools calls fail \u2014 not just ecflow_tool. "
+            "On WCOSS2 this will make ALL uwtools calls fail — not just ecflow_tool. "
             "Raise with uw-tools team before requesting 2.17+ WCOSS2 approval."
         )
