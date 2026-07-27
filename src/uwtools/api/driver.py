@@ -16,6 +16,7 @@ from uwtools.drivers.driver import (
     DriverCycleLeadtimeBased,
     DriverTimeInvariant,
 )
+from uwtools.drivers.stager import FileStager
 
 
 def yaml_keys_to_classes() -> dict[str, type]:
@@ -46,5 +47,6 @@ __all__ = [
     "DriverCycleBased",
     "DriverCycleLeadtimeBased",
     "DriverTimeInvariant",
+    "FileStager",
     "yaml_keys_to_classes",
 ]
