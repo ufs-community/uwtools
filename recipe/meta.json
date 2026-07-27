@@ -24,7 +24,7 @@
       "python-dateutil >=2.9,<2.10",
       "pyyaml >=6.0,<6.1",
       "requests >=2.32,<2.35",
-      "ruff ==0.15.*",
+      "ruff ==0.16.*",
       "setuptools",
       "types-PyYAML",
       "types-jsonschema",
