@@ -38,7 +38,7 @@ test:
     - pytest-randomly 3.15.*
     - pytest-xdist 3.8.*
     - python {{ pymin }}
-    - ruff 0.15.*
+    - ruff 0.16.*
     - types-PyYAML
     - types-jsonschema
     - types-python-dateutil
