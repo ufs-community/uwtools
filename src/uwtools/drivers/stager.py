@@ -10,7 +10,7 @@ from uwtools.strings import STR
 
 class FileStager:
     """
-    An abstract base class for tasks that stage files.
+    A mixin class providing tasks to stage files.
     """
 
     @collection
