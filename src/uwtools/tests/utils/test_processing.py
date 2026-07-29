@@ -50,12 +50,13 @@ def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
 def test_utils_processing_run_shell_cmd__success(
     executable, log_output, quiet, taskname, tmp_path, uwcaplog
 ):
+    rundir = tmp_path / "run"
     cmd = "echo hello $FOO"
     if quiet:
         log.setLevel(logging.INFO)
     success, _ = processing.run_shell_cmd(
         cmd=cmd,
-        cwd=tmp_path,
+        cwd=rundir,
         env={"FOO": "bar"},
         log_output=log_output,
         taskname=taskname,
