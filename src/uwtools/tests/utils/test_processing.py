@@ -69,12 +69,12 @@ def test_utils_processing_run_shell_cmd__success(
     elif log_output:
         pre = f"[{taskname}] " if taskname else ""
         expected = """
-        %sRunning: %s
-          in directory
-            %s
-          with environment
-            FOO=bar
-        %sOutput:
-        %s  hello bar
-        """ % (pre, cmd, rundir, pre, pre)
+        {pre}Running: {cmd}
+        {pre}  in directory
+        {pre}    {rundir}
+        {pre}  with environment
+        {pre}    FOO=bar
+        {pre}Output:
+        {pre}  hello bar
+        """.format(pre=pre, cmd=cmd, rundir=rundir)
         assert uwcaplog.text.strip() == dedent(expected).strip()
