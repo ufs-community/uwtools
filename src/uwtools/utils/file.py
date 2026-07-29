@@ -16,7 +16,7 @@ from uwtools.logging import log
 from uwtools.strings import FORMAT
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterator
 
 
 class StdinProxy:
@@ -43,6 +43,21 @@ class StdinProxy:
 @cache
 def _stdinproxy() -> StdinProxy:
     return StdinProxy()
+
+
+@contextmanager
+def atomic(path: Path) -> Iterator[Path]:
+    """
+    Yields a path to a temporary file, finally renaming that file to ``path``.
+
+    :param path: The final path.
+    :yields: The path to a temporary file.
+    :yieldtype: Path.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = Path("%s.tmp" % path)
+    yield tmp
+    tmp.rename(path)
 
 
 def get_config_format(path: str | Path | None, desc: str | None = None) -> str:

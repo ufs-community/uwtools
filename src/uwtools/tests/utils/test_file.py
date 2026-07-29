@@ -45,6 +45,18 @@ def test__stdinproxy():
         assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
+def test_atomic(tmp_path):
+    path = tmp_path / "foo"
+    with file.atomic(path) as f:
+        assert f == path.with_suffix(".tmp")
+        assert not f.is_file()
+        f.touch()
+        assert f.is_file()
+        assert not path.is_file()
+    assert not f.is_file()
+    assert path.is_file()
+
+
 @mark.parametrize(
     ("ext", "file_type"),
     {
