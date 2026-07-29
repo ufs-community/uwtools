@@ -76,5 +76,5 @@ def test_utils_processing_run_shell_cmd__success(
             FOO=bar
         %sOutput:
         %s  hello bar
-        """ % (pre, cmd, tmp_path, pre, pre)
+        """ % (pre, cmd, rundir, pre, pre)
         assert uwcaplog.text.strip() == dedent(expected).strip()

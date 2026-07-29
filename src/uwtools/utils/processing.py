@@ -4,6 +4,7 @@ Utilities for interacting with external processes.
 
 from __future__ import annotations
 
+from pathlib import Path
 from subprocess import PIPE, STDOUT, Popen
 from typing import TYPE_CHECKING
 
@@ -11,7 +12,6 @@ from uwtools.logging import INDENT, log
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
 
 def run_shell_cmd(
@@ -61,6 +61,8 @@ def run_shell_cmd(
     if cwd:
         logfunc("  in directory")
         logfunc("    %s", cwd)
+        cwd = Path(cwd)
+        cwd.mkdir(parents=True, exist_ok=True)
     if env:
         logfunc("  with environment")
         for k in sorted(env):
