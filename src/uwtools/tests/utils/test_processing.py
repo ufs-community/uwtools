@@ -50,12 +50,13 @@ def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
 def test_utils_processing_run_shell_cmd__success(
     executable, log_output, quiet, taskname, tmp_path, uwcaplog
 ):
+    rundir = tmp_path / "run"
     cmd = "echo hello $FOO"
     if quiet:
         log.setLevel(logging.INFO)
     success, _ = processing.run_shell_cmd(
         cmd=cmd,
-        cwd=tmp_path,
+        cwd=rundir,
         env={"FOO": "bar"},
         log_output=log_output,
         taskname=taskname,
@@ -68,12 +69,12 @@ def test_utils_processing_run_shell_cmd__success(
     elif log_output:
         pre = f"[{taskname}] " if taskname else ""
         expected = """
-        %sRunning: %s
-          in directory
-            %s
-          with environment
-            FOO=bar
-        %sOutput:
-        %s  hello bar
-        """ % (pre, cmd, tmp_path, pre, pre)
+        {pre}Running: {cmd}
+        {pre}  in directory
+        {pre}    {rundir}
+        {pre}  with environment
+        {pre}    FOO=bar
+        {pre}Output:
+        {pre}  hello bar
+        """.format(pre=pre, cmd=cmd, rundir=rundir)
         assert uwcaplog.text.strip() == dedent(expected).strip()
