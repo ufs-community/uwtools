@@ -59,14 +59,14 @@ def run_shell_cmd(
     logfunc = log.debug if quiet else log.info
     logfunc("%sRunning: %s", pre, cmd)
     if cwd:
-        logfunc("  in directory")
-        logfunc("    %s", cwd)
+        logfunc("%s  in directory", pre)
+        logfunc("%s    %s", pre, cwd)
         cwd = Path(cwd)
         cwd.mkdir(parents=True, exist_ok=True)
     if env:
-        logfunc("  with environment")
+        logfunc("%s  with environment", pre)
         for k in sorted(env):
-            logfunc("    %s=%s", k, env[k])
+            logfunc("%s    %s=%s", pre, k, env[k])
     kwargs: dict = dict(
         cwd=cwd,
         encoding="utf=8",
