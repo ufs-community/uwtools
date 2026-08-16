@@ -1073,4 +1073,4 @@ def test_cli__timedelta_from_str(capsys):
 
 
 def test_cli__version():
-    assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
+    assert re.match(r"version \d+\.\d+\.\d+(?:\.dev\d+)? build \d+", cli._version())
