@@ -38,9 +38,9 @@ def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
     check = lambda msg: not logged(msg) if quiet else logged
     assert check("Running:")
     assert check("  %s" % cmd)
-    assert check("Failed with status: 2")
-    assert check("Output:")
-    assert check("  expr: division by zero")
+    assert logged("Failed with status: 2")
+    assert logged("Output:")
+    assert logged("  expr: division by zero")
 
 
 @mark.parametrize("executable", ["/bin/bash", None])
