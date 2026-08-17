@@ -70,6 +70,7 @@ class _ROCOTO(_ValsMatchKeys):
     attrs: str = _
     command: str = _
     cores: str = _
+    cycle: str = _
     cycledef: str = _
     cycledefs: str = _
     cyclestr: str = _
@@ -100,6 +101,7 @@ class _ROCOTO(_ValsMatchKeys):
     rewind: str = _
     sh: str = _
     shared: str = _
+    spec: str = _
     stderr: str = _
     stdout: str = _
     streq: str = _
@@ -107,6 +109,7 @@ class _ROCOTO(_ValsMatchKeys):
     tag: str = _
     task: str = _
     taskdep: str = _
+    taskname: str = _
     tasks: str = _
     taskvalid: str = _
     timedep: str = _

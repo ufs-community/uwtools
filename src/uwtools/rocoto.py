@@ -163,8 +163,8 @@ class _RocotoIterator:
     @property
     def _query_data(self) -> dict:
         return {
-            "taskname": self._task,
-            "cycle": int(self._cycle.replace(tzinfo=timezone.utc).timestamp()),
+            ROCOTO.taskname: self._task,
+            ROCOTO.cycle: int(self._cycle.replace(tzinfo=timezone.utc).timestamp()),
         }
 
     @property
@@ -253,7 +253,9 @@ class _RocotoXML:
         :return: The child element.
         """
         config = config if isinstance(config, list) else [config]
-        cyclestr = lambda x: E.cyclestr(x["cyclestr"]["value"], **x["cyclestr"].get("attrs", {}))
+        cyclestr = lambda x: E.cyclestr(
+            x[ROCOTO.cyclestr][ROCOTO.value], **x[ROCOTO.cyclestr].get(ROCOTO.attrs, {})
+        )
         items = [cyclestr(x) if isinstance(x, dict) else str(x) for x in [tag, *config]]
         child: _Element = E(*items)
         e.append(child)
@@ -477,7 +479,7 @@ class _RocotoXML:
         """
         for item in config:
             cycledef = SubElement(e, ROCOTO.cycledef)
-            cycledef.text = item["spec"]
+            cycledef.text = item[ROCOTO.spec]
             self._set_attrs(cycledef, item)
 
     def _add_workflow_log(self, e: _Element, config: dict) -> None:
