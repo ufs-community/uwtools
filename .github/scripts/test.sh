@@ -11,7 +11,7 @@ run_tests() {
   set -x
   git clean -dfx
   pip install --editable src # sets new Python version in entry-point scripts
-  make test && make test-nb
+  make test && make notebooks && make test-nb
   status=$?
   set +x
   conda deactivate
