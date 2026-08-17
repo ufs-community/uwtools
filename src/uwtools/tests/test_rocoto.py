@@ -284,7 +284,11 @@ class TestRocotoIterator:
         assert instance._state_msg == "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"
 
     def test_rocoto__RocotoIterator__states(self, instance):
-        assert list(instance._states.keys()) == ["active", "inactive", "transient"]
+        assert list(instance._states.keys()) == [
+            rocoto._RocotoIterator.State.ACTIVE,
+            rocoto._RocotoIterator.State.INACTIVE,
+            rocoto._RocotoIterator.State.TRANSIENT,
+        ]
 
 
 class TestRocotoXML:
