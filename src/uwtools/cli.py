@@ -219,8 +219,6 @@ def _dispatch_ecflow_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     return uwtools.api.ecflow.realize(
         config=args[STR.config_file],
         output_path=args.get(STR.output_dir),
@@ -235,8 +233,6 @@ def _dispatch_ecflow_server(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     return uwtools.api.ecflow.server(
         config=args.get(STR.config_file),
         port=args.get(STR.port),
@@ -252,8 +248,6 @@ def _dispatch_ecflow_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     return uwtools.api.ecflow.validate(
         config=args[STR.config_file],
         stdin_ok=True,
@@ -1141,8 +1135,6 @@ def _add_arg_partial(group: Group) -> None:
 
 
 def _add_arg_port(group: Group) -> None:
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     group.add_argument(
         _switch(STR.port),
         help=(
