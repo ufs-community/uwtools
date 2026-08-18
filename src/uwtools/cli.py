@@ -41,20 +41,12 @@ from uwtools.utils.file import get_config_format, resource_path
 if TYPE_CHECKING:
     from iotaa import Node
 
+_ECFLOW_AVAILABLE = True
+try:
+    import uwtools.api.ecflow
+except ImportError:
+    _ECFLOW_AVAILABLE = False
 
-def _ecflow_importable() -> bool:
-    """
-    Check if the ecflow package is importable.
-    """
-    try:
-        import_module("uwtools.api.ecflow")
-    except ImportError:
-        return False
-    else:
-        return True
-
-
-_ECFLOW_AVAILABLE = _ecflow_importable()
 
 DRIVERS = [
     STR.cdeps,

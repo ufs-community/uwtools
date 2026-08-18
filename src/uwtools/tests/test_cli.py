@@ -3,6 +3,7 @@ import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from datetime import timedelta
+from importlib import reload
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, patch
@@ -929,13 +930,15 @@ def test_cli__dispatch_to_driver_show_schema(capsys):
 
 
 def test_cli__ecflow_importable():
-    with patch.object(cli, "import_module"):
-        assert cli._ecflow_importable()
+    reload(cli)
+    assert cli._ECFLOW_AVAILABLE is True
 
 
 def test_cli__ecflow_importable_fail():
-    with patch.object(cli, "import_module", side_effect=ImportError):
-        assert not cli._ecflow_importable()
+    with patch.dict(sys.modules, {"uwtools.api.ecflow": None}):
+        reload(cli)
+        assert cli._ECFLOW_AVAILABLE is False
+    reload(cli)
 
 
 def test_cli_main_ecflow_unavailable():
