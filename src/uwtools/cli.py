@@ -87,7 +87,6 @@ FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
 
-
 Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
 ModeChecks = dict[str, ActionChecks]
