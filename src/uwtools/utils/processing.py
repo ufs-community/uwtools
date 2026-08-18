@@ -83,13 +83,10 @@ def run_shell_cmd(
     if callback:
         callback(proc)
     output, _ = proc.communicate()  # blocking call
-    if proc.returncode == 0:
-        success = True
-    else:
-        if not quiet:
-            log.error("%sFailed with status: %s", pre, proc.returncode)
-            logfunc = log.error
-        success = False
+    success = proc.returncode == 0
+    if not success:
+        logfunc = log.error  # log remaining messages as errors
+        logfunc("%sFailed with status: %s", pre, proc.returncode)
     if output and (log_output or not success):
         logfunc("%sOutput:", pre)
         for line in output.strip().split("\n"):
