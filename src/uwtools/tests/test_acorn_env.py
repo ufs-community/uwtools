@@ -94,6 +94,14 @@ wgrib2 versions:
   7. wgrib2/3.1.1: CONFIRMED a stale stub by GDIT (2026-08-04), never officially
      installed. Use wgrib2/2.0.8 (official; also on Cactus/Dogwood).
 
+  8. `uw fs` link/copy CLI config shape (2.16.0): the standalone `uw fs link` /
+     `uw fs copy` commands expect a FLAT top-level `destination: source` map, with
+     `--target-dir` supplying the root for relative destinations. They do NOT accept
+     a top-level `link:` / `copy:` block, nor a `config:` wrapper — both raise
+     "is not of type 'fs_src'". (The `link:` / `copy:` block form is only valid
+     INSIDE a driver config such as `files_to_hardlink:`, which is a different code
+     path.) Documented here so it doesn't have to be re-derived for uw-aigfs staging.
+
 ===== SMOKE TEST RESULTS — 2026-07-27 =====
 
   Environment:
@@ -174,12 +182,45 @@ wgrib2 versions:
     - wgrib2/3.1.1 resolved: confirmed a stale stub; 2.0.8 is the official version.
     - ecflow module now loads at shell level but import still fails (XFAIL) — good.
 
-  Also validated 2026-08-18 (functional, beyond the smoke suite):
-    - `uw config realize` fully renders a real WCOSS2 config on Acorn:
-      `uw config realize --input-file ush/wcoss_config.yaml --values-needed` -> clean
+===== CLI FUNCTIONAL VALIDATION — 2026-08-18 (beyond the smoke suite) =====
+
+  Ran the uwtools CLI primitives directly on Acorn (alogin01) with uwtools 2.16.0
+  in ve/uwtools/0.1. These exercise the actual `uw` subcommands uw-aigfs relies on,
+  which the in-process smoke tests above do not cover. `uw execute` (run/iterate a
+  driver) is intentionally DEFERRED to the real uw-aigfs workflow run — it requires
+  the uw-aigfs driver modules, staged GFS input, and (for the forecast) the model
+  weights present on the machine.
+
+  uw config realize:
+    - `uw config realize --input-file ush/wcoss_config.yaml --values-needed` -> clean
       (no unrendered keys/values); full render exits 0 with no leftover Jinja2.
-      Confirms uwtools 2.16.0 renders real WCOSS2 configs end-to-end, not just the
-      synthetic test_uwtools_config_realize case.
+    - Confirms 2.16.0 renders a REAL WCOSS2 config end-to-end, not just the synthetic
+      test_uwtools_config_realize case.
+
+  uw config validate:  PASS (positive + negative)
+    - Real driver schema vs. the overlay: validator ran and correctly reported
+      "'aigfs_ics' is a required property" — i.e. the top-level overlay is not a full
+      driver config (expected mismatch, not a bug; proves validate executes).
+    - mini_good.yaml (has platform.scheduler + account) -> "Schema validation
+      succeeded for config".
+    - mini_bad.yaml (missing account) -> "'account' is a required property", reported
+      "at platform:" — correct location. Confirms validate catches errors precisely.
+
+  uw fs makedirs:  PASS
+    - Validated against internal schema, created /tmp/uw_fs_test/{a,b}, "Ready".
+
+  uw fs link:  PASS
+    - Flat map (linked.txt: <src>) + --target-dir /tmp/uw_fs_test -> symlink created,
+      "File links: Ready".
+
+  uw fs copy:  PASS
+    - Flat map (copied.txt: <src>) + --target-dir /tmp/uw_fs_test -> real copy created
+      (17 bytes, contents intact), "File copies: Ready".
+
+  See Known Issue 8 for the exact `uw fs` link/copy config shape on 2.16.0.
+
+  Net: 2.16.0 CLI primitives realize / validate / fs (makedirs, link, copy) all
+  confirmed working on Acorn. Only `uw execute` remains, deferred to the real run.
 
   Still outstanding to Bongi (GDIT):
     - Add pytest to ve/uwtools/0.1 (approved 2026-07-28; not in 2026-08-04 build).
@@ -198,6 +239,9 @@ wgrib2 versions:
   [x] Confirm xarray/netCDF4/grib2io are NATIVE to the VE (not borrowed)  (confirmed 2026-08-06)
   [x] Confirm wgrib2 version question with GDIT  (2.0.8 official; 3.1.1 stale stub)
   [x] Functional: uw config realize against a real WCOSS2 config on Acorn  (clean render 2026-08-18)
+  [x] Functional: uw config validate (positive + negative) on Acorn  (PASS 2026-08-18)
+  [x] Functional: uw fs makedirs / link / copy on Acorn  (all PASS 2026-08-18)
+  [ ] Functional: uw execute (run/iterate a driver) — deferred to the real uw-aigfs run
   [ ] Get pytest added to ve/uwtools/0.1 (drop the PYTHONPATH workaround)
   [ ] Begin v2.18.* approval process (uw-aigfs now requires 2.18.*, not 2.16.0)
   [ ] Build modulefiles/wflow_wcoss (Lmod/TCL; no conda; no ecflow in venv)
