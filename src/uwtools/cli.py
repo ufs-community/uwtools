@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING, Any, NoReturn
 import uwtools.api
 import uwtools.api.config
 import uwtools.api.driver
-import uwtools.api.ecflow
 import uwtools.api.execute
 import uwtools.api.fs
 import uwtools.api.rocoto
@@ -41,6 +40,13 @@ from uwtools.utils.file import get_config_format, resource_path
 
 if TYPE_CHECKING:
     from iotaa import Node
+
+_ECFLOW_AVAILABLE = True
+try:
+    import uwtools.api.ecflow
+except ImportError:
+    _ECFLOW_AVAILABLE = False
+
 
 DRIVERS = [
     STR.cdeps,
@@ -111,8 +117,9 @@ def main() -> None:
             STR.fs: _dispatch_fs,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
-            STR.ecflow: _dispatch_ecflow,
         }
+        if _ECFLOW_AVAILABLE:
+            tools[STR.ecflow] = _dispatch_ecflow
         drivers: dict[str, Callable[..., bool]] = {
             x: partial(_dispatch_to_driver, x) for x in DRIVERS
         }
@@ -1565,12 +1572,13 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     tools = {
         STR.config: partial(_add_subparser_config, subparsers),
-        STR.ecflow: partial(_add_subparser_ecflow, subparsers),
         STR.execute: partial(_add_subparser_execute, subparsers),
         STR.fs: partial(_add_subparser_fs, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
         STR.template: partial(_add_subparser_template, subparsers),
     }
+    if _ECFLOW_AVAILABLE:
+        tools[STR.ecflow] = partial(_add_subparser_ecflow, subparsers)
     no_components: list[str] = []
     assets = {
         component: partial(_add_subparser_for_driver, component, subparsers)

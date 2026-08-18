@@ -7,6 +7,7 @@ import re
 import socket
 import sys
 from copy import deepcopy
+from importlib import reload
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
@@ -1208,3 +1209,11 @@ def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
     assert (ssl_dir / "server.crt").is_file()
     assert (ssl_dir / "dh2048.pem").is_file()
     assert logged("SSL certificate files written to %s" % ssl_dir)
+
+
+def test_ecflow_import_error():
+    with (
+        patch.dict(sys.modules, {"ecflow": None}),
+        raises(ImportError, match="ecFlow Python library could not be imported"),
+    ):
+        reload(ecflow)

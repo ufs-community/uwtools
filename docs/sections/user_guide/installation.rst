@@ -97,3 +97,7 @@ If you are using an app that has its own environment requirements that do not wo
 
       cd src/
       pip install .
+
+ .. note::
+   
+   Since ecFlow is not currently published to PyPI, it cannot be installed as a pip dependency. Thus, the ``ecflow`` mode is available only when ecFlow is separately available.

@@ -16,21 +16,29 @@ from threading import Event, Thread, current_thread
 from time import sleep
 from typing import TYPE_CHECKING, cast
 
-from ecflow import (  # type: ignore[import-untyped]
-    Client,
-    Defs,
-    DState,
-    Family,
-    Late,
-    Node,
-    RepeatDate,
-    RepeatDateTime,
-    RepeatDay,
-    RepeatEnumerated,
-    RepeatInteger,
-    Suite,
-    Task,
-)
+try:
+    from ecflow import (  # type: ignore[import-untyped]
+        Client,
+        Defs,
+        DState,
+        Family,
+        Late,
+        Node,
+        RepeatDate,
+        RepeatDateTime,
+        RepeatDay,
+        RepeatEnumerated,
+        RepeatInteger,
+        Suite,
+        Task,
+    )
+except ImportError as e:
+    msg = (
+        "The ecFlow Python library could not be imported. To use ecFlow functionality, ensure "
+        "that the ecFlow executables are on PATH and the ecFlow Python libraries are on "
+        "PYTHONPATH. "
+    )
+    raise ImportError(msg) from e
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal

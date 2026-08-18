@@ -3,6 +3,7 @@ import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from datetime import timedelta
+from importlib import reload
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, patch
@@ -926,6 +927,29 @@ def test_cli__dispatch_to_driver_show_schema(capsys):
     }
     """
     assert capsys.readouterr().out == dedent(expected).lstrip()
+
+
+def test_cli__ecflow_importable():
+    reload(cli)
+    assert cli._ECFLOW_AVAILABLE is True
+
+
+def test_cli__ecflow_importable_fail():
+    with patch.dict(sys.modules, {"uwtools.api.ecflow": None}):
+        reload(cli)
+        assert cli._ECFLOW_AVAILABLE is False
+    reload(cli)
+
+
+def test_cli_main_ecflow_unavailable():
+    with (
+        patch.object(cli, "_ECFLOW_AVAILABLE", False),
+        patch.object(cli, "_dispatch_template", return_value=True),
+        patch.object(sys, "argv", ["uw", "template", "render"]),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    assert e.value.code == 0
 
 
 @mark.parametrize("quiet", [False, True])
