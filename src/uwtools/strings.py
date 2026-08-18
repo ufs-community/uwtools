@@ -60,6 +60,67 @@ class _FORMAT(_ValsMatchKeys):
 
 
 @dataclass(frozen=True)
+class _ROCOTO(_ValsMatchKeys):
+    """
+    Rocoto strings.
+    """
+
+    account: str = _
+    and_: str = "and"
+    attrs: str = _
+    command: str = _
+    cores: str = _
+    cycle: str = _
+    cycledef: str = _
+    cycledefs: str = _
+    cyclestr: str = _
+    datadep: str = _
+    deadline: str = _
+    dependency: str = _
+    entities: str = _
+    envar: str = _
+    envars: str = _
+    exclusive: str = _
+    hangdependency: str = _
+    jobname: str = _
+    join: str = _
+    log: str = _
+    memory: str = _
+    metatask: str = _
+    metataskdep: str = _
+    name: str = _
+    nand: str = _
+    native: str = _
+    nodes: str = _
+    nodesize: str = _
+    nor: str = _
+    not_: str = "not"
+    or_: str = "or"
+    partition: str = _
+    queue: str = _
+    rewind: str = _
+    sh: str = _
+    shared: str = _
+    spec: str = _
+    stderr: str = _
+    stdout: str = _
+    streq: str = _
+    strneq: str = _
+    tag: str = _
+    task: str = _
+    taskdep: str = _
+    taskname: str = _
+    tasks: str = _
+    taskvalid: str = _
+    timedep: str = _
+    value: str = _
+    var: str = _
+    walltime: str = _
+    workflow: str = _
+    xor: str = _
+
+
+@dataclass(frozen=True)
 class _STR(_ValsMatchKeys):
     """
     General strings.
@@ -238,4 +299,5 @@ class _STR(_ValsMatchKeys):
 # Public
 
 FORMAT = _FORMAT()
+ROCOTO = _ROCOTO()
 STR = _STR()

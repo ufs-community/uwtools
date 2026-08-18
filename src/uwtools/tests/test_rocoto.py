@@ -228,7 +228,9 @@ class TestRocotoIterator:
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             assert instance._run() is True
         run_shell_cmd.assert_called_once_with(
-            "rocotorun -d %s -w %s" % (instance._database, instance._workflow), quiet=True
+            "rocotorun -d %s -w %s -t %s"
+            % (instance._database, instance._workflow, instance._task),
+            quiet=True,
         )
         assert logged("Iterating workflow")
 
@@ -284,7 +286,11 @@ class TestRocotoIterator:
         assert instance._state_msg == "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"
 
     def test_rocoto__RocotoIterator__states(self, instance):
-        assert list(instance._states.keys()) == ["active", "inactive", "transient"]
+        assert list(instance._states.keys()) == [
+            rocoto._RocotoIterator.State.ACTIVE,
+            rocoto._RocotoIterator.State.INACTIVE,
+            rocoto._RocotoIterator.State.TRANSIENT,
+        ]
 
 
 class TestRocotoXML:
