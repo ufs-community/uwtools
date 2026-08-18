@@ -46,15 +46,11 @@ def _ecflow_importable() -> bool:
     """
     Check if the ecflow package is importable.
     """
-    try:
-        import_module("uwtools.api.ecflow")
-    except ImportError:
-        return False
-    else:
-        return True
-
-
-_ECFLOW_AVAILABLE = _ecflow_importable()
+_ECFLOW_AVAILABLE = True
+try:
+    import uwtools.api.ecflow
+except ImportError:
+     _ECFLOW_AVAILABLE = False
 
 DRIVERS = [
     STR.cdeps,

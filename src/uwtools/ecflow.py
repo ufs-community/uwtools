@@ -36,8 +36,7 @@ except ImportError as e:
     msg = (
         "The ecFlow Python library could not be imported. To use ecFlow functionality, ensure "
         "that the ecFlow executables are on PATH and the ecFlow Python libraries are on "
-        "PYTHONPATH. For example, create an ecflow conda environment and add the appropriate "
-        "subdirectories of that environment to PATH and PYTHONPATH."
+        "PYTHONPATH. "
     )
     raise ImportError(msg) from e
 
