@@ -41,6 +41,21 @@ from uwtools.utils.file import get_config_format, resource_path
 if TYPE_CHECKING:
     from iotaa import Node
 
+
+def _ecflow_importable() -> bool:
+    """
+    Check if the ecflow package is importable.
+    """
+    try:
+        import_module("uwtools.api.ecflow")
+    except ImportError:
+        return False
+    else:
+        return True
+
+
+_ECFLOW_AVAILABLE = _ecflow_importable()
+
 DRIVERS = [
     STR.cdeps,
     STR.chgres_cube,
@@ -72,20 +87,6 @@ FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
 
-
-def _ecflow_importable() -> bool:
-    """
-    Check if the ecflow package is importable.
-    """
-    try:
-        import uwtools.api.ecflow  # noqa: F401, PLC0415
-    except ImportError:
-        return False
-    else:
-        return True
-
-
-_ECFLOW_AVAILABLE = _ecflow_importable()
 
 Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]

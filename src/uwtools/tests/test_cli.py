@@ -11,14 +11,13 @@ from pytest import fixture, mark, raises
 
 import uwtools.api
 import uwtools.api.config
+import uwtools.api.ecflow
 import uwtools.api.rocoto
 import uwtools.api.template
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.strings import FORMAT
-
-_skip_no_ecflow = mark.skipif(not cli._ECFLOW_AVAILABLE, reason="ecflow not available")
 
 # Helpers
 
@@ -123,7 +122,6 @@ def test_cli__add_subparser_config_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
-@_skip_no_ecflow
 def test_cli__add_subparser_ecflow(subparsers):
     cli._add_subparser_ecflow(subparsers)
     assert actions(subparsers.choices[STR.ecflow]) == [STR.realize, STR.server, STR.validate]
@@ -134,7 +132,6 @@ def test_cli__add_subparser_ecflow_realize(subparsers):
     assert subparsers.choices[STR.realize]
 
 
-@_skip_no_ecflow
 def test_cli__add_subparser_ecflow_server(subparsers):
     cli._add_subparser_ecflow_server(subparsers)
     assert subparsers.choices[STR.server]
@@ -594,10 +591,7 @@ def test_cli__dispatch_ecflow(params):
     func.assert_called_once_with(args)
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_realize():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: Path("/path/to/config.yaml"), STR.output_dir: Path("/path/to/output")}
     with patch.object(uwtools.api.ecflow, "realize") as realize:
         cli._dispatch_ecflow_realize(args)
@@ -609,10 +603,7 @@ def test_cli__dispatch_ecflow_realize():
     )
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_server():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: None, STR.port: 54321, STR.insecure: False, STR.report: True}
     with patch.object(uwtools.api.ecflow, "server") as server:
         cli._dispatch_ecflow_server(args)
@@ -625,10 +616,7 @@ def test_cli__dispatch_ecflow_server():
     )
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_server_defaults():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: None, STR.port: None, STR.insecure: False, STR.report: False}
     with patch.object(uwtools.api.ecflow, "server") as server:
         cli._dispatch_ecflow_server(args)
@@ -641,10 +629,7 @@ def test_cli__dispatch_ecflow_server_defaults():
     )
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_validate():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: Path("/path/to/config.yaml")}
     with patch.object(uwtools.api.ecflow, "validate") as validate:
         cli._dispatch_ecflow_validate(args)
@@ -654,10 +639,7 @@ def test_cli__dispatch_ecflow_validate():
     )
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_realize_no_optional():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: None, STR.output_dir: None}
     with patch.object(uwtools.api.ecflow, "realize") as realize:
         cli._dispatch_ecflow_realize(args)
@@ -669,19 +651,13 @@ def test_cli__dispatch_ecflow_realize_no_optional():
     )
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_validate_invalid():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: Path("/path/to/config.yaml")}
     with patch.object(uwtools.api.ecflow, "validate", return_value=False):
         assert cli._dispatch_ecflow_validate(args) is False
 
 
-@_skip_no_ecflow
 def test_cli__dispatch_ecflow_validate_no_optional():
-    import uwtools.api.ecflow  # noqa: PLC0415
-
     args = {STR.config_file: None}
     with patch.object(uwtools.api.ecflow, "validate") as validate:
         cli._dispatch_ecflow_validate(args)
@@ -952,13 +928,14 @@ def test_cli__dispatch_to_driver_show_schema(capsys):
     assert capsys.readouterr().out == dedent(expected).lstrip()
 
 
-@mark.parametrize(
-    ("modules_entry", "expected"),
-    [(Mock(), True), (None, False)],
-)
-def test_cli__ecflow_importable(modules_entry, expected):
-    with patch.dict(sys.modules, {"uwtools.api.ecflow": modules_entry}):
-        assert cli._ecflow_importable() is expected
+def test_cli__ecflow_importable():
+    with patch.object(cli, "import_module"):
+        assert cli._ecflow_importable()
+
+
+def test_cli__ecflow_importable_fail():
+    with patch.object(cli, "import_module", side_effect=ImportError):
+        assert not cli._ecflow_importable()
 
 
 def test_cli_main_ecflow_unavailable():
@@ -1073,4 +1050,4 @@ def test_cli__timedelta_from_str(capsys):
 
 
 def test_cli__version():
-    assert re.match(r"version \d+\.\d+\.\d+(?:\.dev\d+)? build \d+", cli._version())
+    assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
