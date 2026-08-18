@@ -2,12 +2,12 @@
 Tests for uwtools.ecflow module.
 """
 
-import importlib
 import os
 import re
 import socket
 import sys
 from copy import deepcopy
+from importlib import reload
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
@@ -1216,4 +1216,4 @@ def test_ecflow_import_error():
         patch.dict(sys.modules, {"ecflow": None}),
         raises(ImportError, match="ecFlow Python library could not be imported"),
     ):
-        importlib.reload(ecflow)
+        reload(ecflow)
