@@ -181,7 +181,7 @@ class _RocotoIterator:
 
     def _run(self) -> bool:
         log.info("Iterating workflow")
-        cmd = "rocotorun -d %s -w %s" % (self._database, self._workflow)
+        cmd = "rocotorun -d %s -w %s -t %s" % (self._database, self._workflow, self._task)
         success, _ = run_shell_cmd(cmd, quiet=True)
         return success
 

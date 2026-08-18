@@ -228,7 +228,9 @@ class TestRocotoIterator:
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             assert instance._run() is True
         run_shell_cmd.assert_called_once_with(
-            "rocotorun -d %s -w %s" % (instance._database, instance._workflow), quiet=True
+            "rocotorun -d %s -w %s -t %s"
+            % (instance._database, instance._workflow, instance._task),
+            quiet=True,
         )
         assert logged("Iterating workflow")
 
