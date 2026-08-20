@@ -102,6 +102,34 @@ wgrib2 versions:
      INSIDE a driver config such as `files_to_hardlink:`, which is a different code
      path.) Documented here so it doesn't have to be re-derived for uw-aigfs staging.
 
+===== DRIVER AUTHORING NOTES for uwtools 2.16.0 (from the uw execute test) =====
+
+  Deriving a minimal working custom driver on Acorn surfaced the exact 2.16.0 /
+  iotaa contract. These apply directly when adapting the uw-aigfs drivers
+  (generate_ics.py, run_graphcast.py):
+
+  - A driver subclassing DriverCycleBased MUST implement the abstract method
+    `provisioned_rundir`, decorated with iotaa's `@collection` (NOT `@tasks` —
+    this iotaa build has no `tasks` export). Missing it -> TypeError "Can't
+    instantiate abstract class ... without an implementation for 'provisioned_rundir'".
+
+  - Every driver MUST ship a JSON schema next to its module, named
+    `<driver_name>.jsonschema` (auto-resolved from driver_name()). Missing it ->
+    FileNotFoundError on `<module_dir>/<driver_name>.jsonschema`. This is why the
+    upstream drivers ship generate_ics.jsonschema / run_graphcast.jsonschema.
+
+  - iotaa asset construction in this build: use the `Asset` CLASS, called
+    positionally as `Asset(ref, ready)` where `ready` is a zero-arg callable
+    returning bool. The lowercase `iotaa.asset` is NOT the builder (it takes a
+    `Node`). `iotaa` exports (2.16.0 VE): Asset, Node, asset, collection, external,
+    graph, log, logcfg, main, ready, ref, req, task, tasknames.
+
+  - `@task` yield order that works: yield "<name>"; yield Asset(path, path.is_file);
+    yield <requirements or None>; then the action code.
+
+  - `uw execute` validates BOTH the driver's own schema AND an internal `platform`
+    schema before running the requested task.
+
 ===== SMOKE TEST RESULTS — 2026-07-27 =====
 
   Environment:
@@ -186,10 +214,7 @@ wgrib2 versions:
 
   Ran the uwtools CLI primitives directly on Acorn (alogin01) with uwtools 2.16.0
   in ve/uwtools/0.1. These exercise the actual `uw` subcommands uw-aigfs relies on,
-  which the in-process smoke tests above do not cover. `uw execute` (run/iterate a
-  driver) is intentionally DEFERRED to the real uw-aigfs workflow run — it requires
-  the uw-aigfs driver modules, staged GFS input, and (for the forecast) the model
-  weights present on the machine.
+  which the in-process smoke tests above do not cover.
 
   uw config realize:
     - `uw config realize --input-file ush/wcoss_config.yaml --values-needed` -> clean
@@ -219,8 +244,28 @@ wgrib2 versions:
 
   See Known Issue 8 for the exact `uw fs` link/copy config shape on 2.16.0.
 
-  Net: 2.16.0 CLI primitives realize / validate / fs (makedirs, link, copy) all
-  confirmed working on Acorn. Only `uw execute` remains, deferred to the real run.
+  uw execute:  PASS  (minimal custom driver, run to completion)
+    - Authored a minimal DriverCycleBased driver (/tmp/mydriver.py) with one @task
+      (`greet`, writes hello.txt), the required `provisioned_rundir` @collection, a
+      matching /tmp/mydriver.jsonschema, and a tiny config (mydriver: {rundir: ...}).
+    - `uw execute --module /tmp/mydriver.py --classname MyDriver --task greet
+       --config-file mydriver.yaml --cycle 2026-08-18T00` output:
+         INFO Schema validation succeeded for mydriver config
+         INFO Schema validation succeeded for platform config
+         INFO greet: Executing
+         INFO greet: Ready
+      and /tmp/uw_exec_test/hello.txt was created with the expected contents.
+    - Confirms the FULL execute path on 2.16.0: CLI dispatch -> module load ->
+      class instantiation -> config + platform schema validation -> iotaa task graph
+      resolution -> task execution -> asset ready. See DRIVER AUTHORING NOTES above.
+    - NOTE: this proves the uw execute MACHINERY. Running a REAL uw-aigfs driver
+      (generate_ics.py / run_graphcast.py) is still deferred to the actual workflow
+      run — it needs graphcast installed, staged GFS input, and the v1.1 model
+      weights on the machine (weights currently live on Dogwood, not Acorn).
+
+  Net: 2.16.0 CLI primitives realize / validate / fs (makedirs, link, copy) / execute
+  are ALL confirmed working on Acorn. Remaining execute work is a real-driver run,
+  not a uwtools-primitive gap.
 
   Still outstanding to Bongi (GDIT):
     - Add pytest to ve/uwtools/0.1 (approved 2026-07-28; not in 2026-08-04 build).
@@ -241,7 +286,8 @@ wgrib2 versions:
   [x] Functional: uw config realize against a real WCOSS2 config on Acorn  (clean render 2026-08-18)
   [x] Functional: uw config validate (positive + negative) on Acorn  (PASS 2026-08-18)
   [x] Functional: uw fs makedirs / link / copy on Acorn  (all PASS 2026-08-18)
-  [ ] Functional: uw execute (run/iterate a driver) — deferred to the real uw-aigfs run
+  [x] Functional: uw execute (minimal custom driver, run to completion) on Acorn  (PASS 2026-08-18)
+  [ ] Functional: uw execute a REAL uw-aigfs driver — deferred to the real run (needs graphcast + weights + GFS input)
   [ ] Get pytest added to ve/uwtools/0.1 (drop the PYTHONPATH workaround)
   [ ] Begin v2.18.* approval process (uw-aigfs now requires 2.18.*, not 2.16.0)
   [ ] Build modulefiles/wflow_wcoss (Lmod/TCL; no conda; no ecflow in venv)
