@@ -26,6 +26,7 @@ from uwtools.utils.file import FORMAT as _FORMAT
 from uwtools.utils.file import str2path as _str2path
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from datetime import datetime, timedelta
 
     from uwtools.config.support import YAMLKey
@@ -43,7 +44,7 @@ def compare(
 
 
 def compose(
-    configs: list[str | Path],
+    configs: Sequence[str | Path],
     realize: bool = False,
     output_file: Path | str | None = None,
     input_format: str | None = None,
@@ -66,7 +67,7 @@ def compose(
 
 
 def compose_to_dict(
-    configs: list[str | Path],
+    configs: Sequence[str | Path],
     realize: bool = False,
     input_format: str | None = None,
     cycle: datetime | None = None,
