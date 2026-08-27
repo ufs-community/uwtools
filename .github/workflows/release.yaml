@@ -19,12 +19,12 @@ jobs:
         run: .github/scripts/make-docs.sh
       - name: Format Check
         run: .github/scripts/format-check.sh
-      - name: Make PyPI Package
-        run: .github/scripts/pypi-package-build.sh
       - name: Make Package
         run: .github/scripts/make-package.sh
       - name: Publish
         run: .github/scripts/publish.sh
+      - name: Make PyPI Package
+        run: .github/scripts/pypi-package-build.sh
       - name: Publish PyPI Package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
