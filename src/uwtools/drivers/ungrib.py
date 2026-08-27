@@ -15,7 +15,6 @@ from uwtools.drivers.driver import DriverCycleBased
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
-from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.tasks import file
 from uwtools.utils.time import to_datetime, to_iso8601, to_timedelta
 
@@ -96,17 +95,6 @@ class Ungrib(DriverCycleBased):
         yield file(path=infile)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(Path(self.config["vtable"]))
-
-    @task
-    def _run_via_local_execution(self):
-        """
-        A run executed directly on the local system.
-        """
-        yield self.taskname("run via local execution")
-        yield [Asset(path, path.is_file) for path in self.output["paths"]]
-        yield self.provisioned_rundir()
-        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
 
     # Public helper methods
 
