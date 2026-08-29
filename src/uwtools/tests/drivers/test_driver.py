@@ -441,19 +441,29 @@ def test_Driver_output_not_implemented(cls, config, utc):
 
 
 @mark.parametrize("batch", [True, False])
-def test_Driver_run(batch, driverobj, node):
+@mark.parametrize("executable", [True, False])
+def test_Driver_run(batch, driverobj, executable, node):
     driverobj._batch = batch
-    executable = Path(driverobj.config["execution"]["executable"])
-    executable.touch()
-    with patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs:
-        with patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle:
-            driverobj.run()
+    execution = driverobj._config["execution"]
+    if executable:
+        Path(execution["executable"]).touch()
+    else:
+        execution["executable"] = None
+    with (
+        patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
+        patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
+    ):
+        driverobj.run()
+    if executable:
         if batch:
             rvbs.assert_called_once_with()
             rvle.assert_not_called()
         else:
             rvbs.assert_not_called()
             rvle.assert_called_once_with()
+    else:
+        rvbs.assert_not_called()
+        rvle.assert_not_called()
 
 
 @mark.parametrize(

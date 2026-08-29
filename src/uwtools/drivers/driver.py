@@ -373,7 +373,13 @@ class Driver(Assets):
         A run.
         """
         yield self.taskname(STR.run)
-        yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
+        if self.config.get(STR.execution, {}).get(STR.executable):
+            if self._batch:
+                yield self._run_via_batch_submission()
+            else:
+                yield self._run_via_local_execution()
+        else:
+            yield None
 
     @task
     def runscript(self):
