@@ -59,8 +59,9 @@ def atomic(path: Path) -> Iterator[Path]:
     with NamedTemporaryFile(dir=path.parent, prefix="%s." % path.name) as ntf:
         tmp = Path(ntf.name)
     yield tmp
-    log.debug("Atomically renaming %s -> %s", str(tmp), str(path))
-    tmp.rename(path)
+    if tmp.is_file():
+        log.debug("Atomically renaming %s -> %s", str(tmp), str(path))
+        tmp.rename(path)
 
 
 def get_config_format(path: str | Path | None, desc: str | None = None) -> str:
