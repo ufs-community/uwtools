@@ -45,16 +45,16 @@ def test__stdinproxy():
         assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
-def test_atomic(tmp_path):
+def test_atomic(tmp_path, uwcaplog):
     path = tmp_path / "foo"
-    with file.atomic(path) as f:
-        assert f == path.with_suffix(".tmp")
-        assert not f.is_file()
-        f.touch()
-        assert f.is_file()
+    with file.atomic(path) as tmp:
+        assert str(tmp).startswith(str(path))
+        assert not tmp.is_file()
+        tmp.touch()
         assert not path.is_file()
-    assert not f.is_file()
+    assert not tmp.is_file()
     assert path.is_file()
+    assert "Atomically renaming %s -> %s" % (tmp, path) in uwcaplog.text
 
 
 @mark.parametrize(

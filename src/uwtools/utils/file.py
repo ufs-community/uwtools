@@ -10,6 +10,7 @@ from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import IO, TYPE_CHECKING, Any
 
 from uwtools.logging import log
@@ -55,8 +56,10 @@ def atomic(path: Path) -> Iterator[Path]:
     :yieldtype: Path.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = Path("%s.tmp" % path)
+    with NamedTemporaryFile(dir=path.parent, prefix="%s." % path.name) as ntf:
+        tmp = Path(ntf.name)
     yield tmp
+    log.debug("Atomically renaming %s -> %s", str(tmp), str(path))
     tmp.rename(path)
 
 
