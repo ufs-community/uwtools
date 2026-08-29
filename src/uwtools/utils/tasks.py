@@ -141,7 +141,10 @@ def filecopy_hsi(src: str, dst: Path, check: bool = True):
     dst.parent.mkdir(parents=True, exist_ok=True)
     with atomic(dst) as tmp:
         cmd = f"{STR.hsi} -q get '{tmp}' : '{src}'"
-        _, output = run_shell_cmd(cmd, taskname=taskname)
+        success, output = run_shell_cmd(cmd, taskname=taskname)
+        if not success:
+            log.error("Failed to copy %s via HSI", src)
+            tmp.unlink(missing_ok=True)
     for line in output.strip().split("\n"):
         log.info("%s: => %s", taskname, line)
 

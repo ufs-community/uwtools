@@ -200,7 +200,8 @@ def test_utils_tasks_filecopy__simple(tmp_path):
     assert dst.is_file()
 
 
-def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
+@mark.parametrize("success", [True, False])
+def test_utils_tasks_filecopy_hsi(logged, ready_task, success, tmp_path):
     src = "/path/to/src"
     dst = tmp_path / "dst"
     tmp = tmp_path / "tmp"
@@ -210,7 +211,8 @@ def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
         patch.object(tasks, "run_shell_cmd") as run_shell_cmd,
     ):
         atomic.return_value.__enter__.return_value = tmp
-        run_shell_cmd.side_effect = lambda *_a, **_kw: (dst.touch(), (True, "msg1\nmsg2\n"))[1]
+        action = lambda: dst.touch() if success else dst.exists()
+        run_shell_cmd.side_effect = lambda *_a, **_k: (action(), (success, "msg1\nmsg2\n"))[1]
         tasks.filecopy_hsi(src=src, dst=Path(dst))
     existing_hpss.assert_called_once_with(src)
     atomic.assert_called_once_with(dst)
@@ -218,7 +220,10 @@ def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
     run_shell_cmd.assert_called_once_with(f"hsi -q get '{tmp}' : '{src}'", taskname=taskname)
     assert logged(f"{taskname}: => msg1")
     assert logged(f"{taskname}: => msg2")
-    assert dst.exists()
+    if success:
+        assert dst.exists()
+    else:
+        assert not dst.exists()
 
 
 def test_utils_tasks_filecopy_htar(logged, ready_task, tmp_path):
