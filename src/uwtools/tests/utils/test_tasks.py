@@ -23,12 +23,6 @@ def exists(x):
 # Tests
 
 
-def test_utils_tasks_blocker():
-    node = tasks.blocker(taskname="Unfulfilled requirement")
-    assert not node.ready
-    assert node.ref is None
-
-
 def test_utils_tasks_directory(tmp_path):
     p = tmp_path / "foo" / "bar"
     assert not p.is_dir()
@@ -329,6 +323,12 @@ def test_utils_tasks_link_target(tmp_path, wrapper):
     for x in [d, f, s]:
         assert tasks.link_target(path=wrapper(x)).ready
     assert not tasks.link_target(path=tmp_path / "foo").ready
+
+
+def test_utils_tasks_poison():
+    node = tasks.poison(taskname="Unfulfilled requirement")
+    assert not node.ready
+    assert node.ref is None
 
 
 def test_utils_tasks__local__path_fail():

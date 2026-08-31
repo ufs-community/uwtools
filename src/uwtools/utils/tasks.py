@@ -30,12 +30,6 @@ SCHEMES = ns(
 )
 
 
-@external
-def blocker(taskname: str):
-    yield taskname
-    yield Asset(None, lambda: False)
-
-
 @task
 def directory(path: Path):
     """
@@ -254,6 +248,25 @@ def hardlink(
             raise UWError("Could not hardlink %s -> %s" % (dst, src)) from e
 
 
+@external
+def link_target(path: Path | str):
+    """
+    An existing file, link, or directory.
+
+    :param path: Path to the file, link, or directory.
+    :param context: Optional additional context for the file.
+    """
+    path = _local_path(path)
+    yield "Target %s" % path
+    yield Asset(path, path.exists)
+
+
+@external
+def poison(taskname: str):
+    yield taskname
+    yield Asset(None, lambda: False)
+
+
 @task
 def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     """
@@ -271,19 +284,6 @@ def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
     dst = linkname
     Path(dst).symlink_to(src)
-
-
-@external
-def link_target(path: Path | str):
-    """
-    An existing file, link, or directory.
-
-    :param path: Path to the file, link, or directory.
-    :param context: Optional additional context for the file.
-    """
-    path = _local_path(path)
-    yield "Target %s" % path
-    yield Asset(path, path.exists)
 
 
 # Private helpers
