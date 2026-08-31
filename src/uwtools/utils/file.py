@@ -56,7 +56,8 @@ def atomic(path: Path) -> Iterator[Path]:
     :yieldtype: Path.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(dir=path.parent, prefix="%s." % path.name) as ntf:
+    with NamedTemporaryFile(dir=path.parent, prefix="%s.tmp." % path.name) as ntf:
+        ntf.close()  # also deletes: some callers may balk at an existing file
         tmp = Path(ntf.name)
     yield tmp
     if tmp.is_file():
