@@ -373,8 +373,7 @@ class Driver(Assets):
         """
         A run.
         """
-        taskname = self.taskname(STR.run)
-        yield taskname
+        yield self.taskname(STR.run)
         if self.config[STR.execution][STR.executable] is None:
             msg = "%s must define 'executable' or implement custom run() method"
             yield blocker(msg % self.__class__.__name__)
