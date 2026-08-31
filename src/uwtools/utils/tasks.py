@@ -30,6 +30,12 @@ SCHEMES = ns(
 )
 
 
+@external
+def blocker(taskname: str):
+    yield taskname
+    yield Asset(taskname, lambda: False)
+
+
 @task
 def directory(path: Path):
     """

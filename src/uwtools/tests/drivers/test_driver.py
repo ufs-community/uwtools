@@ -458,15 +458,17 @@ def test_Driver_run(batch, driverobj, node):
             rvle.assert_called_once_with()
 
 
-def test_Driver_run__no_executable(driverobj, node):
+def test_Driver_run__no_executable(driverobj, node, uwcaplog):
     driverobj._config["execution"]["executable"] = None
+    # Replace driverobj's run() with Driver's, as if it was never overriden:
+    driverobj.run = driver.Driver.run.__get__(driverobj)
     with (
         patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
         patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
     ):
-        with raises(UWNotImplementedError) as e:
-            driverobj.run()
-        assert str(e.value) == "Drivers not specifying 'executable' must override the run() method"
+        node = driverobj.run()
+        assert not node.ready
+        assert "Drivers with no 'executable' must implement a custom run() method" in uwcaplog.text
         rvbs.assert_not_called()
         rvle.assert_not_called()
 

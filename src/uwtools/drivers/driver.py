@@ -31,6 +31,7 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
+from uwtools.utils.tasks import blocker
 
 if TYPE_CHECKING:
     from datetime import datetime, timedelta
@@ -372,10 +373,11 @@ class Driver(Assets):
         """
         A run.
         """
-        yield self.taskname(STR.run)
+        taskname = self.taskname(STR.run)
+        yield taskname
         if self.config[STR.execution][STR.executable] is None:
-            msg = "Drivers not specifying 'executable' must override the run() method"
-            raise UWNotImplementedError(msg)
+            msg = "%s: Drivers with no 'executable' must implement a custom run() method" % taskname
+            yield blocker(msg)
         yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
 
     @task
