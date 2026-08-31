@@ -33,7 +33,7 @@ SCHEMES = ns(
 @external
 def blocker(taskname: str):
     yield taskname
-    yield Asset(taskname, lambda: False)
+    yield Asset(None, lambda: False)
 
 
 @task

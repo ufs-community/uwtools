@@ -376,8 +376,8 @@ class Driver(Assets):
         taskname = self.taskname(STR.run)
         yield taskname
         if self.config[STR.execution][STR.executable] is None:
-            msg = "%s: Drivers with no 'executable' must implement a custom run() method" % taskname
-            yield blocker(msg)
+            msg = "%s must define 'executable' or implement custom run() method"
+            yield blocker(msg % self.__class__.__name__)
         yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
 
     @task
