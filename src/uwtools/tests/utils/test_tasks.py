@@ -331,6 +331,12 @@ def test_utils_tasks_poison():
     assert node.ref is None
 
 
+def test_utils_tasks__bad_scheme():
+    with raises(UWConfigError) as e:
+        tasks._bad_scheme(path="foo://x/y/z", scheme="foo")
+    assert str(e.value) == "Scheme 'foo' in 'foo://x/y/z' not supported"
+
+
 def test_utils_tasks__local__path_fail():
     path = "foo://bucket/a/b"
     with patch.object(tasks, "_bad_scheme") as _bad_scheme:
