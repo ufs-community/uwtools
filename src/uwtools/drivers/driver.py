@@ -379,7 +379,8 @@ class Driver(Assets):
             else:
                 yield self._run_via_local_execution()
         else:
-            yield None
+            msg = "Drivers not specifying 'executable' must override the run() method"
+            raise UWNotImplementedError(msg)
 
     @task
     def runscript(self):

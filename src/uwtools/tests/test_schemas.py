@@ -1318,6 +1318,8 @@ def test_schema_execution_parallel():
     errors = schema_validator("execution-parallel")
     # Basic correctness:
     assert not errors(config)
+    # execution is required:
+    assert "'executable' is a required property" in errors({})
     # batchargs may optionally be specified:
     assert not errors({**config, **batchargs})
     # mpiargs may be optionally specified:
@@ -1370,6 +1372,8 @@ def test_schema_execution_serial():
     errors = schema_validator("execution-serial")
     # Basic correctness:
     assert not errors(config)
+    # execution is required:
+    assert "'executable' is a required property" in errors({})
     # batchargs may optionally be specified:
     assert not errors({**config, **batchargs})
     # All properties are ok:
