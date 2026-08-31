@@ -23,6 +23,12 @@ def exists(x):
 # Tests
 
 
+def test_utils_tasks_blocker():
+    node = tasks.blocker(taskname="Unfulfilled requirement")
+    assert not node.ready
+    assert node.ref is None
+
+
 def test_utils_tasks_directory(tmp_path):
     p = tmp_path / "foo" / "bar"
     assert not p.is_dir()
