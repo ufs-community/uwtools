@@ -376,10 +376,7 @@ class Driver(Assets):
         if self.config[STR.execution][STR.executable] is None:
             msg = "Drivers not specifying 'executable' must override the run() method"
             raise UWNotImplementedError(msg)
-        if self._batch:
-            yield self._run_via_batch_submission()
-        else:
-            yield self._run_via_local_execution()
+        yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
 
     @task
     def runscript(self):

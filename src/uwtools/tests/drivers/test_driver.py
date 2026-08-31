@@ -443,11 +443,12 @@ def test_Driver_output_not_implemented(cls, config, utc):
 @mark.parametrize("batch", [True, False])
 def test_Driver_run(batch, driverobj, node):
     driverobj._batch = batch
+    executable = Path(driverobj.config["execution"]["executable"])
+    executable.touch()
     with (
         patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
         patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
     ):
-        Path(driverobj._config["execution"]["executable"]).touch()
         driverobj.run()
         if batch:
             rvbs.assert_called_once_with()
