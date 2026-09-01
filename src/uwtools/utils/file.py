@@ -56,11 +56,15 @@ def atomic(path: Path) -> Iterator[Path]:
     :yieldtype: Path.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(dir=path.parent, prefix="%s." % path.name) as ntf:
+    with NamedTemporaryFile(dir=path.parent, prefix="%s.tmp." % path.name) as ntf:
+        ntf.close()  # also deletes: some callers may balk at an existing file
         tmp = Path(ntf.name)
     yield tmp
-    log.debug("Atomically renaming %s -> %s", str(tmp), str(path))
-    tmp.rename(path)
+    if tmp.is_file():
+        log.debug("Atomically renaming %s -> %s", tmp, path)
+        tmp.rename(path)
+    else:
+        log.debug("Skipping atomic rename: %s not found", tmp)
 
 
 def get_config_format(path: str | Path | None, desc: str | None = None) -> str:
