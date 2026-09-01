@@ -66,7 +66,7 @@ def test_atomic__fail(tmp_path, uwcaplog):
         assert not path.is_file()
     assert not tmp.is_file()
     assert not path.is_file()
-    assert "Atomically renaming %s -> %s" % (tmp, path) not in uwcaplog.text
+    assert "Skipping atomic rename: %s not found" % tmp in uwcaplog.text
 
 
 @mark.parametrize(

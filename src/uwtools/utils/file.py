@@ -61,8 +61,10 @@ def atomic(path: Path) -> Iterator[Path]:
         tmp = Path(ntf.name)
     yield tmp
     if tmp.is_file():
-        log.debug("Atomically renaming %s -> %s", str(tmp), str(path))
+        log.debug("Atomically renaming %s -> %s", tmp, path)
         tmp.rename(path)
+    else:
+        log.debug("Skipping atomic rename: %s not found", tmp)
 
 
 def get_config_format(path: str | Path | None, desc: str | None = None) -> str:
