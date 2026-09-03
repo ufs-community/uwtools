@@ -195,10 +195,7 @@ def _registry() -> Registry:
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
     def retrieve(uri: str) -> Resource:
-        name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path(f"jsonschema/{name}.jsonschema")
-        text = path.read_text()
-        return Resource(contents=json.loads(text), specification=DRAFT202012)  # type: ignore[call-arg]
+        return Resource(contents=_schema(uri), specification=DRAFT202012)  # type: ignore[call-arg]
 
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
@@ -211,12 +208,16 @@ def _resolver(schema: dict) -> RefResolver:
     """
 
     def retrieve(uri: str) -> dict:
-        name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path(f"jsonschema/{name}.jsonschema")
-        text = path.read_text()
-        return cast(dict, json.loads(text))
+        return _schema(uri)
 
     return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": retrieve}))
+
+
+def _schema(uri: str) -> dict:
+    name = uri.rsplit(":", maxsplit=1)[-1]
+    path = resource_path(f"jsonschema/{name}.jsonschema")
+    text = path.read_text()
+    return cast(dict, json.loads(text))
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
