@@ -194,9 +194,7 @@ def _registry() -> Registry:
 
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
-    def retrieve(uri: str) -> Resource:
-        return Resource(contents=_schema(uri), specification=DRAFT202012)  # type: ignore[call-arg]
-
+    retrieve = lambda uri: Resource(contents=_schema(uri), specification=DRAFT202012)  # type: ignore[call-arg]
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
 
@@ -206,7 +204,6 @@ def _resolver(schema: dict) -> RefResolver:
 
     :param schema: A schema potentially containing $ref keys.
     """
-
     return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": _schema}))
 
 
