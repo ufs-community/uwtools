@@ -11,10 +11,11 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
+from referencing.exceptions import Unretrievable
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 
 # Fixtures
@@ -315,6 +316,35 @@ def test_config_validator__registry(tmp_path):
         r = validator._registry()
         assert r.get_or_retrieve("urn:uwtools:foo-bar").value.contents == d
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
+
+
+@mark.parametrize(
+    ("retriever", "ref_tail", "error"),
+    [
+        ("registry", "relative", Unretrievable),
+        ("registry", "absolute", Unretrievable),
+        ("resolver", "relative", UWError),
+        ("resolver", "absolute", FileNotFoundError),
+    ],
+)
+def test_config_validator__retrieve__blocks_traversal(retriever, ref_tail, error, tmp_path):
+    outside = tmp_path / "outside.jsonschema"
+    outside.write_text(json.dumps({"exfiltrated": True}))
+    schema_name = outside.with_suffix("")
+    if ref_tail == "relative":
+        rootless_schema_name = Path(*schema_name.resolve().parts[1:])
+        levels_to_root = [".."] * len(validator.resource_path("jsonschema").resolve().parts)
+        schema_name = Path(*levels_to_root) / rootless_schema_name
+    uri = f"urn:uwtools:{schema_name}"
+    if retriever == "registry":
+        validator._registry.cache_clear()
+        with raises(error):
+            validator._registry().get_or_retrieve(uri)
+    else:
+        retrieve = validator._resolver({}).handlers["urn"]
+        with raises(error):
+            retrieve(uri)
+    validator._registry.cache_clear()
 
 
 @mark.parametrize("msg", [validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG, "other"])
