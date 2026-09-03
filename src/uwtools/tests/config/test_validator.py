@@ -317,24 +317,20 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-def test_config_validator__registry__retrieve__no_exfil():
-    validator._registry.cache_clear()
-    with patch.object(validator, "Registry") as Registry:
-        validator._registry()
-        retrieve = Registry.call_args.kwargs["retrieve"]
-    suffix = "../../exfiltrated.jsonschema"
-    uri = f"urn:uwtools:{suffix}"
-    with raises(UWError) as e:
-        retrieve(uri=uri)
-    expected = f"Resource reference 'jsonschema/{suffix}.jsonschema' is outside package resources"
-    assert str(e.value) == expected
-    validator._registry.cache_clear()
-
-
-def test_config_validator__resolver__retrieve__no_exfil():
-    with patch.object(validator.RefResolver, "from_schema") as from_schema:
-        validator._resolver({})
-        retrieve = from_schema.call_args.kwargs["handlers"]["urn"]
+@mark.parametrize("caller", ["registry", "resolver"])
+def test_config_validator__registry__retrieve__no_exfil(caller):
+    # The retrieve() function is nested, so use a mocked call to retrieve it:
+    if caller == "registry":
+        validator._registry.cache_clear()
+        with patch.object(validator, "Registry") as Registry:
+            validator._registry()
+            retrieve = Registry.call_args.kwargs["retrieve"]
+        validator._registry.cache_clear()
+    else:  # caller is "resolver"
+        with patch.object(validator.RefResolver, "from_schema") as from_schema:
+            validator._resolver({})
+            retrieve = from_schema.call_args.kwargs["handlers"]["urn"]
+    # Now test that relative paths cannot be used to exfiltrate:
     suffix = "../../exfiltrated.jsonschema"
     uri = f"urn:uwtools:{suffix}"
     with raises(UWError) as e:
