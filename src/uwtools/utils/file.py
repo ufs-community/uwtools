@@ -131,7 +131,7 @@ def resource_path(suffix: str = "") -> Path:
         path = prefix / suffix
         if not path.resolve().is_relative_to(prefix.resolve()):
             raise UWError("Resource reference '%s' is outside package resources" % suffix)
-    return path
+        return path
 
 
 def str2path(val: Any) -> Any:
