@@ -197,8 +197,8 @@ def _registry() -> Registry:
     def retrieve(uri: str) -> Resource:
         name = uri.rsplit(":", maxsplit=1)[-1]
         path = resource_path(f"jsonschema/{name}.jsonschema")
-        text = json.loads(path.read_text())
-        return Resource(contents=text, specification=DRAFT202012)  # type: ignore[call-arg]
+        text = path.read_text()
+        return Resource(contents=json.loads(text), specification=DRAFT202012)  # type: ignore[call-arg]
 
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
