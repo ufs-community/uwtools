@@ -342,12 +342,14 @@ def test_config_validator__validation_errors__pass(config, pre_4_18_jsonschema, 
         ref_schema = tmp_path / "ref.jsonschema"
         ref_schema.write_text(json.dumps({"type": "number"}))
         schema["properties"]["number"] = {"$ref": "urn:uwtools:ref"}
-        mock = partial(
-            mock_extend, validator.validators.extend, validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG
+        extend = partial(
+            mock_extend,
+            validator.validators.extend,
+            validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG,
         )
         with (
-            patch.object(validator, "resource_path", return_value=tmp_path),
-            patch.object(validator.validators, "extend", mock),
+            patch.object(validator, "resource_path", return_value=ref_schema),
+            patch.object(validator.validators, "extend", extend),
         ):
             assert not validator._validation_errors(config, schema)
     else:

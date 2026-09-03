@@ -212,7 +212,7 @@ def _resolver(schema: dict) -> RefResolver:
 
     def retrieve(uri: str) -> dict:
         name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path("jsonschema") / f"{name}.jsonschema"
+        path = resource_path(f"jsonschema/{name}.jsonschema")
         text = path.read_text()
         return cast(dict, json.loads(text))
 
