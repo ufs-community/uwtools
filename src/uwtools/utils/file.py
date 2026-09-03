@@ -13,6 +13,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import IO, TYPE_CHECKING, Any
 
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 
@@ -125,8 +126,12 @@ def resource_path(suffix: str = "") -> Path:
     :param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
         to the resources files is known to Python and varies based on installation location.
     """
-    with resources.as_file(resources.files("uwtools.resources")) as prefix:
-        return prefix / suffix
+    root = resources.files("uwtools.resources")
+    with resources.as_file(root) as prefix:
+        path = prefix / suffix
+        if not path.resolve().is_relative_to(prefix.resolve()):
+            raise UWError("Resource reference '%s' is outside package resources" % suffix)
+    return path
 
 
 def str2path(val: Any) -> Any:
