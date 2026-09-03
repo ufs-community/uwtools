@@ -74,7 +74,7 @@ def internal_schema_file(schema_name: str) -> Path:
 
     :param schema_name: Name of uwtools schema to validate the config against.
     """
-    return resource_path("jsonschema") / f"{schema_name}.jsonschema"
+    return resource_path(f"jsonschema/{schema_name}.jsonschema")
 
 
 def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
