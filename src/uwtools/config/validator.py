@@ -207,10 +207,7 @@ def _resolver(schema: dict) -> RefResolver:
     :param schema: A schema potentially containing $ref keys.
     """
 
-    def retrieve(uri: str) -> dict:
-        return _schema(uri)
-
-    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": retrieve}))
+    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": _schema}))
 
 
 def _schema(uri: str) -> dict:
