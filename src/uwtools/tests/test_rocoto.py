@@ -49,7 +49,7 @@ def validation_assets(tmp_path):
 
 
 def test_rocoto_iterate(rocoto_iterator_args):
-    with patch.object(rocoto, "_RocotoIterator") as _RocotoIterator:  # noqa: N806
+    with patch.object(rocoto, "_RocotoIterator") as _RocotoIterator:
         rocoto.iterate(**rocoto_iterator_args)
     _RocotoIterator.assert_called_once_with(*rocoto_iterator_args.values())
 

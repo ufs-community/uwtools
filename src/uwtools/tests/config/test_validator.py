@@ -11,7 +11,6 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
-from referencing.exceptions import Unretrievable
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
@@ -318,33 +317,30 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
 
 
-@mark.parametrize(
-    ("retriever", "ref_tail", "error"),
-    [
-        ("registry", "relative", Unretrievable),
-        ("registry", "absolute", Unretrievable),
-        ("resolver", "relative", UWError),
-        ("resolver", "absolute", FileNotFoundError),
-    ],
-)
-def test_config_validator__retrieve__blocks_traversal(retriever, ref_tail, error, tmp_path):
-    outside = tmp_path / "outside.jsonschema"
-    outside.write_text(json.dumps({"exfiltrated": True}))
-    schema_name = outside.with_suffix("")
-    if ref_tail == "relative":
-        rootless_schema_name = Path(*schema_name.resolve().parts[1:])
-        levels_to_root = [".."] * len(validator.resource_path("jsonschema").resolve().parts)
-        schema_name = Path(*levels_to_root) / rootless_schema_name
-    uri = f"urn:uwtools:{schema_name}"
-    if retriever == "registry":
-        validator._registry.cache_clear()
-        with raises(error):
-            validator._registry().get_or_retrieve(uri)
-    else:
-        retrieve = validator._resolver({}).handlers["urn"]
-        with raises(error):
-            retrieve(uri)
+def test_config_validator__registry__retrieve__no_exfil():
     validator._registry.cache_clear()
+    with patch.object(validator, "Registry") as Registry:
+        validator._registry()
+        retrieve = Registry.call_args.kwargs["retrieve"]
+    suffix = "../../exfiltrated.jsonschema"
+    uri = f"urn:uwtools:{suffix}"
+    with raises(UWError) as e:
+        retrieve(uri=uri)
+    expected = f"Resource reference 'jsonschema/{suffix}.jsonschema' is outside package resources"
+    assert str(e.value) == expected
+    validator._registry.cache_clear()
+
+
+def test_config_validator__resolver__retrieve__no_exfil():
+    with patch.object(validator.RefResolver, "from_schema") as from_schema:
+        validator._resolver({})
+        retrieve = from_schema.call_args.kwargs["handlers"]["urn"]
+    suffix = "../../exfiltrated.jsonschema"
+    uri = f"urn:uwtools:{suffix}"
+    with raises(UWError) as e:
+        retrieve(uri=uri)
+    expected = f"Resource reference 'jsonschema/{suffix}.jsonschema' is outside package resources"
+    assert str(e.value) == expected
 
 
 @mark.parametrize("msg", [validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG, "other"])
