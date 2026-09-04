@@ -296,6 +296,7 @@ def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
     :return: The rendered value (potentially unchanged).
     """
     if not any(marker in val for marker in ("{{", "{%", "{#")):
+        deref_debug("Rendered", val)
         return val
     env = _register_filters(Environment(undefined=StrictUndefined))
     template = env.from_string(val)
