@@ -14,7 +14,7 @@ from jsonschema import Draft202012Validator, RefResolver, validators
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import UWYAMLGlob
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
@@ -209,7 +209,10 @@ def _resolver(schema: dict) -> RefResolver:
 
 def _schema(uri: str) -> dict:
     name = uri.rsplit(":", maxsplit=1)[-1]
+    root = resource_path()
     path = resource_path(f"jsonschema/{name}.jsonschema")
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise UWError("Invalid schema URI: %s" % uri)
     text = path.read_text()
     return cast(dict, json.loads(text))
 

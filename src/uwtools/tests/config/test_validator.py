@@ -314,7 +314,7 @@ def test_config_validator__registry(tmp_path):
     with patch.object(validator, "resource_path", return_value=path) as resource_path:
         r = validator._registry()
         assert r.get_or_retrieve("urn:uwtools:foo-bar").value.contents == d
-    resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
+    resource_path.assert_called_with("jsonschema/foo-bar.jsonschema")
 
 
 def test_config_validator__schema__no_exfil():
