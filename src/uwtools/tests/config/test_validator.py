@@ -317,13 +317,18 @@ def test_config_validator__registry(tmp_path):
     resource_path.assert_called_with("jsonschema/foo-bar.jsonschema")
 
 
-def test_config_validator__schema__no_exfil():
-    suffix = "../../exfiltrated.jsonschema"
+@mark.parametrize("suffix", ["../exfiltrated.jsonschema", "../../exfiltrated.jsonschema"])
+def test_config_validator__schema__no_exfil(suffix):
     uri = f"urn:uwtools:{suffix}"
     with raises(UWError) as e:
         validator._schema(uri=uri)
-    expected = f"Resource reference 'jsonschema/{suffix}.jsonschema' is outside package resources"
-    assert str(e.value) == expected
+    if suffix.startswith("../.."):
+        # Reference is outside of resources altogether:
+        msg = f"Resource reference 'jsonschema/{suffix}.jsonschema' is outside package resources"
+    else:
+        # Reference is in resources, but outside jsonschema/:
+        msg = f"Invalid schema URI: {uri}"
+    assert str(e.value) == msg
 
 
 @mark.parametrize("msg", [validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG, "other"])

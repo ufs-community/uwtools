@@ -209,9 +209,9 @@ def _resolver(schema: dict) -> RefResolver:
 
 def _schema(uri: str) -> dict:
     name = uri.rsplit(":", maxsplit=1)[-1]
-    root = resource_path()
+    schemaroot = resource_path("jsonschema")
     path = resource_path(f"jsonschema/{name}.jsonschema")
-    if not path.resolve().is_relative_to(root.resolve()):
+    if not path.resolve().is_relative_to(schemaroot.resolve()):
         raise UWError("Invalid schema URI: %s" % uri)
     text = path.read_text()
     return cast(dict, json.loads(text))
