@@ -31,6 +31,7 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
+from uwtools.utils.tasks import poison
 
 if TYPE_CHECKING:
     from datetime import datetime, timedelta
@@ -373,6 +374,9 @@ class Driver(Assets):
         A run.
         """
         yield self.taskname(STR.run)
+        if self.config[STR.execution][STR.executable] is None:  # e.g. from a YAML null
+            msg = "%s must define 'executable' or implement custom run() method"
+            yield poison(msg % self.__class__.__name__)
         yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
 
     @task

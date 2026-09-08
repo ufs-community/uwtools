@@ -1310,7 +1310,7 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
 # execution-parallel
 
 
-def test_schema_parallel_execution():
+def test_schema_execution_parallel():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
@@ -1318,6 +1318,8 @@ def test_schema_parallel_execution():
     errors = schema_validator("execution-parallel")
     # Basic correctness:
     assert not errors(config)
+    # execution is required:
+    assert "'executable' is a required property" in errors({})
     # batchargs may optionally be specified:
     assert not errors({**config, **batchargs})
     # mpiargs may be optionally specified:
@@ -1332,15 +1334,17 @@ def test_schema_parallel_execution():
     )
 
 
-def test_schema_parallel_execution_executable():
+def test_schema_execution_parallel__executable():
     errors = schema_validator("execution-parallel", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
+    # Null value is ok:
+    assert not errors(None)
     # Anything else is not:
-    assert "42 is not of type 'string'\n" in errors(42)
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
 
 
-def test_schema_parallel_execution_mpiargs():
+def test_schema_execution_parallel__mpiargs():
     errors = schema_validator("execution-parallel", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
@@ -1350,7 +1354,7 @@ def test_schema_parallel_execution_mpiargs():
     assert "42 is not of type 'string'\n" in errors(["string1", 42])
 
 
-def test_schema_parallel_execution_threads():
+def test_schema_execution_parallel__threads():
     errors = schema_validator("execution-parallel", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(1)
@@ -1368,12 +1372,24 @@ def test_schema_execution_serial():
     errors = schema_validator("execution-serial")
     # Basic correctness:
     assert not errors(config)
+    # execution is required:
+    assert "'executable' is a required property" in errors({})
     # batchargs may optionally be specified:
     assert not errors({**config, **batchargs})
     # All properties are ok:
     assert not errors({**config, **batchargs})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_execution_serial__executable():
+    errors = schema_validator("execution-serial", "properties", "executable")
+    # String value is ok:
+    assert not errors("fv3.exe")
+    # Null value is ok:
+    assert not errors(None)
+    # Anything else is not:
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
 
 
 # files-to-stage

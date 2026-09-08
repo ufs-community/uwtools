@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 from pytest import mark, raises
 
+from uwtools.exceptions import UWError
 from uwtools.strings import FORMAT
 from uwtools.utils import file
 
@@ -45,16 +46,28 @@ def test__stdinproxy():
         assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
-def test_atomic(tmp_path):
+def test_atomic(tmp_path, uwcaplog):
     path = tmp_path / "foo"
-    with file.atomic(path) as f:
-        assert f == path.with_suffix(".tmp")
-        assert not f.is_file()
-        f.touch()
-        assert f.is_file()
+    with file.atomic(path) as tmp:
+        assert str(tmp).startswith(str(path))
+        assert not tmp.is_file()
+        tmp.touch()
         assert not path.is_file()
-    assert not f.is_file()
+    assert not tmp.is_file()
     assert path.is_file()
+    assert "Atomically renaming %s -> %s" % (tmp, path) in uwcaplog.text
+
+
+def test_atomic__fail(tmp_path, uwcaplog):
+    path = tmp_path / "foo"
+    with file.atomic(path) as tmp:
+        assert str(tmp).startswith(str(path))
+        assert not tmp.is_file()
+        # Avoid creating file.
+        assert not path.is_file()
+    assert not tmp.is_file()
+    assert not path.is_file()
+    assert "Skipping atomic rename: %s not found" % tmp in uwcaplog.text
 
 
 @mark.parametrize(
@@ -107,6 +120,14 @@ def test_readable_nofile():
 
 def test_resource_path():
     assert file.resource_path().is_dir()
+    assert file.resource_path("info.json").is_file()
+
+
+def test_resource_path__bad():
+    ref = "../exfiltrated.txt"
+    with raises(UWError) as e:
+        file.resource_path(ref)
+    assert str(e.value) == "Resource reference '%s' is outside package resources" % ref
 
 
 @mark.parametrize("val", [Path("/some/path"), {"foo": 42}])

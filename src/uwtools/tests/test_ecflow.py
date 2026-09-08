@@ -795,7 +795,7 @@ class Test_ECFlowDef:  # noqa: N801
 @mark.parametrize("insecure", [True, False])
 def test_ecflow__client(insecure):
     portnum = 54321
-    with patch.object(ecflow, "Client") as Client:  # noqa: N806
+    with patch.object(ecflow, "Client") as Client:
         ecflow._client(port=portnum, insecure=insecure)
     Client.assert_called_once_with(socket.gethostname(), str(portnum))
     if insecure:

@@ -445,15 +445,32 @@ def test_Driver_run(batch, driverobj, node):
     driverobj._batch = batch
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
-    with patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs:
-        with patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle:
-            driverobj.run()
+    with (
+        patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
+        patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
+    ):
+        driverobj.run()
         if batch:
             rvbs.assert_called_once_with()
             rvle.assert_not_called()
         else:
             rvbs.assert_not_called()
             rvle.assert_called_once_with()
+
+
+def test_Driver_run__no_executable(driverobj, node, uwcaplog):
+    # Replace driverobj's run() with Driver's, as if it was never overriden:
+    driverobj.run = driver.Driver.run.__get__(driverobj)
+    driverobj._config["execution"]["executable"] = None
+    with (
+        patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
+        patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
+    ):
+        node = driverobj.run()
+        assert not node.ready
+        assert "must define 'executable' or implement custom run() method" in uwcaplog.text
+        rvbs.assert_not_called()
+        rvle.assert_not_called()
 
 
 @mark.parametrize(

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-import yaml
+import json
 
 from uwtools.config.validator import _validation_errors
 from uwtools.utils.file import resource_path
@@ -61,7 +61,7 @@ def schema_validator(schema_name: str, *args: Any) -> Callable:
     :returns: A lambda that, when called with an input to test, returns a string (possibly empty)
         containing the validation errors.
     """
-    schema = yaml.safe_load((resource_path("jsonschema") / f"{schema_name}.jsonschema").read_text())
+    schema = json.loads((resource_path("jsonschema") / f"{schema_name}.jsonschema").read_text())
     defs = schema.get("$defs", {})
     for arg in args:
         schema = schema[arg]

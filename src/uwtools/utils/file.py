@@ -10,8 +10,10 @@ from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import IO, TYPE_CHECKING, Any
 
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 
@@ -55,9 +57,15 @@ def atomic(path: Path) -> Iterator[Path]:
     :yieldtype: Path.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = Path("%s.tmp" % path)
+    with NamedTemporaryFile(dir=path.parent, prefix="%s.tmp." % path.name) as ntf:
+        ntf.close()  # also deletes: some callers may balk at an existing file
+        tmp = Path(ntf.name)
     yield tmp
-    tmp.rename(path)
+    if tmp.is_file():
+        log.debug("Atomically renaming %s -> %s", tmp, path)
+        tmp.rename(path)
+    else:
+        log.debug("Skipping atomic rename: %s not found", tmp)
 
 
 def get_config_format(path: str | Path | None, desc: str | None = None) -> str:
@@ -118,8 +126,12 @@ def resource_path(suffix: str = "") -> Path:
     :param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
         to the resources files is known to Python and varies based on installation location.
     """
-    with resources.as_file(resources.files("uwtools.resources")) as prefix:
-        return prefix / suffix
+    root = resources.files("uwtools.resources")
+    with resources.as_file(root) as prefix:
+        path = prefix / suffix
+        if not path.resolve().is_relative_to(prefix.resolve()):
+            raise UWError("Resource reference '%s' is outside package resources" % suffix)
+        return path
 
 
 def str2path(val: Any) -> Any:
