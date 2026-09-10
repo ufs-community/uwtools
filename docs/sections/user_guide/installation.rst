@@ -10,8 +10,8 @@ The recommended installation mechanism uses the Python package and virtual-envir
 Use an Existing conda Installation
 ----------------------------------
 
-Install Into an Existing Environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Install Into an Existing conda Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To install ``uwtools`` into an existing environment in an existing conda (e.g., :miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaconda:`Anaconda<>`) installation:
 
@@ -71,33 +71,28 @@ Build the ``uwtools`` Package Locally
       conda create -y -n uwtools -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels uwtools[=<version>]
 
 
-Install ``uwtools`` into a non-conda environment
-------------------------------------------------
+Install from PyPI
+-----------------
 
-If you are using an app that has its own environment requirements that do not work well with conda, you may need to install with ``pip`` instead.
-
-#. Clone the ``uwtools`` repo and check out the desired release tag.
-
-   .. code-block:: text
-
-      git clone https://github.com/ufs-community/uwtools.git
-      cd uwtools
-      git checkout <tag>
-
-#. Optional but recommended: Create and activate a Python virtual environment, to avoid installing into the base Python installation.
+#. Optional but recommended: Create and activate a Python virtual environment to avoid installing into the base Python installation.
 
    .. code-block:: text
 
       python -m venv uwtools-venv
       . uwtools-venv/bin/activate
 
-#. Install ``uwtools`` and its required dependencies from the ``src/`` directory:
+#. Install ``uwtools`` from PyPI:
 
    .. code-block:: text
 
-      cd src/
-      pip install .
+      pip install unified-workflow-tools
 
- .. note::
+   To install a specific version:
+
+   .. code-block:: text
+
+      pip install unified-workflow-tools==<version>
+
+.. note::
    
-   Since ecFlow is not currently published to PyPI, it cannot be installed as a pip dependency. Thus, the ``ecflow`` mode is available only when ecFlow is separately available.
+   ecFlow is not currently published to PyPI and so cannot be installed automatically as a dependency of ``uwtools``, but the ``ecflow`` mode can still be used when ecFlow and its Python bindings are made available by other means. For example, they could be installed with conda, built from source, or made available by loading a system module. In any case, ``PATH`` must include the directory where ``ecflow_server`` and ``ecflow_client`` are installed, and ``PYTHONPATH`` must include the directory where the ``ecflow`` Python package is installed. These conditions are likely met if the commands ``which ecflow_server`` and ``python -c "import ecflow"`` succeed.
