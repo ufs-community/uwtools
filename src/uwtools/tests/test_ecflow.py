@@ -902,6 +902,7 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
     export ECF_NAME=%ECF_NAME%
     export ECF_PASS=%ECF_PASS%
     export ECF_PORT=%ECF_PORT%
+    export ECF_SSL=%ECF_SSL%
     export ECF_TRYNO=%ECF_TRYNO%
     export PATH={conda}/bin/:$PATH
     """.format(conda=os.environ["CONDA_PREFIX"])

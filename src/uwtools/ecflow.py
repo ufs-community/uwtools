@@ -500,6 +500,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
             STR.ECF_NAME,
             STR.ECF_PASS,
             STR.ECF_PORT,
+            STR.ECF_SSL,
             STR.ECF_TRYNO,
         )
         lines = [f"export {k}=%{k}%" for k in keys]
