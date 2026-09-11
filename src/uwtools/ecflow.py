@@ -115,7 +115,7 @@ def server(
         thread.initial.wait()
         if thread.proc:
             assert thread.port
-            c = _client(thread.port, insecure)
+            c = _client(thread.port, insecure, prefix)
             log.info("Halting")
             c.halt_server()
             log.info("Checkpointing")
@@ -129,16 +129,17 @@ def server(
     validate(config)
     env = deepcopy(config.data[STR.ecflow][STR.server])
     ssl_cfg = env.get(STR.ECF_SSL)
+    prefix = ssl_cfg if isinstance(ssl_cfg, str) else None
     certsetup()
     env[STR.ECF_HOST] = socket.gethostname()
     if insecure or ssl_cfg is False:
         env.pop(STR.ECF_SSL, None)  # ensure ECF_SSL is unset
     else:
-        env[STR.ECF_SSL] = ssl_cfg if isinstance(ssl_cfg, str) else "1"
+        env[STR.ECF_SSL] = prefix or "1"
     thread = _ServerThread(target=_server_start, args=[env, port, insecure])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
-    _server_wait(thread, insecure, env if report else None)
+    _server_wait(thread, insecure, env if report else None, prefix)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
@@ -426,17 +427,30 @@ class _ServerThread(Thread):
         self.terminal = Event()
 
 
-def _client(port: int, insecure: bool) -> Client:
+def _client(port: int, insecure: bool, prefix: str | None) -> Client:
     """
     Returns an ecFlow client, optionally with SSL enabled.
 
     :param port: TCP port to use.
     :param insecure: Start the server without SSL security.
+    :param prefix: Certificate-filename prefix (None => use the default certificate triplet).
     """
     hostname = socket.gethostname()
     c = Client(hostname, str(port))
     if not insecure:
-        c.enable_ssl()
+        # ecFlow resolves the client certificate when enable_ssl() is called, based on ECF_SSL in
+        # the current environment: The shared triplet is used when ECF_SSL is 1, and the
+        # <host>.<port> triplet when it is any other non-empty value. So set ECF_SSL here, then
+        # restore the original environment.
+        ecf_ssl = os.environ.get(STR.ECF_SSL)
+        os.environ[STR.ECF_SSL] = prefix or "1"
+        try:
+            c.enable_ssl()
+        finally:
+            if ecf_ssl is None:
+                del os.environ[STR.ECF_SSL]
+            else:
+                os.environ[STR.ECF_SSL] = ecf_ssl
     return c
 
 
@@ -556,18 +570,21 @@ def _server_start(env: dict[str, str], port: int | None, insecure: bool) -> None
     thread.initial.set()
 
 
-def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | None) -> None:
+def _server_wait(
+    thread: _ServerThread, insecure: bool, env: dict[str, str] | None, prefix: str | None
+) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
     :param insecure: Do not use SSL.
     :param env: Server variables to report as JSON (None => do not report).
+    :param prefix: Certificate-filename prefix (None => use the default certificate triplet).
     """
     while not thread.terminal.is_set():
         if port := thread.port:
             try:
-                _client(port, insecure).ping()
+                _client(port, insecure, prefix).ping()
             except RuntimeError as e:
                 log.debug("Error pinging server:")
                 for line in str(e).split("\n"):
