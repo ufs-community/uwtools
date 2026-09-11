@@ -8037,7 +8037,7 @@ wxvx:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>[1] 4128514
+<pre>[1] 77469
 </pre>
 </div>
 </div>
@@ -8101,13 +8101,13 @@ wxvx:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>[2026-09-11T03:10:31]     INFO Validating config against internal schema: ecflow
-[2026-09-11T03:10:31]     INFO Schema validation succeeded for ecFlow config
-[2026-09-11T03:10:31]     INFO Generating SSL private key: /home/Paul.Madden/.ecflowrc/ssl/server.key
-[2026-09-11T03:10:31]     INFO Generating SSL certificate: /home/Paul.Madden/.ecflowrc/ssl/server.crt
-[2026-09-11T03:10:31]     INFO Generating DH parameters: /home/Paul.Madden/.ecflowrc/ssl/dh2048.pem
-[2026-09-11T03:10:53]     INFO SSL certificate files written to /home/Paul.Madden/.ecflowrc/ssl
-[2026-09-11T03:10:53]     INFO Server started on port 12321
+<pre>[2026-09-11T04:44:14]     INFO Validating config against internal schema: ecflow
+[2026-09-11T04:44:14]     INFO Schema validation succeeded for ecFlow config
+[2026-09-11T04:44:14]     INFO Generating SSL private key: /home/Paul.Madden/.ecflowrc/ssl/server.key
+[2026-09-11T04:44:14]     INFO Generating SSL certificate: /home/Paul.Madden/.ecflowrc/ssl/server.crt
+[2026-09-11T04:44:14]     INFO Generating DH parameters: /home/Paul.Madden/.ecflowrc/ssl/dh2048.pem
+[2026-09-11T04:44:27]     INFO SSL certificate files written to /home/Paul.Madden/.ecflowrc/ssl
+[2026-09-11T04:44:27]     INFO Server started on port 48294
 </pre>
 </div>
 </div>
@@ -8194,7 +8194,7 @@ export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/en
 <pre><span class="ansi-bold">{</span>
   <span class="ansi-blue-intense-fg ansi-bold">"ECF_HOME"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow"</span><span class="ansi-bold">,</span>
   <span class="ansi-blue-intense-fg ansi-bold">"ECF_HOST"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"uecflow01"</span><span class="ansi-bold">,</span>
-  <span class="ansi-blue-intense-fg ansi-bold">"ECF_PORT"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"12321"</span><span class="ansi-bold">,</span>
+  <span class="ansi-blue-intense-fg ansi-bold">"ECF_PORT"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"48294"</span><span class="ansi-bold">,</span>
   <span class="ansi-blue-intense-fg ansi-bold">"ECF_SSL"</span><span class="ansi-bold">:</span> <span class="ansi-green-fg">"1"</span>
 <span class="ansi-bold">}</span>
 </pre>
@@ -8239,7 +8239,7 @@ export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/en
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>ECF_HOME: /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow
 ECF_HOST: uecflow01
-ECF_PORT: 12321
+ECF_PORT: 48294
 ECF_SSL: 1
 </pre>
 </div>
@@ -8278,7 +8278,7 @@ ECF_SSL: 1
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>ping server(uecflow01:12321) succeeded in 00:00:00.004590  ~4 milliseconds
+<pre>ping server(uecflow01:48294) succeeded in 00:00:00.004476  ~4 milliseconds
 </pre>
 </div>
 </div>
@@ -8397,8 +8397,8 @@ ecflow_client<span class="w"> </span>--stats<span class="w"> </span><span class=
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>[2026-09-11T03:10:56]     INFO Validating config against internal schema: ecflow
-[2026-09-11T03:10:56]     INFO Schema validation succeeded for ecFlow config
+<pre>[2026-09-11T04:44:31]     INFO Validating config against internal schema: ecflow
+[2026-09-11T04:44:31]     INFO Schema validation succeeded for ecFlow config
 </pre>
 </div>
 </div>
@@ -8854,14 +8854,11 @@ endsuite
 extract_grids: queued
 verification:  queued
   fetch_truth: complete
-extract_grids: active
-verification:  queued
-  fetch_truth: complete
 extract_grids: complete
 verification:  submitted
   fetch_truth: complete
 extract_grids: complete
-verification:  submitted
+verification:  active
   fetch_truth: complete
 extract_grids: complete
 verification:  complete
@@ -8913,8 +8910,7 @@ verification:  complete
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>-rw-r--r-- 1 Paul.Madden gsd-hpcs 2368 Sep 11 03:12 uecflow01.12321.ecf.check
--rw-r--r-- 1 Paul.Madden gsd-hpcs 3984 Sep 11 03:13 uecflow01.12321.ecf.log
+<pre>-rw-r--r-- 1 Paul.Madden gsd-hpcs 3692 Sep 11 04:45 uecflow01.48294.ecf.log
 </pre>
 </div>
 </div>
@@ -9052,8 +9048,8 @@ export ECF_HOST=uecflow01
 export ECF_JOB=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/extract_grids.job1
 export ECF_JOBOUT=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/extract_grids.1
 export ECF_NAME=/vx/extract_grids
-export ECF_PASS=jhTE3jUL
-export ECF_PORT=12321
+export ECF_PASS=Gsa5UvPN
+export ECF_PORT=48294
 export ECF_SSL=1
 export ECF_TRYNO=1
 export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin/:$PATH
@@ -9107,44 +9103,44 @@ wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t g
 + ECF_JOBOUT=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/extract_grids.1
 + export ECF_NAME=/vx/extract_grids
 + ECF_NAME=/vx/extract_grids
-+ export ECF_PASS=jhTE3jUL
-+ ECF_PASS=jhTE3jUL
-+ export ECF_PORT=12321
-+ ECF_PORT=12321
++ export ECF_PASS=Gsa5UvPN
++ ECF_PASS=Gsa5UvPN
++ export ECF_PORT=48294
++ ECF_PORT=48294
 + export ECF_SSL=1
 + ECF_SSL=1
 + export ECF_TRYNO=1
 + ECF_TRYNO=1
 + export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin/:/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin:/home/Paul.Madden/.local/bin:/usr/local/slurm/default/bin:/usr/local/slurm/default/sbin:/home/Paul.Madden/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/apps/hpss/bin:/apps/bin:/apps/local/bin
 + PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin/:/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/envs/demo/bin:/home/Paul.Madden/.local/bin:/usr/local/slurm/default/bin:/usr/local/slurm/default/sbin:/home/Paul.Madden/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/apps/hpss/bin:/apps/bin:/apps/local/bin
-+ init 4129731
-+ export ECF_RID=4129731
-+ ECF_RID=4129731
-+ ecflow_client --init=4129731
++ init 77586
++ export ECF_RID=77586
++ ECF_RID=77586
++ ecflow_client --init=77586
 + export 'CYCLE=2026-09-10 00:00:00'
 + CYCLE='2026-09-10 00:00:00'
 + uw config realize -i /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/config.yaml --key-path wxvx
 + wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t grids
-[2026-09-11T03:12:56]     INFO Schema validation succeeded for config
-[2026-09-11T03:12:56]     INFO Preparing task graph for 'grids'
-[2026-09-11T03:12:56]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx at 20260910 00Z 006: Executing
-[2026-09-11T03:12:57]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx at 20260910 00Z 006: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx
-[2026-09-11T03:12:57]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx at 20260910 00Z 006: Ready
-[2026-09-11T03:12:57]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Executing
-[2026-09-11T03:12:57]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260910/00/atmos/gfs.t00z.pgrb2.1p00.f000.idx
-[2026-09-11T03:12:57]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx
-[2026-09-11T03:12:57]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Ready
-[2026-09-11T03:12:57]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/2t-heightAboveGround-0002.grib2: Executing
-[2026-09-11T03:12:57]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/2t-heightAboveGround-0002.grib2: Ready
-[2026-09-11T03:12:57]     INFO GRIB index data at 20260910 06Z 000: Executing
-[2026-09-11T03:12:57]     INFO GRIB index data at 20260910 06Z 000: Ready
-[2026-09-11T03:12:57]     INFO Forecast grids for GFSFCST: Ready
-[2026-09-11T03:12:57]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Executing
-[2026-09-11T03:12:57]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260910/00/atmos/gfs.t00z.pgrb2.1p00.f000 bytes=34911489-34959098
-[2026-09-11T03:12:57]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2
-[2026-09-11T03:12:57]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Ready
-[2026-09-11T03:12:57]     INFO Truth grids for GFS: Ready
-[2026-09-11T03:12:57]     INFO Grids: Ready
+[2026-09-11T04:44:38]     INFO Schema validation succeeded for config
+[2026-09-11T04:44:38]     INFO Preparing task graph for 'grids'
+[2026-09-11T04:44:39]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx at 20260910 00Z 006: Executing
+[2026-09-11T04:44:40]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx at 20260910 00Z 006: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx
+[2026-09-11T04:44:40]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/gfs.t00z.pgrb2.1p00.f006.ecidx at 20260910 00Z 006: Ready
+[2026-09-11T04:44:40]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Executing
+[2026-09-11T04:44:40]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260910/00/atmos/gfs.t00z.pgrb2.1p00.f000.idx
+[2026-09-11T04:44:40]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx
+[2026-09-11T04:44:40]     INFO GRIB index file /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/gfs.t00z.pgrb2.1p00.f000.idx: Ready
+[2026-09-11T04:44:40]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/2t-heightAboveGround-0002.grib2: Executing
+[2026-09-11T04:44:40]     INFO Forecast grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/forecast/20260910/00/006/2t-heightAboveGround-0002.grib2: Ready
+[2026-09-11T04:44:40]     INFO GRIB index data at 20260910 06Z 000: Executing
+[2026-09-11T04:44:40]     INFO GRIB index data at 20260910 06Z 000: Ready
+[2026-09-11T04:44:40]     INFO Forecast grids for GFSFCST: Ready
+[2026-09-11T04:44:40]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Executing
+[2026-09-11T04:44:40]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Fetching https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260910/00/atmos/gfs.t00z.pgrb2.1p00.f000 bytes=34911489-34959098
+[2026-09-11T04:44:40]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Wrote /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2
+[2026-09-11T04:44:40]     INFO Truth grid /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx/truth/20260910/06/000/2t-heightAboveGround-0002.grib2: Ready
+[2026-09-11T04:44:40]     INFO Truth grids for GFS: Ready
+[2026-09-11T04:44:40]     INFO Grids: Ready
 + complete
 + ecflow_client --complete
 </pre>
