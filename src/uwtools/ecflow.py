@@ -135,7 +135,7 @@ def server(
     else:
         certsetup()
         env[STR.ECF_SSL] = prefix or "1"
-    thread = _ServerThread(target=_server_start, args=[env, port, insecure])
+    thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
     _server_wait(thread, insecure, env if report else None, prefix)
@@ -490,13 +490,12 @@ def _server_report(port: int, env: dict[str, str] | None) -> None:
         print(json.dumps(vars_, indent=2, sort_keys=True), flush=True)
 
 
-def _server_start(env: dict[str, str], port: int | None, insecure: bool) -> None:
+def _server_start(env: dict[str, str], port: int | None) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
     :param env: Environment variables from the server config.
     :param port: TCP port to use (None => random port between ECFLOW_PORT_MIN and ECFLOW_PORT_MAX).
-    :param insecure: Start the server without SSL security.
     """
 
     def complain(error: str, messages: str | None = None) -> None:
@@ -526,9 +525,10 @@ def _server_start(env: dict[str, str], port: int | None, insecure: bool) -> None
 
     cmd = ["ecflow_server"]
     cwd = Path(env[STR.ECF_HOME])
-    env = {**os.environ, **env}
-    if insecure:
-        env.pop(STR.ECF_SSL, None)  # ensure an inherited ECF_SSL does not enable SSL
+    external = dict(os.environ)
+    if STR.ECF_SSL not in env:
+        external.pop(STR.ECF_SSL, None)  # mask any inherited ECF_SSL
+    env = {**external, **env}
     static = port is not None
     thread = cast(_ServerThread, current_thread())
     try:
