@@ -798,10 +798,10 @@ def test_ecflow__client(insecure):
     portnum = 54321
     with (
         patch.object(ecflow, "Client") as Client,
-        patch.dict(os.environ, {STR.ECF_SSL: "pre-existing"}),
+        patch.dict(os.environ, {STR.ECF_SSL: "oldval"}),
     ):
         ecflow._client(port=portnum, insecure=insecure, prefix=None)
-        assert os.environ[STR.ECF_SSL] == "pre-existing"  # restored
+        assert os.environ[STR.ECF_SSL] == "oldval"  # restored
     Client.assert_called_once_with(socket.gethostname(), str(portnum))
     if insecure:
         Client().enable_ssl.assert_not_called()
