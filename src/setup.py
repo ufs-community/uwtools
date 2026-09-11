@@ -26,7 +26,7 @@ meta = json.loads(metasrc.read_text())
 name_conda = meta["name"]
 name_dist = os.environ.get("PYPI_PROJECT_NAME", name_conda)
 name_py = name_conda.replace("-", "_")
-readme = Path(__file__).resolve().parent.parent / "README.md"
+readme = recipe.parent / "README.md"
 
 # Define basic setup configuration.
 
