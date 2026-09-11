@@ -438,19 +438,16 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
     hostname = socket.gethostname()
     c = Client(hostname, str(port))
     if not insecure:
-        # ecFlow resolves the client certificate when enable_ssl() is called, based on ECF_SSL in
-        # the current environment: The shared triplet is used when ECF_SSL is 1, and the
-        # <host>.<port> triplet when it is any other non-empty value. So set ECF_SSL here, then
-        # restore the original environment.
-        ecf_ssl = os.environ.get(STR.ECF_SSL)
+        # Ensure ECF_SSL is set correctly during the enable_ssl() call:
+        val = os.environ.get(STR.ECF_SSL)
         os.environ[STR.ECF_SSL] = prefix or "1"
         try:
             c.enable_ssl()
         finally:
-            if ecf_ssl is None:
+            if val is None:
                 del os.environ[STR.ECF_SSL]
             else:
-                os.environ[STR.ECF_SSL] = ecf_ssl
+                os.environ[STR.ECF_SSL] = val
     return c
 
 
