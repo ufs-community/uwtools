@@ -8209,7 +8209,7 @@ export PATH=/scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/conda/en
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Use <code>jq</code> to set environment variables based on these values. Extract values from this file to use to set some crucial environment variables that will allow the ecFlow client tool, <code>ecflow_client</code>, to successfully communicate with the server:</p>
+<p>Extract values from this file with <code>jq</code> and use them to set some crucial environment variables that will allow the ecFlow client tool, <code>ecflow_client</code>, to successfully communicate with the server:</p>
 </div>
 </div>
 </div>
@@ -8332,7 +8332,7 @@ ecflow_client<span class="w"> </span>--stats<span class="w"> </span><span class=
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now the server is ready to be loaded with a suite definition, provided by the <code>ecflow.suitedef</code> block in <code>config.yaml</code>. The config requires a <code>CYCLE</code> environment variable, which we set here to one we expect to be complete:</p>
+<p>Now the server is ready to be loaded with a suite definition, provided by the <code>ecflow.suitedef</code> block in <code>config.yaml</code>. The <code>app.cycle</code> key in the config requires a <code>CYCLE</code> environment variable, which we export here with a value identifying a GFS we expect to be complete at the current time:</p>
 </div>
 </div>
 </div>
@@ -8888,7 +8888,7 @@ verification:  complete
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>First, note that the server has created, in the <code>ECF_HOME</code> directory, a log file based on the hostname of the system it is running on. These can be useful for debugging, but its contents are beyond the scope of this tutorial. Depending on when you look, you may also see a <code>.check</code> file, containing a checkpoint of the workflow state, which can be used to resume a workflow if the server is restarted.</p>
+<p>First, note that the server has created, in the <code>ECF_HOME</code> directory, a log file based on the hostname of the system it is running on. These can be useful for debugging, but its contents are beyond the scope of this tutorial. (Depending on when you look, you may also see a <code>.check</code> file, containing a checkpoint of the workflow state, which can be used to resume a workflow if the server is restarted. The ecFlow server writes this file periodically.)</p>
 </div>
 </div>
 </div>
@@ -8999,7 +8999,7 @@ verification:  complete
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>We previously saw the <code>extract_grids.ecf</code>, <code>fetch_truth.ecf</code>, and <code>verification.ecf</code> template files. The server rendered these to ready-to-run scripts <code>extract_grids.job1</code>, <code>fetch_truth.job1</code>, and <code>verification.job1</code>, respectively. (The <code>1</code> in the <code>.job1</code> filename extensions indicates that these files belong to the first of potentially multiple attempts to run this task. If it had been necessary to retry any of these jobs, corresponding <code>.job2</code> files would have been created.)</p>
 <p>Let's examine the files created for the <code>extract_grids</code> task as an example.</p>
-<p>The file <code>extract_grids.job1</code> is the concatenation of the header file <code>common.h</code>, the header file <code>server.h</code>, and the value of <code>ecflow.suitedef.suite_vx.task_extract_grids.script.body</code> from <code>config.yaml</code>. Here it is:</p>
+<p>The file <code>extract_grids.job1</code> is the concatenation of the header file <code>common.h</code>, the header file <code>server.h</code>, and the value of <code>ecflow.suitedef.suite_vx.task_extract_grids.script.body</code> from <code>config.yaml</code>. When creating it, the ecFlow server replaced <code>%VAR%</code> references with appropriate values. Here it is:</p>
 </div>
 </div>
 </div>
@@ -9158,7 +9158,7 @@ wxvx -c /scratch4/BMC/gsd-hpcs/Paul.Madden/uwtools/notebooks/ecflow/vx.yaml -t g
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Finally, we can consider the files created by <code>wxvx</code>.</p>
+<p>Finally, we can examine the files created by <code>wxvx</code>.</p>
 </div>
 </div>
 </div>
