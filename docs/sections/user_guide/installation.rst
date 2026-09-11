@@ -70,7 +70,6 @@ Build the ``uwtools`` Package Locally
 
       conda create -y -n uwtools -c $CONDA_PREFIX/conda-bld -c conda-forge --override-channels uwtools[=<version>]
 
-
 Install from PyPI
 -----------------
 
@@ -96,3 +95,38 @@ Install from PyPI
 .. note::
    
    ecFlow is not currently published to PyPI and so cannot be installed automatically as a dependency of ``uwtools``, but the ``ecflow`` mode can still be used when ecFlow and its Python bindings are made available by other means. For example, they could be installed with conda, built from source, or made available by loading a system module. In any case, ``PATH`` must include the directory where ``ecflow_server`` and ``ecflow_client`` are installed, and ``PYTHONPATH`` must include the directory where the ``ecflow`` Python package is installed. These conditions are likely met if the commands ``which ecflow_server`` and ``python -c "import ecflow"`` succeed.
+
+Execute with ``uvx``
+--------------------
+
+If you have `uv <https://docs.astral.sh/uv/>`_ installed, you can use its ``uvx`` tool to execute the ``uw`` CLI directly without explicit installation, e.g.:
+
+.. code-block:: text
+
+   $ uvx --from unified-workflow-tools uw config --help
+   usage: uw config [-h] [--version] ACTION ...
+
+   Handle configs
+
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --version
+         Show version info and exit
+
+   Positional arguments:
+     ACTION
+       compare
+         Compare configs
+       compose
+         Compose configs
+       realize
+         Realize config
+       validate
+         Validate config
+
+A specific version may be requested, e.g. ``uvx --from unified-workflow-tools==<version> uw config --help``.
+
+.. note::
+
+   Since ``uvx`` installs from PyPI, the ecFlow caveat described above applies: The ``ecflow`` mode can be used only if ecFlow and its Python bindings are made available by other means.

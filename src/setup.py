@@ -34,12 +34,17 @@ kwargs = {
     "description": "Tools for configuring and executing weather workflows.",
     "entry_points": {"console_scripts": ["uw = %s.cli:main" % name_py]},
     "include_package_data": True,
-    "long_description": readme.read_text(),
-    "long_description_content_type": "text/markdown",
     "name": name_dist,
     "packages": find_packages(exclude=["%s.tests" % name_py], include=[name_py, "%s.*" % name_py]),
     "version": meta["version"],
 }
+
+if readme.is_file():
+    kwargs["long_description"] = readme.read_text()
+    kwargs["long_description_content_type"] = "text/markdown"
+elif os.environ.get("PYPI_PROJECT_NAME"):
+    msg = "Required README not found: %s" % readme
+    raise FileNotFoundError(msg)
 
 # Define dependency packages for non-devshell installs.
 

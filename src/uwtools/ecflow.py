@@ -102,20 +102,21 @@ def server(
     """
 
     def certsetup() -> None:
-        if not insecure and ssl_cfg is not False:
-            prefix = ssl_cfg if isinstance(ssl_cfg, str) else None
-            try:
-                _ssl_check(prefix)
-            except UWSSLCertificateError:
-                if ssl_cfg in [True, None]:
-                    _ssl_provision()
+        try:
+            _ssl_check(prefix)
+        except UWSSLCertificateError as e:
+            if ecf_ssl in [True, None]:
+                _ssl_provision()
+            else:
+                msg = "Named SSL certificate files not found for ECF_SSL=%s" % ecf_ssl
+                raise UWSSLCertificateError(msg) from e
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
         thread.terminal.set()
         thread.initial.wait()
         if thread.proc:
             assert thread.port
-            c = _client(thread.port, insecure)
+            c = _client(thread.port, insecure, prefix)
             log.info("Halting")
             c.halt_server()
             log.info("Checkpointing")
@@ -128,14 +129,19 @@ def server(
     config.dereference()
     validate(config)
     env = deepcopy(config.data[STR.ecflow][STR.server])
-    ssl_cfg = env.get(STR.ECF_SSL)
-    certsetup()
-    ssl_env = "" if insecure or ssl_cfg is False else ssl_cfg if isinstance(ssl_cfg, str) else "1"
-    env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl_env})
+    env[STR.ECF_HOST] = socket.gethostname()
+    ecf_ssl = env.get(STR.ECF_SSL)
+    prefix = ecf_ssl if isinstance(ecf_ssl, str) else None
+    insecure = insecure or ecf_ssl is False
+    if insecure:
+        env.pop(STR.ECF_SSL, None)
+    else:
+        certsetup()
+        env[STR.ECF_SSL] = prefix or "1"
     thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
-    _server_wait(thread, insecure, env if report else None)
+    _server_wait(thread, insecure, env if report else None, prefix)
     thread.join()
     if thread.error:
         raise UWError(thread.error)
@@ -423,17 +429,27 @@ class _ServerThread(Thread):
         self.terminal = Event()
 
 
-def _client(port: int, insecure: bool) -> Client:
+def _client(port: int, insecure: bool, prefix: str | None) -> Client:
     """
     Returns an ecFlow client, optionally with SSL enabled.
 
     :param port: TCP port to use.
     :param insecure: Start the server without SSL security.
+    :param prefix: Custom certificate-filename prefix.
     """
     hostname = socket.gethostname()
     c = Client(hostname, str(port))
     if not insecure:
-        c.enable_ssl()
+        # Ensure ECF_SSL is set correctly during the enable_ssl() call:
+        val = os.environ.get(STR.ECF_SSL)
+        os.environ[STR.ECF_SSL] = prefix or "1"
+        try:
+            c.enable_ssl()
+        finally:
+            if val is None:
+                os.environ.pop(STR.ECF_SSL, None)
+            else:
+                os.environ[STR.ECF_SSL] = val
     return c
 
 
@@ -500,6 +516,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
             STR.ECF_NAME,
             STR.ECF_PASS,
             STR.ECF_PORT,
+            *([STR.ECF_SSL] if STR.ECF_SSL in env else []),  # omit ECF_SSL in insecure mode
             STR.ECF_TRYNO,
         )
         lines = [f"export {k}=%{k}%" for k in keys]
@@ -511,7 +528,10 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
 
     cmd = ["ecflow_server"]
     cwd = Path(env[STR.ECF_HOME])
-    env = {**os.environ, **env}
+    external = dict(os.environ)
+    if STR.ECF_SSL not in env:
+        external.pop(STR.ECF_SSL, None)  # mask any inherited ECF_SSL
+    env = {**external, **env}
     static = port is not None
     thread = cast(_ServerThread, current_thread())
     try:
@@ -549,18 +569,21 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
     thread.initial.set()
 
 
-def _server_wait(thread: _ServerThread, insecure: bool, env: dict[str, str] | None) -> None:
+def _server_wait(
+    thread: _ServerThread, insecure: bool, env: dict[str, str] | None, prefix: str | None
+) -> None:
     """
     Wait for the server to respond to a ping, then optionally report its details.
 
     :param thread: The running server thread.
     :param insecure: Do not use SSL.
     :param env: Server variables to report as JSON (None => do not report).
+    :param prefix: Custom certificate-filename prefix.
     """
     while not thread.terminal.is_set():
         if port := thread.port:
             try:
-                _client(port, insecure).ping()
+                _client(port, insecure, prefix).ping()
             except RuntimeError as e:
                 log.debug("Error pinging server:")
                 for line in str(e).split("\n"):
