@@ -99,7 +99,7 @@ Install from PyPI
 Execute with ``uvx``
 --------------------
 
-If you have `uv <https://docs.astral.sh/uv/>`_ installed, you can use its ``uvx`` tool to execute the ``uw`` CLI directly without explicit installagion, e.g.:
+If you have `uv <https://docs.astral.sh/uv/>`_ installed, you can use its ``uvx`` tool to execute the ``uw`` CLI directly without explicit installation, e.g.:
 
 .. code-block:: text
 
