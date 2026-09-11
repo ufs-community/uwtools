@@ -105,15 +105,15 @@ If you have `uv <https://docs.astral.sh/uv/>`_ installed, you can use its ``uvx`
 
    $ uvx --from unified-workflow-tools uw config --help
    usage: uw config [-h] [--version] ACTION ...
-   
+
    Handle configs
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info and exit
-   
+
    Positional arguments:
      ACTION
        compare
@@ -124,3 +124,9 @@ If you have `uv <https://docs.astral.sh/uv/>`_ installed, you can use its ``uvx`
          Realize config
        validate
          Validate config
+
+A specific version may be requested, e.g. ``uvx --from unified-workflow-tools==<version> uw config --help``.
+
+.. note::
+
+   Since ``uvx`` installs from PyPI, the ecFlow caveat described above applies: The ``ecflow`` mode can be used only if ecFlow and its Python bindings are made available by other means.
