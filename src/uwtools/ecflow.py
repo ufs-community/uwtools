@@ -516,7 +516,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
             STR.ECF_NAME,
             STR.ECF_PASS,
             STR.ECF_PORT,
-            *([STR.ECF_SSL] if STR.ECF_SSL in env else []),
+            *([STR.ECF_SSL] if STR.ECF_SSL in env else []),  # omit ECF_SSL in insecure mode
             STR.ECF_TRYNO,
         )
         lines = [f"export {k}=%{k}%" for k in keys]
