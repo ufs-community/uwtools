@@ -130,8 +130,11 @@ def server(
     env = deepcopy(config.data[STR.ecflow][STR.server])
     ssl_cfg = env.get(STR.ECF_SSL)
     certsetup()
-    ssl_env = "" if insecure or ssl_cfg is False else ssl_cfg if isinstance(ssl_cfg, str) else "1"
-    env.update({STR.ECF_HOST: socket.gethostname(), STR.ECF_SSL: ssl_env})
+    env[STR.ECF_HOST] = socket.gethostname()
+    if insecure or ssl_cfg is False:
+        env.pop(STR.ECF_SSL, None)  # ensure ECF_SSL is unset
+    else:
+        env[STR.ECF_SSL] = ssl_cfg if isinstance(ssl_cfg, str) else "1"
     thread = _ServerThread(target=_server_start, args=[env, port])
     signal.signal(signal.SIGINT, terminate)
     thread.start()
@@ -500,7 +503,7 @@ def _server_start(env: dict[str, str], port: int | None) -> None:
             STR.ECF_NAME,
             STR.ECF_PASS,
             STR.ECF_PORT,
-            STR.ECF_SSL,
+            *([STR.ECF_SSL] if STR.ECF_SSL in env else []),
             STR.ECF_TRYNO,
         )
         lines = [f"export {k}=%{k}%" for k in keys]

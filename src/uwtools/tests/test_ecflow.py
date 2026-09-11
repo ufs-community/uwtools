@@ -166,7 +166,7 @@ def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
     m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: True}}}
     ecflow.server(config=m.config_path, port=3141, insecure=True)
     env, _ = m.thread_cls.call_args.kwargs["args"]
-    assert env[STR.ECF_SSL] == ""
+    assert STR.ECF_SSL not in env
 
 
 def test_ecflow_server__no_report_passes_none(server_mocks):
@@ -208,7 +208,6 @@ def test_ecflow_server__env_insecure_omits_ssl(server_mocks):
     assert m.server_wait.call_args.args[2] == {
         STR.ECF_HOME: "/ecf",
         STR.ECF_HOST: "server.hostname.com",
-        STR.ECF_SSL: "",
     }
 
 
@@ -887,7 +886,7 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
     ):
-        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path, STR.ECF_SSL: "1"}, port=3141)
     assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
     assert run_shell_cmd.call_args.kwargs["cwd"] == tmp_path
     assert thread.error is None
@@ -911,16 +910,31 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
 
 def test_ecflow__server_start__fixed_port_insecure(tmp_path):
     def f(*_args, **_kwargs):
+        run_shell_cmd.call_args.kwargs["callback"](proc)
         thread.terminal.set()
         return True, "all good"
 
+    header = tmp_path / "server.h"
+    proc = object()
     thread = ecflow._ServerThread()
     with (
+        patch.dict(os.environ, {}),
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
     ):
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
     assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
+    expected = """
+    export ECF_HOST=%ECF_HOST%
+    export ECF_JOB=%ECF_JOB%
+    export ECF_JOBOUT=%ECF_JOBOUT%
+    export ECF_NAME=%ECF_NAME%
+    export ECF_PASS=%ECF_PASS%
+    export ECF_PORT=%ECF_PORT%
+    export ECF_TRYNO=%ECF_TRYNO%
+    export PATH={conda}/bin/:$PATH
+    """.format(conda=os.environ["CONDA_PREFIX"])
+    assert header.read_text() == dedent(expected).lstrip()
 
 
 def test_ecflow__server_start__fixed_port_other_failure(tmp_path, uwcaplog):
