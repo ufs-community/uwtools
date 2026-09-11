@@ -914,12 +914,11 @@ def test_ecflow__server_start__fixed_port_ssl(tmp_path):
 
 def test_ecflow__server_start__fixed_port_insecure(tmp_path):
     def f(*_args, **_kwargs):
-        run_shell_cmd.call_args.kwargs["callback"](proc)
+        run_shell_cmd.call_args.kwargs["callback"](None)
         thread.terminal.set()
         return True, "all good"
 
     header = tmp_path / "server.h"
-    proc = object()
     thread = ecflow._ServerThread()
     with (
         patch.dict(os.environ, {STR.ECF_SSL: "1"}),
