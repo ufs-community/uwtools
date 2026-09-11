@@ -165,8 +165,9 @@ def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
     m = server_mocks
     m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: True}}}
     ecflow.server(config=m.config_path, port=3141, insecure=True)
-    env, _ = m.thread_cls.call_args.kwargs["args"]
+    env, _, insecure = m.thread_cls.call_args.kwargs["args"]
     assert STR.ECF_SSL not in env
+    assert insecure is True
 
 
 def test_ecflow_server__no_report_passes_none(server_mocks):
@@ -213,9 +214,10 @@ def test_ecflow_server__env_insecure_omits_ssl(server_mocks):
 
 def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
     ecflow.server(config=server_mocks.config_path, port=3141)
-    env, port = server_mocks.thread_cls.call_args.kwargs["args"]
+    env, port, insecure = server_mocks.thread_cls.call_args.kwargs["args"]
     assert env[STR.ECF_SSL] == "1"
     assert port == 3141
+    assert insecure is False
 
 
 @mark.parametrize("ecf_ssl", [None, True, False, "myhost.8888"])
@@ -918,13 +920,13 @@ def test_ecflow__server_start__fixed_port_insecure(tmp_path):
     proc = object()
     thread = ecflow._ServerThread()
     with (
-        patch.dict(os.environ),
+        patch.dict(os.environ, {STR.ECF_SSL: "1"}),
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
     ):
-        os.environ.pop(STR.ECF_SSL, None)
-        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141, insecure=True)
     assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
+    assert STR.ECF_SSL not in run_shell_cmd.call_args.kwargs["env"]
     expected = """
     export ECF_HOST=%ECF_HOST%
     export ECF_JOB=%ECF_JOB%
