@@ -444,7 +444,7 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
             c.enable_ssl()
         finally:
             if val is None:
-                del os.environ[STR.ECF_SSL]
+                os.environ.pop(STR.ECF_SSL, None)
             else:
                 os.environ[STR.ECF_SSL] = val
     return c
