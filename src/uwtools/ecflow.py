@@ -102,13 +102,11 @@ def server(
     """
 
     def certsetup() -> None:
-        if not insecure and ssl_cfg is not False:
-            prefix = ssl_cfg if isinstance(ssl_cfg, str) else None
-            try:
-                _ssl_check(prefix)
-            except UWSSLCertificateError:
-                if ssl_cfg in [True, None]:
-                    _ssl_provision()
+        try:
+            _ssl_check(prefix)
+        except UWSSLCertificateError:
+            if ecf_ssl in [True, None]:
+                _ssl_provision()
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
         thread.terminal.set()
@@ -128,13 +126,14 @@ def server(
     config.dereference()
     validate(config)
     env = deepcopy(config.data[STR.ecflow][STR.server])
-    ssl_cfg = env.get(STR.ECF_SSL)
-    prefix = ssl_cfg if isinstance(ssl_cfg, str) else None
-    certsetup()
     env[STR.ECF_HOST] = socket.gethostname()
-    if insecure or ssl_cfg is False:
-        env.pop(STR.ECF_SSL, None)  # ensure ECF_SSL is unset
+    ecf_ssl = env.get(STR.ECF_SSL)
+    prefix = ecf_ssl if isinstance(ecf_ssl, str) else None
+    insecure = insecure or ecf_ssl is False
+    if insecure:
+        env.pop(STR.ECF_SSL, None)
     else:
+        certsetup()
         env[STR.ECF_SSL] = prefix or "1"
     thread = _ServerThread(target=_server_start, args=[env, port, insecure])
     signal.signal(signal.SIGINT, terminate)
