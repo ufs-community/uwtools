@@ -918,10 +918,11 @@ def test_ecflow__server_start__fixed_port_insecure(tmp_path):
     proc = object()
     thread = ecflow._ServerThread()
     with (
-        patch.dict(os.environ, {}),
+        patch.dict(os.environ),
         patch.object(ecflow, "current_thread", return_value=thread),
         patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
     ):
+        os.environ.pop(STR.ECF_SSL, None)
         ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
     assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
     expected = """
