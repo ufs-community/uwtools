@@ -480,7 +480,7 @@ def _server_report(port: int, env: dict[str, str] | None) -> None:
         print(json.dumps(vars_, indent=2, sort_keys=True), flush=True)
 
 
-def _server_start(env: dict[str, str], port: int | None, insecure: bool = False) -> None:
+def _server_start(env: dict[str, str], port: int | None, insecure: bool) -> None:
     """
     Thread target: launch ecflow_server, hunting for a free port if none was specified.
 
