@@ -433,7 +433,7 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
 
     :param port: TCP port to use.
     :param insecure: Start the server without SSL security.
-    :param prefix: Certificate-filename prefix (None => use the default certificate triplet).
+    :param prefix: Custom certificate-filename prefix.
     """
     hostname = socket.gethostname()
     c = Client(hostname, str(port))
@@ -576,7 +576,7 @@ def _server_wait(
     :param thread: The running server thread.
     :param insecure: Do not use SSL.
     :param env: Server variables to report as JSON (None => do not report).
-    :param prefix: Certificate-filename prefix (None => use the default certificate triplet).
+    :param prefix: Custom certificate-filename prefix.
     """
     while not thread.terminal.is_set():
         if port := thread.port:
