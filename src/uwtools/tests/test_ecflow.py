@@ -147,6 +147,16 @@ def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
     m.ssl_check.assert_called_once_with("myhost.3141")
 
 
+def test_ecflow_server__ecf_ssl_string_missing_cert_raises(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: "myhost.3141"}}}
+    m.ssl_check.side_effect = UWSSLCertificateError
+    msg = "Named SSL certificate files not found for ECF_SSL=myhost.3141"
+    with raises(UWSSLCertificateError, match=msg):
+        ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_not_called()
+
+
 def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
     m = server_mocks
     m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: True}}}
@@ -218,7 +228,7 @@ def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
     assert port == 3141
 
 
-@mark.parametrize("ecf_ssl", [None, True, False, "myhost.8888"])
+@mark.parametrize("ecf_ssl", [None, True, False])
 def test_ecflow_server__ssl_provision(ecf_ssl, server_mocks):
     server_mocks.ssl_check.side_effect = UWSSLCertificateError
     server_mocks.cfg.data["ecflow"]["server"][STR.ECF_SSL] = ecf_ssl

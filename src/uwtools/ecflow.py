@@ -104,9 +104,12 @@ def server(
     def certsetup() -> None:
         try:
             _ssl_check(prefix)
-        except UWSSLCertificateError:
+        except UWSSLCertificateError as e:
             if ecf_ssl in [True, None]:
                 _ssl_provision()
+            else:
+                msg = "Named SSL certificate files not found for ECF_SSL=%s" % ecf_ssl
+                raise UWSSLCertificateError(msg) from e
 
     def terminate(_signum: int, _frame: FrameType | None) -> None:
         thread.terminal.set()
