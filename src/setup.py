@@ -26,7 +26,7 @@ meta = json.loads(metasrc.read_text())
 name_conda = meta["name"]
 name_dist = os.environ.get("PYPI_PROJECT_NAME", name_conda)
 name_py = name_conda.replace("-", "_")
-readme = recipe.parent / "README.md"
+readme = Path(__file__).resolve().parent.parent / "README.md"
 
 # Define basic setup configuration.
 
@@ -34,12 +34,17 @@ kwargs = {
     "description": "Tools for configuring and executing weather workflows.",
     "entry_points": {"console_scripts": ["uw = %s.cli:main" % name_py]},
     "include_package_data": True,
-    "long_description": readme.read_text(),
-    "long_description_content_type": "text/markdown",
     "name": name_dist,
     "packages": find_packages(exclude=["%s.tests" % name_py], include=[name_py, "%s.*" % name_py]),
     "version": meta["version"],
 }
+
+if readme.is_file():
+    kwargs["long_description"] = readme.read_text()
+    kwargs["long_description_content_type"] = "text/markdown"
+elif os.environ.get("PYPI_PROJECT_NAME"):
+    msg = "Required README not found: %s" % readme
+    raise FileNotFoundError(msg)
 
 # Define dependency packages for non-devshell installs.
 
