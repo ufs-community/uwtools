@@ -179,12 +179,7 @@ class _RocotoIterator:
     @property
     def _query_stmt(self) -> str:
         if self._all:
-            return "".join(
-                [
-                    "select state from jobs where cycle=:cycle and id in ",
-                    "(select max(id) from jobs where cycle=:cycle group by taskname)",
-                ]
-            )
+            return "select state from jobs where cycle=:cycle"
         return "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
 
     def _report(self) -> None:
