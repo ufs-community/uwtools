@@ -236,7 +236,10 @@ class _RocotoIterator:
     @property
     def _states(self) -> dict:
         return {
-            self.State.ACTIVE: [ROCOTO.QUEUED, ROCOTO.RUNNING],
+            self.State.ACTIVE: [
+                ROCOTO.QUEUED,
+                ROCOTO.RUNNING,
+            ],
             self.State.INACTIVE: [
                 ROCOTO.COMPLETE,
                 ROCOTO.DEAD,
@@ -244,7 +247,12 @@ class _RocotoIterator:
                 ROCOTO.STUCK,
                 ROCOTO.SUCCEEDED,
             ],
-            self.State.TRANSIENT: [ROCOTO.CREATED, ROCOTO.DYING, ROCOTO.STALLED, ROCOTO.SUBMITTING],
+            self.State.TRANSIENT: [
+                ROCOTO.CREATED,
+                ROCOTO.DYING,
+                ROCOTO.STALLED,
+                ROCOTO.SUBMITTING,
+            ],
         }
 
 
