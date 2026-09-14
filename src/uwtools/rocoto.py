@@ -120,12 +120,7 @@ class _RocotoIterator:
         TRANSIENT = auto()
 
     def __init__(
-        self,
-        cycle: datetime,
-        database: Path,
-        rate: int,
-        task: str | None,
-        workflow: Path,
+        self, cycle: datetime, database: Path, rate: int, task: str | None, workflow: Path
     ):
         self._cycle = cycle
         self._database = database
