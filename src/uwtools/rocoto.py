@@ -169,10 +169,8 @@ class _RocotoIterator:
 
     @property
     def _query_data(self) -> dict:
-        data: dict[str, int | str | None] = {
-            ROCOTO.cycle: int(self._cycle.replace(tzinfo=timezone.utc).timestamp())
-        }
-        if not self._all:
+        data: dict = {ROCOTO.cycle: int(self._cycle.replace(tzinfo=timezone.utc).timestamp())}
+        if self._task:
             data[ROCOTO.taskname] = self._task
         return data
 
@@ -181,8 +179,8 @@ class _RocotoIterator:
         terms = ["cycle=:cycle"]
         if self._task:
             terms.append("taskname=:taskname")
-        where = "where %s" % " and ".join(terms)
-        return f"select state from jobs {where} order by id desc"  # noqa: S608
+        constraints = " and ".join(terms)
+        return f"select state from jobs where {constraints} order by id desc"  # noqa: S608
 
     def _report(self) -> None:
         cmd = "rocotostat -d %s -w %s" % (self._database, self._workflow)
