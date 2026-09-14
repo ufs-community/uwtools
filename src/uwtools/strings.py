@@ -65,6 +65,17 @@ class _ROCOTO(_ValsMatchKeys):
     Rocoto strings.
     """
 
+    COMPLETE: str = _
+    CREATED: str = _
+    DEAD: str = _
+    DYING: str = _
+    ERROR: str = _
+    QUEUED: str = _
+    RUNNING: str = _
+    STALLED: str = _
+    STUCK: str = _
+    SUBMITTING: str = _
+    SUCCEEDED: str = _
     account: str = _
     and_: str = "and"
     attrs: str = _

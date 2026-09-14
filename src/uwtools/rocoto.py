@@ -219,7 +219,8 @@ class _RocotoIterator:
         ):
             return state
         return next(
-            (state for state in states if state not in ["COMPLETE", "SUCCEEDED"]), "COMPLETE"
+            (state for state in states if state not in [ROCOTO.COMPLETE, ROCOTO.SUCCEEDED]),
+            ROCOTO.COMPLETE,
         )
 
     @property
@@ -235,9 +236,15 @@ class _RocotoIterator:
     @property
     def _states(self) -> dict:
         return {
-            self.State.ACTIVE: ["QUEUED", "RUNNING"],
-            self.State.INACTIVE: ["COMPLETE", "DEAD", "ERROR", "STUCK", "SUCCEEDED"],
-            self.State.TRANSIENT: ["CREATED", "DYING", "STALLED", "SUBMITTING"],
+            self.State.ACTIVE: [ROCOTO.QUEUED, ROCOTO.RUNNING],
+            self.State.INACTIVE: [
+                ROCOTO.COMPLETE,
+                ROCOTO.DEAD,
+                ROCOTO.ERROR,
+                ROCOTO.STUCK,
+                ROCOTO.SUCCEEDED,
+            ],
+            self.State.TRANSIENT: [ROCOTO.CREATED, ROCOTO.DYING, ROCOTO.STALLED, ROCOTO.SUBMITTING],
         }
 
 
