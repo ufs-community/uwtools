@@ -256,10 +256,12 @@ class TestRocotoIterator:
     def test_rocoto__RocotoIterator__query_stmt(self, all_, instance):
         instance._task = None if all_ else "foo"
         if all_:
-            assert instance._query_stmt == "select state from jobs where cycle=:cycle"
+            assert (
+                instance._query_stmt == "select state from jobs where cycle=:cycle order by id desc"
+            )
         else:
             expected = (
-                "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
+                "select state from jobs where cycle=:cycle and taskname=:taskname order by id desc"
             )
             assert instance._query_stmt == expected
 

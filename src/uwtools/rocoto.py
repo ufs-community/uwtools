@@ -178,9 +178,11 @@ class _RocotoIterator:
 
     @property
     def _query_stmt(self) -> str:
-        if self._all:
-            return "select state from jobs where cycle=:cycle"
-        return "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
+        terms = ["cycle=:cycle"]
+        if self._task:
+            terms.append("taskname=:taskname")
+        where = "where %s" % " and ".join(terms)
+        return f"select state from jobs {where} order by id desc"  # noqa: S608
 
     def _report(self) -> None:
         cmd = "rocotostat -d %s -w %s" % (self._database, self._workflow)
