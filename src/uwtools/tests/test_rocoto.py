@@ -223,25 +223,48 @@ class TestRocotoIterator:
     def test_rocoto__RocotoIterator__cursor__no_file(self, instance):
         assert instance._cursor is None
 
-    def test_rocoto__RocotoIterator__iterate(self, instance, logged):
+    @mark.parametrize(
+        ("all_", "task_arg"),
+        [
+            (False, "-t foo"),
+            (True, "-a"),
+        ],
+    )
+    def test_rocoto__RocotoIterator__iterate(self, all_, task_arg, instance, logged):
+        instance._task = None if all_ else "foo"
         retval = (True, "")
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             assert instance._run() is True
         run_shell_cmd.assert_called_once_with(
-            "rocotorun -d %s -w %s -t %s"
-            % (instance._database, instance._workflow, instance._task),
+            "rocotorun -d %s -w %s %s" % (instance._database, instance._workflow, task_arg),
             quiet=True,
         )
         assert logged("Iterating workflow")
 
-    def test_rocoto__RocotoIterator__query_data(self, instance):
-        assert instance._query_data == {"taskname": "foo", "cycle": 1753099200}
+    @mark.parametrize(
+        ("all_", "expected"),
+        [
+            (False, {"taskname": "foo", "cycle": 1753099200}),
+            (True, {"cycle": 1753099200}),
+        ],
+    )
+    def test_rocoto__RocotoIterator__query_data(self, all_, expected, instance):
+        instance._task = None if all_ else "foo"
+        assert instance._query_data == expected
 
-    def test_rocoto__RocotoIterator__query_stmt(self, instance):
-        assert (
-            instance._query_stmt
-            == "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
-        )
+    @mark.parametrize("all_", [False, True])
+    def test_rocoto__RocotoIterator__query_stmt(self, all_, instance):
+        instance._task = None if all_ else "foo"
+        if all_:
+            assert instance._query_stmt == (
+                "select state from jobs where cycle=:cycle and id in "
+                "(select max(id) from jobs where cycle=:cycle group by taskname)"
+            )
+        else:
+            expected = (
+                "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
+            )
+            assert instance._query_stmt == expected
 
     @mark.parametrize("create_database", [True, False])
     def test_rocoto__RocotoIterator__report(self, create_database, instance, logged):
@@ -282,8 +305,45 @@ class TestRocotoIterator:
         self.dbsetup(instance)
         assert instance._state is None
 
-    def test_rocoto__RocotoIterator__state_msg(self, instance):
-        assert instance._state_msg == "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"
+    def test_rocoto__RocotoIterator__state__all(self, instance, logged):
+        instance._task = None
+        self.dbsetup(instance)
+        for id_, taskname, state in [(1, "foo", "COMPLETE"), (2, "bar", "RUNNING")]:
+            instance._cursor.execute(
+                "insert into jobs values (:id, :taskname, :cycle, :state)",
+                {
+                    "id": id_,
+                    "taskname": taskname,
+                    "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
+                    "state": state,
+                },
+            )
+        assert instance._state == "RUNNING"
+        assert logged(f"Rocoto tasks for cycle {instance._cycle}: RUNNING")
+
+    @mark.parametrize(
+        ("states", "expected"),
+        [
+            ([], None),
+            (["COMPLETE", "SUCCEEDED"], "COMPLETE"),
+            (["COMPLETE", "ERROR"], "ERROR"),
+            (["CREATED", "COMPLETE"], "CREATED"),
+            (["RUNNING", "CREATED", "COMPLETE"], "RUNNING"),
+        ],
+    )
+    def test_rocoto__RocotoIterator__all_tasks_state(self, states, expected, instance):
+        assert instance._all_tasks_state(states) == expected
+
+    @mark.parametrize(
+        ("all_", "expected"),
+        [
+            (False, "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"),
+            (True, "Rocoto tasks for cycle 2025-07-21 12:00:00: %s"),
+        ],
+    )
+    def test_rocoto__RocotoIterator__state_msg(self, all_, expected, instance):
+        instance._task = None if all_ else "foo"
+        assert instance._state_msg == expected
 
     def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == [

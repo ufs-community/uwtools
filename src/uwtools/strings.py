@@ -138,6 +138,7 @@ class _STR(_ValsMatchKeys):
     ECF_TRYNO: str = _
     account: str = _
     action: str = _
+    all: str = _
     base_file: str = _
     batch: str = _
     batchargs: str = _

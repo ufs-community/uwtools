@@ -178,6 +178,28 @@ def test_cli__add_subparser_rocoto(subparsers):
     assert subparsers.choices[STR.rocoto]
 
 
+def test_cli__add_subparser_rocoto_iterate(subparsers, capsys):
+    cli._add_subparser_rocoto_iterate(subparsers)
+    base_args = [
+        STR.iterate,
+        "--cycle",
+        "2025-07-21T12",
+        "--database",
+        "rocoto.db",
+        "--workflow",
+        "rocoto.xml",
+    ]
+    parser = subparsers.choices[STR.iterate]
+    assert parser.parse_args([*base_args[1:], "--all"]).all is True
+    assert parser.parse_args([*base_args[1:], "--task", "foo"]).task == "foo"
+    with raises(SystemExit):
+        parser.parse_args(base_args[1:])
+    assert "one of the arguments --all --task is required" in capsys.readouterr().err
+    with raises(SystemExit):
+        parser.parse_args([*base_args[1:], "--all", "--task", "foo"])
+    assert "not allowed with argument --all" in capsys.readouterr().err
+
+
 def test_cli__add_subparser_rocoto_realize(subparsers):
     cli._add_subparser_rocoto_realize(subparsers)
     assert subparsers.choices[STR.realize]
@@ -683,13 +705,20 @@ def test_cli__dispatch_rocoto(params):
     func.assert_called_once_with(args)
 
 
-def test_cli_dispatch_rocoto_iterate(utc):
+@mark.parametrize(
+    ("all_", "task"),
+    [
+        (False, "foo"),
+        (True, None),
+    ],
+)
+def test_cli_dispatch_rocoto_iterate(all_, task, utc):
     cycle = utc()
     database = Path("/path/to/rocoto.db")
     rate = 11
-    task = "foo"
     workflow = Path("/path/to/rocoto.xml")
     args = {
+        STR.all: all_,
         STR.cycle: cycle,
         STR.database: database,
         STR.rate: rate,
@@ -698,7 +727,9 @@ def test_cli_dispatch_rocoto_iterate(utc):
     }
     with patch.object(uwtools.api.rocoto, "_iterate") as _iterate:
         cli._dispatch_rocoto_iterate(args)
-    _iterate.assert_called_once_with(**args)
+    _iterate.assert_called_once_with(
+        cycle=cycle, database=database, rate=rate, task=task, workflow=workflow
+    )
 
 
 def test_cli__dispatch_rocoto_realize():

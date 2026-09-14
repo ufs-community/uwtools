@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 def iterate(
     cycle: datetime,
     database: Path | str,
-    task: str,
+    task: str | None,
     workflow: Path | str,
     rate: int = DEFAULT_ITERATION_RATE,
 ) -> bool:
@@ -33,7 +33,7 @@ def iterate(
 
     :param cycle: A datetime object to make available for use in the config.
     :param database: Path to the Rocoto database file.
-    :param task: The workflow task to iterate.
+    :param task: The workflow task to iterate (``None`` => iterate all tasks).
     :param workflow: Path to the Rocoto XML workflow document.
     :param rate: Seconds between workflow iterations.
     """

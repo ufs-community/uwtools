@@ -729,7 +729,9 @@ def _add_subparser_rocoto_iterate(subparsers: Subparsers) -> ActionChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_cycle(required)
     _add_arg_database(required)
-    _add_arg_task(required)
+    task = required.add_mutually_exclusive_group(required=True)
+    _add_arg_all(task)
+    _add_arg_task(task, required=False)
     _add_arg_workflow(required)
     optional = _basic_setup(parser)
     _add_arg_rate(optional)
@@ -926,6 +928,14 @@ def _dispatch_template_translate(args: Args) -> bool:
 
 
 # Arguments
+
+
+def _add_arg_all(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.all),
+        action="store_true",
+        help="Execute all tasks",
+    )
 
 
 def _add_arg_batch(group: Group) -> None:

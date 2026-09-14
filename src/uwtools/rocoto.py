@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 DEFAULT_ITERATION_RATE = 10  # seconds
 
 
-def iterate(cycle: datetime, database: Path, rate: int, task: str, workflow: Path) -> bool:
+def iterate(cycle: datetime, database: Path, rate: int, task: str | None, workflow: Path) -> bool:
     return _RocotoIterator(cycle, database, rate, task, workflow).iterate()
 
 
@@ -119,7 +119,14 @@ class _RocotoIterator:
         INACTIVE = auto()
         TRANSIENT = auto()
 
-    def __init__(self, cycle: datetime, database: Path, rate: int, task: str, workflow: Path):
+    def __init__(
+        self,
+        cycle: datetime,
+        database: Path,
+        rate: int,
+        task: str | None,
+        workflow: Path,
+    ):
         self._cycle = cycle
         self._database = database
         self._rate = rate
@@ -162,13 +169,22 @@ class _RocotoIterator:
 
     @property
     def _query_data(self) -> dict:
-        return {
-            ROCOTO.taskname: self._task,
-            ROCOTO.cycle: int(self._cycle.replace(tzinfo=timezone.utc).timestamp()),
+        data: dict[str, int | str | None] = {
+            ROCOTO.cycle: int(self._cycle.replace(tzinfo=timezone.utc).timestamp())
         }
+        if not self._all:
+            data[ROCOTO.taskname] = self._task
+        return data
 
     @property
     def _query_stmt(self) -> str:
+        if self._all:
+            return "".join(
+                [
+                    "select state from jobs where cycle=:cycle and id in ",
+                    "(select max(id) from jobs where cycle=:cycle group by taskname)",
+                ]
+            )
         return "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
 
     def _report(self) -> None:
@@ -181,7 +197,8 @@ class _RocotoIterator:
 
     def _run(self) -> bool:
         log.info("Iterating workflow")
-        cmd = "rocotorun -d %s -w %s -t %s" % (self._database, self._workflow, self._task)
+        task_arg = "-a" if self._all else "-t %s" % self._task
+        cmd = "rocotorun -d %s -w %s %s" % (self._database, self._workflow, task_arg)
         success, _ = run_shell_cmd(cmd, quiet=True)
         return success
 
@@ -190,15 +207,40 @@ class _RocotoIterator:
         state = None
         if cursor := self._cursor:
             result = cursor.execute(self._query_stmt, self._query_data)
-            if row := result.fetchone():
+            if self._all:
+                states = [row[0] for row in result.fetchall()]
+                state = self._all_tasks_state(states)
+            elif row := result.fetchone():
                 (state,) = row
+            if state:
                 log.info(self._state_msg % state)
                 assert state in chain.from_iterable(self._states.values())
         return state
 
+    def _all_tasks_state(self, states: list[str]) -> str | None:
+        if not states:
+            return None
+        if state := next(
+            (state for state in states if state in self._states[self.State.ACTIVE]), None
+        ):
+            return state
+        if state := next(
+            (state for state in states if state in self._states[self.State.TRANSIENT]), None
+        ):
+            return state
+        return next(
+            (state for state in states if state not in ["COMPLETE", "SUCCEEDED"]), "COMPLETE"
+        )
+
     @property
     def _state_msg(self) -> str:
+        if self._all:
+            return f"Rocoto tasks for cycle {self._cycle}: %s"
         return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
+
+    @property
+    def _all(self) -> bool:
+        return self._task is None
 
     @property
     def _states(self) -> dict:
