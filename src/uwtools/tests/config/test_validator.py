@@ -14,7 +14,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 
 # Fixtures
@@ -141,8 +141,10 @@ def test_config_validator_bundle(logged):
 
 
 def test_config_validator_internal_schema_file():
-    with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
-        assert validator.internal_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
+    path = Path("/foo/bar/baz.jsonschema")
+    with patch.object(validator, "resource_path", return_value=path) as rp:
+        assert validator.internal_schema_file("baz") == path
+    rp.assert_called_once_with("jsonschema/baz.jsonschema")
 
 
 @mark.parametrize(
@@ -283,7 +285,7 @@ def test_config_validator_validate_check_config(config_data, config_path):
 
 def test_config_validator_validate_internal__no(logged, schema_file):
     with (
-        patch.object(validator, "resource_path", return_value=schema_file.parent),
+        patch.object(validator, "resource_path", return_value=schema_file),
         raises(UWConfigError) as e,
     ):
         validator.validate_internal(schema_name="a", desc="test", config_data={"color": "orange"})
@@ -293,7 +295,7 @@ def test_config_validator_validate_internal__no(logged, schema_file):
 
 
 def test_config_validator_validate_internal__ok(schema_file):
-    with patch.object(validator, "resource_path", return_value=schema_file.parent):
+    with patch.object(validator, "resource_path", return_value=schema_file):
         validator.validate_internal(schema_name="a", desc="test", config_data={"color": "blue"})
 
 
@@ -312,7 +314,21 @@ def test_config_validator__registry(tmp_path):
     with patch.object(validator, "resource_path", return_value=path) as resource_path:
         r = validator._registry()
         assert r.get_or_retrieve("urn:uwtools:foo-bar").value.contents == d
-    resource_path.assert_called_once_with("jsonschema/foo-bar.jsonschema")
+    resource_path.assert_called_with("jsonschema/foo-bar.jsonschema")
+
+
+@mark.parametrize("suffix", ["../exfiltrated.jsonschema", "../../exfiltrated.jsonschema"])
+def test_config_validator__schema__no_exfil(suffix):
+    uri = f"urn:uwtools:{suffix}"
+    with raises(UWError) as e:
+        validator._schema(uri=uri)
+    if suffix.startswith("../.."):
+        # Reference is outside of resources altogether:
+        msg = f"Resource reference 'jsonschema/{suffix}.jsonschema' is outside package resources"
+    else:
+        # Reference is in resources, but outside jsonschema/:
+        msg = f"Invalid schema URI: {uri}"
+    assert str(e.value) == msg
 
 
 @mark.parametrize("msg", [validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG, "other"])
@@ -342,12 +358,14 @@ def test_config_validator__validation_errors__pass(config, pre_4_18_jsonschema, 
         ref_schema = tmp_path / "ref.jsonschema"
         ref_schema.write_text(json.dumps({"type": "number"}))
         schema["properties"]["number"] = {"$ref": "urn:uwtools:ref"}
-        mock = partial(
-            mock_extend, validator.validators.extend, validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG
+        extend = partial(
+            mock_extend,
+            validator.validators.extend,
+            validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG,
         )
         with (
-            patch.object(validator, "resource_path", return_value=tmp_path),
-            patch.object(validator.validators, "extend", mock),
+            patch.object(validator, "resource_path", return_value=ref_schema),
+            patch.object(validator.validators, "extend", extend),
         ):
             assert not validator._validation_errors(config, schema)
     else:

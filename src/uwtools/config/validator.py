@@ -14,7 +14,7 @@ from jsonschema import Draft202012Validator, RefResolver, validators
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import UWYAMLGlob
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
@@ -74,7 +74,7 @@ def internal_schema_file(schema_name: str) -> Path:
 
     :param schema_name: Name of uwtools schema to validate the config against.
     """
-    return resource_path("jsonschema") / f"{schema_name}.jsonschema"
+    return resource_path(f"jsonschema/{schema_name}.jsonschema")
 
 
 def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
@@ -194,12 +194,7 @@ def _registry() -> Registry:
 
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
-    def retrieve(uri: str) -> Resource:
-        name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path(f"jsonschema/{name}.jsonschema")
-        text = json.loads(path.read_text())
-        return Resource(contents=text, specification=DRAFT202012)  # type: ignore[call-arg]
-
+    retrieve = lambda uri: Resource(contents=_schema(uri), specification=DRAFT202012)  # type: ignore[call-arg]
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
 
@@ -209,14 +204,17 @@ def _resolver(schema: dict) -> RefResolver:
 
     :param schema: A schema potentially containing $ref keys.
     """
+    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": _schema}))
 
-    def retrieve(uri: str) -> dict:
-        name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path("jsonschema") / f"{name}.jsonschema"
-        text = path.read_text()
-        return cast(dict, json.loads(text))
 
-    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": retrieve}))
+def _schema(uri: str) -> dict:
+    name = uri.rsplit(":", maxsplit=1)[-1]
+    schemaroot = resource_path("jsonschema")
+    path = resource_path(f"jsonschema/{name}.jsonschema")
+    if not path.resolve().is_relative_to(schemaroot.resolve()):
+        raise UWError("Invalid schema URI: %s" % uri)
+    text = path.read_text()
+    return cast(dict, json.loads(text))
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:
