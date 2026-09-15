@@ -284,16 +284,6 @@ class TestRocotoIterator:
         instance._task = None if all_ else "foo"
         assert instance._state_msg == expected
 
-    def test_rocoto__RocotoIterator__state_to_state_type(self, instance):
-        for state_type in instance.State:
-            for state in instance._states[state_type]:
-                assert instance._state_to_state_type(state=state) is state_type
-
-    def test_rocoto__RocotoIterator__state_to_state_type__error(self, instance):
-        with raises(AssertionError) as e:
-            instance._state_to_state_type(state="foo")
-        assert str(e.value) == "Unexpected state: foo"
-
     @mark.parametrize("set_up_database", [True, False])
     def test_rocoto__RocotoIterator__state_type(self, set_up_database, instance, logged):
         if set_up_database:
@@ -344,6 +334,16 @@ class TestRocotoIterator:
     def test_rocoto__RocotoIterator__state_type__none(self, instance):
         self.dbsetup(instance)
         assert instance._state_type is None
+
+    def test_rocoto__RocotoIterator__state_type_from_state(self, instance):
+        for state_type in instance.State:
+            for state in instance._states[state_type]:
+                assert instance._state_type_from_state(state=state) is state_type
+
+    def test_rocoto__RocotoIterator__state_type_from_state__error(self, instance):
+        with raises(AssertionError) as e:
+            instance._state_type_from_state(state="foo")
+        assert str(e.value) == "Unexpected state: foo"
 
     def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == [

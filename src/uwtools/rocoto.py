@@ -200,36 +200,36 @@ class _RocotoIterator:
         x = "s" if self._all else f" '{self._task}'"
         return f"Rocoto task{x} for cycle {self._cycle}: %s"
 
-    def _state_to_state_type(self, state: str) -> _RocotoIterator.State:
+    @property
+    def _state_type(self) -> _RocotoIterator.State | None:
+        state_type = None
+        if cursor := self._cursor:
+            result = cursor.execute(self._query_stmt, self._query_data)
+            if self._all:
+                state_type = self._state_type_from_states([row[0] for row in result.fetchall()])
+            elif row := result.fetchone():
+                state_type = self._state_type_from_states([row[0]])
+            if state_type:
+                desc = ROCOTO.inactive if state_type is self.State.INACTIVE else ROCOTO.active
+                log.info(self._state_msg % desc)
+                assert state_type in self.State
+        return state_type
+
+    def _state_type_from_state(self, state: str) -> _RocotoIterator.State:
         for state_type in self.State:
             if state in self._states[state_type]:
                 return state_type
         msg = f"Unexpected state: {state}"
         raise AssertionError(msg)
 
-    @property
-    def _state_type(self) -> _RocotoIterator.State | None:
-        def get_state_type(states: list[str]) -> _RocotoIterator.State | None:
-            if not states:
-                return None
-            state_types = set(map(self._state_to_state_type, states))
-            for state_type in [self.State.ACTIVE, self.State.TRANSIENT]:
-                if state_type in state_types:
-                    return state_type
-            return self.State.INACTIVE
-
-        state_type = None
-        if cursor := self._cursor:
-            result = cursor.execute(self._query_stmt, self._query_data)
-            if self._all:
-                state_type = get_state_type([row[0] for row in result.fetchall()])
-            elif row := result.fetchone():
-                state_type = get_state_type([row[0]])
-            if state_type:
-                desc = ROCOTO.inactive if state_type is self.State.INACTIVE else ROCOTO.active
-                log.info(self._state_msg % desc)
-                assert state_type in self.State
-        return state_type
+    def _state_type_from_states(self, states: list[str]) -> _RocotoIterator.State | None:
+        if not states:
+            return None
+        state_types = set(map(self._state_type_from_state, states))
+        for state_type in [self.State.ACTIVE, self.State.TRANSIENT]:
+            if state_type in state_types:
+                return state_type
+        return self.State.INACTIVE
 
     @property
     def _states(self) -> dict:
