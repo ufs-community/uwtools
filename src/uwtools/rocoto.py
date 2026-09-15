@@ -197,12 +197,12 @@ class _RocotoIterator:
 
     @property
     def _state(self) -> _RocotoIterator.State | None:
-        def f(states: list[str]) -> _RocotoIterator.State | None:
+        def f(states: list[str]) -> _RocotoIterator.State:
             xs = set(map(self._state_type, states))
-            for x in [self.State.ACTIVE, self.State.TRANSIENT, self.State.INACTIVE]:
+            for x in [self.State.ACTIVE, self.State.TRANSIENT]:
                 if x in xs:
                     return x
-            return None
+            return self.State.INACTIVE
 
         state = None
         if cursor := self._cursor:
