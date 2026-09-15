@@ -301,7 +301,7 @@ class TestRocotoIterator:
             )
         if set_up_database:
             assert instance._state == instance.State.INACTIVE
-            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: INACTIVE")
+            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: inactive")
         else:
             assert instance._state is None
 
@@ -323,7 +323,7 @@ class TestRocotoIterator:
                 },
             )
         assert instance._state is instance.State.ACTIVE
-        assert logged(f"Rocoto tasks for cycle {instance._cycle}: ACTIVE")
+        assert logged(f"Rocoto tasks for cycle {instance._cycle}: active")
 
     @mark.parametrize(
         ("all_", "expected"),
