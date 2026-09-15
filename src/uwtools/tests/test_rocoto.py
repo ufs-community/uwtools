@@ -350,9 +350,9 @@ class TestRocotoIterator:
 
     def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == [
-            rocoto._RocotoIterator.State.ACTIVE,
-            rocoto._RocotoIterator.State.INACTIVE,
-            rocoto._RocotoIterator.State.TRANSIENT,
+            instance.State.ACTIVE,
+            instance.State.INACTIVE,
+            instance.State.TRANSIENT,
         ]
 
 
