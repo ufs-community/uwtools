@@ -218,18 +218,18 @@ class _RocotoIterator:
                     return state_type
             return self.State.INACTIVE
 
-        state = None
+        state_type = None
         if cursor := self._cursor:
             result = cursor.execute(self._query_stmt, self._query_data)
             if self._all:
-                state = get_state_type([row[0] for row in result.fetchall()])
+                state_type = get_state_type([row[0] for row in result.fetchall()])
             elif row := result.fetchone():
-                state = get_state_type([row[0]])
-            if state:
-                desc = ROCOTO.inactive if state is self.State.INACTIVE else ROCOTO.active
+                state_type = get_state_type([row[0]])
+            if state_type:
+                desc = ROCOTO.inactive if state_type is self.State.INACTIVE else ROCOTO.active
                 log.info(self._state_msg % desc)
-                assert state in self.State
-        return state
+                assert state_type in self.State
+        return state_type
 
     @property
     def _states(self) -> dict:
