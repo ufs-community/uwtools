@@ -196,7 +196,7 @@ class TestRocotoIterator:
         with self.mocks() as mocks:
             mocks["_state_type"].side_effect = [instance.State.INACTIVE]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=0, _run=0, _state_type=1, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=1, _run=0, _state_type=1, sleep=0)
 
     def test_rocoto__RocotoIterator_iterate__transient(self, instance):
         with self.mocks() as mocks:
