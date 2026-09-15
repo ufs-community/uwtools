@@ -134,12 +134,12 @@ class _RocotoIterator:
             self._con.close()
 
     def iterate(self) -> bool:
-        state = self._state
-        while state is not self.State.INACTIVE:
+        state_type = self._state_type
+        while state_type is not self.State.INACTIVE:
             if not self._run():
                 return False
-            state = self._state
-            if state in [self.State.ACTIVE, self.State.TRANSIENT, None]:
+            state_type = self._state_type
+            if state_type in [self.State.ACTIVE, self.State.TRANSIENT, None]:
                 self._report()
                 log.debug("Sleeping %s seconds", self._rate)
                 sleep(self._rate)
@@ -196,9 +196,22 @@ class _RocotoIterator:
         return success
 
     @property
-    def _state(self) -> _RocotoIterator.State | None:
+    def _state_msg(self) -> str:
+        if self._all:
+            return f"Rocoto tasks for cycle {self._cycle}: %s"
+        return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
+
+    def _state_to_state_type(self, state: str) -> _RocotoIterator.State:
+        for state_type in self.State:
+            if state in self._states[state_type]:
+                return state_type
+        msg = f"Unexpected state: {state}"
+        raise AssertionError(msg)
+
+    @property
+    def _state_type(self) -> _RocotoIterator.State | None:
         def f(states: list[str]) -> _RocotoIterator.State:
-            state_types = set(map(self._state_type, states))
+            state_types = set(map(self._state_to_state_type, states))
             for state_type in [self.State.ACTIVE, self.State.TRANSIENT]:
                 if state_type in state_types:
                     return state_type
@@ -216,19 +229,6 @@ class _RocotoIterator:
                 log.info(self._state_msg % desc)
                 assert state in self.State
         return state
-
-    @property
-    def _state_msg(self) -> str:
-        if self._all:
-            return f"Rocoto tasks for cycle {self._cycle}: %s"
-        return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
-
-    def _state_type(self, state: str) -> _RocotoIterator.State:
-        for state_type in self.State:
-            if state in self._states[state_type]:
-                return state_type
-        msg = f"Unexpected state: {state}"
-        raise AssertionError(msg)
 
     @property
     def _states(self) -> dict:

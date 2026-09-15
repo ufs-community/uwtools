@@ -145,10 +145,10 @@ class TestRocotoIterator:
 
     # Helpers
 
-    def check_mock_calls_counts(self, mocks, _report, _run, _state, sleep):
+    def check_mock_calls_counts(self, mocks, _report, _run, _state_type, sleep):
         assert mocks["_report"].call_count == _report
         assert mocks["_run"].call_count == _run
-        assert mocks["_state"].call_count == _state
+        assert mocks["_state_type"].call_count == _state_type
         assert mocks["sleep"].call_count == sleep
 
     def dbsetup(self, instance):
@@ -169,10 +169,12 @@ class TestRocotoIterator:
             patch.object(rocoto, "sleep") as sleep,
             patch.object(rocoto._RocotoIterator, "_report") as _report,
             patch.object(rocoto._RocotoIterator, "_run") as _run,
-            patch.object(rocoto._RocotoIterator, "_state", new_callable=PropertyMock) as _state,
+            patch.object(
+                rocoto._RocotoIterator, "_state_type", new_callable=PropertyMock
+            ) as _state_type,
         ):
             _run.return_value = True
-            yield dict(sleep=sleep, _report=_report, _run=_run, _state=_state)
+            yield dict(sleep=sleep, _report=_report, _run=_run, _state_type=_state_type)
 
     # Tests
 
@@ -185,32 +187,32 @@ class TestRocotoIterator:
 
     def test_rocoto__RocotoIterator_iterate__active(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = [instance.State.ACTIVE, instance.State.INACTIVE]
+            mocks["_state_type"].side_effect = [instance.State.ACTIVE, instance.State.INACTIVE]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=2, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state_type=2, sleep=0)
 
     def test_rocoto__RocotoIterator_iterate__inactive(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = [instance.State.INACTIVE]
+            mocks["_state_type"].side_effect = [instance.State.INACTIVE]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=0, _run=0, _state=1, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=0, _run=0, _state_type=1, sleep=0)
 
     def test_rocoto__RocotoIterator_iterate__transient(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = [
+            mocks["_state_type"].side_effect = [
                 None,
                 instance.State.ACTIVE,
                 instance.State.TRANSIENT,
                 instance.State.INACTIVE,
             ]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=2, _run=3, _state=4, sleep=2)
+            self.check_mock_calls_counts(mocks, _report=2, _run=3, _state_type=4, sleep=2)
 
     def test_rocoto__RocotoIterator_iterate__run_failure(self, instance):
         with self.mocks() as mocks:
             mocks["_run"].return_value = False
             assert instance.iterate() is False
-            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=1, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state_type=1, sleep=0)
 
     def test_rocoto__RocotoIterator__connection(self, instance):
         instance._database.touch()
@@ -286,8 +288,29 @@ class TestRocotoIterator:
         else:
             run_shell_cmd.assert_not_called()
 
+    @mark.parametrize(
+        ("all_", "expected"),
+        [
+            (False, "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"),
+            (True, "Rocoto tasks for cycle 2025-07-21 12:00:00: %s"),
+        ],
+    )
+    def test_rocoto__RocotoIterator__state_msg(self, all_, expected, instance):
+        instance._task = None if all_ else "foo"
+        assert instance._state_msg == expected
+
+    def test_rocoto__RocotoIterator__state_to_state_type(self, instance):
+        for state_type in instance.State:
+            for state in instance._states[state_type]:
+                assert instance._state_to_state_type(state=state) is state_type
+
+    def test_rocoto__RocotoIterator__state_to_state_type__error(self, instance):
+        with raises(AssertionError) as e:
+            instance._state_to_state_type(state="foo")
+        assert str(e.value) == "Unexpected state: foo"
+
     @mark.parametrize("set_up_database", [True, False])
-    def test_rocoto__RocotoIterator__state(self, set_up_database, instance, logged):
+    def test_rocoto__RocotoIterator__state_type(self, set_up_database, instance, logged):
         if set_up_database:
             self.dbsetup(instance)
             instance._cursor.execute(
@@ -300,16 +323,12 @@ class TestRocotoIterator:
                 },
             )
         if set_up_database:
-            assert instance._state == instance.State.INACTIVE
+            assert instance._state_type is instance.State.INACTIVE
             assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: inactive")
         else:
-            assert instance._state is None
+            assert instance._state_type is None
 
-    def test_rocoto__RocotoIterator__state__none(self, instance):
-        self.dbsetup(instance)
-        assert instance._state is None
-
-    def test_rocoto__RocotoIterator__state__all(self, instance, logged):
+    def test_rocoto__RocotoIterator__state_type__all(self, instance, logged):
         instance._task = None
         self.dbsetup(instance)
         for id_, taskname, state in [(1, "foo", "COMPLETE"), (2, "bar", "RUNNING")]:
@@ -322,29 +341,12 @@ class TestRocotoIterator:
                     "state": state,
                 },
             )
-        assert instance._state is instance.State.ACTIVE
+        assert instance._state_type is instance.State.ACTIVE
         assert logged(f"Rocoto tasks for cycle {instance._cycle}: active")
 
-    @mark.parametrize(
-        ("all_", "expected"),
-        [
-            (False, "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"),
-            (True, "Rocoto tasks for cycle 2025-07-21 12:00:00: %s"),
-        ],
-    )
-    def test_rocoto__RocotoIterator__state_msg(self, all_, expected, instance):
-        instance._task = None if all_ else "foo"
-        assert instance._state_msg == expected
-
-    def test_rocoto__RocotoIterator__state_type(self, instance):
-        for state_type in instance.State:
-            for state in instance._states[state_type]:
-                assert instance._state_type(state=state) is state_type
-
-    def test_rocoto__RocotoIterator__state_type__error(self, instance):
-        with raises(AssertionError) as e:
-            instance._state_type(state="foo")
-        assert str(e.value) == "Unexpected state: foo"
+    def test_rocoto__RocotoIterator__state_type__none(self, instance):
+        self.dbsetup(instance)
+        assert instance._state_type is None
 
     def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == [
