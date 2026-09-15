@@ -134,15 +134,14 @@ class _RocotoIterator:
             self._con.close()
 
     def iterate(self) -> bool:
-        state_type = self._state_type
-        while state_type is not self.State.INACTIVE:
+        while True:
             if not self._run():
                 return False
-            state_type = self._state_type
-            if state_type in [self.State.ACTIVE, self.State.TRANSIENT, None]:
-                self._report()
-                log.debug("Sleeping %s seconds", self._rate)
-                sleep(self._rate)
+            if self._state_type is self.State.INACTIVE:
+                break
+            self._report()
+            log.debug("Sleeping %s seconds", self._rate)
+            sleep(self._rate)
         self._report()
         return True
 
