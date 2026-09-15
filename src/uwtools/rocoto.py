@@ -210,7 +210,9 @@ class _RocotoIterator:
 
     @property
     def _state_type(self) -> _RocotoIterator.State | None:
-        def f(states: list[str]) -> _RocotoIterator.State:
+        def f(states: list[str]) -> _RocotoIterator.State | None:
+            if not states:
+                return None
             state_types = set(map(self._state_to_state_type, states))
             for state_type in [self.State.ACTIVE, self.State.TRANSIENT]:
                 if state_type in state_types:

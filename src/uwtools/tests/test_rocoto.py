@@ -328,10 +328,21 @@ class TestRocotoIterator:
         else:
             assert instance._state_type is None
 
-    def test_rocoto__RocotoIterator__state_type__all(self, instance, logged):
+    @mark.parametrize(
+        ("rows", "expected", "msg"),
+        [
+            ([], None, None),
+            (
+                [(1, "foo", "COMPLETE"), (2, "bar", "RUNNING")],
+                rocoto._RocotoIterator.State.ACTIVE,
+                "active",
+            ),
+        ],
+    )
+    def test_rocoto__RocotoIterator__state_type__all(self, expected, instance, logged, msg, rows):
         instance._task = None
         self.dbsetup(instance)
-        for id_, taskname, state in [(1, "foo", "COMPLETE"), (2, "bar", "RUNNING")]:
+        for id_, taskname, state in rows:
             instance._cursor.execute(
                 "insert into jobs values (:id, :taskname, :cycle, :state)",
                 {
@@ -341,8 +352,9 @@ class TestRocotoIterator:
                     "state": state,
                 },
             )
-        assert instance._state_type is instance.State.ACTIVE
-        assert logged(f"Rocoto tasks for cycle {instance._cycle}: active")
+        assert instance._state_type is expected
+        if msg:
+            assert logged(f"Rocoto tasks for cycle {instance._cycle}: {msg}")
 
     def test_rocoto__RocotoIterator__state_type__none(self, instance):
         self.dbsetup(instance)
