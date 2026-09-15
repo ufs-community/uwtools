@@ -1,6 +1,6 @@
-usage: uw rocoto iterate [--cycle CYCLE] --database DATABASE --task TASK
-                         --workflow WORKFLOW [-h] [--version] [--rate SECONDS]
-                         [--quiet] [--verbose]
+usage: uw rocoto iterate [--cycle CYCLE] --database DATABASE
+                         (--all | --task TASK) --workflow WORKFLOW [-h]
+                         [--version] [--rate SECONDS] [--quiet] [--verbose]
 
 Iterate a Rocoto workflow
 
@@ -9,6 +9,8 @@ Required arguments:
       The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
   --database DATABASE, -d DATABASE
       The Rocoto database file
+  --all
+      Execute all tasks
   --task TASK
       Task to execute
   --workflow WORKFLOW, -w WORKFLOW
