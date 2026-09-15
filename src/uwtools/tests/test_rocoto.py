@@ -185,21 +185,26 @@ class TestRocotoIterator:
 
     def test_rocoto__RocotoIterator_iterate__active(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
+            mocks["_state"].side_effect = [instance.State.ACTIVE, instance.State.INACTIVE]
             assert instance.iterate() is True
             self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=2, sleep=0)
 
     def test_rocoto__RocotoIterator_iterate__inactive(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = ["COMPLETE"]
+            mocks["_state"].side_effect = [instance.State.INACTIVE]
             assert instance.iterate() is True
             self.check_mock_calls_counts(mocks, _report=0, _run=0, _state=1, sleep=0)
 
     def test_rocoto__RocotoIterator_iterate__transient(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = [None, "SUBMITTING", "RUNNING", "COMPLETE"]
+            mocks["_state"].side_effect = [
+                None,
+                instance.State.ACTIVE,
+                instance.State.TRANSIENT,
+                instance.State.INACTIVE,
+            ]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=1, _run=3, _state=4, sleep=1)
+            self.check_mock_calls_counts(mocks, _report=2, _run=3, _state=4, sleep=2)
 
     def test_rocoto__RocotoIterator_iterate__run_failure(self, instance):
         with self.mocks() as mocks:
@@ -295,8 +300,8 @@ class TestRocotoIterator:
                 },
             )
         if set_up_database:
-            assert instance._state == "COMPLETE"
-            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
+            assert instance._state == instance.State.INACTIVE
+            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: INACTIVE")
         else:
             assert instance._state is None
 
@@ -317,21 +322,8 @@ class TestRocotoIterator:
                     "state": state,
                 },
             )
-        assert instance._state == "RUNNING"
-        assert logged(f"Rocoto tasks for cycle {instance._cycle}: RUNNING")
-
-    @mark.parametrize(
-        ("states", "expected"),
-        [
-            ([], None),
-            (["COMPLETE", "SUCCEEDED"], "COMPLETE"),
-            (["COMPLETE", "ERROR"], "ERROR"),
-            (["CREATED", "COMPLETE"], "CREATED"),
-            (["RUNNING", "CREATED", "COMPLETE"], "RUNNING"),
-        ],
-    )
-    def test_rocoto__RocotoIterator__all_tasks_state(self, states, expected, instance):
-        assert instance._all_tasks_state(states) == expected
+        assert instance._state is instance.State.ACTIVE
+        assert logged(f"Rocoto tasks for cycle {instance._cycle}: ACTIVE")
 
     @mark.parametrize(
         ("all_", "expected"),

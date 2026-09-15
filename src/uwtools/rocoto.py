@@ -9,7 +9,6 @@ import sqlite3
 from datetime import timezone
 from enum import Enum, auto
 from functools import reduce
-from itertools import chain
 from math import log10
 from operator import getitem
 from pathlib import Path
@@ -136,15 +135,19 @@ class _RocotoIterator:
 
     def iterate(self) -> bool:
         state = self._state
-        while state not in self._states[self.State.INACTIVE]:
+        while state is not self.State.INACTIVE:
             if not self._run():
                 return False
             state = self._state
-            if not state or state in self._states[self.State.ACTIVE]:
+            if state in [self.State.ACTIVE, self.State.TRANSIENT, None]:
                 self._report()
                 log.debug("Sleeping %s seconds", self._rate)
                 sleep(self._rate)
         return True
+
+    @property
+    def _all(self) -> bool:
+        return self._task is None
 
     @property
     def _connection(self) -> sqlite3.Connection | None:
@@ -193,35 +196,26 @@ class _RocotoIterator:
         return success
 
     @property
-    def _state(self) -> str | None:
+    def _state(self) -> _RocotoIterator.State | None:
+        def f(states: list[str]) -> _RocotoIterator.State | None:
+            xs = {self._state_type(state) for state in states}
+            # PM try set(map(...)) ^^^
+            for x in [self.State.ACTIVE, self.State.TRANSIENT, self.State.INACTIVE]:
+                if x in xs:
+                    return x
+            return None
+
         state = None
         if cursor := self._cursor:
             result = cursor.execute(self._query_stmt, self._query_data)
             if self._all:
-                states = [row[0] for row in result.fetchall()]
-                state = self._all_tasks_state(states)
+                state = f([row[0] for row in result.fetchall()])
             elif row := result.fetchone():
-                (state,) = row
+                state = f([row[0]])
             if state:
-                log.info(self._state_msg % state)
-                assert state in chain.from_iterable(self._states.values())
+                log.info(self._state_msg % state.name)
+                assert state in self.State
         return state
-
-    def _all_tasks_state(self, states: list[str]) -> str | None:
-        if not states:
-            return None
-        if state := next(
-            (state for state in states if state in self._states[self.State.ACTIVE]), None
-        ):
-            return state
-        if state := next(
-            (state for state in states if state in self._states[self.State.TRANSIENT]), None
-        ):
-            return state
-        return next(
-            (state for state in states if state not in [ROCOTO.COMPLETE, ROCOTO.SUCCEEDED]),
-            ROCOTO.COMPLETE,
-        )
 
     @property
     def _state_msg(self) -> str:
@@ -229,9 +223,15 @@ class _RocotoIterator:
             return f"Rocoto tasks for cycle {self._cycle}: %s"
         return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
 
-    @property
-    def _all(self) -> bool:
-        return self._task is None
+    def _state_type(self, state: str) -> _RocotoIterator.State:
+        if state in self._states[self.State.ACTIVE]:
+            return self.State.ACTIVE
+        if state in self._states[self.State.INACTIVE]:
+            return self.State.INACTIVE
+        if state in self._states[self.State.TRANSIENT]:
+            return self.State.TRANSIENT
+        msg = f"Unexpected state: {state}"
+        raise AssertionError(msg)
 
     @property
     def _states(self) -> dict:
