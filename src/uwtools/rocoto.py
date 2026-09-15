@@ -197,9 +197,8 @@ class _RocotoIterator:
 
     @property
     def _state_msg(self) -> str:
-        if self._all:
-            return f"Rocoto tasks for cycle {self._cycle}: %s"
-        return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
+        x = "s" if self._all else f" '{self._task}'"
+        return f"Rocoto task{x} for cycle {self._cycle}: %s"
 
     def _state_to_state_type(self, state: str) -> _RocotoIterator.State:
         for state_type in self.State:
