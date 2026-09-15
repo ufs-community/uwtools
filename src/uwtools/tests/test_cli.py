@@ -726,6 +726,20 @@ def test_cli_dispatch_rocoto_iterate(all_, task, utc):
     )
 
 
+def test_cli_dispatch_rocoto_iterate__keyboard_interrupt(logged, utc):
+    args = {
+        STR.all: True,
+        STR.cycle: utc(),
+        STR.database: Path("/path/to/rocoto.db"),
+        STR.rate: 11,
+        STR.task: None,
+        STR.workflow: Path("/path/to/rocoto.xml"),
+    }
+    with patch.object(uwtools.api.rocoto, "_iterate", side_effect=KeyboardInterrupt):
+        assert cli._dispatch_rocoto_iterate(args) is True
+    assert logged("Exiting")
+
+
 def test_cli__dispatch_rocoto_realize():
     args = {STR.config_file: 1, STR.output_file: 2, STR.key_path: None}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:

@@ -784,13 +784,17 @@ def _dispatch_rocoto_iterate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.iterate(
-        cycle=args[STR.cycle],
-        database=args[STR.database],
-        rate=args[STR.rate],
-        task=args[STR.task],
-        workflow=args[STR.workflow],
-    )
+    try:
+        return uwtools.api.rocoto.iterate(
+            cycle=args[STR.cycle],
+            database=args[STR.database],
+            rate=args[STR.rate],
+            task=args[STR.task],
+            workflow=args[STR.workflow],
+        )
+    except KeyboardInterrupt:
+        log.info("Exiting")
+        return True
 
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
