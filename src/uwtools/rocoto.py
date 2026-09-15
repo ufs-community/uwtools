@@ -139,8 +139,8 @@ class _RocotoIterator:
             if not self._run():
                 return False
             state_type = self._state_type
+            self._report()
             if state_type in [self.State.ACTIVE, self.State.TRANSIENT, None]:
-                self._report()
                 log.debug("Sleeping %s seconds", self._rate)
                 sleep(self._rate)
         return True
