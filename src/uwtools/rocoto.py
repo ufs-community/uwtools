@@ -224,12 +224,9 @@ class _RocotoIterator:
         return f"Rocoto task '{self._task}' for cycle {self._cycle}: %s"
 
     def _state_type(self, state: str) -> _RocotoIterator.State:
-        if state in self._states[self.State.ACTIVE]:
-            return self.State.ACTIVE
-        if state in self._states[self.State.INACTIVE]:
-            return self.State.INACTIVE
-        if state in self._states[self.State.TRANSIENT]:
-            return self.State.TRANSIENT
+        for state_type in self.State:
+            if state in self._states[state_type]:
+                return state_type
         msg = f"Unexpected state: {state}"
         raise AssertionError(msg)
 

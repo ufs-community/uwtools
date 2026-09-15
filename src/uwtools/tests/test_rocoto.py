@@ -336,6 +336,16 @@ class TestRocotoIterator:
         instance._task = None if all_ else "foo"
         assert instance._state_msg == expected
 
+    def test_rocoto__RocotoIterator__state_type(self, instance):
+        for state_type in instance.State:
+            for state in instance._states[state_type]:
+                assert instance._state_type(state=state) is state_type
+
+    def test_rocoto__RocotoIterator__state_type__error(self, instance):
+        with raises(AssertionError) as e:
+            instance._state_type(state="foo")
+        assert str(e.value) == "Unexpected state: foo"
+
     def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == [
             rocoto._RocotoIterator.State.ACTIVE,
