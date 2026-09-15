@@ -241,7 +241,7 @@ class TestRocotoIterator:
             "rocotorun -d %s -w %s %s" % (instance._database, instance._workflow, task_arg),
             quiet=True,
         )
-        assert logged("Iterating workflow...")
+        assert logged("Iterating workflow")
 
     @mark.parametrize(
         ("all_", "expected"),
