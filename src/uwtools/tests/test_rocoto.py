@@ -5,6 +5,7 @@ Tests for uwtools.rocoto module.
 import sqlite3
 from contextlib import contextmanager
 from datetime import timezone
+from itertools import combinations
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
 
@@ -338,12 +339,25 @@ class TestRocotoIterator:
     def test_rocoto__RocotoIterator__state_type_from_state(self, instance):
         for state_type in instance.State:
             for state in instance._states[state_type]:
-                assert instance._state_type_from_state(state=state) is state_type
-
-    def test_rocoto__RocotoIterator__state_type_from_state__error(self, instance):
+                assert instance._state_type_from_state(state) is state_type
         with raises(AssertionError) as e:
-            instance._state_type_from_state(state="foo")
+            instance._state_type_from_state("foo")
         assert str(e.value) == "Unexpected state: foo"
+
+    def test_rocoto__RocotoIterator__state_type_from_states(self, instance):
+        assert instance._state_type_from_states([]) is None
+        actives = instance._states[instance.State.ACTIVE]
+        transients = instance._states[instance.State.TRANSIENT]
+        inactives = instance._states[instance.State.INACTIVE]
+        ati = [*actives, *transients, *inactives]
+        for states in combinations(ati, 3):
+            if any(state in actives for state in states):
+                expected = instance.State.ACTIVE
+            elif any(state in transients for state in states):
+                expected = instance.State.TRANSIENT
+            else:
+                expected = instance.State.INACTIVE
+            assert instance._state_type_from_states(states=states) is expected
 
     def test_rocoto__RocotoIterator__states(self, instance):
         assert list(instance._states.keys()) == [
