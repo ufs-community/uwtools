@@ -230,13 +230,7 @@ class TestRocotoIterator:
     def test_rocoto__RocotoIterator__cursor__no_file(self, instance):
         assert instance._cursor is None
 
-    @mark.parametrize(
-        ("all_", "task_arg"),
-        [
-            (False, "-t foo"),
-            (True, "-a"),
-        ],
-    )
+    @mark.parametrize(("all_", "task_arg"), [(False, "-t foo"), (True, "-a")])
     def test_rocoto__RocotoIterator__iterate(self, all_, task_arg, instance, logged):
         instance._task = None if all_ else "foo"
         retval = (True, "")
@@ -250,10 +244,7 @@ class TestRocotoIterator:
 
     @mark.parametrize(
         ("all_", "expected"),
-        [
-            (False, {"taskname": "foo", "cycle": 1753099200}),
-            (True, {"cycle": 1753099200}),
-        ],
+        [(False, {"taskname": "foo", "cycle": 1753099200}), (True, {"cycle": 1753099200})],
     )
     def test_rocoto__RocotoIterator__query_data(self, all_, expected, instance):
         instance._task = None if all_ else "foo"
@@ -262,15 +253,9 @@ class TestRocotoIterator:
     @mark.parametrize("all_", [False, True])
     def test_rocoto__RocotoIterator__query_stmt(self, all_, instance):
         instance._task = None if all_ else "foo"
-        if all_:
-            assert (
-                instance._query_stmt == "select state from jobs where cycle=:cycle order by id desc"
-            )
-        else:
-            expected = (
-                "select state from jobs where cycle=:cycle and taskname=:taskname order by id desc"
-            )
-            assert instance._query_stmt == expected
+        clause = "" if all_ else " and taskname=:taskname"
+        stmt = "select state from jobs where cycle=:cycle%s order by id desc" % clause  # noqa: S608
+        assert instance._query_stmt == stmt
 
     @mark.parametrize("create_database", [True, False])
     def test_rocoto__RocotoIterator__report(self, create_database, instance, logged):

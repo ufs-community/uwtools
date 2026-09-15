@@ -705,13 +705,7 @@ def test_cli__dispatch_rocoto(params):
     func.assert_called_once_with(args)
 
 
-@mark.parametrize(
-    ("all_", "task"),
-    [
-        (False, "foo"),
-        (True, None),
-    ],
-)
+@mark.parametrize(("all_", "task"), [(False, "foo"), (True, None)])
 def test_cli_dispatch_rocoto_iterate(all_, task, utc):
     cycle = utc()
     database = Path("/path/to/rocoto.db")
