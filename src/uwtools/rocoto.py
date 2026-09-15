@@ -227,7 +227,7 @@ class _RocotoIterator:
             elif row := result.fetchone():
                 state = get_state([row[0]])
             if state:
-                desc = "inactive" if state is self.State.INACTIVE else "active"
+                desc = ROCOTO.inactive if state is self.State.INACTIVE else ROCOTO.active
                 log.info(self._state_msg % desc)
                 assert state in self.State
         return state

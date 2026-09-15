@@ -77,6 +77,7 @@ class _ROCOTO(_ValsMatchKeys):
     SUBMITTING: str = _
     SUCCEEDED: str = _
     account: str = _
+    active: str = _
     and_: str = "and"
     attrs: str = _
     command: str = _
@@ -93,6 +94,7 @@ class _ROCOTO(_ValsMatchKeys):
     envars: str = _
     exclusive: str = _
     hangdependency: str = _
+    inactive: str = _
     jobname: str = _
     join: str = _
     log: str = _
