@@ -183,13 +183,12 @@ class _RocotoIterator:
     def _report(self) -> None:
         cmd = "rocotostat -d %s -w %s" % (self._database, self._workflow)
         if self._database.is_file():
-            log.info("Workflow status:")
             _, output = run_shell_cmd(cmd, quiet=True)
             for line in output.strip().split("\n"):
                 log.info(line)
 
     def _run(self) -> bool:
-        log.info("Iterating workflow")
+        log.info("Iterating workflow...")
         task_arg = "-a" if self._all else "-t %s" % self._task
         cmd = "rocotorun -d %s -w %s %s" % (self._database, self._workflow, task_arg)
         success, _ = run_shell_cmd(cmd, quiet=True)
@@ -198,7 +197,7 @@ class _RocotoIterator:
     @property
     def _state_msg(self) -> str:
         x = "s" if self._all else f" '{self._task}'"
-        return f"Rocoto task{x} for cycle {self._cycle}: %s"
+        return f"Task{x} for cycle {self._cycle}: %s"
 
     @property
     def _state_type(self) -> _RocotoIterator.State | None:

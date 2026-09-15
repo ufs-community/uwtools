@@ -241,7 +241,7 @@ class TestRocotoIterator:
             "rocotorun -d %s -w %s %s" % (instance._database, instance._workflow, task_arg),
             quiet=True,
         )
-        assert logged("Iterating workflow")
+        assert logged("Iterating workflow...")
 
     @mark.parametrize(
         ("all_", "expected"),
@@ -266,7 +266,7 @@ class TestRocotoIterator:
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             instance._report()
         if create_database:
-            for line in ["Workflow status:", "foo", "bar"]:
+            for line in ["foo", "bar"]:
                 assert logged(line)
             run_shell_cmd.assert_called_once_with(
                 "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
@@ -277,8 +277,8 @@ class TestRocotoIterator:
     @mark.parametrize(
         ("all_", "expected"),
         [
-            (False, "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"),
-            (True, "Rocoto tasks for cycle 2025-07-21 12:00:00: %s"),
+            (False, "Task 'foo' for cycle 2025-07-21 12:00:00: %s"),
+            (True, "Tasks for cycle 2025-07-21 12:00:00: %s"),
         ],
     )
     def test_rocoto__RocotoIterator__state_msg(self, all_, expected, instance):
@@ -300,7 +300,7 @@ class TestRocotoIterator:
             )
         if set_up_database:
             assert instance._state_type is instance.State.INACTIVE
-            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: inactive")
+            assert logged(f"Task '{instance._task}' for cycle {instance._cycle}: inactive")
         else:
             assert instance._state_type is None
 
@@ -330,7 +330,7 @@ class TestRocotoIterator:
             )
         assert instance._state_type is expected
         if msg:
-            assert logged(f"Rocoto tasks for cycle {instance._cycle}: {msg}")
+            assert logged(f"Tasks for cycle {instance._cycle}: {msg}")
 
     def test_rocoto__RocotoIterator__state_type__none(self, instance):
         self.dbsetup(instance)
