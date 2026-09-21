@@ -67,7 +67,7 @@ def test_utils_processing_run_shell_cmd__success(
     if quiet:
         assert not uwcaplog.messages
     elif log_output:
-        pre = f"[{taskname}] " if taskname else ""
+        pre = f"{taskname}: " if taskname else ""
         expected = """
         {pre}Running: {cmd}
         {pre}  in directory
