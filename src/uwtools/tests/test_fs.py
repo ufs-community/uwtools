@@ -89,7 +89,7 @@ def test_fs_Copier_go__live_config_file_dry_run(assets):
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
     copier = fs.Copier(target_dir=dstdir, config=cfgdict, key_path=["a", "b"])
-    copier.go(dry_run=True)
+    copier.go(iotaa=dict(dry_run=True))
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
 

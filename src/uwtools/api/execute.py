@@ -91,7 +91,7 @@ def execute(
     kwargs.update({arg: args[arg] for arg in sorted([STR.batch, *required]) if arg in accepted})
     driverobj = class_(**kwargs)
     log.debug("Instantiated %s with: %s", classname, kwargs)
-    node: Node = getattr(driverobj, task)(dry_run=dry_run)
+    node: Node = getattr(driverobj, task)(iotaa=dict(dry_run=dry_run))
     if graph_file:
         Path(graph_file).write_text(f"{node.graph}\n")
     return node

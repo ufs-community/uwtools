@@ -197,7 +197,7 @@ def _execute(
     function_scope_locals = locals()
     kwargs.update({arg: function_scope_locals.get(arg) for arg in accepted_args})
     obj = driver_class(**kwargs)
-    node: Node = getattr(obj, task)(dry_run=dry_run)
+    node: Node = getattr(obj, task)(iotaa=dict(dry_run=dry_run))
     if graph_file:
         Path(graph_file).write_text(f"{node.graph}\n")
     return node
