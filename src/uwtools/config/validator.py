@@ -140,7 +140,7 @@ def validate_internal(
     :raises: TypeError if both config_* arguments specified.
     """
     validate_check_config(config_data, config_path)
-    log.info("Validating config against internal schema: %s", schema_name)
+    log.debug("Validating config against internal schema: %s", schema_name)
     validate_external(
         schema_file=internal_schema_file(schema_name),
         desc=desc,
