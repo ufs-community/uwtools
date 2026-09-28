@@ -1,4 +1,3 @@
-[2025-01-02T03:04:05]     INFO Validating config against internal schema: files-to-stage
 [2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]  WARNING Ignoring directory src/20240529
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy-glob/dst/foo: Executing
