@@ -1698,4 +1698,4 @@ def _version() -> str:
     Return version information.
     """
     info = json.loads(resource_path("info.json").read_text())
-    return "version %s build %s" % (info["version"], info["buildnum"])
+    return "version %s" % info["version"]
