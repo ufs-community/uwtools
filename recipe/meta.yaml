@@ -9,7 +9,7 @@ source:
 build:
   include_recipe: false
   noarch: python
-  number: {{ info["buildnum"] }}
+  number: 0 # do not increment
 requirements:
   host:
     - pip
