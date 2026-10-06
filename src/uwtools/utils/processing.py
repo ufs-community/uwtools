@@ -20,12 +20,12 @@ def run_shell_cmd(
     callback: Callable[[Popen], None] | None = None,
     cwd: Path | str | None = None,
     env: dict[str, str] | None = None,
+    env_update: bool = False,
     executable: str | None = None,
     log_output: bool = False,
     quiet: bool = False,
     start_new_session: bool = False,
     taskname: str | None = None,
-    env_update: bool = False,
 ) -> tuple[bool, str]:
     """
     Run a command in a shell.
