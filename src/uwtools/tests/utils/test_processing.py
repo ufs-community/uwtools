@@ -28,6 +28,19 @@ def test_utils_processing_run_shell_cmd__cmd_list():
     assert "hello world" in output
 
 
+def test_utils_processing_run_shell_cmd__env_update(monkeypatch):
+    monkeypatch.setenv("UWTOOLS_TEST_INHERITED", "inherited")
+    monkeypatch.setenv("UWTOOLS_TEST_OVERRIDE", "original")
+    success, output = processing.run_shell_cmd(
+        cmd='printf "%s %s" "$UWTOOLS_TEST_INHERITED" "$UWTOOLS_TEST_OVERRIDE"',
+        env={"UWTOOLS_TEST_OVERRIDE": "updated"},
+        env_update=True,
+    )
+    assert success
+    assert output == "inherited updated"
+    assert processing.os.environ["UWTOOLS_TEST_OVERRIDE"] == "original"
+
+
 @mark.parametrize("quiet", [True, False])
 def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
     caplog.set_level(logging.INFO if quiet else logging.DEBUG)
