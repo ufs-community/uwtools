@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 def run_shell_cmd(
     cmd: str | list[str],
+    *,
     callback: Callable[[Popen], None] | None = None,
     cwd: Path | str | None = None,
     env: dict[str, str] | None = None,
