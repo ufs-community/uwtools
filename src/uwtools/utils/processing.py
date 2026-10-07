@@ -4,6 +4,7 @@ Utilities for interacting with external processes.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from subprocess import PIPE, STDOUT, Popen
 from typing import TYPE_CHECKING
@@ -16,9 +17,11 @@ if TYPE_CHECKING:
 
 def run_shell_cmd(
     cmd: str | list[str],
+    *,
     callback: Callable[[Popen], None] | None = None,
     cwd: Path | str | None = None,
     env: dict[str, str] | None = None,
+    env_update: bool = False,
     executable: str | None = None,
     log_output: bool = False,
     quiet: bool = False,
@@ -32,6 +35,7 @@ def run_shell_cmd(
     :param callback: Called with the ``Popen`` process object.
     :param cwd: Change to this directory before running the command.
     :param env: Environment variables to set before running the command.
+    :param env_update: Update the inherited environment with ``env`` instead of replacing it?
     :param executable: Interpreter to run command in (e.g. "/bin/bash").
     :param log_output: Log output from successful command? (Error output is always logged.)
     :param quiet: Log ``INFO`` messages as ``DEBUG``.
@@ -67,10 +71,11 @@ def run_shell_cmd(
         logfunc("%s  with environment", pre)
         for k in sorted(env):
             logfunc("%s    %s=%s", pre, k, env[k])
+    process_env = {**os.environ, **(env or {})} if env_update else env
     kwargs: dict = dict(
         cwd=cwd,
         encoding="utf=8",
-        env=env,
+        env=process_env,
         shell=isinstance(cmd, str),
         start_new_session=start_new_session,
         stderr=STDOUT,

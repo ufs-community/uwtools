@@ -5,7 +5,7 @@ Tests for uwtools.utils.processing module.
 import logging
 from subprocess import Popen
 from textwrap import dedent
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from pytest import mark
 
@@ -26,6 +26,23 @@ def test_utils_processing_run_shell_cmd__cmd_list():
     success, output = processing.run_shell_cmd(cmd=["echo", "hello", "world"])
     assert success
     assert "hello world" in output
+
+
+def test_utils_processing_run_shell_cmd__env_update():
+    env = {
+        **processing.os.environ,
+        "UWTOOLS_TEST_INHERITED": "inherited",
+        "UWTOOLS_TEST_OVERRIDE": "original",
+    }
+    with patch.object(processing.os, "environ", env):
+        success, output = processing.run_shell_cmd(
+            cmd='printf "%s %s" "$UWTOOLS_TEST_INHERITED" "$UWTOOLS_TEST_OVERRIDE"',
+            env={"UWTOOLS_TEST_OVERRIDE": "updated"},
+            env_update=True,
+        )
+    assert success
+    assert output == "inherited updated"
+    assert env["UWTOOLS_TEST_OVERRIDE"] == "original"
 
 
 @mark.parametrize("quiet", [True, False])
