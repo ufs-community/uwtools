@@ -1,4 +1,3 @@
-[2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy/foo: Executing
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy/foo: Ready
 [2025-01-02T03:04:05]     INFO HTTP https://raw.githubusercontent.com/ufs-community/uwtools/refs/heads/main/LICENSE -> dst/copy/licenses/uwtools: Executing

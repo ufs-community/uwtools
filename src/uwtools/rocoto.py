@@ -98,7 +98,7 @@ def validate_xml_string(xml_string: str) -> bool:
     schema = etree.RelaxNG(etree.fromstring(path.read_text()))
     valid: bool = schema.validate(tree)
     if valid:
-        log.info("Schema validation succeeded for Rocoto XML")
+        log.debug("Schema validation succeeded for Rocoto XML")
     else:
         nerr = len(schema.error_log)
         log.error("%s Rocoto XML validation error%s found", nerr, "" if nerr == 1 else "s")

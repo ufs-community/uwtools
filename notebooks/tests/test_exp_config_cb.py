@@ -30,9 +30,4 @@ def test_exp_config_cb(load, tb):
         "rundir: /path/to/my/output/make_ics",
     )
     assert all(x in tb.cell_output_text(13) for x in deref_cfg)
-    for line in [
-        "Schema validation succeeded for chgres_cube config",
-        "Schema validation succeeded for platform config",
-        "chgres_cube valid schema: Ready",
-    ]:
-        assert line in tb.cell_output_text(15)
+    assert "chgres_cube valid schema: Ready" in tb.cell_output_text(15)
