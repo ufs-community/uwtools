@@ -34,9 +34,8 @@ def test_fs_copy(load, tb):
         "\n  'tmp/copy-target/data/file3-copy.csv'],"
         "\n 'notready': []}" in tb.cell_output_text(7)
     )
-    assert (
-        "{'ready': [], 'notready': ['tmp/copy-target/missing-copy.nml']}"
-        in tb.cell_output_text(11)
+    assert "{'ready': [], 'notready': ['tmp/copy-target/missing-copy.nml']}" in tb.cell_output_text(
+        11
     )
     assert tb.cell_output_text(13) == tb.cell_output_text(9)
     assert tb.cell_output_text(15) == config_keys_str
@@ -74,9 +73,8 @@ def test_fs_link(load, tb):
         "\n  'tmp/link-target/data/file3-link.csv'],"
         "\n 'notready': []}"
     ) in tb.cell_output_text(31)
-    assert (
-        "{'ready': [], 'notready': ['tmp/link-target/missing-link.nml']}"
-        in tb.cell_output_text(35)
+    assert "{'ready': [], 'notready': ['tmp/link-target/missing-link.nml']}" in tb.cell_output_text(
+        35
     )
     assert tb.cell_output_text(37) == tb.cell_output_text(33)
     assert tb.cell_output_text(39) == config_keys_str
