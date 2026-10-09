@@ -1,2 +1,1 @@
-[2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]    ERROR Relative path 'foo' requires target directory to be specified

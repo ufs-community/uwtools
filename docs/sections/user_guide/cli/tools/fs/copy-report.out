@@ -1,4 +1,3 @@
-[2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy-report/foo: Executing
 [2025-01-02T03:04:05]     INFO Local src/foo -> dst/copy-report/foo: Ready
 [2025-01-02T03:04:05]  WARNING File src/qux: Not ready [external asset]

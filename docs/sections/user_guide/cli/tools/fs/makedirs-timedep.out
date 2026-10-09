@@ -1,4 +1,3 @@
-[2025-01-02T03:04:05]     INFO Schema validation succeeded for fs config
 [2025-01-02T03:04:05]     INFO Directory makedirs-parent-timedep/foo/20240529/12/006/bar: Executing
 [2025-01-02T03:04:05]     INFO Directory makedirs-parent-timedep/foo/20240529/12/006/bar: Ready
 [2025-01-02T03:04:05]     INFO Directory makedirs-parent-timedep/baz/20240529/12/006/qux: Executing
