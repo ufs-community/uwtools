@@ -88,7 +88,7 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
     """
     errors = _validation_errors(config, schema)
     if valid := not bool(errors):
-        log.info("Schema validation succeeded for %s", desc)
+        log.debug("Schema validation succeeded for %s", desc)
     else:
         nerr = len(errors)
         log.error("%s schema-validation error%s found in %s", nerr, "" if nerr == 1 else "s", desc)
