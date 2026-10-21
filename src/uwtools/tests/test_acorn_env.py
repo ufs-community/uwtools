@@ -1,5 +1,5 @@
 """
-Acorn (WCOSS2 test environment) smoke tests.
+Acorn / Cactus (WCOSS2 test environment) smoke tests.
 
 Run these on Acorn after loading the workflow environment:
 
@@ -18,26 +18,36 @@ uwtools/0.1 packages (iotaa, uwtools, etc.) active. Bongi has been asked to
 add pytest to ve/uwtools/0.1 to eliminate this workaround. (As of 2026-08-06
 the module-file contamination guard does NOT block this borrow — it still works.)
 
+On Cactus, the GDIT-managed, security-patched VE is loaded instead via:
+
+    module load intel/19.1.3.304
+    module load ve/uwtools/2.16
+
+which resolves to uwtools 2.16.3 (not 2.16.0 — see VERSION TRACKING below).
+
 These tests verify that the venv, uwtools version, and key dependencies
-are functional before attempting a live workflow run on Acorn/WCOSS2.
+are functional before attempting a live workflow run on Acorn/Cactus/Dogwood/WCOSS2.
 
 ===== VERSION TRACKING =====
 
 uwtools versions:
-  - Approved on WCOSS2 (in progress): 2.16.0      <- what this test suite targets
-  - Required by uw-aigfs environment.yml (current): 2.18.*  <- must follow 2.16.0
+  - Approved on WCOSS2 (in progress): 2.16.0 (Acorn) / 2.16.3 (Cactus, GDIT-patched)
+      <- what this test suite targets; tests accept any 2.16.x patch release
+  - Required by uw-aigfs environment.yml (current): 2.18.*  <- must follow 2.16.x
   - Ecflow tool added to uw CLI: 2.17.0
   RISK: cli.py in v2.17+ eagerly imports uwtools.api.ecflow, which in turn does
   a hard top-level `from ecflow import ...`. On WCOSS2, ecflow is built against
   Python 3.8.6, so this import will fail from a Python 3.12+ venv — making the
-  `uw` CLI entirely non-functional. v2.16.0 does NOT have this problem.
+  `uw` CLI entirely non-functional. v2.16.x does NOT have this problem.
   ACTION: Before requesting 2.17+ approval, raise this with uw-tools team.
   See test_ecflow_cli_import_blocker_v217plus() for the regression check.
 
 Python versions:
   - System Python on WCOSS2: 3.8.6  (DO NOT USE — ecflow is compiled against this)
-  - Venv actual version (confirmed 2026-07-27, re-confirmed 2026-08-06): Python 3.12.0
-    Source: /apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/0.1/bin/python3
+  - Venv actual version (confirmed 2026-07-27, re-confirmed 2026-08-06, confirmed
+    on Cactus 2026-10-20): Python 3.12.0
+    Source (Acorn): /apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/0.1/bin/python3
+    Source (Cactus): /apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/2.16/bin/python3
   - uw-aigfs environment.yml: 3.14.*  (aspirational — reconcile with WCOSS2 avail)
 
 ecflow versions:
@@ -49,7 +59,7 @@ ecflow versions:
   NOTE (2026-08-06): The VE now loads the ecflow/5.6.0.13 module at the shell level,
   but `import ecflow` from the VE's Python 3.12 still fails (ABI mismatch) — so
   test_ecflow_import remains XFAIL, as expected. Continued evidence that the 2.17+
-  eager-import problem is real and unresolved.
+  eager-import problem is real and unresolved. Still true on the Cactus 2.16.3 VE.
 
 wgrib2 versions:
   - wgrib2/3.1.1: CONFIRMED a stale leftover stub (GDIT/bongi, 2026-08-04) from prior
@@ -61,13 +71,19 @@ wgrib2 versions:
 ===== KNOWN ISSUES =====
 
   1. ecflow/Python version mismatch: WCOSS2 ecflow 5.6.x built for Python 3.8.6;
-     cannot be imported from a Python 3.12 venv. Not a blocker for v2.16.0 (no
+     cannot be imported from a Python 3.12 venv. Not a blocker for v2.16.x (no
      ecflow in CLI) but WILL block v2.17+ if not resolved first.
 
-  2. graphcast: not installed in ve/uwtools/0.1 (and not expected to be — graphcast
-     lives in the ops venv aigfs.v1.1.0/venv). Acorn HAS outbound internet
-     (confirmed 2026-07-27), so a direct pip install from noaa-emc/graphcast at
-     commit aea0678c is possible if ever needed. test_graphcast_import stays XFAIL.
+  2. graphcast: not installed in ve/uwtools/0.1 or ve/uwtools/2.16 (and not
+     expected to be — graphcast lives in the ops venv aigfs.v1.1.0/venv). Acorn
+     HAS outbound internet (confirmed 2026-07-27), so a direct pip install from
+     noaa-emc/graphcast at commit aea0678c is possible if ever needed.
+     test_graphcast_import stays XFAIL.
+     UPDATE (2026-10-20): Based on the completed NRT runs of AIGFS on
+     Cactus/Dogwood, the workflow only needs to point to pre-staged GraphCast
+     model weights — it does not require the graphcast Python package to be
+     importable from the uwtools VE itself. This further de-risks the XFAIL
+     status of this test; it is not expected to become a real blocker.
 
   3. aigfs_base.yaml key mismatch: parm/wflow/aigfs_base.yaml uses user.aigfs_home
      but ush/default_config.yaml (and wcoss_config.yaml) defines user.aigfs_app.
@@ -101,6 +117,12 @@ wgrib2 versions:
      "is not of type 'fs_src'". (The `link:` / `copy:` block form is only valid
      INSIDE a driver config such as `files_to_hardlink:`, which is a different code
      path.) Documented here so it doesn't have to be re-derived for uw-aigfs staging.
+
+  9. uwtools patch-version drift between environments: Acorn validated 2.16.0;
+     GDIT's Cactus VE (ve/uwtools/2.16) ships 2.16.3 (security-patched). Treat the
+     2.16.x line as the approval unit rather than a single exact patch build, since
+     GDIT may re-patch within a minor version for security reasons without that
+     being a meaningful functional change. Confirmed working on Cactus 2026-10-20.
 
 ===== DRIVER AUTHORING NOTES for uwtools 2.16.0 (from the uw execute test) =====
 
@@ -272,7 +294,43 @@ wgrib2 versions:
     - numpy/netCDF4 binary-compatibility warning persists — rebuild netCDF4/cftime
       against the VE's numpy 2.5.1 to clear it.
 
-===== TODO: AFTER v2.16.0 APPROVAL =====
+===== CACTUS VE CONFIRMATION — 2026-10-20 =====
+
+  Context:
+    - Bongi (GDIT) reported ve/uwtools/2.16 installed on Cactus 10/16/2026 (install
+      on Dogwood was planned for the same date; status to be confirmed separately).
+    - This is a HIERARCHICAL module: it is hidden from `module avail` until one of
+      its prerequisite compiler modules is loaded. Loading intel/19.1.3.304 (same
+      compiler family as the Acorn VE) makes it visible and loadable.
+
+  Confirmed load sequence (clogin, Cactus):
+    module load intel/19.1.3.304
+    module load ve/uwtools/2.16
+
+  Environment:
+    Node:        clogin05/clogin06 (Cactus)
+    Python:      3.12.0 (/apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/2.16/bin/python3)
+    uwtools:     2.16.3 (NOT 2.16.0 — GDIT security-patched build)
+    VE packages (per `module spider`): f90nml 1.5.0, iotaa 1.6.0, jinja2 3.1.6,
+      jsonschema 4.26.0, lxml 6.0.2, python-dateutil 2.9.0.post0, pyyaml 6.0.3,
+      requests 2.33.0, xarray 2026.4.0, netcdf4 1.7.4, pyproj 3.7.1, numpy 2.4.1,
+      grib2io 2.5.4, pytest 9.1.1, uwtools 2.16.3.
+    graphcast: NOT present in this VE (by design — see Known Issue 2 update above).
+
+  Action taken: relaxed test_uwtools_version and test_uw_cli_version to accept
+  any 2.16.x patch release (was a strict == "2.16.0" check), since GDIT's security
+  patching legitimately advances the patch version independent of uw-aigfs/uw-tools
+  functional changes.
+
+  Still outstanding:
+    - Confirm Dogwood install status (planned 10/16; not yet directly confirmed here).
+    - ecflow/Python ABI mismatch unresolved in 2.16.3, as expected; must be re-checked
+      once GDIT bumps uwtools toward 2.20.*/2.21.* to satisfy uw-aigfs's 2.18+
+      requirement and to pick up ecflow_tool — at which point the v2.17+ eager-import
+      blocker (test_ecflow_cli_import_blocker_v217plus) becomes directly relevant and
+      must be re-run against whatever version GDIT delivers.
+
+===== TODO: AFTER v2.16.x APPROVAL =====
 
   [x] Run: python -m pytest src/uwtools/tests/test_acorn_env.py -v  (done 2026-07-27; re-run 2026-08-06)
   [x] Record actual Python version available in the loaded venv  (Python 3.12.0)
@@ -287,19 +345,25 @@ wgrib2 versions:
   [x] Functional: uw config validate (positive + negative) on Acorn  (PASS 2026-08-18)
   [x] Functional: uw fs makedirs / link / copy on Acorn  (all PASS 2026-08-18)
   [x] Functional: uw execute (minimal custom driver, run to completion) on Acorn  (PASS 2026-08-18)
-  [ ] Functional: uw execute a REAL uw-aigfs driver — deferred to the real run (needs graphcast + weights + GFS input)
-  [ ] Get pytest added to ve/uwtools/0.1 (drop the PYTHONPATH workaround)
-  [ ] Begin v2.18.* approval process (uw-aigfs now requires 2.18.*, not 2.16.0)
+  [x] Confirm GDIT VE (ve/uwtools/2.16) loads cleanly on Cactus  (confirmed 2026-10-20, uwtools 2.16.3)
+  [x] Relax strict 2.16.0 version assertions to accept 2.16.x patch releases  (this change)
+  [ ] Run full smoke suite against the Cactus VE and record PASS/XFAIL counts
+  [ ] Confirm Dogwood install of ve/uwtools/2.16 (planned 10/16)
+  [ ] Functional: uw execute a REAL uw-aigfs driver — deferred to the real run (needs
+      GraphCast model weights staged + GFS input; graphcast package import NOT required)
+  [ ] Get pytest added to ve/uwtools/0.1 on Acorn (already native in Cactus 2.16.3 VE)
+  [ ] Begin v2.18.*/2.20.*/2.21.* approval process with GDIT (uw-aigfs requires 2.18.*)
   [ ] Build modulefiles/wflow_wcoss (Lmod/TCL; no conda; no ecflow in venv)
   [ ] Fix load_wflow_modules.sh: replace conda lines with `module load wflow_$1`
   [ ] Pre-generate suite .def on Ursa: `uw ecflow realize -c ush/wcoss_config.yaml`
   [ ] Commit rendered wcoss_suite.def; use `ecflow_client --load` on WCOSS2
   [ ] Confirm /lfs/h1/ops/prod/com/gfs/... path and data retention window
   [ ] Fix user.aigfs_home → user.aigfs_app in uw-aigfs parm/wflow/aigfs_base.yaml
-  [ ] Raise v2.17+ ecflow CLI blocker with uw-tools team before upgrading
+  [ ] Raise v2.17+ ecflow CLI blocker with uw-tools team before upgrading past 2.16.x
 """
 
 import importlib.metadata
+import re
 import shutil
 import subprocess
 import sys
@@ -317,10 +381,15 @@ def test_python_version():
 
 
 def test_uwtools_version():
-    """uwtools must be pinned to 2.16.0 in the active venv."""
+    """uwtools must be pinned to the 2.16.x line in the active venv.
+
+    Acorn's VE shipped 2.16.0; GDIT's Cactus VE (ve/uwtools/2.16) ships a
+    security-patched 2.16.3. Both are valid instances of the approved 2.16
+    minor version, so accept any 2.16.x patch release here.
+    """
     version = importlib.metadata.version("uwtools")
-    assert version == "2.16.0", (
-        f"Expected uwtools 2.16.0 but found {version}. "
+    assert re.match(r"^2\.16\.\d+$", version), (
+        f"Expected uwtools 2.16.x but found {version}. "
         "Check that the correct venv is active."
     )
 
@@ -340,7 +409,7 @@ def test_uwtools_schema_loading():
     reason=(
         "WCOSS2 ecflow 5.6.x is compiled against Python 3.8.6; "
         "import will fail from a Python 3.12+ venv. "
-        "This is expected and NOT a blocker for v2.16.0 (no ecflow in CLI). "
+        "This is expected and NOT a blocker for v2.16.x (no ecflow in CLI). "
         "Resolution: pre-generate suite .def on Ursa and use ecflow_client --load on WCOSS2."
     ),
 )
@@ -389,15 +458,17 @@ def test_grib2io_import():
 @pytest.mark.xfail(
     strict=False,
     reason=(
-        "graphcast may not yet be installed. "
-        "If WCOSS2 blocks outbound internet, pre-clone noaa-emc/graphcast at "
-        "commit aea0678c and install from local path: "
-        "pip install /path/to/local/graphcast"
+        "graphcast may not yet be installed, and per completed NRT runs on "
+        "Cactus/Dogwood, the workflow only needs pre-staged GraphCast model "
+        "weights — not a graphcast Python package import in the uwtools VE. "
+        "If WCOSS2 blocks outbound internet and a graphcast import is ever "
+        "needed, pre-clone noaa-emc/graphcast at commit aea0678c and install "
+        "from local path: pip install /path/to/local/graphcast"
     ),
 )
 def test_graphcast_import():
     """
-    graphcast must be importable once the pinned-commit venv install is complete.
+    graphcast may become importable if the pinned-commit venv install is completed.
 
     Install command (with outbound internet):
         pip install git+https://github.com/noaa-emc/graphcast@aea0678cfbd7...
@@ -405,13 +476,18 @@ def test_graphcast_import():
         git clone https://github.com/noaa-emc/graphcast && cd graphcast
         git checkout aea0678cfbd7e866e4a1d364b456861d0a03954b
         pip install /path/to/graphcast
+
+    NOTE: confirmed via completed NRT runs that this import is not actually
+    required for the workflow to function — only access to pre-staged model
+    weights is needed. Retained as XFAIL rather than removed, for environment
+    tracking purposes.
     """
     import graphcast  # noqa: PLC0415
 
     assert graphcast is not None
 
 
-# ─── System Binaries ─────────────────────────────────────────────────────────
+# ─── System Binaries ────────────────────────────────────────────────────────
 
 
 def test_wgrib2_binary():
@@ -442,7 +518,7 @@ def test_pbs_scheduler_available():
     qsub_path = shutil.which("qsub")
     assert qsub_path is not None, (
         "qsub not found on PATH. "
-        "Verify PBS Pro is available on this Acorn node. "
+        "Verify PBS Pro is available on this node. "
         "Also confirm the scheduler string uwtools expects for PBS — check "
         "uwtools/scheduler.py for the registered scheduler identifiers."
     )
@@ -456,7 +532,7 @@ def test_uw_cli_available():
     The `uw` CLI entrypoint must be on PATH from the active venv.
 
     If this fails, check that the aigfs venv bin/ directory is first on PATH
-    and that `pip install uwtools==2.16.0` succeeded without errors.
+    and that `pip install uwtools==2.16.*` succeeded without errors.
     """
     uw_path = shutil.which("uw")
     assert uw_path is not None, (
@@ -468,9 +544,9 @@ def test_uw_cli_available():
 
 def test_uw_cli_version():
     """
-    `uw --version` must launch without errors and report 2.16.0.
+    `uw --version` must launch without errors and report a 2.16.x version.
 
-    In v2.16.0 the CLI does NOT import ecflow, so this should work even though
+    In v2.16.x the CLI does NOT import ecflow, so this should work even though
     ecflow is not importable from the venv. If this fails with an ImportError for
     ecflow, the wrong uwtools version is installed — check with `pip show uwtools`.
     """
@@ -485,8 +561,9 @@ def test_uw_cli_version():
         f"stdout: {result.stdout}\nstderr: {result.stderr}\n"
         "If the error mentions 'ecflow', the wrong uwtools version is installed."
     )
-    assert "2.16.0" in result.stdout or "2.16.0" in result.stderr, (
-        f"Expected '2.16.0' in output, got stdout={result.stdout!r} "
+    combined_output = result.stdout + result.stderr
+    assert re.search(r"2\.16\.\d+", combined_output), (
+        f"Expected a '2.16.x' version string in output, got stdout={result.stdout!r} "
         f"stderr={result.stderr!r}"
     )
 
@@ -537,7 +614,7 @@ def test_ecflow_cli_import_blocker_v217plus():
     level. On WCOSS2, ecflow is compiled against Python 3.8.6 and cannot be
     imported from a Python 3.12+ venv — so the `uw` CLI will fail entirely.
 
-    v2.16.0 does NOT have this problem (ecflow_tool was added in 2.17.0).
+    v2.16.x does NOT have this problem (ecflow_tool was added in 2.17.0).
 
     This test confirms that importing the config, fs, and execute API modules
     (the ones uw-aigfs actually calls) does NOT trigger an ecflow import. If it
