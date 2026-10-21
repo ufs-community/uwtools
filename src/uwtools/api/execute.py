@@ -51,7 +51,8 @@ def execute(
     :param module: Path to driver module or name of module on sys.path.
     :param classname: Name of driver class to instantiate.
     :param task: Name of driver task to execute. If omitted, a list of available tasks is displayed.
-    :param schema_file: The JSON Schema file to use for validation.
+    :param schema_file: The JSON Schema file to use for validation (default:<driver_name>.jsonschema
+        alongside the driver's module).
     :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
@@ -62,10 +63,9 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: The task-graph Node yielded by the task, if it completes without raising an exception.
     """
-    class_, module_path = _get_driver_class(module, classname)
+    class_, _ = _get_driver_class(module, classname)
     if not class_:
         return None
-    assert module_path is not None
     if bad_task := task and task not in tasknames(class_):
         log.error("%s driver has no task '%s'", class_.__name__, task)
     if bad_task or task is None:
@@ -85,7 +85,7 @@ def execute(
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         key_path=key_path,
-        schema_file=schema_file or module_path.with_suffix(".jsonschema"),
+        schema_file=Path(schema_file) if schema_file else None,
     )
     required = non_optional & accepted
     kwargs.update({arg: args[arg] for arg in sorted([STR.batch, *required]) if arg in accepted})

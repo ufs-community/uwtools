@@ -299,6 +299,25 @@ def test_Assets__rundir(assetsobj):
     assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
 
+@mark.parametrize(
+    ("module", "expected"),
+    [
+        ("foo", Path("/some/path/concrete.jsonschema")),
+        ("uwtools.drivers.foo", None),
+    ],
+)
+@mark.parametrize("explicit", [True, False])
+def test_Assets__schema_file_default(config, expected, explicit, module):
+    schema_file = Path("/explicit/schema.jsonschema") if explicit else None
+    with (
+        patch.object(ConcreteAssetsTimeInvariant, "__module__", module),
+        patch.object(driver.inspect, "getfile", return_value="/some/path/foo.py"),
+    ):
+        assetsobj = ConcreteAssetsTimeInvariant(config=config, schema_file=schema_file)
+        assert assetsobj._schema_file_default() == expected
+    assert assetsobj.schema_file == (schema_file if explicit else expected)
+
+
 def test_Assets__schema_name():
     with patch.object(driver.Assets, "driver_name", return_value="a_driver"):
         assert driver.Assets._schema_name() == "a-driver"

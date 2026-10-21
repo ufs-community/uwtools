@@ -91,6 +91,9 @@ def test_execute__pass(graph, kwargs, logged, remove, tmp_path, utc):
         val = execute.execute(**kwargs)
         assert val
         assert val.ref == 42
+    assert class_.call_args.kwargs["schema_file"] == (
+        None if "schema_file" in remove else Path(kwargs["schema_file"])
+    )
     assert logged("Instantiated %s with" % kwargs["classname"])
     if graph:
         assert graph_file.read_text().strip() == graph_code

@@ -4,6 +4,7 @@ Abstract classes for component drivers.
 
 from __future__ import annotations
 
+import inspect
 import json
 import re
 import stat
@@ -72,7 +73,7 @@ class Assets(ABC):
             msg = "Required '%s' block missing in config" % self.driver_name()
             raise UWConfigError(msg) from e
         self._delegate(controller, STR.rundir)
-        self.schema_file = schema_file
+        self.schema_file = schema_file or self._schema_file_default()
         self._validate()
 
     def __repr__(self) -> str:
@@ -219,6 +220,18 @@ class Assets(ABC):
             for key in controller[1:]:
                 val = val[key]
             self._config[config_key] = val[config_key]
+
+    def _schema_file_default(self) -> Path | None:
+        """
+        Return the default schema file for external drivers, or None for internal drivers.
+
+        The default is <driver_name>.jsonschema in the directory containing the module that defines
+        the concrete driver class.
+        """
+        cls = type(self)
+        if cls.__module__.split(".")[0] == "uwtools":
+            return None
+        return Path(inspect.getfile(cls)).parent / f"{self.driver_name()}.jsonschema"
 
     @classmethod
     def _schema_name(cls) -> str:
@@ -686,7 +699,8 @@ def _add_docstring(class_: type, omit: list[str] | None = None) -> None:
     :param config: Path to config file (read stdin if missing or None).
     :param key_path: Keys of keys to driver config block.
     :param batch: Run component via the batch system?
-    :param schema_file: Path to schema file to use to validate an external driver.
+    :param schema_file: Path to schema file to use to validate an external driver (default: \
+<driver_name>.jsonschema alongside the driver's module).
     :param controller: Key(s) leading to block in config controlling run-time values.
     """
     class_.__doc__ = "\n".join(
