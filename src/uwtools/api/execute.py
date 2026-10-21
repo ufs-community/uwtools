@@ -63,7 +63,7 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: The task-graph Node yielded by the task, if it completes without raising an exception.
     """
-    class_, _ = _get_driver_class(module, classname)
+    class_ = _get_driver_class(module, classname)
     if not class_:
         return None
     if bad_task := task and task not in tasknames(class_):
@@ -104,14 +104,14 @@ def tasks(module: Path | str, classname: str) -> dict[str, str]:
     :param module: Name of driver module.
     :param classname: Name of driver class to instantiate.
     """
-    class_, _ = _get_driver_class(module, classname)
+    class_ = _get_driver_class(module, classname)
     if not class_:
         log.error("Could not get tasks from class %s in module %s", classname, module)
         return {}
     return _tasks(class_)
 
 
-def _get_driver_class(module: Path | str, classname: str) -> tuple[type | None, Path | None]:
+def _get_driver_class(module: Path | str, classname: str) -> type | None:
     """
     Return the driver class.
 
@@ -122,14 +122,12 @@ def _get_driver_class(module: Path | str, classname: str) -> tuple[type | None, 
         m := _get_driver_module_implicit(str(module))
     ):
         log.error("Could not load module %s", module)
-        return None, None
-    assert m.__file__ is not None
-    module_path = Path(m.__file__)
+        return None
     if hasattr(m, classname):
         c: type = getattr(m, classname)
-        return c, module_path
+        return c
     log.error("Module %s has no class %s", module, classname)
-    return None, module_path
+    return None
 
 
 def _get_driver_module_explicit(module: Path) -> ModuleType | None:

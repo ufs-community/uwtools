@@ -303,7 +303,7 @@ def test_Assets__rundir(assetsobj):
     ("module", "expected"),
     [
         ("foo", Path("/some/path/concrete.jsonschema")),
-        ("uwtools.drivers.foo", None),
+        ("%s.drivers.foo" % driver.__name__.split(".")[0], None),
     ],
 )
 @mark.parametrize("explicit", [True, False])

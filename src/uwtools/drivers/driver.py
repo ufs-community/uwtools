@@ -229,7 +229,7 @@ class Assets(ABC):
         the concrete driver class.
         """
         cls = type(self)
-        if cls.__module__.split(".")[0] == "uwtools":
+        if cls.__module__.split(".")[0] == __name__.split(".")[0]:
             return None
         return Path(inspect.getfile(cls)).parent / f"{self.driver_name()}.jsonschema"
 
