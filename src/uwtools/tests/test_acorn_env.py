@@ -330,6 +330,23 @@ wgrib2 versions:
       blocker (test_ecflow_cli_import_blocker_v217plus) becomes directly relevant and
       must be re-run against whatever version GDIT delivers.
 
+===== CACTUS SMOKE TEST RESULTS — 2026-10-20 (GDIT VE ve/uwtools/2.16, uwtools 2.16.3) =====
+
+  Environment:
+    Node:        clogin07 (Cactus / WCOSS2)
+    Modules:     intel/19.1.3.304, ve/uwtools/2.16
+    Python:      3.12.0 (/apps/prod/ve/intel/19.1.3.304/python/3.12.0/uwtools/2.16/bin/python3)
+    uwtools:     2.16.3
+
+  Results:
+    PASSED  (12), XFAIL (2), FAILED (0) — clean sweep, matching the Acorn 2.16.0 profile.
+    XFAILs: test_ecflow_import (expected — ecflow/Python 3.8.6 ABI mismatch, unresolved
+    in 2.16.3 as expected), test_graphcast_import (expected — graphcast package not
+    present in this VE by design; only pre-staged model weights are needed).
+
+  Confirms: the GDIT-patched 2.16.3 VE on Cactus behaves identically to the validated
+  2.16.0 VE on Acorn for all primitives this suite covers.
+
 ===== TODO: AFTER v2.16.x APPROVAL =====
 
   [x] Run: python -m pytest src/uwtools/tests/test_acorn_env.py -v  (done 2026-07-27; re-run 2026-08-06)
@@ -347,7 +364,7 @@ wgrib2 versions:
   [x] Functional: uw execute (minimal custom driver, run to completion) on Acorn  (PASS 2026-08-18)
   [x] Confirm GDIT VE (ve/uwtools/2.16) loads cleanly on Cactus  (confirmed 2026-10-20, uwtools 2.16.3)
   [x] Relax strict 2.16.0 version assertions to accept 2.16.x patch releases  (this change)
-  [ ] Run full smoke suite against the Cactus VE and record PASS/XFAIL counts
+  [x] Run full smoke suite against the Cactus VE and record PASS/XFAIL counts  (12 passed, 2 xfailed, 0 failed — 2026-10-20)
   [ ] Confirm Dogwood install of ve/uwtools/2.16 (planned 10/16)
   [ ] Functional: uw execute a REAL uw-aigfs driver — deferred to the real run (needs
       GraphCast model weights staged + GFS input; graphcast package import NOT required)
@@ -372,7 +389,9 @@ import pytest
 
 
 def test_python_version():
-    """Python 3.12+ must be active — not the system Python 3.8.6 on WCOSS2."""
+    """
+    Python 3.12+ must be active — not the system Python 3.8.6 on WCOSS2.
+    """
     major, minor = sys.version_info.major, sys.version_info.minor
     assert (major, minor) >= (3, 12), (
         f"Expected Python 3.12+, got {major}.{minor}. "
@@ -381,21 +400,23 @@ def test_python_version():
 
 
 def test_uwtools_version():
-    """uwtools must be pinned to the 2.16.x line in the active venv.
+    """
+    Uwtools must be pinned to the 2.16.x line in the active venv.
 
-    Acorn's VE shipped 2.16.0; GDIT's Cactus VE (ve/uwtools/2.16) ships a
-    security-patched 2.16.3. Both are valid instances of the approved 2.16
-    minor version, so accept any 2.16.x patch release here.
+    Acorn's VE shipped 2.16.0; GDIT's Cactus VE (ve/uwtools/2.16) ships a security-patched 2.16.3.
+    Both are valid instances of the approved 2.16 minor version, so accept any 2.16.x patch release
+    here.
     """
     version = importlib.metadata.version("uwtools")
     assert re.match(r"^2\.16\.\d+$", version), (
-        f"Expected uwtools 2.16.x but found {version}. "
-        "Check that the correct venv is active."
+        f"Expected uwtools 2.16.x but found {version}. Check that the correct venv is active."
     )
 
 
 def test_uwtools_schema_loading():
-    """Core uwtools API must load and return a valid schema dict."""
+    """
+    Core uwtools API must load and return a valid schema dict.
+    """
     import uwtools.api.ww3 as ww3
 
     schema_dict = ww3.schema()
@@ -435,21 +456,27 @@ def test_ecflow_import():
 
 
 def test_xarray_import():
-    """xarray must be importable from the active venv (required by uw-aigfs drivers)."""
+    """
+    Xarray must be importable from the active venv (required by uw-aigfs drivers).
+    """
     import xarray as xr  # noqa: PLC0415
 
     assert xr.__version__, "xarray imported but __version__ is empty."
 
 
 def test_netcdf4_import():
-    """netCDF4 must be importable (required by generate_ics.py for IC file generation)."""
+    """
+    NetCDF4 must be importable (required by generate_ics.py for IC file generation).
+    """
     import netCDF4 as nc  # noqa: PLC0415
 
     assert nc.__version__, "netCDF4 imported but __version__ is empty."
 
 
 def test_grib2io_import():
-    """grib2io must be importable (required for GRIB2 output handling in uw-aigfs)."""
+    """
+    Grib2io must be importable (required for GRIB2 output handling in uw-aigfs).
+    """
     import grib2io  # noqa: PLC0415
 
     assert grib2io.__version__, "grib2io imported but __version__ is empty."
@@ -468,7 +495,7 @@ def test_grib2io_import():
 )
 def test_graphcast_import():
     """
-    graphcast may become importable if the pinned-commit venv install is completed.
+    Graphcast may become importable if the pinned-commit venv install is completed.
 
     Install command (with outbound internet):
         pip install git+https://github.com/noaa-emc/graphcast@aea0678cfbd7...
@@ -492,7 +519,7 @@ def test_graphcast_import():
 
 def test_wgrib2_binary():
     """
-    wgrib2 must be on PATH — loaded via module load wgrib2 inside wflow_wcoss.
+    Wgrib2 must be on PATH — loaded via module load wgrib2 inside wflow_wcoss.
 
     wgrib2 is called directly by uw-aigfs post scripts and by generate_ics.py
     for GRIB2 variable extraction.
@@ -509,11 +536,11 @@ def test_wgrib2_binary():
 
 def test_pbs_scheduler_available():
     """
-    qsub must be on PATH — WCOSS2 uses PBS Pro, not SLURM.
+    Qsub must be on PATH — WCOSS2 uses PBS Pro, not SLURM.
 
-    Also confirms that uw-aigfs wcoss_config.yaml must set platform.scheduler: pbs
-    (not slurm). Verify the exact scheduler string uwtools expects by checking
-    uwtools/scheduler.py or running `uw config realize` with a test config.
+    Also confirms that uw-aigfs wcoss_config.yaml must set platform.scheduler: pbs (not slurm).
+    Verify the exact scheduler string uwtools expects by checking uwtools/scheduler.py or running
+    `uw config realize` with a test config.
     """
     qsub_path = shutil.which("qsub")
     assert qsub_path is not None, (
@@ -531,8 +558,8 @@ def test_uw_cli_available():
     """
     The `uw` CLI entrypoint must be on PATH from the active venv.
 
-    If this fails, check that the aigfs venv bin/ directory is first on PATH
-    and that `pip install uwtools==2.16.*` succeeded without errors.
+    If this fails, check that the aigfs venv bin/ directory is first on PATH and that `pip install
+    uwtools==2.16.*` succeeded without errors.
     """
     uw_path = shutil.which("uw")
     assert uw_path is not None, (
@@ -546,9 +573,9 @@ def test_uw_cli_version():
     """
     `uw --version` must launch without errors and report a 2.16.x version.
 
-    In v2.16.x the CLI does NOT import ecflow, so this should work even though
-    ecflow is not importable from the venv. If this fails with an ImportError for
-    ecflow, the wrong uwtools version is installed — check with `pip show uwtools`.
+    In v2.16.x the CLI does NOT import ecflow, so this should work even though ecflow is not
+    importable from the venv. If this fails with an ImportError for ecflow, the wrong uwtools
+    version is installed — check with `pip show uwtools`.
     """
     result = subprocess.run(
         ["uw", "--version"],
@@ -573,11 +600,11 @@ def test_uw_cli_version():
 
 def test_uwtools_config_realize():
     """
-    uwtools config realize must correctly render Jinja2 cross-references in YAML.
+    Uwtools config realize must correctly render Jinja2 cross-references in YAML.
 
-    This exercises the same rendering path used by all uw-aigfs driver calls
-    (generate_ics.py, run_graphcast.py) and by uw ecflow realize when building
-    the pre-generated suite definition on Ursa.
+    This exercises the same rendering path used by all uw-aigfs driver calls (generate_ics.py,
+    run_graphcast.py) and by uw ecflow realize when building the pre-generated suite definition on
+    Ursa.
     """
     import uwtools.api.config as uwconfig  # noqa: PLC0415
 
