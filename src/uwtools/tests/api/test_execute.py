@@ -86,11 +86,14 @@ def test_execute__pass(graph, kwargs, logged, remove, tmp_path, utc):
         driverobj.forty_two.return_value = node
         class_ = Mock(return_value=driverobj)
         setattr(class_, "__name__", "test")
-        gdc.return_value = (class_, kwargs["module"])
+        gdc.return_value = class_
         gfa().args = {"batch", "cycle"}
         val = execute.execute(**kwargs)
         assert val
         assert val.ref == 42
+    assert class_.call_args.kwargs["schema_file"] == (
+        None if "schema_file" in remove else Path(kwargs["schema_file"])
+    )
     assert logged("Instantiated %s with" % kwargs["classname"])
     if graph:
         assert graph_file.read_text().strip() == graph_code
@@ -114,51 +117,33 @@ def test_tasks__pass(args, f):
     assert tasks["forty_two"] == "Forty Two."
 
 
-def test__get_driver_class__explicit_fail_bad_class(args, logged):
-    bad_class = "BadClass"
-    c, module_path = execute._get_driver_class(classname=bad_class, module=args.module)
-    assert c is None
-    assert module_path == args.module
-    assert logged("Module %s has no class %s" % (args.module, bad_class))
+@mark.parametrize("case", ["bad_class", "bad_name", "bad_path", "bad_spec"])
+def test__get_driver_class__fail(args, case, logged, tmp_path):
+    classname, module = args.classname, args.module
+    if case == "bad_class":
+        classname = "BadClass"
+    elif case == "bad_name":
+        module = Path("bad_name")
+    elif case == "bad_path":
+        module = tmp_path / "not.py"
+    spec_kwargs = (
+        {"return_value": None} if case == "bad_spec" else {"wraps": execute.spec_from_file_location}
+    )
+    with patch.object(execute, "spec_from_file_location", **spec_kwargs):
+        assert execute._get_driver_class(classname=classname, module=module) is None
+    assert logged(
+        "Module %s has no class %s" % (module, classname)
+        if case == "bad_class"
+        else "Could not load module %s" % module
+    )
 
 
-def test__get_driver_class__explicit_fail_bad_name(args, logged):
-    bad_name = Path("bad_name")
-    c, module_path = execute._get_driver_class(classname=args.classname, module=bad_name)
-    assert c is None
-    assert module_path is None
-    assert logged("Could not load module %s" % bad_name)
-
-
-def test__get_driver_class__explicit_fail_bad_path(args, logged, tmp_path):
-    module = tmp_path / "not.py"
-    c, module_path = execute._get_driver_class(classname=args.classname, module=module)
-    assert c is None
-    assert module_path is None
-    assert logged("Could not load module %s" % module)
-
-
-def test__get_driver_class__explicit_fail_bad_spec(args, logged):
-    with patch.object(execute, "spec_from_file_location", return_value=None):
-        c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
-    assert c is None
-    assert module_path is None
-    assert logged("Could not load module %s" % args.module)
-
-
-def test__get_driver_class__explicit_pass(args):
-    c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
+@mark.parametrize("cwd", [None, fixture_path()])
+def test__get_driver_class__pass(args, cwd):
+    with patch.object(Path, "cwd", return_value=cwd or Path.cwd()):
+        c = execute._get_driver_class(classname=args.classname, module=args.module)
     assert c
     assert c.__name__ == "TestDriver"
-    assert module_path == args.module
-
-
-def test__get_driver_class__implicit_pass(args):
-    with patch.object(Path, "cwd", return_value=fixture_path()):
-        c, module_path = execute._get_driver_class(classname=args.classname, module=args.module)
-    assert c
-    assert c.__name__ == "TestDriver"
-    assert module_path == args.module
 
 
 def test__get_driver_module__explicit_absolute_fail_syntax_error(args, logged, tmp_path):

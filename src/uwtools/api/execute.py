@@ -51,7 +51,8 @@ def execute(
     :param module: Path to driver module or name of module on sys.path.
     :param classname: Name of driver class to instantiate.
     :param task: Name of driver task to execute. If omitted, a list of available tasks is displayed.
-    :param schema_file: The JSON Schema file to use for validation.
+    :param schema_file: The JSON Schema file to use for validation (default:<driver_name>.jsonschema
+        alongside the driver's module).
     :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
@@ -62,10 +63,9 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: The task-graph Node yielded by the task, if it completes without raising an exception.
     """
-    class_, module_path = _get_driver_class(module, classname)
+    class_ = _get_driver_class(module, classname)
     if not class_:
         return None
-    assert module_path is not None
     if bad_task := task and task not in tasknames(class_):
         log.error("%s driver has no task '%s'", class_.__name__, task)
     if bad_task or task is None:
@@ -85,7 +85,7 @@ def execute(
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         key_path=key_path,
-        schema_file=schema_file or module_path.with_suffix(".jsonschema"),
+        schema_file=Path(schema_file) if schema_file else None,
     )
     required = non_optional & accepted
     kwargs.update({arg: args[arg] for arg in sorted([STR.batch, *required]) if arg in accepted})
@@ -104,14 +104,13 @@ def tasks(module: Path | str, classname: str) -> dict[str, str]:
     :param module: Name of driver module.
     :param classname: Name of driver class to instantiate.
     """
-    class_, _ = _get_driver_class(module, classname)
-    if not class_:
+    if not (class_ := _get_driver_class(module, classname)):
         log.error("Could not get tasks from class %s in module %s", classname, module)
         return {}
     return _tasks(class_)
 
 
-def _get_driver_class(module: Path | str, classname: str) -> tuple[type | None, Path | None]:
+def _get_driver_class(module: Path | str, classname: str) -> type | None:
     """
     Return the driver class.
 
@@ -122,14 +121,12 @@ def _get_driver_class(module: Path | str, classname: str) -> tuple[type | None, 
         m := _get_driver_module_implicit(str(module))
     ):
         log.error("Could not load module %s", module)
-        return None, None
-    assert m.__file__ is not None
-    module_path = Path(m.__file__)
+        return None
     if hasattr(m, classname):
         c: type = getattr(m, classname)
-        return c, module_path
+        return c
     log.error("Module %s has no class %s", module, classname)
-    return None, module_path
+    return None
 
 
 def _get_driver_module_explicit(module: Path) -> ModuleType | None:
