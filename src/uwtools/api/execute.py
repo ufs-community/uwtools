@@ -104,8 +104,7 @@ def tasks(module: Path | str, classname: str) -> dict[str, str]:
     :param module: Name of driver module.
     :param classname: Name of driver class to instantiate.
     """
-    class_ = _get_driver_class(module, classname)
-    if not class_:
+    if not (class_ := _get_driver_class(module, classname)):
         log.error("Could not get tasks from class %s in module %s", classname, module)
         return {}
     return _tasks(class_)
