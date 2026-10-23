@@ -11,7 +11,7 @@ from pathlib import Path
 from iotaa import Asset, collection, task
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import DriverCycleBased
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.drivers.support import set_driver_docstring
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
@@ -19,7 +19,7 @@ from uwtools.utils.tasks import file
 from uwtools.utils.time import to_datetime, to_iso8601, to_timedelta
 
 
-class Ungrib(DriverCycleBased):
+class Ungrib(DriverTimeInvariant):
     """
     A driver for ungrib.
     """
