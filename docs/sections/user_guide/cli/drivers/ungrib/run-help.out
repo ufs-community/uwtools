@@ -1,13 +1,8 @@
-usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH]
-                     [--batch] [--dry-run] [--graph-file PATH]
-                     [--key-path KEY[.KEY...]] [--partial]
-                     [--schema-file PATH] [--quiet] [--verbose]
+usage: uw ungrib run [-h] [--version] [--config-file PATH] [--batch]
+                     [--dry-run] [--graph-file PATH] [--key-path KEY[.KEY...]]
+                     [--partial] [--schema-file PATH] [--quiet] [--verbose]
 
 A run
-
-Required arguments:
-  --cycle CYCLE
-      The cycle in ISO8601 format (e.g. yyyy-mm-ddThh)
 
 Optional arguments:
   -h, --help
