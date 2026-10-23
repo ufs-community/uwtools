@@ -4,6 +4,7 @@ API support for interacting with external drivers.
 
 from __future__ import annotations
 
+import sys
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from inspect import getfullargspec
@@ -138,9 +139,11 @@ def _get_driver_module_explicit(module: Path) -> ModuleType | None:
     log.debug("Loading module %s", module)
     if (spec := spec_from_file_location(module.name, module)) and spec.loader:
         m = module_from_spec(spec)
+        sys.modules[spec.name] = m
         try:
             spec.loader.exec_module(m)
         except Exception:  # noqa: BLE001
+            del sys.modules[spec.name]
             for line in format_exc().strip().split("\n"):
                 log.error(line)
         else:
