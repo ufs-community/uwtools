@@ -137,7 +137,7 @@ def _get_driver_module_explicit(module: Path) -> ModuleType | None:
     :param module: Name of driver module to load.
     """
     log.debug("Loading module %s", module)
-    if (spec := spec_from_file_location(module.name, module)) and spec.loader:
+    if (spec := spec_from_file_location(module.stem, module)) and spec.loader:
         m = module_from_spec(spec)
         sys.modules[spec.name] = m
         try:
