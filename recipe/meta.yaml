@@ -1,5 +1,5 @@
 {% set info = load_file_data("uwtools/resources/info.json") %}
-{% set pymin = "3.11" %}
+{% set pymin = "3.11" %} # keep in sync with docs/environment.yml
 
 package:
   name: uwtools
