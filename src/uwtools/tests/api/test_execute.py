@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from types import ModuleType
 from types import SimpleNamespace as ns
 from unittest.mock import Mock, patch
 
@@ -22,6 +23,13 @@ def args():
         schema_file=fixture_path("testdriver.jsonschema"),
         task="forty_two",
     )
+
+
+@fixture(autouse=True)
+def isolate_sys_modules():
+    # Prevent modules loaded by one test from being visible to others.
+    with patch.dict(sys.modules):
+        yield
 
 
 @fixture
@@ -163,12 +171,30 @@ def test__get_driver_module__explicit_absolute_fail_bad_path(args):
     assert not execute._get_driver_module_explicit(module=module)
 
 
+@mark.parametrize("path", [None, "/some/other/path.py"])
+def test__get_driver_module__explicit_absolute_fail_name_in_use(args, logged, path):
+    existing = ModuleType(args.module.stem)
+    existing.__file__ = path
+    with patch.dict(sys.modules, {args.module.stem: existing}):
+        assert not execute._get_driver_module_explicit(module=args.module)
+        assert sys.modules[args.module.stem] is existing
+    assert logged(
+        "Cannot load module %s: Module name '%s' already in use" % (args.module, args.module.stem)
+    )
+
+
 def test__get_driver_module__explicit_absolute_pass(args):
     assert args.module.is_absolute()
-    with patch.dict(sys.modules):
-        m = execute._get_driver_module_explicit(module=args.module)
-        assert m
-        assert sys.modules[args.module.stem] is m
+    m = execute._get_driver_module_explicit(module=args.module)
+    assert m
+    assert sys.modules[args.module.stem] is m
+
+
+def test__get_driver_module__explicit_absolute_pass_already_loaded(args, logged):
+    m1 = execute._get_driver_module_explicit(module=args.module)
+    m2 = execute._get_driver_module_explicit(module=args.module)
+    assert m1 is m2
+    assert logged("Module %s already loaded" % args.module)
 
 
 def test__get_driver_module__explicit_relative_fail_bad_path(args):

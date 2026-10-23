@@ -137,6 +137,13 @@ def _get_driver_module_explicit(module: Path) -> ModuleType | None:
     :param module: Name of driver module to load.
     """
     log.debug("Loading module %s", module)
+    if existing := sys.modules.get(module.stem):
+        path = getattr(existing, "__file__", None)
+        if path and Path(path).resolve() == module.resolve():
+            log.debug("Module %s already loaded", module)
+            return existing
+        log.error("Cannot load module %s: Module name '%s' already in use", module, module.stem)
+        return None
     if (spec := spec_from_file_location(module.stem, module)) and spec.loader:
         m = module_from_spec(spec)
         sys.modules[spec.name] = m
