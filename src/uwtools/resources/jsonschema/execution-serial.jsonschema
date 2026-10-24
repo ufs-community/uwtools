@@ -18,6 +18,9 @@
     },
     "incantation": {
       "type": "string"
+    },
+    "shell": {
+      "type": "string"
     }
   },
   "required": [
