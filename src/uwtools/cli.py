@@ -1624,6 +1624,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.orog_gsl,
             STR.sfc_climo_gen,
             STR.shave,
+            STR.ungrib,
         ]
     }
     drivers_with_cycle = {
@@ -1638,7 +1639,6 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.jedi,
             STR.mpas,
             STR.mpas_init,
-            STR.ungrib,
         ]
     }
     drivers_with_cycle_and_leadtime = {

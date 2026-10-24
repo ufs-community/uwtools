@@ -47,13 +47,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle(utc):
-    return utc(2024, 2, 1, 18)
-
-
-@fixture
-def driverobj(config, cycle):
-    return Ungrib(config=config, cycle=cycle, batch=True)
+def driverobj(config):
+    return Ungrib(config=config, batch=True)
 
 
 # Tests
@@ -117,7 +112,7 @@ def test_Ungrib_provisioned_rundir(driverobj, ready_task):
 
 
 def test_Ungrib_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
+    assert driverobj.taskname("foo") == "ungrib foo"
 
 
 def test_Ungrib_vtable(driverobj):
