@@ -509,7 +509,7 @@ class Driver(Assets):
         # Render script sections into a template, remove any extraneous newlines related to elided
         # sections, then return the resulting string.
         template = """
-        #!/bin/bash
+        #!/usr/bin/env bash
 
         {directives}
 

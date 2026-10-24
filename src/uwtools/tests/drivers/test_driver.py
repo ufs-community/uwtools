@@ -597,7 +597,7 @@ def test_Driver__runcmd(driverobj):
 
 def test_Driver__runscript(driverobj):
     expected = """
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     #DIR --d1
     #DIR --d2
@@ -630,7 +630,7 @@ def test_Driver__runscript_done_file(driverobj):
 
 def test_Driver__runscript_execution_only(driverobj):
     expected = """
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     foo
     bar
@@ -684,7 +684,7 @@ def test_Driver__write_runscript(driverobj):
     executable = driverobj.config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     #SBATCH --account=me
     #SBATCH --chdir={rundir}
