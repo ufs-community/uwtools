@@ -267,6 +267,7 @@ class _STR(_ValsMatchKeys):
     server: str = _
     sfc_climo_gen: str = _
     shave: str = _
+    shell: str = _
     show_schema: str = _
     stacksize: str = _
     start: str = _

@@ -29,7 +29,10 @@
       "type": "string"
     },
     "shell": {
-      "type": "string"
+      "type": [
+        "null",
+        "string"
+      ]
     },
     "stacksize": {
       "type": "string"

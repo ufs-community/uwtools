@@ -497,6 +497,7 @@ class Driver(Assets):
         envcmds: list[str] | None = None,
         envvars: dict[str, str] | None = None,
         scheduler: JobScheduler | None = None,
+        shell: str | None = "/usr/bin/env bash",
     ) -> str:
         """
         Return a driver runscript.
@@ -505,11 +506,12 @@ class Driver(Assets):
         :param envcmds: Shell commands to set up runtime environment.
         :param envvars: Environment variables to set in runtime environment.
         :param scheduler: A job-scheduler object.
+        :param shell: The shell to specify in the shebang line, or None to omit the shebang line.
         """
         # Render script sections into a template, remove any extraneous newlines related to elided
         # sections, then return the resulting string.
         template = """
-        #!/usr/bin/env bash
+        {shebang}
 
         {directives}
 
@@ -526,6 +528,7 @@ class Driver(Assets):
             envcmds="\n".join(envcmds or []),
             envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
             execution="\n".join([*initcmds, *execution]),
+            shebang="" if shell is None else f"#!{shell}",
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
@@ -568,18 +571,20 @@ class Driver(Assets):
         Write the runscript.
         """
         envvars = envvars or {}
-        threads = self.config.get(STR.execution, {}).get(STR.threads)
+        execution = self.config.get(STR.execution, {})
+        threads = execution.get(STR.threads)
         if threads and "OMP_NUM_THREADS" not in envvars:
             msg = "Config specified threads but driver does not set OMP_NUM_THREADS"
             raise UWConfigError(msg)
         rs = self._runscript(
-            envcmds=self.config.get(STR.execution, {}).get(STR.envcmds, []),
+            envcmds=execution.get(STR.envcmds, []),
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
                 "test $? -eq 0 && touch %s" % self._runscript_done_file,
             ],
             scheduler=self._scheduler if self._batch else None,
+            shell=execution.get(STR.shell, "/usr/bin/env bash"),
         )
         with writable(path) as f:
             print(rs, file=f)

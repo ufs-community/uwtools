@@ -638,6 +638,14 @@ def test_Driver__runscript_execution_only(driverobj):
     assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
 
 
+@mark.parametrize(
+    ("shell", "shebang"),
+    [("/bin/sh", "#!/bin/sh\n\n"), ("/usr/bin/env zsh", "#!/usr/bin/env zsh\n\n"), (None, "")],
+)
+def test_Driver__runscript_shell(driverobj, shebang, shell):
+    assert driverobj._runscript(execution=["foo", "bar"], shell=shell) == f"{shebang}foo\nbar"
+
+
 def test_Driver__runscript_path(driverobj):
     rundir = Path(driverobj.config["rundir"])
     assert driverobj._runscript_path == rundir / "runscript.concrete"
@@ -700,6 +708,22 @@ def test_Driver__write_runscript(driverobj):
     test $? -eq 0 && touch runscript.concrete.done
     """
     assert path.read_text().strip() == dedent(expected).strip()
+
+
+@mark.parametrize(
+    ("execution", "shebang"),
+    [
+        ({}, "#!/usr/bin/env bash\n\n"),
+        ({"shell": "/bin/sh"}, "#!/bin/sh\n\n"),
+        ({"shell": None}, ""),
+    ],
+)
+def test_Driver__write_runscript_shell(driverobj, execution, shebang):
+    path = Path(driverobj.config["rundir"], "runscript")
+    driverobj._batch = False
+    driverobj._config["execution"].update(execution)
+    driverobj._write_runscript(path=path)
+    assert path.read_text().startswith(f"{shebang}time ")
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):
