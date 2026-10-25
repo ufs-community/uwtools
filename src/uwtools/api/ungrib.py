@@ -7,7 +7,7 @@ from uwtools.drivers.ungrib import Ungrib
 from uwtools.utils.api import make_execute as _make_execute
 
 _driver = Ungrib
-execute = _make_execute(_driver, with_cycle=True)
+execute = _make_execute(_driver)
 
 
 def schema() -> dict:

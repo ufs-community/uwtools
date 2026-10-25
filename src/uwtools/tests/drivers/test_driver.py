@@ -563,6 +563,7 @@ def test_Driver__run_via_local_execution(driverobj, node):
             cmd="./{x} >>{x}.out 2>&1".format(x=driverobj._runscript_path.name),
             cwd=driverobj.rundir,
             log_output=True,
+            taskname="concrete run via local execution",
         )
     prd.assert_called_once_with()
 
