@@ -29,9 +29,9 @@ def test_fs_copy(load, tb):
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(5) == config_str
     assert (
-        "{'ready': ['tmp/copy-target/file1-copy.nml',"
-        "\n  'tmp/copy-target/data/file2-copy.txt',"
-        "\n  'tmp/copy-target/data/file3-copy.csv'],"
+        "{'ready': ['tmp/copy-target/data/file2-copy.txt',"
+        "\n  'tmp/copy-target/data/file3-copy.csv',"
+        "\n  'tmp/copy-target/file1-copy.nml'],"
         "\n 'notready': []}" in tb.cell_output_text(7)
     )
     assert "{'ready': [], 'notready': ['tmp/copy-target/missing-copy.nml']}" in tb.cell_output_text(
@@ -40,9 +40,9 @@ def test_fs_copy(load, tb):
     assert tb.cell_output_text(13) == tb.cell_output_text(9)
     assert tb.cell_output_text(15) == config_keys_str
     assert (
-        "{'ready': ['tmp/copy-keys-target/file1-copy.nml',"
-        "\n  'tmp/copy-keys-target/data/file2-copy.txt',"
-        "\n  'tmp/copy-keys-target/data/file3-copy.csv'],"
+        "{'ready': ['tmp/copy-keys-target/data/file2-copy.txt',"
+        "\n  'tmp/copy-keys-target/data/file3-copy.csv',"
+        "\n  'tmp/copy-keys-target/file1-copy.nml'],"
         "\n 'notready': []}" in tb.cell_output_text(17)
     )
 
@@ -68,9 +68,9 @@ def test_fs_link(load, tb):
     # Ensure that cell output text matches expectations.
     assert tb.cell_output_text(29) == config_str
     assert (
-        "{'ready': ['tmp/link-target/file1-link.nml',"
-        "\n  'tmp/link-target/file2-link.txt',"
-        "\n  'tmp/link-target/data/file3-link.csv'],"
+        "{'ready': ['tmp/link-target/data/file3-link.csv',"
+        "\n  'tmp/link-target/file1-link.nml',"
+        "\n  'tmp/link-target/file2-link.txt'],"
         "\n 'notready': []}"
     ) in tb.cell_output_text(31)
     assert "{'ready': [], 'notready': ['tmp/link-target/missing-link.nml']}" in tb.cell_output_text(
@@ -79,9 +79,9 @@ def test_fs_link(load, tb):
     assert tb.cell_output_text(37) == tb.cell_output_text(33)
     assert tb.cell_output_text(39) == config_keys_str
     assert (
-        "{'ready': ['tmp/link-keys-target/file1-link.nml',"
-        "\n  'tmp/link-keys-target/file2-link.txt',"
-        "\n  'tmp/link-keys-target/data/file3-link.csv'],"
+        "{'ready': ['tmp/link-keys-target/data/file3-link.csv',"
+        "\n  'tmp/link-keys-target/file1-link.nml',"
+        "\n  'tmp/link-keys-target/file2-link.txt'],"
         "\n 'notready': []}"
     ) in tb.cell_output_text(41)
 
