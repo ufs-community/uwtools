@@ -162,7 +162,7 @@ class FileStager(Stager):
                 else:
                     msg = "URL scheme '%s' incompatible with tag %s in: %s"
                     log.error(msg, parts.scheme, src.tag, src)
-        return srcs
+        return sorted(srcs)
 
     def _expand_glob_hsi(self, glob_pattern: str, dst: str) -> list[tuple[str, str, bool]]:
         srcs: list[tuple[str, str, bool]] = []
