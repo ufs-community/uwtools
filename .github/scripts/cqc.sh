@@ -6,9 +6,7 @@ cqc() {
   pushd src
   pip install --editable . # corrects Python version in entry-point script
   popd
-  make lint
-  make typecheck
-  make unittest
+  make test
   uw --version
 }
 
