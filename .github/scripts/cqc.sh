@@ -2,14 +2,14 @@
 
 cqc() {
   set -eux
-  notrace conda install --yes python=$PYTHON_VERSION
+  notrace conda install --quiet --yes python=$PYTHON_VERSION
   pushd src
   pip install --editable . # corrects Python version in entry-point script
   popd
   make lint
   make typecheck
   make unittest
-  make cli
+  uwtools --version
 }
 
 if [[ ! -v PYTHON_VERSION ]]; then
