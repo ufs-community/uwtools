@@ -18,6 +18,12 @@
     },
     "incantation": {
       "type": "string"
+    },
+    "shell": {
+      "type": [
+        "null",
+        "string"
+      ]
     }
   },
   "required": [

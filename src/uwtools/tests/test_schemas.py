@@ -1354,6 +1354,16 @@ def test_schema_execution_parallel__mpiargs():
     assert "42 is not of type 'string'\n" in errors(["string1", 42])
 
 
+def test_schema_execution_parallel__shell():
+    errors = schema_validator("execution-parallel", "properties", "shell")
+    # String value is ok:
+    assert not errors("/bin/sh")
+    # Null value is ok:
+    assert not errors(None)
+    # Anything else is not:
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
+
+
 def test_schema_execution_parallel__threads():
     errors = schema_validator("execution-parallel", "properties", "threads")
     # threads must be non-negative, and an integer:
@@ -1386,6 +1396,16 @@ def test_schema_execution_serial__executable():
     errors = schema_validator("execution-serial", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
+    # Null value is ok:
+    assert not errors(None)
+    # Anything else is not:
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
+
+
+def test_schema_execution_serial__shell():
+    errors = schema_validator("execution-serial", "properties", "shell")
+    # String value is ok:
+    assert not errors("/bin/sh")
     # Null value is ok:
     assert not errors(None)
     # Anything else is not:

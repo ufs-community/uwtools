@@ -1,4 +1,6 @@
-#!/bin/bash -eux
+#!/usr/bin/env bash
+
+set -eux
 
 . $(dirname ${BASH_SOURCE[0]})/common.sh
 ci_conda_activate

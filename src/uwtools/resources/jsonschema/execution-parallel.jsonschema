@@ -28,6 +28,12 @@
     "mpicmd": {
       "type": "string"
     },
+    "shell": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "stacksize": {
       "type": "string"
     },
