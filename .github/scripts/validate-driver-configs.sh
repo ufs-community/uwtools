@@ -8,7 +8,7 @@ validate_driver_configs() {
     args=( --config $config )
     $basecmd --help | grep -q -- "--cycle" && args+=( --cycle 1970-01-01T00:00:00 )
     $basecmd --help | grep -q -- "--leadtime" && args+=( --leadtime 6 )
-    ( set -x && $basecmd ${args[*]} )
+    $basecmd ${args[*]}
   done
 }
 
