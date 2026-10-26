@@ -7,9 +7,9 @@ run_tests() {
   conda create --yes --name $env --quiet $devpkgs
   set +x
   conda activate $env
-  set -x
   conda install --yes python=$PYTHON_VERSION
   . notebooks/install-deps
+  set -x
   git clean -dfx
   pip install --editable src # sets new Python version in entry-point scripts
   make test && make notebooks && make test-nb

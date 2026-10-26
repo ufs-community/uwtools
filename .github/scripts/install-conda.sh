@@ -4,4 +4,5 @@ installer=/tmp/$(basename $url)
 wget --no-verbose -O $installer $url
 bash $installer -bfp $CI_CONDA_DIR
 ci_conda_activate
+set +x
 conda install --quiet --yes --channel maddenp --repodata-fn repodata.json anaconda-client condev jq python-build
