@@ -597,7 +597,7 @@ def test_Driver__runcmd(driverobj):
 
 def test_Driver__runscript(driverobj):
     expected = """
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     #DIR --d1
     #DIR --d2
@@ -630,12 +630,20 @@ def test_Driver__runscript_done_file(driverobj):
 
 def test_Driver__runscript_execution_only(driverobj):
     expected = """
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     foo
     bar
     """
     assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
+
+
+@mark.parametrize(
+    ("shell", "shebang"),
+    [("/bin/sh", "#!/bin/sh\n\n"), ("/usr/bin/env zsh", "#!/usr/bin/env zsh\n\n"), (None, "")],
+)
+def test_Driver__runscript_shell(driverobj, shebang, shell):
+    assert driverobj._runscript(execution=["foo", "bar"], shell=shell) == f"{shebang}foo\nbar"
 
 
 def test_Driver__runscript_path(driverobj):
@@ -684,7 +692,7 @@ def test_Driver__write_runscript(driverobj):
     executable = driverobj.config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     #SBATCH --account=me
     #SBATCH --chdir={rundir}
@@ -700,6 +708,22 @@ def test_Driver__write_runscript(driverobj):
     test $? -eq 0 && touch runscript.concrete.done
     """
     assert path.read_text().strip() == dedent(expected).strip()
+
+
+@mark.parametrize(
+    ("execution", "shebang"),
+    [
+        ({}, "#!/usr/bin/env bash\n\n"),
+        ({"shell": "/bin/sh"}, "#!/bin/sh\n\n"),
+        ({"shell": None}, ""),
+    ],
+)
+def test_Driver__write_runscript_shell(driverobj, execution, shebang):
+    path = Path(driverobj.config["rundir"], "runscript")
+    driverobj._batch = False
+    driverobj._config["execution"].update(execution)
+    driverobj._write_runscript(path=path)
+    assert path.read_text().startswith(f"{shebang}time ")
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):
