@@ -9,7 +9,7 @@ cqc() {
   make lint
   make typecheck
   make unittest
-  uwtools --version
+  uw --version
 }
 
 if [[ ! -v PYTHON_VERSION ]]; then
