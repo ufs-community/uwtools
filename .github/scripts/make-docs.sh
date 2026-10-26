@@ -2,7 +2,7 @@
 
 build_and_check_docs() {
   set -eux
-  . docs/install-deps
+  notrace . docs/install-deps
   make docs
   check_for_diffs "UNEXPECTED DOC UPDATES DETECTED"
 }
