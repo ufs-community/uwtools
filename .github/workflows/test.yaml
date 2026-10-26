@@ -8,8 +8,35 @@ on:
       - '**'
   workflow_dispatch:
 jobs:
-  test:
-    name: Test
+  check_format:
+    name: Check Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Check Format
+        run: .github/scripts/check-format.sh
+  make_docs:
+    name: Make Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Make Docs
+        run: .github/scripts/make-docs.sh
+  test_code_quality:
+    name: Test Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Test Code Quality
+        run: .github/scripts/test-code-quality.sh
+  validate_driver_configs:
+    name: Validate Driver Configs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,9 +44,3 @@ jobs:
         run: .github/scripts/install-conda.sh
       - name: Validate Driver Configs
         run: .github/scripts/validate-driver-configs.sh
-      - name: Make Docs
-        run: .github/scripts/make-docs.sh
-      - name: Format Check
-        run: .github/scripts/format-check.sh
-      - name: Test Code Quality
-        run: .github/scripts/test.sh

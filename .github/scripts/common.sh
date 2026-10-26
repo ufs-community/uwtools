@@ -1,6 +1,4 @@
-# Shared resources for workflow scripts.
-
-set -ae
+set -aeux
 
 CI_CONDA_DIR=/tmp/conda
 CI_CONDA_SH=$CI_CONDA_DIR/etc/profile.d/conda.sh
@@ -16,6 +14,8 @@ check_for_diffs() {
 }
 
 ci_conda_activate() {
+  set +x
   . $CI_CONDA_SH
   conda activate
+  set -x
 }

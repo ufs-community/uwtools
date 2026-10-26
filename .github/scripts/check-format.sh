@@ -1,7 +1,7 @@
 . $(dirname ${BASH_SOURCE[0]})/common.sh
 
 unformatted() {
-  set -x
+  set -eux
   make format
   check_for_diffs "UNFORMATTED CODE DETECTED"
 }
