@@ -17,6 +17,21 @@ jobs:
         run: .github/scripts/install-conda.sh
       - name: Check Format
         run: .github/scripts/check-format.sh
+  cqc:
+    env:
+      PYTHON_VERSION: ${{ matrix.python-version }}
+    name: Check Code Quality (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Check Code Quality
+        run: .github/scripts/cqc.sh
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
   make_docs:
     name: Make Docs
     runs-on: ubuntu-latest
@@ -26,21 +41,6 @@ jobs:
         run: .github/scripts/install-conda.sh
       - name: Make Docs
         run: .github/scripts/make-docs.sh
-  test_code_quality:
-    env:
-      PYTHON_VERSION: ${{ matrix.python-version }}
-    name: Test Code Quality (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Conda
-        run: .github/scripts/install-conda.sh
-      - name: Test Code Quality
-        run: .github/scripts/test-code-quality.sh
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
   validate_driver_configs:
     name: Validate Driver Configs
     runs-on: ubuntu-latest
