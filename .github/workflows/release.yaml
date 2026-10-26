@@ -15,14 +15,14 @@ jobs:
         run: .github/scripts/install-conda.sh
       - name: Make Docs
         run: .github/scripts/make-docs.sh
-      - name: Format Check
-        run: .github/scripts/format-check.sh
+      - name: Check Format
+        run: .github/scripts/check-format.sh
       - name: Make Package
         run: .github/scripts/make-package.sh
-      - name: Publish
-        run: .github/scripts/publish.sh
+      - name: Publish Package
+        run: .github/scripts/publish-package.sh
       - name: Make PyPI Package
-        run: .github/scripts/pypi-package-build.sh
+        run: .github/scripts/make-pypi-package.sh
       - name: Publish PyPI Package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

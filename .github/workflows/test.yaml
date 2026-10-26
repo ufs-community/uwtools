@@ -8,8 +8,41 @@ on:
       - '**'
   workflow_dispatch:
 jobs:
-  test:
-    name: Test
+  check_format:
+    name: Check Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Check Format
+        run: .github/scripts/check-format.sh
+  cqc:
+    env:
+      PYTHON_VERSION: ${{ matrix.python-version }}
+    name: Check Code Quality (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Check Code Quality
+        run: .github/scripts/cqc.sh
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+  make_docs:
+    name: Make Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Conda
+        run: .github/scripts/install-conda.sh
+      - name: Make Docs
+        run: .github/scripts/make-docs.sh
+  validate_driver_configs:
+    name: Validate Driver Configs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,9 +50,3 @@ jobs:
         run: .github/scripts/install-conda.sh
       - name: Validate Driver Configs
         run: .github/scripts/validate-driver-configs.sh
-      - name: Make Docs
-        run: .github/scripts/make-docs.sh
-      - name: Format Check
-        run: .github/scripts/format-check.sh
-      - name: Test Code Quality
-        run: .github/scripts/test.sh
