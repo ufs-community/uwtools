@@ -16,29 +16,29 @@ requirements:
     - python {{ pymin }}
     - setuptools
   run:
-    - ecflow 5.18.* # keep docs/conf.py in-sync
-    - f90nml >=1.4,<1.6
-    - iotaa 1.7.*
-    - jinja2 >=3.0,<3.2
-    - jsonschema >=4.17,<4.27
-    - lxml >=5.2,<6.2
+    - ecflow 5.19.* # keep docs/conf.py in-sync
+    - f90nml >=1.4
+    - iotaa >=1.7
+    - jinja2 >=3.0
+    - jsonschema >=4.17
+    - lxml >=5.2
     - python >={{ pymin }},<3.15
-    - python-dateutil >=2.9,<2.10
-    - pyyaml >=6.0,<6.1
-    - requests >=2.32,<2.35
+    - python-dateutil >=2.9
+    - pyyaml >=6.0
+    - requests >=2.32
 test:
   requires:
     - docformatter 1.7.7.* # 1.7.8 is buggy
     - jq 1.8.*
     - lxml-stubs
     - make 4.4.*
-    - mypy 2.2.*
+    - mypy 2.4.*
     - pytest 9.1.*
     - pytest-cov 7.1.*
-    - pytest-randomly 3.15.*
+    - pytest-randomly 5.0.*
     - pytest-xdist 3.8.*
     - python {{ pymin }}
-    - ruff 0.16.*
+    - ruff 0.17.*
     - types-PyYAML
     - types-jsonschema
     - types-python-dateutil

@@ -29,8 +29,8 @@ def yaml_keys_to_classes() -> dict[str, type]:
         module = import_module(f"{pkgname}.{modinfo.name}")
         for driver_class in {obj for _, obj in getmembers(module) if isclass(obj)}:
             try:
-                yaml_key = driver_class.driver_name()
-            except AttributeError:  # noqa: PERF203
+                yaml_key = driver_class.driver_name()  # type: ignore[attr-defined]
+            except AttributeError:
                 pass
             else:
                 if yaml_key:

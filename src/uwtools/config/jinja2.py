@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from functools import cached_property
 from pathlib import Path
 from typing import Any, NoReturn
@@ -335,7 +335,7 @@ def _deref_render_datetime(s: str) -> str:
     pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
     for old, argstr in re.findall(pattern, s):
         dtargs: Any = map(int, argstr.split(","))
-        dt = datetime(*dtargs, tzinfo=timezone.utc)  # type: ignore[misc]
+        dt = datetime(*dtargs, tzinfo=UTC)  # type: ignore[misc]
         new = to_iso8601(dt)
         s = s.replace(old, new)
         log.debug("Replaced '%s' with '%s' in '%s'", old, new, orig)

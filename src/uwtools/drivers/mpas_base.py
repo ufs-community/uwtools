@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from abc import abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import reduce
 from itertools import islice
 from typing import TYPE_CHECKING, cast
@@ -132,7 +132,7 @@ class MPASBase(DriverCycleBased, FileStager):
 
     @staticmethod
     def _decode_timestamp(timestamp: str) -> datetime:
-        return datetime.strptime(timestamp, "%Y-%m-%d_%H:%M:%S").replace(tzinfo=timezone.utc)
+        return datetime.strptime(timestamp, "%Y-%m-%d_%H:%M:%S").replace(tzinfo=UTC)
 
     @staticmethod
     def _filename_interval(stream: dict) -> str:

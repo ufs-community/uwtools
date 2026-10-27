@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from datetime import timezone
+from datetime import UTC
 from enum import Enum, auto
 from functools import reduce
 from math import log10
@@ -167,7 +167,7 @@ class _RocotoIterator:
 
     @property
     def _query_data(self) -> dict:
-        data: dict = {ROCOTO.cycle: int(self._cycle.replace(tzinfo=timezone.utc).timestamp())}
+        data: dict = {ROCOTO.cycle: int(self._cycle.replace(tzinfo=UTC).timestamp())}
         if self._task:
             data[ROCOTO.taskname] = self._task
         return data

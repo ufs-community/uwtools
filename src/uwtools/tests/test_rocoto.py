@@ -4,7 +4,7 @@ Tests for uwtools.rocoto module.
 
 import sqlite3
 from contextlib import contextmanager
-from datetime import timezone
+from datetime import UTC
 from itertools import combinations
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
@@ -294,7 +294,7 @@ class TestRocotoIterator:
                 {
                     "id": 1,
                     "taskname": "foo",
-                    "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
+                    "cycle": instance._cycle.replace(tzinfo=UTC).timestamp(),
                     "state": "COMPLETE",
                 },
             )
@@ -324,7 +324,7 @@ class TestRocotoIterator:
                 {
                     "id": id_,
                     "taskname": taskname,
-                    "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
+                    "cycle": instance._cycle.replace(tzinfo=UTC).timestamp(),
                     "state": state,
                 },
             )

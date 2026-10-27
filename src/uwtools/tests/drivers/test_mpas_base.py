@@ -2,7 +2,7 @@
 uwtools.drivers.mpas_base tests.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pytest import mark
 
@@ -27,7 +27,7 @@ def test_mpas_base__decode_interval(interval, vals):
 
 
 def test_mpas_base__decode_timestamp():
-    expected = datetime(2025, 5, 7, 15, 6, 1, tzinfo=timezone.utc)
+    expected = datetime(2025, 5, 7, 15, 6, 1, tzinfo=UTC)
     assert MPASBase._decode_timestamp("2025-05-07_15:06:01") == expected
 
 
