@@ -5,13 +5,13 @@
   "packages": {
     "dev": [
       "docformatter ==1.7.7.*",
-      "ecflow ==5.19.*",
-      "f90nml >=1.4",
-      "iotaa >=1.7",
-      "jinja2 >=3.0",
+      "ecflow >=5.18,<5.20",
+      "f90nml >=1.4,<1.6",
+      "iotaa >=1.7,<1.9",
+      "jinja2 >=3.0,<3.2",
       "jq ==1.8.*",
-      "jsonschema >=4.17",
-      "lxml >=5.2",
+      "jsonschema >=4.17,<4.27",
+      "lxml >=5.2,<6.3",
       "lxml-stubs",
       "make ==4.4.*",
       "mypy ==2.4.*",
@@ -21,9 +21,9 @@
       "pytest-randomly ==5.0.*",
       "pytest-xdist ==3.8.*",
       "python <3.15,==3.11,>=3.11",
-      "python-dateutil >=2.9",
-      "pyyaml >=6.0",
-      "requests >=2.32",
+      "python-dateutil >=2.9,<3.1",
+      "pyyaml >=6.0,<6.2",
+      "requests >=2.32,<2.35",
       "ruff ==0.17.*",
       "setuptools",
       "types-PyYAML",
@@ -33,16 +33,16 @@
       "types-setuptools"
     ],
     "run": [
-      "ecflow ==5.19.*",
-      "f90nml >=1.4",
-      "iotaa >=1.7",
-      "jinja2 >=3.0",
-      "jsonschema >=4.17",
-      "lxml >=5.2",
+      "ecflow >=5.18,<5.20",
+      "f90nml >=1.4,<1.6",
+      "iotaa >=1.7,<1.9",
+      "jinja2 >=3.0,<3.2",
+      "jsonschema >=4.17,<4.27",
+      "lxml >=5.2,<6.3",
       "python >=3.11,<3.15",
-      "python-dateutil >=2.9",
-      "pyyaml >=6.0",
-      "requests >=2.32"
+      "python-dateutil >=2.9,<3.1",
+      "pyyaml >=6.0,<6.2",
+      "requests >=2.32,<2.35"
     ]
   },
   "version": "2.22.0"

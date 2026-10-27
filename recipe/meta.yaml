@@ -16,16 +16,16 @@ requirements:
     - python {{ pymin }}
     - setuptools
   run:
-    - ecflow 5.19.* # keep docs/conf.py in-sync
-    - f90nml >=1.4
-    - iotaa >=1.7
-    - jinja2 >=3.0
-    - jsonschema >=4.17
-    - lxml >=5.2
+    - ecflow >=5.18,<5.20 # keep docs/conf.py in-sync
+    - f90nml >=1.4,<1.6
+    - iotaa >=1.7,<1.9
+    - jinja2 >=3.0,<3.2
+    - jsonschema >=4.17,<4.27
+    - lxml >=5.2,<6.3
     - python >={{ pymin }},<3.15
-    - python-dateutil >=2.9
-    - pyyaml >=6.0
-    - requests >=2.32
+    - python-dateutil >=2.9,<3.1
+    - pyyaml >=6.0,<6.2
+    - requests >=2.32,<2.35
 test:
   requires:
     - docformatter 1.7.7.* # 1.7.8 is buggy
