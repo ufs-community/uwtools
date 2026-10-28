@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -30,7 +30,7 @@ def test_api_config_compare():
     )
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("input_format", [None, FORMAT.yaml, FORMAT.nml])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 @mark.parametrize("output_file", [None, "/path/to/out.yaml"])
@@ -93,7 +93,7 @@ def test_api_config__get_config(classname, f):
     constructor.assert_called_once_with(**kwargs)
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 def test_api_config_realize(cycle, leadtime):
     kwargs: dict = {

@@ -3,7 +3,7 @@ Tests for uwtools.config.jinja2 module.
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from textwrap import dedent
 from types import SimpleNamespace as ns
@@ -267,7 +267,7 @@ def test_config_jinja2_render(values_file, template_file, tmp_path):
     assert outfile.read_text().strip() == expected
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 def test_config_jinja2_render__cycle_and_or_leadtime(capsys, cycle, leadtime, logged, tmp_path):
     path = tmp_path / "template"
@@ -364,7 +364,7 @@ def test_config_jinja2_unrendered(s, status):
         (True, "!bool", "True"),
         (False, "!bool", "0"),
         (
-            datetime(2024, 9, 9, 0, 0, tzinfo=timezone.utc).replace(tzinfo=None),
+            datetime(2024, 9, 9, 0, 0, tzinfo=UTC).replace(tzinfo=None),
             "!datetime",
             "2024-09-09 00:00:00",
         ),

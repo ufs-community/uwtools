@@ -3,7 +3,7 @@ Tests for uwtools.config.tools module.
 """
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
@@ -526,7 +526,7 @@ def test_config_tools_realize__cycle_and_leadtime_nml(capsys, utc, tmp_path):
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 def test_config_tools_realize__cycle_and_leadtime_yaml(capsys, cycle, leadtime, tmp_path):
     path = tmp_path / "config.yaml"

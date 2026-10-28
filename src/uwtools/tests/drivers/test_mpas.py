@@ -2,7 +2,7 @@
 MPAS driver tests.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -296,7 +296,7 @@ def test_MPAS_streams_file(config, driverobj):
 )
 def test_MPAS__filename_interval_timestamps(driverobj, dtargs, interval, reference_time):
     driverobj._config["length"] = 36
-    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    expected = [datetime(*args, tzinfo=UTC) for args in dtargs]  # type: ignore[misc]
     assert (
         driverobj._filename_interval_timestamps(interval=interval, reference_time=reference_time)
         == expected
@@ -304,7 +304,7 @@ def test_MPAS__filename_interval_timestamps(driverobj, dtargs, interval, referen
 
 
 def test_MPAS__initial_and_final_ts(driverobj):
-    initial = driverobj._cycle.replace(tzinfo=timezone.utc)
+    initial = driverobj._cycle.replace(tzinfo=UTC)
     final = initial + timedelta(hours=1)
     assert driverobj._initial_and_final_ts == (initial, final)
 
@@ -318,13 +318,13 @@ def test_MPAS__initial_and_final_ts(driverobj):
 )
 def test_MPAS__interval_timestamps(driverobj, dtargs, interval, length):
     driverobj._config["length"] = length
-    expected = [datetime(*args, tzinfo=timezone.utc) for args in dtargs]  # type: ignore[misc]
+    expected = [datetime(*args, tzinfo=UTC) for args in dtargs]  # type: ignore[misc]
     assert driverobj._interval_timestamps(interval=interval) == expected
 
 
 def test_MPAS__output_path(driverobj):
     t = "out.$Y_$M_$D-$d-$h_$m_$s.nc"
-    d = datetime(2025, 5, 7, 1, 2, 3, tzinfo=timezone.utc)
+    d = datetime(2025, 5, 7, 1, 2, 3, tzinfo=UTC)
     expected = driverobj.rundir / "out.2025_05_07-127-01_02_03.nc"
     assert driverobj._output_path(template=t, dtobj=d) == expected
 
