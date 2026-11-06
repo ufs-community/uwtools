@@ -1,6 +1,6 @@
 [2025-01-02T03:04:05]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
 [2025-01-02T03:04:05]    DEBUG [realize] Realizing, current value:
-[2025-01-02T03:04:05]    DEBUG [realize]   workflow:
+[2025-01-02T03:04:05]    DEBUG [realize]   rocoto:
 [2025-01-02T03:04:05]    DEBUG [realize]     attrs:
 [2025-01-02T03:04:05]    DEBUG [realize]       realtime: false
 [2025-01-02T03:04:05]    DEBUG [realize]       scheduler: slurm
