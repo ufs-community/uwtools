@@ -7,14 +7,14 @@ Rocoto Workflows
 
 To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a UW YAML language that can be easily manipulated like any other key-value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
 
-Workflow Section
-----------------
+Rocoto Section
+--------------
 
 Starting at the top level of the UW YAML config for Rocoto, there are several required sections. See the example and explanation below:
 
 .. code-block:: yaml
 
-   workflow:
+   rocoto:
      attrs:
        realtime: false
        scheduler: slurm
@@ -46,7 +46,7 @@ UW YAML Keys
    ...
    </workflow>
 
-``cycledef:`` -- This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto (search :rocoto:`this page<>` for those terms). The example above uses the "start, stop, step" syntax and translates to a single ``<cycledef>`` tag:
+``cycledef:`` -- This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``rocoto:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto (search :rocoto:`this page<>` for those terms). The example above uses the "start, stop, step" syntax and translates to a single ``<cycledef>`` tag:
 
 .. code-block:: xml
 
@@ -335,12 +335,16 @@ The ``cyclestr:`` Key
 
    <cyclestr offset="1:00:00">"/some/path/to/workflow_@Y@m@d@H.log"</cyclestr>
 
-The ``workflow:`` Key
-^^^^^^^^^^^^^^^^^^^^^
+The ``rocoto:`` Key
+^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+   The top-level key was formerly named ``workflow:``. This name is deprecated but still supported: Its use will trigger a deprecation warning, and support for it will be removed in a future release. Use ``rocoto:`` instead.
 
 .. code-block:: yaml
 
-   workflow:
+   rocoto:
      attrs:
        cyclethrottle: 2
        realtime: true # required

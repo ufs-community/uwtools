@@ -1,4 +1,4 @@
-workflow:
+rocoto:
   attrs:
     scheduler: slurm
   cycledef:

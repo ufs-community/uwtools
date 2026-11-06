@@ -2645,8 +2645,28 @@ def test_schema_rocoto_metatask_attrs():
     assert "'foo' is not of type 'integer'\n" in errors({"throttle": "foo"})
 
 
+@mark.parametrize(
+    ("keys", "ok"),
+    [
+        ([], False),
+        (["rocoto"], True),
+        (["rocoto", "workflow"], False),
+        (["workflow"], True),  # NB: Remove when support for deprecated 'workflow' key is removed.
+    ],
+)
+def test_schema_rocoto_root(keys, ok):
+    errors = schema_validator("rocoto")
+    block = {
+        "attrs": {"realtime": False, "scheduler": "slurm"},
+        "cycledef": [{"spec": "202311291200 202312011200 06:00:00"}],
+        "log": {"value": "/path/to/log"},
+        "tasks": {"task_foo": {"command": "/bin/true", "cores": 1, "walltime": "00:01:00"}},
+    }
+    assert (not errors(dict.fromkeys(keys, block))) is ok
+
+
 def test_schema_rocoto_task_dependency():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "tasks")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "tasks")
     config = {
         "task_foo": {
             "command": "/bin/true",
@@ -2663,7 +2683,7 @@ def test_schema_rocoto_task_dependency():
 
 
 def test_schema_rocoto_task_hangdependency():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "tasks")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "tasks")
     config = {
         "task_foo": {
             "command": "/bin/true",
@@ -2680,7 +2700,7 @@ def test_schema_rocoto_task_hangdependency():
 
 
 def test_schema_rocoto_workflow_top():
-    errors = schema_validator("rocoto", "properties", "workflow")
+    errors = schema_validator("rocoto", "$defs", "rocoto")
     config = {
         "attrs": {"realtime": False, "scheduler": "slurm"},
         "cycledef": [{"spec": "202311291200 202312011200 06:00:00"}],
@@ -2705,7 +2725,7 @@ def test_schema_rocoto_workflow_top():
 
 
 def test_schema_rocoto_workflow_cycledef():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])
@@ -2735,37 +2755,37 @@ def test_schema_rocoto_workflow_cycledef():
 
 @mark.parametrize("spec", ["60", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_minutes(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"{spec} * * * * *"}])
 
 
 @mark.parametrize("spec", ["24", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_hours(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* {spec} * * * *"}])
 
 
 @mark.parametrize("spec", ["0", "32", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_days(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * {spec} * * *"}])
 
 
 @mark.parametrize("spec", ["0", "13", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_months(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * * {spec} * *"}])
 
 
 @mark.parametrize("spec", ["99", "1899", "10000", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_years(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * * * {spec} *"}])
 
 
 @mark.parametrize("spec", ["7", "Monday"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_weekdays(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * * * * {spec}"}])
 
 
@@ -2774,7 +2794,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_no_weekdays(spec):
     ["*", "0", "59", "*/2", "*/999", "1-10", "0,15,30,45", "15-45/5", "15-45/999", "0-29,30-59/2"],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_minutes(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"{spec} * * * * *"}])
 
 
@@ -2783,7 +2803,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_minutes(spec):
     ["*", "0", "23", "*/6", "*/999", "1-12", "0,6,12,18", "6-18/3", "6-18/999", "0-12,13-23/3"],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_hours(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* {spec} * * * *"}])
 
 
@@ -2792,7 +2812,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_hours(spec):
     ["*", "1", "31", "*/2", "*/999", "1-15", "10,20,30", "5-30/5", "5-30/999", "1-15,16-30/2"],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_days(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * {spec} * * *"}])
 
 
@@ -2800,7 +2820,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_days(spec):
     "spec", ["*", "1", "12", "*/2", "*/999", "6-9", "3,6,9,12", "1-6/2", "1-6/999", "1-6,8-12/2"]
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_months(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * * {spec} * *"}])
 
 
@@ -2821,7 +2841,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_months(spec):
     ],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_years(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * * * {spec} *"}])
 
 
@@ -2829,7 +2849,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_years(spec):
     "spec", ["*", "0", "6", "*/2", "*/999", "0-4", "0,2,4", "0-4/2", "0-4/999", "0-2,3-6/2"]
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_weekdays(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * * * * {spec}"}])
 
 
@@ -2846,7 +2866,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_weekdays(spec):
     ],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_examples(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": spec}])
 
 
@@ -2904,7 +2924,7 @@ def test_schema_rocoto_task_resources():
 
 
 def test_schema_rocoto_workflow_log():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "log")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "log")
     # Basic spec:
     assert not errors({"value": "foo"})
     # The "value" property is mandatory:
