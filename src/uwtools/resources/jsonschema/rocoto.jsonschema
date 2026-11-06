@@ -361,22 +361,27 @@
               "spec": {
                 "oneOf": [
                   {
+                    "description": "First cycle, last cycle, seconds step (may include #var# entity references)",
                     "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+$",
                     "type": "string"
                   },
                   {
+                    "description": "First cycle, last cycle, minutes:seconds step (may include #var# entity references)",
                     "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
                     "type": "string"
                   },
                   {
+                    "description": "First cycle, last cycle, hours:minutes:seconds step (may include #var# entity references)",
                     "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
                     "type": "string"
                   },
                   {
+                    "description": "First cycle, last cycle, days:hours:minutes:seconds step (may include #var# entity references)",
                     "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
                     "type": "string"
                   },
                   {
+                    "description": "Crontab-like cycle spec (see https://noaa-gsl.github.io/rocoto/)",
                     "pattern": "^((((\\d|[1-5]\\d)(-(\\d|[1-5]\\d)(\\/[1-9]\\d*)?)?)(,(\\d|[1-5]\\d)(-(\\d|[1-5]\\d)(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((((\\d|1\\d|2[0-3])(-(\\d|1\\d|2[0-3])(\\/[1-9]\\d*)?)?)(,(\\d|1\\d|2[0-3])(-(\\d|1\\d|2[0-3])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) (((([1-9]|[1-2]\\d|3[0-1])(-([1-9]|[1-2]\\d|3[0-1])(\\/[1-9]\\d*)?)?)(,([1-9]|[1-2]\\d|3[0-1])(-([1-9]|[1-2]\\d|3[0-1])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) (((([1-9]|1[1-2])(-([1-9]|1[1-2])(\\/[1-9]\\d*)?)?)(,([1-9]|1[1-2])(-([1-9]|1[1-2])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((((19\\d{2}|[2-9]\\d{3})(-(19\\d{2}|[2-9]\\d{3})(\\/[1-9]\\d*)?)?)(,(19\\d{2}|[2-9]\\d{3})(-(19\\d{2}|[2-9]\\d{3})(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((([0-6](-[0-6](\\/[1-9]\\d*)?)?)(,[0-6](-[0-6](\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*)$",
                     "type": "string"
                   }
