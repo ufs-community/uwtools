@@ -1,6 +1,6 @@
 [2025-01-02T03:04:05]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
 [2025-01-02T03:04:05]    DEBUG [dereference] Dereferencing, current value:
-[2025-01-02T03:04:05]    DEBUG [dereference]   workflow:
+[2025-01-02T03:04:05]    DEBUG [dereference]   rocoto:
 [2025-01-02T03:04:05]    DEBUG [dereference]     attrs:
 [2025-01-02T03:04:05]    DEBUG [dereference]       realtime: false
 [2025-01-02T03:04:05]    DEBUG [dereference]       scheduler: slurm
