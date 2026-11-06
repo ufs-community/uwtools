@@ -112,6 +112,7 @@ class _ROCOTO(_ValsMatchKeys):
     partition: str = _
     queue: str = _
     rewind: str = _
+    rocoto: str = _
     sh: str = _
     shared: str = _
     spec: str = _

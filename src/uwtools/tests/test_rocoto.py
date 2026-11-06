@@ -3,6 +3,7 @@ Tests for uwtools.rocoto module.
 """
 
 import sqlite3
+import warnings
 from contextlib import contextmanager
 from datetime import UTC
 from itertools import combinations
@@ -10,7 +11,7 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
 
 from lxml import etree
-from pytest import fixture, mark, raises
+from pytest import fixture, mark, raises, warns
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
@@ -49,6 +50,24 @@ def validation_assets(tmp_path):
 # Tests
 
 
+# Remove this test when support for the deprecated 'workflow' key is removed.
+@mark.parametrize("both", [False, True])
+def test_rocoto__deprecated_workflow_key(both):
+    config = {"workflow": {"a": 1}}
+    if both:
+        config["rocoto"] = {"b": 2}
+    with warns(DeprecationWarning, match="Key 'workflow' is deprecated: Use 'rocoto' instead"):
+        result = rocoto._deprecated_workflow_key(config)
+    assert result == ({"rocoto": {"b": 2}, "workflow": {"a": 1}} if both else {"rocoto": {"a": 1}})
+
+
+def test_rocoto__deprecated_workflow_key__not_present():
+    config = {"rocoto": {"a": 1}}
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert rocoto._deprecated_workflow_key(config) == {"rocoto": {"a": 1}}
+
+
 def test_rocoto_iterate(rocoto_iterator_args):
     with patch.object(rocoto, "_RocotoIterator") as _RocotoIterator:
         rocoto.iterate(**rocoto_iterator_args)
@@ -69,11 +88,11 @@ def test_rocoto_realize__cfg_to_stdout(capsys, assets):
 
 
 def test_rocoto_realize__cfg_to_stdout_key_path(capsys, assets):
-    # Test that workflow: block not at the root of the config can be accessed via key_path.
+    # Test that rocoto: block not at the root of the config can be accessed via key_path.
     cfgfile, outfile = assets
     config = YAMLConfig(cfgfile)
-    config["path"] = {"to": {"workflow": config["workflow"]}}
-    del config["workflow"]
+    config["path"] = {"to": {"rocoto": config["rocoto"]}}
+    del config["rocoto"]
     rocoto.realize(config=config, key_path=["path", "to"])
     outfile.write_text(capsys.readouterr().out)
     assert rocoto.validate_xml_file(xml_file=outfile)
@@ -384,6 +403,14 @@ class TestRocotoXML:
         return rocoto.Element("root")
 
     # Tests
+
+    # Remove this test when support for the deprecated 'workflow' key is removed.
+    def test__RocotoXML__instantiate_deprecated_workflow_key(self, assets):
+        cfgfile, _ = assets
+        config = YAMLConfig(cfgfile)
+        config["workflow"] = config.data.pop("rocoto")
+        with warns(DeprecationWarning, match="deprecated"):
+            assert rocoto._RocotoXML(config=config)._root.tag == "workflow"
 
     def test__RocotoXML__instantiate_from_cfgobj(self, assets):
         cfgfile, _ = assets
@@ -715,7 +742,7 @@ class TestRocotoXML:
 
     def test_rocoto__RocotoXML__add_workflow(self, instance):
         config = {
-            "workflow": {
+            "rocoto": {
                 "attrs": {"realtime": True, "scheduler": "slurm"},
                 "cycledef": [],
                 "log": {"attrs": {"verbosity": 10}, "value": "1"},
@@ -739,8 +766,8 @@ class TestRocotoXML:
         assert workflow.get("realtime") == "True"
         assert workflow.get("scheduler") == "slurm"
         mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, [])
-        mocks["_add_workflow_log"].assert_called_once_with(workflow, config["workflow"])
-        mocks["_add_workflow_tasks"].assert_called_once_with(workflow, config["workflow"]["tasks"])
+        mocks["_add_workflow_log"].assert_called_once_with(workflow, config["rocoto"])
+        mocks["_add_workflow_tasks"].assert_called_once_with(workflow, config["rocoto"]["tasks"])
 
     def test_rocoto__RocotoXML__add_workflow_cycledef(self, instance, root):
         config: list[dict] = [
@@ -808,7 +835,7 @@ class TestRocotoXML:
         assert '<!ENTITY FOO "test.log">' in instance._doctype
 
     def test_rocoto__RocotoXML__doctype__entities_none(self, instance):
-        del instance._config["workflow"]["entities"]
+        del instance._config["rocoto"]["entities"]
         assert instance._doctype is None
 
     def test_rocoto__RocotoXML__insert_doctype(self, instance):

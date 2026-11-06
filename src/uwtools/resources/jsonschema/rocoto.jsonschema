@@ -304,6 +304,139 @@
         }
       ]
     },
+    "rocoto": {
+      "additionalProperties": false,
+      "properties": {
+        "attrs": {
+          "properties": {
+            "cyclethrottle": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "realtime": {
+              "type": "boolean"
+            },
+            "scheduler": {
+              "enum": [
+                "sge",
+                "lsf",
+                "lsfcray",
+                "ll",
+                "torque",
+                "moabtorque",
+                "moab",
+                "pbspro",
+                "slurm",
+                "cobalt"
+              ],
+              "type": "string"
+            },
+            "taskthrottle": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "realtime",
+            "scheduler"
+          ],
+          "type": "object"
+        },
+        "cycledef": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "attrs": {
+                "additionalProperties": false,
+                "properties": {
+                  "activation_offset": {
+                    "$ref": "#/$defs/time"
+                  },
+                  "group": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "spec": {
+                "oneOf": [
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^((((\\d|[1-5]\\d)(-(\\d|[1-5]\\d)(\\/[1-9]\\d*)?)?)(,(\\d|[1-5]\\d)(-(\\d|[1-5]\\d)(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((((\\d|1\\d|2[0-3])(-(\\d|1\\d|2[0-3])(\\/[1-9]\\d*)?)?)(,(\\d|1\\d|2[0-3])(-(\\d|1\\d|2[0-3])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) (((([1-9]|[1-2]\\d|3[0-1])(-([1-9]|[1-2]\\d|3[0-1])(\\/[1-9]\\d*)?)?)(,([1-9]|[1-2]\\d|3[0-1])(-([1-9]|[1-2]\\d|3[0-1])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) (((([1-9]|1[1-2])(-([1-9]|1[1-2])(\\/[1-9]\\d*)?)?)(,([1-9]|1[1-2])(-([1-9]|1[1-2])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((((19\\d{2}|[2-9]\\d{3})(-(19\\d{2}|[2-9]\\d{3})(\\/[1-9]\\d*)?)?)(,(19\\d{2}|[2-9]\\d{3})(-(19\\d{2}|[2-9]\\d{3})(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((([0-6](-[0-6](\\/[1-9]\\d*)?)?)(,[0-6](-[0-6](\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*)$",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "spec"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "entities": {
+          "type": "object"
+        },
+        "log": {
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "minProperties": 1,
+              "properties": {
+                "verbosity": {
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "value": {
+              "$ref": "#/$defs/compoundTimeString"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object"
+        },
+        "tasks": {
+          "additionalProperties": false,
+          "minProperties": 1,
+          "patternProperties": {
+            "^metatask_.+$": {
+              "$ref": "#/$defs/metatask"
+            },
+            "^task_.+$": {
+              "$ref": "#/$defs/task"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "attrs",
+        "cycledef",
+        "log",
+        "tasks"
+      ],
+      "type": "object"
+    },
     "task": {
       "additionalProperties": false,
       "anyOf": [
@@ -483,143 +616,25 @@
       "type": "object"
     }
   },
-  "properties": {
-    "workflow": {
-      "additionalProperties": false,
-      "properties": {
-        "attrs": {
-          "properties": {
-            "cyclethrottle": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "realtime": {
-              "type": "boolean"
-            },
-            "scheduler": {
-              "enum": [
-                "sge",
-                "lsf",
-                "lsfcray",
-                "ll",
-                "torque",
-                "moabtorque",
-                "moab",
-                "pbspro",
-                "slurm",
-                "cobalt"
-              ],
-              "type": "string"
-            },
-            "taskthrottle": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "realtime",
-            "scheduler"
-          ],
-          "type": "object"
-        },
-        "cycledef": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "attrs": {
-                "additionalProperties": false,
-                "properties": {
-                  "activation_offset": {
-                    "$ref": "#/$defs/time"
-                  },
-                  "group": {
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              },
-              "spec": {
-                "oneOf": [
-                  {
-                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+$",
-                    "type": "string"
-                  },
-                  {
-                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
-                    "type": "string"
-                  },
-                  {
-                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
-                    "type": "string"
-                  },
-                  {
-                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
-                    "type": "string"
-                  },
-                  {
-                    "pattern": "^((((\\d|[1-5]\\d)(-(\\d|[1-5]\\d)(\\/[1-9]\\d*)?)?)(,(\\d|[1-5]\\d)(-(\\d|[1-5]\\d)(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((((\\d|1\\d|2[0-3])(-(\\d|1\\d|2[0-3])(\\/[1-9]\\d*)?)?)(,(\\d|1\\d|2[0-3])(-(\\d|1\\d|2[0-3])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) (((([1-9]|[1-2]\\d|3[0-1])(-([1-9]|[1-2]\\d|3[0-1])(\\/[1-9]\\d*)?)?)(,([1-9]|[1-2]\\d|3[0-1])(-([1-9]|[1-2]\\d|3[0-1])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) (((([1-9]|1[1-2])(-([1-9]|1[1-2])(\\/[1-9]\\d*)?)?)(,([1-9]|1[1-2])(-([1-9]|1[1-2])(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((((19\\d{2}|[2-9]\\d{3})(-(19\\d{2}|[2-9]\\d{3})(\\/[1-9]\\d*)?)?)(,(19\\d{2}|[2-9]\\d{3})(-(19\\d{2}|[2-9]\\d{3})(\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*) ((([0-6](-[0-6](\\/[1-9]\\d*)?)?)(,[0-6](-[0-6](\\/[1-9]\\d*)?)?)*)|\\*\\/[1-9]\\d*|\\*)$",
-                    "type": "string"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "spec"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "entities": {
-          "type": "object"
-        },
-        "log": {
-          "additionalProperties": false,
-          "properties": {
-            "attrs": {
-              "additionalProperties": false,
-              "minProperties": 1,
-              "properties": {
-                "verbosity": {
-                  "type": "integer"
-                }
-              },
-              "type": "object"
-            },
-            "value": {
-              "$ref": "#/$defs/compoundTimeString"
-            }
-          },
-          "required": [
-            "value"
-          ],
-          "type": "object"
-        },
-        "tasks": {
-          "additionalProperties": false,
-          "minProperties": 1,
-          "patternProperties": {
-            "^metatask_.+$": {
-              "$ref": "#/$defs/metatask"
-            },
-            "^task_.+$": {
-              "$ref": "#/$defs/task"
-            }
-          },
-          "type": "object"
-        }
-      },
+  "oneOf": [
+    {
       "required": [
-        "attrs",
-        "cycledef",
-        "log",
-        "tasks"
-      ],
-      "type": "object"
+        "rocoto"
+      ]
+    },
+    {
+      "required": [
+        "workflow"
+      ]
+    }
+  ],
+  "properties": {
+    "rocoto": {
+      "$ref": "#/$defs/rocoto"
+    },
+    "workflow": {
+      "$ref": "#/$defs/rocoto"
     }
   },
-  "required": [
-    "workflow"
-  ],
   "type": "object"
 }

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+import warnings
 from datetime import UTC
 from enum import Enum, auto
 from functools import reduce
@@ -110,6 +111,27 @@ def validate_xml_string(xml_string: str) -> bool:
         for n, line in enumerate(lines):
             log.error(fmtstr, n + 1, line)
     return valid
+
+
+def _deprecated_workflow_key(config: dict) -> dict:
+    """
+    Replace a deprecated top-level "workflow" key with "rocoto", emitting a deprecation warning.
+
+    :param config: The Rocoto config.
+    :return: The updated config.
+    """
+
+    # NB: Remove this function, and its call, when support for the deprecated 'workflow' key is
+    # removed.
+
+    if ROCOTO.workflow in config:
+        msg = (
+            "Key '%s' is deprecated: Use '%s' instead. Support will be removed in a future release."
+        )
+        warnings.warn(msg % (ROCOTO.workflow, ROCOTO.rocoto), DeprecationWarning, stacklevel=2)
+        if ROCOTO.rocoto not in config:
+            config[ROCOTO.rocoto] = config.pop(ROCOTO.workflow)
+    return config
 
 
 class _RocotoIterator:
@@ -265,7 +287,7 @@ class _RocotoXML:
     ) -> None:
         config = YAMLConfig(config)
         config.dereference()
-        self._config = reduce(getitem, key_path or [], config.data)
+        self._config = _deprecated_workflow_key(reduce(getitem, key_path or [], config.data))
         self._config_validate(self._config)
         self._add_workflow(self._config)
 
@@ -507,7 +529,7 @@ class _RocotoXML:
 
         :param config: Configuration data for this element.
         """
-        config, e = config[ROCOTO.workflow], Element(ROCOTO.workflow)
+        config, e = config[ROCOTO.rocoto], Element(ROCOTO.workflow)
         self._set_attrs(e, config)
         self._add_workflow_cycledef(e, config[ROCOTO.cycledef])
         self._add_workflow_log(e, config)
@@ -572,7 +594,7 @@ class _RocotoXML:
 
         :return: The <!DOCTYPE> block if entities are defined, otherwise None.
         """
-        if entities := self._config[ROCOTO.workflow].get(ROCOTO.entities):
+        if entities := self._config[ROCOTO.rocoto].get(ROCOTO.entities):
             tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
             return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
         return None
