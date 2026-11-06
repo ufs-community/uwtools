@@ -246,7 +246,7 @@ def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta 
     context = {**config}
     context.update({"cycle": cycle} if cycle else {})
     context.update({"leadtime": leadtime} if leadtime is not None else {})
-    config.dereference(context=context)
+    config.realize(context=context)
 
 
 def _realize_input_setup(

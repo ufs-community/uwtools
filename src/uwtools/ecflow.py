@@ -126,7 +126,7 @@ def server(
             thread.proc.wait()
 
     config = YAMLConfig(config)
-    config.dereference()
+    config.realize()
     validate(config)
     env = deepcopy(config.data[STR.ecflow][STR.server])
     env[STR.ECF_HOST] = socket.gethostname()
@@ -181,7 +181,7 @@ class _ECFlowDef:
     def __init__(self, config: dict | YAMLConfig | Path | None = None) -> None:
         log.debug("Creating ecFlow definition from %s", config or "stdin")
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
-        cfgobj.dereference()
+        cfgobj.realize()
         validate(cfgobj)
         self._config = cfgobj.data[STR.ecflow][STR.suitedef]
         self._d = Defs()
@@ -369,7 +369,7 @@ class _ECFlowDef:
         for i in range(len(expand[primary_variable])):
             new_refs = deepcopy(refs)
             new_refs.update({k: v[i] for k, v in expand.items()})
-            new_block = YAMLConfig({name: config}).dereference(context={"ec": new_refs})
+            new_block = YAMLConfig({name: config}).realize(context={"ec": new_refs})
             new_name = list(new_block.keys())[0]
             args = {
                 STR.config: new_block[new_name],
