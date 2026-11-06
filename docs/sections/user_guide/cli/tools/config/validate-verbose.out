@@ -1,21 +1,21 @@
 [2025-01-02T03:04:05]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-[2025-01-02T03:04:05]    DEBUG [dereference] Dereferencing, current value:
-[2025-01-02T03:04:05]    DEBUG [dereference]   values:
-[2025-01-02T03:04:05]    DEBUG [dereference]     greeting: Hello
-[2025-01-02T03:04:05]    DEBUG [dereference]     recipient: World
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: values
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: values
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: greeting
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: greeting
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: Hello
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: Hello
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: recipient
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: recipient
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendering: World
-[2025-01-02T03:04:05]    DEBUG [dereference] Rendered: World
-[2025-01-02T03:04:05]    DEBUG [dereference] Dereferencing, final value:
-[2025-01-02T03:04:05]    DEBUG [dereference]   values:
-[2025-01-02T03:04:05]    DEBUG [dereference]     greeting: Hello
-[2025-01-02T03:04:05]    DEBUG [dereference]     recipient: World
+[2025-01-02T03:04:05]    DEBUG [realize] Realizing, current value:
+[2025-01-02T03:04:05]    DEBUG [realize]   values:
+[2025-01-02T03:04:05]    DEBUG [realize]     greeting: Hello
+[2025-01-02T03:04:05]    DEBUG [realize]     recipient: World
+[2025-01-02T03:04:05]    DEBUG [realize] Rendering: values
+[2025-01-02T03:04:05]    DEBUG [realize] Rendered: values
+[2025-01-02T03:04:05]    DEBUG [realize] Rendering: greeting
+[2025-01-02T03:04:05]    DEBUG [realize] Rendered: greeting
+[2025-01-02T03:04:05]    DEBUG [realize] Rendering: Hello
+[2025-01-02T03:04:05]    DEBUG [realize] Rendered: Hello
+[2025-01-02T03:04:05]    DEBUG [realize] Rendering: recipient
+[2025-01-02T03:04:05]    DEBUG [realize] Rendered: recipient
+[2025-01-02T03:04:05]    DEBUG [realize] Rendering: World
+[2025-01-02T03:04:05]    DEBUG [realize] Rendered: World
+[2025-01-02T03:04:05]    DEBUG [realize] Realizing, final value:
+[2025-01-02T03:04:05]    DEBUG [realize]   values:
+[2025-01-02T03:04:05]    DEBUG [realize]     greeting: Hello
+[2025-01-02T03:04:05]    DEBUG [realize]     recipient: World
 [2025-01-02T03:04:05]    DEBUG Validating config against external schema file: schema.jsonschema
 [2025-01-02T03:04:05]    DEBUG Schema validation succeeded for config

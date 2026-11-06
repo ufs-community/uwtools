@@ -65,7 +65,7 @@ def test_config_support_add_yaml_representers__represent_timedelta(tmp_path):
     path = tmp_path / "config.yaml"
     path.write_text(dedent(s))
     config = YAMLConfig(config=path)
-    config.dereference()
+    config.realize()
     assert config["raw"] == timedelta(days=1, seconds=60480)
     config.dump(path)
     assert path.read_text().strip().split("\n")[-1] == "raw: !timedelta '40:48:00'"
