@@ -20,11 +20,11 @@ def test_rocoto_building_simple_workflow(load, tb):
     assert tb.cell_output_text(11) == load(base / "err-workflow.yaml")
     err_out = (
         "ERROR 3 schema-validation errors found",
-        "ERROR Error at workflow.attrs:",
+        "ERROR Error at rocoto.attrs:",
         "ERROR   'realtime' is a required property",
-        "ERROR Error at workflow.tasks.task_greet:",
+        "ERROR Error at rocoto.tasks.task_greet:",
         "ERROR   'command' is a required property",
-        "ERROR Error at workflow:",
+        "ERROR Error at rocoto:",
         "ERROR   'log' is a required property",
         "YAML validation errors",
     )

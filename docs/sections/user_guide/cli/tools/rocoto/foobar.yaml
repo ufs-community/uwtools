@@ -7,7 +7,7 @@ common: &common
   partition: service
   queue: batch
   walltime: "00:01:00"
-workflow:
+rocoto:
   attrs: {realtime: false, scheduler: slurm}
   cycledef:
     - attrs: {group: default}
