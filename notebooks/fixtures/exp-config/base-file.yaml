@@ -24,4 +24,4 @@ task_make_ics:
             - clwmr
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
           vcoord_file_target_grid: "path/to/global_hyblev.165.txt"
-    rundir: '{{ workflow.EXPTDIR }}/make_ics'
+    rundir: '{{ rocoto.EXPTDIR }}/make_ics'

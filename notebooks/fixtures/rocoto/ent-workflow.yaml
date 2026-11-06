@@ -1,4 +1,4 @@
-workflow:
+rotoco:
   attrs:
     realtime: false
     scheduler: slurm
