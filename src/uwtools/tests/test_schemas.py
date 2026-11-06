@@ -2651,7 +2651,7 @@ def test_schema_rocoto_metatask_attrs():
         ([], False),
         (["rocoto"], True),
         (["rocoto", "workflow"], False),
-        (["workflow"], True),  # Remove when support for the deprecated 'workflow' key is removed.
+        (["workflow"], True),  # NB: Remove when support for deprecated 'workflow' key is removed.
     ],
 )
 def test_schema_rocoto_root(keys, ok):

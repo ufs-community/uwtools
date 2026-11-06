@@ -50,9 +50,11 @@ def validation_assets(tmp_path):
 # Tests
 
 
-# Remove this test when support for the deprecated 'workflow' key is removed.
 @mark.parametrize("both", [False, True])
 def test_rocoto__deprecated_workflow_key(both):
+
+    # NB: Remove this test when support for the deprecated 'workflow' key is removed.
+
     config = {"workflow": {"a": 1}}
     if both:
         config["rocoto"] = {"b": 2}
@@ -404,8 +406,10 @@ class TestRocotoXML:
 
     # Tests
 
-    # Remove this test when support for the deprecated 'workflow' key is removed.
     def test__RocotoXML__instantiate_deprecated_workflow_key(self, assets):
+
+        # NB: Remove this test when support for the deprecated 'workflow' key is removed.
+
         cfgfile, _ = assets
         config = YAMLConfig(cfgfile)
         config["workflow"] = config.data.pop("rocoto")
