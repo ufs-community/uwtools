@@ -16,7 +16,7 @@ from uwtools.utils import tasks
 class NullDriver(FileStager):
     def __init__(self, config_file, rundir):
         config = get_yaml_config(config_file)
-        config.dereference()
+        config.realize()
         self.config = config
         self.rundir = rundir
 

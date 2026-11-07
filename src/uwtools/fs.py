@@ -54,7 +54,7 @@ class Stager(ABC):
         """
         self._target_dir = str2path(target_dir)
         yaml_config = YAMLConfig(config=str2path(config))
-        yaml_config.dereference(
+        yaml_config.realize(
             context={
                 **({"cycle": cycle} if cycle else {}),
                 **({"leadtime": leadtime} if leadtime is not None else {}),

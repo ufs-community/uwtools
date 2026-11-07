@@ -118,7 +118,7 @@ class J2Template:
 # Public functions
 
 
-def dereference(
+def realize(
     val: _ConfigVal, context: dict, local: dict | None = None, keys: list[str] | None = None
 ) -> _ConfigVal:
     """
@@ -140,44 +140,44 @@ def dereference(
     :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
-    report = lambda x: deref_debug("Rendering", x)
+    report = lambda x: realize_debug("Rendering", x)
     rendered: _ConfigVal
     if isinstance(val, dict):
         keys = keys or []
         rendered = {}
         for k, v in val.items():
             if isinstance(v, UWYAMLRemove):
-                deref_debug("Removing value at", ".".join([*keys, k]))
+                realize_debug("Removing value at", ".".join([*keys, k]))
             else:
-                kd, vd = [dereference(x, context, val, [*keys, k]) for x in (k, v)]
+                kd, vd = [realize(x, context, val, [*keys, k]) for x in (k, v)]
                 rendered[kd] = vd
     elif isinstance(val, list):
-        rendered = [dereference(v, context) for v in val]
+        rendered = [realize(v, context) for v in val]
     elif isinstance(val, str):
         report(val)
-        rendered = _deref_render(val, context, local)
+        rendered = _realize_render(val, context, local)
     elif isinstance(val, UWYAMLConvert):
         report(val.value)
-        val.value = _deref_render(val.value, context, local)
-        rendered = _deref_convert(val)
+        val.value = _realize_render(val.value, context, local)
+        rendered = _realize_convert(val)
     elif isinstance(val, UWYAMLGlob):
         report(val.value)
-        val.value = _deref_render(val.value, context, local)
+        val.value = _realize_render(val.value, context, local)
         rendered = val
     else:
-        deref_debug("Accepting", val)
+        realize_debug("Accepting", val)
         rendered = val
     return rendered
 
 
-def deref_debug(action: str, val: _ConfigVal | None = None) -> None:
+def realize_debug(action: str, val: _ConfigVal | None = None) -> None:
     """
-    Log a debug-level message related to dereferencing.
+    Log a debug-level message related to realizing.
 
-    :param action: The dereferencing activity being performed.
-    :param val: The value being dereferenced.
+    :param action: The realizing activity being performed.
+    :param val: The value being realized.
     """
-    tag = "[dereference]"
+    tag = "[realize]"
     args = ("%s %s", tag, action) if val is None else ("%s %s: %s", tag, action, val)
     log.debug(*args)
 
@@ -262,86 +262,6 @@ def unrendered(s: str) -> bool:
 # Private functions
 
 
-def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
-    """
-    Convert a string tagged with an explicit type.
-
-    If conversion cannot be performed (e.g. the value was tagged as an int but int() is not a value
-    that can be represented as an int, the original value will be returned unchanged.
-
-    :param val: A scalar value tagged with an explicit type.
-    :return: The value translated to the specified type.
-    """
-    converted: _ConfigVal = val  # fall-back value
-    deref_debug("Converting", val.value)
-    try:
-        converted = val.converted
-    except Exception as e:  # noqa: BLE001
-        deref_debug("Conversion failed", str(e))
-    else:
-        deref_debug("Converted", converted)
-    return converted
-
-
-def _deref_render(val: str, context: dict, local: dict | None = None) -> str:
-    """
-    Render a Jinja2 variable/expression as part of dereferencing.
-
-    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
-    will be logged and the original value will be returned unchanged.
-
-    :param val: The value potentially containing Jinja2 syntax to render.
-    :param context: Values to use when rendering Jinja2 syntax.
-    :param local: Local sibling values to use if a match is not found in context.
-    :return: The rendered value (potentially unchanged).
-    """
-    if not any(marker in val for marker in ("{{", "{%", "{#")):
-        deref_debug("Rendered", val)
-        return val
-    env = _register_filters(Environment(undefined=StrictUndefined))
-    template = env.from_string(val)
-    context = _update_context(context, local)
-    try:
-        rendered = template.render(context)
-    except Exception as e:  # noqa: BLE001
-        rendered = val
-        deref_debug("Rendering failed", val)
-        for line in str(e).split("\n"):
-            deref_debug(f"  Exception text: {line}")
-    else:
-        deref_debug("Rendered", rendered)
-    rendered = _deref_render_datetime(rendered)
-    try:
-        loaded = yaml.load(rendered, Loader=uw_yaml_loader())
-    except Exception as e:  # noqa: BLE001
-        loaded = None
-        deref_debug("Loading rendered value as YAML", rendered)
-        for line in str(e).split("\n"):
-            deref_debug(line)
-    if isinstance(loaded, UWYAMLConvert):
-        rendered = val
-        deref_debug("Held", rendered)
-    return rendered
-
-
-def _deref_render_datetime(s: str) -> str:
-    """
-    Returns the given string with datetime repr strings, e.g. datetime.datetime(2026, 5, 27, 12),
-    converted to ISO8601 timestamps so that they can be YAML-loaded again without error.
-
-    :param s: A string potentially containing a datetime repr string.
-    """
-    orig = s
-    pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
-    for old, argstr in re.findall(pattern, s):
-        dtargs: Any = map(int, argstr.split(","))
-        dt = datetime(*dtargs, tzinfo=UTC)  # type: ignore[misc]
-        new = to_iso8601(dt)
-        s = s.replace(old, new)
-        log.debug("Replaced '%s' with '%s' in '%s'", old, new, orig)
-    return s
-
-
 def _dry_run_template(rendered_template: str) -> str:
     """
     Log the rendered template and then return as successful.
@@ -363,6 +283,86 @@ def _log_missing_values(missing: list[str]) -> None:
     log.error("Value(s) required to render template not provided:")
     for key in missing:
         log.error("%s%s", INDENT, key)
+
+
+def _realize_convert(val: UWYAMLConvert) -> _ConfigVal:
+    """
+    Convert a string tagged with an explicit type.
+
+    If conversion cannot be performed (e.g. the value was tagged as an int but int() is not a value
+    that can be represented as an int, the original value will be returned unchanged.
+
+    :param val: A scalar value tagged with an explicit type.
+    :return: The value translated to the specified type.
+    """
+    converted: _ConfigVal = val  # fall-back value
+    realize_debug("Converting", val.value)
+    try:
+        converted = val.converted
+    except Exception as e:  # noqa: BLE001
+        realize_debug("Conversion failed", str(e))
+    else:
+        realize_debug("Converted", converted)
+    return converted
+
+
+def _realize_render(val: str, context: dict, local: dict | None = None) -> str:
+    """
+    Render a Jinja2 variable/expression as part of realizing.
+
+    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
+    will be logged and the original value will be returned unchanged.
+
+    :param val: The value potentially containing Jinja2 syntax to render.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
+    :return: The rendered value (potentially unchanged).
+    """
+    if not any(marker in val for marker in ("{{", "{%", "{#")):
+        realize_debug("Rendered", val)
+        return val
+    env = _register_filters(Environment(undefined=StrictUndefined))
+    template = env.from_string(val)
+    context = _update_context(context, local)
+    try:
+        rendered = template.render(context)
+    except Exception as e:  # noqa: BLE001
+        rendered = val
+        realize_debug("Rendering failed", val)
+        for line in str(e).split("\n"):
+            realize_debug(f"  Exception text: {line}")
+    else:
+        realize_debug("Rendered", rendered)
+    rendered = _realize_render_datetime(rendered)
+    try:
+        loaded = yaml.load(rendered, Loader=uw_yaml_loader())
+    except Exception as e:  # noqa: BLE001
+        loaded = None
+        realize_debug("Loading rendered value as YAML", rendered)
+        for line in str(e).split("\n"):
+            realize_debug(line)
+    if isinstance(loaded, UWYAMLConvert):
+        rendered = val
+        realize_debug("Held", rendered)
+    return rendered
+
+
+def _realize_render_datetime(s: str) -> str:
+    """
+    Returns the given string with datetime repr strings, e.g. datetime.datetime(2026, 5, 27, 12),
+    converted to ISO8601 timestamps so that they can be YAML-loaded again without error.
+
+    :param s: A string potentially containing a datetime repr string.
+    """
+    orig = s
+    pattern = re.compile(r"(datetime\.datetime\(([^)]+)\))")
+    for old, argstr in re.findall(pattern, s):
+        dtargs: Any = map(int, argstr.split(","))
+        dt = datetime(*dtargs, tzinfo=UTC)  # type: ignore[misc]
+        new = to_iso8601(dt)
+        s = s.replace(old, new)
+        log.debug("Replaced '%s' with '%s' in '%s'", old, new, orig)
+    return s
 
 
 def _register_filters(env: Environment) -> Environment:

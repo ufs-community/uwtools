@@ -225,9 +225,32 @@ def test_config_base__obj_config_from_file(config):
     assert config.config_file.is_file()
 
 
-def test_config_base__obj_dereference(tmp_path):
+def test_config_base__obj_dereference(config, logged):
+    context = {"foo": "bar"}
+    with patch.object(Config, "realize", return_value=config) as realize:
+        assert config.dereference(context=context) is config
+    realize.assert_called_once_with(context=context)
+    assert logged("Config method dereference() is deprecated")
+    assert logged("Use realize() instead")
+
+
+@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.sh])
+def test_config_base__obj_invalid_config(fmt2, tmp_path):
+    """
+    Test that invalid config files will error when attempting to dump.
+    """
+    fmt1 = FORMAT.yaml
+    outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
+    cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
+    depthin = depth(cfgin.data)
+    with raises(UWConfigError) as e:
+        cast(Config, tools.format_to_config(fmt2)).dump_dict(cfg=cfgin.data, path=outfile)
+    assert f"Cannot treat depth-{depthin} config as '{fmt2}'" in str(e.value)
+
+
+def test_config_base__obj_realize(tmp_path):
     # Test demonstrates that:
-    #   - Config dereferencing ignores environment variables.
+    #   - Config realizing ignores environment variables.
     #   - Initially-unrenderable values do not cause errors.
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
@@ -265,7 +288,7 @@ m: !int "22.0"
     path.write_text(yaml)
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "999"}, clear=True):
-        retval = config.dereference()
+        retval = config.realize()
     assert retval is config
     assert config["a"] == 44
     assert config["b"] == {"c": 33}
@@ -298,7 +321,7 @@ m: !int "22.0"
 
 
 @mark.parametrize("self_as_context", [False, True])
-def test_config_base__obj_dereference__context_is_self(self_as_context, tmp_path):
+def test_config_base__obj_realize__context_is_self(self_as_context, tmp_path):
     yaml = """
     a: !int '{{ 1 + 1 }}'
     sub:
@@ -308,40 +331,26 @@ def test_config_base__obj_dereference__context_is_self(self_as_context, tmp_path
     path.write_text(yaml)
     config = YAMLConfig(path)
     context = YAMLConfig(path).data if self_as_context else None
-    config.dereference(context=context)
+    config.realize(context=context)
     assert config.data == {"a": 2, "sub": {"a": 3}}
 
 
-def test_config_base__obj_dereference__context_absent_from_config(tmp_path):
+def test_config_base__obj_realize__context_absent_from_config(tmp_path):
     path = tmp_path / "config.yaml"
     path.write_text("foo: '{{ bar }}'")
     config = YAMLConfig(path)
-    config.dereference(context={"bar": "baz"})
+    config.realize(context={"bar": "baz"})
     # The context should become part of the config, i.e. bar: baz should not be present.
     assert config.data == {"foo": "baz"}
 
 
-def test_config_base__obj_dereference__context_override(tmp_path, utc):
+def test_config_base__obj_realize__context_override(tmp_path, utc):
     yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
     path = tmp_path / "config.yaml"
     path.write_text(yaml)
     config = YAMLConfig(path)
-    config.dereference(context={"cycle": utc(2024, 2, 12, 6)})
+    config.realize(context={"cycle": utc(2024, 2, 12, 6)})
     assert config["file"] == "gfs.t06z.atmanl.nc"
-
-
-@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.sh])
-def test_config_base__obj_invalid_config(fmt2, tmp_path):
-    """
-    Test that invalid config files will error when attempting to dump.
-    """
-    fmt1 = FORMAT.yaml
-    outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
-    cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
-    depthin = depth(cfgin.data)
-    with raises(UWConfigError) as e:
-        cast(Config, tools.format_to_config(fmt2)).dump_dict(cfg=cfgin.data, path=outfile)
-    assert f"Cannot treat depth-{depthin} config as '{fmt2}'" in str(e.value)
 
 
 def test_config_base__obj_update_from(config):

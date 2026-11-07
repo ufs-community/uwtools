@@ -286,7 +286,7 @@ class _RocotoXML:
         key_path: list[YAMLKey] | None = None,
     ) -> None:
         config = YAMLConfig(config)
-        config.dereference()
+        config.realize()
         self._config = _deprecated_workflow_key(reduce(getitem, key_path or [], config.data))
         self._config_validate(self._config)
         self._add_workflow(self._config)
@@ -621,7 +621,7 @@ class _RocotoXML:
         if ROCOTO.jobname not in config:
             config[ROCOTO.jobname] = taskname
         cfg = YAMLConfig(config=config)
-        cfg.dereference()
+        cfg.realize()
         return cfg.data
 
     def _set_attrs(self, e: _Element, config: dict) -> None:
