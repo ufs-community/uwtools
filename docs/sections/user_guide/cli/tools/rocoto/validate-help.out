@@ -1,0 +1,18 @@
+usage: uw rocoto validate [-h] [--version] [--config-file PATH]
+                          [--key-path KEY[.KEY...]] [--quiet] [--verbose]
+
+Validate a Rocoto YAML config
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys to Rocoto config block
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

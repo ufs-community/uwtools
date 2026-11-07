@@ -1,0 +1,4 @@
+[2025-01-02T03:04:05]    ERROR 1 schema-validation error found in Rocoto config
+[2025-01-02T03:04:05]    ERROR Error at rocoto.tasks.task_hello:
+[2025-01-02T03:04:05]    ERROR   'command' is a required property
+[2025-01-02T03:04:05]    ERROR YAML validation errors
