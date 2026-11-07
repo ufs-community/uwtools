@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from uwtools.rocoto import DEFAULT_ITERATION_RATE
 from uwtools.rocoto import iterate as _iterate
 from uwtools.rocoto import realize as _realize
+from uwtools.rocoto import validate as _validate
 from uwtools.rocoto import validate_xml_file as _validate_xml_file
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
@@ -70,6 +71,25 @@ def realize(
         output_file=_str2path(output_file),
         key_path=key_path,
     )
+    return True
+
+
+def validate(
+    config: _YAMLConfig | dict | Path | str | None = None,
+    key_path: list[YAMLKey] | None = None,
+    stdin_ok: bool = False,
+) -> bool:
+    """
+    Validate a Rocoto config against its schema.
+
+    :param config: YAML input file or ``YAMLConfig`` object to validate (``None`` => read
+        ``stdin``).
+    :param key_path: Path of keys to the Rocoto config block.
+    :param stdin_ok: OK to read from ``stdin``?
+    :return: ``True`` if the config conforms to the schema.
+    :raises: ``UWConfigError`` if validation fails.
+    """
+    _validate(config=_ensure_data_source(_str2path(config), stdin_ok), key_path=key_path)
     return True
 
 

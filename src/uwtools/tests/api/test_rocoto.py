@@ -1,9 +1,11 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import mark
+from pytest import mark, raises
 
 from uwtools.api import rocoto
+from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWError
 
 
 @mark.parametrize("f", [Path, str])
@@ -25,6 +27,34 @@ def test_api_rocoto_realize():
     with patch.object(rocoto, "_realize") as _realize:
         rocoto.realize(config=path1, output_file=path2)
     _realize.assert_called_once_with(config=path1, output_file=path2, key_path=None)
+
+
+@mark.parametrize(
+    ("config", "expected"),
+    [
+        ({"rocoto": {}}, {"rocoto": {}}),
+        (Path("foo"), Path("foo")),
+        ("foo", Path("foo")),
+        (YAMLConfig({"rocoto": {}}), YAMLConfig({"rocoto": {}})),
+    ],
+)
+@mark.parametrize("key_path", [None, ["a", "b"]])
+def test_api_rocoto_validate(config, expected, key_path):
+    with patch.object(rocoto, "_validate") as _validate:
+        assert rocoto.validate(config=config, key_path=key_path) is True
+    _validate.assert_called_once_with(config=expected, key_path=key_path)
+
+
+def test_api_rocoto_validate__no_stdin_no_config():
+    with raises(UWError) as e:
+        rocoto.validate()
+    assert "Set stdin_ok=True to permit read from stdin" in str(e.value)
+
+
+def test_api_rocoto_validate__stdin():
+    with patch.object(rocoto, "_validate") as _validate:
+        assert rocoto.validate(stdin_ok=True) is True
+    _validate.assert_called_once_with(config=None, key_path=None)
 
 
 def test_api_rocoto_validate_xml():

@@ -205,6 +205,11 @@ def test_cli__add_subparser_rocoto_realize(subparsers):
     assert subparsers.choices[STR.realize]
 
 
+def test_cli__add_subparser_rocoto_validate(subparsers):
+    cli._add_subparser_rocoto_validate(subparsers)
+    assert subparsers.choices[STR.validate]
+
+
 def test_cli__add_subparser_rocoto_validate_xml(subparsers):
     cli._add_subparser_rocoto_validate_xml(subparsers)
     assert subparsers.choices[STR.validate_xml]
@@ -694,6 +699,7 @@ def test_cli__dispatch_ecflow_validate_no_optional():
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
+        (STR.validate, "_dispatch_rocoto_validate"),
         (STR.validate_xml, "_dispatch_rocoto_validate_xml"),
     ],
 )
@@ -752,6 +758,16 @@ def test_cli__dispatch_rocoto_realize_no_optional():
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
     func.assert_called_once_with(config=None, output_file=None, key_path=None)
+
+
+@mark.parametrize(
+    ("config", "key_path"), [(None, None), (Path("/path/to/rocoto.yaml"), ["foo", "bar"])]
+)
+def test_cli__dispatch_rocoto_validate(config, key_path):
+    args = {STR.config_file: config, STR.key_path: key_path}
+    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
+        assert cli._dispatch_rocoto_validate(args) is True
+    _validate.assert_called_once_with(config=config, key_path=key_path)
 
 
 def test_cli__dispatch_rocoto_validate_xml():

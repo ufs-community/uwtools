@@ -3,9 +3,11 @@ Tests for uwtools.rocoto module.
 """
 
 import sqlite3
+import sys
 import warnings
 from contextlib import contextmanager
 from datetime import UTC
+from io import StringIO
 from itertools import combinations
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
@@ -17,6 +19,7 @@ from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.tests.support import fixture_path, schema_validator
+from uwtools.utils.file import _stdinproxy
 
 # Fixtures
 
@@ -132,6 +135,53 @@ def test_rocoto_realize__unrendered_xml(assets, logged):
     assert logged(template)
     assert logged("Value(s) needed to render this XML are:")
     assert logged("world")
+
+
+@mark.parametrize("f", [YAMLConfig, lambda x: x, lambda x: YAMLConfig(x).data])
+def test_rocoto_validate(assets, f):
+    cfgfile, _ = assets
+    config = rocoto.validate(config=f(cfgfile))
+    assert config["rocoto"]["cycledef"]
+
+
+def test_rocoto_validate__deprecated_workflow_key(assets):
+
+    # NB: Remove this test when support for the deprecated 'workflow' key is removed.
+
+    cfgfile, _ = assets
+    config = YAMLConfig(cfgfile)
+    config["workflow"] = config.data.pop("rocoto")
+    with warns(DeprecationWarning, match="deprecated"):
+        assert "rocoto" in rocoto.validate(config=config)
+
+
+@mark.parametrize("f", [YAMLConfig, lambda x: x])
+def test_rocoto_validate__fail(f, tmp_path):
+    cfgfile = tmp_path / "bad.yaml"
+    cfgfile.write_text("not: ok")
+    with raises(UWConfigError):
+        rocoto.validate(config=f(cfgfile))
+
+
+def test_rocoto_validate__key_path(assets):
+    cfgfile, _ = assets
+    data = YAMLConfig(cfgfile).data
+    config = rocoto.validate(
+        config={"a": {"b": data}, "scheduler": data["scheduler"]}, key_path=["a", "b"]
+    )
+    assert config["rocoto"]["cycledef"]
+
+
+def test_rocoto_validate__realized(assets):
+    cfgfile, _ = assets
+    assert rocoto.validate(config=cfgfile)["rocoto"]["attrs"]["scheduler"] == "slurm"
+
+
+def test_rocoto_validate__stdin(assets):
+    cfgfile, _ = assets
+    _stdinproxy.cache_clear()
+    with StringIO(cfgfile.read_text()) as sio, patch.object(sys, "stdin", new=sio):
+        assert rocoto.validate()["rocoto"]["cycledef"]
 
 
 def test_rocoto_validate_xml_file__fail(validation_assets):
@@ -813,26 +863,6 @@ class TestRocotoXML:
             instance._add_workflow_tasks(e=root, config=config)
         mocks["_add_metatask"].assert_called_once_with(root, "1", "foo")
         mocks["_add_task"].assert_called_once_with(root, "2", "bar")
-
-    def test_rocoto__RocotoXML__config_validate__config(self, assets, instance):
-        cfgfile, _ = assets
-        instance._config_validate(config=YAMLConfig(cfgfile))
-
-    def test_rocoto__RocotoXML__config_validate_file(self, assets, instance):
-        cfgfile, _ = assets
-        instance._config_validate(config=cfgfile)
-
-    def test_rocoto__RocotoXML__config_validate__config_fail(self, instance, tmp_path):
-        cfgfile = tmp_path / "bad.yaml"
-        cfgfile.write_text("not: ok")
-        with raises(UWConfigError):
-            instance._config_validate(config=YAMLConfig(cfgfile))
-
-    def test_rocoto__RocotoXML__config_validate__file_fail(self, instance, tmp_path):
-        cfgfile = tmp_path / "bad.yaml"
-        cfgfile.write_text("not: ok")
-        with raises(UWConfigError):
-            instance._config_validate(config=cfgfile)
 
     def test_rocoto__RocotoXML__doctype__entities(self, instance):
         assert '<!ENTITY ACCOUNT "myaccount">' in instance._doctype

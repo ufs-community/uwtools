@@ -12,7 +12,6 @@ from enum import Enum, auto
 from functools import reduce
 from math import log10
 from operator import getitem
-from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Any
 
@@ -32,6 +31,7 @@ from uwtools.utils.processing import run_shell_cmd
 
 if TYPE_CHECKING:
     from datetime import datetime
+    from pathlib import Path
 
     from uwtools.config.support import YAMLKey
 
@@ -74,6 +74,29 @@ def realize(
     with writable(output_file) as f:
         print(xml_string, file=f)
     return xml_string
+
+
+def validate(
+    config: dict | YAMLConfig | Path | None = None,
+    key_path: list[YAMLKey] | None = None,
+) -> dict:
+    """
+    Realize and validate a Rocoto YAML config.
+
+    :param config: A dict, a YAMLConfig, a path to a YAML file, or None (None => read stdin).
+    :param key_path: Path of keys to the Rocoto config block.
+    :return: The realized and validated Rocoto config.
+    :raises: UWConfigError if config fails validation.
+    """
+    cfgobj = YAMLConfig(config)
+    cfgobj.realize()
+    data = _deprecated_workflow_key(reduce(getitem, key_path or [], cfgobj.data))
+    validate_yaml(
+        schema_file=resource_path("jsonschema/rocoto.jsonschema"),
+        desc="Rocoto config",
+        config_data=data,
+    )
+    return data
 
 
 def validate_xml_file(xml_file: Path | None) -> bool:
@@ -285,10 +308,7 @@ class _RocotoXML:
         config: dict | YAMLConfig | Path | None = None,
         key_path: list[YAMLKey] | None = None,
     ) -> None:
-        config = YAMLConfig(config)
-        config.realize()
-        self._config = _deprecated_workflow_key(reduce(getitem, key_path or [], config.data))
-        self._config_validate(self._config)
+        self._config = validate(config, key_path)
         self._add_workflow(self._config)
 
     def __str__(self) -> str:
@@ -571,21 +591,6 @@ class _RocotoXML:
             {ROCOTO.metatask: self._add_metatask, ROCOTO.task: self._add_task}[tag](
                 e, subconfig, name
             )
-
-    def _config_validate(self, config: dict | Path | YAMLConfig | None = None) -> None:
-        """
-        Validate the given YAML config.
-
-        :param config: YAMLConfig object or path to YAML file (None => read stdin).
-        :raises: UWConfigError if config fails validation.
-        """
-        config_data, config_path = (None, config) if isinstance(config, Path) else (config, None)
-        validate_yaml(
-            schema_file=resource_path("jsonschema/rocoto.jsonschema"),
-            desc="Rocoto config",
-            config_data=config_data,
-            config_path=config_path,
-        )
 
     @property
     def _doctype(self) -> str | None:

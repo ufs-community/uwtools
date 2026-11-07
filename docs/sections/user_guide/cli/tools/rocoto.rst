@@ -6,7 +6,7 @@
    :depth: 1
    :local:
 
-The ``uw`` mode for realizing and validating Rocoto XML documents.
+The ``uw`` mode for realizing and validating Rocoto XML documents, and for validating the UW YAML configs they are realized from.
 
 .. literalinclude:: rocoto/help.cmd
    :language: text
@@ -117,6 +117,62 @@ The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
      :emphasize-lines: 2
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
      :language: xml
+
+.. _cli_rocoto_validate_examples:
+
+``validate``
+------------
+
+Validate a UW YAML Rocoto config against the UW Rocoto schema, without realizing it as Rocoto XML. Jinja2 expressions in the config are realized before validation.
+
+See :ref:`rocoto_workflows` for more information about the structured UW YAML for Rocoto.
+
+.. literalinclude:: rocoto/validate-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/validate-help.out
+   :language: text
+
+Examples
+^^^^^^^^
+
+The examples in this section use the UW YAML file ``rocoto.yaml`` shown above in the ``realize`` examples.
+
+* To validate a UW YAML config from file ``rocoto.yaml``:
+
+  .. literalinclude:: rocoto/validate-good-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-good-file.out
+     :language: text
+
+* To validate a UW YAML config from ``stdin``:
+
+  .. literalinclude:: rocoto/validate-good-stdin.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-good-stdin.out
+     :language: text
+
+* To validate a Rocoto config block nested within a larger config, specify the path of keys to the block with ``--key-path``:
+
+  .. literalinclude:: rocoto/validate-key-path.yaml
+     :language: yaml
+  .. literalinclude:: rocoto/validate-key-path.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-key-path.out
+     :language: text
+
+* When the config is invalid:
+
+  In this example, the ``command`` entry was removed from the ``hello`` task in ``rocoto.yaml`` to create ``rocoto-bad.yaml``.
+
+  .. literalinclude:: rocoto/validate-bad-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-bad-file.out
+     :language: text
 
 .. _cli_rocoto_validate_xml_examples:
 
