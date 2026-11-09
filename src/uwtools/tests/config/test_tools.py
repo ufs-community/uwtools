@@ -2,6 +2,7 @@
 Tests for uwtools.config.tools module.
 """
 
+import logging
 import sys
 from datetime import UTC, datetime, timedelta
 from io import StringIO
@@ -388,6 +389,14 @@ def test_config_tools_compose__load_error_dict(logged):
     assert logged("Could not load dict:")
     assert logged("  a: 1")
     assert logged("  b: 2")
+
+
+def test_config_tools_compose__load_error_inspection(caplog, tmp_path):
+    path = tmp_path / "invalid.yaml"
+    path.write_bytes(b"a: \xff\n")
+    with raises(UnicodeDecodeError):
+        tools.compose(configs=[path], realize=False)
+    assert ("root", logging.ERROR, f"Could not inspect contents of {path}") in caplog.record_tuples
 
 
 @mark.parametrize(

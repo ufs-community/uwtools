@@ -116,7 +116,7 @@ def compose(
             for key in keys:
                 del cfgobj[key]
             return cfgobj
-        except OSError:
+        except OSError:  # FileNotFoundError, PermissionError, et al.
             raise
         except Exception as e:
             _compose_log_contents(config)
@@ -244,7 +244,11 @@ def _compose_log_contents(config: Path | dict) -> None:
 
     :param config: Path to the config file, or a dict of config data.
     """
-    text = config.read_text() if isinstance(config, Path) else dict_to_yaml_str(config)
+    try:
+        text = config.read_text() if isinstance(config, Path) else dict_to_yaml_str(config)
+    except Exception:
+        log.error("Could not inspect contents of %s", _compose_desc(config))
+        raise
     log.debug("Could not load %s:", _compose_desc(config))
     for line in text.strip().split("\n"):
         log.debug("  %s", line)
