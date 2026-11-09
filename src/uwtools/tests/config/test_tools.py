@@ -348,6 +348,29 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
 
 
 @mark.parametrize(
+    ("input_format", "text"),
+    [
+        (FORMAT.ini, "a: 1"),  # configparser error
+        (FORMAT.nml, "&nl b = "),  # f90nml error
+        (FORMAT.yaml, "&nl\n  b = 2\n/"),  # non-dict YAML
+        (FORMAT.yaml, "[s]\nc = 3"),  # YAML parse error
+    ],
+)
+def test_config_tools_compose__load_error(input_format, text, tmp_path):
+    path = tmp_path / "config"
+    path.write_text(text)
+    with raises(UWConfigError) as e:
+        tools.compose(configs=[path], realize=False, input_format=input_format)
+    assert str(e.value).startswith(f"Could not load {path} as '{input_format}' config: ")
+
+
+def test_config_tools_compose__load_error_dict():
+    with raises(UWConfigError) as e:
+        tools.compose(configs=[{"a": 1}], realize=False, input_format=FORMAT.nml)
+    assert str(e.value).startswith("Could not load dict as 'nml' config: ")
+
+
+@mark.parametrize(
     ("initial", "final"),
     [
         (" !bool 'yes'", " true"),

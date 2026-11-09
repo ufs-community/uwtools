@@ -62,6 +62,15 @@ def compose(
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
 
+    def cfgdesc(config: Path | dict) -> str:
+        """
+        Return a description of the given config, for use in messages.
+
+        :param config: Path to the config file, or a dict of config data.
+        :return: The path as a string, or "dict".
+        """
+        return str(config) if isinstance(config, Path) else "dict"
+
     def cfgobj_from_yaml(yaml: str) -> YAMLConfig:
         """
         Write YAML to a temp file, instantiate a config from it, then clean up.
@@ -110,6 +119,9 @@ def compose(
             for key in keys:
                 del cfgobj[key]
             return cfgobj
+        except Exception as e:
+            msg = "Could not load %s as '%s' config: %s" % (cfgdesc(config), input_format, e)
+            raise UWConfigError(msg) from e
 
     def cfgobj_update(config: Config, src: Path | dict) -> Config:
         """
@@ -119,8 +131,7 @@ def compose(
         :param src: Path to the file containing, or dict of, config data to update with.
         :return: And updated Config object.
         """
-        src_desc = src if isinstance(src, Path) else "dict"
-        log.debug("Composing '%s' config from %s", input_format, src_desc)
+        log.debug("Composing '%s' config from %s", input_format, cfgdesc(src))
         config.update_from(cfgobj_get(src))
         return config
 
