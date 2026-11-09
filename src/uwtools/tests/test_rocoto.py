@@ -158,6 +158,7 @@ def test_rocoto_validate__deprecated_workflow_key(assets):
     cfgfile, _ = assets
     config = YAMLConfig(cfgfile)
     config["workflow"] = config.data.pop("rocoto")
+    config["unrelated"] = "{{ missing }}"
     with warns(DeprecationWarning, match="deprecated"):
         assert "rocoto" in rocoto.validate(config=config)
 
@@ -225,6 +226,22 @@ def test_rocoto_validate__unrendered(assets, unrendered_key):
     with raises(UWConfigRealizeError, match="Rocoto config could not be totally realized") as e:
         rocoto.validate(config=config)
     assert location in str(e.value)
+
+
+@mark.parametrize("action", ["realize", "validate"])
+@mark.parametrize("key_path", [None, ["nested"]])
+def test_rocoto_validate__unrelated_unrendered(assets, action, key_path):
+    cfgfile, outfile = assets
+    config = YAMLConfig(cfgfile).data
+    config["unrelated"] = "{{ missing }}"
+    if key_path:
+        config = {"nested": config, "scheduler": config["scheduler"]}
+    if action == "realize":
+        assert "<workflow" in rocoto.realize(
+            config=YAMLConfig(config), output_file=outfile, key_path=key_path
+        )
+    else:
+        assert "rocoto" in rocoto.validate(config=config, key_path=key_path)
 
 
 def test_rocoto_validate_xml_file__fail(validation_assets):

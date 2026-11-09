@@ -100,7 +100,7 @@ def validate(
         msg = "Value at %s must be a dictionary" % ".".join(map(str, key_path or []))
         raise UWConfigError(msg)
     data = _deprecated_workflow_key(data)
-    keys, vals = cfgobj.incomplete(data)
+    keys, vals = cfgobj.incomplete({ROCOTO.rocoto: data.get(ROCOTO.rocoto)})
     if keys or vals:
         paths = [".".join(map(str, path)) for path in [*keys, *vals]]
         msg = "Rocoto config could not be totally realized at: %s" % ", ".join(paths)
