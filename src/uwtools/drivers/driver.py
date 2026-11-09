@@ -60,7 +60,7 @@ class Assets(ABC):
         controller: list[YAMLKey] | None = None,
     ) -> None:
         config_copy = YAMLConfig(config)
-        config_copy.dereference(
+        config_copy.realize(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
@@ -100,7 +100,7 @@ class Assets(ABC):
     @property
     def config_full(self) -> dict:
         """
-        A copy of the original input config, dereferenced.
+        A copy of the original input config, realized.
         """
         return deepcopy(self._config_full)
 
@@ -120,7 +120,7 @@ class Assets(ABC):
         if base_file := config_values.get(STR.base_file):
             cfgobj = config_class(base_file)
             cfgobj.update_from(user_values)
-            cfgobj.dereference()
+            cfgobj.realize()
             config = cfgobj.data
             dump = partial(cfgobj.dump, path)
         else:

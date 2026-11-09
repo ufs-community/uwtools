@@ -36,7 +36,7 @@ class EnKF(DriverCycleBased, FileStager):
         file_sets = []
         for member in range(1, ensemble_size + 1):
             file_set = get_yaml_config(member_files)
-            file_set.dereference(
+            file_set.realize(
                 context={
                     "member": member,
                     "cycle": self.cycle,

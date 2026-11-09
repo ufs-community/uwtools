@@ -479,7 +479,7 @@ def test_config_tools_realize__conversion_cfg_to_yaml(tmp_path):
         output_format=FORMAT.yaml,
     )
     expected = YAMLConfig(infile)
-    expected.dereference()
+    expected.realize()
     expected_file = tmp_path / "test.yaml"
     expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
@@ -657,7 +657,7 @@ def test_config_tools_realize__dry_run(logged):
     """
     infile = fixture_path("fruit_config.yaml")
     yaml_config = YAMLConfig(infile)
-    yaml_config.dereference()
+    yaml_config.realize()
     tools.realize(
         input_config=infile,
         input_format=FORMAT.yaml,
@@ -926,13 +926,13 @@ def test_config_tools_realize__simple_yaml(tmp_path):
     help_realize_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
-def test_config_tools_realize__single_dereference(capsys, tmp_path):
+def test_config_tools_realize__single_realization(capsys, tmp_path):
     input_config = tmp_path / "a.yaml"
     update_config = tmp_path / "b.yaml"
     with writable(input_config) as f:
-        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+        yaml.dump({"1": "a", "2": "{{ realized }}", "3": "{{ temporalis }}"}, f)
     with writable(update_config) as f:
-        yaml.dump({"2": "b", "temporalis": "c", "deref": "d"}, f)
+        yaml.dump({"2": "b", "temporalis": "c", "realized": "d"}, f)
     tools.realize(
         input_config=input_config,
         update_config=update_config,
@@ -943,7 +943,7 @@ def test_config_tools_realize__single_dereference(capsys, tmp_path):
     '1': a
     '2': b
     '3': c
-    deref: d
+    realized: d
     temporalis: c
     """
     assert actual == dedent(expected).strip()
@@ -961,7 +961,7 @@ def test_config_tools_realize__update_bad_format_defaults_to_yaml(capsys, tmp_pa
     input_config = tmp_path / "a.yaml"
     update_config = tmp_path / "b.clj"
     with writable(input_config) as f:
-        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
+        yaml.dump({"1": "a", "2": "{{ realized }}", "3": "{{ temporalis }}", "realized": "b"}, f)
     with writable(update_config) as f:
         yaml.dump({"2": "b", "temporalis": "c"}, f)
     tools.realize(
@@ -973,7 +973,7 @@ def test_config_tools_realize__update_bad_format_defaults_to_yaml(capsys, tmp_pa
     '1': a
     '2': b
     '3': c
-    deref: b
+    realized: b
     temporalis: c
     """
     assert capsys.readouterr().out.strip() == dedent(expected).strip()
@@ -982,7 +982,7 @@ def test_config_tools_realize__update_bad_format_defaults_to_yaml(capsys, tmp_pa
 def test_config_tools_realize__update_none(capsys, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
-        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
+        yaml.dump({"1": "a", "2": "{{ realized }}", "3": "{{ temporalis }}", "realized": "b"}, f)
     tools.realize(
         input_config=path,
         input_format=FORMAT.yaml,
@@ -992,7 +992,7 @@ def test_config_tools_realize__update_none(capsys, tmp_path):
     '1': a
     '2': b
     '3': '{{ temporalis }}'
-    deref: b
+    realized: b
     """
     actual = capsys.readouterr().out.strip()
     assert actual == dedent(expected).strip()
