@@ -394,6 +394,37 @@ def test_config_tools_compose__no_anchors_or_aliases(capsys, initial, final, tmp
     assert capsys.readouterr().out.strip() == dedent(expected_realized).strip()
 
 
+@mark.parametrize("kind2", ["config", "dict", "path"])
+@mark.parametrize("kind1", ["config", "dict", "path"])
+def test_config_tools_compose__input_types(kind1, kind2, logged, tmp_path):
+    d = {"a": 1, "b": {"c": 2}}
+    u = {"b": {"d": 3}}
+
+    def mkinput(kind, data, name):
+        if kind == "config":
+            return YAMLConfig(data)
+        if kind == "dict":
+            return data
+        path = tmp_path / f"{name}.yaml"
+        YAMLConfig(data).dump(path)
+        return path
+
+    configs = [mkinput(kind1, d, "d"), mkinput(kind2, u, "u")]
+    outpath = tmp_path / "out.yaml"
+    assert isinstance(tools.compose(configs=configs, realize=False, output_file=outpath), Config)
+    assert logged(f"Composing 'yaml' config from {configs[1] if kind2 == 'path' else 'dict'}")
+    assert YAMLConfig(outpath) == {"a": 1, "b": {"c": 2, "d": 3}}
+    assert d == {"a": 1, "b": {"c": 2}}  # inputs not mutated
+
+
+def test_config_tools_compose__input_format_from_config_type(logged, tmp_path):
+    outpath = tmp_path / "out.nml"
+    configs: list = [NMLConfig({"nl": {"a": 1}}), {"nl": {"b": 2}}]
+    tools.compose(configs=configs, realize=False, output_file=outpath)
+    assert logged("Composing 'nml' config from dict")
+    assert NMLConfig(outpath) == {"nl": {"a": 1, "b": 2}}
+
+
 @mark.parametrize("realize", [False, True])
 def test_config_tools_compose__realize(realize, tmp_path, utc):
     dyaml = """
@@ -436,6 +467,17 @@ def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):
     tools.compose(configs=[path_a, path_b, path_c, path_d], realize=False, output_file=outpath)
     expected = {"apple": "green", "banana": "yellow", "cherry": "red", "date": "brown"}
     assert yaml.safe_load(outpath.read_text())["a"] == expected
+
+
+def test_config_tools_compose__split_anchor_alias_with_dict(compose_anchor_alias_assets):
+    path_a, path_b, path_c, path_d = compose_anchor_alias_assets
+    outpath = path_a.parent / "out.yaml"
+    configs = [path_a, {"e": "elderberry"}, path_b, path_c, path_d]
+    tools.compose(configs=configs, realize=False, output_file=outpath)
+    expected = {"apple": "green", "banana": "yellow", "cherry": "red", "date": "brown"}
+    composed = yaml.safe_load(outpath.read_text())
+    assert composed["a"] == expected
+    assert composed["e"] == "elderberry"
 
 
 def test_config_tools_compose__split_anchor_alias_bad_duplicate_anchor(compose_anchor_alias_assets):

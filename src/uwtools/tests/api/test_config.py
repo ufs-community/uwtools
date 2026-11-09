@@ -36,9 +36,10 @@ def test_api_config_compare():
 @mark.parametrize("output_file", [None, "/path/to/out.yaml"])
 @mark.parametrize("output_format", [None, FORMAT.yaml, FORMAT.nml])
 def test_api_config_compose(cycle, input_format, leadtime, output_file, output_format):
-    pathstrs = ["/path/to/c1.yaml", "/path/to/c2.yaml"]
+    cfgobj = YAMLConfig({"a": 1})
+    d = {"b": 2}
     kwargs: dict = {
-        "configs": pathstrs,
+        "configs": ["/path/to/c1.yaml", Path("/path/to/c2.yaml"), cfgobj, d],
         "cycle": cycle,
         "input_format": input_format,
         "leadtime": leadtime,
@@ -49,7 +50,7 @@ def test_api_config_compose(cycle, input_format, leadtime, output_file, output_f
     with patch.object(config, "_compose") as _compose:
         config.compose(**kwargs)
     _compose.assert_called_once_with(
-        configs=list(map(Path, pathstrs)),
+        configs=[Path("/path/to/c1.yaml"), Path("/path/to/c2.yaml"), cfgobj, d],
         cycle=cycle,
         input_format=input_format,
         leadtime=leadtime,
@@ -74,6 +75,13 @@ def test_api_config_compose_to_dict():
         **{**kwargs, "output_file": Path(os.devnull), "output_format": FORMAT.yaml}
     )
     assert result == {"foo": "bar"}
+
+
+def test_api_config_compose_to_dict__input_types(tmp_path):
+    path = tmp_path / "c.yaml"
+    path.write_text("a: 1\n")
+    configs: list = [str(path), YAMLConfig({"b": 2}), {"c": 3}]
+    assert config.compose_to_dict(configs=configs) == {"a": 1, "b": 2, "c": 3}
 
 
 @mark.parametrize(
