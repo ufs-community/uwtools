@@ -353,7 +353,7 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
     [
         (FORMAT.ini, "a: 1"),  # configparser error
         (FORMAT.nml, "&nl b ="),  # f90nml error
-        (FORMAT.yaml, "&nl\n  b = 2\n/"),  # non-dict YAML
+        (FORMAT.yaml, "foo"),  # non-dict YAML
         (FORMAT.yaml, "[s]\nc = 3"),  # YAML parse error
     ],
 )
