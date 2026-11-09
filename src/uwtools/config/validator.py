@@ -14,7 +14,7 @@ from jsonschema import Draft202012Validator, RefResolver, validators
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import UWYAMLGlob
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
@@ -74,7 +74,7 @@ def internal_schema_file(schema_name: str) -> Path:
 
     :param schema_name: Name of uwtools schema to validate the config against.
     """
-    return resource_path("jsonschema") / f"{schema_name}.jsonschema"
+    return resource_path(f"jsonschema/{schema_name}.jsonschema")
 
 
 def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
@@ -88,7 +88,7 @@ def validate(schema: dict, desc: str, config: JSONValueT) -> bool:
     """
     errors = _validation_errors(config, schema)
     if valid := not bool(errors):
-        log.info("Schema validation succeeded for %s", desc)
+        log.debug("Schema validation succeeded for %s", desc)
     else:
         nerr = len(errors)
         log.error("%s schema-validation error%s found in %s", nerr, "" if nerr == 1 else "s", desc)
@@ -130,8 +130,8 @@ def validate_internal(
     """
     Validate a config against a uwtools-internal schema.
 
-    Specify at most one of config_data or config_path. If no config is specified, ``stdin`` is read
-    and will be parsed as YAML and then validated.
+    Specify at most one of config_data or config_path. If no config is specified, stdin is read and
+    will be parsed as YAML and then validated.
 
     :param schema_name: Name of uwtools schema to validate the config against.
     :param desc: A description of the config being validated, for logging.
@@ -140,7 +140,7 @@ def validate_internal(
     :raises: TypeError if both config_* arguments specified.
     """
     validate_check_config(config_data, config_path)
-    log.info("Validating config against internal schema: %s", schema_name)
+    log.debug("Validating config against internal schema: %s", schema_name)
     validate_external(
         schema_file=internal_schema_file(schema_name),
         desc=desc,
@@ -158,8 +158,8 @@ def validate_external(
     """
     Validate a YAML config against the JSON Schema in the given schema file.
 
-    Specify at most one of config_data or config_path. If no config is specified, ``stdin`` is read
-    and will be parsed as YAML and then validated.
+    Specify at most one of config_data or config_path. If no config is specified, stdin is read and
+    will be parsed as YAML and then validated.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param desc: A description of the config being validated, for logging.
@@ -170,9 +170,9 @@ def validate_external(
     validate_check_config(config_data, config_path)
     config: JSONValueT
     if config_data is None:
-        config = YAMLConfig(config_path).dereference().data
+        config = YAMLConfig(config_path).realize().data
     elif isinstance(config_data, YAMLConfig):
-        config = config_data.dereference().data
+        config = config_data.realize().data
     else:
         config = config_data
     if not str(schema_file).startswith(str(resource_path())):
@@ -194,12 +194,7 @@ def _registry() -> Registry:
 
     # See https://github.com/python-jsonschema/referencing/issues/61 about typing issues.
 
-    def retrieve(uri: str) -> Resource:
-        name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path(f"jsonschema/{name}.jsonschema")
-        text = json.loads(path.read_text())
-        return Resource(contents=text, specification=DRAFT202012)  # type: ignore[call-arg]
-
+    retrieve = lambda uri: Resource(contents=_schema(uri), specification=DRAFT202012)  # type: ignore[call-arg]
     return Registry(retrieve=retrieve)  # type: ignore[call-arg]
 
 
@@ -209,14 +204,17 @@ def _resolver(schema: dict) -> RefResolver:
 
     :param schema: A schema potentially containing $ref keys.
     """
+    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": _schema}))
 
-    def retrieve(uri: str) -> dict:
-        name = uri.rsplit(":", maxsplit=1)[-1]
-        path = resource_path("jsonschema") / f"{name}.jsonschema"
-        text = path.read_text()
-        return cast(dict, json.loads(text))
 
-    return cast(RefResolver, RefResolver.from_schema(schema, handlers={"urn": retrieve}))
+def _schema(uri: str) -> dict:
+    name = uri.rsplit(":", maxsplit=1)[-1]
+    schemaroot = resource_path("jsonschema")
+    path = resource_path(f"jsonschema/{name}.jsonschema")
+    if not path.resolve().is_relative_to(schemaroot.resolve()):
+        raise UWError("Invalid schema URI: %s" % uri)
+    text = path.read_text()
+    return cast(dict, json.loads(text))
 
 
 def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError]:

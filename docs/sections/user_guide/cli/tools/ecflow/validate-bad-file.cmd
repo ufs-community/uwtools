@@ -1,1 +1,1 @@
-uw ecflow validate --config-file ecflow-bad.yaml
+uw ecflow validate --config-file bad.yaml

@@ -25,6 +25,7 @@ from uwtools.strings import FORMAT
 from uwtools.utils.file import get_config_format
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from datetime import datetime, timedelta
 
 # Public functions
@@ -49,7 +50,7 @@ def compare(
 
 
 def compose(
-    configs: list[Path],
+    configs: Sequence[Path],
     realize: bool,
     output_file: Path | None = None,
     input_format: str | None = None,
@@ -245,7 +246,7 @@ def _realize_cfgobj(config: Config, cycle: datetime | None, leadtime: timedelta 
     context = {**config}
     context.update({"cycle": cycle} if cycle else {})
     context.update({"leadtime": leadtime} if leadtime is not None else {})
-    config.dereference(context=context)
+    config.realize(context=context)
 
 
 def _realize_input_setup(

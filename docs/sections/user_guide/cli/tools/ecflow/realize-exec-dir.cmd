@@ -1,4 +1,3 @@
 rm -f suite.def
-uw ecflow realize --config-file ecflow.yaml --output-dir .
-echo
+uw ecflow realize --config-file workflow.yaml --output-dir .
 cat suite.def

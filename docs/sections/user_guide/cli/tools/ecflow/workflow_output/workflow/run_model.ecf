@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+echo Running model...
+
+%manual
+This task runs the model.
+%end

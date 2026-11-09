@@ -13,15 +13,15 @@ from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from collections.abc import Callable
+from enum import IntEnum
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import uwtools.api
 import uwtools.api.config
 import uwtools.api.driver
-import uwtools.api.ecflow
 import uwtools.api.execute
 import uwtools.api.fs
 import uwtools.api.rocoto
@@ -38,6 +38,43 @@ from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_config_format, resource_path
 
+if TYPE_CHECKING:
+    from iotaa import Node
+
+_ECFLOW_AVAILABLE = True
+try:
+    import uwtools.api.ecflow
+except ImportError:
+    _ECFLOW_AVAILABLE = False
+
+
+DRIVERS = [
+    STR.cdeps,
+    STR.chgres_cube,
+    STR.enkf,
+    STR.esg_grid,
+    STR.filter_topo,
+    STR.fv3,
+    STR.global_equiv_resol,
+    STR.gsi,
+    STR.ioda,
+    STR.jedi,
+    STR.make_hgrid,
+    STR.make_solo_mosaic,
+    STR.mpas,
+    STR.mpas_init,
+    STR.mpassit,
+    STR.orog,
+    STR.orog_gsl,
+    STR.schism,
+    STR.sfc_climo_gen,
+    STR.shave,
+    STR.ungrib,
+    STR.upp,
+    STR.upp_assets,
+    STR.ww3,
+]
+
 FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
@@ -46,6 +83,12 @@ Args = dict[str, Any]
 ActionChecks = list[Callable[[Args], Args]]
 ModeChecks = dict[str, ActionChecks]
 Checks = dict[str, ModeChecks]
+
+
+class Status(IntEnum):
+    success = 0
+    failure = 1
+    notready = 3
 
 
 def main() -> None:
@@ -74,43 +117,24 @@ def main() -> None:
             STR.fs: _dispatch_fs,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
-            STR.ecflow: _dispatch_ecflow,
         }
+        if _ECFLOW_AVAILABLE:
+            tools[STR.ecflow] = _dispatch_ecflow
         drivers: dict[str, Callable[..., bool]] = {
-            x: partial(_dispatch_to_driver, x)
-            for x in [
-                STR.cdeps,
-                STR.chgres_cube,
-                STR.enkf,
-                STR.esg_grid,
-                STR.filter_topo,
-                STR.fv3,
-                STR.global_equiv_resol,
-                STR.gsi,
-                STR.ioda,
-                STR.jedi,
-                STR.make_hgrid,
-                STR.make_solo_mosaic,
-                STR.mpas,
-                STR.mpas_init,
-                STR.mpassit,
-                STR.orog,
-                STR.orog_gsl,
-                STR.schism,
-                STR.sfc_climo_gen,
-                STR.shave,
-                STR.ungrib,
-                STR.upp,
-                STR.upp_assets,
-                STR.ww3,
-            ]
+            x: partial(_dispatch_to_driver, x) for x in DRIVERS
         }
         modes = {**tools, **drivers}
-        sys.exit(0 if modes[args[STR.mode]](args) else 1)
+        mode = args[STR.mode]
+        success = modes[mode](args)
+        status = {
+            True: Status.success,
+            False: Status.notready if mode in [*DRIVERS, STR.execute] else Status.failure,
+        }
+        sys.exit(status[success])
     except UWError as e:
         for line in str(e).split("\n"):
             log.error(line)
-        sys.exit(1)
+        sys.exit(Status.failure)
 
 
 # Mode ecflow
@@ -127,6 +151,7 @@ def _add_subparser_ecflow(subparsers: Subparsers) -> dict[str, ActionChecks]:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.realize: _add_subparser_ecflow_realize(subparsers),
+        STR.server: _add_subparser_ecflow_server(subparsers),
         STR.validate: _add_subparser_ecflow_validate(subparsers),
     }
 
@@ -142,6 +167,23 @@ def _add_subparser_ecflow_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_config_file(optional)
     _add_arg_output_dir(optional)
     _add_arg_scripts_dir(optional)
+    return _add_args_verbosity(optional)
+
+
+def _add_subparser_ecflow_server(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: ecflow server.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.server, "Start an ecFlow server")
+    optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
+    _add_arg_insecure(optional)
+    _add_arg_port(optional)
+    _add_arg_report(
+        optional, helpmsg="Output server details (e.g. hostname, port) as JSON to stdout"
+    )
     return _add_args_verbosity(optional)
 
 
@@ -165,6 +207,7 @@ def _dispatch_ecflow(args: Args) -> bool:
     """
     actions = {
         STR.realize: _dispatch_ecflow_realize,
+        STR.server: _dispatch_ecflow_server,
         STR.validate: _dispatch_ecflow_validate,
     }
     return actions[args[STR.action]](args)
@@ -180,6 +223,21 @@ def _dispatch_ecflow_realize(args: Args) -> bool:
         config=args[STR.config_file],
         output_path=args.get(STR.output_dir),
         scripts_path=args.get(STR.scripts_dir),
+        stdin_ok=True,
+    )
+
+
+def _dispatch_ecflow_server(args: Args) -> bool:
+    """
+    Define dispatch logic for ecflow server action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ecflow.server(
+        config=args.get(STR.config_file),
+        port=args.get(STR.port),
+        insecure=args[STR.insecure],
+        report=args[STR.report],
         stdin_ok=True,
     )
 
@@ -424,6 +482,7 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to driver config block")
+    _add_arg_partial(optional)
     return {STR.execute: _add_args_verbosity(optional)}
 
 
@@ -447,7 +506,11 @@ def _dispatch_execute(args: Args) -> bool:
         batch=args[STR.batch],
         stdin_ok=True,
     )
-    return bool(node)
+    if node is None:
+        return False
+    if args[STR.partial]:
+        return True
+    return node.ready
 
 
 # Mode fs
@@ -484,7 +547,7 @@ def _add_subparser_fs_common(parser: Parser) -> tuple[ActionChecks, Group]:
     _add_arg_dry_run(optional)
     _add_arg_threads(optional)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to config block to use")
-    _add_arg_report(optional)
+    _add_arg_report(optional, helpmsg="Show JSON report on [non]ready assets")
     return _add_args_verbosity(optional), optional
 
 
@@ -666,7 +729,9 @@ def _add_subparser_rocoto_iterate(subparsers: Subparsers) -> ActionChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_cycle(required)
     _add_arg_database(required)
-    _add_arg_task(required)
+    task = required.add_mutually_exclusive_group(required=True)
+    _add_arg_all(task)
+    _add_arg_task(task, required=False)
     _add_arg_workflow(required)
     optional = _basic_setup(parser)
     _add_arg_rate(optional)
@@ -719,13 +784,17 @@ def _dispatch_rocoto_iterate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.iterate(
-        cycle=args[STR.cycle],
-        database=args[STR.database],
-        rate=args[STR.rate],
-        task=args[STR.task],
-        workflow=args[STR.workflow],
-    )
+    try:
+        return uwtools.api.rocoto.iterate(
+            cycle=args[STR.cycle],
+            database=args[STR.database],
+            rate=args[STR.rate],
+            task=args[STR.task],
+            workflow=args[STR.workflow],
+        )
+    except KeyboardInterrupt:
+        log.info("Exiting")
+        return True
 
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
@@ -865,6 +934,14 @@ def _dispatch_template_translate(args: Args) -> bool:
 # Arguments
 
 
+def _add_arg_all(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.all),
+        action="store_true",
+        help="Execute all tasks",
+    )
+
+
 def _add_arg_batch(group: Group) -> None:
     group.add_argument(
         _switch(STR.batch),
@@ -971,6 +1048,14 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_insecure(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.insecure),
+        action="store_true",
+        help="Start server without SSL security",
+    )
+
+
 def _add_arg_input_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.input_format),
@@ -1055,6 +1140,27 @@ def _add_arg_output_dir(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_partial(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.partial),
+        action="store_true",
+        help="Treat partial execution as success",
+    )
+
+
+def _add_arg_port(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.port),
+        help=(
+            f"TCP port for the ecFlow server "
+            f"(default: random from "
+            f"{uwtools.api.ecflow.ECFLOW_PORT_MIN}-{uwtools.api.ecflow.ECFLOW_PORT_MAX})"
+        ),
+        metavar="PORT",
+        type=int,
+    )
+
+
 def _add_arg_quiet(group: Group) -> None:
     group.add_argument(
         _switch(STR.quiet),
@@ -1085,11 +1191,11 @@ def _add_arg_realize(group: Group) -> None:
     )
 
 
-def _add_arg_report(group: Group) -> None:
+def _add_arg_report(group: Group, helpmsg: str) -> None:
     group.add_argument(
         _switch(STR.report),
         action="store_true",
-        help="Show JSON report on [non]ready assets",
+        help=helpmsg,
     )
 
 
@@ -1262,7 +1368,7 @@ def _abort(msg: str) -> NoReturn:
     :param msg: The message to print.
     """
     print(msg, file=sys.stderr)
-    sys.exit(1)
+    sys.exit(Status.failure)
 
 
 def _add_args_verbosity(group: Group) -> ActionChecks:
@@ -1354,6 +1460,7 @@ def _add_subparser_for_driver_task(
         optional,
         helpmsg="Dot-separated path of keys to driver config block",
     )
+    _add_arg_partial(optional)
     _add_arg_schema_file(optional)
     return _add_args_verbosity(optional)
 
@@ -1419,7 +1526,7 @@ def _check_verbosity(args: Args) -> Args:
 
 def _dict_from_key_eq_val_strings(config_items: list[str]) -> dict[str, str]:
     """
-    Given a list of key=value strings, return a dictionary of key/value pairs.
+    Given a list of key=value strings, return a dictionary of key-value pairs.
 
     :param config_items: Strings in the form key=value.
     :return: A dictionary based on the input key=value strings.
@@ -1440,18 +1547,21 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         return True
     if not args.get(STR.action):
         _abort("No %s specified" % STR.task.upper())
-    execute: Callable[..., bool] = module.execute
+    execute: Callable[..., Node] = module.execute
     kwargs = {
-        "task": args[STR.action],
-        "config": args[STR.config_file],
-        "dry_run": args[STR.dry_run],
-        "graph_file": args[STR.graph_file],
-        "key_path": args[STR.key_path],
-        "schema_file": args[STR.schema_file],
-        "stdin_ok": True,
+        STR.task: args[STR.action],
+        STR.config: args[STR.config_file],
+        STR.dry_run: args[STR.dry_run],
+        STR.graph_file: args[STR.graph_file],
+        STR.key_path: args[STR.key_path],
+        STR.schema_file: args[STR.schema_file],
+        STR.stdin_ok: True,
     }
     kwargs.update({k: args.get(k) for k in [STR.batch, STR.cycle, STR.leadtime] if k in args})
-    return execute(**kwargs)
+    node = execute(**kwargs)
+    if args[STR.partial]:
+        return True
+    return node.ready
 
 
 def _formatter(prog: str) -> HelpFormatter:
@@ -1476,12 +1586,13 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     tools = {
         STR.config: partial(_add_subparser_config, subparsers),
-        STR.ecflow: partial(_add_subparser_ecflow, subparsers),
         STR.execute: partial(_add_subparser_execute, subparsers),
         STR.fs: partial(_add_subparser_fs, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
         STR.template: partial(_add_subparser_template, subparsers),
     }
+    if _ECFLOW_AVAILABLE:
+        tools[STR.ecflow] = partial(_add_subparser_ecflow, subparsers)
     no_components: list[str] = []
     assets = {
         component: partial(_add_subparser_for_driver, component, subparsers)
@@ -1513,6 +1624,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.orog_gsl,
             STR.sfc_climo_gen,
             STR.shave,
+            STR.ungrib,
         ]
     }
     drivers_with_cycle = {
@@ -1527,7 +1639,6 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
             STR.jedi,
             STR.mpas,
             STR.mpas_init,
-            STR.ungrib,
         ]
     }
     drivers_with_cycle_and_leadtime = {
@@ -1587,4 +1698,4 @@ def _version() -> str:
     Return version information.
     """
     info = json.loads(resource_path("info.json").read_text())
-    return "version %s build %s" % (info["version"], info["buildnum"])
+    return "version %s" % info["version"]

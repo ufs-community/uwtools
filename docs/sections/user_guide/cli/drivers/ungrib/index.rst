@@ -21,7 +21,7 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12
+     $ uw ungrib run --config-file config.yaml
 
   The driver creates a ``runscript.ungrib`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``ungrib``.
 
@@ -29,7 +29,7 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12 --batch
+     $ uw ungrib run --config-file config.yaml --batch
 
   The driver creates a ``runscript.ungrib`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``ungrib:``.
 
@@ -37,7 +37,7 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12 --batch --dry-run
+     $ uw ungrib run --config-file config.yaml --batch --dry-run
 
 .. include:: /shared/key_path.rst
 
@@ -45,6 +45,6 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib provisioned_rundir --config-file config.yaml --cycle 2021-04-01T12 --batch
+     $ uw ungrib provisioned_rundir --config-file config.yaml --batch
 
 .. include:: schema-options.rst

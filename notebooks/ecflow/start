@@ -1,0 +1,29 @@
+#!/usr/bin/env -S bash -eu
+
+if [[ -d conda/ ]]; then
+  source conda/etc/profile.d/conda.sh
+else
+  fn=Miniforge3-Linux-$(uname -m).sh
+  wget https://github.com/conda-forge/miniforge/releases/download/26.3.2-3/$fn
+  bash $fn -bfp conda
+  rm -v $fn
+  source conda/etc/profile.d/conda.sh
+  packages=(
+    bash_kernel
+    jq
+    jupyterlab
+    oar-gsl::wxvx
+    tree
+    ufs-community::uwtools
+  )
+  conda create -y -n demo ${packages[*]}
+  if [[ -v DEVMODE ]]; then
+    conda install -y conda-build
+    make -C $(git rev-parse --show-toplevel) package
+    conda install -y -n demo local::uwtools
+  fi
+fi
+conda activate demo
+python -m bash_kernel.install
+export BASEDIR=$PWD
+jupyter lab ecflow.ipynb

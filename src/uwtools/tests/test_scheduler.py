@@ -2,6 +2,7 @@
 Tests for uwtools.scheduler module.
 """
 
+from shutil import which
 from typing import Any
 from unittest.mock import patch
 
@@ -124,7 +125,7 @@ def test_JobScheduler_submit_job(schedulerobj, supply_submit_file, tmp_path):
             cmd = f"set -o pipefail && sub {runscript.name} 2>&1 | tee {submit_file.name}"
         else:
             cmd = f"sub {runscript.name}"
-        run_shell_cmd.assert_called_once_with(cmd=cmd, cwd=str(tmp_path))
+        run_shell_cmd.assert_called_once_with(cmd=cmd, cwd=str(tmp_path), executable=which("bash"))
 
 
 def test_JobScheduler__directive_separator(schedulerobj):
@@ -152,7 +153,7 @@ def test_JobScheduler__validate_props_no(schedulerobj):
     schedulerobj._props = {}
     with raises(UWConfigError) as e:
         schedulerobj._validate_props()
-    assert str(e.value) == "Missing required directives: account, walltime"
+    assert str(e.value) == "Missing required directive(s): walltime"
 
 
 def test_JobScheduler__validate_props_ok(schedulerobj):

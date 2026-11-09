@@ -24,60 +24,6 @@ class _ValsMatchKeys:
 
 
 @dataclass(frozen=True)
-class _EC(_ValsMatchKeys):
-    """
-    EcFlow-specific strings.
-    """
-
-    account: str = _
-    config: str = _
-    date: str = _
-    datelist: str = _
-    datetime: str = _
-    day: str = _
-    defstatus: str = _
-    ecflow: str = _
-    end: str = _
-    enumerated: str = _
-    envcmds: str = _
-    events: str = _
-    execution: str = _
-    expand: str = _
-    extern: str = _
-    families: str = _
-    family: str = _
-    inlimits: str = _
-    int: str = _
-    incantation: str = _
-    labels: str = _
-    late: str = _
-    limits: str = _
-    list: str = _
-    manual: str = _
-    meters: str = _
-    node: str = _
-    parent: str = _
-    post_includes: str = _
-    pre_includes: str = _
-    refs: str = _
-    repeat: str = _
-    rundir: str = _
-    script: str = _
-    server: str = _
-    start: str = _
-    step: str = _
-    string: str = _
-    suite: str = _
-    suitedef: str = _
-    suites: str = _
-    task: str = _
-    tasks: str = _
-    trigger: str = _
-    variable: str = _
-    vars: str = _
-
-
-@dataclass(frozen=True)
 class _FORMAT(_ValsMatchKeys):
     """
     Format names.
@@ -114,16 +60,103 @@ class _FORMAT(_ValsMatchKeys):
 
 
 @dataclass(frozen=True)
+class _ROCOTO(_ValsMatchKeys):
+    """
+    Rocoto strings.
+    """
+
+    COMPLETE: str = _
+    CREATED: str = _
+    DEAD: str = _
+    DYING: str = _
+    ERROR: str = _
+    QUEUED: str = _
+    RUNNING: str = _
+    STALLED: str = _
+    STUCK: str = _
+    SUBMITTING: str = _
+    SUCCEEDED: str = _
+    account: str = _
+    active: str = _
+    and_: str = "and"
+    attrs: str = _
+    command: str = _
+    cores: str = _
+    cycle: str = _
+    cycledef: str = _
+    cycledefs: str = _
+    cyclestr: str = _
+    datadep: str = _
+    deadline: str = _
+    dependency: str = _
+    entities: str = _
+    envar: str = _
+    envars: str = _
+    exclusive: str = _
+    hangdependency: str = _
+    inactive: str = _
+    jobname: str = _
+    join: str = _
+    log: str = _
+    memory: str = _
+    metatask: str = _
+    metataskdep: str = _
+    name: str = _
+    nand: str = _
+    native: str = _
+    nodes: str = _
+    nodesize: str = _
+    nor: str = _
+    not_: str = "not"
+    or_: str = "or"
+    partition: str = _
+    queue: str = _
+    rewind: str = _
+    rocoto: str = _
+    sh: str = _
+    shared: str = _
+    spec: str = _
+    stderr: str = _
+    stdout: str = _
+    streq: str = _
+    strneq: str = _
+    tag: str = _
+    task: str = _
+    taskdep: str = _
+    taskname: str = _
+    tasks: str = _
+    taskvalid: str = _
+    timedep: str = _
+    value: str = _
+    var: str = _
+    walltime: str = _
+    workflow: str = _
+    xor: str = _
+
+
+@dataclass(frozen=True)
 class _STR(_ValsMatchKeys):
     """
     General strings.
     """
 
+    ECF_HOME: str = _
+    ECF_HOST: str = _
+    ECF_JOB: str = _
+    ECF_JOBOUT: str = _
+    ECF_LOG: str = _
+    ECF_NAME: str = _
+    ECF_PASS: str = _
+    ECF_PORT: str = _
+    ECF_SSL: str = _
+    ECF_TRYNO: str = _
     account: str = _
     action: str = _
+    all: str = _
     base_file: str = _
     batch: str = _
     batchargs: str = _
+    body: str = _
     cdeps: str = _
     chgres_cube: str = _
     classname: str = _
@@ -135,17 +168,30 @@ class _STR(_ValsMatchKeys):
     copy: str = _
     cycle: str = _
     database: str = _
+    date: str = _
+    datelist: str = _
+    datetime: str = _
+    day: str = _
+    defstatus: str = _
     dry_run: str = _
     ecflow: str = _
+    end: str = _
     enkf: str = _
+    entry: str = _
+    enumerated: str = _
     env: str = _
     envcmds: str = _
     esg_grid: str = _
+    events: str = _
     executable: str = _
     execute: str = _
     execution: str = _
+    exit: str = _
+    expand: str = _
+    extern: str = _
     fallback: str = _
-    file: str = _
+    families: str = _
+    family: str = _
     filter_topo: str = _
     format1: str = _
     format2: str = _
@@ -158,18 +204,28 @@ class _STR(_ValsMatchKeys):
     help: str = _
     hsi: str = _
     htar: str = _
+    includes: str = _
+    inlimits: str = _
     input_file: str = _
     input_format: str = _
+    insecure: str = _
+    int: str = _
     ioda: str = _
     iterate: str = _
     jedi: str = _
     key_eq_val_pairs: str = _
     key_path: str = _
+    labels: str = _
+    late: str = _
     leadtime: str = _
+    limits: str = _
     link: str = _
+    list: str = _
     make_hgrid: str = _
     make_solo_mosaic: str = _
     makedirs: str = _
+    manual: str = _
+    meters: str = _
     mode: str = _
     module: str = _
     mpas: str = _
@@ -178,21 +234,27 @@ class _STR(_ValsMatchKeys):
     mpiargs: str = _
     mpicmd: str = _
     namelist: str = _
+    node: str = _
     notready: str = _
     orog: str = _
     orog_gsl: str = _
     output_dir: str = _
     output_file: str = _
     output_format: str = _
+    parent: str = _
+    partial: str = _
     path1: str = _
     path2: str = _
     platform: str = _
+    port: str = _
     properties: str = _
     quiet: str = _
     rate: str = _
     ready: str = _
     realize: str = _
+    refs: str = _
     render: str = _
+    repeat: str = _
     report: str = _
     rocoto: str = _
     run: str = _
@@ -200,13 +262,23 @@ class _STR(_ValsMatchKeys):
     scheduler: str = _
     schema_file: str = _
     schism: str = _
+    script: str = _
     scripts_dir: str = _
     search_path: str = _
+    server: str = _
     sfc_climo_gen: str = _
     shave: str = _
+    shell: str = _
     show_schema: str = _
     stacksize: str = _
+    start: str = _
+    stdin_ok: str = _
     stdout: str = _
+    step: str = _
+    string: str = _
+    suite: str = _
+    suitedef: str = _
+    suites: str = _
     symlink: str = _
     target_dir: str = _
     task: str = _
@@ -215,6 +287,7 @@ class _STR(_ValsMatchKeys):
     threads: str = _
     total: str = _
     translate: str = _
+    trigger: str = _
     ungrib: str = _
     update_file: str = _
     update_format: str = _
@@ -231,6 +304,8 @@ class _STR(_ValsMatchKeys):
     values_file: str = _
     values_format: str = _
     values_needed: str = _
+    variable: str = _
+    vars: str = _
     verbose: str = _
     version: str = _
     workflow: str = _
@@ -239,6 +314,6 @@ class _STR(_ValsMatchKeys):
 
 # Public
 
-EC = _EC()
 FORMAT = _FORMAT()
+ROCOTO = _ROCOTO()
 STR = _STR()

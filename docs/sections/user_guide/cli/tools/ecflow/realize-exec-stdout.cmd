@@ -1,1 +1,1 @@
-uw ecflow realize --config-file ecflow.yaml
+uw ecflow realize --config-file workflow.yaml

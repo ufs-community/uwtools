@@ -1,8 +1,8 @@
 Developer Setup
 ===============
 
-Creating a ``bash`` Development Shell
--------------------------------------
+Creating a bash Development Shell
+---------------------------------
 
 If an existing conda (:miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaconda:`Anaconda<>`, etc.) installation is available and writable, step 1 may be skipped.
 
@@ -29,12 +29,12 @@ Future ``make devshell`` invocations will be almost instantaneous, as the underl
   #. Run ``make clean-devenv`` (or ``conda env remove -y -n DEV-uwtools``) to remove the old environment.
   #. Run ``make devshell`` to recreate it.
 
-If your development shell misses any functionality you’re used to in your main (``bash``) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``, and add desired environment-setup commands to it.
+If your development shell misses any functionality you’re used to in your main (bash) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``, and add desired environment-setup commands to it.
 
 If using an IDE such as VS Code, ensure that the correct Python interpreter belonging to the conda environment providing uwtools is selected. In VS Code, this can be changed by using the Command Palette and searching "Python: Select Interpreter".
 
-Using a ``bash`` Development Shell
-----------------------------------
+Using a bash Development Shell
+------------------------------
 
 A development shell makes available several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
 

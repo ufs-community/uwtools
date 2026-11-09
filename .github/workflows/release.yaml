@@ -3,21 +3,27 @@ env:
   ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
 on:
   workflow_dispatch:
-    branches:
-      - '[0-9]+.[0-9]+.[0-9]+'
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - name: Install conda
         run: .github/scripts/install-conda.sh
       - name: Make Docs
         run: .github/scripts/make-docs.sh
-      - name: Format Check
-        run: .github/scripts/format-check.sh
+      - name: Check Format
+        run: .github/scripts/check-format.sh
       - name: Make Package
         run: .github/scripts/make-package.sh
-      - name: Publish
-        run: .github/scripts/publish.sh
+      - name: Publish Package
+        run: .github/scripts/publish-package.sh
+      - name: Make PyPI Package
+        run: .github/scripts/make-pypi-package.sh
+      - name: Publish PyPI Package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: src/dist/

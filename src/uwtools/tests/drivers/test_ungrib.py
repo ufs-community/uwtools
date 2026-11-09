@@ -47,13 +47,8 @@ def config(tmp_path):
 
 
 @fixture
-def cycle(utc):
-    return utc(2024, 2, 1, 18)
-
-
-@fixture
-def driverobj(config, cycle):
-    return Ungrib(config=config, cycle=cycle, batch=True)
+def driverobj(config):
+    return Ungrib(config=config, batch=True)
 
 
 # Tests
@@ -117,7 +112,7 @@ def test_Ungrib_provisioned_rundir(driverobj, ready_task):
 
 
 def test_Ungrib_taskname(driverobj):
-    assert driverobj.taskname("foo") == "20240201 18Z ungrib foo"
+    assert driverobj.taskname("foo") == "ungrib foo"
 
 
 def test_Ungrib_vtable(driverobj):
@@ -137,27 +132,6 @@ def test_Ungrib__gribfile(driverobj):
     assert not dst.is_symlink()
     driverobj._gribfile(src, dst)
     assert dst.is_symlink()
-
-
-def test_Ungrib__run_via_local_execution(driverobj, node):
-    def make_output(*_args, **_kwargs):
-        for path in driverobj.output["paths"]:
-            path.touch()
-
-    with (
-        patch.object(driverobj, "provisioned_rundir", return_value=node) as provisioned_rundir,
-        patch.object(ungrib, "run_shell_cmd", side_effect=make_output) as run_shell_cmd,
-    ):
-        val = driverobj._run_via_local_execution()
-        assert val.ready
-        for path in val.ref:
-            assert path.exists()
-        run_shell_cmd.assert_called_once_with(
-            cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-            cwd=driverobj.rundir,
-            log_output=True,
-        )
-        provisioned_rundir.assert_called_once_with()
 
 
 @mark.parametrize("val", ["06:00:00", "06:00", "06", "6", 6, timedelta(hours=6)])

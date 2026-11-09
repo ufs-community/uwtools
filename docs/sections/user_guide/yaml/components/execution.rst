@@ -35,8 +35,11 @@ Example block:
        - "--export=ALL"
        - "--ntasks $SLURM_CPUS_ON_NODE"
      mpicmd: srun
+     shell: /bin/sh
      stacksize: 100M
      threads: 8
+
+.. _batchargs:
 
 batchargs:
 """"""""""
@@ -171,6 +174,13 @@ mpicmd:
 """""""
 
 The MPI launch program (``mpiexec``, ``srun``, et al.). This entry is only used when configuring parallel components.
+
+shell:
+""""""
+
+The shell to specify in the shebang line at the top of the runscript. If not specified, the default ``/usr/bin/env bash`` is used, yielding the shebang line ``#!/usr/bin/env bash``. If specified as a string, e.g. ``/bin/sh``, the value replaces the default, yielding e.g. ``#!/bin/sh``. If specified as YAML ``null``, the shebang line is omitted from the runscript entirely.
+
+**NB** This entry is distinct from the ``shell`` entry in the ``batchargs:`` block, which maps to a job-scheduler directive.
 
 stacksize:
 """"""""""

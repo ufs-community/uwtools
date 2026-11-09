@@ -1,1 +1,1 @@
-uw ecflow validate --config-file ecflow.yaml
+uw ecflow validate --config-file workflow.yaml

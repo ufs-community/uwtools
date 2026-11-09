@@ -1,9 +1,9 @@
 # NB: Update ../binder/environment.yml with changes to runtime packages.
 
 packages=(
-  "freezegun" # runtime
-  "jupyterlab<4.4"
-  "testbook<0.5"
+  "freezegun=1.5.*" # runtime
+  "jupyterlab=4.6.*"
+  "testbook=0.4.*"
   "tree=2.2.*" # runtime
 )
 conda install -q -y --repodata-fn repodata.json ${packages[@]}

@@ -25,16 +25,9 @@ def test_exp_config_cb(load, tb):
         "PARMdir: /path/to/ufs-srweather-app/parm",
     ]:
         assert line in tb.cell_output_text(11)
-    deref_cfg = (
+    realize_cfg = (
         "data_dir_input_grid: /path/to/my/output/make_ics",
         "rundir: /path/to/my/output/make_ics",
     )
-    assert all(x in tb.cell_output_text(13) for x in deref_cfg)
-    for line in [
-        "Validating config against internal schema: chgres-cube",
-        "Schema validation succeeded for chgres_cube config",
-        "Validating config against internal schema: platform",
-        "Schema validation succeeded for platform config",
-        "chgres_cube valid schema: Ready",
-    ]:
-        assert line in tb.cell_output_text(15)
+    assert all(x in tb.cell_output_text(13) for x in realize_cfg)
+    assert "chgres_cube valid schema: Ready" in tb.cell_output_text(15)

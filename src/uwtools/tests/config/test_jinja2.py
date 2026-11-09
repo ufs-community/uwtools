@@ -3,7 +3,7 @@ Tests for uwtools.config.jinja2 module.
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from textwrap import dedent
 from types import SimpleNamespace as ns
@@ -21,7 +21,7 @@ from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, uw_yaml_loader
 
 
 @fixture
-def deref_render_assets():
+def realize_render_assets():
     return "{{ greeting + ' ' + recipient }}", {"greeting": "hello"}, {"recipient": "world"}
 
 
@@ -171,13 +171,13 @@ class TestJ2Template:
         assert J2Template(values={}, template_source=s).undeclared_variables == uvs
 
 
-def test_config_jinja2_dereference__key_expression():
-    assert jinja2.dereference(val={"{{ fruit }}": "red"}, context={"fruit": "apple"}) == {
+def test_config_jinja2_realize__key_expression():
+    assert jinja2.realize(val={"{{ fruit }}": "red"}, context={"fruit": "apple"}) == {
         "apple": "red"
     }
 
 
-def test_config_jinja2_dereference__local_values():
+def test_config_jinja2_realize__local_values():
     # Rendering can use values from the local contents of the enclosing dict, but are shadowed by
     # values from the top-level context object.
     val = {
@@ -191,7 +191,7 @@ def test_config_jinja2_dereference__local_values():
             "state": "unpeeled",
         },
     }
-    assert jinja2.dereference(val=val, context=val) == {
+    assert jinja2.realize(val=val, context=val) == {
         "color": "blue",
         "apple": {"color": "red", "description": "A blue apple"},
         "banana": {"description": "A banana, unpeeled", "state": "unpeeled"},
@@ -199,9 +199,9 @@ def test_config_jinja2_dereference__local_values():
 
 
 @mark.parametrize("val", [True, 3.14, 42, None])
-def test_config_jinja2_dereference__no_op(val):
-    # These types of values pass through dereferencing unmodified:
-    assert jinja2.dereference(val=val, context={}) == val
+def test_config_jinja2_realize__no_op(val):
+    # These types of values pass through realizing unmodified:
+    assert jinja2.realize(val=val, context={}) == val
 
 
 @mark.parametrize(
@@ -213,50 +213,50 @@ def test_config_jinja2_dereference__no_op(val):
         ("division by zero", "{{ 1 / 0 }}"),
     ],
 )
-def test_config_jinja2_dereference__no_op_due_to_error(logged, logmsg, val):
+def test_config_jinja2_realize__no_op_due_to_error(logged, logmsg, val):
     # Erroneous inputs cause:
     #   - A type error due to + operating on a str and an int.
     #   - An undefined error due to reference to a non-existent value.
     #   - An undefined error in a loop expression.
     #   - A division-by-zero error.
     # The unrenderable expression is returned unmodified.
-    assert jinja2.dereference(val=val, context={}) == val
+    assert jinja2.realize(val=val, context={}) == val
     assert logged(logmsg)
 
 
-def test_config_jinja2_dereference__remove(logged):
+def test_config_jinja2_realize__remove(logged):
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
-    assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
+    assert jinja2.realize(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
     assert logged("Removing value at: a.b.d")
 
 
-def test_config_jinja2_dereference__str_expression_rendered():
+def test_config_jinja2_realize__str_expression_rendered():
     # Context permitting, Jinja2 variables/expressions are rendered:
     val = "{% for a in as %}{{ a }}{% endfor %}"
-    assert jinja2.dereference(val=val, context={"as": ["a", "b", "c"]}) == "abc"
+    assert jinja2.realize(val=val, context={"as": ["a", "b", "c"]}) == "abc"
 
 
-def test_config_jinja2_dereference__str_filter_rendered():
+def test_config_jinja2_realize__str_filter_rendered():
     val = "{{ ['hello', recipient] | join(', ') }}"
-    assert jinja2.dereference(val=val, context={"recipient": "world"}) == "hello, world"
+    assert jinja2.realize(val=val, context={"recipient": "world"}) == "hello, world"
 
 
-def test_config_jinja2_dereference__str_variable_rendered_mixed():
+def test_config_jinja2_realize__str_variable_rendered_mixed():
     # A mixed result remains a str.
     val = "{{ n }} is an {{ t }}"
-    assert jinja2.dereference(val=val, context={"n": 42, "t": "int"}) == "42 is an int"
+    assert jinja2.realize(val=val, context={"n": 42, "t": "int"}) == "42 is an int"
 
 
-def test_config_jinja2_dereference__str_variable_rendered_str():
+def test_config_jinja2_realize__str_variable_rendered_str():
     # A pure str result remains a str.
     val = "{{ greeting }}"
-    assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
+    assert jinja2.realize(val=val, context={"greeting": "hello"}) == "hello"
 
 
-def test_config_jinja2_deref_debug(logged):
-    jinja2.deref_debug(action="Frobnicated", val="foo")
-    assert logged("[dereference] Frobnicated: foo")
+def test_config_jinja2_realize_debug(logged):
+    jinja2.realize_debug(action="Frobnicated", val="foo")
+    assert logged("[realize] Frobnicated: foo")
 
 
 def test_config_jinja2_render(values_file, template_file, tmp_path):
@@ -267,7 +267,7 @@ def test_config_jinja2_render(values_file, template_file, tmp_path):
     assert outfile.read_text().strip() == expected
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 def test_config_jinja2_render__cycle_and_or_leadtime(capsys, cycle, leadtime, logged, tmp_path):
     path = tmp_path / "template"
@@ -358,13 +358,27 @@ def test_config_jinja2_unrendered(s, status):
     assert jinja2.unrendered(s) is status
 
 
+def test_config_jinja2__dry_run_template(logged):
+    jinja2._dry_run_template("roses are red\nviolets are blue")
+    assert logged("roses are red")
+    assert logged("violets are blue")
+
+
+def test_config_jinja2__log_missing_values(logged):
+    missing = ["roses_color", "violets_color"]
+    jinja2._log_missing_values(missing)
+    assert logged("Value(s) required to render template not provided:")
+    assert logged("  roses_color")
+    assert logged("  violets_color")
+
+
 @mark.parametrize(
     ("converted", "tag", "value"),
     [
         (True, "!bool", "True"),
         (False, "!bool", "0"),
         (
-            datetime(2024, 9, 9, 0, 0, tzinfo=timezone.utc).replace(tzinfo=None),
+            datetime(2024, 9, 9, 0, 0, tzinfo=UTC).replace(tzinfo=None),
             "!datetime",
             "2024-09-09 00:00:00",
         ),
@@ -377,10 +391,10 @@ def test_config_jinja2_unrendered(s, status):
         ([0, 1, 2], "!list", "{0: a, 1: b, 2: c}"),
     ],
 )
-def test_config_jinja2__deref_convert(converted, logged, tag, value):
+def test_config_jinja2__realize_convert(converted, logged, tag, value):
     loader = yaml.SafeLoader(os.devnull)
     val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
-    assert jinja2._deref_convert(val=val) == converted
+    assert jinja2._realize_convert(val=val) == converted
     assert logged("Converted")
     assert not logged("Conversion failed")
 
@@ -395,45 +409,45 @@ def test_config_jinja2__deref_convert(converted, logged, tag, value):
         ("!list", "null"),
     ],
 )
-def test_config_jinja2__deref_convert__fail(logged, tag, value):
+def test_config_jinja2__realize_convert__fail(logged, tag, value):
     loader = yaml.SafeLoader(os.devnull)
     val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
-    assert jinja2._deref_convert(val=val) == val
+    assert jinja2._realize_convert(val=val) == val
     assert not logged("Converted")
     assert logged("Conversion failed")
 
 
-def test_config_jinja2__deref_render__held(logged):
+def test_config_jinja2__realize_render__held(logged):
     val, context = "!int '{{ a }}'", yaml.load("a: !int '42'", Loader=uw_yaml_loader())
-    assert jinja2._deref_render(val=val, context=context) == val
+    assert jinja2._realize_render(val=val, context=context) == val
     assert logged("Rendered")
     assert logged("Held")
 
 
-def test_config_jinja2__deref_render(deref_render_assets, logged):
-    val, context, local = deref_render_assets
-    assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
+def test_config_jinja2__realize_render(realize_render_assets, logged):
+    val, context, local = realize_render_assets
+    assert jinja2._realize_render(val=val, context=context, local=local) == "hello world"
     assert logged("Rendered")
     assert not logged("Rendering failed")
 
 
-def test_config_jinja2__deref_render__fail(deref_render_assets, logged):
-    val, context, _ = deref_render_assets
-    assert jinja2._deref_render(val=val, context=context) == val
+def test_config_jinja2__realize_render__fail(realize_render_assets, logged):
+    val, context, _ = realize_render_assets
+    assert jinja2._realize_render(val=val, context=context) == val
     assert not logged("Rendered")
     assert logged("Rendering failed")
 
 
-def test_config_jinja2__deref_render__unloadable_val(logged):
+def test_config_jinja2__realize_render__unloadable_val(logged):
     val = "&XMLENTITY;"
-    assert jinja2._deref_render(val='{{ "%s" if True }}' % val, context={}) == val
+    assert jinja2._realize_render(val='{{ "%s" if True }}' % val, context={}) == val
     assert logged("Rendered")
     assert not logged("Rendering failed")
 
 
-def test_config_jinja2__deref_render_datetime(uwcaplog):
+def test_config_jinja2__realize_render_datetime(uwcaplog):
     s = "foo datetime.datetime(2026, 5, 27) bar datetime.datetime(2026, 5, 27, 1, 2, 3, 4) baz"
-    actual = jinja2._deref_render_datetime(s)
+    actual = jinja2._realize_render_datetime(s)
     expected = "foo 2026-05-27T00:00:00 bar 2026-05-27T01:02:03 baz"
     assert actual == expected
     for old, new in [
@@ -441,20 +455,6 @@ def test_config_jinja2__deref_render_datetime(uwcaplog):
         ("datetime.datetime(2026, 5, 27, 1, 2, 3, 4)", "2026-05-27T01:02:03"),
     ]:
         assert f"Replaced '{old}' with '{new}' in '{s}'" in uwcaplog.text
-
-
-def test_config_jinja2__dry_run_template(logged):
-    jinja2._dry_run_template("roses are red\nviolets are blue")
-    assert logged("roses are red")
-    assert logged("violets are blue")
-
-
-def test_config_jinja2__log_missing_values(logged):
-    missing = ["roses_color", "violets_color"]
-    jinja2._log_missing_values(missing)
-    assert logged("Value(s) required to render template not provided:")
-    assert logged("  roses_color")
-    assert logged("  violets_color")
 
 
 def test_config_jinja2__register_filters__env():

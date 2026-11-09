@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -30,7 +30,7 @@ def test_api_config_compare():
     )
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("input_format", [None, FORMAT.yaml, FORMAT.nml])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 @mark.parametrize("output_file", [None, "/path/to/out.yaml"])
@@ -59,6 +59,23 @@ def test_api_config_compose(cycle, input_format, leadtime, output_file, output_f
     )
 
 
+def test_api_config_compose_to_dict():
+    kwargs: dict = {
+        "configs": ["/path/to/c1.yaml", "/path/to/c2.yaml"],
+        "realize": False,
+        "input_format": "yaml",
+        "cycle": None,
+        "leadtime": None,
+    }
+    with patch.object(config, "compose") as compose:
+        compose.return_value = YAMLConfig(config={"foo": "bar"})
+        result = config.compose_to_dict(**kwargs)
+    compose.assert_called_once_with(
+        **{**kwargs, "output_file": Path(os.devnull), "output_format": FORMAT.yaml}
+    )
+    assert result == {"foo": "bar"}
+
+
 @mark.parametrize(
     ("classname", "f"),
     [
@@ -76,7 +93,7 @@ def test_api_config__get_config(classname, f):
     constructor.assert_called_once_with(**kwargs)
 
 
-@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=timezone.utc)])
+@mark.parametrize("cycle", [None, datetime(2025, 11, 12, 6, tzinfo=UTC)])
 @mark.parametrize("leadtime", [None, timedelta(hours=6)])
 def test_api_config_realize(cycle, leadtime):
     kwargs: dict = {

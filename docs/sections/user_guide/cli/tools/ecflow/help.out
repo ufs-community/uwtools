@@ -12,5 +12,7 @@ Positional arguments:
   ACTION
     realize
       Realize an ecFlow suite definition
+    server
+      Start an ecFlow server
     validate
       Validate an ecFlow YAML config

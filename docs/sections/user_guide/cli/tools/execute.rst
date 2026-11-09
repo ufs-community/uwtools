@@ -53,7 +53,7 @@ Config ``answer.yaml``
   .. literalinclude:: execute/answer-bad-arg.out
      :language: text
   
-* If the schema file for a driver resides in the same directory as its Python module and has the same filename prefix, as well as a ``.jsonschema`` suffix (e.g. ``answer.jsonschema`` alongside ``answer.py``) then the ``--schema-file`` argument is not required. However, ``--schema-file`` can be used to point to an alternate schema:
+* If the schema file for a driver resides in the same directory as the Python module defining the driver class and is named after the value returned by the driver's ``driver_name()`` method, with a ``.jsonschema`` suffix (e.g. ``answer.jsonschema`` alongside ``answer.py``, whose driver's ``driver_name()`` returns ``answer``), then the ``--schema-file`` argument is not required. Since each driver class should return a distinct ``driver_name()`` value, a single module may define multiple drivers, each with its own schema file. However, ``--schema-file`` can be used to point to an alternate schema:
 
   .. literalinclude:: execute/answer-alt-schema.cmd
      :language: text

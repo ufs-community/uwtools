@@ -3,13 +3,15 @@ Tests for uwtools.rocoto module.
 """
 
 import sqlite3
+import warnings
 from contextlib import contextmanager
-from datetime import timezone
+from datetime import UTC
+from itertools import combinations
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
 
 from lxml import etree
-from pytest import fixture, mark, raises
+from pytest import fixture, mark, raises, warns
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
@@ -48,8 +50,28 @@ def validation_assets(tmp_path):
 # Tests
 
 
+@mark.parametrize("both", [False, True])
+def test_rocoto__deprecated_workflow_key(both):
+
+    # NB: Remove this test when support for the deprecated 'workflow' key is removed.
+
+    config = {"workflow": {"a": 1}}
+    if both:
+        config["rocoto"] = {"b": 2}
+    with warns(DeprecationWarning, match="Key 'workflow' is deprecated: Use 'rocoto' instead"):
+        result = rocoto._deprecated_workflow_key(config)
+    assert result == ({"rocoto": {"b": 2}, "workflow": {"a": 1}} if both else {"rocoto": {"a": 1}})
+
+
+def test_rocoto__deprecated_workflow_key__not_present():
+    config = {"rocoto": {"a": 1}}
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert rocoto._deprecated_workflow_key(config) == {"rocoto": {"a": 1}}
+
+
 def test_rocoto_iterate(rocoto_iterator_args):
-    with patch.object(rocoto, "_RocotoIterator") as _RocotoIterator:  # noqa: N806
+    with patch.object(rocoto, "_RocotoIterator") as _RocotoIterator:
         rocoto.iterate(**rocoto_iterator_args)
     _RocotoIterator.assert_called_once_with(*rocoto_iterator_args.values())
 
@@ -68,11 +90,11 @@ def test_rocoto_realize__cfg_to_stdout(capsys, assets):
 
 
 def test_rocoto_realize__cfg_to_stdout_key_path(capsys, assets):
-    # Test that workflow: block not at the root of the config can be accessed via key_path.
+    # Test that rocoto: block not at the root of the config can be accessed via key_path.
     cfgfile, outfile = assets
     config = YAMLConfig(cfgfile)
-    config["path"] = {"to": {"workflow": config["workflow"]}}
-    del config["workflow"]
+    config["path"] = {"to": {"rocoto": config["rocoto"]}}
+    del config["rocoto"]
     rocoto.realize(config=config, key_path=["path", "to"])
     outfile.write_text(capsys.readouterr().out)
     assert rocoto.validate_xml_file(xml_file=outfile)
@@ -145,10 +167,10 @@ class TestRocotoIterator:
 
     # Helpers
 
-    def check_mock_calls_counts(self, mocks, _report, _run, _state, sleep):
+    def check_mock_calls_counts(self, mocks, _report, _run, _state_type, sleep):
         assert mocks["_report"].call_count == _report
         assert mocks["_run"].call_count == _run
-        assert mocks["_state"].call_count == _state
+        assert mocks["_state_type"].call_count == _state_type
         assert mocks["sleep"].call_count == sleep
 
     def dbsetup(self, instance):
@@ -169,10 +191,12 @@ class TestRocotoIterator:
             patch.object(rocoto, "sleep") as sleep,
             patch.object(rocoto._RocotoIterator, "_report") as _report,
             patch.object(rocoto._RocotoIterator, "_run") as _run,
-            patch.object(rocoto._RocotoIterator, "_state", new_callable=PropertyMock) as _state,
+            patch.object(
+                rocoto._RocotoIterator, "_state_type", new_callable=PropertyMock
+            ) as _state_type,
         ):
             _run.return_value = True
-            yield dict(sleep=sleep, _report=_report, _run=_run, _state=_state)
+            yield dict(sleep=sleep, _report=_report, _run=_run, _state_type=_state_type)
 
     # Tests
 
@@ -185,27 +209,32 @@ class TestRocotoIterator:
 
     def test_rocoto__RocotoIterator_iterate__active(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = ["RUNNING", "COMPLETE"]
+            mocks["_state_type"].side_effect = [instance.State.ACTIVE, instance.State.INACTIVE]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=2, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=2, _run=2, _state_type=2, sleep=1)
 
     def test_rocoto__RocotoIterator_iterate__inactive(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = ["COMPLETE"]
+            mocks["_state_type"].side_effect = [instance.State.INACTIVE]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=0, _run=0, _state=1, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=1, _run=1, _state_type=1, sleep=0)
 
     def test_rocoto__RocotoIterator_iterate__transient(self, instance):
         with self.mocks() as mocks:
-            mocks["_state"].side_effect = [None, "SUBMITTING", "RUNNING", "COMPLETE"]
+            mocks["_state_type"].side_effect = [
+                None,
+                instance.State.ACTIVE,
+                instance.State.TRANSIENT,
+                instance.State.INACTIVE,
+            ]
             assert instance.iterate() is True
-            self.check_mock_calls_counts(mocks, _report=1, _run=3, _state=4, sleep=1)
+            self.check_mock_calls_counts(mocks, _report=4, _run=4, _state_type=4, sleep=3)
 
     def test_rocoto__RocotoIterator_iterate__run_failure(self, instance):
         with self.mocks() as mocks:
             mocks["_run"].return_value = False
             assert instance.iterate() is False
-            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state=1, sleep=0)
+            self.check_mock_calls_counts(mocks, _report=0, _run=1, _state_type=0, sleep=0)
 
     def test_rocoto__RocotoIterator__connection(self, instance):
         instance._database.touch()
@@ -223,23 +252,32 @@ class TestRocotoIterator:
     def test_rocoto__RocotoIterator__cursor__no_file(self, instance):
         assert instance._cursor is None
 
-    def test_rocoto__RocotoIterator__iterate(self, instance, logged):
+    @mark.parametrize(("all_", "task_arg"), [(False, "-t foo"), (True, "-a")])
+    def test_rocoto__RocotoIterator__iterate(self, all_, task_arg, instance, logged):
+        instance._task = None if all_ else "foo"
         retval = (True, "")
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             assert instance._run() is True
         run_shell_cmd.assert_called_once_with(
-            "rocotorun -d %s -w %s" % (instance._database, instance._workflow), quiet=True
+            "rocotorun -d %s -w %s %s" % (instance._database, instance._workflow, task_arg),
+            quiet=True,
         )
         assert logged("Iterating workflow")
 
-    def test_rocoto__RocotoIterator__query_data(self, instance):
-        assert instance._query_data == {"taskname": "foo", "cycle": 1753099200}
+    @mark.parametrize(
+        ("all_", "expected"),
+        [(False, {"taskname": "foo", "cycle": 1753099200}), (True, {"cycle": 1753099200})],
+    )
+    def test_rocoto__RocotoIterator__query_data(self, all_, expected, instance):
+        instance._task = None if all_ else "foo"
+        assert instance._query_data == expected
 
-    def test_rocoto__RocotoIterator__query_stmt(self, instance):
-        assert (
-            instance._query_stmt
-            == "select state from jobs where taskname=:taskname and cycle=:cycle order by id desc"
-        )
+    @mark.parametrize("all_", [False, True])
+    def test_rocoto__RocotoIterator__query_stmt(self, all_, instance):
+        instance._task = None if all_ else "foo"
+        clause = "" if all_ else " and taskname=:taskname"
+        stmt = "select state from jobs where cycle=:cycle%s order by id desc" % clause  # noqa: S608
+        assert instance._query_stmt == stmt
 
     @mark.parametrize("create_database", [True, False])
     def test_rocoto__RocotoIterator__report(self, create_database, instance, logged):
@@ -249,7 +287,7 @@ class TestRocotoIterator:
         with patch.object(rocoto, "run_shell_cmd", return_value=retval) as run_shell_cmd:
             instance._report()
         if create_database:
-            for line in ["Workflow status:", "foo", "bar"]:
+            for line in ["foo", "bar"]:
                 assert logged(line)
             run_shell_cmd.assert_called_once_with(
                 "rocotostat -d %s -w %s" % (instance._database, instance._workflow), quiet=True
@@ -257,8 +295,19 @@ class TestRocotoIterator:
         else:
             run_shell_cmd.assert_not_called()
 
+    @mark.parametrize(
+        ("all_", "expected"),
+        [
+            (False, "Task 'foo' for cycle 2025-07-21 12:00:00: %s"),
+            (True, "Tasks for cycle 2025-07-21 12:00:00: %s"),
+        ],
+    )
+    def test_rocoto__RocotoIterator__state_msg(self, all_, expected, instance):
+        instance._task = None if all_ else "foo"
+        assert instance._state_msg == expected
+
     @mark.parametrize("set_up_database", [True, False])
-    def test_rocoto__RocotoIterator__state(self, set_up_database, instance, logged):
+    def test_rocoto__RocotoIterator__state_type(self, set_up_database, instance, logged):
         if set_up_database:
             self.dbsetup(instance)
             instance._cursor.execute(
@@ -266,25 +315,77 @@ class TestRocotoIterator:
                 {
                     "id": 1,
                     "taskname": "foo",
-                    "cycle": instance._cycle.replace(tzinfo=timezone.utc).timestamp(),
+                    "cycle": instance._cycle.replace(tzinfo=UTC).timestamp(),
                     "state": "COMPLETE",
                 },
             )
         if set_up_database:
-            assert instance._state == "COMPLETE"
-            assert logged(f"Rocoto task '{instance._task}' for cycle {instance._cycle}: COMPLETE")
+            assert instance._state_type is instance.State.INACTIVE
+            assert logged(f"Task '{instance._task}' for cycle {instance._cycle}: inactive")
         else:
-            assert instance._state is None
+            assert instance._state_type is None
 
-    def test_rocoto__RocotoIterator__state__none(self, instance):
+    @mark.parametrize(
+        ("rows", "expected", "msg"),
+        [
+            ([], None, None),
+            (
+                [(1, "foo", "COMPLETE"), (2, "bar", "RUNNING")],
+                rocoto._RocotoIterator.State.ACTIVE,
+                "active",
+            ),
+        ],
+    )
+    def test_rocoto__RocotoIterator__state_type__all(self, expected, instance, logged, msg, rows):
+        instance._task = None
         self.dbsetup(instance)
-        assert instance._state is None
+        for id_, taskname, state in rows:
+            instance._cursor.execute(
+                "insert into jobs values (:id, :taskname, :cycle, :state)",
+                {
+                    "id": id_,
+                    "taskname": taskname,
+                    "cycle": instance._cycle.replace(tzinfo=UTC).timestamp(),
+                    "state": state,
+                },
+            )
+        assert instance._state_type is expected
+        if msg:
+            assert logged(f"Tasks for cycle {instance._cycle}: {msg}")
 
-    def test_rocoto__RocotoIterator__state_msg(self, instance):
-        assert instance._state_msg == "Rocoto task 'foo' for cycle 2025-07-21 12:00:00: %s"
+    def test_rocoto__RocotoIterator__state_type__none(self, instance):
+        self.dbsetup(instance)
+        assert instance._state_type is None
+
+    def test_rocoto__RocotoIterator__state_type_from_state(self, instance):
+        for state_type in instance.State:
+            for state in instance._states[state_type]:
+                assert instance._state_type_from_state(state) is state_type
+        with raises(AssertionError) as e:
+            instance._state_type_from_state("foo")
+        assert str(e.value) == "Unexpected state: foo"
+
+    def test_rocoto__RocotoIterator__state_type_from_states(self, instance):
+        assert instance._state_type_from_states([]) is None
+        actives = instance._states[instance.State.ACTIVE]
+        transients = instance._states[instance.State.TRANSIENT]
+        inactives = instance._states[instance.State.INACTIVE]
+        ati = [*actives, *transients, *inactives]
+        for states in combinations(ati, 3):
+            if any(state in actives for state in states):
+                expected = instance.State.ACTIVE
+            elif any(state in transients for state in states):
+                expected = instance.State.TRANSIENT
+            else:
+                expected = instance.State.INACTIVE
+            assert instance._state_type_from_states(states=states) is expected
 
     def test_rocoto__RocotoIterator__states(self, instance):
-        assert list(instance._states.keys()) == ["active", "inactive", "transient"]
+        assert list(instance._states.keys()) == [
+            instance.State.ACTIVE,
+            instance.State.INACTIVE,
+            instance.State.TRANSIENT,
+        ]
 
 
 class TestRocotoXML:
@@ -304,6 +405,16 @@ class TestRocotoXML:
         return rocoto.Element("root")
 
     # Tests
+
+    def test__RocotoXML__instantiate_deprecated_workflow_key(self, assets):
+
+        # NB: Remove this test when support for the deprecated 'workflow' key is removed.
+
+        cfgfile, _ = assets
+        config = YAMLConfig(cfgfile)
+        config["workflow"] = config.data.pop("rocoto")
+        with warns(DeprecationWarning, match="deprecated"):
+            assert rocoto._RocotoXML(config=config)._root.tag == "workflow"
 
     def test__RocotoXML__instantiate_from_cfgobj(self, assets):
         cfgfile, _ = assets
@@ -635,7 +746,7 @@ class TestRocotoXML:
 
     def test_rocoto__RocotoXML__add_workflow(self, instance):
         config = {
-            "workflow": {
+            "rocoto": {
                 "attrs": {"realtime": True, "scheduler": "slurm"},
                 "cycledef": [],
                 "log": {"attrs": {"verbosity": 10}, "value": "1"},
@@ -659,8 +770,8 @@ class TestRocotoXML:
         assert workflow.get("realtime") == "True"
         assert workflow.get("scheduler") == "slurm"
         mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, [])
-        mocks["_add_workflow_log"].assert_called_once_with(workflow, config["workflow"])
-        mocks["_add_workflow_tasks"].assert_called_once_with(workflow, config["workflow"]["tasks"])
+        mocks["_add_workflow_log"].assert_called_once_with(workflow, config["rocoto"])
+        mocks["_add_workflow_tasks"].assert_called_once_with(workflow, config["rocoto"]["tasks"])
 
     def test_rocoto__RocotoXML__add_workflow_cycledef(self, instance, root):
         config: list[dict] = [
@@ -728,7 +839,7 @@ class TestRocotoXML:
         assert '<!ENTITY FOO "test.log">' in instance._doctype
 
     def test_rocoto__RocotoXML__doctype__entities_none(self, instance):
-        del instance._config["workflow"]["entities"]
+        del instance._config["rocoto"]["entities"]
         assert instance._doctype is None
 
     def test_rocoto__RocotoXML__insert_doctype(self, instance):

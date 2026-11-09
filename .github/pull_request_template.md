@@ -21,7 +21,7 @@ INSTRUCTIONS
 - [ ] Bug fix (corrects a known issue)
 - [ ] Code maintenance (refactoring, etc. without behavior change)
 - [ ] Documentation
-- [ ] Enhancement (adds new functionality)
+- [ ] Enhancement (improves or adds new functionality)
 - [ ] Tooling (CI, code-quality, packaging, revision-control, etc.)
 
 **Impact**

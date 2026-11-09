@@ -7,11 +7,11 @@ from uwtools.api import rocoto
 
 
 @mark.parametrize("f", [Path, str])
-def test_api_rocoto_iterate(f, utc):
+@mark.parametrize("task", ["foo", None])
+def test_api_rocoto_iterate(f, task, utc):
     cycle = utc()
     database = f("/path/to/rocoto.db")
     rate = 11
-    task = "foo"
     workflow = f("/path/to/rocoto.xml")
     with patch.object(rocoto, "_iterate") as _iterate:
         rocoto.iterate(cycle=cycle, database=database, rate=rate, task=task, workflow=workflow)

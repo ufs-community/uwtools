@@ -174,10 +174,10 @@ def chgres_cube_prop():
 def ecflow_config():
     return {
         "ecflow": {
-            "server": {},
+            "server": {"ECF_HOME": "/path/to/ecf"},
             "suitedef": {
                 "suite_one": {
-                    "task_two": {"script": {"execution": {"incantation": "/path/to/run.sh"}}},
+                    "task_two": {"script": {"body": "run.sh"}},
                     "families_two": {
                         "expand": {
                             "MEM": ["00", "06"],
@@ -715,6 +715,53 @@ def test_schema_ecflow_suitedef(ecflow_config):
     assert not errors({})
 
 
+def test_schema_ecflow_server():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "server")
+    err = lambda k, v: errors({"ECF_HOME": "/path/to/ecf", k: v})
+    # Basic spec:
+    assert not errors({"ECF_HOME": "/path/to/ecf"})
+    # ECF_HOME is required:
+    assert "'ECF_HOME' is a required property" in errors({})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in err("ECF_BOGUS", "x")
+    # These values must be strings:
+    ks_string = [
+        "ECF_CHECK",
+        "ECF_CHECKOLD",
+        "ECF_CUSTOM_PASSWD",
+        "ECF_HOME",
+        "ECF_JOB_CMD",
+        "ECF_KILL_CMD",
+        "ECF_LISTS",
+        "ECF_LOG",
+        "ECF_PASSWD",
+        "ECF_STATUS_CMD",
+        "ECF_URL",
+        "ECF_URL_BASE",
+        "ECF_URL_CMD",
+    ]
+    for k in ks_string:
+        assert "is not of type 'string'\n" in err(k, 42)
+    # These values must be integers >= 1:
+    for k in ["ECF_CHECKINTERVAL", "ECF_INTERVAL"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 1" in err(k, 0)
+        assert not err(k, 1)
+    # These values must be integers >= 0:
+    for k in ["ECF_PRUNE_NODE_LOG", "ECF_TASK_THRESHOLD"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 0" in err(k, -1)
+        assert not err(k, 0)
+    # ECF_CHECKMODE is constrained to an enum:
+    assert "is not one of" in err("ECF_CHECKMODE", "bad")
+    assert not err("ECF_CHECKMODE", "CHECK_ON_TIME")
+    # ECF_MICRODEF must be a single character:
+    assert "is not of type 'string'\n" in err("ECF_MICRODEF", 1)
+    assert "should be non-empty" in err("ECF_MICRODEF", "")
+    assert "is too long" in err("ECF_MICRODEF", "ab")
+    assert not err("ECF_MICRODEF", "%")
+
+
 def test_schema_ecflow_suitedef_nested_family():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     config = {
@@ -891,7 +938,7 @@ def test_schema_ecflow_suitedef_refs_task_expander():
     # Basic spec:
     config = {
         "expand": {"MEM": ["01", "02"]},
-        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "script": {"body": "run.sh"},
     }
     assert not errors(config)
     # expand is a required top-level key:
@@ -907,13 +954,13 @@ def test_schema_ecflow_suitedef_refs_task_expander():
     assert not errors({**config, "trigger": "task_setup == complete"})
     # script is required (taskcontainer is applied within tasks_* expanders):
     assert "'script' is a required property" in errors(with_del(config, "script"))
-    # script.execution content is validated — incantation is required:
-    assert "'incantation' is a required property" in errors(
-        with_set(config, {}, "script", "execution")
-    )
-    # script.execution rejects unknown keys (e.g., executable has no effect in ecflow):
-    assert "Additional properties are not allowed" in errors(
-        with_set(config, "run.exe", "script", "execution", "executable")
+    # script may be a string:
+    assert not errors({**config, "script": "/path/to/a.ecf"})
+    # script as an object without body is invalid:
+    assert "is not valid under any of the given schemas" in errors(with_set(config, {}, "script"))
+    # script rejects unknown keys:
+    assert "is not valid under any of the given schemas" in errors(
+        with_set(config, "x", "script", "extra")
     )
 
 
@@ -922,7 +969,7 @@ def test_schema_ecflow_suitedef_refs_nodecontainer_family():
         "ecflow", "$defs", "nodecontainer", "patternProperties", "^family_.+$"
     )
     # Basic spec:
-    config = {"task_one": {"script": {"execution": {"incantation": "/path/to/run.sh"}}}}
+    config = {"task_one": {"script": {"body": "run.sh"}}}
     assert not errors(config)
     # Extra properties are not allowed:
     assert "is not valid under any of the given schemas" in errors(
@@ -935,7 +982,7 @@ def test_schema_ecflow_suitedef_refs_nodecontainer_family():
 def test_schema_ecflow_suitedef_refs_nodecontainer_task():
     errors = schema_validator("ecflow", "$defs", "nodecontainer", "patternProperties", "^task_.+$")
     # Basic spec:
-    config = {"script": {"execution": {"incantation": "/path/to/run.sh"}}}
+    config = {"script": {"body": "run.sh"}}
     assert not errors(config)
     # Extra properties are not allowed:
     assert "is not valid under any of the given schemas" in errors(
@@ -943,14 +990,6 @@ def test_schema_ecflow_suitedef_refs_nodecontainer_task():
     )
     # addon properties are valid siblings:
     assert not errors({**config, "defstatus": "suspended"})
-
-
-def test_schema_ecflow_suitedef_refs_family():
-    errors = schema_validator("ecflow", "$defs", "family")
-    # Basic spec:
-    config = {"family_one": {}, "vars": {"MEMBER": "00", "LEAD": "006"}}
-    assert not errors(config)
-    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
 
 
 def test_schema_ecflow_suitedef_refs_familycontainer():
@@ -969,23 +1008,11 @@ def test_schema_ecflow_suitedef_refs_nodecontainer():
     # Note: expected to allow additional properties since it's used to compose higher-level refs.
 
 
-def test_schema_ecflow_suitedef_refs_task():
-    errors = schema_validator("ecflow", "$defs", "task")
-    # Basic spec:
-    config = {
-        "script": {"execution": {"incantation": "/path/to/run.sh"}},
-        "vars": {"MEMBER": "00", "LEAD": "006"},
-    }
-    assert not errors(config)
-    assert "'script' is a required property" in errors({"defstatus": "complete"})
-    assert "is not valid under any of the given schemas" in errors({**config, "extra": 2})
-
-
 def test_schema_ecflow_suitedef_refs_taskcontainer():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
     config = {
-        "script": {"execution": {"incantation": "/path/to/run.sh"}},
+        "script": {"body": "run.sh"},
         "vars": {"MEMBER": "00", "LEAD": "006"},
     }
     assert not errors(config)
@@ -995,12 +1022,17 @@ def test_schema_ecflow_suitedef_refs_taskcontainer():
 def test_schema_ecflow_suitedef_refs_taskcontainer_script():
     errors = schema_validator("ecflow", "$defs", "taskcontainer")
     # Basic spec:
-    config = {
-        "script": {"execution": {"incantation": "/path/to/run.sh"}, "post_includes": ["tail.h"]}
-    }
+    config = {"script": {"body": "run.sh", "includes": {"entry": ["head.h"]}}}
     assert not errors(config)
-    assert "'execution' is a required property" in errors(with_del(config, "script", "execution"))
-    assert "Additional properties are not allowed" in errors(with_set(config, 2, "script", "extra"))
+    # script may be a string:
+    assert not errors({"script": "/path/to/a.ecf"})
+    # script as an object without body is invalid:
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(config, "script", "body")
+    )
+    assert "is not valid under any of the given schemas" in errors(
+        with_set(config, 2, "script", "extra")
+    )
 
 
 def test_schema_ecflow_suitedef_scheduler():
@@ -1022,7 +1054,7 @@ def test_schema_ecflow_suitedef_extern():
     assert "is not of type 'array'" in errors({"extern": "/other/suite/task"})
 
 
-def test_schema_ecflow_suitedef_execution():
+def test_schema_ecflow_suitedef_script():
     errors = schema_validator(
         "ecflow",
         "$defs",
@@ -1031,32 +1063,136 @@ def test_schema_ecflow_suitedef_execution():
         1,
         "properties",
         "script",
+    )
+    # script may be a string:
+    assert not errors("/path/to/a.ecf")
+    # script may be an object with body:
+    assert not errors({"body": "run.sh"})
+    # script as object with optional keys is valid:
+    assert not errors(
+        {
+            "batchargs": {"walltime": "00:30:00"},
+            "body": "run.sh",
+            "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
+            "manual": "This is the manual",
+        }
+    )
+    # An invalid value matches neither oneOf option:
+    for val in [{}, 42, {"body": "run.sh", "extra": "x"}]:
+        assert "is not valid under any of the given schemas" in errors(val)
+
+
+def test_schema_ecflow_suitedef_script_object():
+    errors = schema_validator(
+        "ecflow",
+        "$defs",
+        "taskcontainer",
+        "allOf",
+        1,
         "properties",
-        "execution",
+        "script",
+        "oneOf",
+        1,
     )
     # Basic spec:
-    assert not errors({"incantation": "/path/to/run.sh"})
-    # incantation is required:
-    assert "'incantation' is a required property" in errors({})
-    # executable is not a valid key:
-    assert "Additional properties are not allowed" in errors(
-        {"incantation": "/path/to/run.sh", "executable": "run.exe"}
-    )
-    # mpiargs and mpicmd are not valid keys:
-    assert "Additional properties are not allowed" in errors(
-        {"incantation": "/path/to/run.sh", "mpicmd": "srun"}
-    )
+    assert not errors({"body": "run.sh"})
+    # body is required:
+    assert "'body' is a required property" in errors({})
+    # body must be a string:
+    assert "is not of type 'string'" in errors({"body": 42})
+    # Unknown keys are not allowed:
+    assert "Additional properties are not allowed" in errors({"body": "run.sh", "extra": "x"})
     # Optional keys are valid:
     assert not errors(
         {
-            "incantation": "/path/to/run.sh",
             "batchargs": {"walltime": "00:30:00"},
-            "envcmds": ["module load python"],
-            "threads": 4,
+            "body": "run.sh",
+            "includes": {"entry": ["head.h"], "exit": ["tail.h"]},
+            "manual": "This is the manual",
         }
     )
-    # threads must be a positive integer:
-    assert "is less than the minimum" in errors({"incantation": "/path/to/run.sh", "threads": 0})
+    # includes with only entry is valid:
+    assert not errors({"body": "run.sh", "includes": {"entry": ["head.h"]}})
+    # includes with only exit is valid:
+    assert not errors({"body": "run.sh", "includes": {"exit": ["tail.h"]}})
+    # includes with no sub-keys is valid:
+    assert not errors({"body": "run.sh", "includes": {}})
+    # includes rejects unknown keys:
+    assert "Additional properties are not allowed" in errors(
+        {"body": "run.sh", "includes": {"bad": ["x"]}}
+    )
+    # includes.entry must be an array:
+    assert "is not of type 'array'" in errors({"body": "run.sh", "includes": {"entry": "head.h"}})
+    # includes.entry items must be strings:
+    assert "is not of type 'string'" in errors({"body": "run.sh", "includes": {"entry": [42]}})
+    # includes.exit must be an array:
+    assert "is not of type 'array'" in errors({"body": "run.sh", "includes": {"exit": "tail.h"}})
+    # includes.exit items must be strings:
+    assert "is not of type 'string'" in errors({"body": "run.sh", "includes": {"exit": [42]}})
+
+
+def test_schema_ecflow_suitedef_refs_vars():
+    errors = schema_validator("ecflow", "$defs", "vars")
+    err = lambda k, v: errors({k: v})
+    # Non-ECF_ keys are accepted with any value type:
+    assert not errors({"MY_VAR": "hello", "count": 42, "flag": True})
+    # Unknown ECF_ keys are rejected:
+    assert "does not match any of the regexes" in err("ECF_BOGUS", "x")
+    # These values must be strings:
+    ks_string = [
+        "ECF_CHECK",
+        "ECF_CHECKINTERVAL",
+        "ECF_CHECKMODE",
+        "ECF_CHECKOLD",
+        "ECF_CLOCK",
+        "ECF_CUSTOM_PASSWD",
+        "ECF_DUMMY_TASK",
+        "ECF_EXTN",
+        "ECF_FILES",
+        "ECF_HOME",
+        "ECF_INCLUDE",
+        "ECF_JOB",
+        "ECF_JOBOUT",
+        "ECF_JOB_CMD",
+        "ECF_KILL_CMD",
+        "ECF_LISTS",
+        "ECF_LOG",
+        "ECF_NAME",
+        "ECF_NODE",
+        "ECF_OUT",
+        "ECF_PASS",
+        "ECF_PASSWD",
+        "ECF_RID",
+        "ECF_SCRIPT",
+        "ECF_STATUS_CMD",
+        "ECF_URL",
+        "ECF_URL_BASE",
+        "ECF_URL_CMD",
+    ]
+    for k in ks_string:
+        assert "is not of type 'string'\n" in err(k, 42)
+        assert not err(k, "value")
+    # These values must be integers >= 1:
+    for k in ["ECF_INTERVAL", "ECF_JULIAN", "ECF_PORT", "ECF_TRIES", "ECF_TRYNO"]:
+        assert "is not of type 'integer'\n" in err(k, "x")
+        assert "is less than the minimum of 1" in err(k, 0)
+        assert not err(k, 1)
+    # ECF_MICRO must be a single character:
+    assert "is not of type 'string'\n" in err("ECF_MICRO", 1)
+    assert "should be non-empty" in err("ECF_MICRO", "")
+    assert "is too long" in err("ECF_MICRO", "ab")
+    assert not err("ECF_MICRO", "%")
+    # ECF_DATE must be an 8-digit string:
+    assert "is not of type 'string'\n" in err("ECF_DATE", 20260101)
+    assert "does not match" in err("ECF_DATE", "2026abc1")
+    assert "does not match" in err("ECF_DATE", "2026010")
+    assert "does not match" in err("ECF_DATE", "202601011")
+    assert not err("ECF_DATE", "20260101")
+    # ECF_TIME must match HH:MM pattern:
+    assert "is not of type 'string'\n" in err("ECF_TIME", 1200)
+    assert "does not match" in err("ECF_TIME", "1200")
+    assert "does not match" in err("ECF_TIME", "12:00:00")
+    assert not err("ECF_TIME", "12:00")
 
 
 # enkf
@@ -1174,7 +1310,7 @@ def test_schema_esg_grid_rundir(esg_grid_prop):
 # execution-parallel
 
 
-def test_schema_parallel_execution():
+def test_schema_execution_parallel():
     config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
@@ -1182,6 +1318,8 @@ def test_schema_parallel_execution():
     errors = schema_validator("execution-parallel")
     # Basic correctness:
     assert not errors(config)
+    # execution is required:
+    assert "'executable' is a required property" in errors({})
     # batchargs may optionally be specified:
     assert not errors({**config, **batchargs})
     # mpiargs may be optionally specified:
@@ -1196,15 +1334,17 @@ def test_schema_parallel_execution():
     )
 
 
-def test_schema_parallel_execution_executable():
+def test_schema_execution_parallel__executable():
     errors = schema_validator("execution-parallel", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
+    # Null value is ok:
+    assert not errors(None)
     # Anything else is not:
-    assert "42 is not of type 'string'\n" in errors(42)
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
 
 
-def test_schema_parallel_execution_mpiargs():
+def test_schema_execution_parallel__mpiargs():
     errors = schema_validator("execution-parallel", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
@@ -1214,7 +1354,17 @@ def test_schema_parallel_execution_mpiargs():
     assert "42 is not of type 'string'\n" in errors(["string1", 42])
 
 
-def test_schema_parallel_execution_threads():
+def test_schema_execution_parallel__shell():
+    errors = schema_validator("execution-parallel", "properties", "shell")
+    # String value is ok:
+    assert not errors("/bin/sh")
+    # Null value is ok:
+    assert not errors(None)
+    # Anything else is not:
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
+
+
+def test_schema_execution_parallel__threads():
     errors = schema_validator("execution-parallel", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(1)
@@ -1232,12 +1382,34 @@ def test_schema_execution_serial():
     errors = schema_validator("execution-serial")
     # Basic correctness:
     assert not errors(config)
+    # execution is required:
+    assert "'executable' is a required property" in errors({})
     # batchargs may optionally be specified:
     assert not errors({**config, **batchargs})
     # All properties are ok:
     assert not errors({**config, **batchargs})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_execution_serial__executable():
+    errors = schema_validator("execution-serial", "properties", "executable")
+    # String value is ok:
+    assert not errors("fv3.exe")
+    # Null value is ok:
+    assert not errors(None)
+    # Anything else is not:
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
+
+
+def test_schema_execution_serial__shell():
+    errors = schema_validator("execution-serial", "properties", "shell")
+    # String value is ok:
+    assert not errors("/bin/sh")
+    # Null value is ok:
+    assert not errors(None)
+    # Anything else is not:
+    assert "42 is not of type 'null', 'string'\n" in errors(42)
 
 
 # files-to-stage
@@ -2473,8 +2645,28 @@ def test_schema_rocoto_metatask_attrs():
     assert "'foo' is not of type 'integer'\n" in errors({"throttle": "foo"})
 
 
+@mark.parametrize(
+    ("keys", "ok"),
+    [
+        ([], False),
+        (["rocoto"], True),
+        (["rocoto", "workflow"], False),
+        (["workflow"], True),  # NB: Remove when support for deprecated 'workflow' key is removed.
+    ],
+)
+def test_schema_rocoto_root(keys, ok):
+    errors = schema_validator("rocoto")
+    block = {
+        "attrs": {"realtime": False, "scheduler": "slurm"},
+        "cycledef": [{"spec": "202311291200 202312011200 06:00:00"}],
+        "log": {"value": "/path/to/log"},
+        "tasks": {"task_foo": {"command": "/bin/true", "cores": 1, "walltime": "00:01:00"}},
+    }
+    assert (not errors(dict.fromkeys(keys, block))) is ok
+
+
 def test_schema_rocoto_task_dependency():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "tasks")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "tasks")
     config = {
         "task_foo": {
             "command": "/bin/true",
@@ -2491,7 +2683,7 @@ def test_schema_rocoto_task_dependency():
 
 
 def test_schema_rocoto_task_hangdependency():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "tasks")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "tasks")
     config = {
         "task_foo": {
             "command": "/bin/true",
@@ -2508,7 +2700,7 @@ def test_schema_rocoto_task_hangdependency():
 
 
 def test_schema_rocoto_workflow_top():
-    errors = schema_validator("rocoto", "properties", "workflow")
+    errors = schema_validator("rocoto", "$defs", "rocoto")
     config = {
         "attrs": {"realtime": False, "scheduler": "slurm"},
         "cycledef": [{"spec": "202311291200 202312011200 06:00:00"}],
@@ -2533,7 +2725,7 @@ def test_schema_rocoto_workflow_top():
 
 
 def test_schema_rocoto_workflow_cycledef():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])
@@ -2563,37 +2755,37 @@ def test_schema_rocoto_workflow_cycledef():
 
 @mark.parametrize("spec", ["60", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_minutes(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"{spec} * * * * *"}])
 
 
 @mark.parametrize("spec", ["24", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_hours(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* {spec} * * * *"}])
 
 
 @mark.parametrize("spec", ["0", "32", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_days(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * {spec} * * *"}])
 
 
 @mark.parametrize("spec", ["0", "13", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_months(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * * {spec} * *"}])
 
 
 @mark.parametrize("spec", ["99", "1899", "10000", "x"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_years(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * * * {spec} *"}])
 
 
 @mark.parametrize("spec", ["7", "Monday"])
 def test_schema_rocoto_workflow_cycledef_crontab_like_no_weekdays(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert errors([{"spec": f"* * * * * {spec}"}])
 
 
@@ -2602,7 +2794,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_no_weekdays(spec):
     ["*", "0", "59", "*/2", "*/999", "1-10", "0,15,30,45", "15-45/5", "15-45/999", "0-29,30-59/2"],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_minutes(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"{spec} * * * * *"}])
 
 
@@ -2611,7 +2803,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_minutes(spec):
     ["*", "0", "23", "*/6", "*/999", "1-12", "0,6,12,18", "6-18/3", "6-18/999", "0-12,13-23/3"],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_hours(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* {spec} * * * *"}])
 
 
@@ -2620,7 +2812,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_hours(spec):
     ["*", "1", "31", "*/2", "*/999", "1-15", "10,20,30", "5-30/5", "5-30/999", "1-15,16-30/2"],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_days(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * {spec} * * *"}])
 
 
@@ -2628,7 +2820,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_days(spec):
     "spec", ["*", "1", "12", "*/2", "*/999", "6-9", "3,6,9,12", "1-6/2", "1-6/999", "1-6,8-12/2"]
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_months(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * * {spec} * *"}])
 
 
@@ -2649,7 +2841,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_months(spec):
     ],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_years(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * * * {spec} *"}])
 
 
@@ -2657,7 +2849,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_years(spec):
     "spec", ["*", "0", "6", "*/2", "*/999", "0-4", "0,2,4", "0-4/2", "0-4/999", "0-2,3-6/2"]
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_weekdays(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": f"* * * * * {spec}"}])
 
 
@@ -2674,7 +2866,7 @@ def test_schema_rocoto_workflow_cycledef_crontab_like_ok_weekdays(spec):
     ],
 )
 def test_schema_rocoto_workflow_cycledef_crontab_like_ok_examples(spec):
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "cycledef")
     assert not errors([{"spec": spec}])
 
 
@@ -2732,7 +2924,7 @@ def test_schema_rocoto_task_resources():
 
 
 def test_schema_rocoto_workflow_log():
-    errors = schema_validator("rocoto", "properties", "workflow", "properties", "log")
+    errors = schema_validator("rocoto", "$defs", "rocoto", "properties", "log")
     # Basic spec:
     assert not errors({"value": "foo"})
     # The "value" property is mandatory:

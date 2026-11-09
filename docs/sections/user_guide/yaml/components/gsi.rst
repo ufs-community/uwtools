@@ -27,7 +27,7 @@ coupler.res:
 
   **template_values:**
 
-    The key/value pairs that are required by the ``template_file``.
+    The key-value pairs that are required by the ``template_file``.
 
 execution:
 ^^^^^^^^^^

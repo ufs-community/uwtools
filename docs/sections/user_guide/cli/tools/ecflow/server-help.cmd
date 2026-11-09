@@ -1,0 +1,1 @@
+uw ecflow server --help

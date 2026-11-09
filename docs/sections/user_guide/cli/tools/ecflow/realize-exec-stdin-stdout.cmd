@@ -1,1 +1,1 @@
-cat ecflow.yaml | uw ecflow realize
+cat workflow.yaml | uw ecflow realize

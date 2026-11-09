@@ -11,10 +11,19 @@
       "type": "array"
     },
     "executable": {
-      "type": "string"
+      "type": [
+        "null",
+        "string"
+      ]
     },
     "incantation": {
       "type": "string"
+    },
+    "shell": {
+      "type": [
+        "null",
+        "string"
+      ]
     }
   },
   "required": [

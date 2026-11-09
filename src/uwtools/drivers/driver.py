@@ -4,6 +4,7 @@ Abstract classes for component drivers.
 
 from __future__ import annotations
 
+import inspect
 import json
 import re
 import stat
@@ -31,12 +32,15 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
+from uwtools.utils.tasks import poison
 
 if TYPE_CHECKING:
     from datetime import datetime, timedelta
 
     from uwtools.config.formats.base import Config
     from uwtools.config.support import YAMLKey
+
+DEFAULT_SHELL = "/usr/bin/env bash"
 
 # NB: Class docstrings are programmatically defined.
 
@@ -56,7 +60,7 @@ class Assets(ABC):
         controller: list[YAMLKey] | None = None,
     ) -> None:
         config_copy = YAMLConfig(config)
-        config_copy.dereference(
+        config_copy.realize(
             context={
                 **({STR.cycle: cycle} if cycle else {}),
                 **({STR.leadtime: leadtime} if leadtime is not None else {}),
@@ -71,7 +75,7 @@ class Assets(ABC):
             msg = "Required '%s' block missing in config" % self.driver_name()
             raise UWConfigError(msg) from e
         self._delegate(controller, STR.rundir)
-        self.schema_file = schema_file
+        self.schema_file = schema_file or self._schema_file_default()
         self._validate()
 
     def __repr__(self) -> str:
@@ -96,7 +100,7 @@ class Assets(ABC):
     @property
     def config_full(self) -> dict:
         """
-        A copy of the original input config, dereferenced.
+        A copy of the original input config, realized.
         """
         return deepcopy(self._config_full)
 
@@ -116,7 +120,7 @@ class Assets(ABC):
         if base_file := config_values.get(STR.base_file):
             cfgobj = config_class(base_file)
             cfgobj.update_from(user_values)
-            cfgobj.dereference()
+            cfgobj.realize()
             config = cfgobj.data
             dump = partial(cfgobj.dump, path)
         else:
@@ -218,6 +222,18 @@ class Assets(ABC):
             for key in controller[1:]:
                 val = val[key]
             self._config[config_key] = val[config_key]
+
+    def _schema_file_default(self) -> Path | None:
+        """
+        Return the default schema file for external drivers, or None for internal drivers.
+
+        The default is <driver_name>.jsonschema in the directory containing the module that defines
+        the concrete driver class.
+        """
+        cls = type(self)
+        if cls.__module__.split(".")[0] == __name__.split(".")[0]:
+            return None
+        return Path(inspect.getfile(cls)).parent / f"{self.driver_name()}.jsonschema"
 
     @classmethod
     def _schema_name(cls) -> str:
@@ -373,6 +389,9 @@ class Driver(Assets):
         A run.
         """
         yield self.taskname(STR.run)
+        if self.config[STR.execution][STR.executable] is None:  # e.g. from a YAML null
+            msg = "%s must define 'executable' or implement custom run() method"
+            yield poison(msg % self.__class__.__name__)
         yield self._run_via_batch_submission() if self._batch else self._run_via_local_execution()
 
     @task
@@ -422,12 +441,13 @@ class Driver(Assets):
         """
         A run executed directly on the local system.
         """
-        yield self.taskname("run via local execution")
+        taskname = self.taskname("run via local execution")
+        yield taskname
         path = self.rundir / self._runscript_done_file
         yield Asset(path, path.is_file)
         yield self.provisioned_rundir()
-        cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path.name)
-        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True)
+        cmd = "./{x} >>{x}.out 2>&1".format(x=self._runscript_path.name)
+        run_shell_cmd(cmd=cmd, cwd=self.rundir, log_output=True, taskname=taskname)
 
     # Public methods
 
@@ -479,6 +499,7 @@ class Driver(Assets):
         envcmds: list[str] | None = None,
         envvars: dict[str, str] | None = None,
         scheduler: JobScheduler | None = None,
+        shell: str | None = DEFAULT_SHELL,
     ) -> str:
         """
         Return a driver runscript.
@@ -487,11 +508,12 @@ class Driver(Assets):
         :param envcmds: Shell commands to set up runtime environment.
         :param envvars: Environment variables to set in runtime environment.
         :param scheduler: A job-scheduler object.
+        :param shell: The shell to specify in the shebang line, or None to omit the shebang line.
         """
         # Render script sections into a template, remove any extraneous newlines related to elided
         # sections, then return the resulting string.
         template = """
-        #!/bin/bash
+        {shebang}
 
         {directives}
 
@@ -508,6 +530,7 @@ class Driver(Assets):
             envcmds="\n".join(envcmds or []),
             envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
             execution="\n".join([*initcmds, *execution]),
+            shebang="" if shell is None else f"#!{shell}",
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
@@ -550,18 +573,20 @@ class Driver(Assets):
         Write the runscript.
         """
         envvars = envvars or {}
-        threads = self.config.get(STR.execution, {}).get(STR.threads)
+        execution = self.config.get(STR.execution, {})
+        threads = execution.get(STR.threads)
         if threads and "OMP_NUM_THREADS" not in envvars:
             msg = "Config specified threads but driver does not set OMP_NUM_THREADS"
             raise UWConfigError(msg)
         rs = self._runscript(
-            envcmds=self.config.get(STR.execution, {}).get(STR.envcmds, []),
+            envcmds=execution.get(STR.envcmds, []),
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
                 "test $? -eq 0 && touch %s" % self._runscript_done_file,
             ],
             scheduler=self._scheduler if self._batch else None,
+            shell=execution.get(STR.shell, DEFAULT_SHELL),
         )
         with writable(path) as f:
             print(rs, file=f)
@@ -682,7 +707,8 @@ def _add_docstring(class_: type, omit: list[str] | None = None) -> None:
     :param config: Path to config file (read stdin if missing or None).
     :param key_path: Keys of keys to driver config block.
     :param batch: Run component via the batch system?
-    :param schema_file: Path to schema file to use to validate an external driver.
+    :param schema_file: Path to schema file to use to validate an external driver (default: \
+<driver_name>.jsonschema alongside the driver's module).
     :param controller: Key(s) leading to block in config controlling run-time values.
     """
     class_.__doc__ = "\n".join(

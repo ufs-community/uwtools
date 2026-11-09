@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import Mock
 
 from iotaa import Asset, Node, external
@@ -44,7 +44,7 @@ def ready_task():
 def utc():
     def utc(*args, **kwargs) -> datetime:
         # See https://github.com/python/mypy/issues/6799
-        tz = timezone.utc
+        tz = UTC
         dt = datetime(*args, **kwargs, tzinfo=tz) if args or kwargs else datetime.now(tz=tz)  # type: ignore[misc]
         return dt.replace(tzinfo=None)
 

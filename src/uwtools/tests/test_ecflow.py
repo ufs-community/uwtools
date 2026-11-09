@@ -2,11 +2,17 @@
 Tests for uwtools.ecflow module.
 """
 
+import os
+import re
+import socket
 import sys
 from copy import deepcopy
+from importlib import reload
 from io import StringIO
 from pathlib import Path
-from unittest.mock import Mock, patch
+from textwrap import dedent
+from types import SimpleNamespace as ns
+from unittest.mock import Mock, PropertyMock, patch
 
 import ecflow as ecflowlib  # type: ignore[import-untyped]
 import yaml
@@ -16,7 +22,8 @@ from pytest import fixture, mark, raises
 from uwtools import ecflow
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.ecflow import _ECFlowDef
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError, UWSSLCertificateError
+from uwtools.strings import STR
 from uwtools.utils.file import _stdinproxy
 
 # Fixtures
@@ -38,51 +45,401 @@ def instance(minimal_config):
 
 
 @fixture
-def instance_with_scheduler(instance):
-    instance._scheduler = "slurm"
-    return instance
-
-
-@fixture
 def minimal_config():
     return {"ecflow": {"suitedef": {}}}
 
 
-# Helpers
+@fixture
+def server_mocks():
+    """
+    Patch the collaborators of ecflow.server() and yield handles to the mocks.
 
-
-def assert_line_in(result: str, line: str) -> None:
-    assert line in (x.strip() for x in result.splitlines())
-
-
-def assert_lines_in_order(result: str, expected: list[str]) -> None:
-    lines = [x.strip() for x in result.splitlines()]
-    actual = [line for line in lines if line in expected]
-    assert actual == expected
+    The default config is a minimal valid secure-server config; tests that need
+    different data can reassign `m.cfg.data` before calling ecflow.server().
+    """
+    cfg = Mock()
+    cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf"}}}
+    with (
+        patch.object(ecflow, "YAMLConfig", return_value=cfg) as yamlconfig,
+        patch.object(ecflow, "_ServerThread") as thread_cls,
+        patch.object(ecflow, "_server_wait") as server_wait,
+        patch.object(ecflow, "_ssl_check") as ssl_check,
+        patch.object(ecflow, "_ssl_provision") as ssl_provision,
+        patch.object(ecflow, "validate") as validate,
+        patch.object(ecflow.signal, "signal") as signal,
+    ):
+        thread = thread_cls.return_value
+        thread.error = None
+        yield ns(
+            cfg=cfg,
+            config_path=Path("/some/server.yaml"),
+            server_wait=server_wait,
+            signal=signal,
+            ssl_check=ssl_check,
+            ssl_provision=ssl_provision,
+            thread=thread,
+            thread_cls=thread_cls,
+            validate=validate,
+            yamlconfig=yamlconfig,
+        )
 
 
 # Tests
 
 
-class TestECFlowDef:
+def test_ecflow_realize__cfg_to_file(tmp_path, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
+    output = (tmp_path / "suite.def").read_text()
+    assert output == expected
+
+
+def test_ecflow_realize__cfg_to_stdout(capsys, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=YAMLConfig(cfgfile))
+    output = capsys.readouterr().out
+    assert output == expected
+
+
+def test_ecflow_realize__file_to_file(tmp_path, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=cfgfile, output_path=tmp_path)
+    output = (tmp_path / "suite.def").read_text()
+    assert output == expected
+
+
+def test_ecflow_realize__file_to_stdout(capsys, assets):
+    cfgfile, _, expected = assets
+    ecflow.realize(config=cfgfile)
+    output = capsys.readouterr().out
+    assert output == expected
+
+
+def test_ecflow_realize__write_scripts(capsys, assets):
+    cfgfile, script_path, expected = assets
+    with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
+        ecflow.realize(config=cfgfile, scripts_path=script_path)
+        write_scripts.assert_called_once_with(script_path)
+    output = capsys.readouterr().out
+    assert output == expected
+
+
+@mark.parametrize(
+    "config", [{STR.ECF_HOME: "/ecf"}, YAMLConfig({STR.ECF_HOME: "/ecf"}), Path("s.yaml")]
+)
+def test_ecflow_server__accepts_config_types(server_mocks, config):
+    ecflow.server(config=config, port=3141)
+    server_mocks.yamlconfig.assert_called_once_with(config)
+
+
+def test_ecflow_server__ecf_ssl_false_skips_ssl(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: False}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_not_called()
+
+
+def test_ecflow_server__ecf_ssl_string_checks_named_cert(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: "myhost.3141"}}}
+    ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_not_called()
+    m.ssl_check.assert_called_once_with("myhost.3141")
+
+
+def test_ecflow_server__ecf_ssl_string_missing_cert_raises(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: "myhost.3141"}}}
+    m.ssl_check.side_effect = UWSSLCertificateError
+    msg = "Named SSL certificate files not found for ECF_SSL=myhost.3141"
+    with raises(UWSSLCertificateError, match=msg):
+        ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_not_called()
+
+
+def test_ecflow_server__ecf_ssl_true_provisions_and_sets_env(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: True}}}
+    m.ssl_check.side_effect = UWSSLCertificateError
+    ecflow.server(config=m.config_path, port=3141)
+    m.ssl_provision.assert_called_once_with()
+
+
+def test_ecflow_server__insecure_skips_ssl(server_mocks):
+    ecflow.server(config=server_mocks.config_path, port=3141, insecure=True)
+    server_mocks.ssl_provision.assert_not_called()
+    server_mocks.ssl_check.assert_not_called()
+
+
+def test_ecflow_server__insecure_unsets_ecf_ssl_env(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_SSL: True}}}
+    ecflow.server(config=m.config_path, port=3141, insecure=True)
+    env, _ = m.thread_cls.call_args.kwargs["args"]
+    assert STR.ECF_SSL not in env
+
+
+def test_ecflow_server__no_report_passes_none(server_mocks):
+    m = server_mocks
+    ecflow.server(config=m.config_path, port=54321)
+    assert m.server_wait.call_args.args[2] is None
+
+
+def test_ecflow_server__raises_on_thread_error(server_mocks):
+    m = server_mocks
+    m.thread.error = "ecflow_server failed on port 3141: boom"
+    with raises(UWError, match="ecflow_server failed on port 3141"):
+        ecflow.server(config=m.config_path, port=3141)
+
+
+@mark.parametrize("env", [None, {}])
+def test_ecflow__server_report_no_op(capsys, env):
+    ecflow._server_report(port=54321, env=env)
+    assert not capsys.readouterr().out
+
+
+def test_ecflow_server__env_include_config(server_mocks):
+    m = server_mocks
+    m.cfg.data = {"ecflow": {"server": {STR.ECF_HOME: "/ecf", STR.ECF_LOG: "my.log"}}}
+    with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
+        ecflow.server(config=m.config_path, port=54321, report=True)
+    assert m.server_wait.call_args.args[2] == {
+        STR.ECF_HOME: "/ecf",
+        STR.ECF_HOST: "server.hostname.com",
+        STR.ECF_LOG: "my.log",
+        STR.ECF_SSL: "1",
+    }
+
+
+def test_ecflow_server__env_insecure_omits_ssl(server_mocks):
+    m = server_mocks
+    with patch.object(ecflow.socket, "gethostname", return_value="server.hostname.com"):
+        ecflow.server(config=m.config_path, port=54321, insecure=True, report=True)
+    assert m.server_wait.call_args.args[2] == {
+        STR.ECF_HOME: "/ecf",
+        STR.ECF_HOST: "server.hostname.com",
+    }
+
+
+def test_ecflow_server__secure_sets_ecf_ssl_env(server_mocks):
+    ecflow.server(config=server_mocks.config_path, port=3141)
+    env, port = server_mocks.thread_cls.call_args.kwargs["args"]
+    assert env[STR.ECF_SSL] == "1"
+    assert port == 3141
+
+
+@mark.parametrize("ecf_ssl", [None, True, False])
+def test_ecflow_server__ssl_provision(ecf_ssl, server_mocks):
+    server_mocks.ssl_check.side_effect = UWSSLCertificateError
+    server_mocks.cfg.data["ecflow"]["server"][STR.ECF_SSL] = ecf_ssl
+    ecflow.server(config=server_mocks.config_path, port=3141)
+    if ecf_ssl in [None, True]:
+        server_mocks.ssl_provision.assert_called_once_with()
+    else:
+        server_mocks.ssl_provision.assert_not_called()
+
+
+def test_ecflow_server__starts_thread_and_waits(server_mocks):
+    m = server_mocks
+    ecflow.server(config=m.config_path, port=3141)
+    m.signal.assert_called_once_with(ecflow.signal.SIGINT, m.signal.call_args.args[1])
+    m.thread.start.assert_called_once()
+    m.server_wait.assert_called_once()
+    m.thread.join.assert_called_once()
+
+
+@mark.parametrize("proc", [True, False])
+def test_ecflow_server__terminate(proc, server_mocks, uwcaplog):
+    m = server_mocks
+    if not proc:
+        m.thread.proc = None  # it's a Mock otherwise
+    # terminate() is nested in server() and so is normally inaccessible, but is passed as the second
+    # argument to signal() which is mocked in server_mocks, so get a reference to it from signal()'s
+    # call args, then call it.
+    with patch.object(ecflow, "_server_start"):
+        ecflow.server(config=m.config_path, port=54321)
+    terminate = m.signal.call_args.args[1]
+    with patch.object(ecflow, "_client") as _client:
+        terminate(2, None)
+    m.thread.terminal.set.assert_called_once_with()
+    if proc:
+        assert "Halting" in uwcaplog.text
+        _client().halt_server.assert_called_once_with()
+        assert "Checkpointing" in uwcaplog.text
+        _client().checkpt.assert_called_once_with()
+        assert "Terminating" in uwcaplog.text
+        _client().terminate_server.assert_called_once_with()
+        m.thread.proc.wait.assert_called_once_with()
+
+
+def test_ecflow_server__validates_config(server_mocks):
+    m = server_mocks
+    ecflow.server(config=m.config_path, port=3141)
+    m.validate.assert_called_once_with(m.cfg)
+
+
+def test_ecflow_validate__dict(minimal_config):
+    assert ecflow.validate(minimal_config)
+
+
+def test_ecflow_validate__invalid(tmp_path):
+    yaml_file = tmp_path / "ecflow.yaml"
+    yaml_file.write_text("not_ecflow: {}\n")
+    with raises(UWConfigError) as e:
+        ecflow.validate(yaml_file)
+    assert "YAML validation errors" in str(e.value)
+
+
+def test_ecflow_validate__path(tmp_path, minimal_config):
+    path = tmp_path / "config.yaml"
+    YAMLConfig(minimal_config).dump(path)
+    assert ecflow.validate(path)
+
+
+def test_ecflow_validate__stdin(minimal_config):
+    _stdinproxy.cache_clear()
+    with StringIO(yaml.safe_dump(minimal_config)) as sio, patch.object(sys, "stdin", new=sio):
+        assert ecflow.validate()
+
+
+def test_ecflow_validate__suite_only():
+    config: dict = {"ecflow": {"suitedef": {"suite_mysuite": {}}}}
+    assert ecflow.validate(config)
+
+
+def test_ecflow_validate__suite_with_optional_properties():
+    config = {
+        "ecflow": {
+            "suitedef": {
+                "scheduler": "slurm",
+                "vars": {"FOO": "bar"},
+                "suite_mysuite": {},
+            }
+        }
+    }
+    assert ecflow.validate(config)
+
+
+def test_ecflow_validate__yamlconfig(minimal_config):
+    assert ecflow.validate(YAMLConfig(minimal_config))
+
+
+class Test_ECFlowDef:  # noqa: N801
     """
     Tests for class uwtools.ecflow._ECFlowDef.
     """
+
+    def test_ecflow__ECFlowDef__init__full_workflow(self, tmp_path):
+        config = {
+            "ecflow": {
+                "suitedef": {
+                    "suite_test": {
+                        "vars": {
+                            "SUITE_VAR": "value",
+                        },
+                        "family_prep": {
+                            "task_setup": {
+                                "trigger": "1==1",
+                                "script": {
+                                    "body": "/path/to/prep.sh",
+                                },
+                            },
+                        },
+                        "task_run": {
+                            "trigger": "/test/prep/setup == complete",
+                            "script": {
+                                "body": "/path/to/run.sh",
+                            },
+                        },
+                    }
+                }
+            }
+        }
+        ecf = _ECFlowDef(config=config)
+        # Verify suite definition was created.
+        suite_def = str(ecf)
+        assert "suite test" in suite_def
+        assert "family prep" in suite_def
+        assert "task setup" in suite_def
+        assert "task run" in suite_def
+        ecf.write_suite_definition(tmp_path)
+        assert (tmp_path / "suite.def").is_file()
+        ecf.write_ecf_scripts(tmp_path)
+        assert (tmp_path / "test" / "run.ecf").is_file()
+
+    def test_ecflow__ECFlowDef__init__missing_ecflow_key(self):
+        config: dict = {"not_ecflow": {}}
+        with raises(UWConfigError):
+            _ECFlowDef(config=config)
+
+    def test_ecflow__ECFlowDef__init__with_config_object(self, minimal_config):
+        cfg = YAMLConfig(minimal_config)
+        ecf = _ECFlowDef(config=cfg)
+        assert ecf._config == {}
+        assert isinstance(ecf._d, Defs)
+
+    def test_ecflow__ECFlowDef__init__with_dict(self, minimal_config):
+        ecf = _ECFlowDef(config=minimal_config)
+        assert ecf._config == {}
+        assert ecf._scheduler is None
+        assert isinstance(ecf._d, Defs)
+
+    def test_ecflow__ECFlowDef__init__with_expand(self):
+        config = {
+            "ecflow": {
+                "suitedef": {
+                    "suite_ensemble": {
+                        "tasks_member_{{ ec.MEM }}": {
+                            "expand": {
+                                "MEM": ["01", "02", "03"],
+                            },
+                            "script": {
+                                "body": "hello.exe",
+                            },
+                        },
+                    }
+                }
+            }
+        }
+        ecf = _ECFlowDef(config=config)
+        suite_def = str(ecf)
+        # All three members should be created.
+        assert "task member_01" in suite_def
+        assert "task member_02" in suite_def
+        assert "task member_03" in suite_def
+
+    def test_ecflow__ECFlowDef__init__with_path(self, tmp_path):
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text("ecflow:\n  suitedef:\n    scheduler: pbs\n")
+        ecf = _ECFlowDef(config=config_file)
+        assert ecf._scheduler == "pbs"
+        assert isinstance(ecf._d, Defs)
+
+    def test_ecflow__ECFlowDef__init__with_scheduler(self):
+        config = {"ecflow": {"suitedef": {"scheduler": "slurm"}}}
+        ecf = _ECFlowDef(config=config)
+        assert ecf._scheduler == "slurm"
+
+    def test_ecflow__ECFlowDef__str__(self, instance):
+        result = str(instance)
+        assert isinstance(result, str)
+
+    # Public
 
     def test_ecflow__ECFlowDef_write_ecf_scripts__no_scripts(self, instance, logged, tmp_path):
         instance.write_ecf_scripts(tmp_path)
         assert logged("No scripts are configured for this workflow")
 
     def test_ecflow__ECFlowDef_write_ecf_scripts__with_scripts(self, instance, tmp_path):
-        instance._scripts = {Path("test/hello.ecf"): "#!/bin/bash\necho hello"}
+        instance._scripts = {"/test/hello.ecf": "#!/bin/bash\necho hello"}
         instance.write_ecf_scripts(tmp_path)
         outfile = tmp_path / "test" / "hello.ecf"
         assert outfile.is_file()
         assert "echo hello" in outfile.read_text()
 
     def test_ecflow__ECFlowDef_write_ecf_scripts__with_string_path(self, instance, tmp_path):
-        instance._scripts = {Path("suite/task.ecf"): "#!/bin/bash\necho test"}
-        instance.write_ecf_scripts(str(tmp_path))
+        instance._scripts = {"/suite/task.ecf": "#!/bin/bash\necho test"}
+        instance.write_ecf_scripts(tmp_path)
         outfile = tmp_path / "suite" / "task.ecf"
         assert outfile.is_file()
 
@@ -100,6 +457,19 @@ class TestECFlowDef:
         nested_path = tmp_path / "nested" / "output"
         instance.write_suite_definition(nested_path)
         assert (nested_path / "suite.def").is_file()
+
+    # Private
+
+    @mark.parametrize("prefix", ["family", "task"])
+    def test_ecflow__ECFlowDef__add_node__bad_name_family_task(self, instance, prefix):
+        with raises(UWConfigError) as e:
+            instance._add_node({f"{prefix}_%bad%": {}}, Suite("test"), instance._d)
+        assert re.match(r"^Invalid node name .* '%bad%': .*$", str(e.value))
+
+    def test_ecflow__ECFlowDef__add_node__bad_name_suite(self):
+        with raises(UWConfigError) as e:
+            _ECFlowDef({"ecflow": {"suitedef": {"suite_%bad%": {}}}})
+        assert re.match(r"^Invalid node name .* '%bad%': .*$", str(e.value))
 
     def test_ecflow__ECFlowDef__add_node__basic(self, instance):
         suite = Suite("test")
@@ -209,7 +579,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script LAST so loop exits after processing it.
-        script_config = {"execution": {"incantation": "echo hi"}}
+        script_config = {"body": "echo hi"}
         config = {"trigger": "1==1", "script": script_config}
         instance._add_node(config, task, suite)
         # Verify both trigger and script were processed.
@@ -220,7 +590,7 @@ class TestECFlowDef:
         suite = Suite("test")
         task = Task("t1")
         # Place script FIRST so loop must continue to process trigger afterward.
-        script_config = {"execution": {"incantation": "echo hi"}}
+        script_config = {"body": "echo hi"}
         config = {"script": script_config, "trigger": "1==1"}
         instance._add_node(config, task, suite)
         # Verify script was created and loop continued to process trigger.
@@ -339,100 +709,6 @@ class TestECFlowDef:
             instance._add_workflow_components()
         mock_add_var.assert_called_once_with({"FOO": "bar"})
 
-    def test_ecflow__ECFlowDef__create_ecf_script(self, instance):
-        task = Task("hello")
-        suite = Suite("test")
-        suite.add(task)
-        instance._d.add(suite)
-        config = {
-            "execution": {"incantation": "echo hello"},
-            "manual": "Test task",
-        }
-        instance._create_ecf_script(config, task)
-        assert len(instance._scripts) == 1
-        script_content = list(instance._scripts.values())[0]
-        assert "echo hello" in script_content
-
-    def test_ecflow__ECFlowDef__create_ecf_script__without_incantation(self, instance):
-        task = Task("hello")
-        suite = Suite("test")
-        suite.add(task)
-        instance._d.add(suite)
-        config = {
-            "execution": {},
-            "manual": "Test task",
-        }
-        with raises(UWConfigError, match="must include 'incantation'"):
-            instance._create_ecf_script(config, task)
-
-    def test_ecflow__ECFlowDef__create_ecf_script__with_scheduler(self, instance_with_scheduler):
-        task = Task("hello")
-        suite = Suite("test")
-        suite.add(task)
-        instance_with_scheduler._d.add(suite)
-        config = {
-            "execution": {"incantation": "echo hello"},
-            "account": "myaccount",
-            "rundir": "/path/to/run",
-        }
-        with patch.object(instance_with_scheduler, "_jobscheduler") as _jobscheduler:
-            _jobscheduler.return_value = Mock(directives=[], initcmds=[])
-            instance_with_scheduler._create_ecf_script(config, task)
-        _jobscheduler.assert_called_once()
-
-    def test_ecflow__ECFlowDef__ecflowscript__minimal(self, instance):
-        result = instance._ecflowscript(
-            execution=["echo hello"],
-            manual="Test script",
-        )
-        assert_line_in(result, "echo hello")
-        assert_line_in(result, "Test script")
-        assert_line_in(result, "%manual")
-        assert_line_in(result, "%end")
-        assert_line_in(result, "model=%MODEL%")
-
-    def test_ecflow__ECFlowDef__ecflowscript__with_envcmds(self, instance):
-        result = instance._ecflowscript(
-            execution=["echo hello"],
-            manual="Test script",
-            envcmds=["module load foo", "export BAR=baz"],
-        )
-        assert_line_in(result, "module load foo")
-        assert_line_in(result, "export BAR=baz")
-
-    def test_ecflow__ECFlowDef__ecflowscript__with_envvars(self, instance):
-        result = instance._ecflowscript(
-            execution=["echo hello"],
-            manual="Test script",
-            envvars={"FOO": "bar", "BAZ": "qux"},
-        )
-        assert_line_in(result, "export FOO=bar")
-        assert_line_in(result, "export BAZ=qux")
-
-    def test_ecflow__ECFlowDef__ecflowscript__with_includes(self, instance):
-        result = instance._ecflowscript(
-            execution=["echo hello"],
-            manual="Test script",
-            pre_includes=["head.h", "setup.h"],
-            post_includes=["tail.h"],
-        )
-        assert_lines_in_order(
-            result,
-            ["%include <head.h>", "%include <setup.h>", "%include <tail.h>"],
-        )
-
-    def test_ecflow__ECFlowDef__ecflowscript__with_scheduler(self, instance):
-        mock_scheduler = Mock()
-        mock_scheduler.directives = ["#SBATCH --account=foo", "#SBATCH --time=01:00:00"]
-        mock_scheduler.initcmds = ["srun --export=ALL"]
-        result = instance._ecflowscript(
-            execution=["echo hello"],
-            manual="Test script",
-            scheduler=mock_scheduler,
-        )
-        assert_line_in(result, "#SBATCH --account=foo")
-        assert_line_in(result, "srun --export=ALL")
-
     def test_ecflow__ECFlowDef__expand_block__basic(self, instance):
         config = {"expand": {"MEMBER": ["m01", "m02"]}, "task_{{ ec.MEMBER }}": {}}
         suite = Suite("test")
@@ -451,152 +727,65 @@ class TestECFlowDef:
         with raises(UWConfigError, match="same length"):
             instance._expand_block(config, "suite", Suite, suite)
 
-    def test_ecflow__ECFlowDef__init__defs_check_bad_trigger(self):
+    def test_ecflow__ECFlowDef__prepare_ecf_script__body_only(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {"body": "echo hello"}
+        instance._prepare_ecf_script(config, task)
+        expected = """
+        #!/usr/bin/env bash
+
+        echo hello
+        """
+        assert instance._scripts["/test/t1"] == dedent(expected).strip()
+
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_includes(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
         config = {
-            "ecflow": {
-                "suitedef": {
-                    "suite_test": {
-                        "task_a": {
-                            "script": {
-                                "execution": {
-                                    "incantation": "/path/to/run.sh",
-                                }
-                            },
-                            "trigger": "nonexistent_task == complete",
-                        }
-                    }
-                }
-            }
+            "body": "run.sh",
+            "includes": {
+                "entry": ["<head.h>", "<env.h>"],
+                "exit": ["<tail.h>"],
+            },
         }
-        with raises(AssertionError):
-            _ECFlowDef(config=config)
+        instance._prepare_ecf_script(config, task)
+        result = instance._scripts["/test/t1"]
+        assert "%include <head.h>" in result
+        assert "%include <env.h>" in result
+        assert "%include <tail.h>" in result
+        assert "run.sh" in result
 
-    def test_ecflow__ECFlowDef__init__full_workflow(self, tmp_path):
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_manual(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        config = {"body": "run.sh", "manual": "This is the manual page."}
+        instance._prepare_ecf_script(config, task)
+        result = instance._scripts["/test/t1"]
+        assert "%manual" in result
+        assert "This is the manual page." in result
+        assert "%end" in result
+
+    def test_ecflow__ECFlowDef__prepare_ecf_script__with_scheduler(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        suite.add(task)
+        instance._d.add(suite)
+        instance._scheduler = "slurm"
         config = {
-            "ecflow": {
-                "suitedef": {
-                    "suite_test": {
-                        "vars": {"SUITE_VAR": "value"},
-                        "family_prep": {
-                            "task_setup": {
-                                "trigger": "1==1",
-                                "script": {
-                                    "execution": {
-                                        "incantation": "/path/to/prep.sh",
-                                    },
-                                },
-                            },
-                        },
-                        "task_run": {
-                            "trigger": "/test/prep/setup == complete",
-                            "script": {
-                                "execution": {"incantation": "/path/to/run.sh"},
-                            },
-                        },
-                    }
-                }
-            }
+            "body": "run.sh",
+            "batchargs": {"account": "myacct", "nodes": 1, "walltime": "00:10:00"},
         }
-        ecf = _ECFlowDef(config=config)
-        # Verify suite definition was created.
-        suite_def = str(ecf)
-        assert "suite test" in suite_def
-        assert "family prep" in suite_def
-        assert "task setup" in suite_def
-        assert "task run" in suite_def
-        ecf.write_suite_definition(tmp_path)
-        assert (tmp_path / "suite.def").is_file()
-        ecf.write_ecf_scripts(tmp_path)
-        assert (tmp_path / "test" / "run.ecf").is_file()
-
-    def test_ecflow__ECFlowDef__init__missing_ecflow_key(self):
-        config: dict = {"not_ecflow": {}}
-        with raises(UWConfigError):
-            _ECFlowDef(config=config)
-
-    def test_ecflow__ECFlowDef__init__with_config_object(self, minimal_config):
-        cfg = YAMLConfig(minimal_config)
-        ecf = _ECFlowDef(config=cfg)
-        assert ecf._config == {}
-        assert isinstance(ecf._d, Defs)
-
-    def test_ecflow__ECFlowDef__init__with_dict(self, minimal_config):
-        ecf = _ECFlowDef(config=minimal_config)
-        assert ecf._config == {}
-        assert ecf._scheduler is None
-        assert isinstance(ecf._d, Defs)
-
-    def test_ecflow__ECFlowDef__init__with_expand(self):
-        config = {
-            "ecflow": {
-                "suitedef": {
-                    "suite_ensemble": {
-                        "tasks_member_{{ ec.MEM }}": {
-                            "expand": {"MEM": ["01", "02", "03"]},
-                            "script": {"execution": {"incantation": "hello.exe"}},
-                        }
-                    }
-                }
-            }
-        }
-        ecf = _ECFlowDef(config=config)
-        suite_def = str(ecf)
-        # All three members should be created.
-        assert "task member_01" in suite_def
-        assert "task member_02" in suite_def
-        assert "task member_03" in suite_def
-
-    def test_ecflow__ECFlowDef__init__with_path(self, tmp_path):
-        config_file = tmp_path / "config.yaml"
-        config_file.write_text("ecflow:\n  suitedef:\n    scheduler: pbs\n")
-        ecf = _ECFlowDef(config=config_file)
-        assert ecf._scheduler == "pbs"
-        assert isinstance(ecf._d, Defs)
-
-    def test_ecflow__ECFlowDef__init__with_scheduler(self):
-        config = {"ecflow": {"suitedef": {"scheduler": "slurm"}}}
-        ecf = _ECFlowDef(config=config)
-        assert ecf._scheduler == "slurm"
-
-    def test_ecflow__ECFlowDef__jobscheduler(self, instance_with_scheduler):
-        execution = {"threads": 4, "batchargs": {"queue": "batch"}}
-        with patch.object(ecflow.JobScheduler, "get_scheduler") as get_scheduler:
-            instance_with_scheduler._jobscheduler(
-                account="myaccount",
-                execution=execution,
-                rundir="/path/to/run",
-            )
-        get_scheduler.assert_called_once_with(
-            {
-                "account": "myaccount",
-                "rundir": "/path/to/run",
-                "scheduler": "slurm",
-                "stdout": "/path/to/run.out",
-                "threads": 4,
-                "queue": "batch",
-            }
-        )
-
-    def test_ecflow__ECFlowDef__jobscheduler__no_threads(self, instance_with_scheduler):
-        execution: dict = {}
-        with patch.object(ecflow.JobScheduler, "get_scheduler") as get_scheduler:
-            instance_with_scheduler._jobscheduler(
-                account="myaccount",
-                execution=execution,
-                rundir="/path/to/run",
-            )
-        get_scheduler.assert_called_once_with(
-            {
-                "account": "myaccount",
-                "rundir": "/path/to/run",
-                "scheduler": "slurm",
-                "stdout": "/path/to/run.out",
-            }
-        )
-
-    def test_ecflow__ECFlowDef__str__(self, instance):
-        result = str(instance)
-        assert isinstance(result, str)
+        instance._prepare_ecf_script(config, task)
+        result = instance._scripts["/test/t1"]
+        assert "#SBATCH" in result
+        assert "run.sh" in result
 
     @mark.parametrize(
         ("key", "expected"),
@@ -612,84 +801,465 @@ class TestECFlowDef:
         assert instance._tag_name(key) == expected
 
 
-def test_ecflow_realize__cfg_to_file(tmp_path, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=YAMLConfig(cfgfile), output_path=tmp_path)
-    output = (tmp_path / "suite.def").read_text()
-    assert output == expected
+@mark.parametrize("insecure", [True, False])
+def test_ecflow__client(insecure):
+    portnum = 54321
+    with (
+        patch.object(ecflow, "Client") as Client,
+        patch.dict(os.environ, {STR.ECF_SSL: "oldval"}),
+    ):
+        ecflow._client(port=portnum, insecure=insecure, prefix=None)
+        assert os.environ[STR.ECF_SSL] == "oldval"  # restored
+    Client.assert_called_once_with(socket.gethostname(), str(portnum))
+    if insecure:
+        Client().enable_ssl.assert_not_called()
+    else:
+        Client().enable_ssl.assert_called_once_with()
 
 
-def test_ecflow_realize__cfg_to_stdout(capsys, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=YAMLConfig(cfgfile))
-    output = capsys.readouterr().out
-    assert output == expected
+@mark.parametrize(("prefix", "expected"), [(None, "1"), ("myhost.54321", "myhost.54321")])
+def test_ecflow__client__certificate_selection(expected, prefix):
+    # ecFlow selects the client certificate based on ECF_SSL, which must be set when enable_ssl() is
+    # called, then unset again since it was not originally set.
+    portnum = 54321
+    enable_ssl = Mock(side_effect=lambda: ecf_ssl.append(os.environ[STR.ECF_SSL]))
+    ecf_ssl: list[str] = []
+    with (
+        patch.object(ecflow, "Client", return_value=Mock(enable_ssl=enable_ssl)),
+        patch.dict(os.environ),
+    ):
+        os.environ.pop(STR.ECF_SSL, None)
+        ecflow._client(port=portnum, insecure=False, prefix=prefix)
+        assert STR.ECF_SSL not in os.environ  # restored
+    assert ecf_ssl == [expected]
 
 
-def test_ecflow_realize__file_to_file(tmp_path, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=cfgfile, output_path=tmp_path)
-    output = (tmp_path / "suite.def").read_text()
-    assert output == expected
+class Test_ServerThread:  # noqa: N801
+    """
+    Tests for class uwtools.ecflow._ServerThread.
+    """
+
+    def test_ecflow__ServerThread__init(self):
+        thread = ecflow._ServerThread(target=lambda: None)
+        assert thread.error is None
+        assert isinstance(thread.initial, ecflow.Event)
+        assert not thread.initial.is_set()
+        assert thread.port is None
+        assert thread.proc is None
+        assert isinstance(thread.terminal, ecflow.Event)
+        assert not thread.terminal.is_set()
 
 
-def test_ecflow_realize__file_to_stdout(capsys, assets):
-    cfgfile, _, expected = assets
-    ecflow.realize(config=cfgfile)
-    output = capsys.readouterr().out
-    assert output == expected
+def test_ecflow__node():
+    task = ecflow._node(cls=Task, name="foo")
+    assert isinstance(task, Task)
 
 
-def test_ecflow_realize__write_scripts(capsys, assets):
-    cfgfile, script_path, expected = assets
-    with patch.object(ecflow._ECFlowDef, "write_ecf_scripts") as write_scripts:
-        ecflow.realize(config=cfgfile, scripts_path=script_path)
-        write_scripts.assert_called_once_with(script_path)
-    output = capsys.readouterr().out
-    assert output == expected
-
-
-def test_ecflow_validate__dict(minimal_config):
-    assert ecflow.validate(minimal_config)
-
-
-def test_ecflow_validate__invalid(tmp_path):
-    yaml_file = tmp_path / "ecflow.yaml"
-    yaml_file.write_text("not_ecflow: {}\n")
+def test_ecflow__node__bad_name():
     with raises(UWConfigError) as e:
-        ecflow.validate(yaml_file)
-    assert "YAML validation errors" in str(e.value)
+        ecflow._node(cls=Task, name=".bad.")
+    assert "Invalid node name" in str(e)
 
 
-def test_ecflow_validate__path(tmp_path, minimal_config):
-    path = tmp_path / "config.yaml"
-    YAMLConfig(minimal_config).dump(path)
-    assert ecflow.validate(path)
+def test_ecflow__openssl__not_found():
+    with (
+        patch.object(ecflow.shutil, "which", return_value=None),
+        raises(UWError, match="openssl not found on PATH"),
+    ):
+        ecflow._openssl()
 
 
-def test_ecflow_validate__stdin(minimal_config):
-    _stdinproxy.cache_clear()
-    with StringIO(yaml.safe_dump(minimal_config)) as sio, patch.object(sys, "stdin", new=sio):
-        assert ecflow.validate()
+def test_ecflow__server_report(capsys):
+    ecflow._server_report(port=54321, env={STR.ECF_HOST: "host.com", STR.ECF_SSL: "1"})
+    report = yaml.safe_load(capsys.readouterr().out)
+    assert report == {STR.ECF_HOST: "host.com", STR.ECF_SSL: "1", STR.ECF_PORT: "54321"}
 
 
-def test_ecflow_validate__suite_only():
-    config: dict = {"ecflow": {"suitedef": {"suite_mysuite": {}}}}
-    assert ecflow.validate(config)
+def test_ecflow__server_start__doa(tmp_path):
+    thread = ecflow._ServerThread()
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd") as run_shell_cmd,
+    ):
+        thread.terminal.set()
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=9999)
+    run_shell_cmd.assert_not_called()  # main loop never entered
+    assert thread.error is None
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
 
 
-def test_ecflow_validate__suite_with_optional_properties():
-    config = {
-        "ecflow": {
-            "suitedef": {
-                "scheduler": "slurm",
-                "vars": {"FOO": "bar"},
-                "suite_mysuite": {},
-            }
-        }
-    }
-    assert ecflow.validate(config)
+def test_ecflow__server_start__bad_ecf_home(tmp_path):
+    ecf_home = tmp_path / "home"
+    tmp_path.chmod(0o555)
+    thread = ecflow._ServerThread()
+    with patch.object(ecflow, "current_thread", return_value=thread):
+        ecflow._server_start(env={STR.ECF_HOME: ecf_home}, port=9999)
+    assert thread.error == f"Failed to create ECF_HOME directory {ecf_home}"
+    assert not thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    tmp_path.chmod(0o755)
 
 
-def test_ecflow_validate__yamlconfig(minimal_config):
-    assert ecflow.validate(YAMLConfig(minimal_config))
+def test_ecflow__server_start__fixed_port_ssl(tmp_path):
+    def f(*_args, **_kwargs):
+        run_shell_cmd.call_args.kwargs["callback"](proc)
+        thread.terminal.set()
+        return True, "all good"
+
+    header = tmp_path / "server.h"
+    assert not header.is_file()
+    proc = object()
+    thread = ecflow._ServerThread()
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path, STR.ECF_SSL: "1"}, port=3141)
+    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
+    assert run_shell_cmd.call_args.kwargs["cwd"] == tmp_path
+    assert thread.error is None
+    assert thread.initial.is_set()
+    assert thread.port == 3141
+    assert thread.proc is proc
+    assert header.is_file()
+    expected = """
+    export ECF_HOST=%ECF_HOST%
+    export ECF_JOB=%ECF_JOB%
+    export ECF_JOBOUT=%ECF_JOBOUT%
+    export ECF_NAME=%ECF_NAME%
+    export ECF_PASS=%ECF_PASS%
+    export ECF_PORT=%ECF_PORT%
+    export ECF_SSL=%ECF_SSL%
+    export ECF_TRYNO=%ECF_TRYNO%
+    export PATH={conda}/bin/:$PATH
+    """.format(conda=os.environ["CONDA_PREFIX"])
+    assert header.read_text() == dedent(expected).lstrip()
+
+
+def test_ecflow__server_start__fixed_port_insecure(tmp_path):
+    def f(*_args, **_kwargs):
+        run_shell_cmd.call_args.kwargs["callback"](None)
+        thread.terminal.set()
+        return True, "all good"
+
+    header = tmp_path / "server.h"
+    thread = ecflow._ServerThread()
+    with (
+        patch.dict(os.environ, {STR.ECF_SSL: "1"}),  # inherited ECF_SSL
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
+    assert run_shell_cmd.call_args.kwargs["cmd"] == ["ecflow_server"]
+    assert STR.ECF_SSL not in run_shell_cmd.call_args.kwargs["env"]
+    expected = """
+    export ECF_HOST=%ECF_HOST%
+    export ECF_JOB=%ECF_JOB%
+    export ECF_JOBOUT=%ECF_JOBOUT%
+    export ECF_NAME=%ECF_NAME%
+    export ECF_PASS=%ECF_PASS%
+    export ECF_PORT=%ECF_PORT%
+    export ECF_TRYNO=%ECF_TRYNO%
+    export PATH={conda}/bin/:$PATH
+    """.format(conda=os.environ["CONDA_PREFIX"])
+    assert header.read_text() == dedent(expected).lstrip()
+
+
+def test_ecflow__server_start__fixed_port_other_failure(tmp_path, uwcaplog):
+    thread = ecflow._ServerThread()
+    success, output = False, "ABJECT FAILURE"
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
+    assert "ABJECT FAILURE" in uwcaplog.text
+    assert thread.error == "ecflow_server failed on port 3141"
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
+
+
+def test_ecflow__server_start__fixed_port_unavailable(tmp_path):
+    thread = ecflow._ServerThread()
+    success, output = False, "bind: Address already in use"
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
+    assert thread.error == "Requested port 3141 is unavailable"
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
+
+
+def test_ecflow__server_start__launch_failure(tmp_path):
+    thread = ecflow._ServerThread()
+    err = FileNotFoundError(2, "No such file or directory", "ecflow_server")
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", side_effect=err),
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=3141)
+    assert thread.error is not None
+    assert thread.error.startswith("Failed to launch ecflow_server:")
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
+
+
+def test_ecflow__server_start__random_port_failure(tmp_path, uwcaplog):
+    thread = ecflow._ServerThread()
+    success, output = False, "bad\nnews"
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", return_value=(success, output)),
+        patch.object(ecflow.random, "randint", return_value=31415),
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: tmp_path}, port=None)
+    lines = uwcaplog.text.split("\n")
+    assert "bad" in lines
+    assert "news" in lines
+    assert thread.error == "ecflow_server failed on port 31415"
+    assert thread.initial.is_set()
+    assert thread.port is None
+    assert thread.proc is None
+    assert thread.terminal.is_set()
+
+
+def test_ecflow__server_start__random_port_retries_until_available(tmp_path):
+    def f(*_args, **_kwargs):
+        port = run_shell_cmd.call_args.kwargs["env"][STR.ECF_PORT]
+        if int(port) == ports[0]:
+            return False, "ecf: bind: Address already in use"
+        run_shell_cmd.call_args.kwargs["callback"](None)
+        return True, "all good"
+
+    cwd = tmp_path / "ecf"
+    assert not cwd.exists()
+    thread = ecflow._ServerThread()
+    ports = [12345, 54321]
+    with (
+        patch.object(ecflow, "current_thread", return_value=thread),
+        patch.object(ecflow, "run_shell_cmd", side_effect=f) as run_shell_cmd,
+        patch.object(ecflow.random, "randint", side_effect=ports),
+    ):
+        ecflow._server_start(env={STR.ECF_HOME: cwd}, port=None)
+    assert thread.port == 54321
+    assert thread.error is None
+    assert cwd.is_dir()
+
+
+@mark.parametrize("env", [{"FOO": "bar"}, None])
+@mark.parametrize("insecure", [True, False])
+@mark.parametrize("ping_effect", [None, [RuntimeError("Failed to connect"), None]])
+def test_ecflow__server_wait__ok(env, insecure, ping_effect, uwcaplog):
+    portnum = 54321
+    thread = ecflow._ServerThread()
+    ping = Mock(side_effect=ping_effect)
+    with (
+        patch.object(ecflow, "_client", return_value=Mock(ping=ping)) as _client,
+        patch.object(ecflow, "_server_report") as _server_report,
+        patch.object(ecflow, "sleep") as sleep,
+        patch.object(
+            ecflow._ServerThread,
+            "port",
+            new=PropertyMock(side_effect=[None, portnum, portnum]),
+            create=True,
+        ) as port,
+    ):
+        ecflow._server_wait(thread, insecure=insecure, env=env, prefix="myhost.54321")
+    _client.assert_called_with(portnum, insecure, "myhost.54321")
+    _server_report.assert_called_once_with(portnum, env)
+    assert f"Server started on port {portnum}" in uwcaplog.text
+    if ping_effect:
+        assert _client.call_count == 2
+        assert port.call_count == 3
+        assert sleep.call_count == 2
+    else:
+        assert _client.call_count == 1
+        assert port.call_count == 2
+        assert sleep.call_count == 1
+
+
+def test_ecflow__server_wait__no_op(uwcaplog):
+    # The outer loop terminates without thread.port ever being set, so _server_wait() exits without
+    # any actions being taken.
+    thread = ecflow._ServerThread()
+    with (
+        patch.object(ecflow, "_client") as _client,
+        patch.object(ecflow, "_server_report") as _server_report,
+        patch.object(ecflow, "sleep") as sleep,
+        patch.object(thread.terminal, "is_set", Mock(side_effect=[False, True])),
+    ):
+        ecflow._server_wait(thread, insecure=False, env=None, prefix=None)
+    _client.assert_not_called()
+    _server_report.assert_not_called()
+    assert not uwcaplog.text
+    sleep.assert_called_once()
+
+
+def test_ecflow__server_wait__unhandled_exception(uwcaplog):
+    portnum = 54321
+    thread = ecflow._ServerThread()
+    thread.port = portnum
+    msg = "UNMITIGATED DISASTER"
+    ping = Mock(side_effect=RuntimeError(msg))
+    with (
+        patch.object(ecflow, "_client", return_value=Mock(ping=ping)) as _client,
+        patch.object(ecflow, "_server_report") as _server_report,
+        patch.object(ecflow, "sleep") as sleep,
+        raises(UWError) as e,
+    ):
+        ecflow._server_wait(thread, insecure=False, env=None, prefix=None)
+    _client.assert_called_once_with(portnum, False, None)
+    _server_report.assert_not_called()
+    assert msg in uwcaplog.text
+    assert str(e.value) == "Could not start server on port 54321"
+    sleep.assert_not_called()
+
+
+def test_ecflow__ssl_check__all_files_exist(logged, tmp_path):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+    ssl_dir.mkdir(parents=True)
+    prefix = "myhost.3141"
+    fns = [f"{prefix}.{ext}" for ext in ("crt", "key", "pem")]
+    for fn in fns:
+        (ssl_dir / fn).touch()
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir):
+        ecflow._ssl_check(prefix)
+    assert logged("Using SSL certificates %s in %s" % (", ".join(fns), ssl_dir))
+
+
+@mark.parametrize("excluded", ["dh2048.pem", "server.crt", "server.key"])
+@mark.parametrize("ssl_dir_exists", [True, False])
+def test_ecflow__ssl_check__missing_default_files_raises(
+    excluded, ssl_dir_exists, tmp_path, uwcaplog
+):
+    ssl_dir = tmp_path / "ssl"
+    if ssl_dir_exists:
+        ssl_dir.mkdir()
+        fns = ["dh2048.pem", "server.crt", "server.key"]
+        fns.remove(excluded)
+        for fn in fns:
+            (ssl_dir / fn).touch()
+    with patch.object(ecflow, "_SSL_DIR", ssl_dir), raises(UWSSLCertificateError):
+        ecflow._ssl_check(None)
+    msgs = [
+        "Missing SSL certificate file(s): %s" % (ssl_dir / excluded),
+        "Provide these files or remove %s to automatically generate" % ssl_dir,
+    ]
+    for msg in msgs:
+        if ssl_dir_exists:
+            assert msg in uwcaplog.text
+
+
+@mark.parametrize("excluded", ["crt", "key", "pem"])
+def test_ecflow__ssl_check__missing_named_files_raises(excluded, tmp_path, uwcaplog):
+    prefix = "myhost.3141"
+    for extension in [x for x in ("crt", "key", "pem") if x != excluded]:
+        (tmp_path / f"{prefix}.{extension}").touch()
+    with patch.object(ecflow, "_SSL_DIR", tmp_path), raises(UWSSLCertificateError):
+        ecflow._ssl_check(prefix)
+    msg = "Missing SSL certificate file(s): %s" % (tmp_path / f"{prefix}.{excluded}")
+    assert msg in uwcaplog.text
+
+
+def test_ecflow__ssl_generate_cert__failure(tmp_path):
+    cert_path = tmp_path / "server.crt"
+    key_path = tmp_path / "server.key"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        raises(UWError, match="Failed to generate SSL certificate"),
+    ):
+        ecflow._ssl_generate_cert(cert_path, key_path)
+    assert not cert_path.is_file()
+    assert not key_path.is_file()
+
+
+def test_ecflow__ssl_generate_cert__success(tmp_path):
+    cert_path = tmp_path / "server.crt"
+    key_path = tmp_path / "server.key"
+    ecflow._ssl_generate_key(key_path)
+    ecflow._ssl_generate_cert(cert_path, key_path)
+    assert cert_path.is_file()
+    # umask 077 in the shell command yields owner-only permissions on generated files.
+    assert oct(cert_path.stat().st_mode)[-3:] == "600"
+
+
+def test_ecflow__ssl_generate_dhparam__failure(tmp_path):
+    path = tmp_path / "dh2048.pem"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        raises(UWError, match="Failed to generate DH parameters"),
+    ):
+        ecflow._ssl_generate_dhparam(path)
+    assert not path.is_file()
+
+
+def test_ecflow__ssl_generate_dhparam__success(tmp_path):
+    # DH-parameter generation is slow and entropy-dependent, so (unlike the key and cert tests,
+    # which exercise real openssl) mock the subprocess call and assert the command string. The
+    # resulting 0600 permissions are verified for real by the key and cert tests, which share the
+    # umask 077 shell mechanism.
+    path = tmp_path / "dh2048.pem"
+    with patch.object(ecflow, "run_shell_cmd", return_value=(True, "")) as mock_run:
+        ecflow._ssl_generate_dhparam(path)
+    mock_run.assert_called_once()
+    cmd = mock_run.call_args.kwargs["cmd"]
+    assert "umask 077" in cmd
+    assert f"dhparam -out {path} 2048" in cmd
+
+
+def test_ecflow__ssl_generate_key__failure(tmp_path):
+    path = tmp_path / "server.key"
+    with (
+        patch.object(ecflow, "run_shell_cmd", return_value=(False, "error")),
+        raises(UWError, match="Failed to generate SSL private key"),
+    ):
+        ecflow._ssl_generate_key(path)
+    assert not path.is_file()
+
+
+def test_ecflow__ssl_generate_key__success(tmp_path):
+    path = tmp_path / "server.key"
+    ecflow._ssl_generate_key(path)
+    assert path.is_file()
+    # umask 077 in the shell command yields owner-only permissions on generated files.
+    assert oct(path.stat().st_mode)[-3:] == "600"
+
+
+def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
+    ssl_dir = tmp_path / ".ecflowrc" / "ssl"
+
+    def fake_run(cmd, **_kwargs):
+        # Emulate openssl by creating the file named after its "-out" argument.
+        parts = cmd.split()
+        Path(parts[parts.index("-out") + 1]).touch()
+        return (True, "")
+
+    with (
+        patch.object(ecflow, "_SSL_DIR", ssl_dir),
+        patch.object(ecflow, "run_shell_cmd", side_effect=fake_run),
+    ):
+        ecflow._ssl_provision()
+    assert ssl_dir.is_dir()
+    assert (ssl_dir / "server.key").is_file()
+    assert (ssl_dir / "server.crt").is_file()
+    assert (ssl_dir / "dh2048.pem").is_file()
+    assert logged("SSL certificate files written to %s" % ssl_dir)
+
+
+def test_ecflow_import_error():
+    with (
+        patch.dict(sys.modules, {"ecflow": None}),
+        raises(ImportError, match="ecFlow Python library could not be imported"),
+    ):
+        reload(ecflow)

@@ -299,6 +299,25 @@ def test_Assets__rundir(assetsobj):
     assert assetsobj.rundir == Path(assetsobj.config["rundir"])
 
 
+@mark.parametrize(
+    ("module", "expected"),
+    [
+        ("foo", Path("/some/path/concrete.jsonschema")),
+        ("%s.drivers.foo" % driver.__name__.split(".")[0], None),
+    ],
+)
+@mark.parametrize("explicit", [True, False])
+def test_Assets__schema_file_default(config, expected, explicit, module):
+    schema_file = Path("/explicit/schema.jsonschema") if explicit else None
+    with (
+        patch.object(ConcreteAssetsTimeInvariant, "__module__", module),
+        patch.object(driver.inspect, "getfile", return_value="/some/path/foo.py"),
+    ):
+        assetsobj = ConcreteAssetsTimeInvariant(config=config, schema_file=schema_file)
+        assert assetsobj._schema_file_default() == expected
+    assert assetsobj.schema_file == (schema_file if explicit else expected)
+
+
 def test_Assets__schema_name():
     with patch.object(driver.Assets, "driver_name", return_value="a_driver"):
         assert driver.Assets._schema_name() == "a-driver"
@@ -445,15 +464,32 @@ def test_Driver_run(batch, driverobj, node):
     driverobj._batch = batch
     executable = Path(driverobj.config["execution"]["executable"])
     executable.touch()
-    with patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs:
-        with patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle:
-            driverobj.run()
+    with (
+        patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
+        patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
+    ):
+        driverobj.run()
         if batch:
             rvbs.assert_called_once_with()
             rvle.assert_not_called()
         else:
             rvbs.assert_not_called()
             rvle.assert_called_once_with()
+
+
+def test_Driver_run__no_executable(driverobj, node, uwcaplog):
+    # Replace driverobj's run() with Driver's, as if it was never overriden:
+    driverobj.run = driver.Driver.run.__get__(driverobj)
+    driverobj._config["execution"]["executable"] = None
+    with (
+        patch.object(driverobj, "_run_via_batch_submission", return_value=node) as rvbs,
+        patch.object(driverobj, "_run_via_local_execution", return_value=node) as rvle,
+    ):
+        node = driverobj.run()
+        assert not node.ready
+        assert "must define 'executable' or implement custom run() method" in uwcaplog.text
+        rvbs.assert_not_called()
+        rvle.assert_not_called()
 
 
 @mark.parametrize(
@@ -524,9 +560,10 @@ def test_Driver__run_via_local_execution(driverobj, node):
     ):
         driverobj._run_via_local_execution()
         run_shell_cmd.assert_called_once_with(
-            cmd="./{x} >{x}.out 2>&1".format(x=driverobj._runscript_path.name),
+            cmd="./{x} >>{x}.out 2>&1".format(x=driverobj._runscript_path.name),
             cwd=driverobj.rundir,
             log_output=True,
+            taskname="concrete run via local execution",
         )
     prd.assert_called_once_with()
 
@@ -560,7 +597,7 @@ def test_Driver__runcmd(driverobj):
 
 def test_Driver__runscript(driverobj):
     expected = """
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     #DIR --d1
     #DIR --d2
@@ -593,12 +630,20 @@ def test_Driver__runscript_done_file(driverobj):
 
 def test_Driver__runscript_execution_only(driverobj):
     expected = """
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     foo
     bar
     """
     assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
+
+
+@mark.parametrize(
+    ("shell", "shebang"),
+    [("/bin/sh", "#!/bin/sh\n\n"), ("/usr/bin/env zsh", "#!/usr/bin/env zsh\n\n"), (None, "")],
+)
+def test_Driver__runscript_shell(driverobj, shebang, shell):
+    assert driverobj._runscript(execution=["foo", "bar"], shell=shell) == f"{shebang}foo\nbar"
 
 
 def test_Driver__runscript_path(driverobj):
@@ -647,7 +692,7 @@ def test_Driver__write_runscript(driverobj):
     executable = driverobj.config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
-    #!/bin/bash
+    #!/usr/bin/env bash
 
     #SBATCH --account=me
     #SBATCH --chdir={rundir}
@@ -663,6 +708,22 @@ def test_Driver__write_runscript(driverobj):
     test $? -eq 0 && touch runscript.concrete.done
     """
     assert path.read_text().strip() == dedent(expected).strip()
+
+
+@mark.parametrize(
+    ("execution", "shebang"),
+    [
+        ({}, "#!/usr/bin/env bash\n\n"),
+        ({"shell": "/bin/sh"}, "#!/bin/sh\n\n"),
+        ({"shell": None}, ""),
+    ],
+)
+def test_Driver__write_runscript_shell(driverobj, execution, shebang):
+    path = Path(driverobj.config["rundir"], "runscript")
+    driverobj._batch = False
+    driverobj._config["execution"].update(execution)
+    driverobj._write_runscript(path=path)
+    assert path.read_text().startswith(f"{shebang}time ")
 
 
 def test_Driver__write_runscript_threads_fail(driverobj):

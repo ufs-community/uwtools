@@ -4,9 +4,11 @@ API access to ``uwtools`` ecFlow support.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from uwtools.ecflow import ECFLOW_PORT_MAX, ECFLOW_PORT_MIN
 from uwtools.ecflow import realize as _realize
+from uwtools.ecflow import server as _server
 from uwtools.ecflow import validate as _validate
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.file import str2path as _str2path
@@ -43,6 +45,45 @@ def realize(
         scripts_path=_str2path(scripts_path),
     )
     return True
+
+
+def server(
+    config: _YAMLConfig | dict | Path | str | None,
+    port: int | None = None,
+    insecure: bool = False,
+    report: bool = False,
+    stdin_ok: bool = False,
+) -> bool:
+    """
+    Start an ecFlow server on an available TCP port, optionally with SSL security enabled.
+
+    If no port is specified, a random port in the registered range
+    (``{port_min}``-``{port_max}``) is chosen,
+    retrying if the port is unavailable. SSL certificates are read from or written to
+    ``$HOME/.ecflowrc/ssl``. Use ``insecure`` to skip SSL. Use ``report`` to emit a JSON report
+    of the server details (e.g. hostname, port) to ``stdout``.
+
+    :param config: A ``dict``, a ``YAMLConfig``, or a path to a YAML config file (``None`` => read
+        ``stdin``).
+    :param port: TCP port to use; overrides config value (``None`` => pick a random available port
+        from ``{port_min}``-``{port_max}``).
+    :param insecure: Start the server without SSL security.
+    :param report: Output server details (e.g. hostname, port) as JSON to ``stdout``.
+    :param stdin_ok: OK to read from ``stdin``?
+    :return: ``True``.
+    """
+    _server(
+        config=_ensure_data_source(_str2path(config), stdin_ok),
+        port=port,
+        insecure=insecure,
+        report=report,
+    )
+    return True
+
+
+server.__doc__ = cast("str", server.__doc__).format(
+    port_min=ECFLOW_PORT_MIN, port_max=ECFLOW_PORT_MAX
+)
 
 
 def validate(

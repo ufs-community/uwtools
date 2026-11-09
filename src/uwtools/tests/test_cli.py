@@ -3,6 +3,7 @@ import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from datetime import timedelta
+from importlib import reload
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, patch
@@ -81,6 +82,17 @@ def test_cli__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
+def test_cli__add_arg_partial():
+    parser = Parser()
+    group = parser.add_argument_group()
+    cli._add_arg_partial(group)
+    # Verify the argument was added by parsing with and without the flag
+    args = parser.parse_args([])
+    assert args.partial is False
+    args = parser.parse_args(["--partial"])
+    assert args.partial is True
+
+
 def test_cli__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert actions(subparsers.choices[STR.config]) == [
@@ -113,12 +125,17 @@ def test_cli__add_subparser_config_validate(subparsers):
 
 def test_cli__add_subparser_ecflow(subparsers):
     cli._add_subparser_ecflow(subparsers)
-    assert actions(subparsers.choices[STR.ecflow]) == [STR.realize, STR.validate]
+    assert actions(subparsers.choices[STR.ecflow]) == [STR.realize, STR.server, STR.validate]
 
 
 def test_cli__add_subparser_ecflow_realize(subparsers):
     cli._add_subparser_ecflow_realize(subparsers)
     assert subparsers.choices[STR.realize]
+
+
+def test_cli__add_subparser_ecflow_server(subparsers):
+    cli._add_subparser_ecflow_server(subparsers)
+    assert subparsers.choices[STR.server]
 
 
 def test_cli__add_subparser_ecflow_validate(subparsers):
@@ -161,6 +178,28 @@ def test_cli__add_subparser_rocoto(subparsers):
     assert subparsers.choices[STR.rocoto]
 
 
+def test_cli__add_subparser_rocoto_iterate(subparsers, capsys):
+    cli._add_subparser_rocoto_iterate(subparsers)
+    base_args = [
+        STR.iterate,
+        "--cycle",
+        "2025-07-21T12",
+        "--database",
+        "rocoto.db",
+        "--workflow",
+        "rocoto.xml",
+    ]
+    parser = subparsers.choices[STR.iterate]
+    assert parser.parse_args([*base_args[1:], "--all"]).all is True
+    assert parser.parse_args([*base_args[1:], "--task", "foo"]).task == "foo"
+    with raises(SystemExit):
+        parser.parse_args(base_args[1:])
+    assert "one of the arguments --all --task is required" in capsys.readouterr().err
+    with raises(SystemExit):
+        parser.parse_args([*base_args[1:], "--all", "--task", "foo"])
+    assert "not allowed with argument --all" in capsys.readouterr().err
+
+
 def test_cli__add_subparser_rocoto_realize(subparsers):
     cli._add_subparser_rocoto_realize(subparsers)
     assert subparsers.choices[STR.realize]
@@ -186,7 +225,16 @@ def test_cli__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-def test_cli__dispatch_execute(utc):
+@mark.parametrize(
+    ("expected", "partial", "ready"),
+    [
+        (True, False, True),
+        (False, False, False),
+        (True, True, True),
+        (True, True, False),
+    ],
+)
+def test_cli__dispatch_execute(expected, partial, ready, utc):
     cycle = utc()
     args: dict = {
         "module": "testdriver",
@@ -199,11 +247,16 @@ def test_cli__dispatch_execute(utc):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "partial": partial,
         "task": "forty_two",
         "stdin_ok": True,
     }
     with patch.object(cli.uwtools.api.execute, "execute") as execute:
-        cli._dispatch_execute(args=args)
+        node = Mock()
+        node.ready = ready
+        execute.return_value = node
+        result = cli._dispatch_execute(args=args)
+        assert result == expected
         execute.assert_called_once_with(
             classname="TestDriver",
             module="testdriver",
@@ -218,6 +271,32 @@ def test_cli__dispatch_execute(utc):
             batch=True,
             stdin_ok=True,
         )
+
+
+def test_cli__dispatch_execute_node_none(utc):
+    """
+    Test that _dispatch_execute returns False when node is None.
+    """
+    cycle = utc()
+    args: dict = {
+        "module": "testdriver",
+        "classname": "TestDriver",
+        "schema_file": "/path/to/testdriver.jsonschema",
+        "batch": True,
+        "config_file": "/path/to/config",
+        "cycle": cycle,
+        "leadtime": None,
+        "dry_run": False,
+        "graph_file": None,
+        "key_path": ["foo", "bar"],
+        "partial": False,
+        "task": "forty_two",
+        "stdin_ok": True,
+    }
+    with patch.object(cli.uwtools.api.execute, "execute") as execute:
+        execute.return_value = None
+        result = cli._dispatch_execute(args=args)
+        assert result is False
 
 
 @mark.parametrize(
@@ -523,6 +602,7 @@ def test_cli__dispatch_fs_report_yes(capsys):
     "params",
     [
         (STR.realize, "_dispatch_ecflow_realize"),
+        (STR.server, "_dispatch_ecflow_server"),
         (STR.validate, "_dispatch_ecflow_validate"),
     ],
 )
@@ -542,6 +622,32 @@ def test_cli__dispatch_ecflow_realize():
         config=args[STR.config_file],
         output_path=args[STR.output_dir],
         scripts_path=None,
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_server():
+    args = {STR.config_file: None, STR.port: 54321, STR.insecure: False, STR.report: True}
+    with patch.object(uwtools.api.ecflow, "server") as server:
+        cli._dispatch_ecflow_server(args)
+    server.assert_called_once_with(
+        config=None,
+        port=54321,
+        insecure=False,
+        report=True,
+        stdin_ok=True,
+    )
+
+
+def test_cli__dispatch_ecflow_server_defaults():
+    args = {STR.config_file: None, STR.port: None, STR.insecure: False, STR.report: False}
+    with patch.object(uwtools.api.ecflow, "server") as server:
+        cli._dispatch_ecflow_server(args)
+    server.assert_called_once_with(
+        config=None,
+        port=None,
+        insecure=False,
+        report=False,
         stdin_ok=True,
     )
 
@@ -599,13 +705,14 @@ def test_cli__dispatch_rocoto(params):
     func.assert_called_once_with(args)
 
 
-def test_cli_dispatch_rocoto_iterate(utc):
+@mark.parametrize(("all_", "task"), [(False, "foo"), (True, None)])
+def test_cli_dispatch_rocoto_iterate(all_, task, utc):
     cycle = utc()
     database = Path("/path/to/rocoto.db")
     rate = 11
-    task = "foo"
     workflow = Path("/path/to/rocoto.xml")
     args = {
+        STR.all: all_,
         STR.cycle: cycle,
         STR.database: database,
         STR.rate: rate,
@@ -614,7 +721,23 @@ def test_cli_dispatch_rocoto_iterate(utc):
     }
     with patch.object(uwtools.api.rocoto, "_iterate") as _iterate:
         cli._dispatch_rocoto_iterate(args)
-    _iterate.assert_called_once_with(**args)
+    _iterate.assert_called_once_with(
+        cycle=cycle, database=database, rate=rate, task=task, workflow=workflow
+    )
+
+
+def test_cli_dispatch_rocoto_iterate__keyboard_interrupt(logged, utc):
+    args = {
+        STR.all: True,
+        STR.cycle: utc(),
+        STR.database: Path("/path/to/rocoto.db"),
+        STR.rate: 11,
+        STR.task: None,
+        STR.workflow: Path("/path/to/rocoto.xml"),
+    }
+    with patch.object(uwtools.api.rocoto, "_iterate", side_effect=KeyboardInterrupt):
+        assert cli._dispatch_rocoto_iterate(args) is True
+    assert logged("Exiting")
 
 
 def test_cli__dispatch_rocoto_realize():
@@ -775,7 +898,16 @@ def test_cli__dispatch_template_translate_no_optional():
 
 
 @mark.parametrize("hours", [0, 24, 168])
-def test_cli__dispatch_to_driver(hours, utc):
+@mark.parametrize(
+    ("expected", "partial", "node_ready"),
+    [
+        (True, False, True),
+        (False, False, False),
+        (True, True, True),
+        (True, True, False),
+    ],
+)
+def test_cli__dispatch_to_driver(expected, hours, partial, node_ready, utc):
     cycle = utc()
     leadtime = timedelta(hours=hours)
     args: dict = {
@@ -787,13 +919,18 @@ def test_cli__dispatch_to_driver(hours, utc):
         "dry_run": False,
         "graph_file": None,
         "key_path": ["foo", "bar"],
+        "partial": partial,
         "schema_file": None,
         "show_schema": False,
         "stdin_ok": True,
     }
     adriver = Mock()
+    node = Mock()
+    node.ready = node_ready
+    adriver.execute.return_value = node
     with patch.object(cli, "import_module", return_value=adriver):
-        cli._dispatch_to_driver(name="adriver", args=args)
+        result = cli._dispatch_to_driver(name="adriver", args=args)
+        assert result == expected
         adriver.execute.assert_called_once_with(
             batch=True,
             config="/path/to/config",
@@ -831,6 +968,29 @@ def test_cli__dispatch_to_driver_show_schema(capsys):
     assert capsys.readouterr().out == dedent(expected).lstrip()
 
 
+def test_cli__ecflow_importable():
+    reload(cli)
+    assert cli._ECFLOW_AVAILABLE is True
+
+
+def test_cli__ecflow_importable_fail():
+    with patch.dict(sys.modules, {"uwtools.api.ecflow": None}):
+        reload(cli)
+        assert cli._ECFLOW_AVAILABLE is False
+    reload(cli)
+
+
+def test_cli_main_ecflow_unavailable():
+    with (
+        patch.object(cli, "_ECFLOW_AVAILABLE", False),
+        patch.object(cli, "_dispatch_template", return_value=True),
+        patch.object(sys, "argv", ["uw", "template", "render"]),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    assert e.value.code == 0
+
+
 @mark.parametrize("quiet", [False, True])
 @mark.parametrize("verbose", [False, True])
 def test_cli_main_fail_checks(capsys, quiet, verbose):
@@ -865,6 +1025,19 @@ def test_cli_main_fail_dispatch(vals):
     ):
         cli.main()
     assert e.value.code == exit_status
+
+
+@mark.parametrize("vals", [(True, cli.Status.success), (False, cli.Status.notready)])
+def test_cli_main_fail_dispatch_execute(vals):
+    success, status = vals
+    raw_args = ["testing", STR.execute, "--module", "foo", "--classname", "Bar", "--task", "baz"]
+    with (
+        patch.object(sys, "argv", raw_args),
+        patch.object(cli, "_dispatch_execute", return_value=success),
+        raises(SystemExit) as e,
+    ):
+        cli.main()
+    assert e.value.code == status
 
 
 def test_cli_main_fail_exception_abort():
@@ -919,4 +1092,4 @@ def test_cli__timedelta_from_str(capsys):
 
 
 def test_cli__version():
-    assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
+    assert re.match(r"version \d+\.\d+\.\d+", cli._version())

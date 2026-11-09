@@ -19,6 +19,7 @@ from iotaa import Asset, Node, external, task
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.strings import STR
+from uwtools.utils.file import atomic
 from uwtools.utils.processing import run_shell_cmd
 
 SCHEMES = ns(
@@ -138,8 +139,12 @@ def filecopy_hsi(src: str, dst: Path, check: bool = True):
     yield Asset(Path(dst), Path(dst).is_file)
     yield existing_hpss(src) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
-    cmd = f"{STR.hsi} -q get '{dst}' : '{src}'"
-    _, output = run_shell_cmd(cmd, taskname=taskname)
+    with atomic(dst) as tmp:
+        cmd = f"{STR.hsi} -q get '{tmp}' : '{src}'"
+        success, output = run_shell_cmd(cmd, taskname=taskname)
+        if not success:
+            log.error("Failed to copy %s via HSI", src)
+            tmp.unlink(missing_ok=True)
     for line in output.strip().split("\n"):
         log.info("%s: => %s", taskname, line)
 
@@ -184,7 +189,7 @@ def filecopy_http(url: str, dst: Path, check: bool = True):
     dst.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(url, allow_redirects=True, stream=True, timeout=3)
     if (code := response.status_code) == HTTPStatus.OK:
-        with dst.open(mode="wb") as f:
+        with atomic(dst) as tmp, tmp.open(mode="wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
     else:
@@ -204,7 +209,8 @@ def filecopy_local(src: Path, dst: Path, check: bool = True):
     yield Asset(Path(dst), Path(dst).is_file)
     yield file(src) if check else None
     dst.parent.mkdir(parents=True, exist_ok=True)
-    copy(src, dst)
+    with atomic(dst) as tmp:
+        copy(src, tmp)
 
 
 @task
@@ -233,12 +239,32 @@ def hardlink(
             Path(dst).symlink_to(src)
             log.info("Could not hardlink %s -> %s, symlinked instead" % (dst, src))
         elif fallback == STR.copy:
-            copy(src, dst)
+            with atomic(dst) as tmp:
+                copy(src, tmp)
             log.info("Could not hardlink %s -> %s, copied instead" % (dst, src))
         else:
             for line in str(e).split("\n"):
                 log.error(line)
             raise UWError("Could not hardlink %s -> %s" % (dst, src)) from e
+
+
+@external
+def link_target(path: Path | str):
+    """
+    An existing file, link, or directory.
+
+    :param path: Path to the file, link, or directory.
+    :param context: Optional additional context for the file.
+    """
+    path = _local_path(path)
+    yield "Target %s" % path
+    yield Asset(path, path.exists)
+
+
+@external
+def poison(taskname: str):
+    yield taskname
+    yield Asset(None, lambda: False)
 
 
 @task
@@ -258,19 +284,6 @@ def symlink(target: Path | str, linkname: Path | str, check: bool = True):
     src = target if target.is_absolute() else os.path.relpath(target, linkname.parent)
     dst = linkname
     Path(dst).symlink_to(src)
-
-
-@external
-def link_target(path: Path | str):
-    """
-    An existing file, link, or directory.
-
-    :param path: Path to the file, link, or directory.
-    :param context: Optional additional context for the file.
-    """
-    path = _local_path(path)
-    yield "Target %s" % path
-    yield Asset(path, path.exists)
 
 
 # Private helpers

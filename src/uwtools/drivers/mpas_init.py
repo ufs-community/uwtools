@@ -2,7 +2,7 @@
 A driver for the MPAS Init component.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from iotaa import Asset, collection, task
@@ -98,7 +98,7 @@ class MPASInit(MPASBase):
 
     @property
     def _initial_and_final_ts(self) -> tuple[datetime, datetime]:
-        initial = self._cycle.replace(tzinfo=timezone.utc)
+        initial = self._cycle.replace(tzinfo=UTC)
         final = initial + timedelta(hours=self.config["boundary_conditions"]["length"])
         return initial, final
 

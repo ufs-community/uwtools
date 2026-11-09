@@ -123,13 +123,20 @@ def test_utils_tasks_filecopy__source_http(code, expected, src, tmp_path):
     [("/src/file", True), ("file:///src/file", True), ("foo://bucket/a/b", False)],
 )
 def test_utils_tasks_filecopy__source_local(src, ok):
-    dst = "/dst/file"
+    dst = Path("/dst/file")
+    tmp = Path("/dst/file.tmp")
     with patch.object(tasks.Path, "mkdir") as mkdir:
         if ok:
-            with patch.object(tasks, "file", exists), patch.object(tasks, "copy") as copy:
+            with (
+                patch.object(tasks, "atomic") as atomic,
+                patch.object(tasks, "copy") as copy,
+                patch.object(tasks, "file", exists),
+            ):
+                atomic.return_value.__enter__.return_value = tmp
                 tasks.filecopy(src=src, dst=dst)
+            atomic.assert_called_once_with(dst)
             mkdir.assert_called_once_with(parents=True, exist_ok=True)
-            copy.assert_called_once_with(Path("/src/file"), Path(dst))
+            copy.assert_called_once_with(Path("/src/file"), Path(tmp))
         else:
             with raises(UWConfigError) as e:
                 tasks.filecopy(src=src, dst=dst)
@@ -193,21 +200,30 @@ def test_utils_tasks_filecopy__simple(tmp_path):
     assert dst.is_file()
 
 
-def test_utils_tasks_filecopy_hsi(logged, ready_task, tmp_path):
+@mark.parametrize("success", [True, False])
+def test_utils_tasks_filecopy_hsi(logged, ready_task, success, tmp_path):
     src = "/path/to/src"
     dst = tmp_path / "dst"
+    tmp = tmp_path / "tmp"
     with (
-        patch.object(tasks, "run_shell_cmd") as run_shell_cmd,
+        patch.object(tasks, "atomic") as atomic,
         patch.object(tasks, "existing_hpss", wraps=ready_task) as existing_hpss,
+        patch.object(tasks, "run_shell_cmd") as run_shell_cmd,
     ):
-        run_shell_cmd.side_effect = lambda *_a, **_kw: (dst.touch(), (True, "msg1\nmsg2\n"))[1]
+        atomic.return_value.__enter__.return_value = tmp
+        action = lambda: dst.touch() if success else dst.exists()
+        run_shell_cmd.side_effect = lambda *_a, **_k: (action(), (success, "msg1\nmsg2\n"))[1]
         tasks.filecopy_hsi(src=src, dst=Path(dst))
     existing_hpss.assert_called_once_with(src)
+    atomic.assert_called_once_with(dst)
     taskname = f"HSI {src} -> {dst}"
-    run_shell_cmd.assert_called_once_with(f"hsi -q get '{dst}' : '{src}'", taskname=taskname)
+    run_shell_cmd.assert_called_once_with(f"hsi -q get '{tmp}' : '{src}'", taskname=taskname)
     assert logged(f"{taskname}: => msg1")
     assert logged(f"{taskname}: => msg2")
-    assert dst.exists()
+    if success:
+        assert dst.exists()
+    else:
+        assert not dst.exists()
 
 
 def test_utils_tasks_filecopy_htar(logged, ready_task, tmp_path):
@@ -307,6 +323,18 @@ def test_utils_tasks_link_target(tmp_path, wrapper):
     for x in [d, f, s]:
         assert tasks.link_target(path=wrapper(x)).ready
     assert not tasks.link_target(path=tmp_path / "foo").ready
+
+
+def test_utils_tasks_poison():
+    node = tasks.poison(taskname="Unfulfilled requirement")
+    assert not node.ready
+    assert node.ref is None
+
+
+def test_utils_tasks__bad_scheme():
+    with raises(UWConfigError) as e:
+        tasks._bad_scheme(path="foo://x/y/z", scheme="foo")
+    assert str(e.value) == "Scheme 'foo' in 'foo://x/y/z' not supported"
 
 
 def test_utils_tasks__local__path_fail():

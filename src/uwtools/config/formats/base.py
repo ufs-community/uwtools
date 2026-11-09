@@ -5,11 +5,13 @@ import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
+from functools import reduce
 from io import StringIO
 from pathlib import Path
 from typing import Any, cast
 
 import yaml
+from f90nml import Namelist  # type: ignore[import-untyped]
 
 from uwtools.config import jinja2
 from uwtools.config.support import (
@@ -18,6 +20,7 @@ from uwtools.config.support import (
     UWYAMLExtend,
     depth,
     dict_to_yaml_str,
+    from_od,
     log_and_error,
     uw_yaml_loader,
 )
@@ -162,11 +165,11 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    @abstractmethod
     def as_dict(self) -> dict:
         """
         Returns a pure dict version of the config.
         """
+        return _to_dict(self.data)
 
     def compare_config(
         self, dict1: dict, dict2: dict | None = None, header: bool | None = True
@@ -200,38 +203,13 @@ class Config(ABC, UserDict):
 
     def dereference(self, context: dict | None = None) -> Config:
         """
-        Render as much Jinja2 syntax as possible.
+        Deprecated alias for realize().
         """
-
-        def logstate(state: str) -> None:
-            jinja2.deref_debug("Dereferencing, %s value:" % state)
-            for line in dict_to_yaml_str(self.data).split("\n"):
-                jinja2.deref_debug("%s%s" % (INDENT, line))
-
-        # Context object 'ctx', from which Jinja2 will try to retrieve values for rendering template
-        # expressions found in config keys and values, starts as a deep copy of the current config,
-        # so that self-references can be dereferenced. It is structurally updated from a deep copy,
-        # performed in update_from(), of the optional 'context' object, to provide additional and/or
-        # overriding values. Deep copies are used to avoid structural sharing between 'ctx' and its
-        # precursors.
-        #
-        # During each iteration of the loop, which terminates when a fixed point is found (i.e. no
-        # more template expressions can be rendered), `ctx` is updated to replace unrendered values
-        # with newly rendered ones, so that they can be used to render yet more values in the next
-        # iteration.
-
-        ctx = deepcopy(self)
-        ctx.update_from(context or {})
-        while True:
-            logstate("current")
-            new = jinja2.dereference(val=self.data, context=cast(dict, ctx))
-            assert isinstance(new, dict)
-            if new == self.data:
-                break
-            ctx.update_from(new)
-            self.data = new
-        logstate("final")
-        return self
+        log.warning(
+            "Config method dereference() is deprecated and will be removed in a future release: "
+            "Use realize() instead"
+        )
+        return self.realize(context=context)
 
     def incomplete(
         self,
@@ -262,6 +240,41 @@ class Config(ABC, UserDict):
         elif unrendered(data):
             vals.append(key_path)
         return keys, vals
+
+    def realize(self, context: dict | None = None) -> Config:
+        """
+        Render as much Jinja2 syntax as possible.
+        """
+
+        def logstate(state: str) -> None:
+            jinja2.realize_debug("Realizing, %s value:" % state)
+            for line in dict_to_yaml_str(self.data).split("\n"):
+                jinja2.realize_debug("%s%s" % (INDENT, line))
+
+        # Context object 'ctx', from which Jinja2 will try to retrieve values for rendering template
+        # expressions found in config keys and values, starts as a deep copy of the current config,
+        # so that self-references can be realized. It is structurally updated from a deep copy,
+        # performed in update_from(), of the optional 'context' object, to provide additional and/or
+        # overriding values. Deep copies are used to avoid structural sharing between 'ctx' and its
+        # precursors.
+        #
+        # During each iteration of the loop, which terminates when a fixed point is found (i.e. no
+        # more template expressions can be rendered), `ctx` is updated to replace unrendered values
+        # with newly rendered ones, so that they can be used to render yet more values in the next
+        # iteration.
+
+        ctx = deepcopy(self)
+        ctx.update_from(context or {})
+        while True:
+            logstate("current")
+            new = jinja2.realize(val=self.data, context=cast(dict, ctx))
+            assert isinstance(new, dict)
+            if new == self.data:
+                break
+            ctx.update_from(new)
+            self.data = new
+        logstate("final")
+        return self
 
     @abstractmethod
     def dump(self, path: Path | None) -> None:
@@ -318,3 +331,12 @@ class Config(ABC, UserDict):
                         dst[key] = new
 
         update(deepcopy(src.data if isinstance(src, UserDict) else src), self.data)
+
+
+def _to_dict(x: dict | Namelist) -> dict:
+    """
+    Recursively convert Namelist/OrderedDict objects to plain dicts.
+    """
+    x = from_od(x.todict()) if isinstance(x, Namelist) else x
+    f = lambda m, e: {**m, e[0]: _to_dict(e[1]) if isinstance(e[1], (dict, Namelist)) else e[1]}
+    return reduce(f, x.items(), {})

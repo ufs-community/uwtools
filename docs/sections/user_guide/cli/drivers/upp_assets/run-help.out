@@ -1,7 +1,7 @@
 usage: uw upp_assets provisioned_rundir --cycle CYCLE --leadtime LEADTIME [-h]
                                         [--version] [--config-file PATH]
                                         [--dry-run] [--graph-file PATH]
-                                        [--key-path KEY[.KEY...]]
+                                        [--key-path KEY[.KEY...]] [--partial]
                                         [--schema-file PATH] [--quiet]
                                         [--verbose]
 
@@ -26,6 +26,8 @@ Optional arguments:
       Path to Graphviz DOT output [experimental]
   --key-path KEY[.KEY...]
       Dot-separated path of keys to driver config block
+  --partial
+      Treat partial execution as success
   --schema-file PATH
       Path to schema file to use for validation
   --quiet, -q

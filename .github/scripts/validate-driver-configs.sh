@@ -1,13 +1,14 @@
 . $(dirname ${BASH_SOURCE[0]})/common.sh
 
 validate_driver_configs() {
+  set -eux
   for config in docs/shared/drivers/*.yaml; do
     driver=$(basename ${config%.yaml})
     basecmd="uw $driver validate"
     args=( --config $config )
     $basecmd --help | grep -q -- "--cycle" && args+=( --cycle 1970-01-01T00:00:00 )
     $basecmd --help | grep -q -- "--leadtime" && args+=( --leadtime 6 )
-    ( set -x && $basecmd ${args[*]} )
+    $basecmd ${args[*]}
   done
 }
 

@@ -1,6 +1,6 @@
+rocoto: 
+  EXPTDIR: /path/to/my/output
 user:
   ACCOUNT: zrtrr
   MACHINE: hera
   PARMdir: /path/to/ufs-srweather-app/parm
-workflow: 
-  EXPTDIR: /path/to/my/output

@@ -3,11 +3,46 @@ Tests for uwtools.utils.processing module.
 """
 
 import logging
+from subprocess import Popen
+from textwrap import dedent
+from unittest.mock import Mock, patch
 
 from pytest import mark
 
 from uwtools.logging import log
 from uwtools.utils import processing
+
+
+def test_utils_processing_run_shell_cmd__callback():
+    callback = Mock()
+    success, output = processing.run_shell_cmd(cmd="echo callback_test", callback=callback)
+    assert success
+    assert "callback_test" in output
+    callback.assert_called_once()
+    assert isinstance(callback.call_args[0][0], Popen)
+
+
+def test_utils_processing_run_shell_cmd__cmd_list():
+    success, output = processing.run_shell_cmd(cmd=["echo", "hello", "world"])
+    assert success
+    assert "hello world" in output
+
+
+def test_utils_processing_run_shell_cmd__env_update():
+    env = {
+        **processing.os.environ,
+        "UWTOOLS_TEST_INHERITED": "inherited",
+        "UWTOOLS_TEST_OVERRIDE": "original",
+    }
+    with patch.object(processing.os, "environ", env):
+        success, output = processing.run_shell_cmd(
+            cmd='printf "%s %s" "$UWTOOLS_TEST_INHERITED" "$UWTOOLS_TEST_OVERRIDE"',
+            env={"UWTOOLS_TEST_OVERRIDE": "updated"},
+            env_update=True,
+        )
+    assert success
+    assert output == "inherited updated"
+    assert env["UWTOOLS_TEST_OVERRIDE"] == "original"
 
 
 @mark.parametrize("quiet", [True, False])
@@ -20,25 +55,43 @@ def test_utils_processing_run_shell_cmd__failure(caplog, logged, quiet):
     check = lambda msg: not logged(msg) if quiet else logged
     assert check("Running:")
     assert check("  %s" % cmd)
-    assert check("Failed with status: 2")
-    assert check("Output:")
-    assert check("  expr: division by zero")
+    assert logged("Failed with status: 2")
+    assert logged("Output:")
+    assert logged("  expr: division by zero")
 
 
+@mark.parametrize("executable", ["/bin/bash", None])
 @mark.parametrize("log_output", [True, False])
 @mark.parametrize("quiet", [True, False])
-def test_utils_processing_run_shell_cmd__success(caplog, logged, log_output, quiet, tmp_path):
+@mark.parametrize("taskname", ["test", None])
+def test_utils_processing_run_shell_cmd__success(
+    executable, log_output, quiet, taskname, tmp_path, uwcaplog
+):
+    rundir = tmp_path / "run"
     cmd = "echo hello $FOO"
     if quiet:
         log.setLevel(logging.INFO)
     success, _ = processing.run_shell_cmd(
-        cmd=cmd, cwd=tmp_path, env={"FOO": "bar"}, log_output=log_output, quiet=quiet
+        cmd=cmd,
+        cwd=rundir,
+        env={"FOO": "bar"},
+        log_output=log_output,
+        taskname=taskname,
+        quiet=quiet,
+        executable=executable,
     )
     assert success
     if quiet:
-        assert not caplog.messages
+        assert not uwcaplog.messages
     elif log_output:
-        assert logged("Running in %s with environment variables FOO=bar:" % tmp_path)
-        assert logged("  %s" % cmd)
-        assert logged("Output:")
-        assert logged("  hello bar")
+        pre = f"{taskname}: " if taskname else ""
+        expected = """
+        {pre}Running: {cmd}
+        {pre}  in directory
+        {pre}    {rundir}
+        {pre}  with environment
+        {pre}    FOO=bar
+        {pre}Output:
+        {pre}  hello bar
+        """.format(pre=pre, cmd=cmd, rundir=rundir)
+        assert uwcaplog.text.strip() == dedent(expected).strip()

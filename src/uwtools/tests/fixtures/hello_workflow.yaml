@@ -1,5 +1,5 @@
 scheduler: slurm
-workflow:
+rocoto:
   attrs:
     realtime: false
     scheduler: '{{ scheduler }}'

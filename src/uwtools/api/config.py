@@ -26,6 +26,7 @@ from uwtools.utils.file import FORMAT as _FORMAT
 from uwtools.utils.file import str2path as _str2path
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from datetime import datetime, timedelta
 
     from uwtools.config.support import YAMLKey
@@ -43,7 +44,7 @@ def compare(
 
 
 def compose(
-    configs: list[str | Path],
+    configs: Sequence[str | Path],
     realize: bool = False,
     output_file: Path | str | None = None,
     input_format: str | None = None,
@@ -63,6 +64,23 @@ def compose(
         cycle=cycle,
         leadtime=leadtime,
     )
+
+
+def compose_to_dict(
+    configs: Sequence[str | Path],
+    realize: bool = False,
+    input_format: str | None = None,
+    cycle: datetime | None = None,
+    leadtime: timedelta | None = None,
+) -> dict:
+    """
+    Compose config files to a ``dict``.
+
+    See ``compose()`` for details on arguments, etc.
+    """
+    return compose(
+        **{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml}
+    ).as_dict()
 
 
 def get_fieldtable_config(
@@ -318,6 +336,7 @@ __all__ = [
     "YAMLConfig",
     "compare",
     "compose",
+    "compose_to_dict",
     "get_fieldtable_config",
     "get_ini_config",
     "get_nml_config",

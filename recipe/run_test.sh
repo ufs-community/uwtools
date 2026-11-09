@@ -1,4 +1,6 @@
-#!/bin/bash -eu
+#!/usr/bin/env bash
+
+set -eu
 
 # This script is called 1. By conda-build, to test code at package-build time, and 2. By "make test"
 # to test code in a live development shell. Its name is dictated by conda-build (see URL below for
