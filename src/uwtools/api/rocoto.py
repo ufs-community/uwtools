@@ -82,8 +82,7 @@ def validate(
     """
     Validate a Rocoto config against its schema.
 
-    :param config: YAML input file or ``YAMLConfig`` object to validate (``None`` => read
-        ``stdin``).
+    :param config: YAML file or ``YAMLConfig`` object to validate (``None`` => read ``stdin``).
     :param key_path: Path of keys to the Rocoto config block.
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the config conforms to the schema.
