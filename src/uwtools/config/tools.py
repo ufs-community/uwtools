@@ -18,7 +18,13 @@ from yaml.composer import ComposerError
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
-from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
+from uwtools.config.support import (
+    YAMLKey,
+    depth,
+    dict_to_yaml_str,
+    format_to_config,
+    log_and_error,
+)
 from uwtools.exceptions import UWConfigError, UWConfigKeyError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
@@ -120,6 +126,10 @@ def compose(
                 del cfgobj[key]
             return cfgobj
         except Exception as e:
+            if isinstance(config, dict):
+                log.debug("Could not load dict:")
+                for line in dict_to_yaml_str(config).strip().split("\n"):
+                    log.debug("  %s", line)
             msg = "Could not load %s as '%s' config: %s" % (cfgdesc(config), input_format, e)
             raise UWConfigError(msg) from e
 

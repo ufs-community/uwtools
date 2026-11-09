@@ -364,10 +364,13 @@ def test_config_tools_compose__load_error(input_format, text, tmp_path):
     assert str(e.value).startswith(f"Could not load {path} as '{input_format}' config: ")
 
 
-def test_config_tools_compose__load_error_dict():
+def test_config_tools_compose__load_error_dict(logged):
     with raises(UWConfigError) as e:
-        tools.compose(configs=[{"a": 1}], realize=False, input_format=FORMAT.nml)
+        tools.compose(configs=[{"a": 1, "b": 2}], realize=False, input_format=FORMAT.nml)
     assert str(e.value).startswith("Could not load dict as 'nml' config: ")
+    assert logged("Could not load dict:")
+    assert logged("  a: 1")
+    assert logged("  b: 2")
 
 
 @mark.parametrize(
