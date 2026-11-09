@@ -91,6 +91,11 @@ def validate(
     cfgobj = YAMLConfig(config)
     cfgobj.realize()
     data = _deprecated_workflow_key(reduce(getitem, key_path or [], cfgobj.data))
+    keys, vals = cfgobj.incomplete(data)
+    if keys or vals:
+        paths = [".".join(map(str, path)) for path in [*keys, *vals]]
+        msg = "Rocoto config could not be totally realized at: %s" % ", ".join(paths)
+        raise UWConfigRealizeError(msg)
     validate_yaml(
         schema_file=resource_path("jsonschema/rocoto.jsonschema"),
         desc="Rocoto config",

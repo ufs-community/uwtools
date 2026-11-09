@@ -197,6 +197,22 @@ def test_rocoto_validate__stdin(assets):
         assert rocoto.validate()["rocoto"]["cycledef"]
 
 
+@mark.parametrize("unrendered_key", [False, True])
+def test_rocoto_validate__unrendered(assets, unrendered_key):
+    cfgfile, _ = assets
+    config = YAMLConfig(cfgfile).data
+    task = config["rocoto"]["tasks"]["task_hello"]
+    if unrendered_key:
+        task["envars"]["{{ missing }}"] = task["envars"].pop("person")
+        location = "rocoto.tasks.task_hello.envars.{{ missing }}"
+    else:
+        task["command"] = "{{ missing }}"
+        location = "rocoto.tasks.task_hello.command"
+    with raises(UWConfigRealizeError, match="Rocoto config could not be totally realized") as e:
+        rocoto.validate(config=config)
+    assert location in str(e.value)
+
+
 def test_rocoto_validate_xml_file__fail(validation_assets):
     xml_file_bad, _, _, _ = validation_assets
     assert rocoto.validate_xml_file(xml_file=xml_file_bad) is False
