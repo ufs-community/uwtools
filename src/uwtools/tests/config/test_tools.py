@@ -351,17 +351,34 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
     ("input_format", "text"),
     [
         (FORMAT.ini, "a: 1"),  # configparser error
-        (FORMAT.nml, "&nl b = "),  # f90nml error
+        (FORMAT.nml, "&nl b ="),  # f90nml error
         (FORMAT.yaml, "&nl\n  b = 2\n/"),  # non-dict YAML
         (FORMAT.yaml, "[s]\nc = 3"),  # YAML parse error
     ],
 )
-def test_config_tools_compose__load_error(input_format, text, tmp_path):
+def test_config_tools_compose__load_error(input_format, logged, text, tmp_path):
     path = tmp_path / "config"
     path.write_text(text)
     with raises(UWConfigError) as e:
         tools.compose(configs=[path], realize=False, input_format=input_format)
     assert str(e.value).startswith(f"Could not load {path} as '{input_format}' config: ")
+    assert logged(f"Could not load {path}:")
+    for line in text.split("\n"):
+        assert logged(f"  {line}")
+
+
+@mark.parametrize(
+    ("exc", "setup"),
+    [
+        (FileNotFoundError, lambda _: None),
+        (PermissionError, lambda path: path.touch(mode=0o000)),
+    ],
+)
+def test_config_tools_compose__load_error_os(exc, setup, tmp_path):
+    path = tmp_path / "config.yaml"
+    setup(path)
+    with raises(exc):
+        tools.compose(configs=[path], realize=False)
 
 
 def test_config_tools_compose__load_error_dict(logged):
@@ -1157,6 +1174,29 @@ def test_config_tools_walk_key_path__fail_bad_leaf_value():
     with raises(UWError) as e:
         tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b", "c"])
     assert str(e.value) == "Value at a.b.c must be a dictionary"
+
+
+@mark.parametrize(
+    ("config", "expected"), [({"a": 1}, "dict"), (Path("/path/to/c.yaml"), "/path/to/c.yaml")]
+)
+def test_config_tools__compose_desc(config, expected):
+    assert tools._compose_desc(config) == expected
+
+
+@mark.parametrize("kind", ["dict", "path"])
+def test_config_tools__compose_log_contents(kind, logged, tmp_path):
+    d = {"a": 1, "b": {"c": 2}}
+    path = tmp_path / "c.yaml"
+    path.write_text("\na: 1\nb:\n  c: 2\n\n")
+    config = d if kind == "dict" else path
+    tools._compose_log_contents(config)
+    expected = """
+    Could not load %s:
+      a: 1
+      b:
+        c: 2
+    """ % ("dict" if kind == "dict" else path)
+    assert logged(dedent(expected), full=True)
 
 
 def test_config_tools__ensure_format__no_path_no_format(logged):

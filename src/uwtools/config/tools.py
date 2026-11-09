@@ -68,15 +68,6 @@ def compose(
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
 
-    def cfgdesc(config: Path | dict) -> str:
-        """
-        Return a description of the given config, for use in messages.
-
-        :param config: Path to the config file, or a dict of config data.
-        :return: The path as a string, or "dict".
-        """
-        return str(config) if isinstance(config, Path) else "dict"
-
     def cfgobj_from_yaml(yaml: str) -> YAMLConfig:
         """
         Write YAML to a temp file, instantiate a config from it, then clean up.
@@ -125,12 +116,11 @@ def compose(
             for key in keys:
                 del cfgobj[key]
             return cfgobj
+        except OSError:
+            raise
         except Exception as e:
-            if isinstance(config, dict):
-                log.debug("Could not load dict:")
-                for line in dict_to_yaml_str(config).strip().split("\n"):
-                    log.debug("  %s", line)
-            msg = "Could not load %s as '%s' config: %s" % (cfgdesc(config), input_format, e)
+            _compose_log_contents(config)
+            msg = "Could not load %s as '%s' config: %s" % (_compose_desc(config), input_format, e)
             raise UWConfigError(msg) from e
 
     def cfgobj_update(config: Config, src: Path | dict) -> Config:
@@ -141,7 +131,7 @@ def compose(
         :param src: Path to the file containing, or dict of, config data to update with.
         :return: And updated Config object.
         """
-        log.debug("Composing '%s' config from %s", input_format, cfgdesc(src))
+        log.debug("Composing '%s' config from %s", input_format, _compose_desc(src))
         config.update_from(cfgobj_get(src))
         return config
 
@@ -236,6 +226,28 @@ def walk_key_path(config: dict, key_path: list[YAMLKey]) -> tuple[dict, str]:
 
 
 # Private functions
+
+
+def _compose_desc(config: Path | dict) -> str:
+    """
+    Return a description of the given config, for use in messages.
+
+    :param config: Path to the config file, or a dict of config data.
+    :return: The path as a string, or "dict".
+    """
+    return str(config) if isinstance(config, Path) else "dict"
+
+
+def _compose_log_contents(config: Path | dict) -> None:
+    """
+    Debug-log the contents of the given config, line by line.
+
+    :param config: Path to the config file, or a dict of config data.
+    """
+    text = config.read_text() if isinstance(config, Path) else dict_to_yaml_str(config)
+    log.debug("Could not load %s:", _compose_desc(config))
+    for line in text.strip().split("\n"):
+        log.debug("  %s", line)
 
 
 def _ensure_format(
