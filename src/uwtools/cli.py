@@ -749,7 +749,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_file(optional)
-    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to Rocoto config block")
+    _add_arg_key_path(optional, helpmsg="Dot-separated path to mapping containing Rocoto block")
     return _add_args_verbosity(optional)
 
 
@@ -762,7 +762,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
     parser = _add_subparser(subparsers, STR.validate, "Validate a Rocoto YAML config")
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
-    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to Rocoto config block")
+    _add_arg_key_path(optional, helpmsg="Dot-separated path to mapping containing Rocoto block")
     return _add_args_verbosity(optional)
 
 

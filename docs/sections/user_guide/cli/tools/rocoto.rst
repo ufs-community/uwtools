@@ -154,7 +154,7 @@ The examples in this section use the UW YAML file ``rocoto.yaml`` shown above in
   .. literalinclude:: rocoto/validate-good-stdin.out
      :language: text
 
-* To validate a Rocoto config block nested within a larger config, specify the path of keys to the block with ``--key-path``:
+* To validate a Rocoto config block nested within a larger config, use ``--key-path`` to select the mapping containing the ``rocoto`` key. In this example, the path is ``workflows.forecast``, not ``workflows.forecast.rocoto``:
 
   .. literalinclude:: rocoto/validate-key-path.yaml
      :language: yaml

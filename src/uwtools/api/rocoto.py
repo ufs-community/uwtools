@@ -62,7 +62,7 @@ def realize(
 
     :param config: YAML input file or ``YAMLConfig`` object (``None`` => read ``stdin``).
     :param output_file: XML output file path (``None`` => write to ``stdout``).
-    :param key_path: Path of keys to the Rocoto config block.
+    :param key_path: Path of keys to the mapping containing the Rocoto config block.
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True``.
     """
@@ -83,7 +83,7 @@ def validate(
     Validate a Rocoto config against its schema.
 
     :param config: YAML file or ``YAMLConfig`` object to validate (``None`` => read ``stdin``).
-    :param key_path: Path of keys to the Rocoto config block.
+    :param key_path: Path of keys to the mapping containing the Rocoto config block.
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the config conforms to the schema.
     :raises: ``UWConfigError`` if validation fails.

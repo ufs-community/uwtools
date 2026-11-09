@@ -54,7 +54,7 @@ def realize(
 
     :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
     :param output_file: Path to write rendered XML file (None => write to stdout).
-    :param key_path: Path of keys to the Rocoto config block.
+    :param key_path: Path of keys to the mapping containing the Rocoto config block.
     :return: An XML string.
     """
     rxml = _RocotoXML(config, key_path)
@@ -84,7 +84,7 @@ def validate(
     Realize and validate a Rocoto YAML config.
 
     :param config: A dict, a YAMLConfig, a path to a YAML file, or None (None => read stdin).
-    :param key_path: Path of keys to the Rocoto config block.
+    :param key_path: Path of keys to the mapping containing the Rocoto config block.
     :return: The realized and validated Rocoto config.
     :raises: UWConfigError if config fails validation.
     """
