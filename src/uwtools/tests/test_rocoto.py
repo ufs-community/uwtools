@@ -137,7 +137,14 @@ def test_rocoto_realize__unrendered_xml(assets, logged):
     assert logged("world")
 
 
-@mark.parametrize("f", [YAMLConfig, lambda x: x, lambda x: YAMLConfig(x).data])
+@mark.parametrize(
+    "f",
+    [
+        YAMLConfig,  # test a YAMLConfig object
+        lambda x: x,  # test a filesystem path
+        lambda x: YAMLConfig(x).data,  # test a dict
+    ],
+)
 def test_rocoto_validate(assets, f):
     cfgfile, _ = assets
     config = rocoto.validate(config=f(cfgfile))
