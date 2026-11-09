@@ -17,7 +17,7 @@ from pytest import fixture, mark, raises, warns
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigKeyError, UWConfigRealizeError, UWError
 from uwtools.tests.support import fixture_path, schema_validator
 from uwtools.utils.file import _stdinproxy
 
@@ -183,6 +183,20 @@ def test_rocoto_validate__key_path(assets):
         config={"a": {"b": data}, "scheduler": data["scheduler"]}, key_path=["a", "b"]
     )
     assert config["rocoto"]["cycledef"]
+
+
+@mark.parametrize(
+    ("config", "key_path", "error", "message"),
+    [
+        ({"a": {}}, ["a", "missing"], UWConfigKeyError, "Bad key path: a.missing"),
+        ({"a": []}, ["a", 0], UWConfigKeyError, "Bad key path: a.0"),
+        ({"a": 1}, ["a", "b"], UWConfigKeyError, "Bad key path: a.b"),
+        ({"a": 1}, ["a"], UWConfigError, "Value at a must be a dictionary"),
+    ],
+)
+def test_rocoto_validate__key_path_invalid(config, key_path, error, message):
+    with raises(error, match=message):
+        rocoto.validate(config=config, key_path=key_path)
 
 
 def test_rocoto_validate__realized(assets):

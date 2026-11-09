@@ -23,7 +23,7 @@ from lxml.etree import Element, SubElement, _Element
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.validator import validate_external as validate_yaml
-from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigKeyError, UWConfigRealizeError, UWError
 from uwtools.logging import INDENT, log
 from uwtools.strings import ROCOTO
 from uwtools.utils.file import readable, resource_path, writable
@@ -87,10 +87,19 @@ def validate(
     :param key_path: Path of keys to the mapping containing the Rocoto config block.
     :return: The realized and validated Rocoto config.
     :raises: UWConfigError if config fails validation.
+    :raises: UWConfigKeyError if key_path cannot be followed.
     """
     cfgobj = YAMLConfig(config)
     cfgobj.realize()
-    data = _deprecated_workflow_key(reduce(getitem, key_path or [], cfgobj.data))
+    try:
+        data = reduce(getitem, key_path or [], cfgobj.data)
+    except (IndexError, KeyError, TypeError) as e:
+        msg = "Bad key path: %s" % ".".join(map(str, key_path or []))
+        raise UWConfigKeyError(msg) from e
+    if not isinstance(data, dict):
+        msg = "Value at %s must be a dictionary" % ".".join(map(str, key_path or []))
+        raise UWConfigError(msg)
+    data = _deprecated_workflow_key(data)
     keys, vals = cfgobj.incomplete(data)
     if keys or vals:
         paths = [".".join(map(str, path)) for path in [*keys, *vals]]
