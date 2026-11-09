@@ -141,6 +141,13 @@ This is where you put in your structured YAML that defines your workflow of choi
 Validate Action
 """""""""""""""
 
+Want to check your structured YAML before realizing it as Rocoto XML? Use ``rocoto validate`` to check it against the UW Rocoto schema.
+
+| :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
+
+Validate-XML Action
+"""""""""""""""""""
+
 Do you already have a Rocoto XML but don't want to run Rocoto to make sure it works? Use ``rocoto validate-xml`` to check to see if Rocoto will be happy.
 
 | :any:`CLI documentation with examples<cli_rocoto_validate_xml_examples>`

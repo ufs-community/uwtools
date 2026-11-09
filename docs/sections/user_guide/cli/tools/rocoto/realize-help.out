@@ -14,7 +14,7 @@ Optional arguments:
   --output-file PATH, -o PATH
       Path to output file (default: write to stdout)
   --key-path KEY[.KEY...]
-      Dot-separated path of keys to Rocoto config block
+      Dot-separated path to mapping containing Rocoto block
   --quiet, -q
       Print no logging messages
   --verbose, -v
