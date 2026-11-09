@@ -162,7 +162,13 @@ def test_rocoto_validate__deprecated_workflow_key(assets):
         assert "rocoto" in rocoto.validate(config=config)
 
 
-@mark.parametrize("f", [YAMLConfig, lambda x: x])
+@mark.parametrize(
+    "f",
+    [
+        YAMLConfig,  # test a YAMLConfig object
+        lambda x: x,  # test a filesystem path
+    ],
+)
 def test_rocoto_validate__fail(f, tmp_path):
     cfgfile = tmp_path / "bad.yaml"
     cfgfile.write_text("not: ok")
