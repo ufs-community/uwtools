@@ -304,9 +304,7 @@ class _RocotoXML:
     """
 
     def __init__(
-        self,
-        config: dict | YAMLConfig | Path | None = None,
-        key_path: list[YAMLKey] | None = None
+        self, config: dict | YAMLConfig | Path | None = None, key_path: list[YAMLKey] | None = None
     ) -> None:
         self._config = validate(config, key_path)
         self._add_workflow(self._config)
