@@ -378,8 +378,11 @@ def test_config_tools_compose__load_error(input_format, logged, text, tmp_path):
 def test_config_tools_compose__load_error_os(exc, setup, tmp_path):
     path = tmp_path / "config.yaml"
     setup(path)
-    with raises(exc):
+    with raises(UWConfigError) as error:
         tools.compose(configs=[path], realize=False)
+    cause = error.value.__cause__
+    assert isinstance(cause, exc)
+    assert str(error.value) == f"{path}: {cause.strerror}"
 
 
 def test_config_tools_compose__load_error_dict(logged):

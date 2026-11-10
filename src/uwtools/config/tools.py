@@ -116,8 +116,9 @@ def compose(
             for key in keys:
                 del cfgobj[key]
             return cfgobj
-        except OSError:  # FileNotFoundError, PermissionError, et al.
-            raise
+        except OSError as e:
+            msg = f"{e.filename}: {e.strerror}"
+            raise UWConfigError(msg) from e
         except Exception as e:
             _compose_log_contents(config)
             msg = "Could not load %s as '%s' config: %s" % (_compose_desc(config), input_format, e)
