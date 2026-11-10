@@ -18,7 +18,13 @@ from yaml.composer import ComposerError
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
-from uwtools.config.support import YAMLKey, depth, format_to_config, log_and_error
+from uwtools.config.support import (
+    YAMLKey,
+    depth,
+    dict_to_yaml_str,
+    format_to_config,
+    log_and_error,
+)
 from uwtools.exceptions import UWConfigError, UWConfigKeyError, UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
@@ -50,7 +56,7 @@ def compare(
 
 
 def compose(
-    configs: Sequence[Path],
+    configs: Sequence[Config | Path | dict],
     realize: bool,
     output_file: Path | None = None,
     input_format: str | None = None,
@@ -77,52 +83,63 @@ def compose(
         tmp.unlink()
         return new
 
-    def cfgobj_get(path: Path) -> Config:
+    def cfgobj_get(config: Path | dict) -> Config:
         """
-        Get a Config object representing the data in the specified file.
+        Get a Config object representing the data in the specified file or dict.
 
-        If instantiation fails due to an undefined YAML alias, build in-memory YAML combining the
-        bad YAML with that of each subsequent to-be-composed file, expecting that one of the latter
-        defines the missing anchor. Nest the other-file YAML blocks under unique top-level keys to
-        avoid conflicts. After successful instantiation, remove the added key-value pairs. Note that
-        this procedure applies only to YAML configs.
+        If instantiation from a file fails due to an undefined YAML alias, build in-memory YAML
+        combining the bad YAML with that of each subsequent to-be-composed file, expecting that one
+        of the latter defines the missing anchor. Nest the other-file YAML blocks under unique top-
+        level keys to avoid conflicts. After successful instantiation, remove the added key-value
+        pairs. Note that this procedure applies only to YAML configs.
 
-        :param path: Path to the config file.
+        :param config: Path to the config file, or a dict of config data.
         :return: An instance of the subclass of Config appropriate to the format of the config.
         """
         try:
-            return input_class(path)
+            return input_class(config)
         except ComposerError as e:
             if not (e.problem and "found undefined alias" in e.problem):
                 raise
-            yaml = path.read_text().strip()
+            assert isinstance(config, Path)
+            yaml = config.read_text().strip()
             keys = []
-            for config in configs[configs.index(path) + 1 :]:
+            for other_config in data[data.index(config) + 1 :]:
+                if not isinstance(other_config, Path):
+                    continue
                 while (key := uuid4().hex) in yaml:
                     ...
                 keys.append(key)
-                other = indent(config.read_text().strip(), prefix="  ")
+                other = indent(other_config.read_text().strip(), prefix="  ")
                 yaml = "\n".join([f"{key}:", other, yaml])
             cfgobj = cfgobj_from_yaml(yaml)
             for key in keys:
                 del cfgobj[key]
             return cfgobj
+        except OSError as e:
+            msg = f"{e.filename}: {e.strerror}"
+            raise UWConfigError(msg) from e
+        except Exception as e:
+            _compose_log_contents(config)
+            msg = "Could not load %s as '%s' config: %s" % (_compose_desc(config), input_format, e)
+            raise UWConfigError(msg) from e
 
-    def cfgobj_update(config: Config, path: Path) -> Config:
+    def cfgobj_update(config: Config, src: Path | dict) -> Config:
         """
-        Update the given Config object with config data from the given file.
+        Update the given Config object with config data from the given file or dict.
 
         :param config: The Config objet to update.
-        :param path: Path to the file containing config data to update with.
+        :param src: Path to the file containing, or dict of, config data to update with.
         :return: And updated Config object.
         """
-        log.debug("Composing '%s' config from %s", input_format, path)
-        config.update_from(cfgobj_get(path))
+        log.debug("Composing '%s' config from %s", input_format, _compose_desc(src))
+        config.update_from(cfgobj_get(src))
         return config
 
-    input_format = input_format or get_config_format(configs[0], "input")
+    input_format = _ensure_format("input", input_format, configs[0])
     input_class: type[Config] = format_to_config(input_format)
-    config = reduce(cfgobj_update, configs[1:], cfgobj_get(configs[0]))
+    data = [x.data if isinstance(x, Config) else x for x in configs]
+    config = reduce(cfgobj_update, data[1:], cfgobj_get(data[0]))
     output_format = output_format or get_config_format(output_file, "output")
     output_class = format_to_config(output_format)
     output_config: Config = output_class(config)
@@ -210,6 +227,32 @@ def walk_key_path(config: dict, key_path: list[YAMLKey]) -> tuple[dict, str]:
 
 
 # Private functions
+
+
+def _compose_desc(config: Path | dict) -> str:
+    """
+    Return a description of the given config, for use in messages.
+
+    :param config: Path to the config file, or a dict of config data.
+    :return: The path as a string, or "dict".
+    """
+    return str(config) if isinstance(config, Path) else "dict"
+
+
+def _compose_log_contents(config: Path | dict) -> None:
+    """
+    Debug-log the contents of the given config, line by line.
+
+    :param config: Path to the config file, or a dict of config data.
+    """
+    try:
+        text = config.read_text() if isinstance(config, Path) else dict_to_yaml_str(config)
+    except Exception:
+        log.error("Could not inspect contents of %s", _compose_desc(config))
+        raise
+    log.debug("Could not load %s:", _compose_desc(config))
+    for line in text.strip().split("\n"):
+        log.debug("  %s", line)
 
 
 def _ensure_format(
@@ -394,13 +437,14 @@ Recognized file extensions are: {extensions}
 """.format(extensions=", ".join(FORMAT.extensions())).strip()
 
 compose.__doc__ = """
-Compose config files.
+Compose configs.
 
 Recognized file extensions are: {extensions}
 
-:param configs: Paths to configs to compose.
+:param configs: Configs to compose: paths to config files, Config objects, and/or dicts.
 :param output_file: Output config destination (default: write to stdout).
-:param input_format: Format of configs to compose (choices: {choices}, default: {default}).
+:param input_format: Format of configs to compose (choices: {choices}, default: deduced from first
+    config's file extension or Config type, or {default} for a dict).
 :param output_format: Format of output config (choices: {choices}, default: {default}).
 :param cycle: A datetime object to make available for use in configs.
 :param leadtime: A timedelta object to make available for use in configs.

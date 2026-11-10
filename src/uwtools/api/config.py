@@ -44,7 +44,7 @@ def compare(
 
 
 def compose(
-    configs: Sequence[str | Path],
+    configs: Sequence[Config | Path | dict | str],
     realize: bool = False,
     output_file: Path | str | None = None,
     input_format: str | None = None,
@@ -56,7 +56,7 @@ def compose(
     NB: This docstring is dynamically replaced: See compose.__doc__ definition below.
     """
     return _compose(
-        configs=list(map(Path, configs)),
+        configs=[Path(x) if isinstance(x, str) else x for x in configs],
         realize=realize,
         output_file=Path(output_file) if output_file else None,
         input_format=input_format,
@@ -67,14 +67,14 @@ def compose(
 
 
 def compose_to_dict(
-    configs: Sequence[str | Path],
+    configs: Sequence[Config | Path | dict | str],
     realize: bool = False,
     input_format: str | None = None,
     cycle: datetime | None = None,
     leadtime: timedelta | None = None,
 ) -> dict:
     """
-    Compose config files to a ``dict``.
+    Compose configs to a ``dict``.
 
     See ``compose()`` for details on arguments, etc.
     """
@@ -260,12 +260,17 @@ Recognized file extensions are: {extensions}
 """.format(extensions=", ".join([f"``{x}``" for x in _FORMAT.extensions()])).strip()
 
 compose.__doc__ = """
-Compose config files.
+Compose configs.
+
+Configs may be specified as paths to config files, ``Config`` objects (e.g. ``YAMLConfig``), or
+``dict`` objects, in any combination. Unless ``input_format`` is specified, the input format is
+deduced from the first config: from its file extension if a path, from its type if a ``Config``
+object, or ``{default}`` if a ``dict``.
 
 Specify explicit input or output formats to override default treatment based on file extension.
 Recognized file extensions are: {extensions}.
 
-:param configs: Paths to configs to compose.
+:param configs: Configs to compose.
 :param realize: Render template expressions where possible.
 :param output_file: Output config destination (default: write to ``stdout``).
 :param input_format: Format of configs to compose (choices: {choices}, default: ``{default}``)
