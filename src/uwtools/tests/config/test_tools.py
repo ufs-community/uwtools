@@ -351,8 +351,8 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
 @mark.parametrize(
     ("input_format", "text"),
     [
-        (FORMAT.ini, "a: 1"),  # configparser error
-        (FORMAT.nml, "&nl b ="),  # f90nml error
+        (FORMAT.ini, "a: 1"),  # ini contains no section header
+        (FORMAT.nml, "&nl b ="),  # namelist not closed
         (FORMAT.yaml, "foo"),  # non-dict YAML
         (FORMAT.yaml, "[s]\nc = 3"),  # YAML parse error
     ],
