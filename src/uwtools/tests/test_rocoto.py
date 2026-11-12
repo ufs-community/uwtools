@@ -3,9 +3,11 @@ Tests for uwtools.rocoto module.
 """
 
 import sqlite3
+import sys
 import warnings
 from contextlib import contextmanager
 from datetime import UTC
+from io import StringIO
 from itertools import combinations
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, PropertyMock, patch
@@ -15,8 +17,9 @@ from pytest import fixture, mark, raises, warns
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigKeyError, UWConfigRealizeError, UWError
 from uwtools.tests.support import fixture_path, schema_validator
+from uwtools.utils.file import _stdinproxy
 
 # Fixtures
 
@@ -132,6 +135,113 @@ def test_rocoto_realize__unrendered_xml(assets, logged):
     assert logged(template)
     assert logged("Value(s) needed to render this XML are:")
     assert logged("world")
+
+
+@mark.parametrize(
+    "f",
+    [
+        YAMLConfig,  # test a YAMLConfig object
+        lambda x: x,  # test a filesystem path
+        lambda x: YAMLConfig(x).data,  # test a dict
+    ],
+)
+def test_rocoto_validate(assets, f):
+    cfgfile, _ = assets
+    config = rocoto.validate(config=f(cfgfile))
+    assert config["rocoto"]["cycledef"]
+
+
+def test_rocoto_validate__deprecated_workflow_key(assets):
+
+    # NB: Remove this test when support for the deprecated 'workflow' key is removed.
+
+    cfgfile, _ = assets
+    config = YAMLConfig(cfgfile)
+    config["workflow"] = config.data.pop("rocoto")
+    config["unrelated"] = "{{ missing }}"
+    with warns(DeprecationWarning, match="deprecated"):
+        assert "rocoto" in rocoto.validate(config=config)
+
+
+@mark.parametrize(
+    "f",
+    [
+        YAMLConfig,  # test a YAMLConfig object
+        lambda x: x,  # test a filesystem path
+    ],
+)
+def test_rocoto_validate__fail(f, tmp_path):
+    cfgfile = tmp_path / "bad.yaml"
+    cfgfile.write_text("not: ok")
+    with raises(UWConfigError):
+        rocoto.validate(config=f(cfgfile))
+
+
+def test_rocoto_validate__key_path(assets):
+    cfgfile, _ = assets
+    data = YAMLConfig(cfgfile).data
+    config = rocoto.validate(
+        config={"a": {"b": data}, "scheduler": data["scheduler"]}, key_path=["a", "b"]
+    )
+    assert config["rocoto"]["cycledef"]
+
+
+@mark.parametrize(
+    ("config", "key_path", "error", "message"),
+    [
+        ({"a": {}}, ["a", "missing"], UWConfigKeyError, "Bad key path: a.missing"),
+        ({"a": []}, ["a", 0], UWConfigKeyError, "Bad key path: a.0"),
+        ({"a": 1}, ["a", "b"], UWConfigKeyError, "Bad key path: a.b"),
+        ({"a": 1}, ["a"], UWConfigError, "Value at a must be a dictionary"),
+    ],
+)
+def test_rocoto_validate__key_path_invalid(config, key_path, error, message):
+    with raises(error, match=message):
+        rocoto.validate(config=config, key_path=key_path)
+
+
+def test_rocoto_validate__realized(assets):
+    cfgfile, _ = assets
+    assert rocoto.validate(config=cfgfile)["rocoto"]["attrs"]["scheduler"] == "slurm"
+
+
+def test_rocoto_validate__stdin(assets):
+    cfgfile, _ = assets
+    _stdinproxy.cache_clear()
+    with StringIO(cfgfile.read_text()) as sio, patch.object(sys, "stdin", new=sio):
+        assert rocoto.validate()["rocoto"]["cycledef"]
+
+
+@mark.parametrize("unrendered_key", [False, True])
+def test_rocoto_validate__unrendered(assets, unrendered_key):
+    cfgfile, _ = assets
+    config = YAMLConfig(cfgfile).data
+    task = config["rocoto"]["tasks"]["task_hello"]
+    if unrendered_key:
+        task["envars"]["{{ missing }}"] = task["envars"].pop("person")
+        location = "rocoto.tasks.task_hello.envars.{{ missing }}"
+    else:
+        task["command"] = "{{ missing }}"
+        location = "rocoto.tasks.task_hello.command"
+    with raises(UWConfigRealizeError, match="Rocoto config could not be totally realized") as e:
+        rocoto.validate(config=config)
+    assert location in str(e.value)
+
+
+@mark.parametrize("action", ["realize", "validate"])
+@mark.parametrize("key_path", [None, ["nested"]])
+def test_rocoto_validate__unrelated_unrendered(assets, action, key_path):
+    cfgfile, outfile = assets
+    config = YAMLConfig(cfgfile).data
+    config["unrelated"] = "{{ missing }}"
+    if key_path:
+        config = {"nested": config, "scheduler": config["scheduler"]}
+    if action == "realize":
+        assert "<workflow" in rocoto.realize(
+            config=YAMLConfig(config), output_file=outfile, key_path=key_path
+        )
+    else:
+        assert "rocoto" in rocoto.validate(config=config, key_path=key_path)
 
 
 def test_rocoto_validate_xml_file__fail(validation_assets):
@@ -813,26 +923,6 @@ class TestRocotoXML:
             instance._add_workflow_tasks(e=root, config=config)
         mocks["_add_metatask"].assert_called_once_with(root, "1", "foo")
         mocks["_add_task"].assert_called_once_with(root, "2", "bar")
-
-    def test_rocoto__RocotoXML__config_validate__config(self, assets, instance):
-        cfgfile, _ = assets
-        instance._config_validate(config=YAMLConfig(cfgfile))
-
-    def test_rocoto__RocotoXML__config_validate_file(self, assets, instance):
-        cfgfile, _ = assets
-        instance._config_validate(config=cfgfile)
-
-    def test_rocoto__RocotoXML__config_validate__config_fail(self, instance, tmp_path):
-        cfgfile = tmp_path / "bad.yaml"
-        cfgfile.write_text("not: ok")
-        with raises(UWConfigError):
-            instance._config_validate(config=YAMLConfig(cfgfile))
-
-    def test_rocoto__RocotoXML__config_validate__file_fail(self, instance, tmp_path):
-        cfgfile = tmp_path / "bad.yaml"
-        cfgfile.write_text("not: ok")
-        with raises(UWConfigError):
-            instance._config_validate(config=cfgfile)
 
     def test_rocoto__RocotoXML__doctype__entities(self, instance):
         assert '<!ENTITY ACCOUNT "myaccount">' in instance._doctype

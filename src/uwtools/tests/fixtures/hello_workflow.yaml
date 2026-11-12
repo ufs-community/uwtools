@@ -1,4 +1,3 @@
-scheduler: slurm
 rocoto:
   attrs:
     realtime: false
@@ -53,3 +52,4 @@ rocoto:
         hangdependency:
           sh_false:
             command: /bin/false
+scheduler: slurm

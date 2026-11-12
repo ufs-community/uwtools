@@ -715,6 +715,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     return {
         STR.iterate: _add_subparser_rocoto_iterate(subparsers),
         STR.realize: _add_subparser_rocoto_realize(subparsers),
+        STR.validate: _add_subparser_rocoto_validate(subparsers),
         STR.validate_xml: _add_subparser_rocoto_validate_xml(subparsers),
     }
 
@@ -748,7 +749,20 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_output_file(optional)
-    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to Rocoto config block")
+    _add_arg_key_path(optional, helpmsg="Dot-separated path to mapping containing Rocoto block")
+    return _add_args_verbosity(optional)
+
+
+def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
+    """
+    Add subparser for mode: rocoto validate.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.validate, "Validate a Rocoto YAML config")
+    optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path to mapping containing Rocoto block")
     return _add_args_verbosity(optional)
 
 
@@ -773,6 +787,7 @@ def _dispatch_rocoto(args: Args) -> bool:
     actions = {
         STR.iterate: _dispatch_rocoto_iterate,
         STR.realize: _dispatch_rocoto_realize,
+        STR.validate: _dispatch_rocoto_validate,
         STR.validate_xml: _dispatch_rocoto_validate_xml,
     }
     return actions[args[STR.action]](args)
@@ -806,6 +821,19 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     return uwtools.api.rocoto.realize(
         config=args[STR.config_file],
         output_file=args[STR.output_file],
+        key_path=args[STR.key_path],
+        stdin_ok=True,
+    )
+
+
+def _dispatch_rocoto_validate(args: Args) -> bool:
+    """
+    Define dispatch logic for rocoto validate action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.rocoto.validate(
+        config=args[STR.config_file],
         key_path=args[STR.key_path],
         stdin_ok=True,
     )

@@ -2,6 +2,7 @@
 Tests for uwtools.config.tools module.
 """
 
+import logging
 import sys
 from datetime import UTC, datetime, timedelta
 from io import StringIO
@@ -348,6 +349,60 @@ def test_config_tools_compose__fmt_yaml_2x(compose_assets_yaml, logged, suffix, 
 
 
 @mark.parametrize(
+    ("input_format", "text"),
+    [
+        (FORMAT.ini, "a: 1"),  # ini contains no section header
+        (FORMAT.nml, "&nl b ="),  # namelist not closed
+        (FORMAT.yaml, "foo"),  # non-dict YAML
+        (FORMAT.yaml, "[s]\nc = 3"),  # YAML parse error
+    ],
+)
+def test_config_tools_compose__load_error(input_format, logged, text, tmp_path):
+    path = tmp_path / "config"
+    path.write_text(text)
+    with raises(UWConfigError) as e:
+        tools.compose(configs=[path], realize=False, input_format=input_format)
+    assert str(e.value).startswith(f"Could not load {path} as '{input_format}' config: ")
+    assert logged(f"Could not load {path}:")
+    for line in text.split("\n"):
+        assert logged(f"  {line}")
+
+
+@mark.parametrize(
+    ("exc", "setup"),
+    [
+        (FileNotFoundError, lambda _: None),
+        (PermissionError, lambda path: path.touch(mode=0o000)),
+    ],
+)
+def test_config_tools_compose__load_error_os(exc, setup, tmp_path):
+    path = tmp_path / "config.yaml"
+    setup(path)
+    with raises(UWConfigError) as error:
+        tools.compose(configs=[path], realize=False)
+    cause = error.value.__cause__
+    assert isinstance(cause, exc)
+    assert str(error.value) == f"{path}: {cause.strerror}"
+
+
+def test_config_tools_compose__load_error_dict(logged):
+    with raises(UWConfigError) as e:
+        tools.compose(configs=[{"a": 1, "b": 2}], realize=False, input_format=FORMAT.nml)
+    assert str(e.value).startswith("Could not load dict as 'nml' config: ")
+    assert logged("Could not load dict:")
+    assert logged("  a: 1")
+    assert logged("  b: 2")
+
+
+def test_config_tools_compose__load_error_inspection(caplog, tmp_path):
+    path = tmp_path / "invalid.yaml"
+    path.write_bytes(b"a: \xff\n")
+    with raises(UnicodeDecodeError):
+        tools.compose(configs=[path], realize=False)
+    assert ("root", logging.ERROR, f"Could not inspect contents of {path}") in caplog.record_tuples
+
+
+@mark.parametrize(
     ("initial", "final"),
     [
         (" !bool 'yes'", " true"),
@@ -394,6 +449,37 @@ def test_config_tools_compose__no_anchors_or_aliases(capsys, initial, final, tmp
     assert capsys.readouterr().out.strip() == dedent(expected_realized).strip()
 
 
+@mark.parametrize("kind2", ["config", "dict", "path"])
+@mark.parametrize("kind1", ["config", "dict", "path"])
+def test_config_tools_compose__input_types(kind1, kind2, logged, tmp_path):
+    d = {"a": 1, "b": {"c": 2}}
+    u = {"b": {"d": 3}}
+
+    def mkinput(kind, data, name):
+        if kind == "config":
+            return YAMLConfig(data)
+        if kind == "dict":
+            return data
+        path = tmp_path / f"{name}.yaml"
+        YAMLConfig(data).dump(path)
+        return path
+
+    configs = [mkinput(kind1, d, "d"), mkinput(kind2, u, "u")]
+    outpath = tmp_path / "out.yaml"
+    assert isinstance(tools.compose(configs=configs, realize=False, output_file=outpath), Config)
+    assert logged(f"Composing 'yaml' config from {configs[1] if kind2 == 'path' else 'dict'}")
+    assert YAMLConfig(outpath) == {"a": 1, "b": {"c": 2, "d": 3}}
+    assert d == {"a": 1, "b": {"c": 2}}  # inputs not mutated
+
+
+def test_config_tools_compose__input_format_from_config_type(logged, tmp_path):
+    outpath = tmp_path / "out.nml"
+    configs: list = [NMLConfig({"nl": {"a": 1}}), {"nl": {"b": 2}}]
+    tools.compose(configs=configs, realize=False, output_file=outpath)
+    assert logged("Composing 'nml' config from dict")
+    assert NMLConfig(outpath) == {"nl": {"a": 1, "b": 2}}
+
+
 @mark.parametrize("realize", [False, True])
 def test_config_tools_compose__realize(realize, tmp_path, utc):
     dyaml = """
@@ -436,6 +522,17 @@ def test_config_tools_compose__split_anchor_alias(compose_anchor_alias_assets):
     tools.compose(configs=[path_a, path_b, path_c, path_d], realize=False, output_file=outpath)
     expected = {"apple": "green", "banana": "yellow", "cherry": "red", "date": "brown"}
     assert yaml.safe_load(outpath.read_text())["a"] == expected
+
+
+def test_config_tools_compose__split_anchor_alias_with_dict(compose_anchor_alias_assets):
+    path_a, path_b, path_c, path_d = compose_anchor_alias_assets
+    outpath = path_a.parent / "out.yaml"
+    configs = [path_a, {"e": "elderberry"}, path_b, path_c, path_d]
+    tools.compose(configs=configs, realize=False, output_file=outpath)
+    expected = {"apple": "green", "banana": "yellow", "cherry": "red", "date": "brown"}
+    composed = yaml.safe_load(outpath.read_text())
+    assert composed["a"] == expected
+    assert composed["e"] == "elderberry"
 
 
 def test_config_tools_compose__split_anchor_alias_bad_duplicate_anchor(compose_anchor_alias_assets):
@@ -1089,6 +1186,29 @@ def test_config_tools_walk_key_path__fail_bad_leaf_value():
     with raises(UWError) as e:
         tools.walk_key_path({"a": {"b": {"c": "cherry"}}}, ["a", "b", "c"])
     assert str(e.value) == "Value at a.b.c must be a dictionary"
+
+
+@mark.parametrize(
+    ("config", "expected"), [({"a": 1}, "dict"), (Path("/path/to/c.yaml"), "/path/to/c.yaml")]
+)
+def test_config_tools__compose_desc(config, expected):
+    assert tools._compose_desc(config) == expected
+
+
+@mark.parametrize("kind", ["dict", "path"])
+def test_config_tools__compose_log_contents(kind, logged, tmp_path):
+    d = {"a": 1, "b": {"c": 2}}
+    path = tmp_path / "c.yaml"
+    path.write_text("\na: 1\nb:\n  c: 2\n\n")
+    config = d if kind == "dict" else path
+    tools._compose_log_contents(config)
+    expected = """
+    Could not load %s:
+      a: 1
+      b:
+        c: 2
+    """ % ("dict" if kind == "dict" else path)
+    assert logged(dedent(expected), full=True)
 
 
 def test_config_tools__ensure_format__no_path_no_format(logged):
