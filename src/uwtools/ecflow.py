@@ -18,7 +18,12 @@ from typing import TYPE_CHECKING, cast
 
 try:
     from ecflow import (  # type: ignore[import-untyped]
+        Autoarchive,
+        Autocancel,
         Client,
+        Clock,
+        Cron,
+        Date,
         Defs,
         DState,
         Family,
@@ -231,7 +236,7 @@ class _ECFlowDef:
 
     # Private
 
-    def _add_node(  # noqa: PLR0912
+    def _add_node(  # noqa: PLR0912, PLR0915
         self,
         config: dict,
         node: Node,
@@ -261,6 +266,21 @@ class _ECFlowDef:
                 case STR.tasks:
                     self._expand_block(subconfig, name, Task, node, refs)
                 # Node attribute cases
+                case STR.autoarchive:
+                    node.add_autoarchive(self._autoarchive(subconfig))
+                case STR.autocancel:
+                    node.add_autocancel(self._autocancel(subconfig))
+                case STR.clock:
+                    self._add_clock(subconfig, node)
+                case STR.cron:
+                    for entry in subconfig:
+                        node.add_cron(self._cron(entry))
+                case STR.date:
+                    for date in subconfig:
+                        node.add_date(Date(date))
+                case STR.day:
+                    for day in subconfig:
+                        node.add_day(day)
                 case STR.defstatus:
                     node.add_defstatus(getattr(DState, subconfig))
                 case STR.events:
@@ -283,6 +303,12 @@ class _ECFlowDef:
                     self._add_repeat(subconfig, name, node)
                 case STR.script:
                     self._prepare_ecf_script(subconfig, node)
+                case STR.time:
+                    for time in subconfig:
+                        node.add_time(time)
+                case STR.today:
+                    for today in subconfig:
+                        node.add_today(today)
                 case STR.trigger:
                     node.add_trigger(subconfig)
                 case STR.vars:
@@ -292,6 +318,19 @@ class _ECFlowDef:
                 case _:
                     msg = f"Unrecognized tag: {tag}"
                     raise AssertionError(msg)
+
+    def _add_clock(self, config: str, node: Node) -> None:
+        """
+        Add a clock to a suite.
+
+        :param config: The clock type ('real' or 'hybrid').
+        :param node: The node to add the clock to.
+        :raises UWConfigError: If the node is not a suite.
+        """
+        if not isinstance(node, Suite):
+            msg = "A clock may only be set on a suite, not on node '%s'" % node.name()
+            raise UWConfigError(msg)
+        node.add_clock(Clock(config == STR.hybrid))
 
     def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
@@ -321,6 +360,55 @@ class _ECFlowDef:
             if config.get(k) is not None
         ]
         node.add_repeat(repeat(*args))
+
+    def _autoarchive(self, config: dict) -> Autoarchive:
+        """
+        Build an autoarchive attribute from its configuration.
+
+        :param config: Configuration for the autoarchive ('days' or 'time', plus optional flags).
+        """
+        idle = config.get(STR.idle, False)
+        if (days := config.get(STR.days)) is not None:
+            return Autoarchive(days, idle)
+        hour, minute = self._hhmm(config[STR.time])
+        return Autoarchive(hour, minute, config.get(STR.relative, False), idle)
+
+    def _autocancel(self, config: dict) -> Autocancel:
+        """
+        Build an autocancel attribute from its configuration.
+
+        :param config: Configuration for the autocancel ('days' or 'time', plus optional flags).
+        """
+        if (days := config.get(STR.days)) is not None:
+            return Autocancel(days)
+        hour, minute = self._hhmm(config[STR.time])
+        return Autocancel(hour, minute, config.get(STR.relative, False))
+
+    def _cron(self, config: str | dict) -> Cron:
+        """
+        Build a cron attribute from its configuration.
+
+        :param config: A time string, or a mapping with 'time' and optional day/month filters.
+        """
+        if isinstance(config, str):
+            return Cron(config)
+        kwargs = {
+            k: config[k]
+            for k in (STR.days_of_week, STR.days_of_month, STR.months)
+            if config.get(k) is not None
+        }
+        return Cron(config[STR.time], **kwargs)
+
+    @staticmethod
+    def _hhmm(value: str) -> tuple[int, int]:
+        """
+        Parse an 'HH:MM' time string, ignoring an optional leading '+' (relative) marker.
+
+        :param value: The time string.
+        :return: The hour and minute as integers.
+        """
+        hour, minute = value.lstrip("+").split(":")
+        return int(hour), int(minute)
 
     def _add_workflow_components(self) -> None:
         """

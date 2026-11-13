@@ -2,6 +2,12 @@
   "$defs": {
     "addon_property_names": {
       "enum": [
+        "autoarchive",
+        "autocancel",
+        "clock",
+        "cron",
+        "date",
+        "day",
         "defstatus",
         "events",
         "inlimits",
@@ -16,12 +22,103 @@
         "repeat_enumerated",
         "repeat_int",
         "repeat_string",
+        "time",
+        "today",
         "trigger",
         "vars"
       ]
     },
     "addons": {
       "properties": {
+        "autoarchive": {
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "required": [
+                "days"
+              ]
+            },
+            {
+              "required": [
+                "time"
+              ]
+            }
+          ],
+          "properties": {
+            "days": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "idle": {
+              "type": "boolean"
+            },
+            "relative": {
+              "type": "boolean"
+            },
+            "time": {
+              "pattern": "^\\+?[0-9]{1,2}:[0-9]{2}$",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "autocancel": {
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "required": [
+                "days"
+              ]
+            },
+            {
+              "required": [
+                "time"
+              ]
+            }
+          ],
+          "properties": {
+            "days": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "relative": {
+              "type": "boolean"
+            },
+            "time": {
+              "pattern": "^\\+?[0-9]{1,2}:[0-9]{2}$",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "clock": {
+          "enum": [
+            "hybrid",
+            "real"
+          ],
+          "type": "string"
+        },
+        "cron": {
+          "items": {
+            "$ref": "#/$defs/cron_entry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "date": {
+          "items": {
+            "$ref": "#/$defs/ecflow_date"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "day": {
+          "items": {
+            "$ref": "#/$defs/ecflow_weekday"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
         "defstatus": {
           "enum": [
             "complete",
@@ -353,6 +450,20 @@
           ],
           "type": "object"
         },
+        "time": {
+          "items": {
+            "$ref": "#/$defs/ecflow_time"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "today": {
+          "items": {
+            "$ref": "#/$defs/ecflow_time"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
         "trigger": {
           "type": "string"
         },
@@ -361,6 +472,69 @@
         }
       },
       "type": "object"
+    },
+    "cron_entry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ecflow_time"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "days_of_month": {
+              "items": {
+                "maximum": 31,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "days_of_week": {
+              "items": {
+                "maximum": 6,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "months": {
+              "items": {
+                "maximum": 12,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "time": {
+              "$ref": "#/$defs/ecflow_time"
+            }
+          },
+          "required": [
+            "time"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ecflow_date": {
+      "pattern": "^(\\*|[0-9]{1,2})\\.(\\*|[0-9]{1,2})\\.(\\*|[0-9]{4})$",
+      "type": "string"
+    },
+    "ecflow_time": {
+      "pattern": "^\\+?[0-9]{1,2}:[0-9]{2}( [0-9]{1,2}:[0-9]{2}){0,2}$",
+      "type": "string"
+    },
+    "ecflow_weekday": {
+      "enum": [
+        "friday",
+        "monday",
+        "saturday",
+        "sunday",
+        "thursday",
+        "tuesday",
+        "wednesday"
+      ],
+      "type": "string"
     },
     "expander": {
       "properties": {
