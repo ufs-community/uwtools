@@ -320,6 +320,47 @@ def test_ecflow_validate__suite_with_optional_properties():
     assert ecflow.validate(config)
 
 
+def test_ecflow_validate__suite_with_scheduling_attributes():
+    config = {
+        "ecflow": {
+            "suitedef": {
+                "suite_rt": {
+                    "clock": "real",
+                    "family_cycle": {
+                        "autoarchive": {"days": 2},
+                        "task_prep": {
+                            "script": {"body": "echo prep"},
+                            "time": ["03:45"],
+                            "date": ["1.*.*"],
+                            "day": ["monday"],
+                            "today": ["09:30"],
+                            "cron": [{"time": "14:00", "days_of_week": [1, 3, 5]}],
+                            "autocancel": {"days": 3},
+                        },
+                    },
+                }
+            }
+        }
+    }
+    assert ecflow.validate(config)
+
+
+@mark.parametrize(
+    "addon",
+    [
+        {"clock": "bogus"},
+        {"day": ["funday"]},
+        {"date": ["not-a-date"]},
+        {"autoarchive": {"days": 2, "time": "03:00"}},
+        {"autocancel": {}},
+    ],
+)
+def test_ecflow_validate__scheduling_attributes_invalid(addon):
+    config = {"ecflow": {"suitedef": {"suite_rt": addon}}}
+    with raises(UWConfigError):
+        ecflow.validate(config)
+
+
 def test_ecflow_validate__yamlconfig(minimal_config):
     assert ecflow.validate(YAMLConfig(minimal_config))
 
@@ -328,6 +369,42 @@ class Test_ECFlowDef:  # noqa: N801
     """
     Tests for class uwtools.ecflow._ECFlowDef.
     """
+
+    def test_ecflow__ECFlowDef__init__scheduling_attributes_round_trip(self):
+        config = {
+            "ecflow": {
+                "suitedef": {
+                    "suite_rt": {
+                        "clock": "real",
+                        "family_cycle": {
+                            "autoarchive": {"days": 2},
+                            "task_prep": {
+                                "script": {"body": "echo prep"},
+                                "time": ["03:45", "15:45"],
+                                "date": ["1.*.*"],
+                                "day": ["monday"],
+                                "today": ["09:30"],
+                                "cron": [{"time": "14:00", "days_of_week": [1, 3, 5]}],
+                                "autocancel": {"days": 3},
+                            },
+                        },
+                    }
+                }
+            }
+        }
+        suite_def = str(_ECFlowDef(config=config))
+        for expected in (
+            "clock real",
+            "autoarchive 2",
+            "time 03:45",
+            "time 15:45",
+            "date 1.*.*",
+            "day monday",
+            "today 09:30",
+            "cron -w 1,3,5 14:00",
+            "autocancel 3",
+        ):
+            assert expected in suite_def
 
     def test_ecflow__ECFlowDef__init__full_workflow(self, tmp_path):
         config = {
@@ -484,6 +561,105 @@ class Test_ECFlowDef:  # noqa: N801
         with raises(AssertionError, match="Unrecognized tag: unknown"):
             instance._add_node(config, task, suite)
 
+    def test_ecflow__ECFlowDef__add_node__with_autoarchive_days(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"autoarchive": {"days": 2}}
+        instance._add_node(config, task, suite)
+        autoarchive = suite.find_task("t1").get_autoarchive()
+        assert autoarchive.days() is True
+        assert autoarchive.idle() is False
+        assert "autoarchive 2" in str(autoarchive)
+
+    def test_ecflow__ECFlowDef__add_node__with_autoarchive_time(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"autoarchive": {"time": "+01:30", "relative": True, "idle": True}}
+        instance._add_node(config, task, suite)
+        autoarchive = suite.find_task("t1").get_autoarchive()
+        assert autoarchive.days() is False
+        assert autoarchive.relative() is True
+        assert autoarchive.idle() is True
+        assert "autoarchive +01:30 -i" in str(autoarchive)
+
+    def test_ecflow__ECFlowDef__add_node__with_autocancel_days(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"autocancel": {"days": 3}}
+        instance._add_node(config, task, suite)
+        assert "autocancel 3" in str(suite.find_task("t1").get_autocancel())
+
+    def test_ecflow__ECFlowDef__add_node__with_autocancel_time(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"autocancel": {"time": "02:00"}}
+        instance._add_node(config, task, suite)
+        assert "autocancel 02:00" in str(suite.find_task("t1").get_autocancel())
+
+    @mark.parametrize(("kind", "expected"), [("real", "clock real"), ("hybrid", "clock hybrid")])
+    def test_ecflow__ECFlowDef__add_node__with_clock(self, instance, kind, expected):
+        suite = Suite("test")
+        config = {"clock": kind}
+        instance._add_node(config, suite, instance._d)
+        assert expected in str(instance._d)
+
+    def test_ecflow__ECFlowDef__add_node__with_clock_non_suite_raises(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"clock": "real"}
+        with raises(UWConfigError, match="clock may only be set on a suite"):
+            instance._add_node(config, task, suite)
+
+    def test_ecflow__ECFlowDef__add_node__with_cron_string(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"cron": ["14:00"]}
+        instance._add_node(config, task, suite)
+        assert [str(cron) for cron in suite.find_task("t1").crons] == ["cron 14:00"]
+
+    def test_ecflow__ECFlowDef__add_node__with_cron_object(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"cron": [{"time": "14:00", "days_of_week": [1, 3, 5]}]}
+        instance._add_node(config, task, suite)
+        assert [str(cron) for cron in suite.find_task("t1").crons] == ["cron -w 1,3,5 14:00"]
+
+    def test_ecflow__ECFlowDef__add_node__with_cron_list(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"cron": ["09:00", {"time": "14:00", "months": [1, 2]}]}
+        instance._add_node(config, task, suite)
+        assert [str(cron) for cron in suite.find_task("t1").crons] == [
+            "cron 09:00",
+            "cron -m 1,2 14:00",
+        ]
+
+    @mark.parametrize(
+        ("config", "expected"),
+        [
+            ({"date": ["1.*.*"]}, ["date 1.*.*"]),
+            ({"date": ["1.*.*", "31.12.2026"]}, ["date 1.*.*", "date 31.12.2026"]),
+        ],
+    )
+    def test_ecflow__ECFlowDef__add_node__with_date(self, instance, config, expected):
+        suite = Suite("test")
+        task = Task("t1")
+        instance._add_node(config, task, suite)
+        assert [str(date) for date in suite.find_task("t1").dates] == expected
+
+    @mark.parametrize(
+        ("config", "expected"),
+        [
+            ({"day": ["monday"]}, ["day monday"]),
+            ({"day": ["monday", "friday"]}, ["day monday", "day friday"]),
+        ],
+    )
+    def test_ecflow__ECFlowDef__add_node__with_day(self, instance, config, expected):
+        suite = Suite("test")
+        task = Task("t1")
+        instance._add_node(config, task, suite)
+        assert [str(day) for day in suite.find_task("t1").days] == expected
+
     def test_ecflow__ECFlowDef__add_node__with_defstatus(self, instance):
         suite = Suite("test")
         task = Task("t1")
@@ -611,6 +787,32 @@ class Test_ECFlowDef:  # noqa: N801
         with patch.object(instance, "_expand_block") as mock_expand:
             instance._add_node(config, suite, instance._d)
         mock_expand.assert_called_once()
+
+    @mark.parametrize(
+        ("config", "expected"),
+        [
+            ({"time": ["03:45"]}, ["time 03:45"]),
+            ({"time": ["04:00", "16:00"]}, ["time 04:00", "time 16:00"]),
+        ],
+    )
+    def test_ecflow__ECFlowDef__add_node__with_time(self, instance, config, expected):
+        suite = Suite("test")
+        task = Task("t1")
+        instance._add_node(config, task, suite)
+        assert [str(time) for time in suite.find_task("t1").times] == expected
+
+    @mark.parametrize(
+        ("config", "expected"),
+        [
+            ({"today": ["09:30"]}, ["today 09:30"]),
+            ({"today": ["09:30", "21:30"]}, ["today 09:30", "today 21:30"]),
+        ],
+    )
+    def test_ecflow__ECFlowDef__add_node__with_today(self, instance, config, expected):
+        suite = Suite("test")
+        task = Task("t1")
+        instance._add_node(config, task, suite)
+        assert [str(today) for today in suite.find_task("t1").todays] == expected
 
     def test_ecflow__ECFlowDef__add_node__with_trigger(self, instance):
         suite = Suite("test")
