@@ -619,13 +619,6 @@ class Test_ECFlowDef:  # noqa: N801
         instance._add_node(config, suite, instance._d)
         assert expected in str(instance._d)
 
-    def test_ecflow__ECFlowDef__add_node__with_clock_non_suite_raises(self, instance):
-        suite = Suite("test")
-        task = Task("t1")
-        config = {"clock": "real"}
-        with raises(UWConfigError, match="clock may only be set on a suite"):
-            instance._add_node(config, task, suite)
-
     def test_ecflow__ECFlowDef__add_node__with_cron_string(self, instance):
         suite = Suite("test")
         task = Task("t1")

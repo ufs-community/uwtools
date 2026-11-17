@@ -271,7 +271,7 @@ class _ECFlowDef:
                 case STR.autocancel:
                     node.add_autocancel(self._autocancel(subconfig))
                 case STR.clock:
-                    self._add_clock(subconfig, node)
+                    node.add_clock(Clock(subconfig == STR.hybrid))
                 case STR.cron:
                     for entry in subconfig:
                         node.add_cron(self._cron(entry))
@@ -319,19 +319,6 @@ class _ECFlowDef:
                     msg = f"Unrecognized tag: {tag}"
                     raise AssertionError(msg)
 
-    def _add_clock(self, config: str, node: Node) -> None:
-        """
-        Add a clock to a suite.
-
-        :param config: The clock type ('real' or 'hybrid').
-        :param node: The node to add the clock to.
-        :raises UWConfigError: If the node is not a suite.
-        """
-        if not isinstance(node, Suite):
-            msg = "A clock may only be set on a suite, not on node '%s'" % node.name()
-            raise UWConfigError(msg)
-        node.add_clock(Clock(config == STR.hybrid))
-
     def _add_repeat(self, config: dict, name: str, node: Node) -> None:
         """
         Adds a repeat to a node.
@@ -370,8 +357,7 @@ class _ECFlowDef:
         idle = config.get(STR.idle, False)
         if (days := config.get(STR.days)) is not None:
             return Autoarchive(days, idle)
-        hour, minute = self._hhmm(config[STR.time])
-        relative = config[STR.time].startswith("+") or config.get(STR.relative, False)
+        hour, minute, relative = self._time_and_relative(config)
         return Autoarchive(hour, minute, relative, idle)
 
     def _autocancel(self, config: dict) -> Autocancel:
@@ -382,8 +368,7 @@ class _ECFlowDef:
         """
         if (days := config.get(STR.days)) is not None:
             return Autocancel(days)
-        hour, minute = self._hhmm(config[STR.time])
-        relative = config[STR.time].startswith("+") or config.get(STR.relative, False)
+        hour, minute, relative = self._time_and_relative(config)
         return Autocancel(hour, minute, relative)
 
     def _cron(self, config: str | dict) -> Cron:
@@ -402,15 +387,19 @@ class _ECFlowDef:
         return Cron(config[STR.time], **kwargs)
 
     @staticmethod
-    def _hhmm(value: str) -> tuple[int, int]:
+    def _time_and_relative(config: dict) -> tuple[int, int, bool]:
         """
-        Parse an 'HH:MM' time string, ignoring an optional leading '+' (relative) marker.
+        Parse the hour, minute, and relativity of an autoarchive/autocancel time config.
 
-        :param value: The time string.
-        :return: The hour and minute as integers.
+        A leading '+' on the time, or a true 'relative' flag, selects relative mode.
+
+        :param config: Configuration containing a 'time' value and optional 'relative' flag.
+        :return: The hour, minute, and whether the time is relative.
         """
+        value = config[STR.time]
         hour, minute = value.lstrip("+").split(":")
-        return int(hour), int(minute)
+        relative = value.startswith("+") or config.get(STR.relative, False)
+        return int(hour), int(minute), relative
 
     def _add_workflow_components(self) -> None:
         """

@@ -777,6 +777,22 @@ def test_schema_ecflow_suitedef_nested_family():
     assert "'expand' is a required property" in errors(with_del(config, "suites_a", "expand"))
 
 
+def test_schema_ecflow_suitedef_clock():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    # clock is accepted on a suite, constrained to an enum:
+    assert not errors({"suite_s": {"clock": "real"}})
+    assert not errors({"suite_s": {"clock": "hybrid"}})
+    assert not errors({"suites_s": {"expand": {"MEM": ["1"]}, "clock": "real"}})
+    assert "'bogus' is not one of" in errors({"suite_s": {"clock": "bogus"}})
+    # clock is suite-only: it is rejected on families and tasks:
+    assert "is not valid under any of the given schemas" in errors(
+        {"suite_s": {"family_f": {"clock": "real"}}}
+    )
+    assert "is not valid under any of the given schemas" in errors(
+        {"suite_s": {"task_t": {"script": {"body": "run.sh"}, "clock": "real"}}}
+    )
+
+
 def test_schema_ecflow_suitedef_refs_addons_autoarchive():
     errors = schema_validator("ecflow", "$defs", "addons")
     # Either days or time is accepted:
@@ -818,15 +834,6 @@ def test_schema_ecflow_suitedef_refs_addons_autocancel():
     assert "Additional properties are not allowed" in errors(
         {"autocancel": {"days": 3, "idle": True}}
     )
-
-
-def test_schema_ecflow_suitedef_refs_addons_clock():
-    errors = schema_validator("ecflow", "$defs", "addons")
-    # Basic spec:
-    assert not errors({"clock": "real"})
-    assert not errors({"clock": "hybrid"})
-    # Constrained to an enum:
-    assert "'bogus' is not one of" in errors({"clock": "bogus"})
 
 
 def test_schema_ecflow_suitedef_refs_addons_cron():

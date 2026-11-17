@@ -4,7 +4,6 @@
       "enum": [
         "autoarchive",
         "autocancel",
-        "clock",
         "cron",
         "date",
         "day",
@@ -90,13 +89,6 @@
             }
           },
           "type": "object"
-        },
-        "clock": {
-          "enum": [
-            "hybrid",
-            "real"
-          ],
-          "type": "string"
         },
         "cron": {
           "items": {
@@ -472,6 +464,13 @@
         }
       },
       "type": "object"
+    },
+    "clock": {
+      "enum": [
+        "hybrid",
+        "real"
+      ],
+      "type": "string"
     },
     "cron_entry": {
       "anyOf": [
@@ -996,10 +995,20 @@
                 },
                 {
                   "$ref": "#/$defs/addons"
+                },
+                {
+                  "properties": {
+                    "clock": {
+                      "$ref": "#/$defs/clock"
+                    }
+                  }
                 }
               ],
               "propertyNames": {
                 "anyOf": [
+                  {
+                    "const": "clock"
+                  },
                   {
                     "$ref": "#/$defs/addon_property_names"
                   },
@@ -1016,12 +1025,22 @@
                 },
                 {
                   "$ref": "#/$defs/familycontainer"
+                },
+                {
+                  "properties": {
+                    "clock": {
+                      "$ref": "#/$defs/clock"
+                    }
+                  }
                 }
               ],
               "propertyNames": {
                 "anyOf": [
                   {
                     "const": "expand"
+                  },
+                  {
+                    "const": "clock"
                   },
                   {
                     "$ref": "#/$defs/addon_property_names"
