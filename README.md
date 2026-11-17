@@ -10,8 +10,3 @@ Comprehensive documentation is available for:
 
 * [The latest release](https://uwtools.readthedocs.io/en/stable/)
 * [The development version](https://uwtools.readthedocs.io/en/main/)
-
-### AI Statement
-
-Generative AI tools are used to assist with developing this code.
-The code has been reviewed, edited, and validated by NWS staff.
