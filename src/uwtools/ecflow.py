@@ -371,7 +371,8 @@ class _ECFlowDef:
         if (days := config.get(STR.days)) is not None:
             return Autoarchive(days, idle)
         hour, minute = self._hhmm(config[STR.time])
-        return Autoarchive(hour, minute, config.get(STR.relative, False), idle)
+        relative = config[STR.time].startswith("+") or config.get(STR.relative, False)
+        return Autoarchive(hour, minute, relative, idle)
 
     def _autocancel(self, config: dict) -> Autocancel:
         """
@@ -382,7 +383,8 @@ class _ECFlowDef:
         if (days := config.get(STR.days)) is not None:
             return Autocancel(days)
         hour, minute = self._hhmm(config[STR.time])
-        return Autocancel(hour, minute, config.get(STR.relative, False))
+        relative = config[STR.time].startswith("+") or config.get(STR.relative, False)
+        return Autocancel(hour, minute, relative)
 
     def _cron(self, config: str | dict) -> Cron:
         """

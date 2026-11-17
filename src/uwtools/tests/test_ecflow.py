@@ -574,13 +574,22 @@ class Test_ECFlowDef:  # noqa: N801
     def test_ecflow__ECFlowDef__add_node__with_autoarchive_time(self, instance):
         suite = Suite("test")
         task = Task("t1")
-        config = {"autoarchive": {"time": "+01:30", "relative": True, "idle": True}}
+        config = {"autoarchive": {"time": "01:30", "relative": True, "idle": True}}
         instance._add_node(config, task, suite)
         autoarchive = suite.find_task("t1").get_autoarchive()
         assert autoarchive.days() is False
         assert autoarchive.relative() is True
         assert autoarchive.idle() is True
         assert "autoarchive +01:30 -i" in str(autoarchive)
+
+    def test_ecflow__ECFlowDef__add_node__with_autoarchive_time_relative_plus(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"autoarchive": {"time": "+01:30"}}
+        instance._add_node(config, task, suite)
+        autoarchive = suite.find_task("t1").get_autoarchive()
+        assert autoarchive.relative() is True
+        assert "autoarchive +01:30" in str(autoarchive)
 
     def test_ecflow__ECFlowDef__add_node__with_autocancel_days(self, instance):
         suite = Suite("test")
@@ -595,6 +604,13 @@ class Test_ECFlowDef:  # noqa: N801
         config = {"autocancel": {"time": "02:00"}}
         instance._add_node(config, task, suite)
         assert "autocancel 02:00" in str(suite.find_task("t1").get_autocancel())
+
+    def test_ecflow__ECFlowDef__add_node__with_autocancel_time_relative_plus(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"autocancel": {"time": "+02:00"}}
+        instance._add_node(config, task, suite)
+        assert "autocancel +02:00" in str(suite.find_task("t1").get_autocancel())
 
     @mark.parametrize(("kind", "expected"), [("real", "clock real"), ("hybrid", "clock hybrid")])
     def test_ecflow__ECFlowDef__add_node__with_clock(self, instance, kind, expected):
