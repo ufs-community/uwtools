@@ -762,21 +762,6 @@ def test_schema_ecflow_server():
     assert not err("ECF_MICRODEF", "%")
 
 
-def test_schema_ecflow_suitedef_nested_family():
-    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
-    config = {
-        "suites_a": {
-            "family_a": {"families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}},
-            "expand": {
-                "MEMBER": ["00", "06"],
-            },
-        }
-    }
-    assert not errors(config)
-    # Ensure that the required "expand" key is present:
-    assert "'expand' is a required property" in errors(with_del(config, "suites_a", "expand"))
-
-
 def test_schema_ecflow_suitedef_clock():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # clock is accepted on a suite, constrained to an enum:
@@ -791,6 +776,21 @@ def test_schema_ecflow_suitedef_clock():
     assert "is not valid under any of the given schemas" in errors(
         {"suite_s": {"task_t": {"script": {"body": "run.sh"}, "clock": "real"}}}
     )
+
+
+def test_schema_ecflow_suitedef_nested_family():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    config = {
+        "suites_a": {
+            "family_a": {"families_a{{ ec.var }}": {"family_b": {}, "expand": {"MEM": [1, 2]}}},
+            "expand": {
+                "MEMBER": ["00", "06"],
+            },
+        }
+    }
+    assert not errors(config)
+    # Ensure that the required "expand" key is present:
+    assert "'expand' is a required property" in errors(with_del(config, "suites_a", "expand"))
 
 
 def test_schema_ecflow_suitedef_refs_addons_autoarchive():

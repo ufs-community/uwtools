@@ -619,20 +619,6 @@ class Test_ECFlowDef:  # noqa: N801
         instance._add_node(config, suite, instance._d)
         assert expected in str(instance._d)
 
-    def test_ecflow__ECFlowDef__add_node__with_cron_string(self, instance):
-        suite = Suite("test")
-        task = Task("t1")
-        config = {"cron": ["14:00"]}
-        instance._add_node(config, task, suite)
-        assert [str(cron) for cron in suite.find_task("t1").crons] == ["cron 14:00"]
-
-    def test_ecflow__ECFlowDef__add_node__with_cron_object(self, instance):
-        suite = Suite("test")
-        task = Task("t1")
-        config = {"cron": [{"time": "14:00", "days_of_week": [1, 3, 5]}]}
-        instance._add_node(config, task, suite)
-        assert [str(cron) for cron in suite.find_task("t1").crons] == ["cron -w 1,3,5 14:00"]
-
     def test_ecflow__ECFlowDef__add_node__with_cron_list(self, instance):
         suite = Suite("test")
         task = Task("t1")
@@ -642,6 +628,20 @@ class Test_ECFlowDef:  # noqa: N801
             "cron 09:00",
             "cron -m 1,2 14:00",
         ]
+
+    def test_ecflow__ECFlowDef__add_node__with_cron_object(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"cron": [{"time": "14:00", "days_of_week": [1, 3, 5]}]}
+        instance._add_node(config, task, suite)
+        assert [str(cron) for cron in suite.find_task("t1").crons] == ["cron -w 1,3,5 14:00"]
+
+    def test_ecflow__ECFlowDef__add_node__with_cron_string(self, instance):
+        suite = Suite("test")
+        task = Task("t1")
+        config = {"cron": ["14:00"]}
+        instance._add_node(config, task, suite)
+        assert [str(cron) for cron in suite.find_task("t1").crons] == ["cron 14:00"]
 
     @mark.parametrize(
         ("config", "expected"),
