@@ -261,7 +261,6 @@ class _STR(_ValsMatchKeys):
     quiet: str = _
     rate: str = _
     ready: str = _
-    real: str = _
     realize: str = _
     refs: str = _
     relative: str = _
