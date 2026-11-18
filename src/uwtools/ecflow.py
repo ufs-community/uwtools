@@ -348,6 +348,23 @@ class _ECFlowDef:
         ]
         node.add_repeat(repeat(*args))
 
+    def _add_workflow_components(self) -> None:
+        """
+        Add suite(s) and other attributes to the suite definition.
+        """
+        for key, subconfig in self._config.items():
+            tag, name = self._tag_name(key)
+            match tag:
+                case STR.extern:
+                    for ext in subconfig:
+                        self._d.add_extern(ext)
+                case STR.vars:
+                    self._d.add_variable(subconfig)
+                case STR.suite:
+                    self._add_node(subconfig, _node(Suite, name), self._d)
+                case STR.suites:
+                    self._expand_block(subconfig, name, Suite, self._d)
+
     def _autoarchive(self, config: dict) -> Autoarchive:
         """
         Build an autoarchive attribute from its configuration.
@@ -385,38 +402,6 @@ class _ECFlowDef:
             if config.get(k) is not None
         }
         return Cron(config[STR.time], **kwargs)
-
-    @staticmethod
-    def _time_and_relative(config: dict) -> tuple[int, int, bool]:
-        """
-        Parse the hour, minute, and relativity of an autoarchive/autocancel time config.
-
-        A leading '+' on the time, or a true 'relative' flag, selects relative mode.
-
-        :param config: Configuration containing a 'time' value and optional 'relative' flag.
-        :return: The hour, minute, and whether the time is relative.
-        """
-        value = config[STR.time]
-        hour, minute = value.lstrip("+").split(":")
-        relative = value.startswith("+") or config.get(STR.relative, False)
-        return int(hour), int(minute), relative
-
-    def _add_workflow_components(self) -> None:
-        """
-        Add suite(s) and other attributes to the suite definition.
-        """
-        for key, subconfig in self._config.items():
-            tag, name = self._tag_name(key)
-            match tag:
-                case STR.extern:
-                    for ext in subconfig:
-                        self._d.add_extern(ext)
-                case STR.vars:
-                    self._d.add_variable(subconfig)
-                case STR.suite:
-                    self._add_node(subconfig, _node(Suite, name), self._d)
-                case STR.suites:
-                    self._expand_block(subconfig, name, Suite, self._d)
 
     def _expand_block(
         self,
@@ -492,6 +477,21 @@ class _ECFlowDef:
         tag = parts[0]
         name = parts[1] if len(parts) > 1 else ""
         return tag, name
+
+    @staticmethod
+    def _time_and_relative(config: dict) -> tuple[int, int, bool]:
+        """
+        Parse the hour, minute, and relativity of an autoarchive/autocancel time config.
+
+        A leading '+' on the time, or a true 'relative' flag, selects relative mode.
+
+        :param config: Configuration containing a 'time' value and optional 'relative' flag.
+        :return: The hour, minute, and whether the time is relative.
+        """
+        value = config[STR.time]
+        hour, minute = value.lstrip("+").split(":")
+        relative = value.startswith("+") or config.get(STR.relative, False)
+        return int(hour), int(minute), relative
 
 
 class _ServerThread(Thread):
