@@ -93,6 +93,11 @@ def assert_repeat_date_output(path: Path) -> None:
     assert "repeat date YMD 20240101 20240131 4" in lines
 
 
+def assert_repeat_datelist_output(path: Path) -> None:
+    lines = [line.strip() for line in (path / "suite.def").read_text().splitlines()]
+    assert 'repeat datelist YMD "20240101" "20240131"' in lines
+
+
 def write_repeat_date_config(path: Path, start: str, end: str) -> Path:
     config = path / "config.yaml"
     config.write_text(
@@ -106,6 +111,22 @@ def write_repeat_date_config(path: Path, start: str, end: str) -> Path:
                 end: {end}
                 step: 4
         """)
+    )
+    return config
+
+
+def write_repeat_datelist_config(path: Path, items: list[str]) -> Path:
+    config = path / "config.yaml"
+    config.write_text(
+        dedent("""\
+        ecflow:
+          suitedef:
+            suite_forecast:
+              repeat_datelist:
+                variable: YMD
+                list:
+        """)
+        + "".join(f"          - {item}\n" for item in items)
     )
     return config
 
@@ -170,6 +191,40 @@ def test_ecflow_realize__repeat_date_truncated(tmp_path, uwcaplog):
     assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
         ("repeat_date start: truncated 2024-01-01T12:30:00 to 2024-01-01 (time must be 00:00:00)"),
         ("repeat_date end: truncated 2024-01-31T00:00:01 to 2024-01-31 (time must be 00:00:00)"),
+    ]
+
+
+@mark.parametrize(
+    ("fmt", "type_"),
+    [
+        ("{}", date),
+        ("{}T00:00:00", datetime),
+        ("!datetime {}", datetime),
+        ('"{}"', str),
+        ('"{}T00:00:00"', str),
+    ],
+)
+def test_ecflow_realize__repeat_datelist(fmt, type_, tmp_path, uwcaplog):
+    items = [fmt.format("2024-01-01"), fmt.format("2024-01-31")]
+    config = write_repeat_datelist_config(tmp_path, items)
+    cfgobj = YAMLConfig(config)
+    cfgobj.realize()
+    repeat = cfgobj.data["ecflow"]["suitedef"]["suite_forecast"]["repeat_datelist"]
+    assert all(type(x) is type_ for x in repeat["list"])
+    ecflow.realize(config=config, output_path=tmp_path)
+    assert_repeat_datelist_output(tmp_path)
+    assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
+
+
+def test_ecflow_realize__repeat_datelist_mixed_and_truncated(tmp_path, uwcaplog):
+    config = write_repeat_datelist_config(tmp_path, ["2024-01-01T12:30:00", '"2024-01-31"'])
+    ecflow.realize(config=config, output_path=tmp_path)
+    assert_repeat_datelist_output(tmp_path)
+    assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
+        (
+            "repeat_datelist list[0]: truncated 2024-01-01T12:30:00 to 2024-01-01 "
+            "(time must be 00:00:00)"
+        ),
     ]
 
 
@@ -930,13 +985,6 @@ class Test_ECFlowDef:  # noqa: N801
         instance._add_repeat(config.copy(), "enumerated", node)
         assert 'repeat enumerated MEMBER "m01" "m02" "m03"' in node.get_repeat().__str__()
 
-    @mark.parametrize("repeat_type", ["datelist", "string"])
-    def test_ecflow__ECFlowDef__add_repeat__enumerated_variants(self, instance, repeat_type):
-        node = Task("t1")
-        config = {"variable": "VAR", "list": ["a", "b"]}
-        instance._add_repeat(config.copy(), repeat_type, node)
-        assert 'VAR "a" "b"' in node.get_repeat().__str__()
-
     def test_ecflow__ECFlowDef__add_repeat__int(self, instance):
         node = Task("t1")
         config = {"variable": "STEP", "start": 0, "end": 10, "step": 5}
@@ -945,6 +993,12 @@ class Test_ECFlowDef:  # noqa: N801
         repeat = node.get_repeat()
         actual = [repeat.__getattribute__(a)() for a in ("name", "start", "end", "step")]
         assert actual == expected
+
+    def test_ecflow__ECFlowDef__add_repeat__string(self, instance):
+        node = Task("t1")
+        config = {"variable": "VAR", "list": ["a", "b"]}
+        instance._add_repeat(config.copy(), "string", node)
+        assert 'VAR "a" "b"' in node.get_repeat().__str__()
 
     def test_ecflow__ECFlowDef__add_repeat__unknown_type(self, instance):
         node = Mock()

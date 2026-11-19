@@ -323,9 +323,7 @@
           "properties": {
             "list": {
               "items": {
-                "maximum": 99999999,
-                "minimum": 10000000,
-                "type": "integer"
+                "$ref": "urn:uwtools:iso8601"
               },
               "type": "array"
             },

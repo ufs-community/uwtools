@@ -994,12 +994,41 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_date_rejects_integer(key):
     )
 
 
-@mark.parametrize("top_level", ["repeat_datelist", "repeat_enumerated", "repeat_string"])
+@mark.parametrize(
+    "items",
+    [
+        ["2027-01-04", "2027-02-04T00:00:00"],
+        [date(2027, 1, 4), date(2027, 2, 4)],
+        [datetime(2027, 1, 4, tzinfo=UTC), datetime(2027, 2, 4, tzinfo=UTC)],
+    ],
+)
+def test_schema_ecflow_suitedef_refs_addons_repeat_datelist(items):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"variable": "CYCLE", "list": items}
+    assert not errors({"repeat_datelist": config})
+    # All top-level keys are required:
+    for key in ("variable", "list"):
+        assert f"'{key}' is a required property" in errors(
+            {"repeat_datelist": with_del(config, key)}
+        )
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {"repeat_datelist": {**config, "bad_key": "bad_value"}}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_addons_repeat_datelist_rejects_integer():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    config = {"variable": "CYCLE", "list": ["2027-01-04", 20270204]}
+    assert "is not of type 'date', 'datetime', 'string'" in errors({"repeat_datelist": config})
+
+
+@mark.parametrize("top_level", ["repeat_enumerated", "repeat_string"])
 def test_schema_ecflow_suitedef_refs_addons_repeat_lists(top_level):
     errors = schema_validator("ecflow", "$defs", "addons")
-    type_ = int if top_level == "repeat_datelist" else str
     # Basic spec:
-    config = {"variable": "CYCLE", "list": [type_(i) for i in (20270104, 20270204)]}
+    config = {"variable": "CYCLE", "list": ["20270104", "20270204"]}
     assert not errors({top_level: config})
     # All top-level keys are required:
     for key in ("variable", "list"):

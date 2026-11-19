@@ -285,7 +285,20 @@ All forms produce the same ``YYYYMMDD`` values in the generated suite definition
 
 ``repeat_datelist:``
 
-Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`) (as YYYYMMDD integers). Requires ``variable`` and ``list``.
+Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`). Requires ``variable`` and ``list``. Each ``list`` item is a date, which can be written in any of the forms accepted by ``repeat_date:``, and forms can be mixed:
+
+.. code-block:: yaml
+
+   suite_forecast:
+     repeat_datelist:
+       variable: YMD
+       list:
+         - 2024-01-01           # YAML date
+         - 2024-01-15T00:00:00  # YAML datetime
+         - !datetime 2024-01-31 # uwtools-tagged datetime
+         - "2024-02-15"         # quoted string (may also include T00:00:00)
+
+All forms produce ``YYYYMMDD`` values in the generated suite definition. If an item includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
 
 ``repeat_datetime:``
 

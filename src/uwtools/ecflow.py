@@ -31,6 +31,7 @@ try:
         Late,
         Node,
         RepeatDate,
+        RepeatDateList,
         RepeatDateTime,
         RepeatDay,
         RepeatEnumerated,
@@ -57,6 +58,7 @@ from uwtools.utils.processing import run_shell_cmd
 from uwtools.utils.time import to_datetime
 
 if TYPE_CHECKING:
+    from datetime import date, datetime
     from subprocess import Popen
     from types import FrameType
 
@@ -334,13 +336,15 @@ class _ECFlowDef:
                 repeat = RepeatDate
                 config = config.copy()
                 for key in (STR.start, STR.end):
-                    dt = to_datetime(config[key])
-                    date = dt.date()
-                    if dt.time() != time.min:
-                        msg = "repeat_date %s: truncated %s to %s (time must be 00:00:00)"
-                        log.warning(msg, key, dt.isoformat(), date.isoformat())
-                    config[key] = int(date.strftime("%Y%m%d"))
-            case STR.datelist | STR.enumerated | STR.string:
+                    config[key] = _yyyymmdd(config[key], f"repeat_date {key}")
+            case STR.datelist:
+                repeat = RepeatDateList
+                config = config.copy()
+                config[STR.list] = [
+                    _yyyymmdd(x, f"repeat_datelist list[{i}]")
+                    for i, x in enumerate(config[STR.list])
+                ]
+            case STR.enumerated | STR.string:
                 repeat = RepeatEnumerated
             case STR.datetime:
                 repeat = RepeatDateTime
@@ -770,3 +774,19 @@ def _ssl_provision() -> None:
     _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
     _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
     log.info("SSL certificate files written to %s", _SSL_DIR)
+
+
+def _yyyymmdd(value: str | date | datetime, where: str) -> int:
+    """
+    Convert an ISO8601 date or datetime value to a YYYYMMDD integer, truncating any time.
+
+    :param value: The value to convert.
+    :param where: A description of the value's location, for logging.
+    :return: The YYYYMMDD integer.
+    """
+    dt = to_datetime(value)
+    ymd = dt.date()
+    if dt.time() != time.min:
+        msg = "%s: truncated %s to %s (time must be 00:00:00)"
+        log.warning(msg, where, dt.isoformat(), ymd.isoformat())
+    return int(ymd.strftime("%Y%m%d"))
