@@ -349,7 +349,11 @@ class _ECFlowDef:
                 repeat = RepeatDateTime
                 config = config.copy()
                 for key in (STR.start, STR.end):
-                    config[key] = to_datetime(config[key]).strftime("%Y%m%dT%H%M%S")
+                    dt = to_datetime(config[key])
+                    if dt.microsecond:
+                        msg = "repeat_datetime %s: time must have whole-second precision, not %s"
+                        raise UWConfigError(msg % (key, dt.isoformat()))
+                    config[key] = dt.strftime("%Y%m%dT%H%M%S")
                 config[STR.step] = _hhmmss(config.get(STR.step, "24:00:00"))
             case STR.day:
                 repeat = RepeatDay

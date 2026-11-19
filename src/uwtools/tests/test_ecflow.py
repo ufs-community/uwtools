@@ -284,6 +284,30 @@ def test_ecflow_realize__repeat_datetime(fmt, hhmmss, type_, tmp_path, uwcaplog)
     assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
 
 
+@mark.parametrize("key", ["end", "start"])
+@mark.parametrize("tagged", [False, True])
+def test_ecflow_realize__repeat_datetime__subsecond(key, tagged, tmp_path):
+    start = "2024-01-01T06:30:00"
+    end = "2024-01-31T06:30:00"
+    value = f"{start if key == 'start' else end}.500000"
+    if key == "start":
+        start = value
+    else:
+        end = value
+    config = write_repeat_datetime_config(
+        tmp_path,
+        f"!datetime {start}" if tagged else start,
+        f"!datetime {end}" if tagged else end,
+        step=None,
+    )
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == (
+        f"repeat_datetime {key}: time must have whole-second precision, not {value}"
+    )
+    assert not (tmp_path / "suite.def").exists()
+
+
 @mark.parametrize(
     ("step", "expected"),
     [
@@ -1082,6 +1106,23 @@ class Test_ECFlowDef:  # noqa: N801
         assert str(task.get_repeat()).strip() == (
             "repeat datetime DT 20240101T000000 20240101T120000 01:00:00"
         )
+
+    @mark.parametrize("key", ["end", "start"])
+    def test_ecflow__ECFlowDef__add_repeat__datetime__subsecond(self, instance, key):
+        node = Task("t1")
+        config = {
+            "variable": "DT",
+            "start": datetime(2024, 1, 1, tzinfo=UTC),
+            "end": datetime(2024, 1, 2, tzinfo=UTC),
+        }
+        config[key] = datetime(2024, 1, 1, microsecond=500000, tzinfo=UTC)
+        with raises(UWConfigError) as e:
+            instance._add_repeat(config, "datetime", node)
+        assert str(e.value) == (
+            f"repeat_datetime {key}: time must have whole-second precision, "
+            "not 2024-01-01T00:00:00.500000+00:00"
+        )
+        assert node.get_repeat().empty()
 
     def test_ecflow__ECFlowDef__add_repeat__day(self, instance):
         node = Task("t1")

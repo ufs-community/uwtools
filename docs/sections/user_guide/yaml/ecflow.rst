@@ -388,6 +388,8 @@ The ``start`` and ``end`` values of ``repeat_date:`` and ``repeat_datetime:``, a
 
 Quoted strings must match one of the forms shown exactly, i.e. ``YYYY-MM-DD``, optionally followed by ``T`` or a space and ``HH:MM:SS``.
 
+``repeat_datetime:`` requires whole-second precision. A YAML or ``!datetime`` value with a fractional second is rejected rather than rounded or truncated.
+
 Only ``repeat_datetime:`` uses the time. ``repeat_date:`` and ``repeat_datelist:`` produce ``YYYYMMDD`` values in the generated suite definition, so their values must have no time or a time of ``00:00:00``. Any other time is an error.
 
 Task Script Block
