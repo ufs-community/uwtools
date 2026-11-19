@@ -267,26 +267,20 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
 
 ``repeat_date:``
 
-Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (default 1). The ``start`` and ``end`` values are dates, which can be written in any of these equivalent ways:
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (default 1). See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values. For example:
 
 .. code-block:: yaml
 
    suite_forecast:
      repeat_date:
        variable: YMD
-       start: 2024-01-01            # YAML date
-       #      2024-01-01T00:00:00   # YAML datetime
-       #      2024-01-01 00:00:00   # YAML datetime, space-separated
-       #      !datetime 2024-01-01  # uwtools-tagged datetime
-       #      "2024-01-01"          # quoted string (may also include T00:00:00 or 00:00:00)
+       start: 2024-01-01
        end: 2024-01-31
        step: 1
 
-All forms produce the same ``YYYYMMDD`` values in the generated suite definition. A time may be separated from the date by either ``T`` or a space. If a value includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
-
 ``repeat_datelist:``
 
-Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`). Requires ``variable`` and ``list``. Each ``list`` item is a date, which can be written in any of the forms accepted by ``repeat_date:``, and forms can be mixed:
+Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`). Requires ``variable`` and ``list``. See :ref:`ecflow_date_values` for the accepted ``list`` values. For example:
 
 .. code-block:: yaml
 
@@ -294,30 +288,23 @@ Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <pyth
      repeat_datelist:
        variable: YMD
        list:
-         - 2024-01-01            # YAML date
-         - 2024-01-15T00:00:00   # YAML datetime
-         - 2024-01-22 00:00:00   # YAML datetime, space-separated
-         - !datetime 2024-01-31  # uwtools-tagged datetime
-         - "2024-02-15"          # quoted string (may also include T00:00:00 or 00:00:00)
-
-All forms produce ``YYYYMMDD`` values in the generated suite definition. If an item includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
+         - 2024-01-01
+         - 2024-01-15
+         - 2024-02-01
 
 ``repeat_datetime:``
 
-Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional. The ``start`` and ``end`` values can be written in any of the forms accepted by ``repeat_date:``, and may include any time of day. A value without a time means ``00:00:00``:
+Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional. See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values. For example:
 
 .. code-block:: yaml
 
    suite_forecast:
      repeat_datetime:
        variable: DT
-       start: 2024-01-01T06:30:00           # YAML datetime
-       #      2024-01-01 06:30:00           # YAML datetime, space-separated
-       #      !datetime 2024-01-01T06:30:00 # uwtools-tagged datetime
-       #      "2024-01-01T06:30:00"         # quoted string (or "2024-01-01 06:30:00")
-       end: 2024-01-31                      # YAML date, i.e. 2024-01-31T00:00:00
-       step: "36:00:00"                     # quoted string
-       #     !timedelta 36:00:00            # uwtools-tagged timedelta
+       start: 2024-01-01T06:30:00
+       end: 2024-01-31T00:00:00
+       step: "36:00:00"            # quoted string
+       #     !timedelta 36:00:00   # uwtools-tagged timedelta
 
 The ``step`` value must be positive and can be written either way:
 
@@ -376,6 +363,32 @@ Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <pyth
          - prep
          - run
          - post
+
+.. _ecflow_date_values:
+
+Date and Datetime Values
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``start`` and ``end`` values of ``repeat_date:`` and ``repeat_datetime:``, and the ``list`` items of ``repeat_datelist:``, can be written in any of the following forms. A time may follow the date after either ``T`` or a space, and a value without a time means ``00:00:00``. All the values in each group below are equivalent:
+
+.. code-block:: yaml
+
+   # 2024-01-01 at 00:00:00
+   - 2024-01-01                       # YAML date
+   - 2024-01-01T00:00:00              # YAML datetime
+   - !datetime 2024-01-01             # uwtools-tagged datetime
+   - "2024-01-01"                     # quoted string
+
+   # 2024-01-01 at 06:30:00
+   - 2024-01-01T06:30:00              # YAML datetime
+   - 2024-01-01 06:30:00              # YAML datetime, space-separated
+   - !datetime 2024-01-01T06:30:00    # uwtools-tagged datetime
+   - "2024-01-01T06:30:00"            # quoted string
+   - "2024-01-01 06:30:00"            # quoted string, space-separated
+
+Quoted strings must match one of the forms shown exactly, i.e. ``YYYY-MM-DD``, optionally followed by ``T`` or a space and ``HH:MM:SS``.
+
+Only ``repeat_datetime:`` uses the time. ``repeat_date:`` and ``repeat_datelist:`` produce ``YYYYMMDD`` values in the generated suite definition, so if one of their values includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
 
 Task Script Block
 -----------------
