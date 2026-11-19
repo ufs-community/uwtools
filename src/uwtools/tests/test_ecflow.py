@@ -184,9 +184,12 @@ def test_ecflow_realize__file_to_stdout(capsys, assets):
     [
         ("{}", date),
         ("{}T00:00:00", datetime),
+        ("{} 00:00:00", datetime),
         ("!datetime {}", datetime),
+        ("!datetime {} 00:00:00", datetime),
         ('"{}"', str),
         ('"{}T00:00:00"', str),
+        ('"{} 00:00:00"', str),
     ],
 )
 def test_ecflow_realize__repeat_date(fmt, type_, tmp_path, uwcaplog):
@@ -202,7 +205,7 @@ def test_ecflow_realize__repeat_date(fmt, type_, tmp_path, uwcaplog):
 
 
 def test_ecflow_realize__repeat_date_truncated(tmp_path, uwcaplog):
-    config = write_repeat_date_config(tmp_path, "2024-01-01T12:30:00", '"2024-01-31T00:00:01"')
+    config = write_repeat_date_config(tmp_path, "2024-01-01T12:30:00", "2024-01-31 00:00:01")
     ecflow.realize(config=config, output_path=tmp_path)
     assert_repeat_date_output(tmp_path)
     assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
@@ -216,9 +219,12 @@ def test_ecflow_realize__repeat_date_truncated(tmp_path, uwcaplog):
     [
         ("{}", date),
         ("{}T00:00:00", datetime),
+        ("{} 00:00:00", datetime),
         ("!datetime {}", datetime),
+        ("!datetime {} 00:00:00", datetime),
         ('"{}"', str),
         ('"{}T00:00:00"', str),
+        ('"{} 00:00:00"', str),
     ],
 )
 def test_ecflow_realize__repeat_datelist(fmt, type_, tmp_path, uwcaplog):
@@ -250,12 +256,15 @@ def test_ecflow_realize__repeat_datelist_mixed_and_truncated(tmp_path, uwcaplog)
     [
         ("{}", date, "000000"),
         ("{}T00:00:00", datetime, "000000"),
+        ("{} 00:00:00", datetime, "000000"),
         ("!datetime {}", datetime, "000000"),
         ('"{}"', str, "000000"),
         ('"{}T00:00:00"', str, "000000"),
+        ('"{} 00:00:00"', str, "000000"),
         ("{}T06:30:00", datetime, "063000"),
         ("{} 06:30:00", datetime, "063000"),
         ("!datetime {}T06:30:00", datetime, "063000"),
+        ("!datetime {} 06:30:00", datetime, "063000"),
         ('"{}T06:30:00"', str, "063000"),
         ('"{} 06:30:00"', str, "063000"),
     ],

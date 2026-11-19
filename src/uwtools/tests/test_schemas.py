@@ -964,6 +964,7 @@ def test_schema_ecflow_suitedef_refs_addons_meters():
     ("top_level", "start", "end"),
     [
         ("repeat_date", "2026-01-01", "2026-01-02T00:00:00"),
+        ("repeat_date", "2026-01-01 00:00:00", "2026-01-02 00:00:00"),
         ("repeat_date", date(2026, 1, 1), date(2026, 1, 2)),
         ("repeat_date", datetime(2026, 1, 1, tzinfo=UTC), datetime(2026, 1, 2, tzinfo=UTC)),
         ("repeat_int", 20260101, 20260102),
@@ -997,7 +998,7 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_date_rejects_integer(key):
 @mark.parametrize(
     "items",
     [
-        ["2027-01-04", "2027-02-04T00:00:00"],
+        ["2027-01-04", "2027-02-04T00:00:00", "2027-03-04 00:00:00"],
         [date(2027, 1, 4), date(2027, 2, 4)],
         [datetime(2027, 1, 4, tzinfo=UTC), datetime(2027, 2, 4, tzinfo=UTC)],
     ],
@@ -1043,6 +1044,7 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_lists(top_level):
     ("start", "end"),
     [
         ("2026-01-01", "2026-01-02T12:30:00"),
+        ("2026-01-01 06:00:00", "2026-01-02 12:30:00"),
         (date(2026, 1, 1), date(2026, 1, 2)),
         (datetime(2026, 1, 1, 12, tzinfo=UTC), datetime(2026, 1, 2, 12, 30, tzinfo=UTC)),
     ],

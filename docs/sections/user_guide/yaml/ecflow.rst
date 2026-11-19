@@ -274,14 +274,15 @@ Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/
    suite_forecast:
      repeat_date:
        variable: YMD
-       start: 2024-01-01           # YAML date
-       #      2024-01-01T00:00:00  # YAML datetime
-       #      !datetime 2024-01-01 # uwtools-tagged datetime
-       #      "2024-01-01"         # quoted string (may also include T00:00:00)
+       start: 2024-01-01            # YAML date
+       #      2024-01-01T00:00:00   # YAML datetime
+       #      2024-01-01 00:00:00   # YAML datetime, space-separated
+       #      !datetime 2024-01-01  # uwtools-tagged datetime
+       #      "2024-01-01"          # quoted string (may also include T00:00:00 or 00:00:00)
        end: 2024-01-31
        step: 1
 
-All forms produce the same ``YYYYMMDD`` values in the generated suite definition. If a value includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
+All forms produce the same ``YYYYMMDD`` values in the generated suite definition. A time may be separated from the date by either ``T`` or a space. If a value includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
 
 ``repeat_datelist:``
 
@@ -293,10 +294,11 @@ Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <pyth
      repeat_datelist:
        variable: YMD
        list:
-         - 2024-01-01           # YAML date
-         - 2024-01-15T00:00:00  # YAML datetime
-         - !datetime 2024-01-31 # uwtools-tagged datetime
-         - "2024-02-15"         # quoted string (may also include T00:00:00)
+         - 2024-01-01            # YAML date
+         - 2024-01-15T00:00:00   # YAML datetime
+         - 2024-01-22 00:00:00   # YAML datetime, space-separated
+         - !datetime 2024-01-31  # uwtools-tagged datetime
+         - "2024-02-15"          # quoted string (may also include T00:00:00 or 00:00:00)
 
 All forms produce ``YYYYMMDD`` values in the generated suite definition. If an item includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
 
@@ -310,8 +312,9 @@ Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/re
      repeat_datetime:
        variable: DT
        start: 2024-01-01T06:30:00           # YAML datetime
+       #      2024-01-01 06:30:00           # YAML datetime, space-separated
        #      !datetime 2024-01-01T06:30:00 # uwtools-tagged datetime
-       #      "2024-01-01T06:30:00"         # quoted string
+       #      "2024-01-01T06:30:00"         # quoted string (or "2024-01-01 06:30:00")
        end: 2024-01-31                      # YAML date, i.e. 2024-01-31T00:00:00
        step: "36:00:00"                     # quoted string
        #     !timedelta 36:00:00            # uwtools-tagged timedelta
