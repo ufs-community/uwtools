@@ -298,7 +298,7 @@ Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/re
 
 The ``step`` value is optional (defaults to ``24:00:00``), must be positive, and can be written either as
 
-* A quoted ``hours:MM:SS`` string (e.g. ``"6:00:00"``, ``"36:00:00"``, ``"100:30:00"``)
+* A quoted ``hours:minutes:seconds`` string, where each part is a whole number of any size (e.g. ``"6:00:00"`` for 6 hours or ``"0:120:0"`` for 120 minutes)
 * A :ref:`!timedelta <custom_yaml_tags>` value.
 
 For example:

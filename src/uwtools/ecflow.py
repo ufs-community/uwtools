@@ -555,9 +555,9 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
 
 def _hhmmss(value: str | timedelta) -> str:
     """
-    Return an hours:MM:SS string, where hours may exceed 2 digits.
+    Return a step string for ecFlow, which normalizes it to hours:MM:SS.
 
-    :param value: An hours:MM:SS string, returned as-is, or a timedelta to convert.
+    :param value: An hours:minutes:seconds string, returned as-is, or a timedelta to convert.
     :raises UWConfigError: If a timedelta is not a positive whole number of seconds.
     """
     if isinstance(value, str):
