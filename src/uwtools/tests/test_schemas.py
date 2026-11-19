@@ -8,6 +8,7 @@ from functools import partial
 from pytest import fixture, mark
 
 from uwtools.tests.support import schema_validator, with_del, with_set
+from uwtools.utils.time import to_datetime
 
 # Fixtures
 
@@ -1970,16 +1971,22 @@ def test_schema_ioda_rundir(ioda_prop):
 @mark.parametrize(
     "value",
     [
-        "2025-07-31 00:00:00",
-        "2025-07-31T00:00:00",
-        datetime(2025, 7, 31, tzinfo=UTC),
+        "2026-11-19",
+        "2026-11-19 00:00:00",
+        "2026-11-19T00:00:00",
+        datetime(2026, 11, 19, tzinfo=UTC).replace(tzinfo=None),
     ],
 )
-def test_schema_iso8601(value):
+def test_schema_iso8601(value, utc):
     assert not schema_validator("iso8601")(value)
+    parsed = to_datetime(value)
+    assert isinstance(parsed, datetime)
+    assert parsed == utc(2026, 11, 19)
 
 
-@mark.parametrize("value", ["2025-07-31", "2025-07-31T00:00:00Z", 42])
+@mark.parametrize(
+    "value", ["2026-11", "2026-11-19T", "2026-11-19T00:00", "2026-11-19T00:00:00Z", 42]
+)
 def test_schema_iso8601_invalid(value):
     assert schema_validator("iso8601")(value)
 
