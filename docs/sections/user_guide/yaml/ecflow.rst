@@ -175,6 +175,91 @@ A mapping of variable name/value pairs to set as ecFlow edit variables on the no
 
 See :ref:`this section <ecflow_suite_level_vars>` for more information on ``ECF_`` and other variables that can be set on nodes to override those set at the suite level.
 
+Scheduling Attributes
+^^^^^^^^^^^^^^^^^^^^^^
+
+The following time- and calendar-based attributes control when nodes run. Except where noted, each may be set on suite, family, or task nodes. The ``time:``, ``today:``, ``date:``, ``day:``, and ``cron:`` attributes each take a list of values, so a node may carry several of each.
+
+``autoarchive:``
+
+Automatically archives a completed (or idle) suite or family to disk to reduce checkpoint size (see :ecflow:`ecflow.Autoarchive <python_api/reference/Autoarchive.html>`). Specify exactly one of ``days:`` (an integer) or ``time:`` (an ``HH:MM`` string, optionally prefixed with ``+`` for a time relative to node state). The optional ``relative:`` (boolean, for the ``time:`` form) and ``idle:`` (boolean; when true, also archive queued or aborted nodes) flags default to ``false``. For example:
+
+.. code-block:: yaml
+
+   family_cycle:
+     autoarchive:
+       days: 2
+
+``autocancel:``
+
+Automatically deletes a node some time after it completes (see :ecflow:`ecflow.Autocancel <python_api/reference/Autocancel.html>`). Specify exactly one of ``days:`` (an integer) or ``time:`` (an ``HH:MM`` string, optionally prefixed with ``+`` for a time relative to completion). The optional ``relative:`` (boolean, for the ``time:`` form) flag defaults to ``false``. For example:
+
+.. code-block:: yaml
+
+   task_cleanup:
+     autocancel:
+       days: 3
+
+``clock:``
+
+Sets the suite clock (see :ecflow:`ecflow.Clock <python_api/reference/Clock.html>`). **Only valid on a suite.** Accepts ``real`` (the clock follows real time) or ``hybrid`` (the suite date does not advance). For example:
+
+.. code-block:: yaml
+
+   suite_rtaigfs:
+     clock: real
+
+``cron:``
+
+A repeating time dependency (see :ecflow:`ecflow.Cron <python_api/reference/Cron.html>`). Each entry is either an ecFlow time string (e.g. ``14:00``, or a ``start end increment`` series) or a mapping with a required ``time:`` plus optional ``days_of_week:`` (integers 0-6, Sunday-Saturday), ``days_of_month:`` (integers 1-31), and ``months:`` (integers 1-12). For example:
+
+.. code-block:: yaml
+
+   task_housekeeping:
+     cron:
+       - time: "14:00"
+         days_of_week: [1, 3, 5]
+
+``date:``
+
+A date dependency (see :ecflow:`ecflow.Date <python_api/reference/Date.html>`). Each value is a ``day.month.year`` string in which any field may be ``*`` to wildcard it (e.g. ``1.*.*`` for the first of every month). For example:
+
+.. code-block:: yaml
+
+   task_monthly:
+     date:
+       - "1.*.*"
+
+``day:``
+
+A day-of-week dependency (see :ecflow:`ecflow.Day <python_api/reference/Day.html>`). Each value is a lowercase weekday name (``monday`` through ``sunday``). For example:
+
+.. code-block:: yaml
+
+   task_weekly:
+     day:
+       - monday
+
+``time:``
+
+A time dependency that holds a node until the given wall-clock time (see :ecflow:`ecflow.Time <python_api/reference/Time.html>`). Each value is an ecFlow time string: a single ``HH:MM`` (optionally prefixed with ``+`` for a time relative to suite or repeated-node start), or a ``start end increment`` series. For example:
+
+.. code-block:: yaml
+
+   task_prep:
+     time:
+       - "03:45"
+
+``today:``
+
+Like ``time:``, but the dependency does not wrap to the following day (see :ecflow:`ecflow.Today <python_api/reference/Today.html>`). Accepts the same values as ``time:``. For example:
+
+.. code-block:: yaml
+
+   task_prep:
+     today:
+       - "09:30"
+
 Repeat Attributes
 ^^^^^^^^^^^^^^^^^
 

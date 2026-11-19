@@ -18,7 +18,12 @@ from typing import TYPE_CHECKING, cast
 
 try:
     from ecflow import (  # type: ignore[import-untyped]
+        Autoarchive,
+        Autocancel,
         Client,
+        Clock,
+        Cron,
+        Date,
         Defs,
         DState,
         Family,
@@ -231,7 +236,7 @@ class _ECFlowDef:
 
     # Private
 
-    def _add_node(  # noqa: PLR0912
+    def _add_node(  # noqa: PLR0912, PLR0915
         self,
         config: dict,
         node: Node,
@@ -261,6 +266,21 @@ class _ECFlowDef:
                 case STR.tasks:
                     self._expand_block(subconfig, name, Task, node, refs)
                 # Node attribute cases
+                case STR.autoarchive:
+                    node.add_autoarchive(self._autoarchive(subconfig))
+                case STR.autocancel:
+                    node.add_autocancel(self._autocancel(subconfig))
+                case STR.clock:
+                    node.add_clock(Clock(subconfig == STR.hybrid))
+                case STR.cron:
+                    for entry in subconfig:
+                        node.add_cron(self._cron(entry))
+                case STR.date:
+                    for date in subconfig:
+                        node.add_date(Date(date))
+                case STR.day:
+                    for day in subconfig:
+                        node.add_day(day)
                 case STR.defstatus:
                     node.add_defstatus(getattr(DState, subconfig))
                 case STR.events:
@@ -283,6 +303,12 @@ class _ECFlowDef:
                     self._add_repeat(subconfig, name, node)
                 case STR.script:
                     self._prepare_ecf_script(subconfig, node)
+                case STR.time:
+                    for time in subconfig:
+                        node.add_time(time)
+                case STR.today:
+                    for today in subconfig:
+                        node.add_today(today)
                 case STR.trigger:
                     node.add_trigger(subconfig)
                 case STR.vars:
@@ -338,6 +364,44 @@ class _ECFlowDef:
                     self._add_node(subconfig, _node(Suite, name), self._d)
                 case STR.suites:
                     self._expand_block(subconfig, name, Suite, self._d)
+
+    def _autoarchive(self, config: dict) -> Autoarchive:
+        """
+        Build an autoarchive attribute from its configuration.
+
+        :param config: Configuration for the autoarchive ('days' or 'time', plus optional flags).
+        """
+        idle = config.get(STR.idle, False)
+        if (days := config.get(STR.days)) is not None:
+            return Autoarchive(days, idle)
+        hour, minute, relative = self._time_and_relative(config)
+        return Autoarchive(hour, minute, relative, idle)
+
+    def _autocancel(self, config: dict) -> Autocancel:
+        """
+        Build an autocancel attribute from its configuration.
+
+        :param config: Configuration for the autocancel ('days' or 'time', plus optional flags).
+        """
+        if (days := config.get(STR.days)) is not None:
+            return Autocancel(days)
+        hour, minute, relative = self._time_and_relative(config)
+        return Autocancel(hour, minute, relative)
+
+    def _cron(self, config: str | dict) -> Cron:
+        """
+        Build a cron attribute from its configuration.
+
+        :param config: A time string, or a mapping with 'time' and optional day/month filters.
+        """
+        if isinstance(config, str):
+            return Cron(config)
+        kwargs = {
+            k: config[k]
+            for k in (STR.days_of_week, STR.days_of_month, STR.months)
+            if config.get(k) is not None
+        }
+        return Cron(config[STR.time], **kwargs)
 
     def _expand_block(
         self,
@@ -413,6 +477,21 @@ class _ECFlowDef:
         tag = parts[0]
         name = parts[1] if len(parts) > 1 else ""
         return tag, name
+
+    @staticmethod
+    def _time_and_relative(config: dict) -> tuple[int, int, bool]:
+        """
+        Parse the hour, minute, and relativity of an autoarchive/autocancel time config.
+
+        A leading '+' on the time, or a true 'relative' flag, selects relative mode.
+
+        :param config: Configuration containing a 'time' value and optional 'relative' flag.
+        :return: The hour, minute, and whether the time is relative.
+        """
+        value = config[STR.time]
+        hour, minute = value.lstrip("+").split(":")
+        relative = value.startswith("+") or config.get(STR.relative, False)
+        return int(hour), int(minute), relative
 
 
 class _ServerThread(Thread):

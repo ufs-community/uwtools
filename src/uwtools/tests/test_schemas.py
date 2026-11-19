@@ -762,6 +762,22 @@ def test_schema_ecflow_server():
     assert not err("ECF_MICRODEF", "%")
 
 
+def test_schema_ecflow_suitedef_clock():
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    # clock is accepted on a suite, constrained to an enum:
+    assert not errors({"suite_s": {"clock": "real"}})
+    assert not errors({"suite_s": {"clock": "hybrid"}})
+    assert not errors({"suites_s": {"expand": {"MEM": ["1"]}, "clock": "real"}})
+    assert "'bogus' is not one of" in errors({"suite_s": {"clock": "bogus"}})
+    # clock is suite-only: it is rejected on families and tasks:
+    assert "is not valid under any of the given schemas" in errors(
+        {"suite_s": {"family_f": {"clock": "real"}}}
+    )
+    assert "is not valid under any of the given schemas" in errors(
+        {"suite_s": {"task_t": {"script": {"body": "run.sh"}, "clock": "real"}}}
+    )
+
+
 def test_schema_ecflow_suitedef_nested_family():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     config = {
@@ -775,6 +791,99 @@ def test_schema_ecflow_suitedef_nested_family():
     assert not errors(config)
     # Ensure that the required "expand" key is present:
     assert "'expand' is a required property" in errors(with_del(config, "suites_a", "expand"))
+
+
+def test_schema_ecflow_suitedef_refs_addons_autoarchive():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Either days or time is accepted:
+    assert not errors({"autoarchive": {"days": 2}})
+    assert not errors({"autoarchive": {"days": 2, "idle": True}})
+    assert not errors({"autoarchive": {"time": "03:00"}})
+    assert not errors({"autoarchive": {"time": "+01:30", "relative": True, "idle": True}})
+    # Exactly one of days/time is required:
+    assert "is valid under each of" in errors({"autoarchive": {"days": 2, "time": "03:00"}})
+    assert "is not valid under any of the given schemas" in errors({"autoarchive": {}})
+    # days must be a non-negative integer:
+    assert "is less than the minimum of 0" in errors({"autoarchive": {"days": -1}})
+    assert "is not of type 'integer'" in errors({"autoarchive": {"days": "2"}})
+    # time must match HH:MM, optionally prefixed with '+':
+    assert "does not match" in errors({"autoarchive": {"time": "3pm"}})
+    # relative and idle must be booleans:
+    assert "is not of type 'boolean'" in errors({"autoarchive": {"days": 2, "idle": "yes"}})
+    assert "is not of type 'boolean'" in errors({"autoarchive": {"time": "03:00", "relative": 1}})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors({"autoarchive": {"days": 2, "bad": 1}})
+
+
+def test_schema_ecflow_suitedef_refs_addons_autocancel():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Either days or time is accepted:
+    assert not errors({"autocancel": {"days": 3}})
+    assert not errors({"autocancel": {"time": "02:00"}})
+    assert not errors({"autocancel": {"time": "+02:00", "relative": True}})
+    # Exactly one of days/time is required:
+    assert "is valid under each of" in errors({"autocancel": {"days": 3, "time": "02:00"}})
+    assert "is not valid under any of the given schemas" in errors({"autocancel": {}})
+    # days must be a non-negative integer:
+    assert "is less than the minimum of 0" in errors({"autocancel": {"days": -1}})
+    # time must match HH:MM, optionally prefixed with '+':
+    assert "does not match" in errors({"autocancel": {"time": "3pm"}})
+    # relative must be a boolean:
+    assert "is not of type 'boolean'" in errors({"autocancel": {"time": "02:00", "relative": 1}})
+    # autocancel has no idle flag, and additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {"autocancel": {"days": 3, "idle": True}}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_addons_cron():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Each item is a time string or a mapping with a required time:
+    assert not errors({"cron": ["14:00"]})
+    assert not errors({"cron": ["00:00 20:00 00:30"]})
+    assert not errors(
+        {
+            "cron": [
+                {"time": "14:00", "days_of_week": [1, 3, 5], "days_of_month": [1], "months": [6]}
+            ]
+        }
+    )
+    # It's a non-empty list:
+    assert "[] should be non-empty" in errors({"cron": []})
+    # Mapping items require a time:
+    assert "is not valid under any of the given schemas" in errors(
+        {"cron": [{"days_of_week": [1]}]}
+    )
+    # Day/month filters are range-checked:
+    assert "is not valid under any of the given schemas" in errors(
+        {"cron": [{"time": "14:00", "days_of_week": [7]}]}
+    )
+    # Additional properties are not allowed on mapping items:
+    assert "is not valid under any of the given schemas" in errors(
+        {"cron": [{"time": "14:00", "bad": 1}]}
+    )
+
+
+def test_schema_ecflow_suitedef_refs_addons_date():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # A non-empty list of day.month.year strings, each field optionally wildcarded:
+    assert not errors({"date": ["1.*.*"]})
+    assert not errors({"date": ["31.12.2026", "*.*.*"]})
+    # It's a non-empty list:
+    assert "[] should be non-empty" in errors({"date": []})
+    # Values must match the date pattern:
+    assert "does not match" in errors({"date": ["not-a-date"]})
+
+
+def test_schema_ecflow_suitedef_refs_addons_day():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # A non-empty list of weekday names:
+    assert not errors({"day": ["monday"]})
+    assert not errors({"day": ["monday", "friday"]})
+    # It's a non-empty list:
+    assert "[] should be non-empty" in errors({"day": []})
+    # Values are constrained to an enum:
+    assert "'funday' is not one of" in errors({"day": ["funday"]})
 
 
 def test_schema_ecflow_suitedef_refs_addons_defstatus():
@@ -911,6 +1020,31 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_day():
     assert "Additional properties are not allowed" in errors(
         {"repeat_day": {**config, "bad_key": "bad_value"}}
     )
+
+
+def test_schema_ecflow_suitedef_refs_addons_time():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # A non-empty list of ecFlow time strings (single, relative, or series):
+    assert not errors({"time": ["03:45"]})
+    assert not errors({"time": ["+01:30"]})
+    assert not errors({"time": ["00:00 20:00 00:30"]})
+    assert not errors({"time": ["04:00", "16:00"]})
+    # It's a non-empty list:
+    assert "[] should be non-empty" in errors({"time": []})
+    # Values must match the time pattern:
+    assert "does not match" in errors({"time": ["3pm"]})
+
+
+def test_schema_ecflow_suitedef_refs_addons_today():
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # A non-empty list of ecFlow time strings (single, relative, or series):
+    assert not errors({"today": ["09:30"]})
+    assert not errors({"today": ["+00:15"]})
+    assert not errors({"today": ["00:00 20:00 00:30"]})
+    # It's a non-empty list:
+    assert "[] should be non-empty" in errors({"today": []})
+    # Values must match the time pattern:
+    assert "does not match" in errors({"today": ["3pm"]})
 
 
 def test_schema_ecflow_suitedef_refs_families_expander():
