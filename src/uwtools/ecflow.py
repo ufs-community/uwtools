@@ -36,6 +36,7 @@ try:
         RepeatDay,
         RepeatEnumerated,
         RepeatInteger,
+        RepeatString,
         Suite,
         Task,
     )
@@ -352,10 +353,12 @@ class _ECFlowDef:
                 config[STR.step] = _hhmmss(config.get(STR.step, "24:00:00"))
             case STR.day:
                 repeat = RepeatDay
-            case STR.enumerated | STR.string:
+            case STR.enumerated:
                 repeat = RepeatEnumerated
             case STR.int:
                 repeat = RepeatInteger
+            case STR.string:
+                repeat = RepeatString
         # The schema-checked config blocks for each of these will be the variable and either the
         # start/end/[step] keys or the list key. Since they must be passed as positional arguments,
         # ensure their order is either (argument, start, end, [step]) or (argument, list).

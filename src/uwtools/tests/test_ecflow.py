@@ -1090,7 +1090,7 @@ class Test_ECFlowDef:  # noqa: N801
         node = Task("t1")
         config = {"variable": "VAR", "list": ["a", "b"]}
         instance._add_repeat(config.copy(), "string", node)
-        assert 'VAR "a" "b"' in node.get_repeat().__str__()
+        assert str(node.get_repeat()).strip() == 'repeat string VAR "a" "b"'
 
     def test_ecflow__ECFlowDef__add_repeat__unknown_type(self, instance):
         node = Mock()
