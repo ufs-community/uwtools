@@ -555,18 +555,19 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
 
 def _hhmmss(value: str | timedelta) -> str:
     """
-    Return a step string for ecFlow, which normalizes it to hours:MM:SS.
+    Return an HH:MM:SS string, where hours have at least 2 digits, and minutes and seconds 2.
 
-    :param value: An hours:minutes:seconds string, returned as-is, or a timedelta to convert.
-    :raises UWConfigError: If a timedelta is not a positive whole number of seconds.
+    :param value: An hours:minutes:seconds string, or a timedelta.
+    :raises UWConfigError: If the value is not a positive whole number of seconds.
     """
     if isinstance(value, str):
-        return value
+        hours, minutes, seconds = map(int, value.split(":"))
+        value = timedelta(hours=hours, minutes=minutes, seconds=seconds)
     if value <= timedelta(0) or value.microseconds:
         msg = "repeat_datetime step must be a positive whole number of seconds, not %s" % value
         raise UWConfigError(msg)
     seconds = int(value.total_seconds())
-    return "%d:%02d:%02d" % (seconds // 3600, seconds % 3600 // 60, seconds % 60)
+    return "%02d:%02d:%02d" % (seconds // 3600, seconds % 3600 // 60, seconds % 60)
 
 
 def _node(cls: type[Node], name: str) -> Node:

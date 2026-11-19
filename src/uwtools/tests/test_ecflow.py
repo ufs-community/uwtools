@@ -293,6 +293,8 @@ def test_ecflow_realize__repeat_datetime(fmt, hhmmss, type_, tmp_path, uwcaplog)
         ('"00:120:00"', "02:00:00"),
         ('"0:0:90"', "00:01:30"),
         ('"1:2:3"', "01:02:03"),
+        ('"0:6000:00"', "100:00:00"),
+        ('"0006:00:00"', "06:00:00"),
         ("!timedelta 24:00:00", "24:00:00"),
         ("!timedelta 100:30:00", "100:30:00"),
         ("!timedelta 6", "06:00:00"),
@@ -1264,10 +1266,16 @@ def test_ecflow__client__certificate_selection(expected, prefix):
 @mark.parametrize(
     ("value", "expected"),
     [
-        ("6:00:00", "6:00:00"),
+        ("6:00:00", "06:00:00"),
+        ("0:0:1", "00:00:01"),
+        ("1:2:3", "01:02:03"),
+        ("00:120:00", "02:00:00"),
+        ("0:0:90", "00:01:30"),
+        ("0:6000:00", "100:00:00"),
         ("100:30:00", "100:30:00"),
-        (timedelta(seconds=1), "0:00:01"),
-        (timedelta(hours=6), "6:00:00"),
+        ("0006:00:00", "06:00:00"),
+        (timedelta(seconds=1), "00:00:01"),
+        (timedelta(hours=6), "06:00:00"),
         (timedelta(days=1), "24:00:00"),
         (timedelta(hours=100, minutes=30, seconds=15), "100:30:15"),
     ],
@@ -1277,13 +1285,19 @@ def test_ecflow__hhmmss(expected, value):
 
 
 @mark.parametrize(
-    "value", [timedelta(0), timedelta(hours=-1), timedelta(hours=1, microseconds=500000)]
+    ("value", "shown"),
+    [
+        ("0:00:00", "0:00:00"),
+        (timedelta(0), "0:00:00"),
+        (timedelta(hours=-1), "-1 day, 23:00:00"),
+        (timedelta(hours=1, microseconds=500000), "1:00:00.500000"),
+    ],
 )
-def test_ecflow__hhmmss__invalid(value):
+def test_ecflow__hhmmss__invalid(shown, value):
     with raises(UWConfigError) as e:
         ecflow._hhmmss(value)
     assert str(e.value) == (
-        f"repeat_datetime step must be a positive whole number of seconds, not {value}"
+        f"repeat_datetime step must be a positive whole number of seconds, not {shown}"
     )
 
 
