@@ -325,19 +325,54 @@ If omitted, ``step`` defaults to ``24:00:00``.
 
 ``repeat_day:``
 
-Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/reference/RepeatDay.html>`). Requires ``step``.
+Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/reference/RepeatDay.html>`). Requires ``step``, the number of days between repeats. For example, to repeat every other day:
+
+.. code-block:: yaml
+
+   suite_forecast:
+     repeat_day:
+       step: 2
 
 ``repeat_enumerated:``
 
-Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/reference/RepeatEnumerated.html>`). Requires ``variable`` and ``list``.
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/reference/RepeatEnumerated.html>`). Requires ``variable`` and ``list``. Every item must be a string, so quote items that YAML would otherwise read as another type, e.g. ``"001"`` or ``"true"``:
+
+.. code-block:: yaml
+
+   family_ensemble:
+     repeat_enumerated:
+       variable: MEMBER
+       list:
+         - m01
+         - m02
+         - "003"
 
 ``repeat_int:``
 
-Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional.
+Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (default 1). For example, to repeat over forecast hours 0, 6, 12, ..., 120:
+
+.. code-block:: yaml
+
+   family_post:
+     repeat_int:
+       variable: FHR
+       start: 0
+       end: 120
+       step: 6
 
 ``repeat_string:``
 
-Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/reference/RepeatString.html>`). Requires ``variable`` and ``list``.
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/reference/RepeatString.html>`). Requires ``variable`` and ``list``. As with ``repeat_enumerated:``, every item must be a string:
+
+.. code-block:: yaml
+
+   family_stages:
+     repeat_string:
+       variable: STAGE
+       list:
+         - prep
+         - run
+         - post
 
 Task Script Block
 -----------------
