@@ -305,10 +305,12 @@ def test_ecflow_realize__repeat_datetime(fmt, hhmmss, type_, tmp_path, uwcaplog)
     ],
 )
 def test_ecflow_realize__repeat_datetime_step(expected, step, tmp_path):
-    config = write_repeat_datetime_config(tmp_path, '"2024-01-01"', '"2024-01-31"', step)
+    config = write_repeat_datetime_config(
+        tmp_path, '"2024-01-01T12:00:00"', '"2024-01-31T18:30:00"', step
+    )
     ecflow.realize(config=config, output_path=tmp_path)
     lines = [line.strip() for line in (tmp_path / "suite.def").read_text().splitlines()]
-    assert f"repeat datetime DT 20240101T000000 20240131T000000 {expected}" in lines
+    assert f"repeat datetime DT 20240101T120000 20240131T183000 {expected}" in lines
 
 
 @mark.parametrize(
