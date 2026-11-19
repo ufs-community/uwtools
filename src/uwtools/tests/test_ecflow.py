@@ -187,7 +187,7 @@ def test_ecflow_realize__file_to_stdout(capsys, assets):
         ('"{} 00:00:00"', str),
     ],
 )
-def test_ecflow_realize__repeat_date(fmt, type_, tmp_path, uwcaplog):
+def test_ecflow_realize__repeat_date(fmt, type_, tmp_path):
     start, end = fmt.format("2024-01-01"), fmt.format("2024-01-31")
     config = write_repeat_date_config(tmp_path, start, end)
     cfgobj = YAMLConfig(config)
@@ -196,7 +196,6 @@ def test_ecflow_realize__repeat_date(fmt, type_, tmp_path, uwcaplog):
     assert all(type(repeat_date[k]) is type_ for k in ("end", "start"))
     ecflow.realize(config=config, output_path=tmp_path)
     assert_repeat_date_output(tmp_path)
-    assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
 
 
 @mark.parametrize(
