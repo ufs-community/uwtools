@@ -11,7 +11,7 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
-from datetime import time
+from datetime import time, timedelta
 from pathlib import Path
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -344,12 +344,16 @@ class _ECFlowDef:
                     _yyyymmdd(x, f"repeat_datelist list[{i}]")
                     for i, x in enumerate(config[STR.list])
                 ]
-            case STR.enumerated | STR.string:
-                repeat = RepeatEnumerated
             case STR.datetime:
                 repeat = RepeatDateTime
+                config = config.copy()
+                for key in (STR.start, STR.end):
+                    config[key] = to_datetime(config[key]).strftime("%Y%m%dT%H%M%S")
+                config[STR.step] = _hhmmss(config.get(STR.step, "24:00:00"))
             case STR.day:
                 repeat = RepeatDay
+            case STR.enumerated | STR.string:
+                repeat = RepeatEnumerated
             case STR.int:
                 repeat = RepeatInteger
         # The schema-checked config blocks for each of these will be the variable and either the
@@ -544,6 +548,22 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
             else:
                 os.environ[STR.ECF_SSL] = val
     return c
+
+
+def _hhmmss(value: str | timedelta) -> str:
+    """
+    Return an hours:MM:SS string, where hours may exceed 2 digits.
+
+    :param value: An hours:MM:SS string, returned as-is, or a timedelta to convert.
+    :raises UWConfigError: If a timedelta is not a positive whole number of seconds.
+    """
+    if isinstance(value, str):
+        return value
+    if value <= timedelta(0) or value.microseconds:
+        msg = "repeat_datetime step must be a positive whole number of seconds, not %s" % value
+        raise UWConfigError(msg)
+    seconds = int(value.total_seconds())
+    return "%d:%02d:%02d" % (seconds // 3600, seconds % 3600 // 60, seconds % 60)
 
 
 def _node(cls: type[Node], name: str) -> Node:

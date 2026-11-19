@@ -25,6 +25,10 @@ def test_utils_time_to_iso8601(sep, val):
     assert time.to_iso8601(val % sep) == "2025-07-31T12:00:00"
 
 
+def test_utils_time_to_iso8601_date():
+    assert time.to_iso8601(date(2025, 7, 31)) == "2025-07-31T00:00:00"
+
+
 def test_utils_time_to_iso8601_dtobj(utc):
     dtobj = utc(2025, 7, 31, 12)
     assert time.to_iso8601(dtobj) == "2025-07-31T12:00:00"
