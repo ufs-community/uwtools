@@ -4,18 +4,20 @@ Helpers for working with time values.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 ISO8601FMT = "%Y-%m-%dT%H:%M:%S"
 
 
-def to_datetime(value: str | datetime) -> datetime:
+def to_datetime(value: str | date | datetime) -> datetime:
     if isinstance(value, datetime):
         return value
+    if isinstance(value, date):
+        return datetime.combine(value, time.min)
     return datetime.fromisoformat(value).replace(tzinfo=None)
 
 
-def to_iso8601(value: str | datetime) -> str:
+def to_iso8601(value: str | date | datetime) -> str:
     return to_datetime(value).strftime(ISO8601FMT)
 
 

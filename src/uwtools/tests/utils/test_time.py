@@ -2,7 +2,7 @@
 Tests for uwtools.utils.time module.
 """
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 from pytest import mark
 
@@ -13,6 +13,10 @@ def test_utils_time_to_datetime(utc):
     expected = utc(2025, 7, 31, 12)
     for value in [utc(2025, 7, 31, 12), "2025-07-31T12:00:00"]:
         assert time.to_datetime(value=value) == expected
+
+
+def test_utils_time_to_datetime_date(utc):
+    assert time.to_datetime(value=date(2025, 7, 31)) == utc(2025, 7, 31)
 
 
 @mark.parametrize("sep", ["T", " "])

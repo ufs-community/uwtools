@@ -2,7 +2,7 @@
 Granular tests of JSON Schema schemas.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from functools import partial
 
 from pytest import fixture, mark
@@ -1974,6 +1974,7 @@ def test_schema_ioda_rundir(ioda_prop):
         "2026-11-19",
         "2026-11-19 00:00:00",
         "2026-11-19T00:00:00",
+        date(2026, 11, 19),
         datetime(2026, 11, 19, tzinfo=UTC).replace(tzinfo=None),
     ],
 )
