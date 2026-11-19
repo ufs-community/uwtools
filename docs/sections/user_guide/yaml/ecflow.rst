@@ -267,7 +267,7 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
 
 ``repeat_date:``
 
-Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (default 1). See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values. For example:
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (defaults to  ``1``). See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values. For example:
 
 .. code-block:: yaml
 
@@ -294,7 +294,14 @@ Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <pyth
 
 ``repeat_datetime:``
 
-Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional. See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values. For example:
+Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end``. See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values.
+
+The ``step`` value is optional (defaults to ``24:00:00``), must be positive, and can be written either as
+
+* A quoted ``hours:MM:SS`` string (e.g. ``"6:00:00"``, ``"36:00:00"``, ``"100:30:00"``)
+* A :ref:`!timedelta <custom_yaml_tags>` value.
+
+For example:
 
 .. code-block:: yaml
 
@@ -305,13 +312,6 @@ Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/re
        end: 2024-01-31T00:00:00
        step: "36:00:00"            # quoted string
        #     !timedelta 36:00:00   # uwtools-tagged timedelta
-
-The ``step`` value must be positive and can be written either way:
-
-* A quoted ``hours:MM:SS`` string, where ``hours`` can have any number of digits (e.g. ``"6:00:00"``, ``"36:00:00"``, ``"100:30:00"``). The quotes are required: unquoted values like ``36:00:00`` are not reliably read as strings by YAML.
-* A :ref:`!timedelta <custom_yaml_tags>` value, which does not need quotes (e.g. ``!timedelta 36:00:00``). This tag also accepts shorter forms, e.g. ``!timedelta 6`` means six hours. The value must be a whole number of seconds.
-
-If omitted, ``step`` defaults to ``24:00:00``.
 
 ``repeat_day:``
 
@@ -339,7 +339,7 @@ Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <
 
 ``repeat_int:``
 
-Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (default 1). For example, to repeat over forecast hours 0, 6, 12, ..., 120:
+Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (defaults to ``1``). For example, to repeat over forecast hours 0, 6, 12, ..., 120:
 
 .. code-block:: yaml
 
