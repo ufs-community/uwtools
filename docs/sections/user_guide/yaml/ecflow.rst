@@ -267,16 +267,21 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
 
 ``repeat_date:``
 
-Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers); ``step`` is optional (default 1).
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (default 1). The ``start`` and ``end`` values are dates, which can be written in any of these equivalent ways:
 
 .. code-block:: yaml
 
    suite_forecast:
      repeat_date:
        variable: YMD
-       start: 20240101
-       end: 20240131
+       start: 2024-01-01           # YAML date
+       #      2024-01-01T00:00:00  # YAML datetime
+       #      !datetime 2024-01-01 # uwtools-tagged datetime
+       #      "2024-01-01"         # quoted string (may also include T00:00:00)
+       end: 2024-01-31
        step: 1
+
+All forms produce the same ``YYYYMMDD`` values in the generated suite definition. If a value includes a time other than ``00:00:00``, ``uwtools`` truncates it to the calendar date and logs a warning.
 
 ``repeat_datelist:``
 

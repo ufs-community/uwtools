@@ -11,6 +11,7 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
+from datetime import time
 from pathlib import Path
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -53,6 +54,7 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
+from uwtools.utils.time import to_datetime
 
 if TYPE_CHECKING:
     from subprocess import Popen
@@ -330,6 +332,18 @@ class _ECFlowDef:
         match name:
             case STR.date:
                 repeat = RepeatDate
+                config = config.copy()
+                for key in (STR.start, STR.end):
+                    dt = to_datetime(config[key])
+                    date = dt.date()
+                    if dt.time() != time.min:
+                        log.warning(
+                            "repeat_date %s: truncated %s to %s (time must be 00:00:00)",
+                            key,
+                            dt.isoformat(),
+                            date.isoformat(),
+                        )
+                    config[key] = int(date.strftime("%Y%m%d"))
             case STR.datelist | STR.enumerated | STR.string:
                 repeat = RepeatEnumerated
             case STR.datetime:

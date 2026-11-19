@@ -960,11 +960,19 @@ def test_schema_ecflow_suitedef_refs_addons_meters():
     assert "[] should be non-empty" in errors({"meters": []})
 
 
-@mark.parametrize("top_level", ["repeat_date", "repeat_int"])
-def test_schema_ecflow_suitedef_refs_addons_repeat_ints(top_level):
+@mark.parametrize(
+    ("top_level", "start", "end"),
+    [
+        ("repeat_date", "2026-01-01", "2026-01-02T00:00:00"),
+        ("repeat_date", date(2026, 1, 1), date(2026, 1, 2)),
+        ("repeat_date", datetime(2026, 1, 1, tzinfo=UTC), datetime(2026, 1, 2, tzinfo=UTC)),
+        ("repeat_int", 20260101, 20260102),
+    ],
+)
+def test_schema_ecflow_suitedef_refs_addons_repeat_bounds(top_level, start, end):
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
-    config = {"variable": "MEMBER", "start": 20260101, "end": 20260102}
+    config = {"variable": "MEMBER", "start": start, "end": end}
     assert not errors({top_level: config})
     with_step = {**config, "step": 2}
     assert not errors({top_level: with_step})
@@ -974,6 +982,15 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_ints(top_level):
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors(
         {top_level: {**config, "bad_key": "bad_value"}}
+    )
+
+
+@mark.parametrize("key", ["end", "start"])
+def test_schema_ecflow_suitedef_refs_addons_repeat_date_rejects_integer(key):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    config = {"variable": "YMD", "start": "2026-01-01", "end": "2026-01-02"}
+    assert "is not of type 'date', 'datetime', 'string'" in errors(
+        {"repeat_date": with_set(config, 20260101, key)}
     )
 
 

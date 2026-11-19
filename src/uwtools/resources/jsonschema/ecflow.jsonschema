@@ -299,14 +299,10 @@
           "additionalProperties": false,
           "properties": {
             "end": {
-              "maximum": 99999999,
-              "minimum": 10000000,
-              "type": "integer"
+              "$ref": "urn:uwtools:iso8601"
             },
             "start": {
-              "maximum": 99999999,
-              "minimum": 10000000,
-              "type": "integer"
+              "$ref": "urn:uwtools:iso8601"
             },
             "step": {
               "type": "integer"

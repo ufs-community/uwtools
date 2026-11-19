@@ -7,6 +7,7 @@ import re
 import socket
 import sys
 from copy import deepcopy
+from datetime import date, datetime
 from importlib import reload
 from io import StringIO
 from pathlib import Path
@@ -84,6 +85,31 @@ def server_mocks():
         )
 
 
+# Helpers
+
+
+def assert_repeat_date_output(path: Path) -> None:
+    lines = [line.strip() for line in (path / "suite.def").read_text().splitlines()]
+    assert "repeat date YMD 20240101 20240131 4" in lines
+
+
+def write_repeat_date_config(path: Path, start: str, end: str) -> Path:
+    config = path / "config.yaml"
+    config.write_text(
+        dedent(f"""\
+        ecflow:
+          suitedef:
+            suite_forecast:
+              repeat_date:
+                variable: YMD
+                start: {start}
+                end: {end}
+                step: 4
+        """)
+    )
+    return config
+
+
 # Tests
 
 
@@ -113,6 +139,38 @@ def test_ecflow_realize__file_to_stdout(capsys, assets):
     ecflow.realize(config=cfgfile)
     output = capsys.readouterr().out
     assert output == expected
+
+
+@mark.parametrize(
+    ("fmt", "type_"),
+    [
+        ("{}", date),
+        ("{}T00:00:00", datetime),
+        ("!datetime {}", datetime),
+        ('"{}"', str),
+        ('"{}T00:00:00"', str),
+    ],
+)
+def test_ecflow_realize__repeat_date(fmt, type_, tmp_path, uwcaplog):
+    start, end = fmt.format("2024-01-01"), fmt.format("2024-01-31")
+    config = write_repeat_date_config(tmp_path, start, end)
+    cfgobj = YAMLConfig(config)
+    cfgobj.realize()
+    repeat_date = cfgobj.data["ecflow"]["suitedef"]["suite_forecast"]["repeat_date"]
+    assert all(type(repeat_date[k]) is type_ for k in ("end", "start"))
+    ecflow.realize(config=config, output_path=tmp_path)
+    assert_repeat_date_output(tmp_path)
+    assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
+
+
+def test_ecflow_realize__repeat_date_truncated(tmp_path, uwcaplog):
+    config = write_repeat_date_config(tmp_path, "2024-01-01T12:30:00", '"2024-01-31T00:00:01"')
+    ecflow.realize(config=config, output_path=tmp_path)
+    assert_repeat_date_output(tmp_path)
+    assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
+        ("repeat_date start: truncated 2024-01-01T12:30:00 to 2024-01-01 (time must be 00:00:00)"),
+        ("repeat_date end: truncated 2024-01-31T00:00:01 to 2024-01-31 (time must be 00:00:00)"),
+    ]
 
 
 def test_ecflow_realize__write_scripts(capsys, assets):
@@ -840,7 +898,7 @@ class Test_ECFlowDef:  # noqa: N801
 
     def test_ecflow__ECFlowDef__add_repeat__date(self, instance):
         node = Task("t1")
-        config = {"variable": "YMD", "step": 4, "start": 20240101, "end": 20240131}
+        config = {"variable": "YMD", "step": 4, "start": "2024-01-01", "end": "2024-01-31"}
         start_config = deepcopy(config)
         instance._add_repeat(config, "date", node)
         assert config == start_config
