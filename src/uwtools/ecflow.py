@@ -337,12 +337,8 @@ class _ECFlowDef:
                     dt = to_datetime(config[key])
                     date = dt.date()
                     if dt.time() != time.min:
-                        log.warning(
-                            "repeat_date %s: truncated %s to %s (time must be 00:00:00)",
-                            key,
-                            dt.isoformat(),
-                            date.isoformat(),
-                        )
+                        msg = "repeat_date %s: truncated %s to %s (time must be 00:00:00)"
+                        log.warning(msg, key, dt.isoformat(), date.isoformat())
                     config[key] = int(date.strftime("%Y%m%d"))
             case STR.datelist | STR.enumerated | STR.string:
                 repeat = RepeatEnumerated
