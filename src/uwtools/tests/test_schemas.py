@@ -707,15 +707,6 @@ def test_schema_ecflow(ecflow_config):
     assert "is not valid" in errors({"ecflow": {}})
 
 
-def test_schema_ecflow_suitedef(ecflow_config):
-    config = ecflow_config["ecflow"]["suitedef"]
-    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
-    # Basic spec:
-    assert not errors(config)
-    # No top-level keys are required:
-    assert not errors({})
-
-
 def test_schema_ecflow_server():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "server")
     err = lambda k, v: errors({"ECF_HOME": "/path/to/ecf", k: v})
@@ -763,6 +754,15 @@ def test_schema_ecflow_server():
     assert not err("ECF_MICRODEF", "%")
 
 
+def test_schema_ecflow_suitedef(ecflow_config):
+    config = ecflow_config["ecflow"]["suitedef"]
+    errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
+    # Basic spec:
+    assert not errors(config)
+    # No top-level keys are required:
+    assert not errors({})
+
+
 def test_schema_ecflow_suitedef_clock():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     # clock is accepted on a suite, constrained to an enum:
@@ -779,7 +779,7 @@ def test_schema_ecflow_suitedef_clock():
     )
 
 
-def test_schema_ecflow_suitedef_nested_family():
+def test_schema_ecflow_suitedef_family__nested():
     errors = schema_validator("ecflow", "properties", "ecflow", "properties", "suitedef")
     config = {
         "suites_a": {
@@ -970,7 +970,7 @@ def test_schema_ecflow_suitedef_refs_addons_meters():
         ("repeat_int", 20260101, 20260102),
     ],
 )
-def test_schema_ecflow_suitedef_refs_addons_repeat_bounds(top_level, start, end):
+def test_schema_ecflow_suitedef_refs_addons_repeat__bounds(top_level, start, end):
     errors = schema_validator("ecflow", "$defs", "addons")
     # Basic spec:
     config = {"variable": "MEMBER", "start": start, "end": end}
@@ -986,8 +986,23 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_bounds(top_level, start, end)
     )
 
 
+@mark.parametrize("top_level", ["repeat_enumerated", "repeat_string"])
+def test_schema_ecflow_suitedef_refs_addons_repeat__lists(top_level):
+    errors = schema_validator("ecflow", "$defs", "addons")
+    # Basic spec:
+    config = {"variable": "CYCLE", "list": ["20270104", "20270204"]}
+    assert not errors({top_level: config})
+    # All top-level keys are required:
+    for key in ("variable", "list"):
+        assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {top_level: {**config, "bad_key": "bad_value"}}
+    )
+
+
 @mark.parametrize("key", ["end", "start"])
-def test_schema_ecflow_suitedef_refs_addons_repeat_date_rejects_integer(key):
+def test_schema_ecflow_suitedef_refs_addons_repeat_date__rejects_integer(key):
     errors = schema_validator("ecflow", "$defs", "addons")
     config = {"variable": "YMD", "start": "2026-01-01", "end": "2026-01-02"}
     assert "is not of type 'date', 'datetime', 'string'" in errors(
@@ -1019,25 +1034,10 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_datelist(items):
     )
 
 
-def test_schema_ecflow_suitedef_refs_addons_repeat_datelist_rejects_integer():
+def test_schema_ecflow_suitedef_refs_addons_repeat_datelist__rejects_integer():
     errors = schema_validator("ecflow", "$defs", "addons")
     config = {"variable": "CYCLE", "list": ["2027-01-04", 20270204]}
     assert "is not of type 'date', 'datetime', 'string'" in errors({"repeat_datelist": config})
-
-
-@mark.parametrize("top_level", ["repeat_enumerated", "repeat_string"])
-def test_schema_ecflow_suitedef_refs_addons_repeat_lists(top_level):
-    errors = schema_validator("ecflow", "$defs", "addons")
-    # Basic spec:
-    config = {"variable": "CYCLE", "list": ["20270104", "20270204"]}
-    assert not errors({top_level: config})
-    # All top-level keys are required:
-    for key in ("variable", "list"):
-        assert f"'{key}' is a required property" in errors({top_level: with_del(config, key)})
-    # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors(
-        {top_level: {**config, "bad_key": "bad_value"}}
-    )
 
 
 @mark.parametrize(
@@ -1068,7 +1068,7 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_datetime(start, end):
 
 
 @mark.parametrize("key", ["end", "start"])
-def test_schema_ecflow_suitedef_refs_addons_repeat_datetime_rejects_compact(key):
+def test_schema_ecflow_suitedef_refs_addons_repeat_datetime__rejects_compact(key):
     errors = schema_validator("ecflow", "$defs", "addons")
     config = {"variable": "CYCLE", "start": "2026-01-01", "end": "2026-01-02"}
     assert "does not match" in errors({"repeat_datetime": with_set(config, "20260101T120000", key)})
@@ -1098,7 +1098,7 @@ def test_schema_ecflow_suitedef_refs_addons_repeat_datetime_rejects_compact(key)
         (timedelta(hours=100, minutes=30), True),
     ],
 )
-def test_schema_ecflow_suitedef_refs_addons_repeat_datetime_step(ok, step):
+def test_schema_ecflow_suitedef_refs_addons_repeat_datetime__step(ok, step):
     errors = schema_validator("ecflow", "$defs", "addons")
     config = {"variable": "CYCLE", "start": "2026-01-01", "end": "2026-01-02", "step": step}
     assert not errors({"repeat_datetime": config}) if ok else errors({"repeat_datetime": config})
