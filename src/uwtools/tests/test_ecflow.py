@@ -199,14 +199,19 @@ def test_ecflow_realize__repeat_date(fmt, type_, tmp_path, uwcaplog):
     assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
 
 
-def test_ecflow_realize__repeat_date_truncated(tmp_path, uwcaplog):
-    config = write_repeat_date_config(tmp_path, "2024-01-01T12:30:00", "2024-01-31 00:00:01")
-    ecflow.realize(config=config, output_path=tmp_path)
-    assert_repeat_date_output(tmp_path)
-    assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
-        ("repeat_date start: truncated 2024-01-01T12:30:00 to 2024-01-01 (time must be 00:00:00)"),
-        ("repeat_date end: truncated 2024-01-31T00:00:01 to 2024-01-31 (time must be 00:00:00)"),
-    ]
+@mark.parametrize(
+    ("start", "end", "where", "shown"),
+    [
+        ("2024-01-01T12:30:00", "2024-01-31", "repeat_date start", "2024-01-01T12:30:00"),
+        ("2024-01-01", "2024-01-31 00:00:01", "repeat_date end", "2024-01-31T00:00:01"),
+    ],
+)
+def test_ecflow_realize__repeat_date_not_midnight(end, shown, start, tmp_path, where):
+    config = write_repeat_date_config(tmp_path, start, end)
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == f"{where}: time must be 00:00:00, not {shown}"
+    assert not (tmp_path / "suite.def").exists()
 
 
 @mark.parametrize(
@@ -234,16 +239,19 @@ def test_ecflow_realize__repeat_datelist(fmt, type_, tmp_path, uwcaplog):
     assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
 
 
-def test_ecflow_realize__repeat_datelist_mixed_and_truncated(tmp_path, uwcaplog):
-    config = write_repeat_datelist_config(tmp_path, ["2024-01-01T12:30:00", '"2024-01-31"'])
-    ecflow.realize(config=config, output_path=tmp_path)
-    assert_repeat_datelist_output(tmp_path)
-    assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
-        (
-            "repeat_datelist list[0]: truncated 2024-01-01T12:30:00 to 2024-01-01 "
-            "(time must be 00:00:00)"
-        ),
-    ]
+@mark.parametrize(
+    ("items", "where", "shown"),
+    [
+        (["2024-01-01T12:30:00", '"2024-01-31"'], "repeat_datelist list[0]", "2024-01-01T12:30:00"),
+        (["2024-01-01", '"2024-01-31 00:00:01"'], "repeat_datelist list[1]", "2024-01-31T00:00:01"),
+    ],
+)
+def test_ecflow_realize__repeat_datelist_not_midnight(items, shown, tmp_path, where):
+    config = write_repeat_datelist_config(tmp_path, items)
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == f"{where}: time must be 00:00:00, not {shown}"
+    assert not (tmp_path / "suite.def").exists()
 
 
 @mark.parametrize(
@@ -1729,24 +1737,22 @@ def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
         datetime(2024, 1, 31, tzinfo=UTC).replace(tzinfo=None),
     ],
 )
-def test_ecflow__yyyymmdd(uwcaplog, value):
+def test_ecflow__yyyymmdd(value):
     assert ecflow._yyyymmdd(value, "somewhere") == 20240131
-    assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
 
 
 @mark.parametrize(
     ("value", "shown"),
     [
         ("2024-01-31T12:30:00", "2024-01-31T12:30:00"),
-        ("2024-01-31T00:00:01", "2024-01-31T00:00:01"),
+        ("2024-01-31 00:00:01", "2024-01-31T00:00:01"),
         (datetime(2024, 1, 31, 23, 59, 59, tzinfo=UTC).replace(tzinfo=None), "2024-01-31T23:59:59"),
     ],
 )
-def test_ecflow__yyyymmdd__truncated(shown, uwcaplog, value):
-    assert ecflow._yyyymmdd(value, "somewhere") == 20240131
-    assert [r.getMessage() for r in uwcaplog.records if r.levelname == "WARNING"] == [
-        f"somewhere: truncated {shown} to 2024-01-31 (time must be 00:00:00)"
-    ]
+def test_ecflow__yyyymmdd__not_midnight(shown, value):
+    with raises(UWConfigError) as e:
+        ecflow._yyyymmdd(value, "somewhere")
+    assert str(e.value) == f"somewhere: time must be 00:00:00, not {shown}"
 
 
 def test_ecflow_import_error():

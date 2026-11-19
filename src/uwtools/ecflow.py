@@ -802,15 +802,15 @@ def _ssl_provision() -> None:
 
 def _yyyymmdd(value: str | date | datetime, where: str) -> int:
     """
-    Convert an ISO8601 date or datetime value to a YYYYMMDD integer, truncating any time.
+    Convert an ISO8601 date or datetime value to a YYYYMMDD integer.
 
     :param value: The value to convert.
-    :param where: A description of the value's location, for logging.
+    :param where: A description of the value's location, for error reporting.
     :return: The YYYYMMDD integer.
+    :raises UWConfigError: If the value has a time other than 00:00:00.
     """
     dt = to_datetime(value)
-    ymd = dt.date()
     if dt.time() != time.min:
-        msg = "%s: truncated %s to %s (time must be 00:00:00)"
-        log.warning(msg, where, dt.isoformat(), ymd.isoformat())
-    return int(ymd.strftime("%Y%m%d"))
+        msg = "%s: time must be 00:00:00, not %s" % (where, dt.isoformat())
+        raise UWConfigError(msg)
+    return int(dt.strftime("%Y%m%d"))
