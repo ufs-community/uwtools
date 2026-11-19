@@ -100,51 +100,46 @@ def assert_repeat_datelist_output(path: Path) -> None:
 
 def write_repeat_date_config(path: Path, start: str, end: str) -> Path:
     config = path / "config.yaml"
-    config.write_text(
-        dedent(f"""\
-        ecflow:
-          suitedef:
-            suite_forecast:
-              repeat_date:
-                variable: YMD
-                start: {start}
-                end: {end}
-                step: 4
-        """)
-    )
+    text = f"""
+    ecflow:
+      suitedef:
+        suite_forecast:
+          repeat_date:
+            variable: YMD
+            start: {start}
+            end: {end}
+            step: 4
+    """
+    config.write_text(dedent(text))
     return config
 
 
 def write_repeat_datelist_config(path: Path, items: list[str]) -> Path:
     config = path / "config.yaml"
-    config.write_text(
-        dedent("""\
-        ecflow:
-          suitedef:
-            suite_forecast:
-              repeat_datelist:
-                variable: YMD
-                list:
-        """)
-        + "".join(f"          - {item}\n" for item in items)
-    )
+    text = """
+    ecflow:
+      suitedef:
+        suite_forecast:
+          repeat_datelist:
+            variable: YMD
+            list: [%s]
+    """ % ", ".join(items)
+    config.write_text(dedent(text))
     return config
 
 
 def write_repeat_datetime_config(path: Path, start: str, end: str, step: str | None) -> Path:
     config = path / "config.yaml"
-    config.write_text(
-        dedent(f"""\
-        ecflow:
-          suitedef:
-            suite_forecast:
-              repeat_datetime:
-                variable: DT
-                start: {start}
-                end: {end}
-        """)
-        + (f"        step: {step}\n" if step else "")
-    )
+    text = f"""
+    ecflow:
+      suitedef:
+        suite_forecast:
+          repeat_datetime:
+            variable: DT
+            start: {start}
+            end: {end}
+    """
+    config.write_text(dedent(text) + (f"        step: {step}\n" if step else ""))
     return config
 
 
