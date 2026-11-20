@@ -6,6 +6,8 @@ from __future__ import annotations
 
 from datetime import date, datetime, time, timedelta
 
+from uwtools.exceptions import UWConfigError
+
 ISO8601FMT = "%Y-%m-%dT%H:%M:%S"
 
 
@@ -14,7 +16,11 @@ def to_datetime(value: str | date | datetime) -> datetime:
         return value
     if isinstance(value, date):
         return datetime.combine(value, time.min)
-    return datetime.fromisoformat(value).replace(tzinfo=None)
+    try:
+        return datetime.fromisoformat(value).replace(tzinfo=None)
+    except ValueError as e:
+        msg = "Converting '%s': %s" % (value, str(e))
+        raise UWConfigError(msg) from e
 
 
 def to_iso8601(value: str | date | datetime) -> str:
