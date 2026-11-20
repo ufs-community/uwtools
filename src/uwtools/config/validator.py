@@ -5,7 +5,7 @@ Support for validating a config using JSON Schema.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -230,6 +230,7 @@ def _validation_errors(config: JSONValueT, schema: dict) -> list[ValidationError
         base.TYPE_CHECKER.redefine(
             "fs_src", lambda _, x: any(isinstance(x, t) for t in [str, UWYAMLGlob])
         )
+        .redefine("date", lambda _, x: isinstance(x, date))
         .redefine("datetime", lambda _, x: isinstance(x, datetime))
         .redefine("timedelta", lambda _, x: isinstance(x, timedelta))
     )

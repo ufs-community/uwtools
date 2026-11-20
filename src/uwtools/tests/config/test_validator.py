@@ -4,6 +4,7 @@ Tests for uwtools.config.validator module.
 
 import json
 import logging
+from datetime import UTC, date, datetime
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -329,6 +330,22 @@ def test_config_validator__schema__no_exfil(suffix):
         # Reference is in resources, but outside jsonschema/:
         msg = f"Invalid schema URI: {uri}"
     assert str(e.value) == msg
+
+
+@mark.parametrize(
+    ("type_", "value", "ok"),
+    [
+        ("date", "2025-07-31", False),
+        ("date", date(2025, 7, 31), True),
+        ("date", datetime(2025, 7, 31, tzinfo=UTC), True),
+        ("datetime", "2025-07-31", False),
+        ("datetime", date(2025, 7, 31), False),
+        ("datetime", datetime(2025, 7, 31, tzinfo=UTC), True),
+    ],
+)
+def test_config_validator__validation_errors__date_types(ok, type_, value):
+    errors = validator._validation_errors(value, {"type": type_})
+    assert not errors if ok else errors
 
 
 @mark.parametrize("msg", [validator.JSONSCHEMA_MSG_REGISTRY_NO_KWARG, "other"])

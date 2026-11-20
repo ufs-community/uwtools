@@ -2,7 +2,7 @@
 Tests for uwtools.utils.time module.
 """
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 from pytest import mark
 
@@ -15,10 +15,18 @@ def test_utils_time_to_datetime(utc):
         assert time.to_datetime(value=value) == expected
 
 
+def test_utils_time_to_datetime_date(utc):
+    assert time.to_datetime(value=date(2025, 7, 31)) == utc(2025, 7, 31)
+
+
 @mark.parametrize("sep", ["T", " "])
 @mark.parametrize("val", ["2025-07-31%s12", "2025-07-31%s12:00", "2025-07-31%s12:00:00"])
 def test_utils_time_to_iso8601(sep, val):
     assert time.to_iso8601(val % sep) == "2025-07-31T12:00:00"
+
+
+def test_utils_time_to_iso8601_date():
+    assert time.to_iso8601(date(2025, 7, 31)) == "2025-07-31T00:00:00"
 
 
 def test_utils_time_to_iso8601_dtobj(utc):

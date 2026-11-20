@@ -7,6 +7,7 @@ import re
 import socket
 import sys
 from copy import deepcopy
+from datetime import UTC, date, datetime, timedelta
 from importlib import reload
 from io import StringIO
 from pathlib import Path
@@ -84,6 +85,64 @@ def server_mocks():
         )
 
 
+# Helpers
+
+
+def assert_repeat_date_output(path: Path) -> None:
+    lines = [line.strip() for line in (path / "suite.def").read_text().splitlines()]
+    assert "repeat date YMD 20240101 20240131 4" in lines
+
+
+def assert_repeat_datelist_output(path: Path) -> None:
+    lines = [line.strip() for line in (path / "suite.def").read_text().splitlines()]
+    assert 'repeat datelist YMD "20240101" "20240131"' in lines
+
+
+def write_repeat_date_config(path: Path, start: str, end: str) -> Path:
+    config = path / "config.yaml"
+    text = f"""
+    ecflow:
+      suitedef:
+        suite_forecast:
+          repeat_date:
+            variable: YMD
+            start: {start}
+            end: {end}
+            step: 4
+    """
+    config.write_text(dedent(text))
+    return config
+
+
+def write_repeat_datelist_config(path: Path, items: list[str]) -> Path:
+    config = path / "config.yaml"
+    text = """
+    ecflow:
+      suitedef:
+        suite_forecast:
+          repeat_datelist:
+            variable: YMD
+            list: [%s]
+    """ % ", ".join(items)
+    config.write_text(dedent(text))
+    return config
+
+
+def write_repeat_datetime_config(path: Path, start: str, end: str, step: str | None) -> Path:
+    config = path / "config.yaml"
+    text = f"""
+    ecflow:
+      suitedef:
+        suite_forecast:
+          repeat_datetime:
+            variable: DT
+            start: {start}
+            end: {end}
+    """
+    config.write_text(dedent(text) + (f"        step: {step}\n" if step else ""))
+    return config
+
+
 # Tests
 
 
@@ -113,6 +172,184 @@ def test_ecflow_realize__file_to_stdout(capsys, assets):
     ecflow.realize(config=cfgfile)
     output = capsys.readouterr().out
     assert output == expected
+
+
+@mark.parametrize(
+    ("fmt", "type_"),
+    [
+        ("{}", date),
+        ("{}T00:00:00", datetime),
+        ("{} 00:00:00", datetime),
+        ("!datetime {}", datetime),
+        ("!datetime {} 00:00:00", datetime),
+        ('"{}"', str),
+        ('"{}T00:00:00"', str),
+        ('"{} 00:00:00"', str),
+    ],
+)
+def test_ecflow_realize__repeat_date(fmt, type_, tmp_path):
+    start, end = fmt.format("2024-01-01"), fmt.format("2024-01-31")
+    config = write_repeat_date_config(tmp_path, start, end)
+    cfgobj = YAMLConfig(config)
+    cfgobj.realize()
+    repeat_date = cfgobj.data["ecflow"]["suitedef"]["suite_forecast"]["repeat_date"]
+    assert all(type(repeat_date[k]) is type_ for k in ("end", "start"))
+    ecflow.realize(config=config, output_path=tmp_path)
+    assert_repeat_date_output(tmp_path)
+
+
+@mark.parametrize(
+    ("start", "end", "where", "shown"),
+    [
+        ("2024-01-01T12:30:00", "2024-01-31", "repeat_date start", "2024-01-01T12:30:00"),
+        ("2024-01-01", "2024-01-31 00:00:01", "repeat_date end", "2024-01-31T00:00:01"),
+    ],
+)
+def test_ecflow_realize__repeat_date_not_midnight(end, shown, start, tmp_path, where):
+    config = write_repeat_date_config(tmp_path, start, end)
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == f"{where}: time must be 00:00:00, not {shown}"
+    assert not (tmp_path / "suite.def").exists()
+
+
+@mark.parametrize(
+    ("fmt", "type_"),
+    [
+        ("{}", date),
+        ("{}T00:00:00", datetime),
+        ("{} 00:00:00", datetime),
+        ("!datetime {}", datetime),
+        ("!datetime {} 00:00:00", datetime),
+        ('"{}"', str),
+        ('"{}T00:00:00"', str),
+        ('"{} 00:00:00"', str),
+    ],
+)
+def test_ecflow_realize__repeat_datelist(fmt, type_, tmp_path, uwcaplog):
+    items = [fmt.format("2024-01-01"), fmt.format("2024-01-31")]
+    config = write_repeat_datelist_config(tmp_path, items)
+    cfgobj = YAMLConfig(config)
+    cfgobj.realize()
+    repeat = cfgobj.data["ecflow"]["suitedef"]["suite_forecast"]["repeat_datelist"]
+    assert all(type(x) is type_ for x in repeat["list"])
+    ecflow.realize(config=config, output_path=tmp_path)
+    assert_repeat_datelist_output(tmp_path)
+    assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
+
+
+@mark.parametrize(
+    ("items", "where", "shown"),
+    [
+        (["2024-01-01T12:30:00", '"2024-01-31"'], "repeat_datelist list[0]", "2024-01-01T12:30:00"),
+        (["2024-01-01", '"2024-01-31 00:00:01"'], "repeat_datelist list[1]", "2024-01-31T00:00:01"),
+    ],
+)
+def test_ecflow_realize__repeat_datelist_not_midnight(items, shown, tmp_path, where):
+    config = write_repeat_datelist_config(tmp_path, items)
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == f"{where}: time must be 00:00:00, not {shown}"
+    assert not (tmp_path / "suite.def").exists()
+
+
+@mark.parametrize(
+    ("fmt", "type_", "hhmmss"),
+    [
+        ("{}", date, "000000"),
+        ("{}T00:00:00", datetime, "000000"),
+        ("{} 00:00:00", datetime, "000000"),
+        ("!datetime {}", datetime, "000000"),
+        ('"{}"', str, "000000"),
+        ('"{}T00:00:00"', str, "000000"),
+        ('"{} 00:00:00"', str, "000000"),
+        ("{}T06:30:00", datetime, "063000"),
+        ("{} 06:30:00", datetime, "063000"),
+        ("!datetime {}T06:30:00", datetime, "063000"),
+        ("!datetime {} 06:30:00", datetime, "063000"),
+        ('"{}T06:30:00"', str, "063000"),
+        ('"{} 06:30:00"', str, "063000"),
+    ],
+)
+def test_ecflow_realize__repeat_datetime(fmt, hhmmss, type_, tmp_path, uwcaplog):
+    start, end = fmt.format("2024-01-01"), fmt.format("2024-01-31")
+    config = write_repeat_datetime_config(tmp_path, start, end, step=None)
+    cfgobj = YAMLConfig(config)
+    cfgobj.realize()
+    repeat = cfgobj.data["ecflow"]["suitedef"]["suite_forecast"]["repeat_datetime"]
+    assert all(type(repeat[k]) is type_ for k in ("end", "start"))
+    ecflow.realize(config=config, output_path=tmp_path)
+    lines = [line.strip() for line in (tmp_path / "suite.def").read_text().splitlines()]
+    assert f"repeat datetime DT 20240101T{hhmmss} 20240131T{hhmmss} 24:00:00" in lines
+    assert not [r for r in uwcaplog.records if r.levelname == "WARNING"]
+
+
+@mark.parametrize("key", ["end", "start"])
+@mark.parametrize("tagged", [False, True])
+def test_ecflow_realize__repeat_datetime__subsecond(key, tagged, tmp_path):
+    start = "2024-01-01T06:30:00"
+    end = "2024-01-31T06:30:00"
+    value = f"{start if key == 'start' else end}.500000"
+    if key == "start":
+        start = value
+    else:
+        end = value
+    config = write_repeat_datetime_config(
+        tmp_path,
+        f"!datetime {start}" if tagged else start,
+        f"!datetime {end}" if tagged else end,
+        step=None,
+    )
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == (
+        f"repeat_datetime {key}: time must have whole-second precision, not {value}"
+    )
+    assert not (tmp_path / "suite.def").exists()
+
+
+@mark.parametrize(
+    ("step", "expected"),
+    [
+        (None, "24:00:00"),
+        ('"6:00:00"', "06:00:00"),
+        ('"00:00:01"', "00:00:01"),
+        ('"24:00:00"', "24:00:00"),
+        ('"100:30:00"', "100:30:00"),
+        ('"00:120:00"', "02:00:00"),
+        ('"0:0:90"', "00:01:30"),
+        ('"1:2:3"', "01:02:03"),
+        ('"0:6000:00"', "100:00:00"),
+        ('"0006:00:00"', "06:00:00"),
+        ("!timedelta 24:00:00", "24:00:00"),
+        ("!timedelta 100:30:00", "100:30:00"),
+        ("!timedelta 6", "06:00:00"),
+        ("!timedelta 1:30", "01:30:00"),
+        ("!timedelta 0:00:01", "00:00:01"),
+    ],
+)
+def test_ecflow_realize__repeat_datetime_step(expected, step, tmp_path):
+    config = write_repeat_datetime_config(
+        tmp_path, '"2024-01-01T12:00:00"', '"2024-01-31T18:30:00"', step
+    )
+    ecflow.realize(config=config, output_path=tmp_path)
+    lines = [line.strip() for line in (tmp_path / "suite.def").read_text().splitlines()]
+    assert f"repeat datetime DT 20240101T120000 20240131T183000 {expected}" in lines
+
+
+@mark.parametrize(
+    ("step", "shown"),
+    [("0", "0:00:00"), ("-1", "-1 day, 23:00:00"), ("1:00:00.5", "1:00:00.500000")],
+)
+def test_ecflow_realize__repeat_datetime_step_timedelta_invalid(shown, step, tmp_path):
+    config = write_repeat_datetime_config(
+        tmp_path, '"2024-01-01"', '"2024-01-31"', f"!timedelta {step}"
+    )
+    with raises(UWConfigError) as e:
+        ecflow.realize(config=config, output_path=tmp_path)
+    assert str(e.value) == (
+        f"repeat_datetime step must be a positive whole number of seconds, not {shown}"
+    )
 
 
 def test_ecflow_realize__write_scripts(capsys, assets):
@@ -840,7 +1077,7 @@ class Test_ECFlowDef:  # noqa: N801
 
     def test_ecflow__ECFlowDef__add_repeat__date(self, instance):
         node = Task("t1")
-        config = {"variable": "YMD", "step": 4, "start": 20240101, "end": 20240131}
+        config = {"variable": "YMD", "step": 4, "start": "2024-01-01", "end": "2024-01-31"}
         start_config = deepcopy(config)
         instance._add_repeat(config, "date", node)
         assert config == start_config
@@ -849,16 +1086,43 @@ class Test_ECFlowDef:  # noqa: N801
         actual = [repeat.__getattribute__(a)() for a in ("name", "start", "end", "step")]
         assert actual == expected
 
+    def test_ecflow__ECFlowDef__add_repeat__datelist(self, instance):
+        node = Task("t1")
+        config = {"variable": "YMD", "list": ["2024-01-01", "2024-01-31T00:00:00"]}
+        start_config = deepcopy(config)
+        instance._add_repeat(config, "datelist", node)
+        assert config == start_config
+        assert str(node.get_repeat()).strip() == 'repeat datelist YMD "20240101" "20240131"'
+
     def test_ecflow__ECFlowDef__add_repeat__datetime(self, instance):
         task = Task("t1")
         config = {
             "variable": "DT",
-            "start": "20240101T000000",
-            "end": "20240101T120000",
+            "start": "2024-01-01",
+            "end": "2024-01-01T12:00:00",
             "step": "01:00:00",
         }
         instance._add_repeat(config.copy(), "datetime", task)
-        assert task.get_repeat().name() == "DT"
+        assert str(task.get_repeat()).strip() == (
+            "repeat datetime DT 20240101T000000 20240101T120000 01:00:00"
+        )
+
+    @mark.parametrize("key", ["end", "start"])
+    def test_ecflow__ECFlowDef__add_repeat__datetime__subsecond(self, instance, key):
+        node = Task("t1")
+        config = {
+            "variable": "DT",
+            "start": datetime(2024, 1, 1, tzinfo=UTC),
+            "end": datetime(2024, 1, 2, tzinfo=UTC),
+        }
+        config[key] = datetime(2024, 1, 1, microsecond=500000, tzinfo=UTC)
+        with raises(UWConfigError) as e:
+            instance._add_repeat(config, "datetime", node)
+        assert str(e.value) == (
+            f"repeat_datetime {key}: time must have whole-second precision, "
+            "not 2024-01-01T00:00:00.500000+00:00"
+        )
+        assert node.get_repeat().empty()
 
     def test_ecflow__ECFlowDef__add_repeat__day(self, instance):
         node = Task("t1")
@@ -872,13 +1136,6 @@ class Test_ECFlowDef:  # noqa: N801
         instance._add_repeat(config.copy(), "enumerated", node)
         assert 'repeat enumerated MEMBER "m01" "m02" "m03"' in node.get_repeat().__str__()
 
-    @mark.parametrize("repeat_type", ["datelist", "string"])
-    def test_ecflow__ECFlowDef__add_repeat__enumerated_variants(self, instance, repeat_type):
-        node = Task("t1")
-        config = {"variable": "VAR", "list": ["a", "b"]}
-        instance._add_repeat(config.copy(), repeat_type, node)
-        assert 'VAR "a" "b"' in node.get_repeat().__str__()
-
     def test_ecflow__ECFlowDef__add_repeat__int(self, instance):
         node = Task("t1")
         config = {"variable": "STEP", "start": 0, "end": 10, "step": 5}
@@ -887,6 +1144,12 @@ class Test_ECFlowDef:  # noqa: N801
         repeat = node.get_repeat()
         actual = [repeat.__getattribute__(a)() for a in ("name", "start", "end", "step")]
         assert actual == expected
+
+    def test_ecflow__ECFlowDef__add_repeat__string(self, instance):
+        node = Task("t1")
+        config = {"variable": "VAR", "list": ["a", "b"]}
+        instance._add_repeat(config.copy(), "string", node)
+        assert str(node.get_repeat()).strip() == 'repeat string VAR "a" "b"'
 
     def test_ecflow__ECFlowDef__add_repeat__unknown_type(self, instance):
         node = Mock()
@@ -1043,6 +1306,44 @@ def test_ecflow__client__certificate_selection(expected, prefix):
         ecflow._client(port=portnum, insecure=False, prefix=prefix)
         assert STR.ECF_SSL not in os.environ  # restored
     assert ecf_ssl == [expected]
+
+
+@mark.parametrize(
+    ("value", "expected"),
+    [
+        ("6:00:00", "06:00:00"),
+        ("0:0:1", "00:00:01"),
+        ("1:2:3", "01:02:03"),
+        ("00:120:00", "02:00:00"),
+        ("0:0:90", "00:01:30"),
+        ("0:6000:00", "100:00:00"),
+        ("100:30:00", "100:30:00"),
+        ("0006:00:00", "06:00:00"),
+        (timedelta(seconds=1), "00:00:01"),
+        (timedelta(hours=6), "06:00:00"),
+        (timedelta(days=1), "24:00:00"),
+        (timedelta(hours=100, minutes=30, seconds=15), "100:30:15"),
+    ],
+)
+def test_ecflow__hhmmss(expected, value):
+    assert ecflow._hhmmss(value) == expected
+
+
+@mark.parametrize(
+    ("value", "shown"),
+    [
+        ("0:00:00", "0:00:00"),
+        (timedelta(0), "0:00:00"),
+        (timedelta(hours=-1), "-1 day, 23:00:00"),
+        (timedelta(hours=1, microseconds=500000), "1:00:00.500000"),
+    ],
+)
+def test_ecflow__hhmmss__invalid(shown, value):
+    with raises(UWConfigError) as e:
+        ecflow._hhmmss(value)
+    assert str(e.value) == (
+        f"repeat_datetime step must be a positive whole number of seconds, not {shown}"
+    )
 
 
 class Test_ServerThread:  # noqa: N801
@@ -1466,6 +1767,34 @@ def test_ecflow__ssl_provision__creates_dir_and_files(logged, tmp_path):
     assert (ssl_dir / "server.crt").is_file()
     assert (ssl_dir / "dh2048.pem").is_file()
     assert logged("SSL certificate files written to %s" % ssl_dir)
+
+
+@mark.parametrize(
+    "value",
+    [
+        "2024-01-31",
+        "2024-01-31T00:00:00",
+        "2024-01-31 00:00:00",
+        date(2024, 1, 31),
+        datetime(2024, 1, 31, tzinfo=UTC).replace(tzinfo=None),
+    ],
+)
+def test_ecflow__yyyymmdd(value):
+    assert ecflow._yyyymmdd(value, "somewhere") == 20240131
+
+
+@mark.parametrize(
+    ("value", "shown"),
+    [
+        ("2024-01-31T12:30:00", "2024-01-31T12:30:00"),
+        ("2024-01-31 00:00:01", "2024-01-31T00:00:01"),
+        (datetime(2024, 1, 31, 23, 59, 59, tzinfo=UTC).replace(tzinfo=None), "2024-01-31T23:59:59"),
+    ],
+)
+def test_ecflow__yyyymmdd__not_midnight(shown, value):
+    with raises(UWConfigError) as e:
+        ecflow._yyyymmdd(value, "somewhere")
+    assert str(e.value) == f"somewhere: time must be 00:00:00, not {shown}"
 
 
 def test_ecflow_import_error():

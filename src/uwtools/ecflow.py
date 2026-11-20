@@ -11,6 +11,7 @@ import shutil
 import signal
 import socket
 from copy import deepcopy
+from datetime import time, timedelta
 from pathlib import Path
 from threading import Event, Thread, current_thread
 from time import sleep
@@ -30,10 +31,12 @@ try:
         Late,
         Node,
         RepeatDate,
+        RepeatDateList,
         RepeatDateTime,
         RepeatDay,
         RepeatEnumerated,
         RepeatInteger,
+        RepeatString,
         Suite,
         Task,
     )
@@ -53,8 +56,10 @@ from uwtools.scheduler import JobScheduler
 from uwtools.strings import STR
 from uwtools.utils.file import writable
 from uwtools.utils.processing import run_shell_cmd
+from uwtools.utils.time import to_datetime
 
 if TYPE_CHECKING:
+    from datetime import date, datetime
     from subprocess import Popen
     from types import FrameType
 
@@ -330,14 +335,34 @@ class _ECFlowDef:
         match name:
             case STR.date:
                 repeat = RepeatDate
-            case STR.datelist | STR.enumerated | STR.string:
-                repeat = RepeatEnumerated
+                config = config.copy()
+                for key in (STR.start, STR.end):
+                    config[key] = _yyyymmdd(config[key], f"repeat_date {key}")
+            case STR.datelist:
+                repeat = RepeatDateList
+                config = config.copy()
+                config[STR.list] = [
+                    _yyyymmdd(x, f"repeat_datelist list[{i}]")
+                    for i, x in enumerate(config[STR.list])
+                ]
             case STR.datetime:
                 repeat = RepeatDateTime
+                config = config.copy()
+                for key in (STR.start, STR.end):
+                    dt = to_datetime(config[key])
+                    if dt.microsecond:
+                        msg = "repeat_datetime %s: time must have whole-second precision, not %s"
+                        raise UWConfigError(msg % (key, dt.isoformat()))
+                    config[key] = dt.strftime("%Y%m%dT%H%M%S")
+                config[STR.step] = _hhmmss(config.get(STR.step, "24:00:00"))
             case STR.day:
                 repeat = RepeatDay
+            case STR.enumerated:
+                repeat = RepeatEnumerated
             case STR.int:
                 repeat = RepeatInteger
+            case STR.string:
+                repeat = RepeatString
         # The schema-checked config blocks for each of these will be the variable and either the
         # start/end/[step] keys or the list key. Since they must be passed as positional arguments,
         # ensure their order is either (argument, start, end, [step]) or (argument, list).
@@ -530,6 +555,23 @@ def _client(port: int, insecure: bool, prefix: str | None) -> Client:
             else:
                 os.environ[STR.ECF_SSL] = val
     return c
+
+
+def _hhmmss(value: str | timedelta) -> str:
+    """
+    Return an HH:MM:SS string, where hours have at least 2 digits, and minutes and seconds 2.
+
+    :param value: An hours:minutes:seconds string, or a timedelta.
+    :raises UWConfigError: If the value is not a positive whole number of seconds.
+    """
+    if isinstance(value, str):
+        hours, minutes, seconds = map(int, value.split(":"))
+        value = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    if value <= timedelta(0) or value.microseconds:
+        msg = "repeat_datetime step must be a positive whole number of seconds, not %s" % value
+        raise UWConfigError(msg)
+    seconds = int(value.total_seconds())
+    return "%02d:%02d:%02d" % (seconds // 3600, seconds % 3600 // 60, seconds % 60)
 
 
 def _node(cls: type[Node], name: str) -> Node:
@@ -760,3 +802,19 @@ def _ssl_provision() -> None:
     _ssl_generate_cert(_SSL_DIR / _SSL_CERT, _SSL_DIR / _SSL_KEY)
     _ssl_generate_dhparam(_SSL_DIR / _SSL_DHPARAM)
     log.info("SSL certificate files written to %s", _SSL_DIR)
+
+
+def _yyyymmdd(value: str | date | datetime, where: str) -> int:
+    """
+    Convert an ISO8601 date or datetime value to a YYYYMMDD integer.
+
+    :param value: The value to convert.
+    :param where: A description of the value's location, for error reporting.
+    :return: The YYYYMMDD integer.
+    :raises UWConfigError: If the value has a time other than 00:00:00.
+    """
+    dt = to_datetime(value)
+    if dt.time() != time.min:
+        msg = "%s: time must be 00:00:00, not %s" % (where, dt.isoformat())
+        raise UWConfigError(msg)
+    return int(dt.strftime("%Y%m%d"))

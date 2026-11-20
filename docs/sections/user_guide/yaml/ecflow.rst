@@ -267,40 +267,130 @@ Only one ``repeat_*:`` attribute is allowed per node. The available repeat types
 
 ``repeat_date:``
 
-Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end`` (as YYYYMMDD integers); ``step`` is optional (default 1).
+Repeats over a date range (see :ecflow:`ecflow.RepeatDate <python_api/reference/RepeatDate.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (defaults to  ``1``). See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values. For example:
 
 .. code-block:: yaml
 
    suite_forecast:
      repeat_date:
        variable: YMD
-       start: 20240101
-       end: 20240131
+       start: 2024-01-01
+       end: 2024-01-31
        step: 1
 
 ``repeat_datelist:``
 
-Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`) (as YYYYMMDD integers). Requires ``variable`` and ``list``.
+Repeats over an explicit list of dates (see :ecflow:`ecflow.RepeatDateList <python_api/reference/RepeatDateList.html>`). Requires ``variable`` and ``list``. See :ref:`ecflow_date_values` for the accepted ``list`` values. For example:
+
+.. code-block:: yaml
+
+   suite_forecast:
+     repeat_datelist:
+       variable: YMD
+       list:
+         - 2024-01-01
+         - 2024-01-15
+         - 2024-02-01
 
 ``repeat_datetime:``
 
-Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end`` (as ``YYYYMMDDTHHmmss`` strings); ``step`` (as ``HH:mm:ss``) is optional.
+Repeats over a datetime range (see :ecflow:`ecflow.RepeatDateTime <python_api/reference/RepeatDateTime.html>`). Requires ``variable``, ``start``, and ``end``. See :ref:`ecflow_date_values` for the accepted ``start`` and ``end`` values.
+
+The ``step`` value is optional (defaults to ``24:00:00``), must be positive, and can be written either as
+
+* A quoted ``hours:minutes:seconds`` string, where each part is a whole number of any size (e.g. ``"6:00:00"`` for 6 hours or ``"0:120:0"`` for 120 minutes)
+* A :ref:`!timedelta <custom_yaml_tags>` value.
+
+For example:
+
+.. code-block:: yaml
+
+   suite_forecast:
+     repeat_datetime:
+       variable: DT
+       start: 2024-01-01T06:30:00
+       end: 2024-01-31T00:00:00
+       step: "36:00:00"            # quoted string
+       #     !timedelta 36:00:00   # uwtools-tagged timedelta
 
 ``repeat_day:``
 
-Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/reference/RepeatDay.html>`). Requires ``step``.
+Repeats by day increment (see :ecflow:`ecflow.RepeatDay <python_api/reference/RepeatDay.html>`). Requires ``step``, the number of days between repeats. For example, to repeat every other day:
+
+.. code-block:: yaml
+
+   suite_forecast:
+     repeat_day:
+       step: 2
 
 ``repeat_enumerated:``
 
-Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/reference/RepeatEnumerated.html>`). Requires ``variable`` and ``list``.
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatEnumerated <python_api/reference/RepeatEnumerated.html>`). Requires ``variable`` and ``list``. Every item must be a string, so quote items that YAML would otherwise read as another type, e.g. ``"001"`` or ``"true"``:
+
+.. code-block:: yaml
+
+   family_ensemble:
+     repeat_enumerated:
+       variable: MEMBER
+       list:
+         - m01
+         - m02
+         - "003"
 
 ``repeat_int:``
 
-Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional.
+Repeats over an integer range (see :ecflow:`ecflow.RepeatInteger <python_api/reference/RepeatInteger.html>`). Requires ``variable``, ``start``, and ``end``; ``step`` is optional (defaults to ``1``). For example, to repeat over forecast hours 0, 6, 12, ..., 120:
+
+.. code-block:: yaml
+
+   family_post:
+     repeat_int:
+       variable: FHR
+       start: 0
+       end: 120
+       step: 6
 
 ``repeat_string:``
 
-Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/reference/RepeatString.html>`). Requires ``variable`` and ``list``.
+Repeats over an explicit list of strings (see :ecflow:`ecflow.RepeatString <python_api/reference/RepeatString.html>`). Requires ``variable`` and ``list``. As with ``repeat_enumerated:``, every item must be a string:
+
+.. code-block:: yaml
+
+   family_stages:
+     repeat_string:
+       variable: STAGE
+       list:
+         - prep
+         - run
+         - post
+
+.. _ecflow_date_values:
+
+Date and Datetime Values
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``start`` and ``end`` values of ``repeat_date:`` and ``repeat_datetime:``, and the ``list`` items of ``repeat_datelist:``, can be written in any of the following forms. A time may follow the date after either ``T`` or a space, and a value without a time means ``00:00:00``. All the values in each group below are equivalent:
+
+.. code-block:: yaml
+
+   # 2024-01-01 at 00:00:00
+   - 2024-01-01                       # YAML date
+   - 2024-01-01T00:00:00              # YAML datetime
+   - !datetime 2024-01-01             # uwtools-tagged datetime
+   - "2024-01-01"                     # quoted string
+
+   # 2024-01-01 at 06:30:00
+   - 2024-01-01T06:30:00              # YAML datetime
+   - 2024-01-01 06:30:00              # YAML datetime, space-separated
+   - !datetime 2024-01-01T06:30:00    # uwtools-tagged datetime
+   - "2024-01-01T06:30:00"            # quoted string
+   - "2024-01-01 06:30:00"            # quoted string, space-separated
+
+Quoted strings must match one of the forms shown exactly, i.e. ``YYYY-MM-DD``, optionally followed by ``T`` or a space and ``HH:MM:SS``.
+
+``repeat_datetime:`` requires whole-second precision. A YAML or ``!datetime`` value with a fractional second is rejected rather than rounded or truncated.
+
+Only ``repeat_datetime:`` uses the time. ``repeat_date:`` and ``repeat_datelist:`` produce ``YYYYMMDD`` values in the generated suite definition, so their values must have no time or a time of ``00:00:00``. Any other time is an error.
 
 Task Script Block
 -----------------
