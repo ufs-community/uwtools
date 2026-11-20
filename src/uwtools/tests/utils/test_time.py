@@ -4,8 +4,9 @@ Tests for uwtools.utils.time module.
 
 from datetime import date, timedelta
 
-from pytest import mark
+from pytest import mark, raises
 
+from uwtools.exceptions import UWConfigError
 from uwtools.utils import time
 
 
@@ -17,6 +18,12 @@ def test_utils_time_to_datetime(utc):
 
 def test_utils_time_to_datetime_date(utc):
     assert time.to_datetime(value=date(2025, 7, 31)) == utc(2025, 7, 31)
+
+
+def test_utils_time_to_datetime_invalid_date():
+    with raises(UWConfigError, match=r"Converting '2026-02-30': .*day") as exc:
+        time.to_datetime(value="2026-02-30")
+    assert isinstance(exc.value.__cause__, ValueError)
 
 
 @mark.parametrize("sep", ["T", " "])

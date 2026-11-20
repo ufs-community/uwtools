@@ -174,7 +174,7 @@ class TestUWYAMLConvert:
 
     def test_UWYAMLConvert_datetime_no(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!datetime", value="foo"))
-        with raises(ValueError, match="Invalid isoformat string"):
+        with raises(UWConfigError, match="Invalid isoformat string"):
             assert ts.converted
 
     def test_UWYAMLConvert_datetime_ok(self, loader, utc):
